@@ -685,7 +685,7 @@ async function renderDashboard() {
 function renderDemo(data, mes) {
   const nome=data.nome||currentUser.nome, linhas=data.linhas||[], avulsos=data.avulsos||[], despesas=data.despesas||[];
   const tB=linhas.reduce((s,l)=>s+(l.bruto||0),0), tN=linhas.reduce((s,l)=>s+(l.nf||0),0);
-  const tA=linhas.reduce((s,l)=>s+(l.adm||0),0), tL=linhas.reduce((s,l)=>s+(l.liquido||0),0);
+  const tA=linhas.reduce((s,l)=>s+(l.admValor||0),0), tL=linhas.reduce((s,l)=>s+(l.liquido||0),0);
   const tAv=avulsos.reduce((s,a)=>s+(a.valor||0),0), tD=despesas.reduce((s,d)=>s+(d.valor||0),0);
   const totalFinal=data.totalFinal||(tL+tAv+tD);
   const recP=tB+avulsos.filter(a=>a.valor>0).reduce((s,a)=>s+a.valor,0);
@@ -702,20 +702,20 @@ function renderDemo(data, mes) {
       <td class="mono" style="color:var(--text2)">${l.parcela||'-'}</td>
       <td class="mono num">${fmtBRL(l.bruto)}</td>
       <td class="mono num neg">(${fmtBRL(l.nf)})</td>
-      <td class="mono num" style="color:var(--text2)">(${fmtBRL(l.adm)})</td>
-      <td class="mono num ${(l.liquido||0)>=0?'Mos':'neg'} fw6">${fmtBRL(l.liquido)}</td>
+      <td class="mono num" style="color:var(--text2)">(${fmtBRL(l.admValor)})</td>
+      <td class="mono num ${(l.liquido||0)>=0?'pos':'neg'} fw6">${fmtBRL(l.liquido)}</td>
     </tr>`;
   }).join('');
 
   if(avulsos.length){
     rows+=`<tr><td colspan="10" style="padding:4px 12px;background:#F0FDF4;border-top:2px solid #22C55E;font-size:9px;color:#166534;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Lancamentos Avulsos</td></tr>`;
-    avulsos.forEach(a=>{const c=a.valor>=0?'Mos':'neg';const bg=a.valor>=0?'rgba(34,197,94,.05)':'#FEF2F2';const bd=a.valor>=0?'#22C55E':'#EF4444';
+    avulsos.forEach(a=>{const c=a.valor>=0?'pos':'neg';const bg=a.valor>=0?'rgba(34,197,94,.05)':'#FEF2F2';const bd=a.valor>=0?'#22C55E':'#EF4444';
       rows+=`<tr style="background:${bg};border-left:3px solid ${bd}"><td colspan="6" style="font-size:11px;font-weight:500;padding:8px 12px"><span class="tag" style="font-size:9px;background:${bg};color:${bd};border:1px solid ${bd}">AVULSO</span> <span style="margin-left:8px">${a.descricao||'-'}</span></td><td class="mono num" style="color:var(--text3)">-</td><td class="mono num" style="color:var(--text3)">-</td><td class="mono num" style="color:var(--text3)">-</td><td class="mono num ${c} fw6">${fmtBRL(a.valor)}</td></tr>`;
     });
   }
   if(despesas.length){
     rows+=`<tr><td colspan="10" style="padding:4px 12px;background:#FEF2F2;border-top:2px solid #DC2626;font-size:9px;color:#991B1B;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Despesas da Sala</td></tr>`;
-    despesas.forEach(d=>{const c=d.valor>=0?'Mos':'neg';const bg=d.valor>=0?'rgba(34,197,94,.05)':'#FEF2F2';const bd=d.valor>=0?'#22C55E':'#DC2626';
+    despesas.forEach(d=>{const c=d.valor>=0?'pos':'neg';const bg=d.valor>=0?'rgba(34,197,94,.05)':'#FEF2F2';const bd=d.valor>=0?'#22C55E':'#DC2626';
       rows+=`<tr style="background:${bg};border-left:3px solid ${bd}"><td colspan="6" style="font-size:11px;font-weight:500;padding:8px 12px"><span class="tag" style="font-size:9px;background:${bg};color:${bd};border:1px solid ${bd}">DESP</span> <span style="margin-left:8px">${d.descricao||'-'}</span></td><td class="mono num" style="color:var(--text3)">-</td><td class="mono num" style="color:var(--text3)">-</td><td class="mono num" style="color:var(--text3)">-</td><td class="mono num ${c} fw6">${fmtBRL(d.valor)}</td></tr>`;
     });
   }
@@ -737,7 +737,7 @@ function renderDemo(data, mes) {
     <div class="tbl-wrap" style="padding:0"><table class="tbl">
       <thead><tr><th>Admin</th><th>Tipo</th><th>Ref</th><th>Cliente</th><th>Data</th><th>Parc</th><th class="num">Bruto</th><th class="num">NF</th><th class="num">ADM</th><th class="num">Liquido</th></tr></thead>
       <tbody>${rows}</tbody>
-      <tfoot><tr><td colspan="6" class="fw7">TOTAL</td><td class="mono num fw7">${fmtBRL(tB)}</td><td class="mono num neg fw7">(${fmtBRL(tN)})</td><td class="mono num fw7" style="color:var(--text2)">(${fmtBRL(tA)})</td><td class="mono num Mos fw7">${fmtBRL(totalFinal)}</td></tr></tfoot>
+      <tfoot><tr><td colspan="6" class="fw7">TOTAL</td><td class="mono num fw7">${fmtBRL(tB)}</td><td class="mono num neg fw7">(${fmtBRL(tN)})</td><td class="mono num fw7" style="color:var(--text2)">(${fmtBRL(tA)})</td><td class="mono num pos fw7">${fmtBRL(totalFinal)}</td></tr></tfoot>
     </table></div>
   </div>`;
 }
@@ -758,7 +758,7 @@ async function renderHistorico() {
 async function viewHist(mes) {
   const d=await DB.getDemo(mes,currentUser.nome);if(!d)return;
   const el=document.getElementById('hist-detail');
-  if(el){el.innerHTML=renderDemo(d,mes);el.scrollIntoViem({behavior:'smooth',block:'start'});}
+  if(el){el.innerHTML=renderDemo(d,mes);el.scrollIntoView({behavior:'smooth',block:'start'});}
 }
 
 // ═══ CHANGE PW ═══
