@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Master Prime — Portal do Consultor</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* ══════════════════════════════════════════════════════
@@ -417,7 +418,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 //  (Instrucoes no arquivo SETUP.md)
 // ══════════════════════════════════════════════════════════════════════════
 const SUPABASE_URL = 'https://jhwciwvgagnuxakukyob.supabase.co';  // Ex: 'https://xyzabc.supabase.co'
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Impod2Npd3ZnYWdudXhha3VreW9iIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3NjEwNzc0MywiZXhwIjoyMDkxNjgzNzQzfQ.8IY-MiCz7DK5a-i17XuSUUGOjgG8e9kSHol5Smv4cDo';  // Sua anon/public key
+const SUPABASE_KEY = 'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx';  // Publishable key (segura para frontend - respeita RLS)
 
 // ══════════════════════════════════════════════════════════════════════════
 //  MODO: SUPABASE ou DEMO (localStorage)
@@ -771,9 +772,10 @@ function renderDemo(data, mes) {
   // separadas, Cartas de Parceria etc.). Renderizamos direto.
   if (data && data.html) {
     const nome = data.nome || currentUser.nome;
+    const nomeSafe = nome.replace(/[^a-zA-Z0-9]/g,'_');
     return `
-    <div class="card"><div class="card-head"><div><div class="card-title">Demonstrativo - ${nome}</div><div class="card-sub">${fmtMes(mes)}</div></div><button class="btn btn-outline btn-sm" onclick="window.print()">&#128424; Imprimir</button></div>
-      <div class="card-body" style="padding:20px">${data.html}</div>
+    <div class="card"><div class="card-head"><div><div class="card-title">Demonstrativo - ${nome}</div><div class="card-sub">${fmtMes(mes)}</div></div><div style="display:flex;gap:8px"><button class="btn btn-outline btn-sm" onclick="baixarDemoExcel('${nomeSafe}', '${nome.replace(/'/g,"\\'")}', '${mes}')">&#128202; Excel</button><button class="btn btn-outline btn-sm" onclick="imprimirDemo('${nomeSafe}')">&#128424; PDF / Imprimir</button></div></div>
+      <div class="card-body" id="demo-body-${nomeSafe}" style="padding:20px">${data.html}</div>
     </div>`;
   }
   const nome=data.nome||currentUser.nome, linhas=data.linhas||[], avulsos=data.avulsos||[], despesas=data.despesas||[];
@@ -1026,6 +1028,37 @@ async function renderAdminOverview() {
         </table>
       </div>
     </div>`;
+}
+
+// ═══ EXPORTAR DEMO (Excel / PDF) ═══
+// Percorre as tabelas dentro do container do demo e gera um xlsx
+function baixarDemoExcel(nomeSafe, nome, mes) {
+  try {
+    const container = document.getElementById('demo-body-' + nomeSafe);
+    if (!container) { alert('Demo não encontrado'); return; }
+    const tabelas = container.querySelectorAll('table');
+    if (!tabelas.length) { alert('Sem dados para exportar'); return; }
+    const wb = XLSX.utils.book_new();
+    tabelas.forEach((tbl, i) => {
+      const ws = XLSX.utils.table_to_sheet(tbl);
+      const nomeAba = (i === 0 ? 'Demonstrativo' : 'Tabela ' + (i+1)).slice(0,31);
+      XLSX.utils.book_append_sheet(wb, ws, nomeAba);
+    });
+    const filename = 'Demo_' + nome.replace(/\s+/g,'_') + '_' + mes + '.xlsx';
+    XLSX.writeFile(wb, filename);
+  } catch(e) { alert('Erro ao exportar Excel: ' + (e.message||e)); }
+}
+
+// Imprime o demo em janela nova (que vira PDF)
+function imprimirDemo(nomeSafe) {
+  const container = document.getElementById('demo-body-' + nomeSafe);
+  if (!container) { window.print(); return; }
+  // Abre janela nova com só o demo (estilo print)
+  const w = window.open('', '_blank', 'width=900,height=1000');
+  const stylesTags = Array.from(document.querySelectorAll('style,link[rel="stylesheet"]')).map(s => s.outerHTML).join('\n');
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Demonstrativo</title>${stylesTags}<style>body{padding:20px;background:#fff}@media print{body{padding:0}}</style></head><body>${container.innerHTML}</body></html>`);
+  w.document.close();
+  setTimeout(() => { w.focus(); w.print(); }, 500);
 }
 
 function toggleOverviewDemo(nome) {

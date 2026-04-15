@@ -3891,22 +3891,104 @@ function publicarNoPortal() {
   const consultorOriginal = S.curConsultor;
 
   const consultores = {};
+  // Pré-calcula, para cada parceiro que RECEBE cartas, o conjunto de cartas dele.
+  // S.cartas é { RESPONSAVEL: { PARCEIRO: [linhas] } } — invertemos para
+  // { PARCEIRO: { RESPONSAVEL: [linhas] } } para consulta rápida por parceiro.
+  const cartasPorParceiro = {};
+  Object.entries(S.cartas || {}).forEach(([resp, byPart]) => {
+    Object.entries(byPart || {}).forEach(([part, items]) => {
+      if (!items || !items.length) return;
+      if (!cartasPorParceiro[part]) cartasPorParceiro[part] = {};
+      cartasPorParceiro[part][resp] = items;
+    });
+  });
+  // Helper: gera uma tabela HTML com as cartas que um parceiro recebe
+  function renderCartasHtmlParceiro(partner) {
+    const byResp = cartasPorParceiro[partner];
+    if (!byResp) return '';
+    let blocos = '';
+    let totalGeral = 0;
+    Object.entries(byResp).forEach(([resp, items]) => {
+      const total = items.reduce((s,e)=>s+(e.valor||0),0);
+      totalGeral += total;
+      blocos += `
+      <div class="card" style="margin-top:16px">
+        <div class="card-head" style="background:var(--mp-navy);border-radius:var(--r) var(--r) 0 0">
+          <div>
+            <div style="color:#fff;font-weight:700;font-size:13px">Carta de Parceria — ${resp} → ${partner}</div>
+            <div style="color:rgba(255,255,255,.55);font-size:11px">Mês ${S.mes} · Total: ${fmtBRL(total)}</div>
+          </div>
+          <div style="color:rgba(255,255,255,.4);font-size:10px">Informativo — valor a receber</div>
+        </div>
+        <div class="tbl-wrap" style="padding:0"><table class="tbl">
+          <thead><tr><th>Admin</th><th>Ref</th><th>Cliente</th><th class="num">Parcela</th><th class="num">Bruto</th><th class="num">NF</th><th class="num">ADM</th><th class="num">Líquido</th><th>%</th></tr></thead>
+          <tbody>
+            ${items.map(e => `<tr>
+              <td style="font-size:10px">${e.linha?.adm || '—'}</td>
+              <td class="mono" style="font-size:10px">${(typeof fmtRef==='function'?fmtRef(e.linha):(e.linha?.grupoCota||e.linha?.contrato||'—'))}</td>
+              <td style="font-size:10px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.linha?.nomeCliente || '—'}</td>
+              <td class="mono dim">${e.linha?.parcela || '—'}</td>
+              <td class="mono num">${fmtBRL(e.linha?.brutoCons||0)}</td>
+              <td class="mono num neg">(${fmtBRL(e.linha?.nfCons||0)})</td>
+              <td class="mono num" style="color:var(--text2)">(${fmtBRL(e.linha?.admCons||0)})</td>
+              <td class="mono num pos fw6">${fmtBRL(e.valor||0)}</td>
+              <td class="mono dim" style="font-size:10px">${e.pct||''}</td>
+            </tr>`).join('')}
+          </tbody>
+          <tfoot><tr><td colspan="7" class="fw7">TOTAL</td><td class="mono num pos fw7">${fmtBRL(total)}</td><td></td></tr></tfoot>
+        </table></div>
+      </div>`;
+    });
+    return blocos ? `
+      <div style="margin-top:24px">
+        <div style="font-size:14px;font-weight:700;color:var(--mp-navy);margin-bottom:6px">Cartas de Parceria</div>
+        <div style="font-size:11px;color:var(--text2);margin-bottom:8px">Valores a receber de parceiros internos · Total: ${fmtBRL(totalGeral)}</div>
+        ${blocos}
+      </div>` : '';
+  }
+
   try {
-    Object.entries(S.resultado).forEach(([nome, r]) => {
-      // Pula entradas auxiliares que não fazem sentido no Portal
+    // Garante que os nomes que recebem cartas também entrem no portal, mesmo
+    // que não estejam em S.resultado (parceiros externos sem demonstrativo).
+    const nomesDemo = new Set(Object.keys(S.resultado));
+    Object.keys(cartasPorParceiro).forEach(n => nomesDemo.add(n));
+
+    nomesDemo.forEach(nome => {
       if (nome === 'CAIXA') return;
-      if (nome.startsWith('LE - ')) return; // Repasses Leidiane/Edson
+      if (nome.startsWith('LE - ')) return;
       try {
-        mostrarDetalhe(nome);
-        // Captura o HTML renderizado
-        const html = panel.innerHTML;
-        // Total final para sumário (se disponível)
-        const totalFinal = (r.totLiqSocio !== undefined && r.totLiqSocio !== null)
-          ? r.totLiqSocio
-          : (r.totLiq || 0);
+        let html;
+        let totalFinal = 0;
+        const r = S.resultado[nome];
+        if (r) {
+          mostrarDetalhe(nome);
+          html = panel.innerHTML;
+          // Remove botões que chamam funções específicas do painel (exportarDemoExcel,
+          // exportarDemo, etc.) — no portal do consultor essas funções não existem.
+          html = html.replace(/<button[^>]*onclick="[^"]*exportar(?:Demo|Excel|Resumo)[^"]*"[^>]*>[\s\S]*?<\/button>/g, '');
+          // Também remove qualquer outro botão com onclick quebrado (referencias a funções internas)
+          html = html.replace(/<button[^>]*onclick="[^"]*(?:S\.|atualizar|nav\(|mostrar|calcular)[^"]*"[^>]*>[\s\S]*?<\/button>/g, '');
+          totalFinal = (r.totLiqSocio !== undefined && r.totLiqSocio !== null) ? r.totLiqSocio : (r.totLiq || 0);
+        } else {
+          // Parceiro externo sem demo — monta um cabeçalho simples
+          html = `
+            <div class="det-header">
+              <div class="det-name">${nome}</div>
+              <div class="det-meta">Parceiro externo · ${S.mes}</div>
+            </div>`;
+        }
+        // Anexa cartas de parceria que este parceiro recebe
+        const cartasHtml = renderCartasHtmlParceiro(nome);
+        if (cartasHtml) {
+          html += cartasHtml;
+          // Soma total das cartas no total final
+          Object.values(cartasPorParceiro[nome]||{}).forEach(items => {
+            totalFinal += items.reduce((s,e)=>s+(e.valor||0),0);
+          });
+        }
         consultores[nome] = {
           nome,
-          tipo: r.tipo || 'consultor',
+          tipo: r ? (r.tipo || 'consultor') : 'parceiro',
           html,
           totalFinal: +(+totalFinal).toFixed(2)
         };
@@ -3915,7 +3997,6 @@ function publicarNoPortal() {
       }
     });
   } finally {
-    // Restaura o painel
     panel.innerHTML = htmlOriginal;
     S.curConsultor = consultorOriginal;
   }
