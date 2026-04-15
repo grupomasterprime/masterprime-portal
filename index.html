@@ -1183,8 +1183,7 @@ async function renderUsers() {
   const rows = users.map(u => {
     const tc = u.tipo==='admin'?'tag-navy':u.tipo==='socio'?'tag-teal':'tag-blue';
     const tl = u.tipo==='admin'?'Admin':u.tipo==='socio'?'S&oacute;cio':u.tipo==='parceiro'?'Parceiro':'Consultor';
-    const cpfFmt = u.cpf && u.cpf.length === 11 && /^\d+$/.test(u.cpf) ? fmtCPF(u.cpf) : (u.cpf || '-');
-    const userLogin = u.username ? u.username : `<span style="color:var(--text3);font-style:italic">${cpfFmt}</span>`;
+    const userLogin = u.username ? u.username : `<span style="color:var(--text3);font-style:italic">(sem usu&aacute;rio)</span>`;
     const senhaDisplay = u.senha ? `<span class="mono" style="font-size:11px">${u.senha}</span>` : '<span style="color:var(--text3)">&mdash;</span>';
     const canDel = u.cpf !== currentUser.cpf;
     return `<tr>
@@ -1192,7 +1191,6 @@ async function renderUsers() {
       <td style="font-weight:600;font-size:12px">${u.nome}</td>
       <td class="mono" style="font-size:12px">${userLogin}</td>
       <td>${senhaDisplay}</td>
-      <td class="mono" style="font-size:10px;color:var(--text2)">${cpfFmt}</td>
       <td style="text-align:right;white-space:nowrap">
         <button class="btn btn-outline btn-sm" onclick="resetPw('${u.cpf}')">Reset senha</button>
         ${canDel ? `<button class="btn btn-danger btn-sm" onclick="delUser('${u.cpf}')">Remover</button>` : ''}
@@ -1208,7 +1206,6 @@ async function renderUsers() {
             <th>Nome</th>
             <th>Usu&aacute;rio</th>
             <th>Senha atual</th>
-            <th>CPF</th>
             <th></th>
           </tr>
         </thead>
