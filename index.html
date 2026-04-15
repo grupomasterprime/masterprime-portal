@@ -170,6 +170,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 .tag-blue { background:var(--blue-bg); color:var(--blue); }
 .tag-gray { background:#F1F5F9; color:var(--text2); }
 .tag-yellow { background:rgba(200,200,74,.15); color:#6B6B00; }
+.tag-black { background:#1E293B; color:#fff; }
+.tag-blue-cat { background:#EFF6FF; color:#1D4ED8; }
 
 /* ═══ HISTORY ═══ */
 .hist-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:16px; }
@@ -301,6 +303,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
       <div class="sb-section">Menu</div>
       <div class="sb-item active" onclick="nav('dashboard')" id="ni-dashboard"><span class="ic">&#128202;</span> Demonstrativo</div>
       <div class="sb-item" onclick="nav('historico')" id="ni-historico"><span class="ic">&#128197;</span> Historico</div>
+      <div class="sb-item" onclick="nav('assembleia')" id="ni-assembleia"><span class="ic">&#127942;</span> Resultado Assembleia</div>
+      <div class="sb-item" onclick="nav('lances')" id="ni-lances"><span class="ic">&#128269;</span> Consulta de Lances</div>
       <div class="sb-item" onclick="nav('perfil')" id="ni-perfil"><span class="ic">&#128100;</span> Meu Perfil</div>
       <div id="admin-nav" class="hidden">
         <div class="sb-section">Administracao</div>
@@ -331,6 +335,16 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
         <div class="page-title">Historico</div>
         <div class="page-sub">Todos os seus demonstrativos anteriores</div>
         <div id="hist-content"><div class="empty-state"><div class="empty-state-icon">&#128197;</div><div class="empty-state-title">Nenhum historico</div><div class="empty-state-desc">Seus demonstrativos anteriores aparecerao aqui.</div></div></div>
+      </div>
+
+      <!-- ASSEMBLEIA (iframe) -->
+      <div class="screen" id="s-assembleia" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
+        <iframe id="iframe-assembleia" src="" style="width:100%;height:100%;border:0;display:block" loading="lazy" title="Resultado de Assembleia"></iframe>
+      </div>
+
+      <!-- LANCES (iframe) -->
+      <div class="screen" id="s-lances" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
+        <iframe id="iframe-lances" src="" style="width:100%;height:100%;border:0;display:block" loading="lazy" title="Consulta de Lances"></iframe>
       </div>
 
       <!-- PERFIL -->
@@ -761,6 +775,14 @@ function nav(id) {
   const s=document.getElementById('s-'+id), n=document.getElementById('ni-'+id);
   if(s)s.classList.add('active'); if(n)n.classList.add('active');
   document.getElementById('sidebar').classList.remove('open');
+  // Lazy-load dos iframes: só carrega na primeira visita (evita 2.5 MB no login)
+  if (id === 'assembleia') {
+    const ifr = document.getElementById('iframe-assembleia');
+    if (ifr && !ifr.src) ifr.src = 'assembleia.html';
+  } else if (id === 'lances') {
+    const ifr = document.getElementById('iframe-lances');
+    if (ifr && !ifr.src) ifr.src = 'lances.html';
+  }
 }
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
 
