@@ -303,6 +303,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
       <div class="sb-item" onclick="nav('perfil')" id="ni-perfil"><span class="ic">&#128100;</span> Meu Perfil</div>
       <div id="admin-nav" class="hidden">
         <div class="sb-section">Administracao</div>
+        <div class="sb-item" onclick="nav('admin-overview')" id="ni-admin-overview"><span class="ic">&#128200;</span> Visao Geral</div>
         <div class="sb-item" onclick="nav('admin-upload')" id="ni-admin-upload"><span class="ic">&#128228;</span> Upload Demonstrativos</div>
         <div class="sb-item" onclick="nav('admin-users')" id="ni-admin-users"><span class="ic">&#128101;</span> Gerenciar Usuarios</div>
         <div class="sb-item" onclick="window.open('painel.html','_blank')" id="ni-painel"><span class="ic">&#9881;</span> Abrir Painel Split</div>
@@ -354,6 +355,17 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
         </div>
       </div>
 
+      <!-- ADMIN: VISAO GERAL -->
+      <div class="screen" id="s-admin-overview">
+        <div class="page-title">Visao Geral</div>
+        <div class="page-sub" id="overview-sub">Dashboard administrativa - todos os demonstrativos do mes</div>
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px">
+          <label style="font-size:12px;color:var(--text2);font-weight:600">Mes:</label>
+          <select id="overview-mes" class="form-select" style="padding:8px 12px;font-size:12px;border-radius:6px;border:1px solid var(--border2)" onchange="renderAdminOverview()"></select>
+        </div>
+        <div id="overview-content"><div class="empty-state"><div class="empty-state-icon">&#128202;</div><div class="empty-state-title">Carregando...</div></div></div>
+      </div>
+
       <!-- ADMIN: UPLOAD -->
       <div class="screen" id="s-admin-upload">
         <div class="page-title">Upload de Demonstrativos</div>
@@ -384,6 +396,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
               <div><label class="login-label">Nome completo</label><input type="text" class="login-input" id="nu-nome" placeholder="NOME SOBRENOME" style="font-size:12px;padding:9px 12px;text-transform:uppercase"></div>
               <div><label class="login-label">CPF</label><input type="text" class="login-input" id="nu-cpf" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)" style="font-size:12px;padding:9px 12px"></div>
               <div><label class="login-label">Tipo</label><select class="login-input" id="nu-tipo" style="font-size:12px;padding:9px 12px"><option value="consultor">Consultor</option><option value="socio">Socio</option><option value="admin">Administrador</option></select></div>
+              <div><label class="login-label">Senha inicial (opcional)</label><input type="text" class="login-input" id="nu-senha" placeholder="Deixe vazio = CPF. Pode usar CNPJ." style="font-size:12px;padding:9px 12px"></div>
             </div>
             <div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" onclick="addUser()">Salvar</button><button class="btn btn-outline btn-sm" onclick="document.getElementById('add-form').classList.add('hidden')">Cancelar</button></div>
             <div id="add-msg" style="margin-top:12px"></div>
@@ -411,12 +424,18 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 // ══════════════════════════════════════════════════════════════════════════
 const USE_SUPABASE = !!(SUPABASE_URL && SUPABASE_KEY);
 let sb = null;
+// Cliente secundário usado só para signUp de novos usuários (não mexe na sessão do admin)
+let sbSignup = null;
 
 // ═══ DATA LAYER (abstrai Supabase vs localStorage) ═══
 const DB = {
   async init() {
     if (USE_SUPABASE) {
       sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      // Cliente separado sem persistência de sessão: signUp aqui não deslogga o admin
+      sbSignup = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+        auth: { persistSession: false, autoRefreshToken: false, storageKey: 'mp-signup-only' }
+      });
       console.log('Conectado ao Supabase');
     } else {
       console.log('Modo demo (localStorage)');
@@ -610,7 +629,12 @@ function togglePw(id,btn) { const i=document.getElementById(id); i.type=i.type==
 function getInitials(n) { const p=(n||'').split(' ').filter(Boolean); return p.length>=2?(p[0][0]+p[p.length-1][0]).toUpperCase():(p[0]||'--').slice(0,2).toUpperCase(); }
 function fmtMes(k) { const [y,m]=k.split('-'); return `${MESES_NOME[m]||m} ${y}`; }
 
-// ═══ AUTH ═══
+// ═══ AUTH (Supabase Auth + migração automática) ═══
+// Login usa "email fantasma" {cpf}@masterprime.internal.
+// Se o usuário ainda não foi migrado (auth_id IS NULL em portal_users),
+// valida a senha antiga via RPC, faz signUp e vincula.
+function cpfToFakeEmail(cpf) { return cpf + '@masterprime.internal'; }
+
 async function doLogin() {
   const cpf = cleanCPF(document.getElementById('login-cpf').value);
   const senha = document.getElementById('login-senha').value;
@@ -620,25 +644,84 @@ async function doLogin() {
   if (!senha) { err.style.display='block'; err.textContent='Digite sua senha.'; return; }
   btn.disabled = true; btn.textContent = 'Entrando...';
   try {
-    const user = await DB.getUser(cpf);
-    if (!user || user.senha !== senha) { err.style.display='block'; err.textContent='CPF ou senha incorretos.'; btn.disabled=false; btn.textContent='Entrar'; return; }
+    if (!USE_SUPABASE) {
+      // Fallback localStorage (apenas para dev sem Supabase)
+      const user = await DB.getUser(cpf);
+      if (!user || user.senha !== senha) throw new Error('CPF ou senha incorretos.');
+      currentUser = user; sessionStorage.setItem('mp_session', cpf);
+      err.style.display='none'; await enterPortal();
+      btn.disabled=false; btn.textContent='Entrar'; return;
+    }
+    const email = cpfToFakeEmail(cpf);
+    // 1) Tenta signIn direto (usuário já migrado)
+    let { data, error } = await sb.auth.signInWithPassword({ email, password: senha });
+    if (error) {
+      // 2) Pode ser que o user ainda não tenha sido migrado. Validar senha antiga.
+      const { data: ok, error: rpcErr } = await sb.rpc('validar_senha_portal', { cpf_param: cpf, senha_param: senha });
+      if (rpcErr) throw rpcErr;
+      if (!ok) {
+        err.style.display='block'; err.textContent='CPF ou senha incorretos.';
+        btn.disabled=false; btn.textContent='Entrar'; return;
+      }
+      // 3) Senha bate: cria conta no Supabase Auth
+      const su = await sb.auth.signUp({ email, password: senha });
+      if (su.error) throw su.error;
+      // 4) Garante que está autenticado e vincula auth_id
+      if (!su.data.session) {
+        const si = await sb.auth.signInWithPassword({ email, password: senha });
+        if (si.error) throw si.error;
+      }
+      const linkRes = await sb.rpc('link_auth_to_portal', { cpf_param: cpf });
+      if (linkRes.error) throw linkRes.error;
+    }
+    // Busca dados do user (RLS garante que só vê o próprio ou tudo se admin)
+    const authUser = (await sb.auth.getUser()).data.user;
+    let userRow = null;
+    {
+      const r = await sb.from('portal_users').select('*').eq('auth_id', authUser.id).maybeSingle();
+      userRow = r.data;
+    }
+    if (!userRow) {
+      // Tenta vincular pelo CPF (caso o link ainda não tenha sido feito)
+      await sb.rpc('link_auth_to_portal', { cpf_param: cpf });
+      const r2 = await sb.from('portal_users').select('*').eq('auth_id', authUser.id).maybeSingle();
+      userRow = r2.data;
+    }
+    if (!userRow) throw new Error('Conta criada mas perfil não encontrado. Contate o administrador.');
+    currentUser = userRow;
     err.style.display='none';
-    currentUser = user;
-    sessionStorage.setItem('mp_session', cpf);
     await enterPortal();
-  } catch(e) { err.style.display='block'; err.textContent='Erro de conexao: '+e.message; }
+  } catch(e) {
+    err.style.display='block'; err.textContent = 'Erro: ' + (e.message||e);
+  }
   btn.disabled = false; btn.textContent = 'Entrar';
 }
-function doLogout() {
+
+async function doLogout() {
+  try { if (USE_SUPABASE) await sb.auth.signOut(); } catch(e) {}
   currentUser=null; sessionStorage.removeItem('mp_session');
   document.getElementById('login-screen').style.display='flex';
   document.getElementById('portal-screen').style.display='none';
   document.getElementById('login-cpf').value='';
   document.getElementById('login-senha').value='';
 }
+
 async function checkSession() {
-  const cpf = sessionStorage.getItem('mp_session');
-  if (cpf) { const u = await DB.getUser(cpf); if(u){currentUser=u; await enterPortal(); return;} }
+  if (USE_SUPABASE) {
+    const { data } = await sb.auth.getSession();
+    if (data && data.session && data.session.user) {
+      const authId = data.session.user.id;
+      const r = await sb.from('portal_users').select('*').eq('auth_id', authId).maybeSingle();
+      if (r.data) {
+        currentUser = r.data;
+        await enterPortal();
+        return;
+      }
+    }
+  } else {
+    const cpf = sessionStorage.getItem('mp_session');
+    if (cpf) { const u = await DB.getUser(cpf); if(u){currentUser=u; await enterPortal(); return;} }
+  }
   document.getElementById('loading-screen').style.display='none';
   document.getElementById('login-screen').style.display='flex';
   if (!USE_SUPABASE) document.getElementById('config-warn').classList.remove('hidden');
@@ -658,7 +741,7 @@ async function enterPortal() {
   nav('dashboard');
   await renderDashboard();
   await renderHistorico();
-  if (currentUser.tipo==='admin') { await renderAdminMeses(); await renderUsers(); }
+  if (currentUser.tipo==='admin') { await renderAdminMeses(); await renderUsers(); await renderAdminOverview(); }
 }
 
 // ═══ NAV ═══
@@ -777,13 +860,50 @@ async function changePw() {
   if(cur!==currentUser.senha){msg.innerHTML='<div class="alert alert-err">Senha atual incorreta.</div>';return;}
   if(nw.length<6){msg.innerHTML='<div class="alert alert-warn">Minimo 6 caracteres.</div>';return;}
   if(nw!==cf){msg.innerHTML='<div class="alert alert-err">Senhas nao conferem.</div>';return;}
-  await DB.updateUser(currentUser.cpf, {senha:nw});
-  currentUser.senha=nw;
-  msg.innerHTML='<div class="alert alert-ok">Senha alterada!</div>';
-  document.getElementById('pw-cur').value='';document.getElementById('pw-new').value='';document.getElementById('pw-conf').value='';
+  try {
+    if (USE_SUPABASE) {
+      // Atualiza em portal_users E em auth.users (via RPC) de uma vez
+      const { error } = await sb.rpc('trocar_senha_portal', { nova_senha: nw });
+      if (error) throw error;
+    } else {
+      await DB.updateUser(currentUser.cpf, {senha:nw});
+    }
+    currentUser.senha=nw;
+    msg.innerHTML='<div class="alert alert-ok">Senha alterada!</div>';
+    document.getElementById('pw-cur').value='';document.getElementById('pw-new').value='';document.getElementById('pw-conf').value='';
+  } catch(e) {
+    msg.innerHTML='<div class="alert alert-err">Erro ao alterar: '+(e.message||e)+'</div>';
+  }
 }
 
 // ═══ ADMIN: UPLOAD ═══
+// Cria conta no Supabase Auth + portal_users quando o consultor ainda não existe.
+// Usa cliente secundário (sbSignup) para não deslogar o admin.
+async function criarUsuarioCompleto({ nome, cpf, senha, tipo }) {
+  // 1) Signup no Supabase Auth (usuário autentica pelo email fantasma)
+  const email = cpfToFakeEmail(cpf);
+  let authId = null;
+  if (USE_SUPABASE && sbSignup) {
+    const su = await sbSignup.auth.signUp({ email, password: senha });
+    if (su.error && !/already registered|already exists|User already/i.test(su.error.message)) {
+      throw new Error('Supabase signUp: ' + su.error.message);
+    }
+    authId = su.data?.user?.id || null;
+    // Se o user já existia, tenta signIn pra pegar o id
+    if (!authId) {
+      const si = await sbSignup.auth.signInWithPassword({ email, password: senha });
+      if (!si.error) authId = si.data.user.id;
+    }
+    await sbSignup.auth.signOut().catch(()=>{});
+  }
+  // 2) Insere/atualiza em portal_users
+  await DB.createUser({ nome, cpf, tipo: tipo||'consultor', senha, criado:new Date().toISOString().slice(0,10) });
+  // 3) Vincula auth_id (admin tem permissão total pela policy admin_all)
+  if (USE_SUPABASE && authId) {
+    await sb.from('portal_users').update({ auth_id: authId }).eq('cpf', cpf);
+  }
+}
+
 async function adminUpload(evt) {
   const file=evt.target.files[0]; if(!file)return;
   const res=document.getElementById('upload-result');
@@ -792,19 +912,19 @@ async function adminUpload(evt) {
     const data=JSON.parse(text);
     if(!data.mes||!data.consultores){res.innerHTML='<div class="alert alert-err">Formato invalido. Precisa ter "mes" e "consultores".</div>';return;}
     await DB.publishDemos(data.mes, data.consultores);
-    // Auto-create users
+    // Auto-create users (+ signUp Supabase Auth)
     let novos=0;
     const users=await DB.getAllUsers();
     for(const nome of Object.keys(data.consultores)){
       if(!users.find(u=>u.nome===nome)){
         const cpf=String(Math.floor(10000000000+Math.random()*89999999999));
-        await DB.createUser({nome,cpf,tipo:'consultor',senha:cpf,criado:new Date().toISOString().slice(0,10)});
+        await criarUsuarioCompleto({ nome, cpf, senha: cpf, tipo:'consultor' });
         novos++;
       }
     }
     const nc=Object.keys(data.consultores).length;
     res.innerHTML=`<div class="alert alert-ok">Demonstrativos de <strong>${fmtMes(data.mes)}</strong> publicados! ${nc} consultores${novos?` (${novos} novos usuarios criados)`:''}</div>`;
-    await renderAdminMeses(); await renderUsers(); await renderDashboard(); await renderHistorico();
+    await renderAdminMeses(); await renderUsers(); await renderDashboard(); await renderHistorico(); await renderAdminOverview();
   } catch(e){res.innerHTML=`<div class="alert alert-err">Erro: ${e.message}</div>`;}
 }
 async function renderAdminMeses() {
@@ -819,19 +939,122 @@ async function renderAdminMeses() {
   }
   el.innerHTML=html;
 }
-async function delMes(m) { if(!confirm('Remover '+fmtMes(m)+'?'))return; await DB.deleteMes(m); await renderAdminMeses(); await renderDashboard(); await renderHistorico(); }
+async function delMes(m) { if(!confirm('Remover '+fmtMes(m)+'?'))return; await DB.deleteMes(m); await renderAdminMeses(); await renderDashboard(); await renderHistorico(); await renderAdminOverview(); }
+
+// ═══ ADMIN: VISAO GERAL ═══
+// Agrega todos os demonstrativos do mes selecionado e mostra:
+// - KPIs (total consultores, soma de liquidos, receita bruta, descontos)
+// - Tabela com todos consultores e valor liquido (clicavel para ver demo completo)
+// - Modal/expansao com o demonstrativo completo de cada um
+async function renderAdminOverview() {
+  if (!currentUser || currentUser.tipo !== 'admin') return;
+  const sel = document.getElementById('overview-mes');
+  const content = document.getElementById('overview-content');
+  const sub = document.getElementById('overview-sub');
+  if (!sel || !content) return;
+  const meses = await DB.getMeses();
+  if (!meses.length) {
+    sel.innerHTML = '<option value="">(nenhum)</option>';
+    content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#128202;</div><div class="empty-state-title">Nenhum demonstrativo publicado</div><div class="empty-state-desc">Faca o upload de um JSON em "Upload Demonstrativos" para comecar.</div></div>';
+    return;
+  }
+  // Preserva selecao atual
+  const cur = sel.value || meses[0];
+  sel.innerHTML = meses.map(m => `<option value="${m}" ${m===cur?'selected':''}>${fmtMes(m)}</option>`).join('');
+  const mes = sel.value;
+  sub.textContent = 'Dashboard administrativa - ' + fmtMes(mes);
+
+  const demos = await DB.getDemosMes(mes); // { nome: dados }
+  const nomes = Object.keys(demos).sort();
+  if (!nomes.length) {
+    content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#128196;</div><div class="empty-state-title">Sem demos neste mes</div></div>';
+    return;
+  }
+
+  // KPIs
+  let totalLiq = 0, totalPos = 0, totalNeg = 0, nPositivos = 0, nNegativos = 0;
+  const rows = nomes.map(nome => {
+    const d = demos[nome] || {};
+    const liq = +d.totalFinal || 0;
+    totalLiq += liq;
+    if (liq >= 0) { totalPos += liq; nPositivos++; } else { totalNeg += liq; nNegativos++; }
+    const tipo = d.tipo || 'consultor';
+    const tipoClass = tipo==='socio'?'tag-teal':tipo==='admin'?'tag-navy':tipo==='parceiro'?'tag-amber':'tag-blue';
+    const tipoLabel = tipo==='socio'?'Socio':tipo==='admin'?'Admin':tipo==='parceiro'?'Parceiro':'Consultor';
+    const liqClass = liq>=0?'pos':'neg';
+    return `<tr style="cursor:pointer" onclick="toggleOverviewDemo('${nome.replace(/'/g,"\\'")}')">
+      <td class="fw6" style="font-size:12px">${nome}</td>
+      <td><span class="tag ${tipoClass}" style="font-size:9px">${tipoLabel}</span></td>
+      <td class="mono num ${liqClass} fw6">${fmtBRL(liq)}</td>
+      <td style="text-align:right;font-size:10px;color:var(--text2)">clique para ver &#8594;</td>
+    </tr>
+    <tr id="ov-demo-${nome.replace(/[^a-zA-Z0-9]/g,'_')}" class="hidden"><td colspan="4" style="padding:0;background:#F8FAFC">
+      <div style="padding:20px">${renderDemo(demos[nome], mes)}</div>
+    </td></tr>`;
+  }).join('');
+
+  content.innerHTML = `
+    <div class="stats" style="margin-bottom:20px">
+      <div class="stat stat-accent">
+        <div class="stat-label">Consultores</div>
+        <div class="stat-value">${nomes.length}</div>
+        <div class="stat-sub">${nPositivos} a receber &middot; ${nNegativos} a pagar</div>
+      </div>
+      <div class="stat stat-teal">
+        <div class="stat-label">Total a pagar</div>
+        <div class="stat-value">${fmtBRL(totalPos)}</div>
+        <div class="stat-sub">liquidos positivos</div>
+      </div>
+      <div class="stat stat-navy">
+        <div class="stat-label">Total a receber/descontar</div>
+        <div class="stat-value" style="color:var(--red)">${fmtBRL(totalNeg)}</div>
+        <div class="stat-sub">liquidos negativos</div>
+      </div>
+      <div class="stat stat-green">
+        <div class="stat-label">Saldo geral</div>
+        <div class="stat-value" style="color:var(--green)">${fmtBRL(totalLiq)}</div>
+        <div class="stat-sub">soma de todos</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div><div class="card-title">Demonstrativos de ${fmtMes(mes)}</div><div class="card-sub">${nomes.length} pessoas &middot; clique em qualquer linha para expandir</div></div></div>
+      <div class="tbl-wrap" style="padding:0">
+        <table class="tbl">
+          <thead><tr><th>Nome</th><th>Tipo</th><th class="num">Liquido total</th><th></th></tr></thead>
+          <tbody>${rows}</tbody>
+          <tfoot><tr><td colspan="2" class="fw7">TOTAL GERAL</td><td class="mono num fw7 ${totalLiq>=0?'pos':'neg'}">${fmtBRL(totalLiq)}</td><td></td></tr></tfoot>
+        </table>
+      </div>
+    </div>`;
+}
+
+function toggleOverviewDemo(nome) {
+  const id = 'ov-demo-' + nome.replace(/[^a-zA-Z0-9]/g,'_');
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('hidden');
+}
 
 // ═══ ADMIN: USERS ═══
 async function addUser() {
   const nome=document.getElementById('nu-nome').value.trim().toUpperCase(), cpf=cleanCPF(document.getElementById('nu-cpf').value), tipo=document.getElementById('nu-tipo').value, msg=document.getElementById('add-msg');
+  // Campo opcional "senha inicial" - se não preencher usa CPF
+  const senhaInput = document.getElementById('nu-senha');
+  const senhaCustom = senhaInput ? senhaInput.value.trim() : '';
+  const senha = senhaCustom || cpf;
   if(!nome||nome.length<3){msg.innerHTML='<div class="alert alert-warn">Nome invalido.</div>';return;}
   if(cpf.length!==11){msg.innerHTML='<div class="alert alert-warn">CPF invalido.</div>';return;}
+  if(senha.length<6){msg.innerHTML='<div class="alert alert-warn">Senha deve ter no minimo 6 caracteres.</div>';return;}
   const users=await DB.getAllUsers();
   if(users.find(u=>u.cpf===cpf)){msg.innerHTML='<div class="alert alert-err">CPF ja cadastrado.</div>';return;}
-  await DB.createUser({nome,cpf,tipo,senha:cpf,criado:new Date().toISOString().slice(0,10)});
-  msg.innerHTML=`<div class="alert alert-ok">${nome} cadastrado! Senha: ${fmtCPF(cpf)}</div>`;
-  document.getElementById('nu-nome').value='';document.getElementById('nu-cpf').value='';
-  await renderUsers();
+  try {
+    await criarUsuarioCompleto({ nome, cpf, senha, tipo });
+    msg.innerHTML=`<div class="alert alert-ok">${nome} cadastrado! Senha inicial: ${senhaCustom?senha:fmtCPF(cpf)}</div>`;
+    document.getElementById('nu-nome').value='';document.getElementById('nu-cpf').value='';
+    if (senhaInput) senhaInput.value='';
+    await renderUsers();
+  } catch(e) {
+    msg.innerHTML='<div class="alert alert-err">Erro: '+(e.message||e)+'</div>';
+  }
 }
 async function renderUsers() {
   const users=await DB.getAllUsers(); const el=document.getElementById('users-list');
@@ -843,8 +1066,36 @@ async function renderUsers() {
     return `<div class="user-mgmt-row"><div style="width:32px;height:32px;border-radius:50%;background:${bg};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${getInitials(u.nome)}</div><div style="flex:1"><div style="font-weight:600;font-size:12px">${u.nome}</div><div style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace">${fmtCPF(u.cpf)}</div></div><span class="tag ${tc}">${tl}</span><button class="btn btn-outline btn-sm" onclick="resetPw('${u.cpf}')">Reset senha</button>${u.cpf!==currentUser.cpf?`<button class="btn btn-danger btn-sm" onclick="delUser('${u.cpf}')">Remover</button>`:''}</div>`;
   }).join('');
 }
-async function resetPw(cpf) { await DB.updateUser(cpf,{senha:cpf}); const u=await DB.getUser(cpf); alert(`Senha de ${u.nome} resetada para o CPF.`); }
-async function delUser(cpf) { const u=await DB.getUser(cpf); if(!u||!confirm('Remover '+u.nome+'?'))return; await DB.deleteUser(cpf); await renderUsers(); }
+async function resetPw(cpf) {
+  const u = await DB.getUser(cpf);
+  if (!u) { alert('Usuário não encontrado.'); return; }
+  const novaSenha = prompt(`Nova senha para ${u.nome}\n(mínimo 6 caracteres; deixe vazio para usar o CPF):`, cpf);
+  if (novaSenha === null) return;
+  const senhaFinal = (novaSenha && novaSenha.length >= 6) ? novaSenha : cpf;
+  try {
+    if (USE_SUPABASE) {
+      const { error } = await sb.rpc('admin_resetar_senha', { cpf_param: cpf, nova_senha: senhaFinal });
+      if (error) throw error;
+    } else {
+      await DB.updateUser(cpf, { senha: senhaFinal });
+    }
+    alert(`Senha de ${u.nome} redefinida: ${senhaFinal === cpf ? 'CPF (' + fmtCPF(cpf) + ')' : senhaFinal}`);
+  } catch(e) { alert('Erro: ' + (e.message||e)); }
+}
+
+async function delUser(cpf) {
+  const u = await DB.getUser(cpf);
+  if (!u || !confirm('Remover ' + u.nome + '? Essa ação é irreversível.')) return;
+  try {
+    if (USE_SUPABASE) {
+      const { error } = await sb.rpc('admin_deletar_user', { cpf_param: cpf });
+      if (error) throw error;
+    } else {
+      await DB.deleteUser(cpf);
+    }
+    await renderUsers();
+  } catch(e) { alert('Erro: ' + (e.message||e)); }
+}
 
 // ═══ INIT ═══
 (async()=>{ await DB.init(); await checkSession(); })();
