@@ -919,42 +919,34 @@ async function criarUsuarioCompleto({ nome, cpf, username, senha, tipo }) {
 }
 
 async function adminUpload(evt) {
-  const file=evt.target.files[0]; if(!file)return;
-  const res=document.getElementById('upload-result');
+  const file = evt.target.files[0]; if (!file) return;
+  const res = document.getElementById('upload-result');
   try {
-    const text=await file.text();
-    const data=JSON.parse(text);
-    if(!data.mes||!data.consultores){res.innerHTML='<div class="alert alert-err">Formato invalido. Precisa ter "mes" e "consultores".</div>';return;}
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if (!data.mes || !data.consultores) { res.innerHTML = '<div class="alert alert-err">Formato invalido. Precisa ter "mes" e "consultores".</div>'; return; }
     await DB.publishDemos(data.mes, data.consultores);
     // Cria/atualiza contas usando username+senhaInicial do JSON
-    let novos=0, atualizados=0;
-    const credenciaisGeradas = [];
+    let novos = 0, atualizados = 0;
     const users = await DB.getAllUsers();
     for (const [nome, dados] of Object.entries(data.consultores)) {
       const existente = users.find(u => u.nome === nome);
       const username = dados.username || null;
       const senhaInicial = dados.senhaInicial || null;
       if (!existente) {
-        // Usuário novo: cria com username+senha do JSON
         if (!username || !senhaInicial) {
-          // Fallback: gera CPF aleatório (fluxo antigo)
-          const cpf = String(Math.floor(10000000000+Math.random()*89999999999));
+          const cpf = String(Math.floor(10000000000 + Math.random() * 89999999999));
           await criarUsuarioCompleto({ nome, cpf, senha: cpf, tipo: 'consultor' });
-          credenciaisGeradas.push({ nome, usuario: cpf, senha: cpf });
         } else {
-          const cpf = String(Math.floor(10000000000+Math.random()*89999999999));
+          const cpf = String(Math.floor(10000000000 + Math.random() * 89999999999));
           await criarUsuarioCompleto({ nome, cpf, username, senha: senhaInicial, tipo: 'consultor' });
-          credenciaisGeradas.push({ nome, usuario: username, senha: senhaInicial });
         }
         novos++;
       } else if (username && senhaInicial && !existente.username) {
-        // Usuário legado sem username: atualiza para novo esquema
         try {
           await sb.rpc('admin_set_username_senha', { cpf_param: existente.cpf, username_param: username, senha_param: senhaInicial });
-          // Cria conta Auth se não existir
           if (!existente.auth_id) {
-            const result = await criarUsuarioCompleto({ nome, cpf: existente.cpf, username, senha: senhaInicial, tipo: existente.tipo });
-            credenciaisGeradas.push({ nome, usuario: username, senha: senhaInicial });
+            await criarUsuarioCompleto({ nome, cpf: existente.cpf, username, senha: senhaInicial, tipo: existente.tipo });
           }
           atualizados++;
         } catch(e) { console.warn('Erro atualizando', nome, e); }
@@ -964,35 +956,10 @@ async function adminUpload(evt) {
     let msg = `<div class="alert alert-ok">Demonstrativos de <strong>${fmtMes(data.mes)}</strong> publicados! ${nc} pessoas`;
     if (novos) msg += ` &middot; ${novos} usu&aacute;rios criados`;
     if (atualizados) msg += ` &middot; ${atualizados} atualizados`;
-    msg += '</div>';
-    if (credenciaisGeradas.length) {
-      msg += `<div class="card mt16" style="margin-top:16px">
-        <div class="card-head"><div><div class="card-title">Credenciais geradas (${credenciaisGeradas.length})</div><div class="card-sub">Envie para cada pessoa. No primeiro login \u00e9 obrigat\u00f3rio trocar a senha.</div></div>
-          <button class="btn btn-outline btn-sm" onclick="baixarCredenciaisExcel()">&#128202; Baixar Excel</button>
-        </div>
-        <div class="tbl-wrap" style="padding:0"><table class="tbl">
-          <thead><tr><th>Nome</th><th>Usu\u00e1rio</th><th>Senha inicial</th></tr></thead>
-          <tbody>${credenciaisGeradas.map(c=>`<tr><td>${c.nome}</td><td class="mono">${c.usuario}</td><td class="mono">${c.senha}</td></tr>`).join('')}</tbody>
-        </table></div>
-      </div>`;
-      window._ultimasCredenciais = credenciaisGeradas;
-    }
+    msg += ` &middot; <a href="#" onclick="nav('admin-users');return false;" style="color:var(--mp-navy);font-weight:600">Ver usu&aacute;rios &rarr;</a></div>`;
     res.innerHTML = msg;
     await renderAdminMeses(); await renderUsers(); await renderDashboard(); await renderHistorico(); await renderAdminOverview();
-  } catch(e){res.innerHTML=`<div class="alert alert-err">Erro: ${e.message}</div>`;}
-}
-
-// Baixa lista de credenciais em Excel para o admin distribuir
-function baixarCredenciaisExcel() {
-  const lista = window._ultimasCredenciais || [];
-  if (!lista.length) { alert('Nenhuma credencial gerada.'); return; }
-  const rows = [['Nome','Usuario','Senha inicial']];
-  lista.forEach(c => rows.push([c.nome, c.usuario, c.senha]));
-  const wb = XLSX.utils.book_new();
-  const ws = XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols'] = [{wch:30},{wch:25},{wch:14}];
-  XLSX.utils.book_append_sheet(wb, ws, 'Credenciais');
-  XLSX.writeFile(wb, 'credenciais_portal.xlsx');
+  } catch(e) { res.innerHTML = `<div class="alert alert-err">Erro: ${e.message}</div>`; }
 }
 async function renderAdminMeses() {
   const el=document.getElementById('admin-meses-list');
@@ -1204,14 +1171,50 @@ async function addUser() {
   }
 }
 async function renderUsers() {
-  const users=await DB.getAllUsers(); const el=document.getElementById('users-list');
-  document.getElementById('user-count').textContent=users.length+' usuarios';
-  el.innerHTML=users.map(u=>{
-    const tc=u.tipo==='admin'?'tag-navy':u.tipo==='socio'?'tag-teal':'tag-blue';
-    const tl=u.tipo==='admin'?'Admin':u.tipo==='socio'?'Socio':'Consultor';
-    const bg=u.tipo==='admin'?'var(--mp-navy)':u.tipo==='socio'?'var(--mp-teal)':'var(--mp-blue)';
-    return `<div class="user-mgmt-row"><div style="width:32px;height:32px;border-radius:50%;background:${bg};color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0">${getInitials(u.nome)}</div><div style="flex:1"><div style="font-weight:600;font-size:12px">${u.nome}</div><div style="font-size:10px;color:var(--text2);font-family:'DM Mono',monospace">${fmtCPF(u.cpf)}</div></div><span class="tag ${tc}">${tl}</span><button class="btn btn-outline btn-sm" onclick="resetPw('${u.cpf}')">Reset senha</button>${u.cpf!==currentUser.cpf?`<button class="btn btn-danger btn-sm" onclick="delUser('${u.cpf}')">Remover</button>`:''}</div>`;
+  const users = await DB.getAllUsers();
+  const el = document.getElementById('users-list');
+  document.getElementById('user-count').textContent = users.length + ' usuarios';
+  // Ordena: admin primeiro, depois por nome
+  users.sort((a,b) => {
+    if (a.tipo === 'admin' && b.tipo !== 'admin') return -1;
+    if (b.tipo === 'admin' && a.tipo !== 'admin') return 1;
+    return (a.nome||'').localeCompare(b.nome||'');
+  });
+  const rows = users.map(u => {
+    const tc = u.tipo==='admin'?'tag-navy':u.tipo==='socio'?'tag-teal':'tag-blue';
+    const tl = u.tipo==='admin'?'Admin':u.tipo==='socio'?'S&oacute;cio':u.tipo==='parceiro'?'Parceiro':'Consultor';
+    const cpfFmt = u.cpf && u.cpf.length === 11 && /^\d+$/.test(u.cpf) ? fmtCPF(u.cpf) : (u.cpf || '-');
+    const userLogin = u.username ? u.username : `<span style="color:var(--text3);font-style:italic">${cpfFmt}</span>`;
+    const senhaDisplay = u.senha ? `<span class="mono" style="font-size:11px">${u.senha}</span>` : '<span style="color:var(--text3)">&mdash;</span>';
+    const canDel = u.cpf !== currentUser.cpf;
+    return `<tr>
+      <td><span class="tag ${tc}" style="font-size:9px">${tl}</span></td>
+      <td style="font-weight:600;font-size:12px">${u.nome}</td>
+      <td class="mono" style="font-size:12px">${userLogin}</td>
+      <td>${senhaDisplay}</td>
+      <td class="mono" style="font-size:10px;color:var(--text2)">${cpfFmt}</td>
+      <td style="text-align:right;white-space:nowrap">
+        <button class="btn btn-outline btn-sm" onclick="resetPw('${u.cpf}')">Reset senha</button>
+        ${canDel ? `<button class="btn btn-danger btn-sm" onclick="delUser('${u.cpf}')">Remover</button>` : ''}
+      </td>
+    </tr>`;
   }).join('');
+  el.innerHTML = `
+    <div class="tbl-wrap" style="padding:0">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Tipo</th>
+            <th>Nome</th>
+            <th>Usu&aacute;rio</th>
+            <th>Senha atual</th>
+            <th>CPF</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
 }
 async function resetPw(cpf) {
   const u = await DB.getUser(cpf);
