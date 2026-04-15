@@ -4043,6 +4043,18 @@ function publicarNoPortal() {
         // Remove botões do painel que não funcionam no portal
         html = html.replace(/<button[^>]*onclick="[^"]*exportar(?:Demo|Excel|Resumo)[^"]*"[^>]*>[\s\S]*?<\/button>/g, '');
         html = html.replace(/<button[^>]*onclick="[^"]*(?:S\.|atualizar|nav\(|mostrar|calcular)[^"]*"[^>]*>[\s\S]*?<\/button>/g, '');
+        // Bug 1: remover spans de obsParc onde o valor é R$ 0,00 (ex: "LEIDI: R$ 0,00 vc paga")
+        html = html.replace(/<span style="font-size:9px;color:var\(--amber\);white-space:nowrap">[^<]*R\$\s*0,00[\s\S]*?<\/span>\s*<\/span>/g, '');
+        // Caso simplificado: span obsParc com valor 0 sem tag interna
+        html = html.replace(/<span style="font-size:9px;color:var\(--amber\);white-space:nowrap">[^<]*R\$\s*0,00[^<]*<\/span>(?:<br>)?/g, '');
+        // Limpa <br> órfãos
+        html = html.replace(/<br>\s*(<br>)+/g, '<br>');
+        // Bug 2: linhas de venda com bruto/nf/adm/líquido todos R$ 0,00 → mostrar "—"
+        // Padrão: 4 células consecutivas mono num com R$ 0,00
+        html = html.replace(
+          /<td class="mono num">R\$\s*0,00<\/td>\s*<td class="mono num neg">\(R\$\s*0,00\)<\/td>\s*<td class="mono num"[^>]*>\(R\$\s*0,00\)<\/td>\s*<td class="mono num pos fw6">R\$\s*0,00<\/td>/g,
+          '<td class="mono num dim">&mdash;</td><td class="mono num dim">&mdash;</td><td class="mono num dim">&mdash;</td><td class="mono num dim">&mdash;</td>'
+        );
         // Anexa cartas de parceria que este consultor PAGA (cada um vê só as suas)
         const cartasHtml = renderCartasHtmlPagador(nome);
         if (cartasHtml) html += cartasHtml;
