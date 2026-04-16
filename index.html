@@ -787,14 +787,18 @@ function nav(id) {
   if(s)s.classList.add('active'); if(n)n.classList.add('active');
   document.getElementById('sidebar').classList.remove('open');
   // Lazy-load dos iframes: só carrega na primeira visita (evita 2.5 MB no login)
-  const embeddedScreens = ['assembleia','lances','painel'];
-  const app = document.getElementById('portal-app');
-  const fab = document.getElementById('portal-menu-fab');
-  if (embeddedScreens.includes(id)) {
+  // Iframes com lazy-load (assembleia/lances/painel) — carrega só na primeira visita
+  const iframeScreens = ['assembleia','lances','painel'];
+  if (iframeScreens.includes(id)) {
     const ifr = document.getElementById('iframe-' + id);
     if (ifr && ifr.dataset.target && ifr.getAttribute('src') === 'about:blank') {
       ifr.src = ifr.dataset.target;
     }
+  }
+  // Apenas o Painel Split abre em tela cheia (esconde sidebar do portal)
+  const app = document.getElementById('portal-app');
+  const fab = document.getElementById('portal-menu-fab');
+  if (id === 'painel') {
     if (app) app.classList.add('embedded');
     if (fab) fab.style.display = 'flex';
     document.body.classList.add('embedded-mode');
