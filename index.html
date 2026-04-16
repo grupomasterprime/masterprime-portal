@@ -301,7 +301,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
         <div class="sb-item" onclick="nav('admin-overview')" id="ni-admin-overview"><span class="ic">&#128200;</span> Visao Geral</div>
         <div class="sb-item" onclick="nav('admin-upload')" id="ni-admin-upload"><span class="ic">&#128228;</span> Upload Demonstrativos</div>
         <div class="sb-item" onclick="nav('admin-users')" id="ni-admin-users"><span class="ic">&#128101;</span> Gerenciar Usuarios</div>
-        <div class="sb-item" onclick="window.open('painel.html','_blank')" id="ni-painel"><span class="ic">&#9881;</span> Abrir Painel Split</div>
+        <div class="sb-item" onclick="nav('painel')" id="ni-painel"><span class="ic">&#9881;</span> Painel Split</div>
       </div>
       <div class="sb-user-card">
         <div class="sb-user-info">
@@ -335,6 +335,11 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
       <!-- LANCES (iframe carregado sob demanda) -->
       <div class="screen" id="s-lances" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
         <iframe id="iframe-lances" src="about:blank" data-target="lances.html" style="width:100%;height:100%;border:0;display:block" title="Consulta de Lances"></iframe>
+      </div>
+
+      <!-- PAINEL SPLIT (iframe carregado sob demanda) -->
+      <div class="screen" id="s-painel" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
+        <iframe id="iframe-painel" src="about:blank" data-target="painel.html" style="width:100%;height:100%;border:0;display:block" title="Painel Split"></iframe>
       </div>
 
       <!-- PERFIL -->
@@ -766,7 +771,7 @@ function nav(id) {
   if(s)s.classList.add('active'); if(n)n.classList.add('active');
   document.getElementById('sidebar').classList.remove('open');
   // Lazy-load dos iframes: só carrega na primeira visita (evita 2.5 MB no login)
-  if (id === 'assembleia' || id === 'lances') {
+  if (id === 'assembleia' || id === 'lances' || id === 'painel') {
     const ifr = document.getElementById('iframe-' + id);
     if (ifr && ifr.dataset.target && ifr.getAttribute('src') === 'about:blank') {
       ifr.src = ifr.dataset.target;
