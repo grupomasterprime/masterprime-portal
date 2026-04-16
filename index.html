@@ -96,11 +96,26 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 
 /* ═══ LAYOUT ═══ */
 #portal-screen { display:none; min-height:100vh; }
-.app { display:grid; grid-template-columns:240px 1fr; min-height:100vh; }
+.app { display:grid; grid-template-columns:240px 1fr; min-height:100vh; transition:grid-template-columns .25s ease; }
+.app.embedded { grid-template-columns:0 1fr; }
+.app.embedded .sidebar { transform:translateX(-260px); pointer-events:none; }
 .sidebar {
   background:var(--sidebar-bg); display:flex; flex-direction:column;
   position:sticky; top:0; height:100vh; overflow-y:auto;
+  transition:transform .25s ease;
 }
+/* Botão flutuante para reabrir o menu do portal quando em tela cheia */
+.portal-menu-fab {
+  display:none; position:fixed; top:12px; left:12px; z-index:500;
+  width:40px; height:40px; border-radius:10px; background:var(--sidebar-bg);
+  color:#fff; border:1px solid rgba(255,255,255,.15); cursor:pointer;
+  font-size:18px; align-items:center; justify-content:center;
+  box-shadow:0 4px 12px rgba(0,0,0,.25); transition:all .15s;
+}
+.portal-menu-fab:hover { background:#1a2942; transform:scale(1.05); }
+.app.embedded ~ .portal-menu-fab,
+.app.embedded .portal-menu-fab { display:flex; }
+body.embedded-mode .portal-menu-fab { display:flex; }
 .sb-logo { padding:24px 20px 20px; border-bottom:1px solid rgba(255,255,255,.1); }
 .sb-ver { font-size:9px; color:rgba(255,255,255,.35); font-family:'DM Mono',monospace; margin-top:8px; letter-spacing:.5px; }
 .sb-section { padding:16px 20px 4px; font-size:9px; color:rgba(255,255,255,.35); text-transform:uppercase; letter-spacing:1.2px; font-weight:600; }
@@ -284,7 +299,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 <div id="portal-screen" style="display:none">
   <button class="mobile-toggle" onclick="toggleSidebar()">&#9776;</button>
   <div class="sidebar-backdrop" onclick="toggleSidebar()"></div>
-  <div class="app">
+  <button class="portal-menu-fab" id="portal-menu-fab" onclick="exitEmbedded()" title="Voltar ao menu do portal">&#9776;</button>
+  <div class="app" id="portal-app">
     <aside class="sidebar" id="sidebar">
       <div class="sb-logo">
         <img src="logo.png" alt="Master Prime" style="width:100%;max-width:200px;height:auto;display:block;margin:0 auto;filter:brightness(0) invert(1)">
@@ -771,12 +787,29 @@ function nav(id) {
   if(s)s.classList.add('active'); if(n)n.classList.add('active');
   document.getElementById('sidebar').classList.remove('open');
   // Lazy-load dos iframes: só carrega na primeira visita (evita 2.5 MB no login)
-  if (id === 'assembleia' || id === 'lances' || id === 'painel') {
+  const embeddedScreens = ['assembleia','lances','painel'];
+  const app = document.getElementById('portal-app');
+  const fab = document.getElementById('portal-menu-fab');
+  if (embeddedScreens.includes(id)) {
     const ifr = document.getElementById('iframe-' + id);
     if (ifr && ifr.dataset.target && ifr.getAttribute('src') === 'about:blank') {
       ifr.src = ifr.dataset.target;
     }
+    if (app) app.classList.add('embedded');
+    if (fab) fab.style.display = 'flex';
+    document.body.classList.add('embedded-mode');
+  } else {
+    if (app) app.classList.remove('embedded');
+    if (fab) fab.style.display = 'none';
+    document.body.classList.remove('embedded-mode');
   }
+}
+function exitEmbedded(){
+  const app = document.getElementById('portal-app');
+  if (app) app.classList.remove('embedded');
+  document.getElementById('portal-menu-fab').style.display = 'none';
+  document.body.classList.remove('embedded-mode');
+  nav('dashboard');
 }
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
 
