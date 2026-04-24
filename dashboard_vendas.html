@@ -12,7 +12,7 @@
 body{background:#0f172a;color:#e2e8f0;font-family:'Segoe UI',system-ui,Arial,sans-serif;min-height:100vh}
 
 /* HEADER */
-.hdr{background:#1e293b;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #334155}
+.hdr{background:#2D3F5E;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #334155}
 .hdr-left{display:flex;align-items:center;gap:12px}
 .hdr-logo{width:36px;height:36px}
 .hdr h1{font-size:15px;font-weight:800;color:#fff}
@@ -20,7 +20,7 @@ body{background:#0f172a;color:#e2e8f0;font-family:'Segoe UI',system-ui,Arial,san
 .hdr-right{display:flex;align-items:center;gap:12px}
 .hdr-status{font-size:11px;color:#64748b}
 .btn{padding:8px 16px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:.15s}
-.btn-login{background:#3b82f6;color:#fff}.btn-login:hover{background:#2563eb}
+.btn-login{background:#2D3F5E;color:#fff}.btn-login:hover{background:#1E2D45}
 .btn-logout{background:#334155;color:#94a3b8}.btn-logout:hover{background:#475569}
 .btn-refresh{background:#059669;color:#fff}.btn-refresh:hover{background:#047857}
 
@@ -36,7 +36,7 @@ body{background:#0f172a;color:#e2e8f0;font-family:'Segoe UI',system-ui,Arial,san
 /* FILTERS */
 .filters{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
 .filter-select{background:#1e293b;border:1px solid #334155;color:#e2e8f0;padding:8px 12px;border-radius:8px;font-size:13px;font-family:inherit;min-width:180px}
-.filter-select:focus{outline:none;border-color:#3b82f6}
+.filter-select:focus{outline:none;border-color:#2D3F5E}
 .filter-label{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:1px}
 .filter-group{display:flex;flex-direction:column;gap:4px}
 
@@ -44,7 +44,7 @@ body{background:#0f172a;color:#e2e8f0;font-family:'Segoe UI',system-ui,Arial,san
 .kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}
 .kpi{background:#1e293b;border-radius:10px;padding:16px;border-left:4px solid #334155;position:relative;overflow:hidden}
 .kpi::after{content:'';position:absolute;top:0;right:0;width:60px;height:60px;border-radius:50%;opacity:.05;transform:translate(20px,-20px)}
-.kpi.blue{border-left-color:#3b82f6}.kpi.blue::after{background:#3b82f6}
+.kpi.blue{border-left-color:#2D3F5E}.kpi.blue::after{background:#2D3F5E}
 .kpi.green{border-left-color:#10b981}.kpi.green::after{background:#10b981}
 .kpi.amber{border-left-color:#f59e0b}.kpi.amber::after{background:#f59e0b}
 .kpi.purple{border-left-color:#8b5cf6}.kpi.purple::after{background:#8b5cf6}
@@ -72,11 +72,11 @@ body{background:#0f172a;color:#e2e8f0;font-family:'Segoe UI',system-ui,Arial,san
 .rank-n{background:#334155;color:#94a3b8}
 .bar-cell{display:flex;align-items:center;gap:8px}
 .bar-bg{height:8px;background:#334155;border-radius:4px;flex:1;overflow:hidden}
-.bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#3b82f6,#8b5cf6)}
+.bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#2D3F5E,#8b5cf6)}
 
 /* LOADING */
 .loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:50vh}
-.spinner{width:40px;height:40px;border:3px solid #334155;border-top-color:#3b82f6;border-radius:50%;animation:spin .8s linear infinite}
+.spinner{width:40px;height:40px;border:3px solid #334155;border-top-color:#2D3F5E;border-radius:50%;animation:spin .8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
 .loading p{margin-top:12px;color:#64748b;font-size:13px}
 
@@ -93,7 +93,7 @@ body{background:#0f172a;color:#e2e8f0;font-family:'Segoe UI',system-ui,Arial,san
 <!-- HEADER -->
 <div class="hdr">
   <div class="hdr-left">
-    <svg class="hdr-logo" viewBox="0 0 36 36"><rect width="36" height="36" rx="8" fill="#3b82f6"/><text x="18" y="24" text-anchor="middle" fill="#fff" font-size="18" font-weight="900">M</text></svg>
+    <img src="logo.png" class="hdr-logo" alt="Master Prime">
     <div><h1>Master Prime</h1><p>Dashboard de Vendas</p></div>
   </div>
   <div class="hdr-right">
@@ -322,7 +322,7 @@ async function loadData() {
     const iCredito = headers.indexOf('CREDITO');
     const iConsultor = headers.indexOf('CONSULTOR RESPONSAVEL');
     const iData = headers.indexOf('DATA DA VENDA');
-    const iMes = headers.indexOf('MES');
+    const iMes = headers.findIndex(h => h && h.toString().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim() === 'MES');
     const iCliente = headers.indexOf('NOME DO CLIENTE');
 
     for (let r = 1; r < rows.length; r++) {
@@ -397,6 +397,9 @@ function populateFilters() {
   fillSelect('filterAno', anos, 'Todos os anos');
   fillSelect('filterAdm', adms, 'Todas');
   fillSelect('filterSit', sits, 'Todas');
+  const currentYear = String(new Date().getFullYear());
+  const anoSel = document.getElementById('filterAno');
+  if (anoSel && [...anoSel.options].some(o => o.value === currentYear)) anoSel.value = currentYear;
 }
 
 function fillSelect(id, items, allLabel) {
@@ -424,6 +427,10 @@ function applyFilters() {
 // ══════════════════════════════════════════════════════════════
 // KPIs
 // ══════════════════════════════════════════════════════════════
+function fmtFull(n) {
+  return 'R$ ' + (n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 function fmt(n) {
   if (n >= 1e6) return 'R$ ' + (n/1e6).toFixed(2).replace('.',',') + ' mi';
   if (n >= 1e3) return 'R$ ' + (n/1e3).toFixed(1).replace('.',',') + ' mil';
@@ -437,7 +444,7 @@ function renderKPIs(data) {
   const consultores = new Set(data.map(d=>d.consultor).filter(Boolean));
   const adms = new Set(data.map(d=>d.adm).filter(Boolean));
 
-  document.getElementById('kCredito').textContent = fmt(totalCredito);
+  document.getElementById('kCredito').textContent = fmtFull(totalCredito);
   document.getElementById('kCreditoSub').textContent = `em ${totalCotas} operacoes`;
   document.getElementById('kCotas').textContent = totalCotas.toLocaleString('pt-BR');
   document.getElementById('kTicket').textContent = fmt(ticket);
@@ -451,7 +458,22 @@ function renderKPIs(data) {
 // ══════════════════════════════════════════════════════════════
 // CHARTS
 // ══════════════════════════════════════════════════════════════
-const COLORS = ['#3b82f6','#10b981','#f59e0b','#8b5cf6','#f43f5e','#06b6d4','#ec4899','#84cc16','#f97316','#6366f1'];
+const COLORS = ['#2D3F5E','#10b981','#f59e0b','#8b5cf6','#f43f5e','#06b6d4','#ec4899','#84cc16','#f97316','#6366f1'];
+
+const ADMIN_COLORS = {
+  'PORTO SEGURO': '#0B3D91',
+  'PORTO': '#0B3D91',
+  'ITAU': '#EC7000',
+  'ITAÚ': '#EC7000',
+  'BRADESCO': '#CC092F',
+  'YAMAHA': '#E60012',
+  'ADEMICON': '#1A7A84',
+  'EMBRACON': '#F59E0B'
+};
+function colorForAdm(name) {
+  const k = (name||'').toString().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+  return ADMIN_COLORS[k] || '#64748b';
+}
 
 function destroyChart(key) { if (charts[key]) { charts[key].destroy(); delete charts[key]; } }
 
@@ -472,7 +494,7 @@ function renderChartMes(data) {
     type: 'bar',
     data: {
       labels: mesLabels,
-      datasets: [{ data: counts, backgroundColor: '#3b82f6', borderRadius: 4, barPercentage: 0.7 }]
+      datasets: [{ data: counts, backgroundColor: '#2D3F5E', borderRadius: 4, barPercentage: 0.7 }]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
@@ -499,7 +521,7 @@ function renderChartAdm(data) {
     type: 'doughnut',
     data: {
       labels: sorted.map(s=>s[0]),
-      datasets: [{ data: sorted.map(s=>s[1]), backgroundColor: COLORS, borderWidth: 0, hoverOffset: 8 }]
+      datasets: [{ data: sorted.map(s=>s[1]), backgroundColor: sorted.map(s => colorForAdm(s[0])), borderWidth: 0, hoverOffset: 8 }]
     },
     options: {
       responsive: true, maintainAspectRatio: false, cutout: '55%',
@@ -566,8 +588,8 @@ function renderChartEvolucao(data) {
       labels: sorted.map(s => { const [y,m]=s[0].split('-'); return (mesAbrev[m]||m)+'/'+y.slice(2); }),
       datasets: [{
         data: sorted.map(s=>s[1]),
-        borderColor: '#3b82f6', backgroundColor: 'rgba(59,130,246,0.1)',
-        fill: true, tension: 0.3, pointRadius: 3, pointBackgroundColor: '#3b82f6'
+        borderColor: '#2D3F5E', backgroundColor: 'rgba(59,130,246,0.1)',
+        fill: true, tension: 0.3, pointRadius: 3, pointBackgroundColor: '#2D3F5E'
       }]
     },
     options: {
@@ -609,7 +631,7 @@ function renderRanking(data) {
       <td><span class="rank-num ${rankCls}">${i+1}</span></td>
       <td style="font-weight:600;color:#fff">${nome}</td>
       <td>${v.cotas}</td>
-      <td style="font-weight:600;color:#3b82f6">${fmt(v.credito)}</td>
+      <td style="font-weight:600;color:#2D3F5E">${fmt(v.credito)}</td>
       <td>${fmt(v.credito/v.cotas)}</td>
       <td><div class="bar-cell"><div class="bar-bg"><div class="bar-fill" style="width:${barW}%"></div></div><span style="font-size:11px;color:#64748b">${pct}%</span></div></td>
     </tr>`;
