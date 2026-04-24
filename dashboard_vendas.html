@@ -57,6 +57,7 @@ thead th{text-align:left;padding:10px 12px;background:#F4F6FA;color:#64748B;font
 tbody td{padding:10px 12px;border-bottom:1px solid #F1F5F9;color:#1E293B}
 tbody tr:hover{background:#F4F6FA}
 tbody td:nth-child(1){font-weight:700;color:#2D3F5E}
+tbody td:nth-child(2){color:#1E293B;font-weight:500}
 tbody td:nth-child(3){font-weight:600;color:#2D3F5E}
 tbody td:nth-child(4){font-weight:700;color:#16A34A}
 .bar-wrap{display:flex;align-items:center;gap:8px}
@@ -127,7 +128,7 @@ tbody td:nth-child(4){font-weight:700;color:#16A34A}
         </select>
       </div>
       <div class="filter-group">
-        <span class="filter-label">Situacao</span>
+        <span class="filter-label">Contemplação</span>
         <select class="filter-select" id="filterSit" onchange="applyFilters()">
           <option value="">Todas</option>
         </select>
@@ -174,6 +175,28 @@ tbody td:nth-child(4){font-weight:700;color:#16A34A}
         <thead><tr><th>#</th><th>Consultor</th><th>Cotas</th><th>Credito Total</th><th>Ticket Medio</th><th>Participacao</th></tr></thead>
         <tbody id="rankingBody"></tbody>
       </table>
+    </div>
+
+    <div class="tbl-card">
+      <div class="chart-title" style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+        <span>Lista de Vendas</span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="searchVendas" type="text" placeholder="Buscar..." style="padding:6px 10px;border:1px solid #CBD5E1;border-radius:6px;font-size:12px;width:240px">
+          <select id="pageSize" style="padding:6px 8px;border:1px solid #CBD5E1;border-radius:6px;font-size:12px">
+            <option value="20">20/pág</option><option value="50">50/pág</option><option value="100">100/pág</option>
+          </select>
+          <button class="btn btn-refresh" onclick="exportCSV()" style="padding:6px 12px;font-size:11px">Exportar CSV</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table id="vendasTable" style="min-width:900px">
+          <thead><tr>
+            <th data-col="dataVenda">Data</th><th data-col="contrato">Contrato</th><th data-col="consultor">Consultor</th><th data-col="adm">Administradora</th><th data-col="tipo">Tipo</th><th data-col="credito" style="text-align:right">Crédito</th><th data-col="status">Status</th><th data-col="cliente">Cliente</th>
+          </tr></thead>
+          <tbody id="vendasBody"></tbody>
+        </table>
+      </div>
+      <div id="vendasPag" style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:12px;color:#64748B"></div>
     </div>
   </div>
 </div>
@@ -308,6 +331,7 @@ async function loadData() {
     const iConsultor = headers.indexOf('CONSULTOR RESPONSAVEL');
     const iData = headers.indexOf('DATA DA VENDA');
     const iMes = headers.findIndex(h => h && h.toString().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim() === 'MES');
+    const iStatus = headers.indexOf('STATUS');
     const iCliente = headers.indexOf('NOME DO CLIENTE');
 
     for (let r = 1; r < rows.length; r++) {
@@ -345,6 +369,9 @@ async function loadData() {
         grupo: (row[iGrupo]||'').toString().trim(),
         cota: (row[iCota]||'').toString().trim(),
         tipo: (row[iTipo]||'').toString().trim(),
+        status: iStatus >= 0 ? (row[iStatus]||'').toString().toUpperCase().trim() : '',
+        cliente: iCliente >= 0 ? (row[iCliente]||'').toString().trim() : '',
+        dataVenda: iData >= 0 ? (row[iData]||'').toString().trim() : '',
         credito: credito,
         consultor: (row[iConsultor]||'').toString().trim(),
         data: dataVenda,
@@ -385,10 +412,22 @@ function populateFilters() {
   const mesesSorted = mesesOrder.filter(m => mesesInData.some(x => x.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'') === m));
   fillSelect('filterMes', mesesSorted, 'Todos os meses');
   fillSelect('filterAdm', adms, 'Todas');
-  fillSelect('filterSit', sits, 'Todas');
+  const sitSel = document.getElementById('filterSit');
+  if (sitSel) sitSel.innerHTML = '<option value="">Todas</option><option value="CONTEMPLADO">Contemplados</option><option value="NORMAL">Não Contemplados</option>';
   const currentYear = String(new Date().getFullYear());
   const anoSel = document.getElementById('filterAno');
   if (anoSel && [...anoSel.options].some(o => o.value === currentYear)) anoSel.value = currentYear;
+  const normMes = s => (s||'').toString().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+  const yrData = rawData.filter(d => d.ano === currentYear);
+  const mesesOrd = ['JANEIRO','FEVEREIRO','MARCO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
+  const lastMonth = mesesOrd.slice().reverse().find(m => yrData.some(d => normMes(d.mes) === m));
+  if (lastMonth) {
+    const mesSel = document.getElementById('filterMes');
+    if (mesSel) {
+      const opt = [...mesSel.options].find(o => normMes(o.value) === lastMonth);
+      if (opt) mesSel.value = opt.value;
+    }
+  }
 
 }
 
@@ -408,7 +447,11 @@ function applyFilters() {
   if (fc) data = data.filter(d => d.consultor === fc);
   if (fa) data = data.filter(d => d.ano === fa);
   if (fAdm) data = data.filter(d => d.adm === fAdm);
-  if (fSit) data = data.filter(d => d.sit === fSit);
+  if (fSit) {
+    const normS = s => (s||'').toString().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+    if (fSit === 'CONTEMPLADO') data = data.filter(d => normS(d.status).startsWith('CONTEMPL'));
+    else if (fSit === 'NORMAL') data = data.filter(d => normS(d.status) === 'NORMAL');
+  }
   if (fMes) {
     const normM = s => (s||'').toString().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
     const target = normM(fMes);
@@ -417,6 +460,7 @@ function applyFilters() {
 
   renderKPIs(data);
   renderCharts(data);
+  renderVendasTable(data);
   renderRanking(data);
 }
 
@@ -633,6 +677,59 @@ function renderRanking(data) {
     </tr>`;
   }).join('');
 }
+
+// ════════════════════════════════════════════════════════════════════
+// VENDAS TABLE (Excel-like)
+// ════════════════════════════════════════════════════════════════════
+let vendasState = { data: [], sortCol: 'dataVenda', sortDir: 'desc', page: 1, search: '' };
+function renderVendasTable(data) { vendasState.data = data; vendasState.page = 1; drawVendasTable(); }
+function statusColor(s) { const x=(s||'').toUpperCase(); if(x.startsWith('CONTEMPL'))return{bg:'#F0FDF4',fg:'#16A34A'}; if(x==='CANCELADO')return{bg:'#FEF2F2',fg:'#DC2626'}; if(x==='NORMAL')return{bg:'#EFF6FF',fg:'#2563EB'}; return{bg:'#F1F5F9',fg:'#64748B'}; }
+function pageVendas(delta) { vendasState.page += delta; drawVendasTable(); }
+function drawVendasTable() {
+  const q = (vendasState.search || '').toLowerCase().trim();
+  let rows = vendasState.data;
+  if (q) rows = rows.filter(d => Object.values(d).some(v => (v||'').toString().toLowerCase().includes(q)));
+  const col = vendasState.sortCol, dir = vendasState.sortDir === 'asc' ? 1 : -1;
+  rows = rows.slice().sort((a,b) => { const av=a[col],bv=b[col]; if(col==='credito')return(av-bv)*dir; return (av||'').toString().localeCompare((bv||'').toString())*dir; });
+  const ps = document.getElementById('pageSize'); const pageSize = ps ? parseInt(ps.value)||20 : 20;
+  const total = rows.length, pages = Math.max(1, Math.ceil(total/pageSize));
+  vendasState.page = Math.min(vendasState.page, pages);
+  const start = (vendasState.page-1)*pageSize;
+  const pageRows = rows.slice(start, start+pageSize);
+  const body = document.getElementById('vendasBody'); if (!body) return;
+  body.innerHTML = pageRows.map(d => {
+    const sc = statusColor(d.status);
+    return '<tr><td>'+(d.dataVenda||'-')+'</td><td>'+(d.contrato||'-')+'</td><td>'+(d.consultor||'-')+'</td><td>'+(d.adm||'-')+'</td><td>'+(d.tipo||'-')+'</td><td style="text-align:right">'+fmtFull(d.credito||0)+'</td><td><span style="padding:2px 8px;border-radius:4px;font-size:10px;font-weight:600;background:'+sc.bg+';color:'+sc.fg+'">'+(d.status||'-')+'</span></td><td>'+(d.cliente||'-')+'</td></tr>';
+  }).join('');
+  const pag = document.getElementById('vendasPag');
+  if (pag) pag.innerHTML = '<span>Mostrando '+(total?start+1:0)+'-'+Math.min(start+pageSize,total)+' de '+total.toLocaleString('pt-BR')+'</span><div style="display:flex;gap:6px;align-items:center"><button onclick="pageVendas(-1)" '+(vendasState.page<=1?'disabled':'')+' style="padding:4px 10px;border:1px solid #CBD5E1;background:#fff;border-radius:4px;cursor:pointer">‹ Anterior</button><span>Página '+vendasState.page+' de '+pages+'</span><button onclick="pageVendas(1)" '+(vendasState.page>=pages?'disabled':'')+' style="padding:4px 10px;border:1px solid #CBD5E1;background:#fff;border-radius:4px;cursor:pointer">Próxima ›</button></div>';
+}
+function exportCSV() {
+  const q = (vendasState.search || '').toLowerCase().trim();
+  let rows = vendasState.data;
+  if (q) rows = rows.filter(d => Object.values(d).some(v => (v||'').toString().toLowerCase().includes(q)));
+  const h = ['Data','Contrato','Consultor','Administradora','Tipo','Credito','Status','Cliente'];
+  const csv = [h.join(';'), ...rows.map(d => [d.dataVenda||'', d.contrato||'', d.consultor||'', d.adm||'', d.tipo||'', (d.credito||0).toFixed(2).replace('.',','), d.status||'', (d.cliente||'').replace(/;/g,',')].join(';'))].join('\n');
+  const blob = new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href = url; a.download = 'vendas-master-prime-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click(); URL.revokeObjectURL(url);
+}
+document.addEventListener('DOMContentLoaded', () => {
+  const s = document.getElementById('searchVendas');
+  if (s) s.addEventListener('input', e => { vendasState.search = e.target.value; vendasState.page = 1; drawVendasTable(); });
+  const ps = document.getElementById('pageSize');
+  if (ps) ps.addEventListener('change', () => { vendasState.page = 1; drawVendasTable(); });
+  document.querySelectorAll('#vendasTable thead th').forEach(th => {
+    th.style.cursor = 'pointer';
+    th.addEventListener('click', () => {
+      const col = th.dataset.col; if (!col) return;
+      if (vendasState.sortCol === col) vendasState.sortDir = vendasState.sortDir === 'asc' ? 'desc' : 'asc';
+      else { vendasState.sortCol = col; vendasState.sortDir = 'asc'; }
+      drawVendasTable();
+    });
+  });
+});
 
 // ══════════════════════════════════════════════════════════════
 // AUTO-REFRESH
