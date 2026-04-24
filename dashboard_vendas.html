@@ -295,7 +295,7 @@ async function loadData() {
     });
     if (!wsResp.ok) throw new Error(`Erro ao acessar planilha: ${wsResp.status} ${wsResp.statusText}`);
     const wsData = await wsResp.json();
-    const sheetName = wsData.value[0].name;
+    const sheetName = wsData.value.find(w => w.name === 'Base de Vendas')?.name || wsData.value[0].name;
 
     // 2. Ler dados (usedRange)
     const rangeResp = await fetch(`${base}/worksheets('${encodeURIComponent(sheetName)}')/usedRange`, {
