@@ -364,8 +364,6 @@ async function loadData() {
     const iData = headers.indexOf('DATA DA VENDA');
     const iMes = headers.findIndex(h => h && h.toString().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim() === 'MES');
     const iStatus = headers.indexOf('STATUS');
-    const iGrupo = headers.indexOf('GRUPO');
-    const iCota = headers.indexOf('COTA');
     const iCpf = headers.indexOf('CPF/CNPJ');
     const iCliente = headers.indexOf('NOME DO CLIENTE');
 
