@@ -49,7 +49,6 @@ body{background:#F4F6FA;color:#1E293B;font-family:'Inter','Segoe UI',system-ui,A
 .kpi-val.small{font-size:18px}
 .kpi-sub{font-size:11px;color:#94A3B8;margin-top:4px}
 .charts-row{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px}
-.main > .charts-row:nth-of-type(2){grid-template-columns:1fr 2fr}
 .chart-card{background:#fff;border-radius:10px;padding:18px;border:1px solid #E2E8F0;box-shadow:0 1px 3px rgba(0,0,0,.04)}
 .chart-title{font-size:12px;color:#2D3F5E;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
 .chart-wrap{position:relative;height:240px;width:100%}
@@ -169,18 +168,18 @@ tbody td:nth-child(4){font-weight:700;color:#16A34A}
     <!-- CHARTS ROW 2 -->
     <div class="charts-row">
       <div class="chart-card">
-        <div class="chart-title"><span>Crédito por Administradora</span><div style="font-size:10px;color:#94A3B8;font-weight:500;letter-spacing:.3px;text-transform:none;margin-top:2px">Distribuição por parceiro</div></div>
-        <div class="chart-wrap"><canvas id="chartAdm"></canvas></div>
-      </div>
-      <div class="chart-card">
         <div class="chart-title"><span>Crédito Mensal · Evolução</span><div style="font-size:10px;color:#94A3B8;font-weight:500;letter-spacing:.3px;text-transform:none;margin-top:2px">Comparativo anual · últimos 2 anos no período</div></div>
         <div class="chart-wrap"><canvas id="chartEvolucao"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title"><span>Contratos por Administradora</span><div style="font-size:10px;color:#94A3B8;font-weight:500;letter-spacing:.3px;text-transform:none;margin-top:2px">Quantidade de contratos por parceiro</div></div>
+        <div class="chart-wrap"><canvas id="chartAdm"></canvas></div>
       </div>
     </div>
 
     <!-- RANKING TABLE -->
     <div class="tbl-card">
-      <div class="chart-title"><span>Ranking de Consultores <span style="background:#C8C84A;color:#2D3F5E;padding:2px 8px;border-radius:4px;font-size:10px;margin-left:6px;letter-spacing:.5px">Top 10</span></span><div style="font-size:10px;color:#94A3B8;font-weight:500;letter-spacing:.3px;text-transform:none;margin-top:2px">Performance por volume de crédito no período</div></div>
+      <div class="chart-title"><span>Ranking de Consultores</span><div style="font-size:10px;color:#94A3B8;font-weight:500;letter-spacing:.3px;text-transform:none;margin-top:2px">Performance por volume de crédito no período</div></div>
       <table>
         <thead><tr><th>#</th><th>Consultor</th><th>Cotas</th><th>Credito Total</th><th>Ticket Medio</th><th>Participacao</th></tr></thead>
         <tbody id="rankingBody"></tbody>
@@ -558,6 +557,7 @@ function applyFilters() {
   
   renderKPIs(data);
   renderCharts(data);
+  renderRanking(data);
   renderVendasTable(data);
 }
 
@@ -679,33 +679,22 @@ function renderChartMes(data) {
   destroyChart('mes');
   const meses = ['JANEIRO','FEVEREIRO','MARCO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
   const mesLabels = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  const counts = meses.map(m => data.filter(d => d.mes.toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'') === m).length);
-
+  const norm = s => (s||'').toString().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
+  const counts = meses.map(m => data.filter(d => norm(d.mes) === m).length);
+  let lastIdx = -1; counts.forEach((c,i) => { if (c > 0) lastIdx = i; });
+  const labels = lastIdx >= 0 ? mesLabels.slice(0, lastIdx+1) : mesLabels;
+  const values = lastIdx >= 0 ? counts.slice(0, lastIdx+1) : counts;
   charts.mes = new Chart(document.getElementById('chartMes'), {
     type: 'bar',
-    data: {
-      labels: mesLabels,
-      datasets: [{ data: counts, backgroundColor: '#7A9BC8', borderRadius: 4, barPercentage: 0.7 }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        datalabels: { color: '#64748B', anchor: 'end', align: 'top', font: { size: 10, weight: 700 },
-          formatter: v => v > 0 ? v : '' }
-      },
-      scales: {
-        x: { ticks: { color: '#64748b', font: { size: 11 } }, grid: { display: false } },
-        y: { ticks: { color: '#475569', font: { size: 10 } }, grid: { color: '#1e293b' } }
-      }
-    }
+    data: { labels, datasets: [{ data: values, backgroundColor: '#7A9BC8', borderRadius: 4, barPercentage: 0.7 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { anchor: 'end', align: 'top', color: '#64748B', font: { size: 10, weight: 'bold' } } }, scales: { x: { ticks: { color: '#64748B', font: { size: 10 } }, grid: { display: false } }, y: { ticks: { color: '#64748B', font: { size: 10 } }, grid: { color: '#E2E8F0' } } } }
   });
 }
 
 function renderChartAdm(data) {
   destroyChart('adm');
   const groups = {};
-  data.forEach(d => { groups[d.adm] = (groups[d.adm]||0) + d.credito; });
+  data.forEach(d => { groups[d.adm] = (groups[d.adm]||0) + 1; });
   const sorted = Object.entries(groups).sort((a,b) => b[1]-a[1]);
 
   charts.adm = new Chart(document.getElementById('chartAdm'), {
@@ -770,25 +759,27 @@ function renderChartEvolucao(data) {
   const normMes = s => (s||'').toString().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
   const fc = getMSValues('wrapConsultor');
   const fAdm = getMSValues('wrapAdm');
-  const monthlyForYear = year => mesesFull.map(m => {
-    let rows = rawData.filter(d => d.ano === String(year) && normMes(d.mes) === m);
-    if (fc.length) rows = rows.filter(d => fc.includes(d.consultor));
-    if (fAdm.length) rows = rows.filter(d => fAdm.includes(d.adm));
-    return rows.reduce((s,d) => s + d.credito, 0);
-  });
-  let datasets;
+  const monthlyForYear = year => mesesFull.map(m => { let rows = rawData.filter(d => d.ano === String(year) && normMes(d.mes) === m); if (fc.length) rows = rows.filter(d => fc.includes(d.consultor)); if (fAdm.length) rows = rows.filter(d => fAdm.includes(d.adm)); return rows.reduce((s,d) => s + d.credito, 0); });
+  let datasets, labels;
   if (selectedYears.length <= 1) {
     const y = selectedYears.length === 1 ? parseInt(selectedYears[0]) : new Date().getFullYear();
+    const cur = monthlyForYear(y); const prev = monthlyForYear(y - 1);
+    let lastIdx = -1; cur.forEach((v,i) => { if (v > 0) lastIdx = i; });
+    const end = lastIdx >= 0 ? lastIdx + 1 : 12;
+    labels = mesesOrd.slice(0, end);
     datasets = [
-      { label: String(y-1), data: monthlyForYear(y-1), borderColor: '#7A9BC8', backgroundColor: 'rgba(122,155,200,.12)', fill: true, tension: .4, pointRadius: 3, borderWidth: 2 },
-      { label: String(y), data: monthlyForYear(y), borderColor: '#2D3F5E', backgroundColor: 'rgba(45,63,94,.08)', fill: true, tension: .4, pointRadius: 3, borderWidth: 2.5 }
+      { label: String(y-1), data: prev.slice(0, end), borderColor: '#7A9BC8', backgroundColor: 'rgba(122,155,200,.12)', fill: true, tension: .4, pointRadius: 3, borderWidth: 2 },
+      { label: String(y), data: cur.slice(0, end), borderColor: '#2D3F5E', backgroundColor: 'rgba(45,63,94,.08)', fill: true, tension: .4, pointRadius: 3, borderWidth: 2.5 }
     ];
   } else {
     const summed = mesesFull.map((_, i) => selectedYears.reduce((s, y) => s + monthlyForYear(parseInt(y))[i], 0));
-    datasets = [{ label: selectedYears.join(' + '), data: summed, borderColor: '#2D3F5E', backgroundColor: 'rgba(45,63,94,.1)', fill: true, tension: .4, pointRadius: 3, borderWidth: 2.5 }];
+    let lastIdx = -1; summed.forEach((v,i) => { if (v > 0) lastIdx = i; });
+    const end = lastIdx >= 0 ? lastIdx + 1 : 12;
+    labels = mesesOrd.slice(0, end);
+    datasets = [{ label: selectedYears.join(' + '), data: summed.slice(0, end), borderColor: '#2D3F5E', backgroundColor: 'rgba(45,63,94,.1)', fill: true, tension: .4, pointRadius: 3, borderWidth: 2.5 }];
   }
   charts.evolucao = new Chart(document.getElementById('chartEvolucao'), {
-    type: 'line', data: { labels: mesesOrd, datasets },
+    type: 'line', data: { labels, datasets },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top', align: 'end', labels: { color: '#64748B', font: { size: 11 }, padding: 12, usePointStyle: true, pointStyle: 'rect' } }, datalabels: { display: false } }, scales: { x: { ticks: { color: '#64748B', font: { size: 10 } }, grid: { display: false } }, y: { ticks: { color: '#64748B', font: { size: 10 }, callback: v => 'R$ ' + (v/1e6).toFixed(1) + 'M' }, grid: { color: '#E2E8F0' } } } }
   });
 }
@@ -806,7 +797,7 @@ function renderRanking(data) {
   });
 
   const totalCredito = data.reduce((s,d) => s + d.credito, 0);
-  const sorted = Object.entries(groups).sort((a,b) => b[1].credito - a[1].credito).slice(0, 10);
+  const sorted = Object.entries(groups).sort((a,b) => b[1].credito - a[1].credito);
   const maxCredito = sorted.length > 0 ? sorted[0][1].credito : 1;
 
   const tbody = document.getElementById('rankingBody');
