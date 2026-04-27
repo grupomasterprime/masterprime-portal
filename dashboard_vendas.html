@@ -1,50 +1,3 @@
-
-  document.querySelectorAll('select.ms-col[data-filter-col]').forEach(sel => {
-    const col = sel.dataset.filterCol;
-    if (sel.parentNode.classList && sel.parentNode.classList.contains('mscol-wrap')) return; // already wrapped
-    const wrap = document.createElement('div');
-    wrap.className = 'mscol-wrap';
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'mscol-btn';
-    btn.textContent = 'Todas';
-    const panel = document.createElement('div');
-    panel.className = 'mscol-panel';
-    panel.style.display = 'none';
-    const opts = Array.from(sel.options).map(o => o.value).filter(v => v);
-    opts.forEach(v => {
-      const lbl = document.createElement('label');
-      const cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.value = v;
-      cb.addEventListener('change', () => {
-        const vals = Array.from(panel.querySelectorAll('input:checked')).map(c => c.value);
-        btn.textContent = vals.length === 0 ? 'Todas' : (vals.length === 1 ? vals[0] : vals.length + ' selecionados');
-        vendasState.colFilters[col] = vals.length ? vals : '';
-        vendasState.page = 1;
-        drawVendasTable();
-      });
-      lbl.appendChild(cb);
-      lbl.appendChild(document.createTextNode(' ' + v));
-      panel.appendChild(lbl);
-    });
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      document.querySelectorAll('.mscol-panel').forEach(p => { if (p !== panel) p.style.display = 'none'; });
-      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-    });
-    wrap.appendChild(btn);
-    wrap.appendChild(panel);
-    sel.parentNode.insertBefore(wrap, sel);
-  });
-  if (!window.__mscolDocClick) {
-    window.__mscolDocClick = true;
-    document.addEventListener('click', e => {
-      document.querySelectorAll('.mscol-panel').forEach(p => {
-        if (!p.parentNode.contains(e.target)) p.style.display = 'none';
-      });
-    });
-  }
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -947,6 +900,53 @@ function populateColFilters() {
   if (admSel) { const uniq = [...new Set(vendasState.data.map(d => d.adm).filter(Boolean))].sort(); admSel.innerHTML = '<option value="">Todas</option>' + mkOpts(uniq); }
   if (sitSel) { const uniq = [...new Set(vendasState.data.map(d => d.sitRaw).filter(Boolean))].sort(); sitSel.innerHTML = '<option value="">Todas</option>' + mkOpts(uniq); }
   if (statusSel) { const uniq = [...new Set(vendasState.data.map(d => d.status).filter(Boolean))].sort(); statusSel.innerHTML = '<option value="">Todos</option>' + mkOpts(uniq); }
+
+  document.querySelectorAll('select.ms-col[data-filter-col]').forEach(sel => {
+    const col = sel.dataset.filterCol;
+    if (sel.parentNode && sel.parentNode.classList && sel.parentNode.classList.contains('mscol-wrap')) return;
+    const wrap = document.createElement('div');
+    wrap.className = 'mscol-wrap';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'mscol-btn';
+    btn.textContent = 'Todas';
+    const panel = document.createElement('div');
+    panel.className = 'mscol-panel';
+    panel.style.display = 'none';
+    const opts = Array.from(sel.options).map(o => o.value).filter(v => v);
+    opts.forEach(v => {
+      const lbl = document.createElement('label');
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.value = v;
+      cb.addEventListener('change', () => {
+        const vals = Array.from(panel.querySelectorAll('input:checked')).map(c => c.value);
+        btn.textContent = vals.length === 0 ? 'Todas' : (vals.length === 1 ? vals[0] : vals.length + ' selecionados');
+        vendasState.colFilters[col] = vals.length ? vals : '';
+        vendasState.page = 1;
+        drawVendasTable();
+      });
+      lbl.appendChild(cb);
+      lbl.appendChild(document.createTextNode(' ' + v));
+      panel.appendChild(lbl);
+    });
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      document.querySelectorAll('.mscol-panel').forEach(p => { if (p !== panel) p.style.display = 'none'; });
+      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    });
+    wrap.appendChild(btn);
+    wrap.appendChild(panel);
+    sel.parentNode.insertBefore(wrap, sel);
+  });
+  if (!window.__mscolDocClick) {
+    window.__mscolDocClick = true;
+    document.addEventListener('click', e => {
+      document.querySelectorAll('.mscol-panel').forEach(p => {
+        if (!p.parentNode.contains(e.target)) p.style.display = 'none';
+      });
+    });
+  }
 }
 function applyColFilters(rows) {
   const f = vendasState.colFilters;
