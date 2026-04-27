@@ -1,3 +1,50 @@
+
+  document.querySelectorAll('select.ms-col[data-filter-col]').forEach(sel => {
+    const col = sel.dataset.filterCol;
+    if (sel.parentNode.classList && sel.parentNode.classList.contains('mscol-wrap')) return; // already wrapped
+    const wrap = document.createElement('div');
+    wrap.className = 'mscol-wrap';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'mscol-btn';
+    btn.textContent = 'Todas';
+    const panel = document.createElement('div');
+    panel.className = 'mscol-panel';
+    panel.style.display = 'none';
+    const opts = Array.from(sel.options).map(o => o.value).filter(v => v);
+    opts.forEach(v => {
+      const lbl = document.createElement('label');
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.value = v;
+      cb.addEventListener('change', () => {
+        const vals = Array.from(panel.querySelectorAll('input:checked')).map(c => c.value);
+        btn.textContent = vals.length === 0 ? 'Todas' : (vals.length === 1 ? vals[0] : vals.length + ' selecionados');
+        vendasState.colFilters[col] = vals.length ? vals : '';
+        vendasState.page = 1;
+        drawVendasTable();
+      });
+      lbl.appendChild(cb);
+      lbl.appendChild(document.createTextNode(' ' + v));
+      panel.appendChild(lbl);
+    });
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      document.querySelectorAll('.mscol-panel').forEach(p => { if (p !== panel) p.style.display = 'none'; });
+      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+    });
+    wrap.appendChild(btn);
+    wrap.appendChild(panel);
+    sel.parentNode.insertBefore(wrap, sel);
+  });
+  if (!window.__mscolDocClick) {
+    window.__mscolDocClick = true;
+    document.addEventListener('click', e => {
+      document.querySelectorAll('.mscol-panel').forEach(p => {
+        if (!p.parentNode.contains(e.target)) p.style.display = 'none';
+      });
+    });
+  }
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -86,7 +133,7 @@ tbody td:nth-child(4){font-weight:700;color:#16A34A}
 .tbl-filter-row input,.tbl-filter-row select{width:100%;padding:4px 6px;border:1px solid #E2E8F0;border-radius:4px;font-size:11px;background:#fff;color:#1E293B}
 .tbl-filter-row input::placeholder{color:#94A3B8;font-size:10px}
 @media (max-width:1100px){.kpis{grid-template-columns:repeat(2,1fr)}.charts-row{grid-template-columns:1fr}}
-</style>
+.mscol-wrap{position:relative;display:inline-block;width:100%;}.mscol-btn{width:100%;padding:6px 24px 6px 8px;background:#fff;border:1px solid #CBD5E1;border-radius:6px;font-size:12px;color:#1E293B;cursor:pointer;text-align:left;font-family:inherit;position:relative;}.mscol-btn::after{content:"▾";position:absolute;right:8px;top:50%;transform:translateY(-50%);color:#94A3B8;font-size:10px;}.mscol-panel{position:absolute;top:calc(100% + 4px);left:0;min-width:220px;max-width:320px;max-height:280px;overflow-y:auto;background:#fff;border:1px solid #CBD5E1;border-radius:8px;padding:6px;z-index:50;box-shadow:0 8px 24px rgba(0,0,0,.12);}.mscol-panel label{display:flex;align-items:center;gap:6px;padding:5px 8px;font-size:12px;color:#1E293B;cursor:pointer;border-radius:4px;}.mscol-panel label:hover{background:#F1F5F9;}.mscol-panel input{margin:0;}select.ms-col{display:none;}</style>
 </head>
 <body>
 
@@ -219,8 +266,8 @@ tbody td:nth-child(4){font-weight:700;color:#16A34A}
               <th><input type="text" placeholder="dd/mm" data-filter-col="dataVenda"></th>
               <th><input type="text" placeholder="..." data-filter-col="contrato"></th>
               <th><input type="text" placeholder="..." data-filter-col="grupoCota"></th>
-              <th><select data-filter-col="adm"><option value="">Todas</option></select></th>
-              <th><select data-filter-col="sitRaw"><option value="">Todas</option></select></th>
+              <th><select data-filter-col="adm" multiple class="ms-col"><option value="">Todas</option></select></th>
+              <th><select data-filter-col="sitRaw" multiple class="ms-col"><option value="">Todas</option></select></th>
               <th><input type="text" placeholder="..." data-filter-col="consultor"></th>
               <th><input type="text" placeholder="..." data-filter-col="cliente"></th>
               <th><input type="text" placeholder="..." data-filter-col="cpf"></th>
@@ -910,6 +957,9 @@ function applyColFilters(rows) {
       if (k === 'credito') {
         const min = parseFloat(f[k].replace(/[^\d.-]/g,''));
         if (!isNaN(min) && (d.credito||0) < min) return false;
+      } else if (Array.isArray(f[k])) {
+        const v = (d[k]||'').toString().toLowerCase();
+        if (!f[k].some(s => s.toString().toLowerCase() === v)) return false;
       } else if (Array.isArray(f[k])) {
         const v = (d[k]||'').toString().toLowerCase();
         if (!f[k].some(s => s.toString().toLowerCase() === v)) return false;
