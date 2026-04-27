@@ -903,7 +903,7 @@ function populateColFilters() {
 
   document.querySelectorAll('select.ms-col[data-filter-col]').forEach(sel => {
     const col = sel.dataset.filterCol;
-    if (sel.parentNode && sel.parentNode.classList && sel.parentNode.classList.contains('mscol-wrap')) return;
+    const prev = sel.previousElementSibling; if (prev && prev.classList && prev.classList.contains('mscol-wrap')) prev.remove();
     const wrap = document.createElement('div');
     wrap.className = 'mscol-wrap';
     const btn = document.createElement('button');
