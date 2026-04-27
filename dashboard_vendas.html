@@ -1036,7 +1036,21 @@ setInterval(() => {
 let msalBusy = false;
 let portalUser = null, sb = null, portalReady = false, cacheMeta = { atualizado_em: null, atualizado_por: null }, autoRefreshTimer = null;
 async function loadPortalConfig() { const r = await fetch('./index.html?' + Date.now()); const html = await r.text(); const urlM = html.match(/SUPABASE_URL\s*=\s*['\"]([^'\"]+)['\"]/); const keyM = html.match(/SUPABASE_KEY\s*=\s*['\"]([^'\"]+)['\"]/); if (!urlM || !keyM) throw new Error('Supabase config nao encontrada'); return { url: urlM[1], key: keyM[1] }; }
-async function fetchPortalUser(identificador) { const soDig = (identificador||'').replace(/\D/g,''); const ehCpf = soDig.length === 11; const idBusca = ehCpf ? soDig : identificador.toLowerCase(); let q = sb.from('portal_users').select('*'); if (ehCpf) q = q.eq('cpf', idBusca); else q = q.ilike('username', idBusca); const { data } = await q.maybeSingle(); return data; }
+async function fetchPortalUser(identificador) {
+      try {
+        const { data: authData } = await sb.auth.getUser();
+        if (authData?.user) {
+          const r = await sb.from('portal_users').select('*').eq('auth_id', authData.user.id).maybeSingle();
+          if (r.data) return r.data;
+        }
+      } catch(_e) {}
+      const soDig = (identificador||'').replace(/\D/g,'');
+      if (soDig.length === 11) {
+        const r = await sb.from('portal_users').select('*').eq('cpf', soDig).maybeSingle();
+        return r.data;
+      }
+      return null;
+    }
 async function fetchVendasCache() { const { data } = await sb.from('portal_vendas_cache').select('*').eq('id', 1).maybeSingle(); if (data) { cacheMeta = { atualizado_em: data.atualizado_em, atualizado_por: data.atualizado_por }; return data.dados || []; } return []; }
 function renderCacheStatus() { const el = document.getElementById('cacheStatus'); if (!el || !cacheMeta.atualizado_em) return; const d = new Date(cacheMeta.atualizado_em); const mins = Math.floor((new Date() - d) / 60000); let rel; if (mins < 1) rel = 'agora mesmo'; else if (mins < 60) rel = 'há ' + mins + ' min'; else if (mins < 1440) rel = 'há ' + Math.floor(mins/60) + ' h'; else rel = d.toLocaleDateString('pt-BR'); el.textContent = 'Atualizado ' + rel + (cacheMeta.atualizado_por ? ' · ' + cacheMeta.atualizado_por : ''); }
 const canSeeAll = u => u && ['admin', 'socio', 'backoffice'].includes(u.tipo);
