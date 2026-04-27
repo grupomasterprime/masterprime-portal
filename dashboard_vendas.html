@@ -86,7 +86,7 @@ tbody td:nth-child(4){font-weight:700;color:#16A34A}
 .tbl-filter-row input,.tbl-filter-row select{width:100%;padding:4px 6px;border:1px solid #E2E8F0;border-radius:4px;font-size:11px;background:#fff;color:#1E293B}
 .tbl-filter-row input::placeholder{color:#94A3B8;font-size:10px}
 @media (max-width:1100px){.kpis{grid-template-columns:repeat(2,1fr)}.charts-row{grid-template-columns:1fr}}
-.mscol-wrap{position:relative;display:inline-block;width:100%;}.mscol-btn{width:100%;padding:8px 26px 8px 10px;background:#fff;border:1px solid #CBD5E1;border-radius:6px;font-size:12px;color:#1E293B;cursor:pointer;text-align:left;font-family:inherit;position:relative;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.mscol-btn::after{content:"▾";position:absolute;right:10px;top:50%;transform:translateY(-50%);color:#94A3B8;font-size:10px;pointer-events:none;}.mscol-panel{position:absolute;top:calc(100% + 4px);left:0;min-width:280px;width:max-content;max-width:420px;max-height:320px;overflow-y:auto;background:#fff;border:1px solid #CBD5E1;border-radius:8px;padding:6px;z-index:100;box-shadow:0 12px 28px rgba(0,0,0,.18);}.mscol-panel label{display:flex;align-items:center;gap:8px;padding:6px 10px;font-size:12px;color:#1E293B;cursor:pointer;border-radius:4px;white-space:nowrap;line-height:1.4;}.mscol-panel label:hover{background:#F1F5F9;}.mscol-panel input{margin:0;flex-shrink:0;}select.ms-col{display:none;}</style>
+</style>
 </head>
 <body>
 
@@ -219,8 +219,8 @@ tbody td:nth-child(4){font-weight:700;color:#16A34A}
               <th><input type="text" placeholder="dd/mm" data-filter-col="dataVenda"></th>
               <th><input type="text" placeholder="..." data-filter-col="contrato"></th>
               <th><input type="text" placeholder="..." data-filter-col="grupoCota"></th>
-              <th><select data-filter-col="adm" multiple class="ms-col"><option value="">Todas</option></select></th>
-              <th><select data-filter-col="sitRaw" multiple class="ms-col"><option value="">Todas</option></select></th>
+              <th><div class="ms-wrap col-msw" id="wrapColAdm" data-filter-col="adm"><option value="">Todas</option></div></th>
+              <th><div class="ms-wrap col-msw" id="wrapColSit" data-filter-col="sitRaw"><option value="">Todas</option></div></th>
               <th><input type="text" placeholder="..." data-filter-col="consultor"></th>
               <th><input type="text" placeholder="..." data-filter-col="cliente"></th>
               <th><input type="text" placeholder="..." data-filter-col="cpf"></th>
@@ -473,7 +473,7 @@ function initMS(wrapId, items, allLabel, opts) {
   opts = opts || {};
   const wrap = document.getElementById(wrapId);
   if (!wrap) return;
-  msState[wrapId] = { items: items, allLabel: allLabel, selected: [], labels: opts.labels || {} };
+  msState[wrapId] = { items: items, allLabel: allLabel, selected: [], labels: opts.labels || {}, onChange: opts.onChange || null };
   const display = v => opts.labels && opts.labels[v] ? opts.labels[v] : v;
   wrap.innerHTML = '<button type="button" class="ms-btn" onclick="toggleMS(\'' + wrapId + '\', event)"><span class="ms-label">' + allLabel + '</span><span class="caret">▾</span></button>' +
     '<div class="ms-dropdown" id="' + wrapId + '_dd">' +
@@ -501,13 +501,13 @@ function toggleMSItem(wrapId, value, checked) {
   const s = msState[wrapId]; if (!s) return;
   if (checked) { if (!s.selected.includes(value)) s.selected.push(value); }
   else s.selected = s.selected.filter(x => x !== value);
-  updateMSLabel(wrapId); applyFilters();
+  updateMSLabel(wrapId); (msState[wrapId] && msState[wrapId].onChange ? msState[wrapId].onChange() : applyFilters());
 }
 function selectAllMS(wrapId, checked) {
   const s = msState[wrapId]; if (!s) return;
   s.selected = checked ? s.items.slice() : [];
   document.querySelectorAll('#' + wrapId + '_list .ms-item:not(.all) input').forEach(cb => cb.checked = checked);
-  updateMSLabel(wrapId); applyFilters();
+  updateMSLabel(wrapId); (msState[wrapId] && msState[wrapId].onChange ? msState[wrapId].onChange() : applyFilters());
 }
 function setMSValues(wrapId, values) {
   const s = msState[wrapId]; if (!s) return;
@@ -893,59 +893,18 @@ function renderVendasTable(data) {
   drawVendasTable();
 }
 function populateColFilters() {
-  const admSel = document.querySelector('[data-filter-col="adm"]');
-  const sitSel = document.querySelector('[data-filter-col="sitRaw"]');
   const statusSel = document.querySelector('[data-filter-col="status"]');
   const mkOpts = arr => arr.map(v => '<option value="' + String(v).replace(/"/g,'&quot;') + '">' + v + '</option>').join('');
-  if (admSel) { const uniq = [...new Set(vendasState.data.map(d => d.adm).filter(Boolean))].sort(); admSel.innerHTML = '<option value="">Todas</option>' + mkOpts(uniq); }
-  if (sitSel) { const uniq = [...new Set(vendasState.data.map(d => d.sitRaw).filter(Boolean))].sort(); sitSel.innerHTML = '<option value="">Todas</option>' + mkOpts(uniq); }
-  if (statusSel) { const uniq = [...new Set(vendasState.data.map(d => d.status).filter(Boolean))].sort(); statusSel.innerHTML = '<option value="">Todos</option>' + mkOpts(uniq); }
-
-  document.querySelectorAll('select.ms-col[data-filter-col]').forEach(sel => {
-    const col = sel.dataset.filterCol;
-    const prev = sel.previousElementSibling; if (prev && prev.classList && prev.classList.contains('mscol-wrap')) prev.remove();
-    const wrap = document.createElement('div');
-    wrap.className = 'mscol-wrap';
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'mscol-btn';
-    btn.textContent = 'Todas';
-    const panel = document.createElement('div');
-    panel.className = 'mscol-panel';
-    panel.style.display = 'none';
-    const opts = Array.from(sel.options).map(o => o.value).filter(v => v);
-    opts.forEach(v => {
-      const lbl = document.createElement('label');
-      const cb = document.createElement('input');
-      cb.type = 'checkbox';
-      cb.value = v;
-      cb.addEventListener('change', () => {
-        const vals = Array.from(panel.querySelectorAll('input:checked')).map(c => c.value);
-        btn.textContent = vals.length === 0 ? 'Todas' : (vals.length === 1 ? vals[0] : vals.length + ' selecionados');
-        vendasState.colFilters[col] = vals.length ? vals : '';
-        vendasState.page = 1;
-        drawVendasTable();
-      });
-      lbl.appendChild(cb);
-      lbl.appendChild(document.createTextNode(' ' + v));
-      panel.appendChild(lbl);
-    });
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      document.querySelectorAll('.mscol-panel').forEach(p => { if (p !== panel) p.style.display = 'none'; });
-      panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-    });
-    wrap.appendChild(btn);
-    wrap.appendChild(panel);
-    sel.parentNode.insertBefore(wrap, sel);
-  });
-  if (!window.__mscolDocClick) {
-    window.__mscolDocClick = true;
-    document.addEventListener('click', e => {
-      document.querySelectorAll('.mscol-panel').forEach(p => {
-        if (!p.parentNode.contains(e.target)) p.style.display = 'none';
-      });
-    });
+  if (statusSel) { const uniq = [...new Set(vendasState.data.map(d => d.status).filter(Boolean))].sort(); statusSel.innerHTML = '<option value="">Todas</option>' + mkOpts(uniq); }
+  const wrapAdm = document.getElementById('wrapColAdm');
+  if (wrapAdm) {
+    const uniq = [...new Set(vendasState.data.map(d => d.adm).filter(Boolean))].sort();
+    initMS('wrapColAdm', uniq, 'Todas', { onChange: () => { vendasState.colFilters.adm = getMSValues('wrapColAdm'); vendasState.page = 1; drawVendasTable(); } });
+  }
+  const wrapSit = document.getElementById('wrapColSit');
+  if (wrapSit) {
+    const uniq = [...new Set(vendasState.data.map(d => d.sitRaw).filter(Boolean))].sort();
+    initMS('wrapColSit', uniq, 'Todas', { onChange: () => { vendasState.colFilters.sitRaw = getMSValues('wrapColSit'); vendasState.page = 1; drawVendasTable(); } });
   }
 }
 function applyColFilters(rows) {
