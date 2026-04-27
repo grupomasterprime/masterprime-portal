@@ -279,6 +279,7 @@ try {
 }
 
 async function doLogin() {
+  if(window.self!==window.top){window.open(location.href,'_blank');return;}
   if (!msalInstance) msalInstance = new msal.PublicClientApplication(msalConfig);
   try {
     const resp = await msalInstance.loginPopup({ scopes: ['Files.Read'] });
