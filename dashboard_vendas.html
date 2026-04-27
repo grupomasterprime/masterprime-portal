@@ -609,47 +609,22 @@ function varChip(cur, prev, small) {
 }
 
 function computePrevPeriod(currentData) {
-  // Compare against same filters but one period back (month if single month selected, else year back)
-  const fa = getMSValues('wrapAno');
-  const fMes = getMSValues('wrapMes');
-  const fc = getMSValues('wrapConsultor');
-  const fAdm = getMSValues('wrapAdm');
-  const normMes = s => (s||'').toString().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim();
-  const mesesOrd = ['JANEIRO','FEVEREIRO','MARCO','ABRIL','MAIO','JUNHO','JULHO','AGOSTO','SETEMBRO','OUTUBRO','NOVEMBRO','DEZEMBRO'];
-  
-  let prev = rawData;
-  if (fc.length) prev = prev.filter(d => fc.includes(d.consultor));
-  if (fAdm.length) prev = prev.filter(d => fAdm.includes(d.adm));
-  
-  if (fMes.length === 1 && fa.length === 1) {
-    // Single month: compare previous month in same year (or Dec of prev year if Jan)
-    const curMes = normMes(fMes[0]);
-    const idx = mesesOrd.indexOf(curMes);
-    const curYear = parseInt(fa[0]);
-    if (idx === 0) {
-      // January → Dec of prev year
-      prev = prev.filter(d => normMes(d.mes) === 'DEZEMBRO' && d.ano === String(curYear-1));
-    } else {
-      prev = prev.filter(d => normMes(d.mes) === mesesOrd[idx-1] && d.ano === String(curYear));
+      const fc = getMSValues('wrapConsultor');
+      const fa = getMSValues('wrapAno');
+      const fMes = getMSValues('wrapMes');
+      const fAdm = getMSValues('wrapAdm');
+      const fSit = getMSValues('wrapSit');
+      if (!fa || fa.length === 0) return [];
+      const prevAnos = fa.map(a => String(parseInt(a) - 1));
+      const normM = s => (s||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase();
+      const fMesNorm = (fMes||[]).map(normM);
+      let prev = rawData.filter(d => prevAnos.includes(String(d.ano)));
+      if (fc && fc.length) prev = prev.filter(d => fc.includes(d.consultor));
+      if (fAdm && fAdm.length) prev = prev.filter(d => fAdm.includes(d.adm));
+      if (fSit && fSit.length) prev = prev.filter(d => fSit.includes(d.status));
+      if (fMesNorm.length) prev = prev.filter(d => fMesNorm.includes(normM(d.mes)));
+      return prev;
     }
-  } else if (fa.length === 1) {
-    // Year only: compare previous year
-    const curYear = parseInt(fa[0]);
-    prev = prev.filter(d => d.ano === String(curYear-1));
-    if (fMes.length) {
-      const targets = fMes.map(normMes);
-      prev = prev.filter(d => targets.includes(normMes(d.mes)));
-    }
-  } else {
-    return { credito: 0, cotas: 0, ticket: 0, consultores: 0 };
-  }
-  
-  const credito = prev.reduce((s,d) => s + d.credito, 0);
-  const cotas = prev.length;
-  const ticket = cotas > 0 ? credito / cotas : 0;
-  const consultores = new Set(prev.map(d=>d.consultor).filter(Boolean)).size;
-  return { credito, cotas, ticket, consultores };
-}
 
 // ══════════════════════════════════════════════════════════════
 // CHARTS
