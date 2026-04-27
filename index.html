@@ -995,7 +995,7 @@ async function adminUpload(evt) {
       if (!existente) {
         if (!username || !senhaInicial) {
           const cpf = String(Math.floor(10000000000 + Math.random() * 89999999999));
-          await criarUsuarioCompleto({ nome, cpf, senha: cpf, tipo: 'consultor' });
+          { const _u = ((nome||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().split(/\s+/)); const _f = _u[0]||''; const _l = _u.length>1?_u[_u.length-1]:''; const _uName = (_f + (_l?'.'+_l:'')).toLowerCase(); const _uPwd = (_f.charAt(0).toUpperCase()+_f.slice(1,3).toLowerCase()) + _l.slice(0,3).toLowerCase() + '26@'; await criarUsuarioCompleto({ nome, cpf, username: _uName, senha: _uPwd, tipo: 'consultor' }); }
         } else {
           const cpf = String(Math.floor(10000000000 + Math.random() * 89999999999));
           await criarUsuarioCompleto({ nome, cpf, username, senha: senhaInicial, tipo: 'consultor' });
