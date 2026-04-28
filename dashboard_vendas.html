@@ -86,7 +86,7 @@ tbody td:nth-child(4){font-weight:700;color:#16A34A}
 .tbl-filter-row input,.tbl-filter-row select{width:100%;padding:4px 6px;border:1px solid #E2E8F0;border-radius:4px;font-size:11px;background:#fff;color:#1E293B}
 .tbl-filter-row input::placeholder{color:#94A3B8;font-size:10px}
 @media (max-width:1100px){.kpis{grid-template-columns:repeat(2,1fr)}.charts-row{grid-template-columns:1fr}}
-.col-msw .ms-dropdown{right:auto !important;min-width:260px;width:max-content;max-width:480px;}.col-msw .ms-list{text-align:left;}.col-msw .ms-item{white-space:nowrap;justify-content:flex-start !important;text-align:left !important;}.col-msw .ms-item span{text-align:left !important;flex-grow:0;}.tbl-filter-row .col-msw .ms-item input[type="checkbox"]{width:auto !important;height:auto;flex:0 0 auto;}.tbl-filter-row .col-msw .ms-search input{width:100%;}.col-msw .ms-item span{flex-grow:0;flex-shrink:0;}</style>
+.col-msw .ms-dropdown{right:auto !important;min-width:260px;width:max-content;max-width:480px;}.col-msw .ms-list{text-align:left;}.col-msw .ms-item{white-space:nowrap;justify-content:flex-start !important;text-align:left !important;}.col-msw .ms-item span{text-align:left !important;flex-grow:0;}.tbl-filter-row .col-msw .ms-item input[type="checkbox"]{width:auto !important;height:auto;flex:0 0 auto;}.tbl-filter-row .col-msw .ms-search input{width:100%;}.col-msw .ms-item span{flex-grow:0;flex-shrink:0;}.col-msw .ms-dropdown{z-index:9999 !important;}.col-msw{position:relative;}#vendasTable, #vendasTable thead, #vendasTable tbody, #vendasTable tr, #vendasTable td, #vendasTable th{overflow:visible !important;}.tbl-filter-row, .tbl-filter-row td{overflow:visible !important;position:relative;}</style>
 </head>
 <body>
 
@@ -899,19 +899,19 @@ function populateColFilters() {
   const wrapAdm = document.getElementById('wrapColAdm');
   if (wrapAdm) {
     const uniq = [...new Set(vendasState.data.map(d => d.adm).filter(Boolean))].sort();
-    initMS('wrapColAdm', uniq, 'Todas', { onChange: () => { vendasState.colFilters.adm = getMSValues('wrapColAdm'); vendasState.page = 1; drawVendasTable(); } });
+    initMS('wrapColAdm', uniq, 'Todas', { onChange: () => { const v = getMSValues('wrapColAdm'); vendasState.colFilters.adm = v.length ? v : ''; vendasState.page = 1; drawVendasTable(); } });
   }
   const wrapSit = document.getElementById('wrapColSit');
   if (wrapSit) {
     const uniq = [...new Set(vendasState.data.map(d => d.sitRaw).filter(Boolean))].sort();
-    initMS('wrapColSit', uniq, 'Todas', { onChange: () => { vendasState.colFilters.sitRaw = getMSValues('wrapColSit'); vendasState.page = 1; drawVendasTable(); } });
+    initMS('wrapColSit', uniq, 'Todas', { onChange: () => { const v = getMSValues('wrapColSit'); vendasState.colFilters.sitRaw = v.length ? v : ''; vendasState.page = 1; drawVendasTable(); } });
   }
 }
 function applyColFilters(rows) {
   const f = vendasState.colFilters;
   return rows.filter(d => {
     for (const k in f) {
-      if (!f[k]) continue;
+      if (!f[k] || (Array.isArray(f[k]) && f[k].length === 0)) continue;
       const q = f[k].toString().toLowerCase();
       if (k === 'credito') {
         const min = parseFloat(f[k].replace(/[^\d.-]/g,''));
@@ -998,7 +998,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (s) s.addEventListener('input', e => { vendasState.search = e.target.value; vendasState.page = 1; drawVendasTable(); });
   const ps = document.getElementById('pageSize');
   if (ps) ps.addEventListener('change', () => { vendasState.page = 1; drawVendasTable(); });
-  document.querySelectorAll('[data-filter-col]').forEach(el => {
+  document.querySelectorAll('input[data-filter-col], select[data-filter-col], textarea[data-filter-col]').forEach(el => {
     const col = el.dataset.filterCol;
     const handler = () => { vendasState.colFilters[col] = el.value; vendasState.page = 1; drawVendasTable(); };
     el.addEventListener('input', handler);
@@ -1051,6 +1051,61 @@ const canRefresh = u => u && u.tipo === 'admin';
 async function portalInit() { const identificador = sessionStorage.getItem('mp_session'); /*identificador-check-skipped*/ try { const cfg = await loadPortalConfig(); sb = supabase.createClient(cfg.url, cfg.key); } catch (e) { alert('Config portal: ' + e.message); return; } portalUser = await fetchPortalUser(identificador); if (!portalUser) { sessionStorage.removeItem('mp_session'); (window.self!==window.top?(document.body.innerHTML='<div style="padding:40px;text-align:center;color:#64748b;font-family:system-ui;font-size:14px">Sessão expirada. Recarregue o Portal.</div>'):(location.href='index.html')); return; } const tag = document.getElementById('portalUserTag'); if (tag) tag.textContent = portalUser.nome + ' · ' + portalUser.tipo.toUpperCase(); if (canRefresh(portalUser)) document.getElementById('btnRefresh').style.display = ''; const cached = await fetchVendasCache(); renderCacheStatus(); if (!cached.length) { if (canRefresh(portalUser)) { try { await refreshFromOneDrive(true); } catch (e) { document.querySelector('.main').innerHTML = '<div class="login-card"><h2>Sem dados em cache</h2><p>Clique em <strong>Atualizar do OneDrive</strong> no topo.</p></div>'; } } else { document.querySelector('.main').innerHTML = '<div class="login-card"><h2>Aguardando dados</h2><p>Admin precisa carregar os dados. Volte em breve.</p></div>'; } return; } rawData = cached; if (!canSeeAll(portalUser)) rawData = rawData.filter(d => d.consultor === portalUser.nome); populateFilters(); if (!canSeeAll(portalUser)) { setMSValues('wrapConsultor', [portalUser.nome]); const wrap = document.getElementById('wrapConsultor'); if (wrap) { wrap.style.pointerEvents = 'none'; wrap.style.opacity = '0.7'; } } applyFilters(); portalReady = true; if (canRefresh(portalUser)) { refreshFromOneDrive(true).catch(() => {}); autoRefreshTimer = setInterval(() => { refreshFromOneDrive(true).catch(() => {}); }, 5 * 60 * 1000); setInterval(renderCacheStatus, 30000); }  if((vendasState&&vendasState.data&&vendasState.data.length)||!canRefresh(portalUser)){document.getElementById('loginScreen').style.display='none';document.getElementById('dashboard').style.display='block';}}
 async function refreshFromOneDrive(silent) { if (!canRefresh(portalUser)) return; if (msalBusy) { if (!silent) console.log('MSAL ocupado'); return; } msalBusy = true; const btn = document.getElementById('btnRefresh'); if (!silent) { btn.disabled = true; btn.textContent = 'Atualizando...'; } try { await msalInstance.initialize(); let token; const accounts = msalInstance.getAllAccounts(); if (accounts.length > 0) { try { const res = await msalInstance.acquireTokenSilent({ scopes: ['Files.Read'], account: accounts[0] }); token = res.accessToken; } catch (e) { if (silent) throw e; const res = await msalInstance.loginPopup({ scopes: ['Files.Read'] }); token = res.accessToken; } } else { if (silent) throw new Error('MSAL absent'); const res = await msalInstance.loginPopup({ scopes: ['Files.Read'] }); token = res.accessToken; } window.accessToken = token; await loadDataFromOneDrive(); await sb.from('portal_vendas_cache').upsert({ id: 1, dados: rawData, atualizado_em: new Date().toISOString(), atualizado_por: portalUser.nome }); cacheMeta = { atualizado_em: new Date().toISOString(), atualizado_por: portalUser.nome }; if (!canSeeAll(portalUser)) rawData = rawData.filter(d => d.consultor === portalUser.nome); populateFilters(); if (!canSeeAll(portalUser)) setMSValues('wrapConsultor', [portalUser.nome]); applyFilters(); renderCacheStatus(); if (!silent) { btn.textContent = '✓ Atualizado'; setTimeout(() => { btn.textContent = 'Atualizar do OneDrive'; btn.disabled = false; }, 2000); } } catch (e) { if (!silent) { btn.textContent = 'Erro: ' + (e.message||e).toString().slice(0,40); setTimeout(() => { btn.textContent = 'Atualizar do OneDrive'; btn.disabled = false; }, 3500); } throw e; } finally { msalBusy = false; } }
 window.addEventListener('load', () => { portalInit(); });
+</script>
+
+<script id="mscol-portal">
+(function(){
+  const originalToggleMS = window.toggleMS;
+  window.toggleMS = function(wrapId, ev) {
+    const wrap = document.getElementById(wrapId);
+    if (!wrap || !wrap.classList.contains('col-msw')) {
+      return originalToggleMS.apply(this, arguments);
+    }
+    if (ev && ev.stopPropagation) ev.stopPropagation();
+    const dd = wrap.querySelector('.ms-dropdown') || document.querySelector('[data-orig-wrap="' + wrapId + '"]');
+    if (!dd) return;
+    const isOpen = dd.dataset.open === '1';
+    document.querySelectorAll('.ms-dropdown[data-open="1"]').forEach(d => {
+      if (d !== dd) closeDd(d);
+    });
+    if (isOpen) closeDd(dd);
+    else openDd(dd, wrap, wrapId);
+  };
+  function openDd(dd, wrap, wrapId) {
+    if (dd.dataset.portaled !== '1') {
+      dd.dataset.origWrap = wrapId;
+      document.body.appendChild(dd);
+      dd.dataset.portaled = '1';
+    }
+    const r = wrap.getBoundingClientRect();
+    dd.style.position = 'fixed';
+    dd.style.top = (r.bottom + 4) + 'px';
+    dd.style.left = r.left + 'px';
+    dd.style.minWidth = Math.max(280, r.width) + 'px';
+    dd.style.zIndex = '100000';
+    dd.style.display = 'flex';
+    dd.dataset.open = '1';
+  }
+  function closeDd(dd) {
+    dd.dataset.open = '0';
+    dd.style.display = 'none';
+  }
+  document.addEventListener('click', function(e){
+    if (e.target.closest('.col-msw') || e.target.closest('.ms-dropdown[data-portaled="1"]')) return;
+    document.querySelectorAll('.ms-dropdown[data-open="1"]').forEach(closeDd);
+  }, true);
+  function reposition() {
+    document.querySelectorAll('.ms-dropdown[data-portaled="1"][data-open="1"]').forEach(d => {
+      const wrap = document.getElementById(d.dataset.origWrap);
+      if (!wrap) return;
+      const r = wrap.getBoundingClientRect();
+      d.style.top = (r.bottom + 4) + 'px';
+      d.style.left = r.left + 'px';
+    });
+  }
+  window.addEventListener('scroll', reposition, true);
+  window.addEventListener('resize', reposition);
+})();
 </script>
 </body>
 </html>
