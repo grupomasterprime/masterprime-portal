@@ -86,7 +86,7 @@ tbody td:nth-child(4){font-weight:700;color:#16A34A}
 .tbl-filter-row input,.tbl-filter-row select{width:100%;padding:4px 6px;border:1px solid #E2E8F0;border-radius:4px;font-size:11px;background:#fff;color:#1E293B}
 .tbl-filter-row input::placeholder{color:#94A3B8;font-size:10px}
 @media (max-width:1100px){.kpis{grid-template-columns:repeat(2,1fr)}.charts-row{grid-template-columns:1fr}}
-#wrapColAdm .ms-dropdown,#wrapColSit .ms-dropdown{min-width:280px;width:max-content !important;max-width:520px !important;}.col-msw .ms-btn{padding:6px 22px 6px 8px;font-size:11px;}.col-msw .ms-item{white-space:nowrap !important;align-items:center !important;}.col-msw .ms-item span{padding-left:4px;white-space:nowrap !important;overflow:visible !important;}.col-msw .ms-list{max-height:320px;overflow-y:auto;overflow-x:auto;}</style>
+</style>
 </head>
 <body>
 
@@ -219,8 +219,8 @@ tbody td:nth-child(4){font-weight:700;color:#16A34A}
               <th><input type="text" placeholder="dd/mm" data-filter-col="dataVenda"></th>
               <th><input type="text" placeholder="..." data-filter-col="contrato"></th>
               <th><input type="text" placeholder="..." data-filter-col="grupoCota"></th>
-              <th><div class="ms-wrap col-msw" id="wrapColAdm" data-filter-col="adm"><option value="">Todas</option></div></th>
-              <th><div class="ms-wrap col-msw" id="wrapColSit" data-filter-col="sitRaw"><option value="">Todas</option></div></th>
+              <th><select data-filter-col="adm"></select></th>
+              <th><select data-filter-col="sitRaw"></select></th>
               <th><input type="text" placeholder="..." data-filter-col="consultor"></th>
               <th><input type="text" placeholder="..." data-filter-col="cliente"></th>
               <th><input type="text" placeholder="..." data-filter-col="cpf"></th>
@@ -893,19 +893,13 @@ function renderVendasTable(data) {
   drawVendasTable();
 }
 function populateColFilters() {
+  const admSel = document.querySelector('[data-filter-col="adm"]');
+  const sitSel = document.querySelector('[data-filter-col="sitRaw"]');
   const statusSel = document.querySelector('[data-filter-col="status"]');
   const mkOpts = arr => arr.map(v => '<option value="' + String(v).replace(/"/g,'&quot;') + '">' + v + '</option>').join('');
+  if (admSel) { const uniq = [...new Set(vendasState.data.map(d => d.adm).filter(Boolean))].sort(); admSel.innerHTML = '<option value="">Todas</option>' + mkOpts(uniq); }
+  if (sitSel) { const uniq = [...new Set(vendasState.data.map(d => d.sitRaw).filter(Boolean))].sort(); sitSel.innerHTML = '<option value="">Todas</option>' + mkOpts(uniq); }
   if (statusSel) { const uniq = [...new Set(vendasState.data.map(d => d.status).filter(Boolean))].sort(); statusSel.innerHTML = '<option value="">Todas</option>' + mkOpts(uniq); }
-  const wrapAdm = document.getElementById('wrapColAdm');
-  if (wrapAdm) {
-    const uniq = [...new Set(vendasState.data.map(d => d.adm).filter(Boolean))].sort();
-    initMS('wrapColAdm', uniq, 'Todas', { onChange: () => { vendasState.colFilters.adm = getMSValues('wrapColAdm'); vendasState.page = 1; drawVendasTable(); } });
-  }
-  const wrapSit = document.getElementById('wrapColSit');
-  if (wrapSit) {
-    const uniq = [...new Set(vendasState.data.map(d => d.sitRaw).filter(Boolean))].sort();
-    initMS('wrapColSit', uniq, 'Todas', { onChange: () => { vendasState.colFilters.sitRaw = getMSValues('wrapColSit'); vendasState.page = 1; drawVendasTable(); } });
-  }
 }
 function applyColFilters(rows) {
   const f = vendasState.colFilters;
@@ -1000,7 +994,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (ps) ps.addEventListener('change', () => { vendasState.page = 1; drawVendasTable(); });
   document.querySelectorAll('[data-filter-col]').forEach(el => {
     const col = el.dataset.filterCol;
-    const handler = () => { if (el.tagName === 'SELECT' && el.multiple) { const vals = Array.from(el.selectedOptions).map(o => o.value).filter(Boolean); vendasState.colFilters[col] = vals.length ? vals : ''; } else { vendasState.colFilters[col] = el.value; } vendasState.page = 1; drawVendasTable(); };
+    const handler = () => { vendasState.colFilters[col] = el.value; vendasState.page = 1; drawVendasTable(); };
     el.addEventListener('input', handler);
     el.addEventListener('change', handler);
   });
