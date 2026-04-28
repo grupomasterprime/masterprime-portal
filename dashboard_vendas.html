@@ -998,7 +998,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (s) s.addEventListener('input', e => { vendasState.search = e.target.value; vendasState.page = 1; drawVendasTable(); });
   const ps = document.getElementById('pageSize');
   if (ps) ps.addEventListener('change', () => { vendasState.page = 1; drawVendasTable(); });
-  document.querySelectorAll('[data-filter-col]').forEach(el => {
+  document.querySelectorAll('input[data-filter-col], select[data-filter-col], textarea[data-filter-col]').forEach(el => {
     const col = el.dataset.filterCol;
     const handler = () => { vendasState.colFilters[col] = el.value; vendasState.page = 1; drawVendasTable(); };
     el.addEventListener('input', handler);
