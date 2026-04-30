@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portal do Cliente — Faturamento</title>
+  <link rel="stylesheet" href="../shared/estilo.css">
+  <style>
+    /* Estilos específicos da página do cliente */
+    .header-portal {
+      background: var(--azul-escuro);
+      color: white;
+      padding: 20px 0;
+      margin-bottom: 32px;
+    }
+
+    .header-portal .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .logo span { color: var(--ciano); }
+
+    .container {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .secao-titulo {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--texto-claro);
+      margin-bottom: 12px;
+    }
+
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      background: white;
+      border: 1px solid var(--borda);
+      border-radius: var(--raio-lg);
+      margin-bottom: 24px;
+    }
+
+    .status-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #eff6ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    /* Tabs de navegação */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      border-bottom: 1px solid var(--borda);
+      margin-bottom: 24px;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      border: none;
+      background: none;
+      font-family: var(--fonte);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--texto-claro);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: all 0.2s;
+    }
+
+    .tab.ativa {
+      color: var(--azul-claro);
+      border-bottom-color: var(--azul-claro);
+    }
+
+    .painel { display: none; }
+    .painel.ativo { display: block; }
+
+    /* Campo de mensagem */
+    .enviar-msg {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .enviar-msg textarea {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1px solid var(--borda);
+      border-radius: var(--raio);
+      font-family: var(--fonte);
+      font-size: 14px;
+      resize: none;
+      height: 44px;
+    }
+
+    .enviar-msg textarea:focus {
+      outline: none;
+      border-color: var(--azul-acento);
+    }
+
+    .tela-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      gap: 16px;
+    }
+
+    .tela-loading .spinner-grande {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--borda);
+      border-top-color: var(--azul-claro);
+      border-radius: 50%;
+      animation: girar 0.8s linear infinite;
+    }
+  </style>
+</head>
+<body>
+
+<!-- CABEÇALHO -->
+<header class="header-portal">
+  <div class="container">
+    <div class="logo">Master<span>Prime</span> · Portal</div>
+    <div class="texto-pequeno" style="color: rgba(255,255,255,0.5)">Área do Cliente</div>
+  </div>
+</header>
+
+<div class="container" id="conteudo-principal">
+  <!-- Loading enquanto carrega os dados -->
+  <div class="tela-loading" id="loading">
+    <div class="spinner-grande"></div>
+    <p>Carregando seu processo...</p>
+  </div>
+</div>
+
+<!-- TEMPLATE PRINCIPAL (aparece após o carregamento) -->
+<template id="template-principal">
+  <div id="alerta" class="alerta"></div>
+
+  <!-- Status do processo -->
+  <div class="status-bar">
+    <div class="status-icon">📋</div>
+    <div>
+      <div class="negrito" id="cliente-nome">—</div>
+      <div class="texto-pequeno" id="processo-criado">—</div>
+    </div>
+    <div style="margin-left: auto;">
+      <span class="badge" id="badge-status">—</span>
+    </div>
+  </div>
+
+  <!-- Tabs de navegação -->
+  <div class="tabs">
+    <button class="tab ativa" onclick="trocarTab('dados')">📝 Meus Dados</button>
+    <button class="tab" onclick="trocarTab('documentos')">📎 Documentos</button>
+    <button class="tab" onclick="trocarTab('mensagens')">💬 Mensagens</button>
+  </div>
+
+  <!-- ===== TAB 1: DADOS DO CLIENTE ===== -->
+  <div class="painel ativo" id="painel-dados">
+    <div class="card">
+      <h3 style="margin-bottom: 20px;">Seus dados cadastrais</h3>
+      <p class="texto-pequeno" style="margin-bottom: 20px;">
+        Preencha e confirme seus dados abaixo. Você pode atualizar a qualquer momento.
+      </p>
+
+      <!-- ➕ Para adicionar campos: copie um bloco .campo abaixo -->
+      <div class="campo">
+        <label>Nome completo *</label>
+        <input type="text" id="campo-nome" placeholder="Seu nome">
+      </div>
+
+      <div class="campo">
+        <label>E-mail</label>
+        <input type="email" id="campo-email" placeholder="seu@email.com">
+      </div>
+
+      <div class="campo">
+        <label>Telefone / WhatsApp</label>
+        <input type="text" id="campo-telefone" placeholder="(00) 00000-0000">
+      </div>
+
+      <div class="campo">
+        <label>Descrição / Observações</label>
+        <textarea id="campo-descricao" placeholder="Descreva detalhes do seu processo..."></textarea>
+      </div>
+
+      <button class="btn btn-primario w-100" id="btn-salvar" onclick="salvarDados()">
+        Salvar dados
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== TAB 2: DOCUMENTOS ===== -->
+  <div class="painel" id="painel-documentos">
+    <div class="card">
+      <h3 style="margin-bottom: 8px;">Envio de documentos</h3>
+      <p class="texto-pequeno" style="margin-bottom: 20px;">
+        Envie PDFs ou imagens. Tamanho máximo: 16MB por arquivo.
+      </p>
+
+      <!-- Área de drag-and-drop -->
+      <div class="upload-area" id="upload-area" onclick="document.getElementById('input-arquivo').click()">
+        <input type="file" id="input-arquivo" accept=".pdf,.jpg,.jpeg,.png" onchange="uploadArquivo(this)">
+        <div style="font-size: 32px; margin-bottom: 8px;">📤</div>
+        <p class="negrito">Clique para selecionar</p>
+        <p class="texto-pequeno mt-8">ou arraste um arquivo aqui</p>
+        <p class="texto-pequeno">PDF, JPG, PNG — até 16MB</p>
+      </div>
+
+      <!-- Lista de arquivos enviados -->
+      <div id="lista-arquivos" style="margin-top: 16px;"></div>
+    </div>
+  </div>
+
+  <!-- ===== TAB 3: MENSAGENS ===== -->
+  <div class="painel" id="painel-mensagens">
+    <div class="card">
+      <h3 style="margin-bottom: 16px;">Comunicação com a equipe</h3>
+
+      <!-- Timeline de mensagens -->
+      <div class="timeline" id="timeline-mensagens">
+        <p class="texto-pequeno texto-centro">Nenhuma mensagem ainda.</p>
+      </div>
+
+      <!-- Campo para enviar mensagem -->
+      <div class="enviar-msg" style="margin-top: 16px; border-top: 1px solid var(--borda); padding-top: 16px;">
+        <textarea id="campo-mensagem" placeholder="Escreva uma mensagem para a equipe..." rows="2"></textarea>
+        <button class="btn btn-primario" onclick="enviarMensagem()">Enviar</button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script src="../shared/api.js"></script>
+<script>
+// ============================================================
+// cliente/index.js — Lógica da página do cliente
+// ============================================================
+
+// Pega o token da URL. Ex: /cliente/index.html?token=abc123
+const params = new URLSearchParams(window.location.search);
+const TOKEN  = params.get('token');
+
+// Dados do processo (preenchidos ao carregar)
+let processoAtual = null;
+
+// --- Inicialização ---
+document.addEventListener('DOMContentLoaded', async () => {
+  if (!TOKEN) {
+    document.getElementById('conteudo-principal').innerHTML = `
+      <div class="card texto-centro" style="margin-top: 40px;">
+        <div style="font-size: 48px; margin-bottom: 16px;">🔒</div>
+        <h2>Link inválido</h2>
+        <p>Este link não é válido. Verifique o link enviado pela equipe.</p>
+      </div>
+    `;
+    return;
+  }
+
+  await carregarProcesso();
+});
+
+async function carregarProcesso() {
+  const { dados, erro } = await api.get(`/api/processos/cliente/${TOKEN}`);
+
+  if (erro) {
+    document.getElementById('conteudo-principal').innerHTML = `
+      <div class="card texto-centro" style="margin-top: 40px;">
+        <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+        <h2>Processo não encontrado</h2>
+        <p>${erro}</p>
+      </div>
+    `;
+    return;
+  }
+
+  processoAtual = dados;
+
+  // Renderiza o template principal
+  const template = document.getElementById('template-principal');
+  const clone    = template.content.cloneNode(true);
+  const container = document.getElementById('conteudo-principal');
+  container.innerHTML = '';
+  container.appendChild(clone);
+
+  // Preenche os dados
+  preencherDados(dados);
+  renderizarArquivos(dados.arquivos);
+  renderizarMensagens(dados.mensagens);
+
+  // Drag and drop na área de upload
+  configurarDragDrop();
+}
+
+function preencherDados(dados) {
+  const p = dados.processo;
+
+  document.getElementById('cliente-nome').textContent = p.nome || 'Sem nome';
+  document.getElementById('processo-criado').textContent = `Criado em ${formatarData(p.criado_em)}`;
+
+  const badge = document.getElementById('badge-status');
+  badge.textContent = p.status;
+  badge.className   = `badge badge-${statusParaClasse(p.status)}`;
+
+  // Preenche o formulário
+  document.getElementById('campo-nome').value      = p.nome      || '';
+  document.getElementById('campo-email').value     = p.email     || '';
+  document.getElementById('campo-telefone').value  = p.telefone  || '';
+  document.getElementById('campo-descricao').value = p.descricao || '';
+}
+
+function renderizarArquivos(arquivos) {
+  const lista = document.getElementById('lista-arquivos');
+  if (!lista) return;
+
+  if (!arquivos || arquivos.length === 0) {
+    lista.innerHTML = '<p class="texto-pequeno texto-centro mt-8">Nenhum arquivo enviado ainda.</p>';
+    return;
+  }
+
+  lista.innerHTML = arquivos.map(a => `
+    <div class="arquivo-item">
+      <span>${iconeArquivo(a.nome_original)}</span>
+      <a href="${api.urlDownload(a.id)}" target="_blank" style="flex:1">${a.nome_original}</a>
+      <span class="texto-pequeno">${formatarData(a.criado_em)}</span>
+    </div>
+  `).join('');
+}
+
+function renderizarMensagens(mensagens) {
+  const timeline = document.getElementById('timeline-mensagens');
+  if (!timeline) return;
+
+  if (!mensagens || mensagens.length === 0) {
+    timeline.innerHTML = '<p class="texto-pequeno texto-centro">Nenhuma mensagem ainda.</p>';
+    return;
+  }
+
+  timeline.innerHTML = mensagens.map(m => `
+    <div class="mensagem-item ${m.autor}">
+      <div class="mensagem-avatar">
+        ${m.autor === 'admin' ? '👤' : '🙋'}
+      </div>
+      <div>
+        <div class="mensagem-balao">${m.texto}</div>
+        <div class="mensagem-hora">${m.autor === 'admin' ? 'Equipe · ' : 'Você · '}${formatarData(m.criado_em)}</div>
+      </div>
+    </div>
+  `).join('');
+
+  // Scrolla para a última mensagem
+  timeline.scrollTop = timeline.scrollHeight;
+}
+
+// --- Salvar dados do formulário ---
+async function salvarDados() {
+  const btn = document.getElementById('btn-salvar');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Salvando...';
+
+  const { erro } = await api.post(`/api/processos/cliente/${TOKEN}`, {
+    nome:      document.getElementById('campo-nome').value,
+    email:     document.getElementById('campo-email').value,
+    telefone:  document.getElementById('campo-telefone').value,
+    descricao: document.getElementById('campo-descricao').value
+  });
+
+  btn.disabled = false;
+  btn.innerHTML = 'Salvar dados';
+
+  if (erro) {
+    mostrarAlerta('alerta', erro, 'erro');
+  } else {
+    mostrarAlerta('alerta', 'Dados salvos com sucesso! ✅', 'sucesso');
+  }
+}
+
+// --- Upload de arquivo ---
+async function uploadArquivo(input) {
+  const arquivo = input.files[0];
+  if (!arquivo) return;
+
+  const area = document.getElementById('upload-area');
+  area.innerHTML = `
+    <div class="spinner" style="border-top-color: var(--azul-claro); width:32px; height:32px; border-width:3px; margin:0 auto 12px;"></div>
+    <p>Enviando <strong>${arquivo.name}</strong>...</p>
+  `;
+
+  const { dados, erro } = await api.upload(`/api/arquivos/upload/${TOKEN}`, arquivo);
+
+  // Recarrega os dados para mostrar o novo arquivo
+  if (erro) {
+    mostrarAlerta('alerta', erro, 'erro');
+  } else {
+    mostrarAlerta('alerta', 'Arquivo enviado com sucesso! ✅', 'sucesso');
+  }
+
+  await carregarProcesso();
+  trocarTab('documentos');
+}
+
+// --- Enviar mensagem ---
+async function enviarMensagem() {
+  const campo = document.getElementById('campo-mensagem');
+  const texto = campo.value.trim();
+
+  if (!texto) return;
+
+  const { erro } = await api.post(`/api/processos/cliente/${TOKEN}/comentario`, { texto });
+
+  if (erro) {
+    mostrarAlerta('alerta', erro, 'erro');
+  } else {
+    campo.value = '';
+    await carregarProcesso();
+    trocarTab('mensagens');
+  }
+}
+
+// --- Troca de tabs ---
+function trocarTab(tab) {
+  // Remove classe ativa de todos
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    const nomes = ['dados', 'documentos', 'mensagens'];
+    t.classList.toggle('ativa', nomes[i] === tab);
+  });
+
+  document.querySelectorAll('.painel').forEach(p => p.classList.remove('ativo'));
+  document.getElementById(`painel-${tab}`)?.classList.add('ativo');
+}
+
+// --- Drag and drop ---
+function configurarDragDrop() {
+  const area = document.getElementById('upload-area');
+  if (!area) return;
+
+  area.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    area.classList.add('dragover');
+  });
+
+  area.addEventListener('dragleave', () => area.classList.remove('dragover'));
+
+  area.addEventListener('drop', (e) => {
+    e.preventDefault();
+    area.classList.remove('dragover');
+    const arquivos = e.dataTransfer.files;
+    if (arquivos.length > 0) {
+      const input = document.getElementById('input-arquivo');
+      input.files = arquivos;
+      uploadArquivo(input);
+    }
+  });
+}
+
+// Enter para enviar mensagem
+document.addEventListener('keydown', (e) => {
+  const campo = document.getElementById('campo-mensagem');
+  if (e.key === 'Enter' && !e.shiftKey && document.activeElement === campo) {
+    e.preventDefault();
+    enviarMensagem();
+  }
+});
+</script>
+
+</body>
+</html>
