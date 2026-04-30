@@ -491,11 +491,17 @@ function calcProposta(s) {
     return sum;
   }
   function cetConsorcio(parcelaPos, prazoFinal) {
-    if(prazoFinal <= 0 || lanceProprios_v <= 0) return {m:0, a:0};
-    const sumPar = calcSumParcelas(parcelaPos, prazoFinal);
-    const ratio = sumPar / lanceProprios_v;
-    if(ratio <= 0) return {m:0, a:0};
-    const mm = Math.pow(ratio, 1/prazoFinal) - 1;
+    // Fórmula do Op. Simples (validada centavo-a-centavo com Conkey):
+    //   custo = crédito × (taxaAdm + fundo)
+    //   disponível = crédito − lanceProprios
+    //   mensal = (1 + custo/disponível)^(1/prazoEf) − 1
+    const disponivel = credito - lanceProprios_v;
+    if(prazoFinal <= 0 || disponivel <= 0) return {m:0, a:0};
+    const custo = credito * (taxaAdm + fundo);
+    const ratio = custo / disponivel;
+    const mensalReal = Math.pow(1 + ratio, 1/prazoFinal) - 1;
+    // Conkey arredonda para 4 casas decimais antes de calcular o anual
+    const mm = Math.round(mensalReal * 10000) / 10000;
     const aa = Math.pow(1+mm, 12) - 1;
     return {m: mm*100, a: aa*100};
   }
