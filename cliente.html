@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Master Prime — Portal do Cliente</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="stylesheet" href="shared/estilo.css">
+  <style>
+    /* ══════════════════════════════════
+       ESTILOS ESPECÍFICOS DO PORTAL CLIENTE
+       ══════════════════════════════════ */
+    body {
+      background:
+        linear-gradient(180deg, rgba(45,63,94,.06), rgba(77,188,200,.06) 42%, #F6F8FB 100%);
+      min-height: 100vh;
+    }
+
+    /* Cabeçalho */
+    .header {
+      background: var(--mp-navy);
+      padding: 0 24px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0,0,0,.2);
+    }
+    .header-logo { font-size: 15px; font-weight: 800; color: white; letter-spacing: -.3px; }
+    .header-logo span { color: var(--mp-teal); }
+    .header-tag {
+      font-size: 10px;
+      font-weight: 600;
+      color: rgba(255,255,255,.45);
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+    }
+
+    /* Container principal */
+    .container {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 32px 20px 60px;
+    }
+    .cliente-hero {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 24px;
+      align-items: center;
+      margin-bottom: 24px;
+      padding: 28px;
+      border-radius: 14px;
+      background: var(--mp-navy);
+      color: white;
+      box-shadow: 0 16px 36px rgba(45,63,94,.22);
+    }
+    .cliente-hero h1 {
+      font-size: 24px;
+      line-height: 1.15;
+      font-weight: 800;
+      margin-bottom: 8px;
+      letter-spacing: -.2px;
+    }
+    .cliente-hero p {
+      font-size: 13px;
+      color: rgba(255,255,255,.74);
+      line-height: 1.55;
+      max-width: 520px;
+    }
+    .cliente-hero-panel {
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.08);
+      border-radius: 10px;
+      padding: 16px;
+      font-size: 12px;
+      color: rgba(255,255,255,.82);
+    }
+    .cliente-hero-panel strong { display:block; color:#fff; margin-bottom:6px; font-size:13px; }
+
+    /* Bloco do protocolo */
+    .protocolo-bar {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+      box-shadow: var(--shadow);
+    }
+    .protocolo-num {
+      font-family: var(--fonte-mono);
+      font-size: 17px;
+      font-weight: 700;
+      color: var(--mp-navy);
+      letter-spacing: .5px;
+    }
+    .protocolo-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--text3);
+      margin-bottom: 3px;
+    }
+
+    /* Abas */
+    .tabs {
+      display: flex;
+      gap: 0;
+      border-bottom: 2px solid var(--border);
+      margin-bottom: 24px;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      padding: 11px 20px;
+      background: none;
+      border: none;
+      font-family: var(--fonte);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text3);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      transition: all .15s;
+      white-space: nowrap;
+    }
+    .tab-btn.ativa { color: var(--mp-navy); border-bottom-color: var(--mp-yellow); }
+    .tab-btn:hover:not(.ativa) { color: var(--text2); }
+    .painel { display: none; animation: fadeIn .2s ease; }
+    .painel.ativo { display: block; }
+
+    /* Tela de consulta (antes de acessar via token) */
+    .consulta-hero {
+      text-align: center;
+      padding: 48px 0 32px;
+    }
+    .consulta-logo {
+      font-size: 36px;
+      margin-bottom: 16px;
+    }
+    .consulta-hero h1 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--mp-navy);
+      margin-bottom: 8px;
+    }
+    .consulta-hero p { font-size: 13px; color: var(--text2); }
+
+    /* Formulário inicial do cliente (preenchimento de dados) */
+    .form-inicio .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 16px;
+    }
+
+    /* Arquivos múltiplos */
+    #lista-arquivos-novos {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 12px;
+    }
+    .arquivo-pendente {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      background: var(--blue-bg);
+      border: 1px solid #BFDBFE;
+      border-radius: 8px;
+      font-size: 12px;
+    }
+    .arquivo-pendente button {
+      margin-left: auto;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--red);
+      font-size: 14px;
+      padding: 0 4px;
+    }
+
+    /* Stepper de status */
+    .stepper {
+      display: flex;
+      align-items: flex-start;
+      gap: 0;
+      margin: 20px 0;
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+    .step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      min-width: 80px;
+      position: relative;
+    }
+    .step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      top: 15px;
+      left: calc(50% + 16px);
+      right: calc(-50% + 16px);
+      height: 2px;
+      background: var(--border);
+      z-index: 0;
+    }
+    .step.concluido:not(:last-child)::after { background: var(--mp-teal); }
+    .step-dot {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      z-index: 1;
+      position: relative;
+      transition: all .3s;
+    }
+    .step.concluido .step-dot { background: var(--mp-teal); border-color: var(--mp-teal); color: white; }
+    .step.atual .step-dot { background: var(--mp-navy); border-color: var(--mp-navy); color: white; box-shadow: 0 0 0 4px rgba(45,63,94,.15); }
+    .step-label {
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--text3);
+      text-align: center;
+      margin-top: 6px;
+      max-width: 72px;
+      line-height: 1.3;
+      text-transform: uppercase;
+      letter-spacing: .3px;
+    }
+    .step.atual .step-label { color: var(--mp-navy); }
+    .step.concluido .step-label { color: var(--mp-teal); }
+
+    /* Envio de mensagem */
+    .msg-input-wrap {
+      display: flex;
+      gap: 8px;
+      margin-top: 16px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+    }
+    .msg-input-wrap textarea {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1.5px solid var(--border2);
+      border-radius: 8px;
+      font-family: var(--fonte);
+      font-size: 12px;
+      resize: none;
+      min-height: 42px;
+      max-height: 100px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .msg-input-wrap textarea:focus { border-color: var(--mp-teal); }
+
+    /* Loading overlay */
+    #loading-page {
+      min-height: calc(100vh - 60px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+    #loading-page .spinner-dark { width: 40px; height: 40px; border-width: 3px; }
+
+    /* Responsivo */
+    @media (max-width: 600px) {
+      .form-inicio .grid-2 { grid-template-columns: 1fr; }
+      .cliente-hero { grid-template-columns:1fr; padding:22px; }
+      .protocolo-bar { flex-direction: column; align-items: flex-start; }
+      .stepper { gap: 0; }
+      .step-label { font-size: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     CABEÇALHO
+     ══════════════════════════════════════ -->
+<header class="header">
+  <div class="header-logo">Master<span>Prime</span></div>
+  <div class="header-tag">Portal do Cliente</div>
+</header>
+
+<!-- ══════════════════════════════════════
+     CONTEÚDO PRINCIPAL (renderizado por JS)
+     ══════════════════════════════════════ -->
+<div id="root">
+  <!-- Loading inicial -->
+  <div id="loading-page">
+    <div class="spinner spinner-dark"></div>
+    <p style="color: var(--text2); font-size:13px;">Aguarde...</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SCRIPT PRINCIPAL
+     ══════════════════════════════════════ -->
+<script>
+// ════════════════════════════════════════════════════════════
+// ⚙️  CONFIGURAÇÃO — Altere apenas estas duas linhas
+// ════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://jhwciwvgagnuxakukyob.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx';
+
+// ➕ Etapas do processo (ordem exata)
+// Altere aqui para mudar a sequência de status
+const ETAPAS = [
+  { status: 'Recebido',                    icone: '📥' },
+  { status: 'Em análise',                  icone: '🔍' },
+  { status: 'Enviado para administradora', icone: '📤' },
+  { status: 'Em retorno da administradora',icone: '🔄' },
+  { status: 'Finalizado',                  icone: '✅' },
+];
+
+// ════════════════════════════════════════════════════════════
+// INICIALIZAÇÃO
+// ════════════════════════════════════════════════════════════
+const sb    = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const root  = document.getElementById('root');
+const params = new URLSearchParams(window.location.search);
+const TOKEN  = params.get('token');   // ex: ?token=abc123
+
+// Arquivos selecionados antes do envio
+let arquivosPendentes = [];
+// Processo carregado
+let processoAtual = null;
+
+// ── Inicializa a página ──
+window.addEventListener('DOMContentLoaded', async () => {
+  if (TOKEN) {
+    // Acesso via link direto → carrega o processo
+    await carregarProcesso(TOKEN);
+  } else {
+    // Sem token → mostra tela de consulta por CPF + protocolo
+    renderTelaConsulta();
+  }
+});
+
+// ════════════════════════════════════════════════════════════
+// TELA 1 — CONSULTA SOMENTE POR CPF
+// ════════════════════════════════════════════════════════════
+function renderTelaConsulta() {
+  root.innerHTML = `
+    <div class="container">
+      <div class="consulta-hero">
+        <div class="consulta-logo">🔎</div>
+        <h1>Consultar meu processo</h1>
+        <p>Informe seu CPF para acessar o andamento do seu processo de faturamento.</p>
+      </div>
+
+      <div class="card" style="max-width:480px; margin:0 auto;">
+        <div class="card-body">
+          <div id="alerta-consulta" class="alerta"></div>
+
+          <div class="campo">
+            <label>CPF</label>
+            <input type="text" id="cpf-consulta" placeholder="000.000.000-00" maxlength="14"
+              oninput="mascaraCPF(this)"
+              onkeydown="if(event.key==='Enter') consultarProcesso()">
+          </div>
+
+          <button class="btn btn-primary w-100" onclick="consultarProcesso()" style="margin-top:4px;">
+            Consultar processo →
+          </button>
+
+          <div style="text-align:center; margin-top:20px; padding-top:16px; border-top:1px solid var(--border);">
+            <p style="font-size:11px; color: var(--text3);">
+              Ainda não possui um processo?<br>
+              <a href="#" onclick="renderTelaCadastro()" style="color:var(--mp-teal); font-weight:600;">
+                Iniciar novo processo de faturamento
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lista de processos encontrados (aparece após busca) -->
+      <div id="lista-processos-cpf" style="max-width:480px; margin:16px auto 0;"></div>
+    </div>`;
+}
+
+async function consultarProcesso() {
+  const cpf = document.getElementById('cpf-consulta').value.replace(/\D/g,'');
+
+  if (cpf.length < 11) {
+    alerta('alerta-consulta', 'Informe um CPF válido com 11 dígitos.', 'erro');
+    return;
+  }
+
+  const btn = document.querySelector('#alerta-consulta + .campo ~ .btn-primary')
+    || document.querySelector('button[onclick="consultarProcesso()"]');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Buscando...'; }
+
+  const { data, error } = await sb
+    .from('portal_processos')
+    .select('token, protocolo, nome, status, criado_em, grupo, cota')
+    .eq('cpf', cpf)
+    .order('criado_em', { ascending: false });
+
+  if (btn) { btn.disabled = false; btn.innerHTML = 'Consultar processo →'; }
+
+  if (error) {
+    alerta('alerta-consulta', 'Erro ao buscar. Tente novamente.', 'erro');
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    alerta('alerta-consulta', 'Nenhum processo encontrado para este CPF.', 'erro');
+    return;
+  }
+
+  // Um único processo → vai direto para o portal
+  if (data.length === 1) {
+    window.location.href = `?token=${data[0].token}`;
+    return;
+  }
+
+  // Múltiplos processos → lista para o cliente escolher
+  const lista = document.getElementById('lista-processos-cpf');
+  lista.innerHTML = `
+    <div class="card">
+      <div class="card-head">
+        <div class="card-title">Processos encontrados (${data.length})</div>
+        <div class="card-sub">Clique no processo que deseja acompanhar</div>
+      </div>
+      <div class="card-body" style="padding:8px 0;">
+        ${data.map(p => `
+          <div onclick="window.location.href='?token=${p.token}'"
+            style="display:flex; align-items:center; gap:12px; padding:14px 20px;
+                   cursor:pointer; border-bottom:1px solid var(--border); transition:background .15s;"
+            onmouseover="this.style.background='#F8FAFC'"
+            onmouseout="this.style.background=''"
+          >
+            <div style="flex:1;">
+              <div style="font-weight:600; font-size:13px;">${esc(p.nome)}</div>
+              <div style="font-size:11px; color:var(--text2); margin-top:2px;">
+                ${p.protocolo
+                  ? `<span class="mono" style="font-weight:700;">${p.protocolo}</span> · `
+                  : '<span style="color:var(--amber);">Protocolo pendente</span> · '}
+                ${p.grupo ? `Grupo ${esc(p.grupo)}` : ''}
+                ${p.cota  ? ` · Cota ${esc(p.cota)}` : ''}
+              </div>
+              <div style="font-size:10px; color:var(--text3); margin-top:2px;">
+                Aberto em ${fmtData(p.criado_em)}
+              </div>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+              <span class="tag ${tagClass(p.status)}" style="font-size:10px;">${p.status}</span>
+              <span style="font-size:11px; color:var(--text3);">→</span>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    </div>`;
+}
+
+// ════════════════════════════════════════════════════════════
+// TELA 2 — CADASTRO INICIAL (cliente preenche e envia)
+// ════════════════════════════════════════════════════════════
+function renderTelaCadastro() {
+  root.innerHTML = `
+    <div class="container">
+      <div class="cliente-hero">
+        <div>
+          <h1>Iniciar processo de faturamento</h1>
+          <p>Envie seus dados e documentos com segurança para a equipe Master Prime acompanhar o processo junto ao banco.</p>
+        </div>
+        <div class="cliente-hero-panel">
+          <strong>Antes de enviar</strong>
+          Confira CPF, grupo, cota e documentos. O protocolo será atribuído pela equipe após validação com o banco.
+        </div>
+      </div>
+      <div style="margin-bottom:18px;">
+        <a href="#" onclick="renderTelaConsulta()" style="font-size:12px; color:var(--text2);">
+          ← Voltar
+        </a>
+      </div>
+
+      <div id="alerta-cadastro" class="alerta"></div>
+
+      <div class="card form-inicio">
+        <div class="card-head">
+          <div class="card-title">📋 Dados pessoais</div>
+        </div>
+        <div class="card-body">
+          <div class="grid-2">
+            <div class="campo">
+              <label>Nome completo *</label>
+              <input type="text" id="f-nome" placeholder="Seu nome completo">
+            </div>
+            <div class="campo">
+              <label>CPF *</label>
+              <input type="text" id="f-cpf" placeholder="000.000.000-00" maxlength="14"
+                oninput="mascaraCPF(this)" style="font-family:var(--fonte-mono);">
+            </div>
+          </div>
+          <div class="grid-2">
+            <!-- ➕ CAMPO DE NEGÓCIO: Grupo -->
+            <div class="campo">
+              <label>Grupo *</label>
+              <input type="text" id="f-grupo" placeholder="Ex: Grupo A, Grupo 12...">
+            </div>
+            <!-- ➕ CAMPO DE NEGÓCIO: Cota -->
+            <div class="campo">
+              <label>Cota *</label>
+              <input type="text" id="f-cota" placeholder="Ex: 0042">
+            </div>
+          </div>
+          <div class="grid-2">
+            <div class="campo">
+              <label>E-mail (para notificações)</label>
+              <input type="email" id="f-email" placeholder="seu@email.com">
+            </div>
+            <div class="campo">
+              <label>WhatsApp (para notificações)</label>
+              <input type="text" id="f-telefone" placeholder="(00) 00000-0000" maxlength="15"
+                oninput="mascaraTel(this)">
+            </div>
+          </div>
+          <div class="campo">
+            <label>Corretor (opcional)</label>
+            <input type="text" id="f-corretor" placeholder="Nome do corretor, se houver">
+          </div>
+          <div class="campo">
+            <label>Observações / descrição</label>
+            <textarea id="f-descricao" placeholder="Descreva detalhes do seu caso (opcional)..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upload de documentos -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title">📎 Documentos</div>
+          <div class="card-sub">PDF, JPG ou PNG — máx. 16MB cada</div>
+        </div>
+        <div class="card-body">
+          <div class="upload-area" onclick="document.getElementById('input-files').click()">
+            <input type="file" id="input-files" accept=".pdf,.jpg,.jpeg,.png" multiple hidden
+              onchange="selecionarArquivos(this)">
+            <div style="font-size:28px; margin-bottom:8px;">📤</div>
+            <p style="font-size:13px; font-weight:600;">Clique para selecionar arquivos</p>
+            <p class="texto-pequeno" style="margin-top:4px;">ou arraste e solte aqui</p>
+          </div>
+          <div id="lista-arquivos-novos"></div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary w-100" id="btn-enviar" onclick="enviarCadastro()"
+        style="padding:14px; font-size:13px;">
+        Enviar processo →
+      </button>
+    </div>`;
+
+  configurarDragDrop('upload-area', 'input-files', selecionarArquivos);
+}
+
+function selecionarArquivos(input) {
+  const novos = Array.from(input.files);
+  novos.forEach(f => {
+    if (!arquivosPendentes.find(a => a.name === f.name && a.size === f.size)) {
+      arquivosPendentes.push(f);
+    }
+  });
+  renderArquivosPendentes();
+  input.value = '';
+}
+
+function removerArquivoPendente(idx) {
+  arquivosPendentes.splice(idx, 1);
+  renderArquivosPendentes();
+}
+
+function renderArquivosPendentes() {
+  const lista = document.getElementById('lista-arquivos-novos');
+  if (!lista) return;
+  if (arquivosPendentes.length === 0) { lista.innerHTML = ''; return; }
+  lista.innerHTML = arquivosPendentes.map((f, i) => `
+    <div class="arquivo-pendente">
+      <span>${iconeArquivo(f.name)}</span>
+      <span style="flex:1">${f.name}</span>
+      <span class="texto-pequeno">${(f.size / 1024).toFixed(0)} KB</span>
+      <button onclick="removerArquivoPendente(${i})" title="Remover">✕</button>
+    </div>
+  `).join('');
+}
+
+async function enviarCadastro() {
+  // Validações
+  const nome  = v('f-nome')?.trim();
+  const cpf   = v('f-cpf')?.replace(/\D/g,'');
+  const grupo = v('f-grupo')?.trim();
+  const cota  = v('f-cota')?.trim();
+  const email = v('f-email')?.trim();
+  const tel   = v('f-telefone')?.trim();
+  const corretor = v('f-corretor')?.trim();
+  const desc  = v('f-descricao')?.trim();
+
+  if (!nome)         { alerta('alerta-cadastro','Nome é obrigatório.','erro'); return; }
+  if (!cpf || cpf.length < 11) { alerta('alerta-cadastro','CPF inválido.','erro'); return; }
+  if (!grupo)        { alerta('alerta-cadastro','Grupo é obrigatório.','erro'); return; }
+  if (!cota)         { alerta('alerta-cadastro','Cota é obrigatória.','erro'); return; }
+
+  const btn = document.getElementById('btn-enviar');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Enviando...';
+
+  try {
+    // 1. Gerar apenas o token do link (protocolo é gerado pelo ADM depois)
+    const token = gerarToken();
+
+    // 2. Criar o processo no banco SEM protocolo (campo fica null até o ADM atribuir)
+    const { data: proc, error: errProc } = await sb
+      .from('portal_processos')
+      .insert({
+        token,
+        protocolo: null,   // ← ADM define o protocolo, não o cliente
+        nome, cpf, grupo, cota,
+        email: email || null,
+        telefone: tel || null,
+        corretor: corretor || null,
+        descricao: desc || null,
+        status: 'Recebido'
+      })
+      .select()
+      .single();
+
+    if (errProc) throw new Error(errProc.message);
+
+    // 3. Registrar no histórico
+    await sb.from('portal_historico').insert({
+      processo_id: proc.id,
+      status_novo: 'Recebido',
+      observacao: 'Processo iniciado pelo cliente.',
+      autor: 'cliente'
+    });
+
+    // 4. Upload dos arquivos
+    for (const arquivo of arquivosPendentes) {
+      if (arquivo.size > 16 * 1024 * 1024) {
+        console.warn('Arquivo ignorado (>16MB):', arquivo.name);
+        continue;
+      }
+      const path = `${token}/${Date.now()}_${arquivo.name}`;
+      const { error: errUp } = await sb.storage.from('arquivos').upload(path, arquivo);
+      if (!errUp) {
+        await sb.from('portal_arquivos').insert({
+          processo_id: proc.id,
+          nome_original: arquivo.name,
+          storage_path: path
+        });
+      }
+    }
+
+    // 5. Redireciona para a tela do processo
+    arquivosPendentes = [];
+    window.location.href = `?token=${token}`;
+
+  } catch (err) {
+    alerta('alerta-cadastro', 'Erro ao enviar: ' + err.message, 'erro');
+    btn.disabled = false;
+    btn.innerHTML = 'Enviar processo →';
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// TELA 3 — PORTAL DO PROCESSO (após ter token)
+// ════════════════════════════════════════════════════════════
+
+// Guarda o intervalo de polling para poder cancelar se necessário
+let _pollingInterval = null;
+
+async function carregarProcesso(token) {
+  // Para polling anterior se existir
+  if (_pollingInterval) clearInterval(_pollingInterval);
+
+  // Busca o processo principal primeiro
+  const { data: proc, error: e1 } = await sb
+    .from('portal_processos')
+    .select('*')
+    .eq('token', token)
+    .single();
+
+  if (e1 || !proc) {
+    root.innerHTML = `
+      <div class="container">
+        <div class="card" style="text-align:center; padding:48px 24px; margin-top:32px;">
+          <div style="font-size:40px; margin-bottom:16px;">⚠️</div>
+          <h2 style="color:var(--mp-navy);">Processo não encontrado</h2>
+          <p style="margin-top:8px; font-size:13px;">
+            O link pode estar expirado ou incorreto.
+          </p>
+          <a href="?" class="btn btn-outline" style="margin-top:20px;">← Consultar outro processo</a>
+        </div>
+      </div>`;
+    return;
+  }
+
+  processoAtual = proc;
+
+  // Carrega tudo em paralelo com o ID real
+  const [
+    { data: arquivos },
+    { data: mensagens },
+    { data: historico }
+  ] = await Promise.all([
+    sb.from('portal_arquivos').select('*').eq('processo_id', proc.id).order('criado_em'),
+    sb.from('portal_mensagens').select('*').eq('processo_id', proc.id).order('criado_em'),
+    sb.from('portal_historico').select('*').eq('processo_id', proc.id).order('criado_em', { ascending: false })
+  ]);
+
+  renderPortalProcesso(proc, arquivos || [], mensagens || [], historico || []);
+
+  // ─── Atualização em tempo real ───
+  // Verifica a cada 30 segundos se houve mudanças no processo.
+  // Quando detecta algo diferente, atualiza APENAS os campos
+  // alterados sem recarregar a página toda (preserva a aba aberta).
+  _pollingInterval = setInterval(async () => {
+    await verificarAtualizacoes(token);
+  }, 30000); // 30 segundos — ajuste aqui se quiser mais ou menos frequente
+}
+
+// ─── Verifica silenciosamente se houve mudanças ───
+// Roda a cada 30s. Compara o atualizado_em do servidor com o local.
+// Se mudou, busca o que mudou e atualiza só aquela parte.
+async function verificarAtualizacoes(token) {
+  const { data: proc } = await sb
+    .from('portal_processos')
+    .select('*')
+    .eq('token', token)
+    .single();
+
+  if (!proc || !processoAtual) return;
+
+  const mudou = proc.atualizado_em !== processoAtual.atualizado_em
+             || proc.status        !== processoAtual.status
+             || proc.protocolo     !== processoAtual.protocolo;
+
+  if (!mudou) return; // nada mudou, não faz nada
+
+  // Guarda qual aba está aberta para não perder a navegação do usuário
+  const tabAtiva = document.querySelector('.tab-btn.ativa')?.textContent?.trim() || '';
+
+  processoAtual = proc;
+
+  // Busca apenas o que pode ter mudado
+  const [
+    { data: arquivos  },
+    { data: mensagens },
+    { data: historico }
+  ] = await Promise.all([
+    sb.from('portal_arquivos').select('*').eq('processo_id', proc.id).order('criado_em'),
+    sb.from('portal_mensagens').select('*').eq('processo_id', proc.id).order('criado_em'),
+    sb.from('portal_historico').select('*').eq('processo_id', proc.id).order('criado_em', { ascending: false })
+  ]);
+
+  // ── Atualiza o cabeçalho (status + protocolo) ──
+  atualizarCabecalho(proc);
+
+  // ── Atualiza o stepper de progresso ──
+  atualizarStepper(proc);
+
+  // ── Atualiza contadores nas abas ──
+  atualizarContadoresAbas(arquivos || [], mensagens || [], historico || []);
+
+  // ── Atualiza conteúdo de cada painel (sem destruir o DOM) ──
+  atualizarPainelDocumentos(arquivos || []);
+  atualizarPainelMensagens(mensagens || []);
+  atualizarPainelHistorico(historico || []);
+
+  // ── Mostra notificação discreta no topo ──
+  mostrarNotificacaoAtualizacao();
+}
+
+function atualizarCabecalho(proc) {
+  // Protocolo
+  const numEl = document.querySelector('.protocolo-num');
+  const pendEl = document.querySelector('.protocolo-bar div[style*="amber"]');
+  if (proc.protocolo) {
+    if (pendEl) pendEl.outerHTML = `<div class="protocolo-num">${proc.protocolo}</div>`;
+    else if (numEl) numEl.textContent = proc.protocolo;
+  }
+  // Badge de status
+  const badge = document.querySelector('.protocolo-bar .tag');
+  if (badge) {
+    badge.textContent = `${statusIcone(proc.status)} ${proc.status}`;
+    badge.className = `tag ${tagClass(proc.status)}`;
+    badge.style.fontSize = '11px';
+  }
+}
+
+function atualizarStepper(proc) {
+  const stepper = document.querySelector('.stepper');
+  if (!stepper) return;
+  const idxAtual = ETAPAS.findIndex(e => e.status === proc.status);
+  stepper.innerHTML = ETAPAS.map((e, i) => `
+    <div class="step ${i < idxAtual ? 'concluido' : i === idxAtual ? 'atual' : ''}">
+      <div class="step-dot">${i < idxAtual ? '✓' : e.icone}</div>
+      <div class="step-label">${e.status}</div>
+    </div>
+  `).join('');
+}
+
+function atualizarContadoresAbas(arquivos, mensagens, historico) {
+  const tabs = document.querySelectorAll('.tab-btn');
+  // tabs[0]=dados, tabs[1]=documentos, tabs[2]=mensagens, tabs[3]=historico
+  if (tabs[1]) tabs[1].textContent = `📎 Documentos (${arquivos.length})`;
+  if (tabs[2]) tabs[2].textContent = `💬 Mensagens (${mensagens.length})`;
+  if (tabs[3]) tabs[3].textContent = `🕐 Histórico (${historico.length})`;
+}
+
+function atualizarPainelDocumentos(arquivos) {
+  // Atualiza apenas a lista de arquivos existentes (não mexe na área de upload)
+  const listaEl = document.querySelector('#painel-documentos .card-body > div:first-child');
+  if (!listaEl) return;
+  if (arquivos.length === 0) {
+    listaEl.innerHTML = '<p class="texto-pequeno texto-centro" style="padding:16px 0;">Nenhum documento enviado ainda.</p>';
+  } else {
+    listaEl.innerHTML = arquivos.map(a => `
+      <div class="arquivo-item">
+        <span>${iconeArquivo(a.nome_original)}</span>
+        <a href="${sb.storage.from('arquivos').getPublicUrl(a.storage_path).data.publicUrl}"
+           target="_blank" style="flex:1">${a.nome_original}</a>
+        <span class="texto-pequeno">${fmtData(a.criado_em)}</span>
+      </div>`).join('');
+  }
+}
+
+function atualizarPainelMensagens(mensagens) {
+  const timeline = document.getElementById('timeline-msgs');
+  if (!timeline) return;
+  const jaNoFim = timeline.scrollTop + timeline.clientHeight >= timeline.scrollHeight - 10;
+  timeline.innerHTML = mensagens.length === 0
+    ? '<p class="texto-pequeno texto-centro" style="padding:20px 0;">Nenhuma mensagem ainda.<br>Envie uma mensagem para a equipe abaixo.</p>'
+    : mensagens.map(m => `
+        <div class="mensagem-item ${m.autor}">
+          <div class="mensagem-avatar">${m.autor === 'admin' ? '👤' : '🙋'}</div>
+          <div>
+            <div class="mensagem-balao">${esc(m.texto)}</div>
+            <div class="mensagem-hora">${m.autor === 'admin' ? 'Equipe' : 'Você'} · ${fmtDataHora(m.criado_em)}</div>
+          </div>
+        </div>`).join('');
+  // Só rola para o fim se o usuário já estava no fim antes
+  if (jaNoFim) timeline.scrollTop = timeline.scrollHeight;
+}
+
+function atualizarPainelHistorico(historico) {
+  const hist = document.querySelector('#painel-historico .card-body');
+  if (!hist) return;
+  hist.innerHTML = historico.length === 0
+    ? '<p class="texto-pequeno texto-centro">Nenhum registro ainda.</p>'
+    : historico.map(h => `
+        <div class="historico-item">
+          <div class="historico-dot">${statusIcone(h.status_novo)}</div>
+          <div class="historico-conteudo">
+            <div class="historico-status">
+              <span class="tag ${tagClass(h.status_novo)}">${h.status_novo}</span>
+            </div>
+            ${h.observacao ? `<div class="historico-obs">${esc(h.observacao)}</div>` : ''}
+            <div class="historico-hora">${fmtDataHora(h.criado_em)}</div>
+          </div>
+        </div>`).join('');
+}
+
+function mostrarNotificacaoAtualizacao() {
+  // Remove notificação anterior se existir
+  document.getElementById('notif-atualizacao')?.remove();
+
+  const notif = document.createElement('div');
+  notif.id = 'notif-atualizacao';
+  notif.style.cssText = `
+    position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+    background: var(--mp-navy); color: white;
+    padding: 10px 20px; border-radius: 999px;
+    font-size: 12px; font-weight: 600;
+    box-shadow: 0 4px 16px rgba(0,0,0,.25);
+    z-index: 999; animation: fadeIn .3s ease;
+    display: flex; align-items: center; gap: 8px;
+  `;
+  notif.innerHTML = '🔄 Processo atualizado pela equipe';
+  document.body.appendChild(notif);
+  setTimeout(() => notif?.remove(), 4000);
+}
+
+function renderPortalProcesso(proc, arquivos, mensagens, historico) {
+  const idxAtual = ETAPAS.findIndex(e => e.status === proc.status);
+
+  root.innerHTML = `
+    <div class="container">
+      <div id="alerta-portal" class="alerta"></div>
+
+      <!-- Protocolo e status -->
+      <div class="protocolo-bar">
+        <div>
+          <div class="protocolo-label">Número do protocolo</div>
+          ${proc.protocolo
+            ? `<div class="protocolo-num">${proc.protocolo}</div>`
+            : `<div style="font-size:12px; color:var(--amber); font-weight:600; margin-top:2px;">
+                ⏳ Aguardando atribuição pela equipe
+               </div>`
+          }
+        </div>
+        <div style="text-align:right;">
+          <div class="protocolo-label">Status atual</div>
+          <span class="tag ${tagClass(proc.status)}" style="font-size:11px;">
+            ${statusIcone(proc.status)} ${proc.status}
+          </span>
+        </div>
+        <div style="text-align:right; display:flex; flex-direction:column; gap:4px; align-items:flex-end;">
+          <button class="btn btn-outline btn-xs" onclick="copiarLink()">🔗 Copiar link</button>
+          <span class="texto-pequeno">Aberto em ${fmtData(proc.criado_em)}</span>
+        </div>
+      </div>
+
+      <!-- Stepper de progresso -->
+      <div class="stepper">
+        ${ETAPAS.map((e, i) => `
+          <div class="step ${i < idxAtual ? 'concluido' : i === idxAtual ? 'atual' : ''}">
+            <div class="step-dot">${i < idxAtual ? '✓' : e.icone}</div>
+            <div class="step-label">${e.status}</div>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- Abas -->
+      <div class="tabs">
+        <button class="tab-btn ativa" onclick="trocarTab('dados')">📋 Meus Dados</button>
+        <button class="tab-btn" onclick="trocarTab('documentos')">📎 Documentos (${arquivos.length})</button>
+        <button class="tab-btn" onclick="trocarTab('mensagens')">💬 Mensagens (${mensagens.length})</button>
+        <button class="tab-btn" onclick="trocarTab('historico')">🕐 Histórico (${historico.length})</button>
+      </div>
+
+      <!-- ══ TAB: DADOS ══ -->
+      <div class="painel ativo" id="painel-dados">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Dados cadastrais</div></div>
+          <div class="card-body">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0 20px;">
+              <div class="campo"><label>Nome completo *</label>
+                <input type="text" id="edit-nome" value="${esc(proc.nome)}"></div>
+              <div class="campo"><label>CPF</label>
+                <input type="text" value="${fmtCPF(proc.cpf)}" disabled style="background:#F8FAFC; color:var(--text3);" title="CPF não pode ser alterado"></div>
+              <div class="campo"><label>Grupo *</label>
+                <input type="text" id="edit-grupo" value="${esc(proc.grupo||'')}"></div>
+              <div class="campo"><label>Cota *</label>
+                <input type="text" id="edit-cota" value="${esc(proc.cota||'')}"></div>
+              <div class="campo"><label>E-mail</label>
+                <input type="email" id="edit-email" value="${esc(proc.email||'')}"></div>
+              <div class="campo"><label>WhatsApp</label>
+                <input type="text" id="edit-telefone" value="${esc(proc.telefone||'')}"></div>
+              <div class="campo"><label>Corretor (opcional)</label>
+                <input type="text" id="edit-corretor" value="${esc(proc.corretor||'')}" placeholder="Nome do corretor, se houver"></div>
+            </div>
+            <div class="campo">
+              <label>Observações</label>
+              <textarea id="edit-desc">${esc(proc.descricao||'')}</textarea>
+            </div>
+            <button class="btn btn-primary" id="btn-salvar-dados" onclick="salvarDados()">
+              💾 Salvar alterações
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ TAB: DOCUMENTOS ══ -->
+      <div class="painel" id="painel-documentos">
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">Documentos enviados</div>
+          </div>
+          <div class="card-body">
+            ${arquivos.length === 0
+              ? '<p class="texto-pequeno texto-centro" style="padding:16px 0;">Nenhum documento enviado ainda.</p>'
+              : arquivos.map(a => `
+                <div class="arquivo-item">
+                  <span>${iconeArquivo(a.nome_original)}</span>
+                  <a href="${sb.storage.from('arquivos').getPublicUrl(a.storage_path).data.publicUrl}"
+                     target="_blank" style="flex:1">${a.nome_original}</a>
+                  <span class="texto-pequeno">${fmtData(a.criado_em)}</span>
+                </div>`).join('')
+            }
+
+            <div style="margin-top:20px; padding-top:16px; border-top:1px solid var(--border);">
+              <p style="font-size:11px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px;">
+                Adicionar documentos
+              </p>
+              <div class="upload-area" onclick="document.getElementById('input-mais-files').click()">
+                <input type="file" id="input-mais-files" accept=".pdf,.jpg,.jpeg,.png" multiple hidden
+                  onchange="uploadMaisArquivos(this)">
+                <div style="font-size:24px; margin-bottom:6px;">📤</div>
+                <p style="font-size:12px; font-weight:600;">Clique ou arraste arquivos</p>
+              </div>
+              <div id="lista-mais-arquivos"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ TAB: MENSAGENS ══ -->
+      <div class="painel" id="painel-mensagens">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Comunicação com a equipe</div></div>
+          <div class="card-body">
+            <div class="timeline" id="timeline-msgs" style="max-height:400px; overflow-y:auto; padding-right:4px;">
+              ${mensagens.length === 0
+                ? '<p class="texto-pequeno texto-centro" style="padding:20px 0;">Nenhuma mensagem ainda.<br>Envie uma mensagem para a equipe abaixo.</p>'
+                : mensagens.map(m => `
+                  <div class="mensagem-item ${m.autor}">
+                    <div class="mensagem-avatar">${m.autor === 'admin' ? '👤' : '🙋'}</div>
+                    <div>
+                      <div class="mensagem-balao">${esc(m.texto)}</div>
+                      <div class="mensagem-hora">${m.autor === 'admin' ? 'Equipe' : 'Você'} · ${fmtDataHora(m.criado_em)}</div>
+                    </div>
+                  </div>`).join('')
+              }
+            </div>
+            <div class="msg-input-wrap">
+              <textarea id="campo-msg" placeholder="Digite sua mensagem para a equipe..."></textarea>
+              <button class="btn btn-primary btn-sm" onclick="enviarMensagem()">Enviar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ TAB: HISTÓRICO ══ -->
+      <div class="painel" id="painel-historico">
+        <div class="card">
+          <div class="card-head"><div class="card-title">Histórico do processo</div></div>
+          <div class="card-body">
+            ${historico.length === 0
+              ? '<p class="texto-pequeno texto-centro">Nenhum registro ainda.</p>'
+              : historico.map(h => `
+                <div class="historico-item">
+                  <div class="historico-dot">${statusIcone(h.status_novo)}</div>
+                  <div class="historico-conteudo">
+                    <div class="historico-status">
+                      <span class="tag ${tagClass(h.status_novo)}">${h.status_novo}</span>
+                    </div>
+                    ${h.observacao ? `<div class="historico-obs">${esc(h.observacao)}</div>` : ''}
+                    <div class="historico-hora">${fmtDataHora(h.criado_em)}</div>
+                  </div>
+                </div>`).join('')
+            }
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  // Scrolla mensagens para o fim
+  setTimeout(() => {
+    const tl = document.getElementById('timeline-msgs');
+    if (tl) tl.scrollTop = tl.scrollHeight;
+  }, 100);
+
+  configurarDragDrop('upload-area', 'input-mais-files', uploadMaisArquivos);
+}
+
+// ─── Salvar dados do cliente ───
+async function salvarDados() {
+  const nome  = document.getElementById('edit-nome')?.value.trim();
+  const grupo = document.getElementById('edit-grupo')?.value.trim();
+  const cota  = document.getElementById('edit-cota')?.value.trim();
+  if (!nome)  { alerta('alerta-portal','Nome é obrigatório.','erro'); return; }
+  if (!grupo) { alerta('alerta-portal','Grupo é obrigatório.','erro'); return; }
+  if (!cota)  { alerta('alerta-portal','Cota é obrigatória.','erro'); return; }
+
+  const btn = document.getElementById('btn-salvar-dados');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Salvando...';
+
+  const { error } = await sb.from('portal_processos').update({
+    nome, grupo, cota,
+    email: document.getElementById('edit-email')?.value.trim() || null,
+    telefone: document.getElementById('edit-telefone')?.value.trim() || null,
+    corretor: document.getElementById('edit-corretor')?.value.trim() || null,
+    descricao: document.getElementById('edit-desc')?.value.trim() || null,
+    atualizado_em: new Date()
+  }).eq('id', processoAtual.id);
+
+  btn.disabled = false; btn.innerHTML = '💾 Salvar alterações';
+
+  if (error) alerta('alerta-portal','Erro ao salvar: ' + error.message,'erro');
+  else {
+    alerta('alerta-portal','Dados salvos com sucesso! ✅','sucesso');
+    processoAtual.nome = nome;
+  }
+}
+
+// ─── Upload de mais arquivos ───
+async function uploadMaisArquivos(input) {
+  const files = Array.from(input.files);
+  if (!files.length) return;
+
+  const listaEl = document.getElementById('lista-mais-arquivos');
+  if (listaEl) listaEl.innerHTML = '<p class="texto-pequeno" style="margin-top:8px;">Enviando arquivos...</p>';
+
+  for (const arquivo of files) {
+    if (arquivo.size > 16 * 1024 * 1024) {
+      alerta('alerta-portal', `"${arquivo.name}" é muito grande (máx. 16MB).`, 'aviso');
+      continue;
+    }
+    const path = `${TOKEN}/${Date.now()}_${arquivo.name}`;
+    const { error: errUp } = await sb.storage.from('arquivos').upload(path, arquivo);
+    if (errUp) { alerta('alerta-portal', 'Erro no upload: ' + errUp.message, 'erro'); continue; }
+    await sb.from('portal_arquivos').insert({
+      processo_id: processoAtual.id,
+      nome_original: arquivo.name,
+      storage_path: path
+    });
+  }
+  input.value = '';
+  alerta('alerta-portal', 'Arquivo(s) enviado(s)! ✅', 'sucesso');
+  await carregarProcesso(TOKEN);
+  trocarTab('documentos');
+}
+
+// ─── Enviar mensagem ───
+async function enviarMensagem() {
+  const campo = document.getElementById('campo-msg');
+  const texto = campo?.value.trim();
+  if (!texto) return;
+
+  const { error } = await sb.from('portal_mensagens').insert({
+    processo_id: processoAtual.id,
+    autor: 'cliente',
+    texto
+  });
+
+  if (error) { alerta('alerta-portal', 'Erro ao enviar mensagem.', 'erro'); return; }
+  campo.value = '';
+  await carregarProcesso(TOKEN);
+  trocarTab('mensagens');
+}
+
+// ─── Copiar link ───
+function copiarLink() {
+  navigator.clipboard.writeText(window.location.href)
+    .then(() => alerta('alerta-portal', '🔗 Link copiado! Guarde para consultar seu processo.', 'sucesso'));
+}
+
+// ════════════════════════════════════════════════════════════
+// FUNÇÕES AUXILIARES
+// ════════════════════════════════════════════════════════════
+
+// Troca de abas
+function trocarTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+    const nomes = ['dados','documentos','mensagens','historico'];
+    btn.classList.toggle('ativa', nomes[i] === tab);
+  });
+  document.querySelectorAll('.painel').forEach(p => p.classList.remove('ativo'));
+  document.getElementById(`painel-${tab}`)?.classList.add('ativo');
+}
+
+// Drag and drop genérico
+function configurarDragDrop(areaId, inputId, callback) {
+  const area  = document.querySelector('.' + areaId) || document.getElementById(areaId);
+  const input = document.getElementById(inputId);
+  if (!area || !input) return;
+  area.addEventListener('dragover',  e => { e.preventDefault(); area.classList.add('dragover'); });
+  area.addEventListener('dragleave', () => area.classList.remove('dragover'));
+  area.addEventListener('drop', e => {
+    e.preventDefault(); area.classList.remove('dragover');
+    const f = e.dataTransfer.files;
+    if (f.length) { input.files = f; callback(input); }
+  });
+}
+
+// Gera token único para o link do cliente
+function gerarToken() {
+  return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+}
+
+// Pega valor de input por id
+function v(id) {
+  return document.getElementById(id)?.value;
+}
+
+// Escapa HTML para evitar XSS
+function esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── Formatação ───
+function fmtCPF(cpf) {
+  const c = String(cpf||'').replace(/\D/g,'');
+  return c.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4');
+}
+function fmtData(d) {
+  if (!d) return '-';
+  return new Date(d).toLocaleDateString('pt-BR');
+}
+function fmtDataHora(d) {
+  if (!d) return '-';
+  return new Date(d).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+
+// ─── Máscaras ───
+function mascaraCPF(input) {
+  let v = input.value.replace(/\D/g,'').slice(0,11);
+  v = v.replace(/(\d{3})(\d)/,'$1.$2');
+  v = v.replace(/(\d{3})\.(\d{3})(\d)/,'$1.$2.$3');
+  v = v.replace(/\.(\d{3})(\d)/,'.$1-$2');
+  input.value = v;
+}
+function mascaraTel(input) {
+  let v = input.value.replace(/\D/g,'').slice(0,11);
+  v = v.replace(/(\d{2})(\d)/,'($1) $2');
+  v = v.replace(/(\d{4,5})(\d{4})$/,'$1-$2');
+  input.value = v;
+}
+
+// ─── Classe de tag por status ───
+// ➕ Para adicionar novo status com cor: adicione um caso aqui
+function tagClass(s) {
+  const m = {
+    'Recebido':                      'tag-blue',
+    'Em análise':                    'tag-amber',
+    'Enviado para administradora':   'tag-purple',
+    'Em retorno da administradora':  'tag-teal',
+    'Finalizado':                    'tag-green',
+    'Cancelado':                     'tag-red',
+  };
+  return m[s] || 'tag-gray';
+}
+
+// ─── Ícone por status ───
+function statusIcone(s) {
+  const et = ETAPAS.find(e => e.status === s);
+  return et ? et.icone : '📌';
+}
+
+// ─── Ícone por extensão de arquivo ───
+function iconeArquivo(nome) {
+  const ext = String(nome).split('.').pop().toLowerCase();
+  if (ext === 'pdf') return '📄';
+  if (['jpg','jpeg','png'].includes(ext)) return '🖼️';
+  return '📎';
+}
+
+// ─── Mostrar alerta ───
+function alerta(id, msg, tipo) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.className = `alerta alerta-${tipo} visivel`;
+  setTimeout(() => el.classList.remove('visivel'), 6000);
+}
+
+// Atalho: Enter para enviar mensagem
+document.addEventListener('keydown', e => {
+  const campo = document.getElementById('campo-msg');
+  if (e.key === 'Enter' && !e.shiftKey && document.activeElement === campo) {
+    e.preventDefault(); enviarMensagem();
+  }
+});
+</script>
+</body>
+</html>

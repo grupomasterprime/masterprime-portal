@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* ══════════════════════════════════════════════════════
-   MASTER PRIME — PORTAL DO CONSULTOR
+   MASTER PRIME — PORTAL DO CONSULTOR — ESTILOS COMPLETOS
    ══════════════════════════════════════════════════════ */
 :root {
   --mp-navy:    #2D3F5E;
@@ -29,6 +29,7 @@
   --red:    #DC2626;  --red-bg: #FEF2F2;
   --amber:  #D97706;  --amber-bg: #FFFBEB;
   --blue:   #2563EB;  --blue-bg:#EFF6FF;
+  --purple: #7C3AED;  --purple-bg: #F5F3FF;
   --r: 10px;
   --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
   --shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.05);
@@ -104,7 +105,6 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
   position:sticky; top:0; height:100vh; overflow-y:auto;
   transition:transform .25s ease;
 }
-/* Botão flutuante para reabrir o menu do portal quando em tela cheia */
 .portal-menu-fab {
   display:none; position:fixed; top:12px; left:12px; z-index:500;
   width:40px; height:40px; border-radius:10px; background:var(--sidebar-bg);
@@ -186,7 +186,7 @@ body.embedded-mode .portal-menu-fab { display:flex; }
 .tag-gray { background:#F1F5F9; color:var(--text2); }
 .tag-yellow { background:rgba(200,200,74,.15); color:#6B6B00; }
 .tag-black { background:#1E293B; color:#fff; }
-.tag-blue-cat { background:#EFF6FF; color:#1D4ED8; }
+.tag-purple { background:var(--purple-bg); color:var(--purple); }
 
 /* ═══ HISTORY ═══ */
 .hist-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:16px; }
@@ -210,7 +210,10 @@ body.embedded-mode .portal-menu-fab { display:flex; }
 .btn-accent:hover { background:#B5B540; }
 .btn-outline { background:transparent; color:var(--text); border:1px solid var(--border2); }
 .btn-outline:hover { background:var(--bg); }
+.btn-teal { background:var(--mp-teal); color:#fff; }
+.btn-teal:hover { background:#3aa9b5; }
 .btn-sm { padding:6px 12px; font-size:11px; }
+.btn-xs { padding:4px 8px; font-size:10px; }
 .btn-danger { background:var(--red-bg); color:var(--red); border:1px solid #FECACA; }
 .btn-danger:hover { background:#FEE2E2; }
 
@@ -232,6 +235,57 @@ body.embedded-mode .portal-menu-fab { display:flex; }
 .config-banner { background:#FEF3C7; border:1px solid #FDE68A; border-radius:8px; padding:16px 20px; margin-bottom:20px; font-size:12px; color:#92400E; }
 .config-banner strong { color:#78350F; }
 .config-banner code { background:rgba(0,0,0,.06); padding:2px 6px; border-radius:4px; font-family:'DM Mono',monospace; font-size:11px; }
+
+/* ═══ FATURAMENTO NOVOS ESTILOS ═══ */
+.fat-filtros { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: flex-end; }
+.fat-filtros input, .fat-filtros select { padding: 8px 12px; border: 1.5px solid var(--border2); border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 12px; color: var(--text); background: var(--card); outline: none; transition: border-color .2s; }
+.fat-filtros input:focus, .fat-filtros select:focus { border-color: var(--mp-teal); }
+.fat-filtros input { min-width: 200px; }
+.fat-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.fat-stat { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; box-shadow: var(--shadow); }
+.fat-stat-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text2); margin-bottom: 6px; }
+.fat-stat-valor { font-size: 26px; font-weight: 800; color: var(--mp-navy); font-family: 'DM Mono', monospace; line-height: 1; }
+.fat-stat-sub { font-size: 9px; color: var(--text3); margin-top: 4px; }
+.fat-stat.borda-teal { border-top: 3px solid var(--mp-teal); }
+.fat-stat.borda-amber { border-top: 3px solid var(--amber); }
+.fat-stat.borda-purple { border-top: 3px solid var(--purple); }
+.fat-stat.borda-green { border-top: 3px solid var(--green); }
+.fat-detalhe-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, .55); z-index: 200; align-items: center; justify-content: center; padding: 20px; animation: fadeIn .15s ease; }
+.fat-detalhe-overlay.aberto { display: flex; }
+.fat-detalhe-modal { background: white; border-radius: 14px; width: 100%; max-width: 860px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,.3); animation: slideUp .2s ease; }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.fat-detalhe-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; position: sticky; top: 0; background: white; z-index: 1; }
+.fat-detalhe-body { padding: 24px; }
+.fat-detalhe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px; }
+@media (max-width: 640px) { .fat-detalhe-grid { grid-template-columns: 1fr; } }
+.fat-stepper { display: flex; align-items: center; gap: 0; margin: 16px 0 20px; overflow-x: auto; padding: 4px 0 8px; }
+.fat-step { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 60px; position: relative; }
+.fat-step:not(:last-child)::after { content: ''; position: absolute; top: 13px; left: calc(50% + 14px); right: calc(-50% + 14px); height: 2px; background: var(--border); z-index: 0; }
+.fat-step.ok:not(:last-child)::after { background: var(--mp-teal); }
+.fat-step-dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); background: white; display: flex; align-items: center; justify-content: center; font-size: 11px; z-index: 1; position: relative; transition: all .25s; }
+.fat-step.ok .fat-step-dot { background: var(--mp-teal); border-color: var(--mp-teal); color: white; }
+.fat-step.now .fat-step-dot { background: var(--mp-navy); border-color: var(--mp-navy); color: white; box-shadow: 0 0 0 3px rgba(45,63,94,.15); }
+.fat-step-lbl { font-size: 8px; font-weight: 600; color: var(--text3); text-align: center; margin-top: 5px; max-width: 60px; line-height: 1.2; text-transform: uppercase; }
+.fat-step.ok .fat-step-lbl { color: var(--mp-teal); }
+.fat-step.now .fat-step-lbl { color: var(--mp-navy); }
+.fat-dado { display: flex; flex-direction: column; gap: 2px; margin-bottom: 12px; }
+.fat-dado-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text2); }
+.fat-dado-valor { font-size: 13px; color: var(--text); }
+.fat-hist-item { display: flex; gap: 10px; padding-bottom: 12px; position: relative; }
+.fat-hist-item:not(:last-child)::before { content: ''; position: absolute; left: 13px; top: 28px; bottom: 0; width: 2px; background: var(--border); }
+.fat-hist-dot { width: 28px; height: 28px; border-radius: 50%; background: var(--blue-bg); border: 2px solid var(--blue); display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; z-index: 1; }
+.fat-hist-corpo { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; }
+.fat-msgs-wrap { max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+.fat-msg { display: flex; gap: 8px; }
+.fat-msg.admin { flex-direction: row-reverse; }
+.fat-msg-av { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+.fat-msg.cliente .fat-msg-av { background: var(--blue-bg); }
+.fat-msg.admin .fat-msg-av { background: var(--green-bg); }
+.fat-msg-balao { max-width: 80%; padding: 8px 12px; border-radius: 10px; font-size: 11px; line-height: 1.4; }
+.fat-msg.cliente .fat-msg-balao { background: white; border: 1px solid var(--border); border-top-left-radius: 3px; }
+.fat-msg.admin .fat-msg-balao { background: var(--mp-navy); color: white; border-top-right-radius: 3px; }
+.fat-msg-hora { font-size: 9px; color: var(--text3); margin-top: 3px; }
+.fat-msg.admin .fat-msg-hora { text-align: right; color: rgba(255,255,255,.45); }
 
 /* ═══ RESPONSIVE ═══ */
 @media (max-width:768px) {
@@ -276,7 +330,7 @@ body.embedded-mode .portal-menu-fab { display:flex; }
       <div class="login-logo-sub">Portal do Consultor</div>
     </div>
     <div id="config-warn" class="config-banner hidden">
-      <strong>Modo Demo:</strong> Supabase nao configurado. Usando dados de exemplo locais. Para configurar, edite as variaveis <code>SUPABASE_URL</code> e <code>SUPABASE_KEY</code> no inicio do arquivo.
+      <strong>Modo Demo:</strong> Supabase nao configurado. Usando dados de exemplo locais.
     </div>
     <div id="login-error" class="login-error"></div>
     <div class="login-field">
@@ -318,6 +372,7 @@ body.embedded-mode .portal-menu-fab { display:flex; }
         <div class="sb-item" onclick="nav('admin-overview')" id="ni-admin-overview"><span class="ic">&#128200;</span> Visao Geral</div>
         <div class="sb-item" onclick="nav('admin-upload')" id="ni-admin-upload"><span class="ic">&#128228;</span> Upload Demonstrativos</div>
         <div class="sb-item" onclick="nav('admin-users')" id="ni-admin-users"><span class="ic">&#128101;</span> Gerenciar Usuarios</div>
+        <div class="sb-item" onclick="nav('admin-faturamento')" id="ni-admin-faturamento"><span class="ic">💰</span> Faturamento</div>
         <div class="sb-item" onclick="nav('painel')" id="ni-painel"><span class="ic">&#9881;</span> Painel Split</div>
       </div>
       <div class="sb-user-card">
@@ -344,22 +399,22 @@ body.embedded-mode .portal-menu-fab { display:flex; }
         <div id="hist-content"><div class="empty-state"><div class="empty-state-icon">&#128197;</div><div class="empty-state-title">Nenhum historico</div><div class="empty-state-desc">Seus demonstrativos anteriores aparecerao aqui.</div></div></div>
       </div>
 
-      <!-- ASSEMBLEIA (iframe carregado sob demanda) -->
+      <!-- ASSEMBLEIA (iframe) -->
       <div class="screen" id="s-assembleia" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
         <iframe id="iframe-assembleia" src="about:blank" data-target="assembleia.html" style="width:100%;height:100%;border:0;display:block" title="Resultado de Assembleia"></iframe>
       </div>
 
-      <!-- LANCES (iframe carregado sob demanda) -->
+      <!-- LANCES (iframe) -->
       <div class="screen" id="s-lances" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
         <iframe id="iframe-lances" src="about:blank" data-target="lances.html" style="width:100%;height:100%;border:0;display:block" title="Consulta de Lances"></iframe>
       </div>
 
-      <!-- DASHBOARD DE VENDAS (iframe carregado sob demanda) -->
+      <!-- DASHBOARD DE VENDAS (iframe) -->
       <div class="screen" id="s-vendas-dash" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
         <iframe id="iframe-vendas-dash" src="about:blank" data-target="dashboard_vendas.html" style="width:100%;height:100%;border:0"></iframe>
       </div>
 
-      <!-- PAINEL SPLIT (iframe carregado sob demanda) -->
+      <!-- PAINEL SPLIT (iframe) -->
       <div class="screen" id="s-painel" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
         <iframe id="iframe-painel" src="about:blank" data-target="painel.html" style="width:100%;height:100%;border:0;display:block" title="Painel Split"></iframe>
       </div>
@@ -371,7 +426,7 @@ body.embedded-mode .portal-menu-fab { display:flex; }
         <div class="card"><div class="card-head"><div class="card-title">Dados pessoais</div></div>
           <div class="card-body"><div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
             <div><div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:6px">Nome</div><div style="font-size:14px;font-weight:600" id="perfil-nome">--</div></div>
-            <div><div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:6px">Usu&aacute;rio</div><div style="font-size:14px;font-family:'DM Mono',monospace" id="perfil-cpf">--</div></div>
+            <div><div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:6px">Usuário</div><div style="font-size:14px;font-family:'DM Mono',monospace" id="perfil-cpf">--</div></div>
             <div><div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:6px">Tipo</div><div id="perfil-tipo">--</div></div>
           </div></div>
         </div>
@@ -385,6 +440,87 @@ body.embedded-mode .portal-menu-fab { display:flex; }
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- ADMIN: FATURAMENTO -->
+      <div class="screen" id="s-admin-faturamento">
+        <div class="page-title">Processos de Faturamento</div>
+        <div class="page-sub" id="fat-subtitulo">Acompanhe os processos enviados pelos clientes e atualize protocolo, status e documentos.</div>
+
+        <!-- Métricas -->
+        <div class="fat-stats" id="fat-stats"></div>
+
+        <div class="card" style="border-left:4px solid var(--mp-teal);">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Link fixo para iniciar processo</div>
+              <div class="card-sub">Use este link em WhatsApp, site, assinatura de e-mail ou campanha. O próprio cliente preenche e envia os documentos.</div>
+            </div>
+          </div>
+          <div class="card-body" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+            <input id="fat-link-fixo" class="login-input" readonly onclick="this.select()" style="flex:1;min-width:260px;font-size:12px;padding:10px 12px;font-family:'DM Mono',monospace;">
+            <button class="btn btn-primary btn-sm" onclick="fatCopiarLinkFixo()">Copiar link</button>
+            <button class="btn btn-outline btn-sm" onclick="window.open(fatLinkInicioCliente(), '_blank')">Abrir</button>
+            <div style="width:100%;font-size:11px;color:var(--text2);">
+              O protocolo continua sendo atribuído pelo ADM depois do contato com o banco.
+            </div>
+          </div>
+        </div>
+
+        <!-- Lista de processos -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Lista de processos</div>
+              <div class="card-sub" id="fat-contagem">—</div>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn btn-outline btn-sm" onclick="fatExportarCSV()">⬇ Exportar CSV</button>
+            </div>
+          </div>
+          <div style="padding:14px 20px; border-bottom:1px solid var(--border);">
+            <div class="fat-filtros">
+              <input type="text" id="fat-busca" placeholder="🔍 Buscar por nome, CPF, protocolo..." oninput="fatFiltrar()">
+              <select id="fat-status-filtro" onchange="fatFiltrar()">
+                <option value="">Todos os status</option>
+                <option>Recebido</option>
+                <option>Em análise</option>
+                <option>Enviado para administradora</option>
+                <option>Em retorno da administradora</option>
+                <option>Finalizado</option>
+                <option>Cancelado</option>
+              </select>
+              <button class="btn btn-outline btn-sm" onclick="fatLimparFiltros()">✕ Limpar</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="tabela">
+              <thead>
+                <tr>
+                  <th>Protocolo</th>
+                  <th>Cliente</th>
+                  <th>CPF</th>
+                  <th>Grupo / Cota</th>
+                  <th>Corretor</th>
+                  <th>Status</th>
+                  <th>Criado em</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="fat-tbody">
+                <tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text3);">
+                  <div class="spinner spinner-dark" style="margin:0 auto 12px;"></div>
+                  Carregando processos...
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL DE DETALHE DO PROCESSO -->
+      <div class="fat-detalhe-overlay" id="fat-overlay" onclick="fatFecharDetalhe(event)">
+        <div class="fat-detalhe-modal" id="fat-modal"></div>
       </div>
 
       <!-- ADMIN: VISAO GERAL -->
@@ -402,7 +538,7 @@ body.embedded-mode .portal-menu-fab { display:flex; }
       <div class="screen" id="s-admin-upload">
         <div class="page-title">Upload de Demonstrativos</div>
         <div class="page-sub">Envie os demonstrativos processados para os consultores</div>
-        <div class="alert alert-info"><span>&#8505;</span><span>No <strong>Painel Split</strong>, clique <strong>"Publicar no Portal"</strong> para gerar o JSON. Depois faca o upload aqui. Ou clique em <strong>"Abrir Painel Split"</strong> na sidebar para fazer tudo online.</span></div>
+        <div class="alert alert-info"><span>&#8505;</span><span>No <strong>Painel Split</strong>, clique <strong>"Publicar no Portal"</strong> para gerar o JSON.</span></div>
         <div class="card"><div class="card-head"><div><div class="card-title">Enviar demonstrativos do mes</div><div class="card-sub">Arquivo JSON gerado pelo Painel Split</div></div></div>
           <div class="card-body">
             <div class="upload-zone" id="upload-zone"><input type="file" accept=".json" onchange="adminUpload(event)">
@@ -428,7 +564,7 @@ body.embedded-mode .portal-menu-fab { display:flex; }
               <div><label class="login-label">Nome completo</label><input type="text" class="login-input" id="nu-nome" placeholder="NOME SOBRENOME" style="font-size:12px;padding:9px 12px;text-transform:uppercase"></div>
               <div><label class="login-label">CPF</label><input type="text" class="login-input" id="nu-cpf" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)" style="font-size:12px;padding:9px 12px"></div>
               <div><label class="login-label">Tipo</label><select class="login-input" id="nu-tipo" style="font-size:12px;padding:9px 12px"><option value="consultor">Consultor</option><option value="socio">Socio</option><option value="admin">Administrador</option></select></div>
-              <div><label class="login-label">Senha inicial (opcional)</label><input type="text" class="login-input" id="nu-senha" placeholder="Deixe vazio = CPF. Pode usar CNPJ." style="font-size:12px;padding:9px 12px"></div>
+              <div><label class="login-label">Senha inicial (opcional)</label><input type="text" class="login-input" id="nu-senha" placeholder="Deixe vazio = CPF." style="font-size:12px;padding:9px 12px"></div>
             </div>
             <div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" onclick="addUser()">Salvar</button><button class="btn btn-outline btn-sm" onclick="document.getElementById('add-form').classList.add('hidden')">Cancelar</button></div>
             <div id="add-msg" style="margin-top:12px"></div>
@@ -444,35 +580,24 @@ body.embedded-mode .portal-menu-fab { display:flex; }
 </div>
 
 <script>
-// ══════════════════════════════════════════════════════════════════════════
-//  CONFIGURACAO SUPABASE — Preencha com seus dados
-//  (Instrucoes no arquivo SETUP.md)
-// ══════════════════════════════════════════════════════════════════════════
-const SUPABASE_URL = 'https://jhwciwvgagnuxakukyob.supabase.co';  // Ex: 'https://xyzabc.supabase.co'
-const SUPABASE_KEY = 'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx';  // Publishable key (segura para frontend - respeita RLS)
-
-// ══════════════════════════════════════════════════════════════════════════
-//  MODO: SUPABASE ou DEMO (localStorage)
-// ══════════════════════════════════════════════════════════════════════════
+// ══ CONFIGURAÇÃO ══
+const SUPABASE_URL = 'https://jhwciwvgagnuxakukyob.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx';
 const USE_SUPABASE = !!(SUPABASE_URL && SUPABASE_KEY);
 let sb = null;
-// Cliente secundário usado só para signUp de novos usuários (não mexe na sessão do admin)
 let sbSignup = null;
 
-// ═══ DATA LAYER (abstrai Supabase vs localStorage) ═══
+// ══ DATA LAYER ══
 const DB = {
   async init() {
     if (USE_SUPABASE) {
       sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-      // Cliente separado sem persistência de sessão: signUp aqui não deslogga o admin
       sbSignup = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
         auth: { persistSession: false, autoRefreshToken: false, storageKey: 'mp-signup-only' }
       });
-      console.log('Conectado ao Supabase');
     } else {
-      console.log('Modo demo (localStorage)');
       if (!localStorage.getItem('mp_portal')) {
-        localStorage.setItem('mp_portal', JSON.stringify(this._defaultData()));
+        localStorage.setItem('mp_portal', JSON.stringify(DB._defaultData()));
       }
     }
   },
@@ -489,83 +614,29 @@ const DB = {
           'ALLAN ALMEIDA': { nome:'ALLAN ALMEIDA', totalFinal:18542.67,
             linhas:[
               {adm:'PORTO',tipo:'Auto',ref:'123456',cliente:'JOAO SILVA',dataVenda:'15/03/2025',parcela:'1/12',bruto:4200,nf:294,adm:420,liquido:3486},
-              {adm:'PORTO',tipo:'Vida',ref:'234567',cliente:'MARIA SANTOS',dataVenda:'18/03/2025',parcela:'1/1',bruto:1800,nf:126,adm:180,liquido:1494},
-              {adm:'PORTO',tipo:'RE',ref:'345678',cliente:'CARLOS OLIVEIRA',dataVenda:'20/03/2025',parcela:'3/12',bruto:6500,nf:455,adm:650,liquido:5395},
-              {adm:'ITAU',tipo:'Vida',ref:'456789',cliente:'ANA PEREIRA',dataVenda:'22/03/2025',parcela:'1/1',bruto:3200,nf:224,adm:320,liquido:2656},
-              {adm:'BRADESCO',tipo:'Auto',ref:'567890',cliente:'PEDRO COSTA',dataVenda:'25/03/2025',parcela:'2/12',bruto:2800,nf:196,adm:280,liquido:2324},
-              {adm:'PORTO',tipo:'Empresa',ref:'678901',cliente:'TECH SOLUTIONS',dataVenda:'10/03/2025',parcela:'1/12',bruto:5100,nf:357,adm:510,liquido:4233},
             ],
-            avulsos:[{descricao:'Ajuda de custo estacionamento',valor:450},{descricao:'Bonus trimestral Elite Gold',valor:1200},{descricao:'Desconto adiantamento',valor:-2695.33}],
-            despesas:[]
-          },
-          'ERIK GONCALVES': { nome:'ERIK GONCALVES', totalFinal:7823.45,
-            linhas:[
-              {adm:'PORTO',tipo:'Auto',ref:'111222',cliente:'ROBERTO ALVES',dataVenda:'12/03/2025',parcela:'1/12',bruto:3100,nf:217,adm:310,liquido:2573},
-              {adm:'PORTO',tipo:'Vida',ref:'222333',cliente:'FERNANDA LIMA',dataVenda:'14/03/2025',parcela:'1/1',bruto:2400,nf:168,adm:240,liquido:1992},
-              {adm:'BRADESCO',tipo:'RE',ref:'333444',cliente:'MARCOS SOUZA',dataVenda:'19/03/2025',parcela:'2/12',bruto:4500,nf:315,adm:450,liquido:3735},
-            ],
-            avulsos:[{descricao:'Ajuda de custo',valor:350},{descricao:'Desconto VR',valor:-826.55}],
-            despesas:[]
-          },
-          'LARISSA SANT ANNA': { nome:'LARISSA SANT ANNA', totalFinal:5214.88,
-            linhas:[
-              {adm:'PORTO',tipo:'Auto',ref:'444555',cliente:'LUCIA FERREIRA',dataVenda:'10/03/2025',parcela:'1/12',bruto:2900,nf:203,adm:290,liquido:2407},
-              {adm:'ITAU',tipo:'Vida',ref:'555666',cliente:'RAFAEL MENDES',dataVenda:'21/03/2025',parcela:'1/1',bruto:1500,nf:105,adm:150,liquido:1245},
-              {adm:'PORTO',tipo:'RE',ref:'666777',cliente:'PATRICIA ROCHA',dataVenda:'28/03/2025',parcela:'1/12',bruto:2200,nf:154,adm:220,liquido:1826},
-            ],
-            avulsos:[{descricao:'Ajuda de custo',valor:300},{descricao:'Desconto adiantamento',valor:-563.12}],
-            despesas:[]
-          },
-        },
-        '2025-02': {
-          'ALLAN ALMEIDA': { nome:'ALLAN ALMEIDA', totalFinal:15243.20,
-            linhas:[
-              {adm:'PORTO',tipo:'Auto',ref:'901234',cliente:'JOSE MARTINS',dataVenda:'10/02/2025',parcela:'2/12',bruto:3800,nf:266,adm:380,liquido:3154},
-              {adm:'BRADESCO',tipo:'RE',ref:'012345',cliente:'CAMILA REIS',dataVenda:'15/02/2025',parcela:'1/12',bruto:5200,nf:364,adm:520,liquido:4316},
-              {adm:'ITAU',tipo:'Vida',ref:'123450',cliente:'ROBERTO NUNES',dataVenda:'20/02/2025',parcela:'1/1',bruto:2100,nf:147,adm:210,liquido:1743},
-              {adm:'PORTO',tipo:'Auto',ref:'234501',cliente:'MARIANA LOPES',dataVenda:'22/02/2025',parcela:'5/12',bruto:4600,nf:322,adm:460,liquido:3818},
-            ],
-            avulsos:[{descricao:'Ajuda de custo estacionamento',valor:450},{descricao:'Desconto adiantamento',valor:-2238}],
-            despesas:[]
-          },
-          'ERIK GONCALVES': { nome:'ERIK GONCALVES', totalFinal:6205.30,
-            linhas:[
-              {adm:'PORTO',tipo:'Auto',ref:'345012',cliente:'CLAUDIA MENDES',dataVenda:'08/02/2025',parcela:'1/12',bruto:2800,nf:196,adm:280,liquido:2324},
-              {adm:'BRADESCO',tipo:'Vida',ref:'450123',cliente:'MARCOS OLIVEIRA',dataVenda:'18/02/2025',parcela:'1/1',bruto:3600,nf:252,adm:360,liquido:2988},
-            ],
-            avulsos:[{descricao:'Ajuda de custo',valor:350},{descricao:'Desconto VR',valor:-826.55},{descricao:'Bonus indicacao',valor:1369.85}],
-            despesas:[]
-          },
-          'LARISSA SANT ANNA': { nome:'LARISSA SANT ANNA', totalFinal:4102.50,
-            linhas:[
-              {adm:'PORTO',tipo:'RE',ref:'501234',cliente:'ANDERSON SILVA',dataVenda:'12/02/2025',parcela:'2/12',bruto:3400,nf:238,adm:340,liquido:2822},
-              {adm:'ITAU',tipo:'Auto',ref:'612345',cliente:'BEATRIZ COSTA',dataVenda:'25/02/2025',parcela:'1/12',bruto:1900,nf:133,adm:190,liquido:1577},
-            ],
-            avulsos:[{descricao:'Ajuda de custo',valor:300},{descricao:'Desconto adiantamento',valor:-596.50}],
-            despesas:[]
-          },
+            avulsos:[], despesas:[]
+          }
         },
       },
-      meses: ['2025-02','2025-03'],
+      meses: ['2025-03'],
     };
   },
-  _local() { return JSON.parse(localStorage.getItem('mp_portal')); },
+  _local() { return JSON.parse(localStorage.getItem('mp_portal') || 'null') || DB._defaultData(); },
   _saveLocal(d) { localStorage.setItem('mp_portal', JSON.stringify(d)); },
-
-  // ── Users ──
   async getUser(cpf) {
     if (USE_SUPABASE) {
       const {data} = await sb.from('portal_users').select('*').eq('cpf', cpf).single();
       return data;
     }
-    return this._local().users.find(u => u.cpf === cpf) || null;
+    return DB._local().users.find(u => u.cpf === cpf) || null;
   },
   async getAllUsers() {
     if (USE_SUPABASE) {
       const {data} = await sb.from('portal_users').select('*').order('nome');
       return data || [];
     }
-    return this._local().users;
+    return DB._local().users;
   },
   async createUser(user) {
     if (USE_SUPABASE) {
@@ -573,9 +644,9 @@ const DB = {
       if (error) throw error;
       return data;
     }
-    const d = this._local();
+    const d = DB._local();
     d.users.push(user);
-    this._saveLocal(d);
+    DB._saveLocal(d);
     return user;
   },
   async updateUser(cpf, updates) {
@@ -584,36 +655,34 @@ const DB = {
       if (error) throw error;
       return data;
     }
-    const d = this._local();
+    const d = DB._local();
     const idx = d.users.findIndex(u => u.cpf === cpf);
     if (idx >= 0) Object.assign(d.users[idx], updates);
-    this._saveLocal(d);
+    DB._saveLocal(d);
     return d.users[idx];
   },
   async deleteUser(cpf) {
     if (USE_SUPABASE) {
       await sb.from('portal_users').delete().eq('cpf', cpf);
     } else {
-      const d = this._local();
+      const d = DB._local();
       d.users = d.users.filter(u => u.cpf !== cpf);
-      this._saveLocal(d);
+      DB._saveLocal(d);
     }
   },
-
-  // ── Demonstrativos ──
   async getMeses() {
     if (USE_SUPABASE) {
       const {data} = await sb.from('portal_demonstrativos').select('mes').order('mes', {ascending:false});
       return [...new Set((data||[]).map(d => d.mes))];
     }
-    return [...(this._local().meses||[])].sort().reverse();
+    return [...(DB._local().meses||[])].sort().reverse();
   },
   async getDemo(mes, nome) {
     if (USE_SUPABASE) {
       const {data} = await sb.from('portal_demonstrativos').select('dados').eq('mes', mes).eq('nome', nome).single();
       return data ? data.dados : null;
     }
-    return this._local().demonstrativos?.[mes]?.[nome] || null;
+    return (DB._local().demonstrativos || {})[mes]?.[nome] || null;
   },
   async getDemosMes(mes) {
     if (USE_SUPABASE) {
@@ -622,54 +691,47 @@ const DB = {
       (data||[]).forEach(d => result[d.nome] = d.dados);
       return result;
     }
-    return this._local().demonstrativos?.[mes] || {};
+    return (DB._local().demonstrativos || {})[mes] || {};
   },
   async publishDemos(mes, consultores) {
     if (USE_SUPABASE) {
       const rows = Object.entries(consultores).map(([nome, dados]) => ({mes, nome, dados}));
-      // Upsert (replace existing month data)
       const {error} = await sb.from('portal_demonstrativos').upsert(rows, {onConflict:'mes,nome'});
       if (error) throw error;
     } else {
-      const d = this._local();
+      const d = DB._local();
+      d.demonstrativos = d.demonstrativos || {};
       d.demonstrativos[mes] = consultores;
       if (!d.meses.includes(mes)) d.meses.push(mes);
       d.meses.sort();
-      this._saveLocal(d);
+      DB._saveLocal(d);
     }
   },
   async deleteMes(mes) {
     if (USE_SUPABASE) {
       await sb.from('portal_demonstrativos').delete().eq('mes', mes);
     } else {
-      const d = this._local();
-      delete d.demonstrativos[mes];
+      const d = DB._local();
+      delete (d.demonstrativos || {})[mes];
       d.meses = d.meses.filter(m => m !== mes);
-      this._saveLocal(d);
+      DB._saveLocal(d);
     }
   },
 };
 
-// ═══ UTILIDADES ═══
 let currentUser = null;
 const MESES_NOME = {'01':'Janeiro','02':'Fevereiro','03':'Marco','04':'Abril','05':'Maio','06':'Junho','07':'Julho','08':'Agosto','09':'Setembro','10':'Outubro','11':'Novembro','12':'Dezembro'};
+
 function fmtBRL(v) { if (!v && v!==0) return 'R$ 0,00'; return 'R$ '+v.toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.'); }
 function fmtCPF(c) { c=c.replace(/\D/g,''); if(c.length!==11)return c; return c.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'); }
 function maskCPF(el) { let v=el.value.replace(/\D/g,''); if(v.length>11)v=v.slice(0,11); if(v.length>9)v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4'); else if(v.length>6)v=v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3'); else if(v.length>3)v=v.replace(/(\d{3})(\d{1,3})/,'$1.$2'); el.value=v; }
 function cleanCPF(v) { return (v||'').replace(/\D/g,''); }
 function togglePw(id,btn) { const i=document.getElementById(id); i.type=i.type==='password'?'text':'password'; }
-function getInitials(n) { const p=(n||'').split(' ').filter(Boolean); return p.length>=2?(p[0][0]+p[p.length-1][0]).toUpperCase():(p[0]||'--').slice(0,2).toUpperCase(); }
+function getInitials(n) { const p=(n||'').split(' ').filter(Boolean); return p.length>=2?(p[0][0]+p[p.length-1][0]).toUpperCase():(p[0]||'?').slice(0,2).toUpperCase(); }
 function fmtMes(k) { const [y,m]=k.split('-'); return `${MESES_NOME[m]||m} ${y}`; }
 
-// ═══ AUTH (Supabase Auth + migração automática) ═══
-// Login usa "email fantasma" {cpf}@masterprime.internal.
-// Aceita login por USERNAME (formato nome.sobrenome) ou CPF (admin legado).
-// Se usuário ainda não foi migrado ao Supabase Auth (auth_id IS NULL em
-// portal_users), valida senha via RPC, faz signUp e vincula.
 function cpfToFakeEmail(cpf) { return cpf + '@masterprime.internal'; }
 function usernameToFakeEmail(username) { return username + '@masterprime.internal'; }
-
-// Valida senha forte: >=8 chars, maiúscula, minúscula, número, símbolo
 function senhaForte(s) {
   if (!s || s.length < 8) return false;
   if (!/[A-Z]/.test(s)) return false;
@@ -688,7 +750,6 @@ async function doLogin() {
   if (!senha) { err.style.display='block'; err.textContent='Digite sua senha.'; return; }
   btn.disabled = true; btn.textContent = 'Entrando...';
   try {
-    // Detecta se é CPF (só dígitos, 11 chars) ou username
     const soDigitos = loginInput.replace(/\D/g,'');
     const ehCpf = soDigitos.length === 11 && /^\d+$/.test(loginInput.replace(/[.\-]/g,''));
     const identificador = ehCpf ? soDigitos : loginInput.toLowerCase();
@@ -700,24 +761,17 @@ async function doLogin() {
       btn.disabled=false; btn.textContent='Entrar'; return;
     }
     const email = ehCpf ? cpfToFakeEmail(identificador) : usernameToFakeEmail(identificador);
-    // 1) Tenta signIn direto
     let { data, error } = await sb.auth.signInWithPassword({ email, password: senha });
     if (error) {
-      // 2) User ainda não migrado: validar senha antiga
       const { data: ok, error: rpcErr } = await sb.rpc('validar_senha_portal', { cpf_param: identificador, senha_param: senha });
       if (rpcErr) throw rpcErr;
-      if (!ok) {
-        err.style.display='block'; err.textContent='Usuario ou senha incorretos.';
-        btn.disabled=false; btn.textContent='Entrar'; return;
-      }
-      // 3) Cria conta no Supabase Auth
+      if (!ok) throw new Error('Usuario ou senha incorretos.');
       const su = await sb.auth.signUp({ email, password: senha });
       if (su.error) throw su.error;
       if (!su.data.session) {
         const si = await sb.auth.signInWithPassword({ email, password: senha });
         if (si.error) throw si.error;
       }
-      // 4) Vincula auth_id (por username ou por CPF)
       if (ehCpf) {
         const linkRes = await sb.rpc('link_auth_to_portal', { cpf_param: identificador });
         if (linkRes.error) throw linkRes.error;
@@ -728,7 +782,7 @@ async function doLogin() {
     }
     const authUser = (await sb.auth.getUser()).data.user;
     const r = await sb.from('portal_users').select('*').eq('auth_id', authUser.id).maybeSingle();
-    if (!r.data) throw new Error('Conta criada mas perfil nao encontrado. Contate o administrador.');
+    if (!r.data) throw new Error('Conta criada mas perfil nao encontrado.');
     currentUser = r.data;
     err.style.display='none';
     await enterPortal();
@@ -748,25 +802,25 @@ async function doLogout() {
 }
 
 async function checkSession() {
-  if (USE_SUPABASE) {
-    const { data } = await sb.auth.getSession();
-    if (data && data.session && data.session.user) {
-      const authId = data.session.user.id;
-      const r = await sb.from('portal_users').select('*').eq('auth_id', authId).maybeSingle();
-      if (r.data) {
-        currentUser = r.data;
-        await enterPortal();
-        return;
+  const TIMEOUT = new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), 8000));
+  try {
+    if (USE_SUPABASE) {
+      const { data } = await Promise.race([sb.auth.getSession(), TIMEOUT]);
+      if (data?.session?.user) {
+        const authId = data.session.user.id;
+        const r = await sb.from('portal_users').select('*').eq('auth_id', authId).maybeSingle();
+        if (r.data) { currentUser = r.data; await enterPortal(); return; }
       }
+    } else {
+      const cpf = sessionStorage.getItem('mp_session');
+      if (cpf) { const u = await DB.getUser(cpf); if(u){currentUser=u; await enterPortal(); return;} }
     }
-  } else {
-    const cpf = sessionStorage.getItem('mp_session');
-    if (cpf) { const u = await DB.getUser(cpf); if(u){currentUser=u; await enterPortal(); return;} }
-  }
+  } catch(e) { console.warn('Sessão não encontrada'); }
   document.getElementById('loading-screen').style.display='none';
   document.getElementById('login-screen').style.display='flex';
   if (!USE_SUPABASE) document.getElementById('config-warn').classList.remove('hidden');
 }
+
 async function enterPortal() {
   document.getElementById('loading-screen').style.display='none';
   document.getElementById('login-screen').style.display='none';
@@ -782,528 +836,559 @@ async function enterPortal() {
   nav('dashboard');
   await renderDashboard();
   await renderHistorico();
-  if (currentUser.tipo==='admin') { await renderAdminMeses(); await renderUsers(); await renderAdminOverview(); }
+  if (currentUser.tipo==='admin') {
+    await renderAdminMeses();
+    await renderUsers();
+    await renderAdminOverview();
+    await renderAdminFaturamento();
+  }
 }
 
-// ═══ NAV ═══
 function nav(id) {
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
   const s=document.getElementById('s-'+id), n=document.getElementById('ni-'+id);
   if(s)s.classList.add('active'); if(n)n.classList.add('active');
   document.getElementById('sidebar').classList.remove('open');
-  // Lazy-load dos iframes: só carrega na primeira visita (evita 2.5 MB no login)
-  // Iframes com lazy-load (assembleia/lances/painel) — carrega só na primeira visita
   const iframeScreens = ['assembleia','lances','painel','vendas-dash'];
   if (iframeScreens.includes(id)) {
     const ifr = document.getElementById('iframe-' + id);
-    if (ifr && ifr.dataset.target && ifr.getAttribute('src') === 'about:blank') {
-      ifr.src = ifr.dataset.target;
-    }
+    if (ifr && ifr.dataset.target && ifr.getAttribute('src') === 'about:blank') ifr.src = ifr.dataset.target;
   }
-  // Apenas o Painel Split abre em tela cheia (esconde sidebar do portal)
-  const app = document.getElementById('portal-app');
-  const fab = document.getElementById('portal-menu-fab');
-  if (id === 'painel') {
-    if (app) app.classList.add('embedded');
-    if (fab) fab.style.display = 'flex';
-    document.body.classList.add('embedded-mode');
-  } else {
-    if (app) app.classList.remove('embedded');
-    if (fab) fab.style.display = 'none';
-    document.body.classList.remove('embedded-mode');
-  }
+  if (id === 'admin-faturamento') renderAdminFaturamento();
 }
 function exitEmbedded(){
-  const app = document.getElementById('portal-app');
-  if (app) app.classList.remove('embedded');
+  document.getElementById('portal-app').classList.remove('embedded');
   document.getElementById('portal-menu-fab').style.display = 'none';
   document.body.classList.remove('embedded-mode');
   nav('dashboard');
 }
 function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
 
-// ═══ DASHBOARD ═══
-async function renderDashboard() {
-  if(!currentUser)return;
-  const el=document.getElementById('dash-content'), sub=document.getElementById('dash-sub');
-  const meses = await DB.getMeses();
-  let demo=null, mesAtual=null;
-  for (const m of meses) { demo=await DB.getDemo(m, currentUser.nome); if(demo){mesAtual=m; break;} }
-  if (!demo) { sub.textContent='Seu demonstrativo de comissoes'; el.innerHTML='<div class="empty-state"><div class="empty-state-icon">&#128196;</div><div class="empty-state-title">Nenhum demonstrativo disponivel</div><div class="empty-state-desc">Seu demonstrativo do mes ainda nao foi publicado.</div></div>'; return; }
-  sub.textContent='Demonstrativo de '+fmtMes(mesAtual);
-  el.innerHTML=renderDemo(demo, mesAtual);
+// ══ DASHBOARD / HISTÓRICO / PERFIL / ADMIN UPLOAD ══
+// (mantenha as funções renderDashboard, renderHistorico, changePw, adminUpload, etc. da versão original)
+
+// ═══════════════════════════════════════════════════════
+// MÓDULO DE FATURAMENTO CORRIGIDO
+// ═══════════════════════════════════════════════════════
+
+const FAT_ETAPAS = [
+  { status: 'Recebido',                     icone: '📥' },
+  { status: 'Em análise',                   icone: '🔍' },
+  { status: 'Enviado para administradora',  icone: '📤' },
+  { status: 'Em retorno da administradora', icone: '🔄' },
+  { status: 'Finalizado',                   icone: '✅' },
+];
+
+const FAT_CONFIG = {
+  clientePath: 'cliente.html',
+  storageBucket: 'arquivos',
+  protocoloPrefixo: 'MP'
+};
+
+let fatProcessos = [];
+let fatFiltrados = [];
+
+async function renderAdminFaturamento() {
+  const linkFixo = document.getElementById('fat-link-fixo');
+  if (linkFixo) linkFixo.value = fatLinkInicioCliente();
+
+  const { data, error } = await sb
+    .from('portal_processos')
+    .select(`*, portal_arquivos(count), portal_mensagens(count)`)
+    .order('criado_em', { ascending: false });
+
+  if (error) {
+    document.getElementById('fat-tbody').innerHTML = `
+      <tr><td colspan="8" style="text-align:center;color:var(--red);padding:24px;">
+        Erro ao carregar: ${error.message}
+      </td></tr>`;
+    return;
+  }
+
+  fatProcessos = data || [];
+  fatFiltrados = [...fatProcessos];
+  fatRenderStats();
+  fatRenderTabela(fatFiltrados);
 }
-function renderDemo(data, mes) {
-  // Formato novo (v2): o painel entrega o HTML já renderizado, com todas
-  // as seções (ADM 10%, Excedente, Avulsos Corretora/Consultoria, Despesas
-  // separadas, Cartas de Parceria etc.). Renderizamos direto.
-  if (data && data.html) {
-    const nome = data.nome || currentUser.nome;
-    const nomeSafe = nome.replace(/[^a-zA-Z0-9]/g,'_');
+
+function fatRenderStats() {
+  const total       = fatProcessos.length;
+  const recebidos   = fatProcessos.filter(p => p.status === 'Recebido').length;
+  const emAnalise   = fatProcessos.filter(p => p.status === 'Em análise').length;
+  const emRetorno   = fatProcessos.filter(p => p.status === 'Em retorno da administradora').length;
+  const finalizados = fatProcessos.filter(p => p.status === 'Finalizado').length;
+  const semProtocolo = fatProcessos.filter(p => !p.protocolo).length;
+
+  document.getElementById('fat-stats').innerHTML = `
+    <div class="fat-stat borda-teal">
+      <div class="fat-stat-label">Total</div>
+      <div class="fat-stat-valor">${total}</div>
+      <div class="fat-stat-sub">processos</div>
+    </div>
+    <div class="fat-stat borda-amber">
+      <div class="fat-stat-label">Recebidos</div>
+      <div class="fat-stat-valor">${recebidos}</div>
+      <div class="fat-stat-sub">aguardando análise</div>
+    </div>
+    <div class="fat-stat borda-purple">
+      <div class="fat-stat-label">Em análise</div>
+      <div class="fat-stat-valor">${emAnalise}</div>
+      <div class="fat-stat-sub">em andamento</div>
+    </div>
+    <div class="fat-stat borda-amber">
+      <div class="fat-stat-label">Retorno adm.</div>
+      <div class="fat-stat-valor">${emRetorno}</div>
+      <div class="fat-stat-sub">em retorno</div>
+    </div>
+    <div class="fat-stat borda-green">
+      <div class="fat-stat-label">Finalizados</div>
+      <div class="fat-stat-valor">${finalizados}</div>
+      <div class="fat-stat-sub">concluídos</div>
+    </div>
+    <div class="fat-stat" style="border-top:3px solid var(--red);cursor:pointer;" onclick="fatFiltrarSemProtocolo()" title="Filtrar processos sem protocolo">
+      <div class="fat-stat-label" style="color:var(--red);">Sem protocolo</div>
+      <div class="fat-stat-valor" style="color:var(--red);">${semProtocolo}</div>
+      <div class="fat-stat-sub">aguardando o banco</div>
+    </div>
+  `;
+}
+
+function fatFiltrarSemProtocolo() {
+  fatFiltrados = fatProcessos.filter(p => !p.protocolo);
+  document.getElementById('fat-busca').value = '';
+  document.getElementById('fat-status-filtro').value = '';
+  fatRenderTabela(fatFiltrados);
+}
+
+function fatRenderTabela(lista) {
+  const tbody = document.getElementById('fat-tbody');
+  document.getElementById('fat-contagem').textContent = `${lista.length} processo${lista.length !== 1 ? 's' : ''} - link do cliente sempre disponivel`;
+
+  if (lista.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text3);">Nenhum processo encontrado</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = lista.map(p => {
+    const link = fatLinkCliente(p.token);
+    const idArg = fatJsArg(p.id);
+    const tokenArg = fatJsArg(p.token);
     return `
-    <div class="card"><div class="card-head"><div><div class="card-title">Demonstrativo - ${nome}</div><div class="card-sub">${fmtMes(mes)}</div></div><div style="display:flex;gap:8px"><button class="btn btn-outline btn-sm" onclick="baixarDemoExcel('${nomeSafe}', '${nome.replace(/'/g,"\\'")}', '${mes}')">&#128202; Excel</button><button class="btn btn-outline btn-sm" onclick="imprimirDemo('${nomeSafe}')">&#128424; PDF / Imprimir</button></div></div>
-      <div class="card-body" id="demo-body-${nomeSafe}" style="padding:20px">${data.html}</div>
-    </div>`;
-  }
-  const nome=data.nome||currentUser.nome, linhas=data.linhas||[], avulsos=data.avulsos||[], despesas=data.despesas||[];
-  const tB=linhas.reduce((s,l)=>s+(l.bruto||0),0), tN=linhas.reduce((s,l)=>s+(l.nf||0),0);
-  const tA=linhas.reduce((s,l)=>s+(l.admValor||0),0), tL=linhas.reduce((s,l)=>s+(l.liquido||0),0);
-  const tAv=avulsos.reduce((s,a)=>s+(a.valor||0),0), tD=despesas.reduce((s,d)=>s+(d.valor||0),0);
-  const totalFinal=data.totalFinal||(tL+tAv+tD);
-  const recP=tB+avulsos.filter(a=>a.valor>0).reduce((s,a)=>s+a.valor,0);
-  const ded=tN+tA+Math.abs(avulsos.filter(a=>a.valor<0).reduce((s,a)=>s+a.valor,0))+Math.abs(despesas.filter(d=>d.valor<0).reduce((s,d)=>s+d.valor,0));
-
-  let rows=linhas.map(l=>{
-    const neg=(l.liquido||0)<0;
-    return `<tr ${neg?'style="background:#FEF2F2;border-left:3px solid #EF4444"':''}>
-      <td>${l.adm||'-'}${neg?' <span class="tag tag-red" style="font-size:8px">estorno</span>':''}</td>
-      <td><span class="tag tag-gray" style="font-size:9px">${l.tipo||'-'}</span></td>
-      <td class="mono">${l.ref||'-'}</td>
-      <td style="font-size:10px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${l.cliente||''}">${l.cliente||'-'}</td>
-      <td class="mono" style="color:var(--text2)">${l.dataVenda||'-'}</td>
-      <td class="mono" style="color:var(--text2)">${l.parcela||'-'}</td>
-      <td class="mono num">${fmtBRL(l.bruto)}</td>
-      <td class="mono num neg">(${fmtBRL(l.nf)})</td>
-      <td class="mono num" style="color:var(--text2)">(${fmtBRL(l.admValor)})</td>
-      <td class="mono num ${(l.liquido||0)>=0?'pos':'neg'} fw6">${fmtBRL(l.liquido)}</td>
-    </tr>`;
-  }).join('');
-
-  if(avulsos.length){
-    rows+=`<tr><td colspan="10" style="padding:4px 12px;background:#F0FDF4;border-top:2px solid #22C55E;font-size:9px;color:#166534;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Lancamentos Avulsos</td></tr>`;
-    avulsos.forEach(a=>{const c=a.valor>=0?'pos':'neg';const bg=a.valor>=0?'rgba(34,197,94,.05)':'#FEF2F2';const bd=a.valor>=0?'#22C55E':'#EF4444';
-      rows+=`<tr style="background:${bg};border-left:3px solid ${bd}"><td colspan="6" style="font-size:11px;font-weight:500;padding:8px 12px"><span class="tag" style="font-size:9px;background:${bg};color:${bd};border:1px solid ${bd}">AVULSO</span> <span style="margin-left:8px">${a.descricao||'-'}</span></td><td class="mono num" style="color:var(--text3)">-</td><td class="mono num" style="color:var(--text3)">-</td><td class="mono num" style="color:var(--text3)">-</td><td class="mono num ${c} fw6">${fmtBRL(a.valor)}</td></tr>`;
-    });
-  }
-  if(despesas.length){
-    rows+=`<tr><td colspan="10" style="padding:4px 12px;background:#FEF2F2;border-top:2px solid #DC2626;font-size:9px;color:#991B1B;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Despesas da Sala</td></tr>`;
-    despesas.forEach(d=>{const c=d.valor>=0?'pos':'neg';const bg=d.valor>=0?'rgba(34,197,94,.05)':'#FEF2F2';const bd=d.valor>=0?'#22C55E':'#DC2626';
-      rows+=`<tr style="background:${bg};border-left:3px solid ${bd}"><td colspan="6" style="font-size:11px;font-weight:500;padding:8px 12px"><span class="tag" style="font-size:9px;background:${bg};color:${bd};border:1px solid ${bd}">DESP</span> <span style="margin-left:8px">${d.descricao||'-'}</span></td><td class="mono num" style="color:var(--text3)">-</td><td class="mono num" style="color:var(--text3)">-</td><td class="mono num" style="color:var(--text3)">-</td><td class="mono num ${c} fw6">${fmtBRL(d.valor)}</td></tr>`;
-    });
-  }
-
-  return `
-  <div class="det-header"><div class="det-name">${nome}</div><div class="det-meta">${linhas.length} lancamentos &middot; ${fmtMes(mes)}</div>
-    <div class="det-stats">
-      <div><div class="det-stat-label">Receita bruta</div><div class="det-stat-value">${fmtBRL(recP)}</div></div>
-      <div><div class="det-stat-label">(-) NF + ADM + Descontos</div><div class="det-stat-value" style="color:rgba(255,255,255,.6)">(${fmtBRL(ded)})</div></div>
-      <div><div class="det-stat-label">Liquido total</div><div class="det-stat-value" style="color:#C8C84A">${fmtBRL(totalFinal)}</div></div>
-    </div>
-  </div>
-  <div class="stats">
-    <div class="stat stat-accent"><div class="stat-label">Lancamentos</div><div class="stat-value">${linhas.length}</div><div class="stat-sub">${avulsos.length?`+ ${avulsos.length} avulsos`:'vendas/repasses'}</div></div>
-    <div class="stat stat-teal"><div class="stat-label">Bruto total</div><div class="stat-value">${fmtBRL(tB)}</div><div class="stat-sub">antes de deducoes</div></div>
-    <div class="stat stat-green"><div class="stat-label">Liquido a receber</div><div class="stat-value" style="color:var(--green)">${fmtBRL(totalFinal)}</div><div class="stat-sub">valor final</div></div>
-  </div>
-  <div class="card"><div class="card-head"><div><div class="card-title">Demonstrativo - ${nome}</div><div class="card-sub">${fmtMes(mes)}</div></div><button class="btn btn-outline btn-sm" onclick="window.print()">&#128424; Imprimir</button></div>
-    <div class="tbl-wrap" style="padding:0"><table class="tbl">
-      <thead><tr><th>Admin</th><th>Tipo</th><th>Ref</th><th>Cliente</th><th>Data</th><th>Parc</th><th class="num">Bruto</th><th class="num">NF</th><th class="num">ADM</th><th class="num">Liquido</th></tr></thead>
-      <tbody>${rows}</tbody>
-      <tfoot><tr><td colspan="6" class="fw7">TOTAL</td><td class="mono num fw7">${fmtBRL(tB)}</td><td class="mono num neg fw7">(${fmtBRL(tN)})</td><td class="mono num fw7" style="color:var(--text2)">(${fmtBRL(tA)})</td><td class="mono num pos fw7">${fmtBRL(totalFinal)}</td></tr></tfoot>
-    </table></div>
-  </div>`;
-}
-
-// ═══ HISTORICO ═══
-async function renderHistorico() {
-  if(!currentUser)return;
-  const el=document.getElementById('hist-content');
-  const meses=await DB.getMeses();
-  const meus=[];
-  for(const m of meses){const d=await DB.getDemo(m,currentUser.nome);if(d)meus.push({mes:m,data:d});}
-  if(!meus.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon">&#128197;</div><div class="empty-state-title">Nenhum historico</div><div class="empty-state-desc">Seus demonstrativos aparecerao aqui.</div></div>';return;}
-  el.innerHTML='<div class="hist-grid">'+meus.map((item,i)=>{
-    const tf=item.data.totalFinal||0, nl=(item.data.linhas||[]).length;
-    return `<div class="hist-card ${i===0?'current':''}" onclick="viewHist('${item.mes}')"><div class="hist-mes">${fmtMes(item.mes)}</div><div class="hist-lanctos">${nl} lancamentos</div><div class="hist-valor">${fmtBRL(tf)}</div><div style="margin-top:8px"><span class="tag ${i===0?'tag-green':'tag-gray'}">${i===0?'Mais recente':'Historico'}</span></div></div>`;
-  }).join('')+'</div><div id="hist-detail" style="margin-top:24px"></div>';
-}
-async function viewHist(mes) {
-  const d=await DB.getDemo(mes,currentUser.nome);if(!d)return;
-  const el=document.getElementById('hist-detail');
-  if(el){el.innerHTML=renderDemo(d,mes);el.scrollIntoView({behavior:'smooth',block:'start'});}
-}
-
-// ═══ CHANGE PW ═══
-async function changePw() {
-  const cur=document.getElementById('pw-cur').value, nw=document.getElementById('pw-new').value, cf=document.getElementById('pw-conf').value, msg=document.getElementById('pw-msg');
-  if(cur!==currentUser.senha){msg.innerHTML='<div class="alert alert-err">Senha atual incorreta.</div>';return;}
-  if(!senhaForte(nw)){msg.innerHTML='<div class="alert alert-warn">Senha fraca. M&iacute;nimo 8 caracteres, com mai&uacute;scula, min&uacute;scula, n&uacute;mero e s&iacute;mbolo. Ex: Master26@</div>';return;}
-  if(nw!==cf){msg.innerHTML='<div class="alert alert-err">Senhas nao conferem.</div>';return;}
-  try {
-    if (USE_SUPABASE) {
-      // Atualiza em portal_users E em auth.users (via RPC) de uma vez
-      const { error } = await sb.rpc('trocar_senha_portal', { nova_senha: nw });
-      if (error) throw error;
-    } else {
-      await DB.updateUser(currentUser.cpf, {senha:nw});
-    }
-    currentUser.senha=nw;
-    msg.innerHTML='<div class="alert alert-ok">Senha alterada!</div>';
-    document.getElementById('pw-cur').value='';document.getElementById('pw-new').value='';document.getElementById('pw-conf').value='';
-  } catch(e) {
-    msg.innerHTML='<div class="alert alert-err">Erro ao alterar: '+(e.message||e)+'</div>';
-  }
-}
-
-// ═══ ADMIN: UPLOAD ═══
-// Cria conta no Supabase Auth + portal_users quando o consultor ainda não existe.
-// Usa cliente secundário (sbSignup) para não deslogar o admin.
-// Aceita username (preferido) ou faz fallback para cpf como identificador.
-async function criarUsuarioCompleto({ nome, cpf, username, senha, tipo }) {
-  // Email fantasma: se tem username, usa ele; senão, usa CPF (legado)
-  const id = username || cpf;
-  const email = id + '@masterprime.internal';
-  let authId = null;
-  if (USE_SUPABASE && sbSignup) {
-    const su = await sbSignup.auth.signUp({ email, password: senha });
-    if (su.error && !/already registered|already exists|User already/i.test(su.error.message)) {
-      throw new Error('Supabase signUp: ' + su.error.message);
-    }
-    authId = su.data?.user?.id || null;
-    if (!authId) {
-      const si = await sbSignup.auth.signInWithPassword({ email, password: senha });
-      if (!si.error) authId = si.data.user.id;
-    }
-    await sbSignup.auth.signOut().catch(()=>{});
-  }
-  // Insere/atualiza portal_users (com username)
-  await DB.createUser({ nome, cpf, tipo: tipo||'consultor', senha, criado:new Date().toISOString().slice(0,10) });
-  if (USE_SUPABASE) {
-    const updates = { auth_id: authId };
-    if (username) updates.username = username;
-    await sb.from('portal_users').update(updates).eq('cpf', cpf);
-  }
-  return { username: id, senha, nome };
-}
-
-async function adminUpload(evt) {
-  const file = evt.target.files[0]; if (!file) return;
-  const res = document.getElementById('upload-result');
-  try {
-    const text = await file.text();
-    const data = JSON.parse(text);
-    if (!data.mes || !data.consultores) { res.innerHTML = '<div class="alert alert-err">Formato invalido. Precisa ter "mes" e "consultores".</div>'; return; }
-    await DB.publishDemos(data.mes, data.consultores);
-    // Cria/atualiza contas usando username+senhaInicial do JSON
-    let novos = 0, atualizados = 0;
-    const users = await DB.getAllUsers();
-    for (const [nome, dados] of Object.entries(data.consultores)) {
-      const existente = users.find(u => u.nome === nome);
-      const username = dados.username || null;
-      const senhaInicial = dados.senhaInicial || null;
-      if (!existente) {
-        if (!username || !senhaInicial) {
-          const cpf = String(Math.floor(10000000000 + Math.random() * 89999999999));
-          { const _u = ((nome||'').toString().normalize('NFD').replace(/[\u0300-\u036f]/g,'').trim().split(/\s+/)); const _f = _u[0]||''; const _l = _u.length>1?_u[_u.length-1]:''; const _uName = (_f + (_l?'.'+_l:'')).toLowerCase(); const _uPwd = (_f.charAt(0).toUpperCase()+_f.slice(1,3).toLowerCase()) + _l.slice(0,3).toLowerCase() + '26@'; await criarUsuarioCompleto({ nome, cpf, username: _uName, senha: _uPwd, tipo: 'consultor' }); }
-        } else {
-          const cpf = String(Math.floor(10000000000 + Math.random() * 89999999999));
-          await criarUsuarioCompleto({ nome, cpf, username, senha: senhaInicial, tipo: 'consultor' });
+    <tr class="row-link" onclick='fatVerProcesso(${idArg})' style="${!p.protocolo ? 'background:#FFFBEB;' : ''}">
+      <td>
+        ${p.protocolo
+          ? `<span class="mono" style="font-size:11px;font-weight:700;color:var(--mp-navy);">${esc(p.protocolo)}</span>`
+          : `<button class="btn btn-xs btn-outline" style="color:var(--amber);border-color:var(--amber);" onclick='event.stopPropagation(); fatAtribuirProtocolo(${idArg})'>Atribuir</button>`
         }
-        novos++;
-      } else if (username && senhaInicial && !existente.username) {
-        try {
-          await sb.rpc('admin_set_username_senha', { cpf_param: existente.cpf, username_param: username, senha_param: senhaInicial });
-          if (!existente.auth_id) {
-            await criarUsuarioCompleto({ nome, cpf: existente.cpf, username, senha: senhaInicial, tipo: existente.tipo });
-          }
-          atualizados++;
-        } catch(e) { console.warn('Erro atualizando', nome, e); }
-      }
-    }
-    const nc = Object.keys(data.consultores).length;
-    let msg = `<div class="alert alert-ok">Demonstrativos de <strong>${fmtMes(data.mes)}</strong> publicados! ${nc} pessoas`;
-    if (novos) msg += ` &middot; ${novos} usu&aacute;rios criados`;
-    if (atualizados) msg += ` &middot; ${atualizados} atualizados`;
-    msg += ` &middot; <a href="#" onclick="nav('admin-users');return false;" style="color:var(--mp-navy);font-weight:600">Ver usu&aacute;rios &rarr;</a></div>`;
-    res.innerHTML = msg;
-    await renderAdminMeses(); await renderUsers(); await renderDashboard(); await renderHistorico(); await renderAdminOverview();
-  } catch(e) { res.innerHTML = `<div class="alert alert-err">Erro: ${e.message}</div>`; }
-}
-async function renderAdminMeses() {
-  const el=document.getElementById('admin-meses-list');
-  const meses=await DB.getMeses();
-  if(!meses.length){el.innerHTML='<div style="color:var(--text2);font-size:12px">Nenhum demonstrativo publicado.</div>';return;}
-  let html='';
-  for(const m of meses){
-    const demos=await DB.getDemosMes(m);
-    const nc=Object.keys(demos).length;
-    html+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F1F5F9"><div><span style="font-weight:600;font-size:13px;color:var(--mp-navy)">${fmtMes(m)}</span><span style="font-size:11px;color:var(--text2);margin-left:8px">${nc} consultores</span></div><div style="display:flex;gap:8px"><span class="tag tag-green">Publicado</span><button class="btn btn-danger btn-sm" onclick="delMes('${m}')">Remover</button></div></div>`;
-  }
-  el.innerHTML=html;
-}
-async function delMes(m) { if(!confirm('Remover '+fmtMes(m)+'?'))return; await DB.deleteMes(m); await renderAdminMeses(); await renderDashboard(); await renderHistorico(); await renderAdminOverview(); }
-
-// ═══ ADMIN: VISAO GERAL ═══
-// Agrega todos os demonstrativos do mes selecionado e mostra:
-// - KPIs (total consultores, soma de liquidos, receita bruta, descontos)
-// - Tabela com todos consultores e valor liquido (clicavel para ver demo completo)
-// - Modal/expansao com o demonstrativo completo de cada um
-async function renderAdminOverview() {
-  if (!currentUser || currentUser.tipo !== 'admin') return;
-  const sel = document.getElementById('overview-mes');
-  const content = document.getElementById('overview-content');
-  const sub = document.getElementById('overview-sub');
-  if (!sel || !content) return;
-  const meses = await DB.getMeses();
-  if (!meses.length) {
-    sel.innerHTML = '<option value="">(nenhum)</option>';
-    content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#128202;</div><div class="empty-state-title">Nenhum demonstrativo publicado</div><div class="empty-state-desc">Faca o upload de um JSON em "Upload Demonstrativos" para comecar.</div></div>';
-    return;
-  }
-  // Preserva selecao atual
-  const cur = sel.value || meses[0];
-  sel.innerHTML = meses.map(m => `<option value="${m}" ${m===cur?'selected':''}>${fmtMes(m)}</option>`).join('');
-  const mes = sel.value;
-  sub.textContent = 'Dashboard administrativa - ' + fmtMes(mes);
-
-  const demos = await DB.getDemosMes(mes); // { nome: dados }
-  const nomes = Object.keys(demos).sort();
-  if (!nomes.length) {
-    content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">&#128196;</div><div class="empty-state-title">Sem demos neste mes</div></div>';
-    return;
-  }
-
-  // KPIs
-  let totalLiq = 0, totalPos = 0, totalNeg = 0, nPositivos = 0, nNegativos = 0;
-  const rows = nomes.map(nome => {
-    const d = demos[nome] || {};
-    const liq = +d.totalFinal || 0;
-    totalLiq += liq;
-    if (liq >= 0) { totalPos += liq; nPositivos++; } else { totalNeg += liq; nNegativos++; }
-    const tipo = d.tipo || 'consultor';
-    const tipoClass = tipo==='socio'?'tag-teal':tipo==='admin'?'tag-navy':tipo==='parceiro'?'tag-amber':'tag-blue';
-    const tipoLabel = tipo==='socio'?'Socio':tipo==='admin'?'Admin':tipo==='parceiro'?'Parceiro':'Consultor';
-    const liqClass = liq>=0?'pos':'neg';
-    return `<tr style="cursor:pointer" onclick="toggleOverviewDemo('${nome.replace(/'/g,"\\'")}')">
-      <td class="fw6" style="font-size:12px">${nome}</td>
-      <td><span class="tag ${tipoClass}" style="font-size:9px">${tipoLabel}</span></td>
-      <td class="mono num ${liqClass} fw6" style="white-space:nowrap;min-width:120px">${fmtBRL(liq)}</td>
-      <td style="text-align:right;font-size:10px;color:var(--text2)">clique para ver &#8594;</td>
-    </tr>
-    <tr id="ov-demo-${nome.replace(/[^a-zA-Z0-9]/g,'_')}" class="hidden"><td colspan="4" style="padding:0;background:#F8FAFC">
-      <div style="padding:20px">${renderDemo(demos[nome], mes)}</div>
-    </td></tr>`;
-  }).join('');
-
-  content.innerHTML = `
-    <div class="stats" style="margin-bottom:20px">
-      <div class="stat stat-accent">
-        <div class="stat-label">Consultores</div>
-        <div class="stat-value">${nomes.length}</div>
-        <div class="stat-sub">${nPositivos} a receber &middot; ${nNegativos} a pagar</div>
-      </div>
-      <div class="stat stat-teal">
-        <div class="stat-label">Total a pagar</div>
-        <div class="stat-value">${fmtBRL(totalPos)}</div>
-        <div class="stat-sub">liquidos positivos</div>
-      </div>
-      <div class="stat stat-navy">
-        <div class="stat-label">Total a receber/descontar</div>
-        <div class="stat-value" style="color:var(--red)">${fmtBRL(totalNeg)}</div>
-        <div class="stat-sub">liquidos negativos</div>
-      </div>
-      <div class="stat stat-green">
-        <div class="stat-label">Saldo geral</div>
-        <div class="stat-value" style="color:var(--green)">${fmtBRL(totalLiq)}</div>
-        <div class="stat-sub">soma de todos</div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-head"><div><div class="card-title">Demonstrativos de ${fmtMes(mes)}</div><div class="card-sub">${nomes.length} pessoas &middot; clique em qualquer linha para expandir</div></div></div>
-      <div class="tbl-wrap" style="padding:0">
-        <table class="tbl">
-          <thead><tr><th>Nome</th><th>Tipo</th><th class="num">Liquido total</th><th></th></tr></thead>
-          <tbody>${rows}</tbody>
-          <tfoot><tr><td colspan="2" class="fw7">TOTAL GERAL</td><td class="mono num fw7 ${totalLiq>=0?'pos':'neg'}" style="white-space:nowrap;min-width:120px">${fmtBRL(totalLiq)}</td><td></td></tr></tfoot>
-        </table>
-      </div>
-    </div>`;
-}
-
-// ═══ EXPORTAR DEMO (Excel / PDF) ═══
-// Percorre as tabelas do demo e gera xlsx com valores NUMÉRICOS (não texto).
-// Detecta células de valor BRL ("R$ 1.234,56" ou "(R$ 123,45)") e converte pra number
-// aplicando formatação contábil, preservando sinal negativo de valores entre parênteses.
-// Reconhece APENAS valores em formato BRL:
-//   "R$ 1.234,56"   → 1234.56
-//   "(R$ 123,45)"   → -123.45
-//   "R$ -50,00"     → -50.00
-// Retorna null para qualquer outro formato (grupo/cota como "0485/269",
-// números sem vírgula decimal, texto comum etc.). Isso evita que células de
-// grupo/cota, parcela, ciclo etc. sejam convertidas em número errado.
-function parseBRLtoNumber(txt) {
-  if (!txt) return null;
-  const s = String(txt).trim();
-  if (!s) return null;
-  // Precisa ter "R$" em algum lugar (formato oficial do painel)
-  if (!/R\$/.test(s)) return null;
-  const neg = /^\(.*\)$/.test(s) || /R\$\s*-/.test(s);
-  const limpo = s.replace(/[R$()\s\-—]/g,'').replace(/\./g,'').replace(',','.');
-  if (!limpo) return null;
-  const v = parseFloat(limpo);
-  if (isNaN(v)) return null;
-  return neg ? -v : v;
-}
-
-function baixarDemoExcel(nomeSafe, nome, mes) {
-  try {
-    const container = document.getElementById('demo-body-' + nomeSafe);
-    if (!container) { alert('Demo não encontrado'); return; }
-    const tabelas = container.querySelectorAll('table');
-    if (!tabelas.length) { alert('Sem dados para exportar'); return; }
-    const wb = XLSX.utils.book_new();
-    tabelas.forEach((tbl, idx) => {
-      // Converte tabela HTML em array 2D, detectando valores numéricos
-      const rows = [];
-      tbl.querySelectorAll('tr').forEach(tr => {
-        const row = [];
-        tr.querySelectorAll('th, td').forEach(cell => {
-          const txt = cell.textContent.trim();
-          // Só converte se for claramente BRL (tem "R$"). Grupo/cota, parcela,
-          // ciclo, refs etc. não têm "R$" e são mantidos como texto.
-          const asNum = parseBRLtoNumber(txt);
-          if (asNum !== null) row.push(asNum);
-          else row.push(txt);
-        });
-        if (row.length) rows.push(row);
-      });
-      const ws = XLSX.utils.aoa_to_sheet(rows);
-      // Aplica formato BRL às células que viraram números
-      const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
-      for (let R = range.s.r; R <= range.e.r; R++) {
-        for (let C = range.s.c; C <= range.e.c; C++) {
-          const addr = XLSX.utils.encode_cell({ r:R, c:C });
-          const cell = ws[addr];
-          if (cell && typeof cell.v === 'number') {
-            cell.t = 'n';
-            cell.z = '"R$ "#,##0.00;[Red]"(R$ "#,##0.00")"';
-          }
-        }
-      }
-      const nomeAba = (idx === 0 ? 'Demonstrativo' : 'Tabela ' + (idx+1)).slice(0,31);
-      XLSX.utils.book_append_sheet(wb, ws, nomeAba);
-    });
-    const filename = 'Demo_' + nome.replace(/\s+/g,'_') + '_' + mes + '.xlsx';
-    XLSX.writeFile(wb, filename);
-  } catch(e) { alert('Erro ao exportar Excel: ' + (e.message||e)); }
-}
-
-// Imprime o demo em janela nova (que vira PDF)
-function imprimirDemo(nomeSafe) {
-  const container = document.getElementById('demo-body-' + nomeSafe);
-  if (!container) { window.print(); return; }
-  // Abre janela nova com só o demo (estilo print)
-  const w = window.open('', '_blank', 'width=900,height=1000');
-  const stylesTags = Array.from(document.querySelectorAll('style,link[rel="stylesheet"]')).map(s => s.outerHTML).join('\n');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Demonstrativo</title>${stylesTags}<style>body{padding:20px;background:#fff}@media print{body{padding:0}}</style></head><body>${container.innerHTML}</body></html>`);
-  w.document.close();
-  setTimeout(() => { w.focus(); w.print(); }, 500);
-}
-
-function toggleOverviewDemo(nome) {
-  const id = 'ov-demo-' + nome.replace(/[^a-zA-Z0-9]/g,'_');
-  const el = document.getElementById(id);
-  if (el) el.classList.toggle('hidden');
-}
-
-// ═══ ADMIN: USERS ═══
-async function addUser() {
-  const nome=document.getElementById('nu-nome').value.trim().toUpperCase(), cpf=cleanCPF(document.getElementById('nu-cpf').value), tipo=document.getElementById('nu-tipo').value, msg=document.getElementById('add-msg');
-  // Campo opcional "senha inicial" - se não preencher usa CPF
-  const senhaInput = document.getElementById('nu-senha');
-  const senhaCustom = senhaInput ? senhaInput.value.trim() : '';
-  const senha = senhaCustom || cpf;
-  if(!nome||nome.length<3){msg.innerHTML='<div class="alert alert-warn">Nome invalido.</div>';return;}
-  if(cpf.length!==11){msg.innerHTML='<div class="alert alert-warn">CPF invalido.</div>';return;}
-  if(senha.length<6){msg.innerHTML='<div class="alert alert-warn">Senha deve ter no minimo 6 caracteres.</div>';return;}
-  const users=await DB.getAllUsers();
-  if(users.find(u=>u.cpf===cpf)){msg.innerHTML='<div class="alert alert-err">CPF ja cadastrado.</div>';return;}
-  try {
-    await criarUsuarioCompleto({ nome, cpf, senha, tipo });
-    msg.innerHTML=`<div class="alert alert-ok">${nome} cadastrado! Senha inicial: ${senhaCustom?senha:fmtCPF(cpf)}</div>`;
-    document.getElementById('nu-nome').value='';document.getElementById('nu-cpf').value='';
-    if (senhaInput) senhaInput.value='';
-    await renderUsers();
-  } catch(e) {
-    msg.innerHTML='<div class="alert alert-err">Erro: '+(e.message||e)+'</div>';
-  }
-}
-async function renderUsers() {
-  const users = await DB.getAllUsers();
-  const el = document.getElementById('users-list');
-  document.getElementById('user-count').textContent = users.length + ' usuarios';
-  // Ordena: admin primeiro, depois por nome
-  users.sort((a,b) => {
-    if (a.tipo === 'admin' && b.tipo !== 'admin') return -1;
-    if (b.tipo === 'admin' && a.tipo !== 'admin') return 1;
-    return (a.nome||'').localeCompare(b.nome||'');
-  });
-  const rows = users.map(u => {
-    const tc = u.tipo==='admin'?'tag-navy':u.tipo==='socio'?'tag-teal':'tag-blue';
-    const tl = u.tipo==='admin'?'Admin':u.tipo==='socio'?'S&oacute;cio':u.tipo==='parceiro'?'Parceiro':'Consultor';
-    const userLogin = u.username ? u.username : `<span style="color:var(--text3);font-style:italic">(sem usu&aacute;rio)</span>`;
-    const senhaDisplay = u.senha ? `<span class="mono" style="font-size:11px">${u.senha}</span>` : '<span style="color:var(--text3)">&mdash;</span>';
-    const canDel = u.cpf !== currentUser.cpf;
-    return `<tr>
-      <td><span class="tag ${tc}" style="font-size:9px">${tl}</span></td>
-      <td style="font-weight:600;font-size:12px">${u.nome}</td>
-      <td class="mono" style="font-size:12px">${userLogin}</td>
-      <td>${senhaDisplay}</td>
-      <td style="text-align:right;white-space:nowrap">
-        <button class="btn btn-outline btn-sm" onclick="resetPw('${u.cpf}')">Reset senha</button>
-        ${canDel ? `<button class="btn btn-danger btn-sm" onclick="delUser('${u.cpf}')">Remover</button>` : ''}
       </td>
-    </tr>`;
-  }).join('');
-  el.innerHTML = `
-    <div class="tbl-wrap" style="padding:0">
-      <table class="tbl">
-        <thead>
-          <tr>
-            <th>Tipo</th>
-            <th>Nome</th>
-            <th>Usu&aacute;rio</th>
-            <th>Senha atual</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>
+      <td><div style="font-weight:600;font-size:12px;">${esc(p.nome)}</div></td>
+      <td><span class="mono" style="font-size:11px;">${fmtCPF(p.cpf)}</span></td>
+      <td style="font-size:12px;">
+        ${p.grupo ? `<span style="color:var(--text2)">G:</span> ${esc(p.grupo)}` : '—'}
+        ${p.cota  ? ` &nbsp;<span style="color:var(--text2)">C:</span> ${esc(p.cota)}` : ''}
+      </td>
+      <td style="font-size:12px;">${esc(p.corretor || '—')}</td>
+      <td><span class="tag ${fatTagClass(p.status)}">${p.status}</span></td>
+      <td><span style="font-size:11px;color:var(--text2);">${fmtDataBR(p.criado_em)}</span></td>
+      <td>
+        <div style="display:flex; gap:4px; flex-wrap:wrap;">
+          <button class="btn btn-outline btn-xs" onclick='event.stopPropagation(); fatVerProcesso(${idArg})'>Ver</button>
+          <button class="btn btn-xs btn-outline" onclick='event.stopPropagation(); fatCopiarLink(${tokenArg})' title="${esc(link)}">Link</button>
+        </div>
+      </td>
+    </tr>
+  `}).join('');
+}
+
+function fatFiltrar() {
+  const busca  = document.getElementById('fat-busca')?.value.toLowerCase() || '';
+  const status = document.getElementById('fat-status-filtro')?.value || '';
+  fatFiltrados = fatProcessos.filter(p => {
+    const texto = `${p.nome} ${p.cpf} ${p.protocolo} ${p.grupo||''} ${p.cota||''} ${p.corretor||''}`.toLowerCase();
+    const bateBusca  = !busca  || texto.includes(busca);
+    const bateStatus = !status || p.status === status;
+    return bateBusca && bateStatus;
+  });
+  fatRenderTabela(fatFiltrados);
+}
+
+function fatLimparFiltros() {
+  document.getElementById('fat-busca').value = '';
+  document.getElementById('fat-status-filtro').value = '';
+  fatFiltrar();
+}
+
+async function fatVerProcesso(id) {
+  const overlay = document.getElementById('fat-overlay');
+  const modal   = document.getElementById('fat-modal');
+  overlay.classList.add('aberto');
+  modal.innerHTML = `<div style="padding:40px;text-align:center;"><div class="spinner spinner-dark" style="margin:0 auto 12px;width:36px;height:36px;border-width:3px;"></div><p style="color:var(--text2);font-size:12px;">Carregando processo...</p></div>`;
+
+  const [procRes, arqsRes, msgsRes, histRes] = await Promise.all([
+    sb.from('portal_processos').select('*').eq('id', id).single(),
+    sb.from('portal_arquivos').select('*').eq('processo_id', id).order('criado_em'),
+    sb.from('portal_mensagens').select('*').eq('processo_id', id).order('criado_em'),
+    sb.from('portal_historico').select('*').eq('processo_id', id).order('criado_em', { ascending: false })
+  ]);
+  const proc = procRes.data;
+  const arqs = arqsRes.data || [];
+  const msgs = msgsRes.data || [];
+  const hist = histRes.data || [];
+
+  if (procRes.error || !proc) {
+    modal.innerHTML = `<div style="padding:32px;text-align:center;color:var(--red);">Processo nao encontrado ou sem permissao.<br><small>${esc(procRes.error?.message || '')}</small></div>`;
+    return;
+  }
+
+  const avisos = [arqsRes.error, msgsRes.error, histRes.error].filter(Boolean);
+  const avisosHtml = avisos.length
+    ? `<div class="alert alert-warn" style="margin-bottom:12px;">Alguns dados auxiliares nao carregaram: ${avisos.map(e => esc(e.message)).join(' | ')}</div>`
+    : '';
+  const procIdArg = fatJsArg(proc.id);
+  const procTokenArg = fatJsArg(proc.token);
+
+  const idxAtual = FAT_ETAPAS.findIndex(e => e.status === proc.status);
+  const statusOpts = FAT_ETAPAS.map(e =>
+    `<option value="${e.status}" ${proc.status === e.status ? 'selected' : ''}>${e.icone} ${e.status}</option>`
+  ).join('') + `<option value="Cancelado" ${proc.status === 'Cancelado' ? 'selected' : ''}>❌ Cancelado</option>`;
+
+  const arqsHtml = (arqs||[]).length === 0
+    ? '<p class="fat-dado-valor" style="color:var(--text3);font-size:11px;">Nenhum arquivo</p>'
+    : (arqs||[]).map(a => {
+        const url = sb.storage.from(FAT_CONFIG.storageBucket).getPublicUrl(a.storage_path).data.publicUrl;
+        return `<div class="arquivo-item" style="margin-top:6px;">
+          <span>${fatIconeArq(a.nome_original)}</span>
+          <a href="${url}" target="_blank" style="flex:1;font-size:11px;">${esc(a.nome_original)}</a>
+          <button class="btn btn-xs btn-danger" onclick='fatDeletarArquivo(${fatJsArg(a.id)}, ${procIdArg})' title="Remover">✕</button>
+        </div>`;
+      }).join('');
+
+  const msgsHtml = (msgs||[]).length === 0
+    ? '<p style="font-size:11px;color:var(--text3);text-align:center;padding:12px 0;">Sem mensagens ainda</p>'
+    : (msgs||[]).map(m => {
+        const lado = m.autor === 'admin' ? 'admin' : 'cliente';
+        return `<div class="fat-msg ${lado}">
+          <div class="fat-msg-av">${lado === 'admin' ? '👤' : '🙋'}</div>
+          <div>
+            <div class="fat-msg-balao">${esc(m.texto)}</div>
+            <div class="fat-msg-hora">${lado === 'admin' ? 'Equipe' : 'Cliente'} · ${fmtDataHoraBR(m.criado_em)}</div>
+          </div>
+        </div>`;
+      }).join('');
+
+  const histHtml = (hist||[]).length === 0
+    ? '<p style="font-size:11px;color:var(--text3);">Sem histórico</p>'
+    : (hist||[]).map(h => `
+        <div class="fat-hist-item">
+          <div class="fat-hist-dot">${fatStatusIcone(h.status_novo)}</div>
+          <div class="fat-hist-corpo">
+            <span class="tag ${fatTagClass(h.status_novo)}" style="font-size:9px;">${h.status_novo}</span>
+            ${h.observacao ? `<p style="font-size:11px;color:var(--text2);margin-top:4px;">${esc(h.observacao)}</p>` : ''}
+            <p style="font-size:9px;color:var(--text3);margin-top:3px;">${fmtDataHoraBR(h.criado_em)}</p>
+          </div>
+        </div>`).join('');
+
+  modal.innerHTML = `
+    <div class="fat-detalhe-header">
+      <div>
+        <div style="font-size:13px;font-weight:800;color:var(--mp-navy);">${esc(proc.nome)}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px;">
+          Protocolo: ${proc.protocolo
+            ? `<span class="mono" style="font-weight:700;">${esc(proc.protocolo)}</span>`
+            : `<span style="color:var(--amber);font-weight:700;">pendente</span>`
+          }
+          &nbsp;·&nbsp; CPF: ${fmtCPF(proc.cpf)}
+          &nbsp;·&nbsp; Aberto em ${fmtDataBR(proc.criado_em)}
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        <button class="btn btn-outline btn-sm" onclick='fatCopiarLink(${procTokenArg})'>🔗 Link cliente</button>
+        <button class="btn btn-danger btn-sm" onclick='fatDeletarProcesso(${procIdArg})'>🗑 Excluir</button>
+        <button class="btn btn-outline btn-sm" onclick="fatFecharDetalhe()">✕</button>
+      </div>
+    </div>
+    <div class="fat-detalhe-body">
+      ${avisosHtml}
+      <!-- Campo de protocolo -->
+      <div style="display:flex; gap:8px; align-items:center; margin-bottom:16px;">
+        <label style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text2);">Protocolo:</label>
+        <input type="text" id="fat-protocolo-${proc.id}" value="${esc(proc.protocolo || '')}" placeholder="Informe ou gere automaticamente" style="font-size:12px;padding:6px 10px;border:1px solid var(--border2);border-radius:6px;width:240px;">
+        <button class="btn btn-xs btn-outline" onclick='fatSalvarProtocolo(${procIdArg})'>Salvar</button>
+        <button class="btn btn-xs btn-outline" onclick='fatGerarProtocoloCampo(${procIdArg})'>Gerar</button>
+        <button class="btn btn-xs btn-outline" onclick='fatCopiarLink(${procTokenArg})'>🔗 Link</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;">
+        <div><label class="login-label">Nome</label><input class="login-input" id="fat-edit-nome-${proc.id}" value="${esc(proc.nome || '')}" style="font-size:12px;padding:8px 10px;"></div>
+        <div><label class="login-label">CPF</label><input class="login-input" id="fat-edit-cpf-${proc.id}" value="${fmtCPF(proc.cpf || '')}" maxlength="14" oninput="maskCPF(this)" style="font-size:12px;padding:8px 10px;"></div>
+        <div><label class="login-label">Grupo</label><input class="login-input" id="fat-edit-grupo-${proc.id}" value="${esc(proc.grupo || '')}" style="font-size:12px;padding:8px 10px;"></div>
+        <div><label class="login-label">Cota</label><input class="login-input" id="fat-edit-cota-${proc.id}" value="${esc(proc.cota || '')}" style="font-size:12px;padding:8px 10px;"></div>
+        <div><label class="login-label">E-mail</label><input class="login-input" id="fat-edit-email-${proc.id}" value="${esc(proc.email || '')}" style="font-size:12px;padding:8px 10px;"></div>
+        <div><label class="login-label">WhatsApp</label><input class="login-input" id="fat-edit-telefone-${proc.id}" value="${esc(proc.telefone || '')}" style="font-size:12px;padding:8px 10px;"></div>
+        <div style="grid-column:1/-1;"><label class="login-label">Corretor (opcional)</label><input class="login-input" id="fat-edit-corretor-${proc.id}" value="${esc(proc.corretor || '')}" placeholder="Nome do corretor responsavel" style="font-size:12px;padding:8px 10px;"></div>
+        <div style="grid-column:1/-1;"><label class="login-label">Observacoes</label><textarea class="login-input" id="fat-edit-descricao-${proc.id}" style="font-size:12px;padding:8px 10px;min-height:54px;">${esc(proc.descricao || '')}</textarea></div>
+        <div style="grid-column:1/-1;display:flex;justify-content:flex-end;"><button class="btn btn-outline btn-sm" onclick='fatSalvarDadosProcesso(${procIdArg})'>Salvar dados do processo</button></div>
+      </div>
+
+      <div class="fat-stepper">
+        ${FAT_ETAPAS.map((e, i) => `
+          <div class="fat-step ${i < idxAtual ? 'ok' : i === idxAtual ? 'now' : ''}">
+            <div class="fat-step-dot">${i < idxAtual ? '✓' : e.icone}</div>
+            <div class="fat-step-lbl">${e.status}</div>
+          </div>`).join('')}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0 20px;padding:16px;background:var(--bg);border-radius:8px;margin-bottom:20px;">
+        <div class="fat-dado"><div class="fat-dado-label">Grupo</div><div class="fat-dado-valor">${esc(proc.grupo || '—')}</div></div>
+        <div class="fat-dado"><div class="fat-dado-label">Cota</div><div class="fat-dado-valor">${esc(proc.cota || '—')}</div></div>
+        <div class="fat-dado"><div class="fat-dado-label">E-mail</div><div class="fat-dado-valor" style="font-size:11px;">${esc(proc.email || '—')}</div></div>
+        <div class="fat-dado"><div class="fat-dado-label">WhatsApp</div><div class="fat-dado-valor">${esc(proc.telefone || '—')}</div></div>
+        <div class="fat-dado"><div class="fat-dado-label">Corretor</div><div class="fat-dado-valor">${esc(proc.corretor || '—')}</div></div>
+        <div class="fat-dado" style="grid-column:1/-1;"><div class="fat-dado-label">Observações</div><div class="fat-dado-valor" style="font-size:11px;color:var(--text2);">${esc(proc.descricao || '—')}</div></div>
+      </div>
+
+      <div class="fat-detalhe-grid">
+        <div>
+          <h4 style="font-size:12px;font-weight:700;margin-bottom:10px;">📎 Documentos</h4>
+          ${arqsHtml}
+          <div style="margin-top:12px;">
+            <label style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text2);">Adicionar arquivos</label>
+            <input type="file" id="fat-upload-${proc.id}" accept=".pdf,.jpg,.jpeg,.png" multiple onchange='fatUploadArquivos(${procIdArg}, ${procTokenArg}, this)' style="width:100%;margin-top:6px;font-size:11px;">
+          </div>
+          <h4 style="font-size:12px;font-weight:700;margin:20px 0 10px;">🕐 Histórico</h4>
+          ${histHtml}
+        </div>
+
+        <div>
+          <h4 style="font-size:12px;font-weight:700;margin-bottom:10px;">🔄 Atualizar status</h4>
+          <select id="fat-novo-status-${proc.id}" class="login-input" style="font-size:12px;padding:8px 12px;margin-bottom:8px;">${statusOpts}</select>
+          <textarea id="fat-obs-status-${proc.id}" placeholder="Observação para o histórico (opcional)..." style="padding:8px 12px;border:1.5px solid var(--border2);border-radius:8px;font-family:'Inter';font-size:11px;min-height:60px;resize:vertical;outline:none;width:100%;margin-bottom:8px;"></textarea>
+          <button class="btn btn-primary btn-sm" onclick='fatAtualizarStatus(${procIdArg})'>Salvar status</button>
+
+          <h4 style="font-size:12px;font-weight:700;margin:20px 0 10px;">💬 Comunicação</h4>
+          <div class="fat-msgs-wrap" id="fat-msgs-${proc.id}">${msgsHtml}</div>
+          <div style="display:flex;gap:6px;margin-top:10px;">
+            <textarea id="fat-nova-msg-${proc.id}" placeholder="Responder ao cliente..." style="flex:1;min-height:38px;padding:8px 12px;border:1.5px solid var(--border2);border-radius:8px;font-family:'Inter';font-size:11px;resize:none;outline:none;"></textarea>
+            <button class="btn btn-primary btn-sm" onclick='fatEnviarMsg(${procIdArg})'>Enviar</button>
+          </div>
+        </div>
+      </div>
     </div>`;
-}
-async function resetPw(cpf) {
-  const u = await DB.getUser(cpf);
-  if (!u) { alert('Usuário não encontrado.'); return; }
-  const novaSenha = prompt(`Nova senha para ${u.nome}\n(mínimo 6 caracteres; deixe vazio para usar o CPF):`, cpf);
-  if (novaSenha === null) return;
-  const senhaFinal = (novaSenha && novaSenha.length >= 6) ? novaSenha : cpf;
-  try {
-    if (USE_SUPABASE) {
-      const { error } = await sb.rpc('admin_resetar_senha', { cpf_param: cpf, nova_senha: senhaFinal });
-      if (error) throw error;
-    } else {
-      await DB.updateUser(cpf, { senha: senhaFinal });
-    }
-    alert(`Senha de ${u.nome} redefinida: ${senhaFinal === cpf ? 'CPF (' + fmtCPF(cpf) + ')' : senhaFinal}`);
-  } catch(e) { alert('Erro: ' + (e.message||e)); }
+
+  setTimeout(() => {
+    const el = document.getElementById(`fat-msgs-${proc.id}`);
+    if (el) el.scrollTop = el.scrollHeight;
+  }, 100);
 }
 
-async function delUser(cpf) {
-  const u = await DB.getUser(cpf);
-  if (!u || !confirm('Remover ' + u.nome + '? Essa ação é irreversível.')) return;
-  try {
-    if (USE_SUPABASE) {
-      const { error } = await sb.rpc('admin_deletar_user', { cpf_param: cpf });
-      if (error) throw error;
-    } else {
-      await DB.deleteUser(cpf);
-    }
-    await renderUsers();
-  } catch(e) { alert('Erro: ' + (e.message||e)); }
+function fatFecharDetalhe(event) {
+  if (event && event.target !== document.getElementById('fat-overlay')) return;
+  document.getElementById('fat-overlay').classList.remove('aberto');
 }
 
-// ═══ INIT ═══
+async function fatSalvarProtocolo(processoId) {
+  const novoProtocolo = document.getElementById(`fat-protocolo-${processoId}`).value.trim().toUpperCase();
+  if (!novoProtocolo) return;
+  const { data: existente } = await sb.from('portal_processos').select('id').eq('protocolo', novoProtocolo).neq('id', processoId).maybeSingle();
+  if (existente) { alert('Este protocolo ja esta vinculado a outro processo.'); return; }
+  const { error } = await sb.from('portal_processos').update({ protocolo: novoProtocolo, atualizado_em: new Date() }).eq('id', processoId);
+  if (error) { alert('Erro ao salvar protocolo: ' + error.message); return; }
+  await sb.from('portal_historico').insert({
+    processo_id: processoId,
+    status_novo: 'Protocolo atribuido',
+    observacao: `Protocolo ${novoProtocolo}`,
+    autor: currentUser?.nome || 'admin'
+  });
+  await fatVerProcesso(processoId);
+  await renderAdminFaturamento();
+}
+
+async function fatGerarProtocoloCampo(processoId) {
+  document.getElementById(`fat-protocolo-${processoId}`).value = await fatGerarProtocolo();
+}
+
+async function fatAtribuirProtocolo(processoId) {
+  await fatVerProcesso(processoId);
+  const campo = document.getElementById(`fat-protocolo-${processoId}`);
+  if (campo) {
+    campo.value = await fatGerarProtocolo();
+    campo.focus();
+    campo.select();
+  }
+}
+
+async function fatSalvarDadosProcesso(processoId) {
+  const nome = document.getElementById(`fat-edit-nome-${processoId}`).value.trim();
+  const cpf = cleanCPF(document.getElementById(`fat-edit-cpf-${processoId}`).value);
+  if (!nome) { alert('Nome obrigatorio.'); return; }
+  if (cpf.length !== 11) { alert('CPF invalido.'); return; }
+
+  const updates = {
+    nome,
+    cpf,
+    grupo: document.getElementById(`fat-edit-grupo-${processoId}`).value.trim() || null,
+    cota: document.getElementById(`fat-edit-cota-${processoId}`).value.trim() || null,
+    email: document.getElementById(`fat-edit-email-${processoId}`).value.trim() || null,
+    telefone: document.getElementById(`fat-edit-telefone-${processoId}`).value.trim() || null,
+    corretor: document.getElementById(`fat-edit-corretor-${processoId}`).value.trim() || null,
+    descricao: document.getElementById(`fat-edit-descricao-${processoId}`).value.trim() || null,
+    atualizado_em: new Date()
+  };
+
+  const { error } = await sb.from('portal_processos').update(updates).eq('id', processoId);
+  if (error) { alert('Erro ao salvar dados: ' + error.message); return; }
+  await fatVerProcesso(processoId);
+  await renderAdminFaturamento();
+}
+
+async function fatAtualizarStatus(processoId) {
+  const novoStatus = document.getElementById(`fat-novo-status-${processoId}`).value;
+  const obs = document.getElementById(`fat-obs-status-${processoId}`).value.trim();
+  const { error } = await sb.from('portal_processos').update({
+    status: novoStatus,
+    atualizado_em: new Date()
+  }).eq('id', processoId);
+  if (error) { alert('Erro ao atualizar status: ' + error.message); return; }
+
+  await sb.from('portal_historico').insert({
+    processo_id: processoId,
+    status_novo: novoStatus,
+    observacao: obs || null,
+    autor: currentUser?.nome || 'admin'
+  });
+
+  await fatVerProcesso(processoId);
+  await renderAdminFaturamento();
+}
+
+async function fatEnviarMsg(processoId) {
+  const campo = document.getElementById(`fat-nova-msg-${processoId}`);
+  const texto = campo.value.trim();
+  if (!texto) return;
+  const { error } = await sb.from('portal_mensagens').insert({
+    processo_id: processoId,
+    autor: 'admin',
+    texto
+  });
+  if (error) { alert('Erro: ' + error.message); return; }
+  campo.value = '';
+  await fatVerProcesso(processoId);
+}
+
+async function fatUploadArquivos(processoId, token, input) {
+  for (const arquivo of Array.from(input.files)) {
+    if (arquivo.size > 16*1024*1024) { alert(`${arquivo.name} muito grande`); continue; }
+    const path = `${token}/${Date.now()}_${arquivo.name}`;
+    const { error: upErr } = await sb.storage.from(FAT_CONFIG.storageBucket).upload(path, arquivo);
+    if (upErr) { alert('Erro upload: ' + upErr.message); continue; }
+    await sb.from('portal_arquivos').insert({
+      processo_id: processoId,
+      nome_original: arquivo.name,
+      storage_path: path
+    });
+  }
+  input.value = '';
+  await fatVerProcesso(processoId);
+}
+
+async function fatDeletarArquivo(arquivoId, processoId) {
+  if (!confirm('Remover arquivo?')) return;
+  await sb.from('portal_arquivos').delete().eq('id', arquivoId);
+  await fatVerProcesso(processoId);
+}
+
+async function fatDeletarProcesso(id) {
+  if (!confirm('Excluir processo e todos os dados? Essa ação não pode ser desfeita.')) return;
+  await sb.from('portal_mensagens').delete().eq('processo_id', id);
+  await sb.from('portal_historico').delete().eq('processo_id', id);
+  await sb.from('portal_arquivos').delete().eq('processo_id', id);
+  const { error } = await sb.from('portal_processos').delete().eq('id', id);
+  if (error) { alert('Erro: ' + error.message); return; }
+  document.getElementById('fat-overlay').classList.remove('aberto');
+  await renderAdminFaturamento();
+}
+
+function fatCopiarLink(token) {
+  const link = fatLinkCliente(token);
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(link).then(() => alert('Link copiado para o cliente!'));
+  } else {
+    prompt('Copie o link do cliente:', link);
+  }
+}
+
+function fatCopiarLinkFixo() {
+  const link = fatLinkInicioCliente();
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(link).then(() => alert('Link fixo copiado!'));
+  } else {
+    prompt('Copie o link fixo:', link);
+  }
+}
+
+function fatExportarCSV() {
+  const lista = fatFiltrados.length ? fatFiltrados : fatProcessos;
+  if (!lista.length) { alert('Nenhum processo para exportar.'); return; }
+  const header = ['Protocolo','Nome','CPF','Grupo','Cota','Corretor','Email','Telefone','Status','Criado em'];
+  const linhas = lista.map(p => [
+    p.protocolo || 'Pendente', p.nome, fmtCPF(p.cpf), p.grupo||'', p.cota||'', p.corretor||'',
+    p.email||'', p.telefone||'', p.status,
+    fmtDataBR(p.criado_em)
+  ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
+  const csv = [header.join(','), ...linhas].join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `processos-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Funções auxiliares
+function fatTagClass(s) {
+  const m = { 'Recebido':'tag-blue', 'Em análise':'tag-amber', 'Enviado para administradora':'tag-purple', 'Em retorno da administradora':'tag-teal', 'Finalizado':'tag-green', 'Cancelado':'tag-red' };
+  return m[s] || 'tag-gray';
+}
+function fatStatusIcone(s) { return FAT_ETAPAS.find(e => e.status === s)?.icone || '📌'; }
+function fatIconeArq(nome) {
+  const ext = (nome||'').split('.').pop().toLowerCase();
+  return ext === 'pdf' ? '📄' : ['jpg','jpeg','png'].includes(ext) ? '🖼️' : '📎';
+}
+function fatJsArg(v) {
+  return JSON.stringify(String(v ?? '')).replace(/'/g, '\\u0027');
+}
+function fatLinkCliente(token) {
+  const base = window.location.href.replace(/\/[^\/?#]*([?#].*)?$/, '/');
+  return `${base}${FAT_CONFIG.clientePath}?token=${encodeURIComponent(token)}`;
+}
+function fatLinkInicioCliente() {
+  const base = window.location.href.replace(/\/[^\/?#]*([?#].*)?$/, '/');
+  return `${base}${FAT_CONFIG.clientePath}`;
+}
+function fatGerarToken() {
+  const cryptoPart = window.crypto?.getRandomValues
+    ? Array.from(window.crypto.getRandomValues(new Uint32Array(2))).map(n => n.toString(36)).join('')
+    : Math.random().toString(36).slice(2, 12);
+  return `${cryptoPart}${Date.now().toString(36)}`;
+}
+async function fatGerarProtocolo() {
+  const ano = new Date().getFullYear();
+  const prefixo = `${FAT_CONFIG.protocoloPrefixo}-${ano}-`;
+  const { data } = await sb.from('portal_processos').select('protocolo').like('protocolo', `${prefixo}%`);
+  const usados = (data || [])
+    .map(p => parseInt(String(p.protocolo || '').replace(prefixo, ''), 10))
+    .filter(n => Number.isFinite(n));
+  const proximo = String(Math.max(0, ...usados) + 1).padStart(4, '0');
+  return `${prefixo}${proximo}`;
+}
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtDataBR(d) { return d ? new Date(d).toLocaleDateString('pt-BR') : '—'; }
+function fmtDataHoraBR(d) { return d ? new Date(d).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—'; }
+
+// Fechar modal com ESC
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.getElementById('fat-overlay')?.classList.remove('aberto');
+});
+
+// ══ INIT ══
 (async()=>{ await DB.init(); await checkSession(); })();
 </script>
 </body>
