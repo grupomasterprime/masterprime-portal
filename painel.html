@@ -1729,7 +1729,8 @@ function parseInd(ind, consultor, multConsultor=0.625) {
   }
 
   // ── Enoque + Seguros (ou dois parceiros sem /) ──
-  // "0,5% ENOQUE 0,5% SEGUROS" → Master paga os dois, Bete recebe normal
+  // "0,5% ENOQUE 0,5% SEGUROS" → Master paga os dois (geram demonstrativo próprio
+  //   no Resumo), mas o custo é DESCONTADO da fatia do consultor (não do excedente).
   // Padrão: dois parceiros justapostos sem barra
   const mDoisParc = s.match(/^(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s]+?)\s+(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s]+?)(?:\s+(BRUTO|LIQUIDO))?$/);
   if (mDoisParc) {
@@ -1741,8 +1742,8 @@ function parseInd(ind, consultor, multConsultor=0.625) {
     // Dois parceiros externos (≤ 4%): Enoque/Seguros etc → demonstrativo próprio
     if (p1 > 0 && p1 <= 0.04 && p2 > 0 && p2 <= 0.04) {
       return { tipo:'ok', partes:[
-        { quem:n1, fracBruto:pctObsToFrac(p1), ehParceiro:true, masterPaga:true, oculto:false, ehCarta:false, ehLiquido:ehLiq||true },
-        { quem:n2, fracBruto:pctObsToFrac(p2), ehParceiro:true, masterPaga:true, oculto:false, ehCarta:false, ehLiquido:ehLiq||true },
+        { quem:n1, fracBruto:pctObsToFrac(p1), ehParceiro:true, masterPaga:true, descontoVendedor:true, oculto:false, ehCarta:false, ehLiquido:ehLiq||true },
+        { quem:n2, fracBruto:pctObsToFrac(p2), ehParceiro:true, masterPaga:true, descontoVendedor:true, oculto:false, ehCarta:false, ehLiquido:ehLiq||true },
       ]};
     }
     // Split entre dois consultores (> 4%): "50% FABRICIO 50% RODRIGUES"
@@ -2105,7 +2106,13 @@ function processarLinha(linha, match, ciclo, mult, split, isAdvanced=false) {
 
   // Sem split de consultores → linha simples
   if (!naoParc.length) {
-    const c = calcLinha(rec, multEfet, isAdvanced);
+    // Parceiros com descontoVendedor (ex: 0,5% ENOQUE 0,5% SEGUROS) saem
+    // da fatia do consultor — não do excedente da Master. Ajusta mult.
+    const descFrac = parceiros
+      .filter(p => p.descontoVendedor && !p.ehCarta && !p.oculto)
+      .reduce((s,p) => s + (p.fracBruto || 0), 0);
+    const multCalc = Math.max(0, multEfet - descFrac);
+    const c = calcLinha(rec, multCalc, isAdvanced);
     const obsInfo = match.obsInfo;
     const obsComInfo = obsInfo ? [...obsParc, {quem:obsInfo, valor:0, masterPaga:false, ehInfo:true}] : obsParc;
     addResultado(consultor, isSocioC?'socio':'vendedor', {
