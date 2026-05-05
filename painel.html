@@ -1729,8 +1729,7 @@ function parseInd(ind, consultor, multConsultor=0.625) {
   }
 
   // ── Enoque + Seguros (ou dois parceiros sem /) ──
-  // "0,5% ENOQUE 0,5% SEGUROS" → Master paga os dois (geram demonstrativo próprio
-  //   no Resumo), mas o custo é DESCONTADO da fatia do consultor (não do excedente).
+  // "0,5% ENOQUE 0,5% SEGUROS" → Master paga os dois, Bete recebe normal
   // Padrão: dois parceiros justapostos sem barra
   const mDoisParc = s.match(/^(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s]+?)\s+(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s]+?)(?:\s+(BRUTO|LIQUIDO))?$/);
   if (mDoisParc) {
@@ -1742,8 +1741,8 @@ function parseInd(ind, consultor, multConsultor=0.625) {
     // Dois parceiros externos (≤ 4%): Enoque/Seguros etc → demonstrativo próprio
     if (p1 > 0 && p1 <= 0.04 && p2 > 0 && p2 <= 0.04) {
       return { tipo:'ok', partes:[
-        { quem:n1, fracBruto:pctObsToFrac(p1), ehParceiro:true, masterPaga:true, descontoVendedor:true, oculto:false, ehCarta:false, ehLiquido:ehLiq||true },
-        { quem:n2, fracBruto:pctObsToFrac(p2), ehParceiro:true, masterPaga:true, descontoVendedor:true, oculto:false, ehCarta:false, ehLiquido:ehLiq||true },
+        { quem:n1, fracBruto:pctObsToFrac(p1), ehParceiro:true, masterPaga:true, oculto:false, ehCarta:false, ehLiquido:ehLiq||true },
+        { quem:n2, fracBruto:pctObsToFrac(p2), ehParceiro:true, masterPaga:true, oculto:false, ehCarta:false, ehLiquido:ehLiq||true },
       ]};
     }
     // Split entre dois consultores (> 4%): "50% FABRICIO 50% RODRIGUES"
@@ -1953,6 +1952,18 @@ function parseInd(ind, consultor, multConsultor=0.625) {
         }
       } else { valido = false; }
     });
+    // Se o split contém o próprio consultor (ehSelf — ex: "2% BETE / 0,5% ENOQUE LIQUIDO / 0,5% SEGUROS LIQUIDO"),
+    // os parceiros LIQUIDO geram demonstrativo próprio (Master paga eles do excedente)
+    // e ficam ESCONDIDOS da OBS no demonstrativo do consultor.
+    const temSelf = partes.some(p => p.ehSelf);
+    if (temSelf) {
+      partes.forEach(p => {
+        if (p.ehParceiro && p.ehLiquido && !p.ehCarta) {
+          p.masterPaga = true;
+          p.silenciaObs = true;
+        }
+      });
+    }
     if (valido && partes.length) return { tipo:'ok', partes, selfFrac };
   }
 
@@ -2045,7 +2056,7 @@ function processarLinha(linha, match, ciclo, mult, split, isAdvanced=false) {
       valParc = brutoPart; // BRUTO: paga limpo
     }
 
-    if (!parte.oculto) {
+    if (!parte.oculto && !parte.silenciaObs) {
       obsParc.push({ quem:parte.quem, frac:parte.fracBruto, valor:valParc,
         masterPaga:parte.masterPaga, ehLiquido:!!parte.ehLiquido, ehStub:!!parte.ehStub,
         ehCarta:!!parte.ehCarta, cartaResp:parte.cartaResp||'' });
@@ -2106,12 +2117,13 @@ function processarLinha(linha, match, ciclo, mult, split, isAdvanced=false) {
 
   // Sem split de consultores → linha simples
   if (!naoParc.length) {
-    // Parceiros com descontoVendedor (ex: 0,5% ENOQUE 0,5% SEGUROS) saem
-    // da fatia do consultor — não do excedente da Master. Ajusta mult.
-    const descFrac = parceiros
-      .filter(p => p.descontoVendedor && !p.ehCarta && !p.oculto)
-      .reduce((s,p) => s + (p.fracBruto || 0), 0);
-    const multCalc = Math.max(0, multEfet - descFrac);
+    // Quando o split menciona o próprio consultor com fração explícita
+    // (ex: "2% BETE / 0,5% ENOQUE LIQUIDO / 0,5% SEGUROS LIQUIDO" → selfFrac=0.8),
+    // respeitar essa fração: bruto_cons = rec × multEfet × selfFrac.
+    // Os parceiros líquidos com masterPaga geram demo próprio e debitam excedente.
+    const selfFrac = (split.selfFrac !== undefined && split.selfFrac > 0 && split.selfFrac < 1)
+      ? split.selfFrac : 1;
+    const multCalc = multEfet * selfFrac;
     const c = calcLinha(rec, multCalc, isAdvanced);
     const obsInfo = match.obsInfo;
     const obsComInfo = obsInfo ? [...obsParc, {quem:obsInfo, valor:0, masterPaga:false, ehInfo:true}] : obsParc;
