@@ -3406,8 +3406,8 @@ function renderResumo() {
     return `<tr>
       <td class="fw6">${nome}</td>
       <td><span class="tag ${tipoCls}">${tipoReal}</span></td>
-      <td class="mono num" style="font-size:11px">${fmtC(corr)}</td>
-      <td class="mono num" style="font-size:11px">${fmtC(cons)}</td>
+      <td class="mono num" style="font-size:11px" data-val="${corr}">${fmtC(corr)}</td>
+      <td class="mono num" style="font-size:11px" data-val="${cons}">${fmtC(cons)}</td>
     </tr>`;
   };
 
@@ -3420,8 +3420,8 @@ function renderResumo() {
   document.getElementById('resumo-body').innerHTML = html;
   document.getElementById('resumo-foot').innerHTML = `
     <td class="fw7">TOTAL GERAL</td><td></td>
-    <td class="mono num pos fw7">${fmtBRL(tCorr)}</td>
-    <td class="mono num pos fw7">${fmtBRL(tCons)}</td>`;
+    <td class="mono num pos fw7" data-val="${tCorr}">${fmtBRL(tCorr)}</td>
+    <td class="mono num pos fw7" data-val="${tCons}">${fmtBRL(tCons)}</td>`;
 }
 
 // ── CONCILIAÇÃO ────────────────────────────────────────────────────────────
@@ -3869,30 +3869,59 @@ function exportarResumoExcel() {
     if (cells.length < 4) return; // separadores de seção
     const nome = cells[0]?.textContent?.trim() || '';
     const tipo = cells[1]?.textContent?.trim() || '';
-    const corr = parseBRLCell(cells[2]?.textContent);
-    const cons = parseBRLCell(cells[3]?.textContent);
+    const corr = readNumCell(cells[2]);
+    const cons = readNumCell(cells[3]);
     if (nome) rows.push([nome, tipo, corr, cons, corr+cons]);
   });
   // Rodapé totais
   const foot = document.getElementById('resumo-foot');
   if (foot) {
     const cells = foot.querySelectorAll('td');
-    const c = parseBRLCell(cells[2]?.textContent);
-    const co = parseBRLCell(cells[3]?.textContent);
+    const c = readNumCell(cells[2]);
+    const co = readNumCell(cells[3]);
     rows.push(['TOTAL GERAL','', c, co, c+co]);
   }
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols'] = [{wch:28},{wch:12},{wch:16},{wch:16},{wch:16}];
+  ws['!cols'] = [{wch:28},{wch:12},{wch:18},{wch:18},{wch:18}];
+  // Aplica formato de moeda BRL (R$ #.##0,00) nas colunas C, D, E
+  const fmt = '"R$" #,##0.00;[Red]"-R$" #,##0.00';
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  for (let R = 1; R <= range.e.r; ++R) {
+    for (const C of [2,3,4]) {
+      const addr = XLSX.utils.encode_cell({r:R, c:C});
+      const cell = ws[addr];
+      if (cell && typeof cell.v === 'number') {
+        cell.t = 'n';
+        cell.z = fmt;
+      }
+    }
+  }
   XLSX.utils.book_append_sheet(wb, ws, 'Resumo');
   XLSX.writeFile(wb, 'Resumo_Pagamento_'+S.mes+'.xlsx');
 }
 
+// Lê valor numérico bruto da célula (data-val gravado pelo render).
+// Fallback: parser robusto para "R$ 37.675,17" e "-R$ 885,52".
+function readNumCell(td) {
+  if (!td) return 0;
+  const dv = td.getAttribute && td.getAttribute('data-val');
+  if (dv != null && dv !== '') {
+    const n = Number(dv);
+    if (!isNaN(n)) return n;
+  }
+  return parseBRLCell(td.textContent);
+}
+
 function parseBRLCell(txt) {
   if (!txt) return 0;
-  const s = txt.replace(/[^\d,.-]/g,'').replace(',','.');
-  const v = parseFloat(s) || 0;
-  return txt.includes('(') ? -v : v;
+  const t = String(txt).trim();
+  if (!t || t === '—' || t === '-') return 0;
+  const isNeg = /^-|\(/.test(t);
+  // Remove tudo que não for dígito ou vírgula; ponto é separador de milhar e some.
+  const cleaned = t.replace(/[^\d,]/g,'').replace(',', '.');
+  const v = parseFloat(cleaned) || 0;
+  return isNeg ? -v : v;
 }
 
 function exportarExcel() {
