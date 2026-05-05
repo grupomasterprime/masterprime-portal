@@ -783,17 +783,26 @@ async function enterPortal() {
   const role = currentUser.tipo==='admin'?'Administrador':currentUser.tipo==='socio'?'Socio':'Consultor';
   document.getElementById('sb-user-role').textContent=role;
   document.getElementById('admin-nav').classList.toggle('hidden', currentUser.tipo!=='admin');
+  // Restrição: Erik Goncalves não vê Visão Geral
+  const _restrictedOverview = ['ERIK GONCALVES'];
+  const _isOverviewBlocked = _restrictedOverview.includes((currentUser.nome||'').trim().toUpperCase());
+  const _ovItem = document.getElementById('ni-admin-overview');
+  if (_ovItem) _ovItem.style.display = _isOverviewBlocked ? 'none' : '';
   document.getElementById('perfil-nome').textContent=currentUser.nome;
   document.getElementById('perfil-cpf').textContent=currentUser.username || fmtCPF(currentUser.cpf);
   document.getElementById('perfil-tipo').innerHTML=`<span class="tag tag-${currentUser.tipo==='admin'?'navy':currentUser.tipo==='socio'?'teal':'blue'}">${role}</span>`;
   nav('dashboard');
   await renderDashboard();
   await renderHistorico();
-  if (currentUser.tipo==='admin') { await renderAdminMeses(); await renderUsers(); await renderAdminOverview(); }
+  if (currentUser.tipo==='admin') { await renderAdminMeses(); await renderUsers(); if (!_isOverviewBlocked) { await renderAdminOverview(); } }
 }
 
 // ═══ NAV ═══
 function nav(id) {
+  // Restrição: Erik Goncalves não acessa Visão Geral mesmo via URL
+  if (id === 'admin-overview' && currentUser && ['ERIK GONCALVES'].includes((currentUser.nome||'').trim().toUpperCase())) {
+    id = 'dashboard';
+  }
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
   const s=document.getElementById('s-'+id), n=document.getElementById('ni-'+id);
