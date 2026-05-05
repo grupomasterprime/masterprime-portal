@@ -1210,26 +1210,34 @@ function parseItau(data) {
 }
 
 function parseBradesco(data) {
+  // Layout planilha Bradesco_Extrato_Limpo (real, abril/2026):
+  // Col 0: Periodo | 1: Venda (data) | 2: Data Aloc. | 3: Equipe | 4: Bem
+  // Col 5: Contrato | 6: Consorciado (xxxxx-xxxx-xx) | 7: Ger. | 8: Pcl/Lib (parcela)
+  // Col 9: Regra | 10: Categ. | 11: Doc. | 12: % Comis. | 13: Calc Comis | 14: $ Comissao (recebido)
   const rows = [];
   for (let i = 1; i < data.length; i++) {
     const r = data[i];
-    const recebido = parseFloat(String(r[6]||0).replace(/[^\d.-]/g,'')) || 0;
+    // Ignorar linha de TOTAIS e outras sem dados validos
+    const periodo = String(r[0]||'').trim().toUpperCase();
+    if (periodo === 'TOTAIS' || periodo === 'TOTAL' || periodo.startsWith('TOTAL')) continue;
+    const recebido = parseFloat(String(r[14]||0).replace(',','.').replace(/[^\d.-]/g,'')) || 0;
     if (!recebido) continue;
-    const contrato = String(r[1]||'').replace(/\D/g,'');
+    const contrato = String(r[5]||'').replace(/\D/g,'');
     if (!contrato) continue;
-    const consRaw = String(r[2]||'').trim().replace(/-00$/,'');
+    // Consorciado formato: "010496-0825-00" -> grupo "10496", cota "0825"
+    const consRaw = String(r[6]||'').trim().replace(/-00$/,'');
     const parts   = consRaw.split('-');
-    const grupo   = parts[0] || consRaw;
+    const grupo   = (parts[0] || consRaw).replace(/^0+/, '') || (parts[0] || consRaw);
     const cota    = parts[1] || '';
-    const pctParc = r[4];
+    const pctParc = r[12];
     rows.push({
       adm: 'BRADESCO', grupo, cota,
       grupoCota: cota ? grupo+'/'+cota : consRaw,
       contrato,
-      parcela: String(r[3]||'') + '/' + parcTotBradesco(pctParc),
-      dataVenda: parseDateFromCell(r[0]),
+      parcela: String(r[8]||'') + '/' + parcTotBradesco(pctParc),
+      dataVenda: parseDateFromCell(r[1]),
       recebido,
-      isPesado: false, isItau5a: false, isEstorno: false,
+      isPesado: false, isItau5a: false, isEstorno: recebido < 0,
     });
   }
   return rows;
@@ -1244,7 +1252,7 @@ function parseAdemicon(data) {
     const r = data[i];
     const recebido = parseFloat(String(r[0]||0).replace(',','.')) || 0;
     if (!recebido) continue;
-    const grupo = String(r[2]||'').trim();
+    const grupo = String(r[2]||'').trim().replace(/^0+/, '') || String(r[2]||'').trim();
     const cota = String(r[3]||'').trim();
     const segmento = String(r[4]||'').trim();
     const contrato = String(r[5]||'').replace(/\D/g,'');
