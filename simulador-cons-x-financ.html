@@ -617,29 +617,37 @@ function recalc(){
     let pIni = 0, pFim = 0, sumP = 0;
     const cf = [finFinanciado];
     const parcelas = [];
-    // SAC: amortização FIXA = financiamento / prazo (igual referencial Conkey)
+    // SAC tradicional: amortização fixa, saldo decresce sem TR no saldo (TR é aditiva).
+    // PRICE/CDC: TR corrige saldo, PMT recalculado por mês com saldo+prazo atualizados.
     const amortFixa = finTipo === 'SAC' ? finFinanciado / finPrazoF : 0;
     for(let m=1; m<=finPrazoF; m++) {
-      // Correção monetária do saldo pela TR
-      saldo *= (1 + trMensal);
-      const juros = saldo * iMensal;
-      const prazoResta = finPrazoF - m + 1;
       let parcelaBase, amortMes;
+      let saldoParaAditivos = saldo;
       if(finTipo === 'SAC') {
-        amortMes = amortFixa; // amortização constante
+        // SAC: saldo NÃO acumula TR (TR só vai como aditivo se comTarifa)
+        const juros = saldo * iMensal;
+        amortMes = amortFixa;
         parcelaBase = juros + amortMes;
-      } else { // PRICE / CDC: PMT recalculado com saldo atualizado e prazo restante
+        saldo -= amortMes;
+        saldoParaAditivos = saldo; // saldo após amortização (para TR aditiva)
+      } else {
+        // PRICE/CDC: TR corrige saldo, PMT recalculado
+        saldo *= (1 + trMensal);
+        const juros = saldo * iMensal;
+        const prazoResta = finPrazoF - m + 1;
         parcelaBase = (iMensal > 0)
           ? saldo * iMensal / (1 - Math.pow(1+iMensal, -prazoResta))
           : saldo / prazoResta;
         amortMes = parcelaBase - juros;
+        saldo -= amortMes;
+        saldoParaAditivos = saldo;
       }
-      saldo -= amortMes;
       if(saldo < 0) saldo = 0;
       let parcelaTotal = parcelaBase;
       if(comTarifa) {
-        // Conkey "PARCELA + TARIFA + TR": TR aditiva sobre saldo + tarifa + MIP + DFI
-        parcelaTotal += saldo * trMensal + saldo * mipMensal + finImovel * dfiMensal + finTarifa;
+        // "PARCELA + TARIFA + TR": TR aditiva (sobre saldo) + MIP + DFI + tarifa fixa.
+        // Para SAC, isso replica a única forma de TR aplicada (saldo não cresceu antes).
+        parcelaTotal += saldoParaAditivos * trMensal + saldoParaAditivos * mipMensal + finImovel * dfiMensal + finTarifa;
       }
       if(m === 1) pIni = parcelaTotal;
       pFim = parcelaTotal;
