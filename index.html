@@ -259,6 +259,56 @@ body.embedded-mode .portal-menu-fab { display:flex; }
 ::-webkit-scrollbar-thumb { background:var(--border2); border-radius:10px; }
 .sidebar-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:99; }
 @media (max-width:768px) { .sidebar.open ~ .sidebar-backdrop { display:block; } }
+/* ═══ Faturamento (módulo de processos/protocolos do cliente) ═══ */
+.fat-filtros { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: flex-end; }
+.fat-filtros input, .fat-filtros select { padding: 8px 12px; border: 1.5px solid var(--border2); border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 12px; color: var(--text); background: var(--card); outline: none; transition: border-color .2s; }
+.fat-filtros input:focus, .fat-filtros select:focus { border-color: var(--mp-teal); }
+.fat-filtros input { min-width: 200px; }
+.fat-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
+.fat-stat { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; box-shadow: var(--shadow); }
+.fat-stat-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text2); margin-bottom: 6px; }
+.fat-stat-valor { font-size: 26px; font-weight: 800; color: var(--mp-navy); font-family: 'DM Mono', monospace; line-height: 1; }
+.fat-stat-sub { font-size: 9px; color: var(--text3); margin-top: 4px; }
+.fat-stat.borda-teal { border-top: 3px solid var(--mp-teal); }
+.fat-stat.borda-amber { border-top: 3px solid var(--amber); }
+.fat-stat.borda-purple { border-top: 3px solid var(--purple); }
+.fat-stat.borda-green { border-top: 3px solid var(--green); }
+.fat-detalhe-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, .55); z-index: 200; align-items: center; justify-content: center; padding: 20px; animation: fadeIn .15s ease; }
+.fat-detalhe-overlay.aberto { display: flex; }
+.fat-detalhe-modal { background: white; border-radius: 14px; width: 100%; max-width: 860px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,.3); animation: slideUp .2s ease; }
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.fat-detalhe-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; position: sticky; top: 0; background: white; z-index: 1; }
+.fat-detalhe-body { padding: 24px; }
+.fat-detalhe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px; }
+@media (max-width: 640px) { .fat-detalhe-grid { grid-template-columns: 1fr; } }
+.fat-stepper { display: flex; align-items: center; gap: 0; margin: 16px 0 20px; overflow-x: auto; padding: 4px 0 8px; }
+.fat-step { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 60px; position: relative; }
+.fat-step:not(:last-child)::after { content: ''; position: absolute; top: 13px; left: calc(50% + 14px); right: calc(-50% + 14px); height: 2px; background: var(--border); z-index: 0; }
+.fat-step.ok:not(:last-child)::after { background: var(--mp-teal); }
+.fat-step-dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); background: white; display: flex; align-items: center; justify-content: center; font-size: 11px; z-index: 1; position: relative; transition: all .25s; }
+.fat-step.ok .fat-step-dot { background: var(--mp-teal); border-color: var(--mp-teal); color: white; }
+.fat-step.now .fat-step-dot { background: var(--mp-navy); border-color: var(--mp-navy); color: white; box-shadow: 0 0 0 3px rgba(45,63,94,.15); }
+.fat-step-lbl { font-size: 8px; font-weight: 600; color: var(--text3); text-align: center; margin-top: 5px; max-width: 60px; line-height: 1.2; text-transform: uppercase; }
+.fat-step.ok .fat-step-lbl { color: var(--mp-teal); }
+.fat-step.now .fat-step-lbl { color: var(--mp-navy); }
+.fat-dado { display: flex; flex-direction: column; gap: 2px; margin-bottom: 12px; }
+.fat-dado-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text2); }
+.fat-dado-valor { font-size: 13px; color: var(--text); }
+.fat-hist-item { display: flex; gap: 10px; padding-bottom: 12px; position: relative; }
+.fat-hist-item:not(:last-child)::before { content: ''; position: absolute; left: 13px; top: 28px; bottom: 0; width: 2px; background: var(--border); }
+.fat-hist-dot { width: 28px; height: 28px; border-radius: 50%; background: var(--blue-bg); border: 2px solid var(--blue); display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; z-index: 1; }
+.fat-hist-corpo { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; }
+.fat-msgs-wrap { max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+.fat-msg { display: flex; gap: 8px; }
+.fat-msg.admin { flex-direction: row-reverse; }
+.fat-msg-av { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+.fat-msg.cliente .fat-msg-av { background: var(--blue-bg); }
+.fat-msg.admin .fat-msg-av { background: var(--green-bg); }
+.fat-msg-balao { max-width: 80%; padding: 8px 12px; border-radius: 10px; font-size: 11px; line-height: 1.4; }
+.fat-msg.cliente .fat-msg-balao { background: white; border: 1px solid var(--border); border-top-left-radius: 3px; }
+.fat-msg.admin .fat-msg-balao { background: var(--mp-navy); color: white; border-top-right-radius: 3px; }
+.fat-msg-hora { font-size: 9px; color: var(--text3); margin-top: 3px; }
+.fat-msg.admin .fat-msg-hora { text-align: right; color: rgba(255,255,255,.45); }
 </style>
 </head>
 <body>
@@ -292,7 +342,7 @@ body.embedded-mode .portal-menu-fab { display:flex; }
       </div>
     </div>
     <button class="login-btn" id="login-btn" onclick="doLogin()">Entrar</button>
-    <div class="login-footer">Primeiro acesso? Sua senha inicial e o seu CPF (so numeros).</div>
+    <div class="login-footer">Sem acesso? Solicite ao administrador.</div>
   </div>
 </div>
 
@@ -320,6 +370,7 @@ body.embedded-mode .portal-menu-fab { display:flex; }
         <div class="sb-item" onclick="nav('admin-overview')" id="ni-admin-overview"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg></span> Visao Geral</div>
         <div class="sb-item" onclick="nav('admin-upload')" id="ni-admin-upload"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> Upload Demonstrativos</div>
         <div class="sb-item" onclick="nav('admin-users')" id="ni-admin-users"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Gerenciar Usuarios</div>
+        <div class="sb-item" onclick="nav('admin-faturamento')" id="ni-admin-faturamento"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span> Faturamento</div>
         <div class="sb-item" onclick="nav('painel')" id="ni-painel"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> Painel Split</div>
       </div>
       <div class="sb-user-card">
@@ -392,6 +443,87 @@ body.embedded-mode .portal-menu-fab { display:flex; }
             </div>
           </div>
         </div>
+      </div>
+
+      <!-- ADMIN: FATURAMENTO -->
+      <div class="screen" id="s-admin-faturamento">
+        <div class="page-title">Processos de Faturamento</div>
+        <div class="page-sub" id="fat-subtitulo">Acompanhe os processos enviados pelos clientes e atualize protocolo, status e documentos.</div>
+
+        <!-- Métricas -->
+        <div class="fat-stats" id="fat-stats"></div>
+
+        <div class="card" style="border-left:4px solid var(--mp-teal);">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Link fixo para iniciar processo</div>
+              <div class="card-sub">Use este link em WhatsApp, site, assinatura de e-mail ou campanha. O próprio cliente preenche e envia os documentos.</div>
+            </div>
+          </div>
+          <div class="card-body" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+            <input id="fat-link-fixo" class="login-input" readonly onclick="this.select()" style="flex:1;min-width:260px;font-size:12px;padding:10px 12px;font-family:'DM Mono',monospace;">
+            <button class="btn btn-primary btn-sm" onclick="fatCopiarLinkFixo()">Copiar link</button>
+            <button class="btn btn-outline btn-sm" onclick="window.open(fatLinkInicioCliente(), '_blank')">Abrir</button>
+            <div style="width:100%;font-size:11px;color:var(--text2);">
+              O protocolo continua sendo atribuído pelo ADM depois do contato com o banco.
+            </div>
+          </div>
+        </div>
+
+        <!-- Lista de processos -->
+        <div class="card">
+          <div class="card-head">
+            <div>
+              <div class="card-title">Lista de processos</div>
+              <div class="card-sub" id="fat-contagem">—</div>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn btn-outline btn-sm" onclick="fatExportarCSV()">⬇ Exportar CSV</button>
+            </div>
+          </div>
+          <div style="padding:14px 20px; border-bottom:1px solid var(--border);">
+            <div class="fat-filtros">
+              <input type="text" id="fat-busca" placeholder="🔍 Buscar por nome, CPF, protocolo..." oninput="fatFiltrar()">
+              <select id="fat-status-filtro" onchange="fatFiltrar()">
+                <option value="">Todos os status</option>
+                <option>Recebido</option>
+                <option>Em análise</option>
+                <option>Enviado para administradora</option>
+                <option>Em retorno da administradora</option>
+                <option>Finalizado</option>
+                <option>Cancelado</option>
+              </select>
+              <button class="btn btn-outline btn-sm" onclick="fatLimparFiltros()">✕ Limpar</button>
+            </div>
+          </div>
+          <div style="overflow-x:auto;">
+            <table class="tabela">
+              <thead>
+                <tr>
+                  <th>Protocolo</th>
+                  <th>Cliente</th>
+                  <th>CPF</th>
+                  <th>Grupo / Cota</th>
+                  <th>Corretor</th>
+                  <th>Status</th>
+                  <th>Criado em</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="fat-tbody">
+                <tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text3);">
+                  <div class="spinner spinner-dark" style="margin:0 auto 12px;"></div>
+                  Carregando processos...
+                </td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL DE DETALHE DO PROCESSO -->
+      <div class="fat-detalhe-overlay" id="fat-overlay" onclick="fatFecharDetalhe(event)">
+        <div class="fat-detalhe-modal" id="fat-modal"></div>
       </div>
 
       <!-- ADMIN: VISAO GERAL -->
@@ -800,7 +932,7 @@ async function enterPortal() {
   document.getElementById('perfil-tipo').innerHTML=`<span class="tag tag-${currentUser.tipo==='admin'?'navy':currentUser.tipo==='socio'?'teal':'blue'}">${role}</span>`;
   nav('dashboard-vendas');
   if (!_isDemoBlocked) { await renderDashboard(); await renderHistorico(); }
-  if (currentUser.tipo==='admin') { await renderAdminMeses(); await renderUsers(); if (_isOverviewAllowed) { await renderAdminOverview(); } }
+  if (currentUser.tipo==='admin') { await renderAdminMeses(); await renderUsers(); if (_isOverviewAllowed) { await renderAdminOverview(); } await renderAdminFaturamento(); }
 }
 
 // ═══ NAV ═══
@@ -813,6 +945,8 @@ function nav(id) {
   if ((id === 'dashboard' || id === 'historico') && currentUser && ['CLAUDIA BARRETO'].includes((currentUser.nome||'').trim().toUpperCase())) {
     id = 'assembleia';
   }
+  // Re-renderiza Faturamento ao entrar na tela
+  if (id === 'admin-faturamento') renderAdminFaturamento();
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
   const s=document.getElementById('s-'+id), n=document.getElementById('ni-'+id);
@@ -1269,7 +1403,10 @@ async function renderUsers() {
     const tc = u.tipo==='admin'?'tag-navy':u.tipo==='socio'?'tag-teal':'tag-blue';
     const tl = u.tipo==='admin'?'Admin':u.tipo==='socio'?'S&oacute;cio':u.tipo==='parceiro'?'Parceiro':'Consultor';
     const userLogin = u.username ? u.username : `<span style="color:var(--text3);font-style:italic">(sem usu&aacute;rio)</span>`;
-    const senhaDisplay = u.senha ? `<span class="mono" style="font-size:11px">${u.senha}</span>` : '<span style="color:var(--text3)">&mdash;</span>';
+    // Senha oculta por padrão; admin clica no olho para revelar (necessário para testar acesso)
+    const senhaDisplay = u.senha
+      ? `<span class="senha-cell" data-senha="${(u.senha+'').replace(/"/g,'&quot;')}" style="display:inline-flex;align-items:center;gap:6px"><span class="senha-val mono" style="font-size:11px">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span><button type="button" onclick="toggleSenhaCell(this)" title="Mostrar/ocultar senha" style="background:none;border:0;padding:2px;cursor:pointer;color:var(--text3)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span>`
+      : '<span style="color:var(--text3)">&mdash;</span>';
     const canDel = u.cpf !== currentUser.cpf;
     return `<tr>
       <td><span class="tag ${tc}" style="font-size:9px">${tl}</span></td>
@@ -1290,7 +1427,7 @@ async function renderUsers() {
             <th>Tipo</th>
             <th>Nome</th>
             <th>Usu&aacute;rio</th>
-            <th>Senha atual</th>
+            <th>Senha</th>
             <th></th>
           </tr>
         </thead>
@@ -1298,12 +1435,42 @@ async function renderUsers() {
       </table>
     </div>`;
 }
+// Toggle de revelar senha na tabela de usuários (admin only)
+function toggleSenhaCell(btn) {
+  const cell = btn.closest('.senha-cell');
+  if (!cell) return;
+  const span = cell.querySelector('.senha-val');
+  const senha = cell.getAttribute('data-senha') || '';
+  const oculta = '••••••••';
+  if (span.textContent === oculta) {
+    span.textContent = senha;
+    span.style.color = 'var(--text)';
+  } else {
+    span.textContent = oculta;
+    span.style.color = '';
+  }
+}
+
+// Gera senha temporária forte (10 chars: maiúscula+minúscula+número+símbolo)
+function gerarSenhaTemporaria() {
+  const mai = 'ABCDEFGHJKLMNPQRSTUVWXYZ';   // sem I/O (confusão visual)
+  const min = 'abcdefghjkmnpqrstuvwxyz';
+  const num = '23456789';                     // sem 0/1
+  const sim = '!@#$%&*';
+  const todos = mai + min + num + sim;
+  const pick = (s) => s[Math.floor(Math.random()*s.length)];
+  // Garante ao menos 1 de cada categoria
+  let s = pick(mai) + pick(min) + pick(num) + pick(sim);
+  for (let i=0; i<6; i++) s += pick(todos);
+  // Embaralha
+  return s.split('').sort(()=>Math.random()-0.5).join('');
+}
+
 async function resetPw(cpf) {
   const u = await DB.getUser(cpf);
   if (!u) { alert('Usuário não encontrado.'); return; }
-  const novaSenha = prompt(`Nova senha para ${u.nome}\n(mínimo 6 caracteres; deixe vazio para usar o CPF):`, cpf);
-  if (novaSenha === null) return;
-  const senhaFinal = (novaSenha && novaSenha.length >= 6) ? novaSenha : cpf;
+  if (!confirm(`Resetar a senha de ${u.nome}?\n\nUma senha temporária forte será gerada. Você precisará informá-la ao usuário, que será obrigado a trocar no próximo login.`)) return;
+  const senhaFinal = gerarSenhaTemporaria();
   try {
     if (USE_SUPABASE) {
       const { error } = await sb.rpc('admin_resetar_senha', { cpf_param: cpf, nova_senha: senhaFinal });
@@ -1311,7 +1478,8 @@ async function resetPw(cpf) {
     } else {
       await DB.updateUser(cpf, { senha: senhaFinal });
     }
-    alert(`Senha de ${u.nome} redefinida: ${senhaFinal === cpf ? 'CPF (' + fmtCPF(cpf) + ')' : senhaFinal}`);
+    // Mostra a senha temporária UMA vez para o admin copiar/passar ao usuário
+    prompt(`Senha temporária de ${u.nome}:\n\nCopie e envie ao usuário. Esta tela não vai mostrar a senha de novo.`, senhaFinal);
   } catch(e) { alert('Erro: ' + (e.message||e)); }
 }
 
@@ -1329,6 +1497,521 @@ async function delUser(cpf) {
   } catch(e) { alert('Erro: ' + (e.message||e)); }
 }
 
+
+// ═══════════════════════════════════════════════════════
+//  MÓDULO FATURAMENTO (Erik/Leo)
+//  Sistema de processos/protocolos enviados pelo cliente
+// ═══════════════════════════════════════════════════════
+const FAT_ETAPAS = [
+  { status: 'Recebido',                     icone: '📥' },
+  { status: 'Em análise',                   icone: '🔍' },
+  { status: 'Enviado para administradora',  icone: '📤' },
+  { status: 'Em retorno da administradora', icone: '🔄' },
+  { status: 'Finalizado',                   icone: '✅' },
+];
+
+const FAT_CONFIG = {
+  clientePath: 'cliente.html',
+  storageBucket: 'arquivos',
+  protocoloPrefixo: 'MP'
+};
+
+let fatProcessos = [];
+let fatFiltrados = [];
+
+async function renderAdminFaturamento() {
+  const linkFixo = document.getElementById('fat-link-fixo');
+  if (linkFixo) linkFixo.value = fatLinkInicioCliente();
+
+  const { data, error } = await sb
+    .from('portal_processos')
+    .select(`*, portal_arquivos(count), portal_mensagens(count)`)
+    .order('criado_em', { ascending: false });
+
+  if (error) {
+    document.getElementById('fat-tbody').innerHTML = `
+      <tr><td colspan="8" style="text-align:center;color:var(--red);padding:24px;">
+        Erro ao carregar: ${error.message}
+      </td></tr>`;
+    return;
+  }
+
+  fatProcessos = data || [];
+  fatFiltrados = [...fatProcessos];
+  fatRenderStats();
+  fatRenderTabela(fatFiltrados);
+}
+
+function fatRenderStats() {
+  const total       = fatProcessos.length;
+  const recebidos   = fatProcessos.filter(p => p.status === 'Recebido').length;
+  const emAnalise   = fatProcessos.filter(p => p.status === 'Em análise').length;
+  const emRetorno   = fatProcessos.filter(p => p.status === 'Em retorno da administradora').length;
+  const finalizados = fatProcessos.filter(p => p.status === 'Finalizado').length;
+  const semProtocolo = fatProcessos.filter(p => !p.protocolo).length;
+
+  document.getElementById('fat-stats').innerHTML = `
+    <div class="fat-stat borda-teal">
+      <div class="fat-stat-label">Total</div>
+      <div class="fat-stat-valor">${total}</div>
+      <div class="fat-stat-sub">processos</div>
+    </div>
+    <div class="fat-stat borda-amber">
+      <div class="fat-stat-label">Recebidos</div>
+      <div class="fat-stat-valor">${recebidos}</div>
+      <div class="fat-stat-sub">aguardando análise</div>
+    </div>
+    <div class="fat-stat borda-purple">
+      <div class="fat-stat-label">Em análise</div>
+      <div class="fat-stat-valor">${emAnalise}</div>
+      <div class="fat-stat-sub">em andamento</div>
+    </div>
+    <div class="fat-stat borda-amber">
+      <div class="fat-stat-label">Retorno adm.</div>
+      <div class="fat-stat-valor">${emRetorno}</div>
+      <div class="fat-stat-sub">em retorno</div>
+    </div>
+    <div class="fat-stat borda-green">
+      <div class="fat-stat-label">Finalizados</div>
+      <div class="fat-stat-valor">${finalizados}</div>
+      <div class="fat-stat-sub">concluídos</div>
+    </div>
+    <div class="fat-stat" style="border-top:3px solid var(--red);cursor:pointer;" onclick="fatFiltrarSemProtocolo()" title="Filtrar processos sem protocolo">
+      <div class="fat-stat-label" style="color:var(--red);">Sem protocolo</div>
+      <div class="fat-stat-valor" style="color:var(--red);">${semProtocolo}</div>
+      <div class="fat-stat-sub">aguardando o banco</div>
+    </div>
+  `;
+}
+
+function fatFiltrarSemProtocolo() {
+  fatFiltrados = fatProcessos.filter(p => !p.protocolo);
+  document.getElementById('fat-busca').value = '';
+  document.getElementById('fat-status-filtro').value = '';
+  fatRenderTabela(fatFiltrados);
+}
+
+function fatRenderTabela(lista) {
+  const tbody = document.getElementById('fat-tbody');
+  document.getElementById('fat-contagem').textContent = `${lista.length} processo${lista.length !== 1 ? 's' : ''} - link do cliente sempre disponivel`;
+
+  if (lista.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text3);">Nenhum processo encontrado</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = lista.map(p => {
+    const link = fatLinkCliente(p.token);
+    const idArg = fatJsArg(p.id);
+    const tokenArg = fatJsArg(p.token);
+    return `
+    <tr class="row-link" onclick='fatVerProcesso(${idArg})' style="${!p.protocolo ? 'background:#FFFBEB;' : ''}">
+      <td>
+        ${p.protocolo
+          ? `<span class="mono" style="font-size:11px;font-weight:700;color:var(--mp-navy);">${esc(p.protocolo)}</span>`
+          : `<button class="btn btn-xs btn-outline" style="color:var(--amber);border-color:var(--amber);" onclick='event.stopPropagation(); fatAtribuirProtocolo(${idArg})'>Atribuir</button>`
+        }
+      </td>
+      <td><div style="font-weight:600;font-size:12px;">${esc(p.nome)}</div></td>
+      <td><span class="mono" style="font-size:11px;">${fmtCPF(p.cpf)}</span></td>
+      <td style="font-size:12px;">
+        ${p.grupo ? `<span style="color:var(--text2)">G:</span> ${esc(p.grupo)}` : '—'}
+        ${p.cota  ? ` &nbsp;<span style="color:var(--text2)">C:</span> ${esc(p.cota)}` : ''}
+      </td>
+      <td style="font-size:12px;">${esc(p.corretor || '—')}</td>
+      <td><span class="tag ${fatTagClass(p.status)}">${p.status}</span></td>
+      <td><span style="font-size:11px;color:var(--text2);">${fmtDataBR(p.criado_em)}</span></td>
+      <td>
+        <div style="display:flex; gap:4px; flex-wrap:wrap;">
+          <button class="btn btn-outline btn-xs" onclick='event.stopPropagation(); fatVerProcesso(${idArg})'>Ver</button>
+          <button class="btn btn-xs btn-outline" onclick='event.stopPropagation(); fatCopiarLink(${tokenArg})' title="${esc(link)}">Link</button>
+        </div>
+      </td>
+    </tr>
+  `}).join('');
+}
+
+function fatFiltrar() {
+  const busca  = document.getElementById('fat-busca')?.value.toLowerCase() || '';
+  const status = document.getElementById('fat-status-filtro')?.value || '';
+  fatFiltrados = fatProcessos.filter(p => {
+    const texto = `${p.nome} ${p.cpf} ${p.protocolo} ${p.grupo||''} ${p.cota||''} ${p.corretor||''}`.toLowerCase();
+    const bateBusca  = !busca  || texto.includes(busca);
+    const bateStatus = !status || p.status === status;
+    return bateBusca && bateStatus;
+  });
+  fatRenderTabela(fatFiltrados);
+}
+
+function fatLimparFiltros() {
+  document.getElementById('fat-busca').value = '';
+  document.getElementById('fat-status-filtro').value = '';
+  fatFiltrar();
+}
+
+async function fatVerProcesso(id) {
+  const overlay = document.getElementById('fat-overlay');
+  const modal   = document.getElementById('fat-modal');
+  overlay.classList.add('aberto');
+  modal.innerHTML = `<div style="padding:40px;text-align:center;"><div class="spinner spinner-dark" style="margin:0 auto 12px;width:36px;height:36px;border-width:3px;"></div><p style="color:var(--text2);font-size:12px;">Carregando processo...</p></div>`;
+
+  const [procRes, arqsRes, msgsRes, histRes] = await Promise.all([
+    sb.from('portal_processos').select('*').eq('id', id).single(),
+    sb.from('portal_arquivos').select('*').eq('processo_id', id).order('criado_em'),
+    sb.from('portal_mensagens').select('*').eq('processo_id', id).order('criado_em'),
+    sb.from('portal_historico').select('*').eq('processo_id', id).order('criado_em', { ascending: false })
+  ]);
+  const proc = procRes.data;
+  const arqs = arqsRes.data || [];
+  const msgs = msgsRes.data || [];
+  const hist = histRes.data || [];
+
+  if (procRes.error || !proc) {
+    modal.innerHTML = `<div style="padding:32px;text-align:center;color:var(--red);">Processo nao encontrado ou sem permissao.<br><small>${esc(procRes.error?.message || '')}</small></div>`;
+    return;
+  }
+
+  const avisos = [arqsRes.error, msgsRes.error, histRes.error].filter(Boolean);
+  const avisosHtml = avisos.length
+    ? `<div class="alert alert-warn" style="margin-bottom:12px;">Alguns dados auxiliares nao carregaram: ${avisos.map(e => esc(e.message)).join(' | ')}</div>`
+    : '';
+  const procIdArg = fatJsArg(proc.id);
+  const procTokenArg = fatJsArg(proc.token);
+
+  const idxAtual = FAT_ETAPAS.findIndex(e => e.status === proc.status);
+  const statusOpts = FAT_ETAPAS.map(e =>
+    `<option value="${e.status}" ${proc.status === e.status ? 'selected' : ''}>${e.icone} ${e.status}</option>`
+  ).join('') + `<option value="Cancelado" ${proc.status === 'Cancelado' ? 'selected' : ''}>❌ Cancelado</option>`;
+
+  const arqsHtml = (arqs||[]).length === 0
+    ? '<p class="fat-dado-valor" style="color:var(--text3);font-size:11px;">Nenhum arquivo</p>'
+    : (arqs||[]).map(a => {
+        const url = sb.storage.from(FAT_CONFIG.storageBucket).getPublicUrl(a.storage_path).data.publicUrl;
+        return `<div class="arquivo-item" style="margin-top:6px;">
+          <span>${fatIconeArq(a.nome_original)}</span>
+          <a href="${url}" target="_blank" style="flex:1;font-size:11px;">${esc(a.nome_original)}</a>
+          <button class="btn btn-xs btn-danger" onclick='fatDeletarArquivo(${fatJsArg(a.id)}, ${procIdArg})' title="Remover">✕</button>
+        </div>`;
+      }).join('');
+
+  const msgsHtml = (msgs||[]).length === 0
+    ? '<p style="font-size:11px;color:var(--text3);text-align:center;padding:12px 0;">Sem mensagens ainda</p>'
+    : (msgs||[]).map(m => {
+        const lado = m.autor === 'admin' ? 'admin' : 'cliente';
+        return `<div class="fat-msg ${lado}">
+          <div class="fat-msg-av">${lado === 'admin' ? '👤' : '🙋'}</div>
+          <div>
+            <div class="fat-msg-balao">${esc(m.texto)}</div>
+            <div class="fat-msg-hora">${lado === 'admin' ? 'Equipe' : 'Cliente'} · ${fmtDataHoraBR(m.criado_em)}</div>
+          </div>
+        </div>`;
+      }).join('');
+
+  const histHtml = (hist||[]).length === 0
+    ? '<p style="font-size:11px;color:var(--text3);">Sem histórico</p>'
+    : (hist||[]).map(h => `
+        <div class="fat-hist-item">
+          <div class="fat-hist-dot">${fatStatusIcone(h.status_novo)}</div>
+          <div class="fat-hist-corpo">
+            <span class="tag ${fatTagClass(h.status_novo)}" style="font-size:9px;">${h.status_novo}</span>
+            ${h.observacao ? `<p style="font-size:11px;color:var(--text2);margin-top:4px;">${esc(h.observacao)}</p>` : ''}
+            <p style="font-size:9px;color:var(--text3);margin-top:3px;">${fmtDataHoraBR(h.criado_em)}</p>
+          </div>
+        </div>`).join('');
+
+  modal.innerHTML = `
+    <div class="fat-detalhe-header">
+      <div>
+        <div style="font-size:13px;font-weight:800;color:var(--mp-navy);">${esc(proc.nome)}</div>
+        <div style="font-size:11px;color:var(--text2);margin-top:3px;">
+          Protocolo: ${proc.protocolo
+            ? `<span class="mono" style="font-weight:700;">${esc(proc.protocolo)}</span>`
+            : `<span style="color:var(--amber);font-weight:700;">pendente</span>`
+          }
+          &nbsp;·&nbsp; CPF: ${fmtCPF(proc.cpf)}
+          &nbsp;·&nbsp; Aberto em ${fmtDataBR(proc.criado_em)}
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-shrink:0;">
+        <button class="btn btn-outline btn-sm" onclick='fatCopiarLink(${procTokenArg})'>🔗 Link cliente</button>
+        <button class="btn btn-danger btn-sm" onclick='fatDeletarProcesso(${procIdArg})'>🗑 Excluir</button>
+        <button class="btn btn-outline btn-sm" onclick="fatFecharDetalhe()">✕</button>
+      </div>
+    </div>
+    <div class="fat-detalhe-body">
+      ${avisosHtml}
+      <!-- Campo de protocolo -->
+      <div style="display:flex; gap:8px; align-items:center; margin-bottom:16px;">
+        <label style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text2);">Protocolo:</label>
+        <input type="text" id="fat-protocolo-${proc.id}" value="${esc(proc.protocolo || '')}" placeholder="Informe ou gere automaticamente" style="font-size:12px;padding:6px 10px;border:1px solid var(--border2);border-radius:6px;width:240px;">
+        <button class="btn btn-xs btn-outline" onclick='fatSalvarProtocolo(${procIdArg})'>Salvar</button>
+        <button class="btn btn-xs btn-outline" onclick='fatGerarProtocoloCampo(${procIdArg})'>Gerar</button>
+        <button class="btn btn-xs btn-outline" onclick='fatCopiarLink(${procTokenArg})'>🔗 Link</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;">
+        <div><label class="login-label">Nome</label><input class="login-input" id="fat-edit-nome-${proc.id}" value="${esc(proc.nome || '')}" style="font-size:12px;padding:8px 10px;"></div>
+        <div><label class="login-label">CPF</label><input class="login-input" id="fat-edit-cpf-${proc.id}" value="${fmtCPF(proc.cpf || '')}" maxlength="14" oninput="maskCPF(this)" style="font-size:12px;padding:8px 10px;"></div>
+        <div><label class="login-label">Grupo</label><input class="login-input" id="fat-edit-grupo-${proc.id}" value="${esc(proc.grupo || '')}" style="font-size:12px;padding:8px 10px;"></div>
+        <div><label class="login-label">Cota</label><input class="login-input" id="fat-edit-cota-${proc.id}" value="${esc(proc.cota || '')}" style="font-size:12px;padding:8px 10px;"></div>
+        <div><label class="login-label">E-mail</label><input class="login-input" id="fat-edit-email-${proc.id}" value="${esc(proc.email || '')}" style="font-size:12px;padding:8px 10px;"></div>
+        <div><label class="login-label">WhatsApp</label><input class="login-input" id="fat-edit-telefone-${proc.id}" value="${esc(proc.telefone || '')}" style="font-size:12px;padding:8px 10px;"></div>
+        <div style="grid-column:1/-1;"><label class="login-label">Corretor (opcional)</label><input class="login-input" id="fat-edit-corretor-${proc.id}" value="${esc(proc.corretor || '')}" placeholder="Nome do corretor responsavel" style="font-size:12px;padding:8px 10px;"></div>
+        <div style="grid-column:1/-1;"><label class="login-label">Observacoes</label><textarea class="login-input" id="fat-edit-descricao-${proc.id}" style="font-size:12px;padding:8px 10px;min-height:54px;">${esc(proc.descricao || '')}</textarea></div>
+        <div style="grid-column:1/-1;display:flex;justify-content:flex-end;"><button class="btn btn-outline btn-sm" onclick='fatSalvarDadosProcesso(${procIdArg})'>Salvar dados do processo</button></div>
+      </div>
+
+      <div class="fat-stepper">
+        ${FAT_ETAPAS.map((e, i) => `
+          <div class="fat-step ${i < idxAtual ? 'ok' : i === idxAtual ? 'now' : ''}">
+            <div class="fat-step-dot">${i < idxAtual ? '✓' : e.icone}</div>
+            <div class="fat-step-lbl">${e.status}</div>
+          </div>`).join('')}
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0 20px;padding:16px;background:var(--bg);border-radius:8px;margin-bottom:20px;">
+        <div class="fat-dado"><div class="fat-dado-label">Grupo</div><div class="fat-dado-valor">${esc(proc.grupo || '—')}</div></div>
+        <div class="fat-dado"><div class="fat-dado-label">Cota</div><div class="fat-dado-valor">${esc(proc.cota || '—')}</div></div>
+        <div class="fat-dado"><div class="fat-dado-label">E-mail</div><div class="fat-dado-valor" style="font-size:11px;">${esc(proc.email || '—')}</div></div>
+        <div class="fat-dado"><div class="fat-dado-label">WhatsApp</div><div class="fat-dado-valor">${esc(proc.telefone || '—')}</div></div>
+        <div class="fat-dado"><div class="fat-dado-label">Corretor</div><div class="fat-dado-valor">${esc(proc.corretor || '—')}</div></div>
+        <div class="fat-dado" style="grid-column:1/-1;"><div class="fat-dado-label">Observações</div><div class="fat-dado-valor" style="font-size:11px;color:var(--text2);">${esc(proc.descricao || '—')}</div></div>
+      </div>
+
+      <div class="fat-detalhe-grid">
+        <div>
+          <h4 style="font-size:12px;font-weight:700;margin-bottom:10px;">📎 Documentos</h4>
+          ${arqsHtml}
+          <div style="margin-top:12px;">
+            <label style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text2);">Adicionar arquivos</label>
+            <input type="file" id="fat-upload-${proc.id}" accept=".pdf,.jpg,.jpeg,.png" multiple onchange='fatUploadArquivos(${procIdArg}, ${procTokenArg}, this)' style="width:100%;margin-top:6px;font-size:11px;">
+          </div>
+          <h4 style="font-size:12px;font-weight:700;margin:20px 0 10px;">🕐 Histórico</h4>
+          ${histHtml}
+        </div>
+
+        <div>
+          <h4 style="font-size:12px;font-weight:700;margin-bottom:10px;">🔄 Atualizar status</h4>
+          <select id="fat-novo-status-${proc.id}" class="login-input" style="font-size:12px;padding:8px 12px;margin-bottom:8px;">${statusOpts}</select>
+          <textarea id="fat-obs-status-${proc.id}" placeholder="Observação para o histórico (opcional)..." style="padding:8px 12px;border:1.5px solid var(--border2);border-radius:8px;font-family:'Inter';font-size:11px;min-height:60px;resize:vertical;outline:none;width:100%;margin-bottom:8px;"></textarea>
+          <button class="btn btn-primary btn-sm" onclick='fatAtualizarStatus(${procIdArg})'>Salvar status</button>
+
+          <h4 style="font-size:12px;font-weight:700;margin:20px 0 10px;">💬 Comunicação</h4>
+          <div class="fat-msgs-wrap" id="fat-msgs-${proc.id}">${msgsHtml}</div>
+          <div style="display:flex;gap:6px;margin-top:10px;">
+            <textarea id="fat-nova-msg-${proc.id}" placeholder="Responder ao cliente..." style="flex:1;min-height:38px;padding:8px 12px;border:1.5px solid var(--border2);border-radius:8px;font-family:'Inter';font-size:11px;resize:none;outline:none;"></textarea>
+            <button class="btn btn-primary btn-sm" onclick='fatEnviarMsg(${procIdArg})'>Enviar</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  setTimeout(() => {
+    const el = document.getElementById(`fat-msgs-${proc.id}`);
+    if (el) el.scrollTop = el.scrollHeight;
+  }, 100);
+}
+
+function fatFecharDetalhe(event) {
+  if (event && event.target !== document.getElementById('fat-overlay')) return;
+  document.getElementById('fat-overlay').classList.remove('aberto');
+}
+
+async function fatSalvarProtocolo(processoId) {
+  const novoProtocolo = document.getElementById(`fat-protocolo-${processoId}`).value.trim().toUpperCase();
+  if (!novoProtocolo) return;
+  const { data: existente } = await sb.from('portal_processos').select('id').eq('protocolo', novoProtocolo).neq('id', processoId).maybeSingle();
+  if (existente) { alert('Este protocolo ja esta vinculado a outro processo.'); return; }
+  const { error } = await sb.from('portal_processos').update({ protocolo: novoProtocolo, atualizado_em: new Date() }).eq('id', processoId);
+  if (error) { alert('Erro ao salvar protocolo: ' + error.message); return; }
+  await sb.from('portal_historico').insert({
+    processo_id: processoId,
+    status_novo: 'Protocolo atribuido',
+    observacao: `Protocolo ${novoProtocolo}`,
+    autor: currentUser?.nome || 'admin'
+  });
+  await fatVerProcesso(processoId);
+  await renderAdminFaturamento();
+}
+
+async function fatGerarProtocoloCampo(processoId) {
+  document.getElementById(`fat-protocolo-${processoId}`).value = await fatGerarProtocolo();
+}
+
+async function fatAtribuirProtocolo(processoId) {
+  await fatVerProcesso(processoId);
+  const campo = document.getElementById(`fat-protocolo-${processoId}`);
+  if (campo) {
+    campo.value = await fatGerarProtocolo();
+    campo.focus();
+    campo.select();
+  }
+}
+
+async function fatSalvarDadosProcesso(processoId) {
+  const nome = document.getElementById(`fat-edit-nome-${processoId}`).value.trim();
+  const cpf = cleanCPF(document.getElementById(`fat-edit-cpf-${processoId}`).value);
+  if (!nome) { alert('Nome obrigatorio.'); return; }
+  if (cpf.length !== 11) { alert('CPF invalido.'); return; }
+
+  const updates = {
+    nome,
+    cpf,
+    grupo: document.getElementById(`fat-edit-grupo-${processoId}`).value.trim() || null,
+    cota: document.getElementById(`fat-edit-cota-${processoId}`).value.trim() || null,
+    email: document.getElementById(`fat-edit-email-${processoId}`).value.trim() || null,
+    telefone: document.getElementById(`fat-edit-telefone-${processoId}`).value.trim() || null,
+    corretor: document.getElementById(`fat-edit-corretor-${processoId}`).value.trim() || null,
+    descricao: document.getElementById(`fat-edit-descricao-${processoId}`).value.trim() || null,
+    atualizado_em: new Date()
+  };
+
+  const { error } = await sb.from('portal_processos').update(updates).eq('id', processoId);
+  if (error) { alert('Erro ao salvar dados: ' + error.message); return; }
+  await fatVerProcesso(processoId);
+  await renderAdminFaturamento();
+}
+
+async function fatAtualizarStatus(processoId) {
+  const novoStatus = document.getElementById(`fat-novo-status-${processoId}`).value;
+  const obs = document.getElementById(`fat-obs-status-${processoId}`).value.trim();
+  const { error } = await sb.from('portal_processos').update({
+    status: novoStatus,
+    atualizado_em: new Date()
+  }).eq('id', processoId);
+  if (error) { alert('Erro ao atualizar status: ' + error.message); return; }
+
+  await sb.from('portal_historico').insert({
+    processo_id: processoId,
+    status_novo: novoStatus,
+    observacao: obs || null,
+    autor: currentUser?.nome || 'admin'
+  });
+
+  await fatVerProcesso(processoId);
+  await renderAdminFaturamento();
+}
+
+async function fatEnviarMsg(processoId) {
+  const campo = document.getElementById(`fat-nova-msg-${processoId}`);
+  const texto = campo.value.trim();
+  if (!texto) return;
+  const { error } = await sb.from('portal_mensagens').insert({
+    processo_id: processoId,
+    autor: 'admin',
+    texto
+  });
+  if (error) { alert('Erro: ' + error.message); return; }
+  campo.value = '';
+  await fatVerProcesso(processoId);
+}
+
+async function fatUploadArquivos(processoId, token, input) {
+  for (const arquivo of Array.from(input.files)) {
+    if (arquivo.size > 16*1024*1024) { alert(`${arquivo.name} muito grande`); continue; }
+    const path = `${token}/${Date.now()}_${arquivo.name}`;
+    const { error: upErr } = await sb.storage.from(FAT_CONFIG.storageBucket).upload(path, arquivo);
+    if (upErr) { alert('Erro upload: ' + upErr.message); continue; }
+    await sb.from('portal_arquivos').insert({
+      processo_id: processoId,
+      nome_original: arquivo.name,
+      storage_path: path
+    });
+  }
+  input.value = '';
+  await fatVerProcesso(processoId);
+}
+
+async function fatDeletarArquivo(arquivoId, processoId) {
+  if (!confirm('Remover arquivo?')) return;
+  await sb.from('portal_arquivos').delete().eq('id', arquivoId);
+  await fatVerProcesso(processoId);
+}
+
+async function fatDeletarProcesso(id) {
+  if (!confirm('Excluir processo e todos os dados? Essa ação não pode ser desfeita.')) return;
+  await sb.from('portal_mensagens').delete().eq('processo_id', id);
+  await sb.from('portal_historico').delete().eq('processo_id', id);
+  await sb.from('portal_arquivos').delete().eq('processo_id', id);
+  const { error } = await sb.from('portal_processos').delete().eq('id', id);
+  if (error) { alert('Erro: ' + error.message); return; }
+  document.getElementById('fat-overlay').classList.remove('aberto');
+  await renderAdminFaturamento();
+}
+
+function fatCopiarLink(token) {
+  const link = fatLinkCliente(token);
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(link).then(() => alert('Link copiado para o cliente!'));
+  } else {
+    prompt('Copie o link do cliente:', link);
+  }
+}
+
+function fatCopiarLinkFixo() {
+  const link = fatLinkInicioCliente();
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(link).then(() => alert('Link fixo copiado!'));
+  } else {
+    prompt('Copie o link fixo:', link);
+  }
+}
+
+function fatExportarCSV() {
+  const lista = fatFiltrados.length ? fatFiltrados : fatProcessos;
+  if (!lista.length) { alert('Nenhum processo para exportar.'); return; }
+  const header = ['Protocolo','Nome','CPF','Grupo','Cota','Corretor','Email','Telefone','Status','Criado em'];
+  const linhas = lista.map(p => [
+    p.protocolo || 'Pendente', p.nome, fmtCPF(p.cpf), p.grupo||'', p.cota||'', p.corretor||'',
+    p.email||'', p.telefone||'', p.status,
+    fmtDataBR(p.criado_em)
+  ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
+  const csv = [header.join(','), ...linhas].join('\n');
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `processos-${new Date().toISOString().slice(0,10)}.csv`; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Funções auxiliares
+function fatTagClass(s) {
+  const m = { 'Recebido':'tag-blue', 'Em análise':'tag-amber', 'Enviado para administradora':'tag-purple', 'Em retorno da administradora':'tag-teal', 'Finalizado':'tag-green', 'Cancelado':'tag-red' };
+  return m[s] || 'tag-gray';
+}
+function fatStatusIcone(s) { return FAT_ETAPAS.find(e => e.status === s)?.icone || '📌'; }
+function fatIconeArq(nome) {
+  const ext = (nome||'').split('.').pop().toLowerCase();
+  return ext === 'pdf' ? '📄' : ['jpg','jpeg','png'].includes(ext) ? '🖼️' : '📎';
+}
+function fatJsArg(v) {
+  return JSON.stringify(String(v ?? '')).replace(/'/g, '\\u0027');
+}
+function fatLinkCliente(token) {
+  const base = window.location.href.replace(/\/[^\/?#]*([?#].*)?$/, '/');
+  return `${base}${FAT_CONFIG.clientePath}?token=${encodeURIComponent(token)}`;
+}
+function fatLinkInicioCliente() {
+  const base = window.location.href.replace(/\/[^\/?#]*([?#].*)?$/, '/');
+  return `${base}${FAT_CONFIG.clientePath}`;
+}
+function fatGerarToken() {
+  const cryptoPart = window.crypto?.getRandomValues
+    ? Array.from(window.crypto.getRandomValues(new Uint32Array(2))).map(n => n.toString(36)).join('')
+    : Math.random().toString(36).slice(2, 12);
+  return `${cryptoPart}${Date.now().toString(36)}`;
+}
+async function fatGerarProtocolo() {
+  const ano = new Date().getFullYear();
+  const prefixo = `${FAT_CONFIG.protocoloPrefixo}-${ano}-`;
+  const { data } = await sb.from('portal_processos').select('protocolo').like('protocolo', `${prefixo}%`);
+  const usados = (data || [])
+    .map(p => parseInt(String(p.protocolo || '').replace(prefixo, ''), 10))
+    .filter(n => Number.isFinite(n));
+  const proximo = String(Math.max(0, ...usados) + 1).padStart(4, '0');
+  return `${prefixo}${proximo}`;
+}
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function fmtDataBR(d) { return d ? new Date(d).toLocaleDateString('pt-BR') : '—'; }
+function fmtDataHoraBR(d) { return d ? new Date(d).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—'; }
 // ═══ INIT ═══
 (async()=>{ await DB.init(); await checkSession(); })();
 </script>
