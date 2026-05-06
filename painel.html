@@ -2070,10 +2070,16 @@ function processarLinha(linha, match, ciclo, mult, split, isAdvanced=false) {
 
     // Parceiro que a Master paga → gera demonstrativo próprio (Enoque, Seguros, Strada, etc.)
     if (parte.masterPaga && !parte.ehCarta && !parte.oculto) {
+      // OBS no demo do parceiro: "X,X% NOME_DO_CONSULTOR" (ex: "1,50% LEIDIANE RIBEIRO")
+      const pctLabel = parte.pctOrig
+        ? ((parte.pctOrig*100).toFixed(2).replace('.',',').replace(/,00$/,'')+'%')
+        : fracToBase(parte.fracBruto);
       addResultado(parte.quem, 'parceiro', {
         ...linha, dataVenda:dv, ciclo, nomeCliente:nc,
         mult:parte.fracBruto, brutoCons:brutoPart, nfCons:nfParc, admCons:admParc, liqCons:valParc,
-        excedente:0, obsParc:[], indicacao: parte.ehLiquido ? 'Líquido' : 'Bruto'
+        excedente:0,
+        obsParc:[{quem: pctLabel+' '+consultor, valor:0, masterPaga:false, ehInfo:true}],
+        indicacao: parte.ehLiquido ? 'Líquido · '+consultor : 'Bruto · '+consultor
       });
       addExcedente(-valParc, linha.adm);
     }
@@ -2120,13 +2126,21 @@ function processarLinha(linha, match, ciclo, mult, split, isAdvanced=false) {
 
   // Sem split de consultores → linha simples
   if (!naoParc.length) {
-    // Quando o split menciona o próprio consultor com fração explícita
-    // (ex: "2% BETE / 0,5% ENOQUE LIQUIDO / 0,5% SEGUROS LIQUIDO" → selfFrac=0.8),
-    // respeitar essa fração: bruto_cons = rec × multEfet × selfFrac.
-    // Os parceiros líquidos com masterPaga geram demo próprio e debitam excedente.
-    const selfFrac = (split.selfFrac !== undefined && split.selfFrac > 0 && split.selfFrac < 1)
-      ? split.selfFrac : 1;
-    const multCalc = multEfet * selfFrac;
+    // Caso 1: split menciona o próprio consultor com fração explícita (ex: "2% BETE /
+    //   0,5% ENOQUE / 0,5% SEGUROS" → selfFrac=0.8). Respeita selfFrac.
+    // Caso 2: parceiro masterPaga (CAMINO, SPOLAOR, STRADA, ADVANCED, ENOQUE, SEGUROS,
+    //   ANDRESSA etc.) sem selfFrac. A fração do parceiro DESCONTA do tier do consultor
+    //   — não pode passar de 4% (consultor tier + parceiro). Ex: Leidi Black (3%) com
+    //   "1,5% CAMINO LIQUIDO" → multCalc = 0,75 - 0,375 = 0,375 → bruto_cons = 1,5%.
+    let multCalc;
+    if (split.selfFrac !== undefined && split.selfFrac > 0 && split.selfFrac < 1) {
+      multCalc = multEfet * split.selfFrac;
+    } else {
+      const descParceiros = parceiros
+        .filter(p => p.masterPaga && !p.ehCarta && !p.oculto)
+        .reduce((s,p) => s + (p.fracBruto || 0), 0);
+      multCalc = Math.max(0, multEfet - descParceiros);
+    }
     const c = calcLinha(rec, multCalc, isAdvanced);
     const obsInfo = match.obsInfo;
     const obsComInfo = obsInfo ? [...obsParc, {quem:obsInfo, valor:0, masterPaga:false, ehInfo:true}] : obsParc;
