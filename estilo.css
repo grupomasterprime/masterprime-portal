@@ -1,0 +1,342 @@
+/* ══════════════════════════════════════════════════════════════
+   shared/estilo.css — Estilos compartilhados Master Prime
+   Compatível com index.html (portal do consultor) + cliente.html
+   ══════════════════════════════════════════════════════════════ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+
+/* ─── Variáveis de design ─── */
+/* ➕ Para mudar cores do sistema, altere apenas aqui */
+:root {
+  --mp-navy:    #2D3F5E;
+  --mp-yellow:  #C8C84A;
+  --mp-teal:    #4DBCC8;
+  --mp-blue:    #7A9BC8;
+  --mp-white:   #FFFFFF;
+  --bg:         #F4F6FA;
+  --card:       #FFFFFF;
+  --border:     #E2E8F0;
+  --border2:    #CBD5E1;
+  --text:       #1E293B;
+  --text2:      #64748B;
+  --text3:      #94A3B8;
+  --green:      #16A34A;  --green-bg:  #F0FDF4;
+  --red:        #DC2626;  --red-bg:    #FEF2F2;
+  --amber:      #D97706;  --amber-bg:  #FFFBEB;
+  --blue:       #2563EB;  --blue-bg:   #EFF6FF;
+  --purple:     #7C3AED;  --purple-bg: #F5F3FF;
+  --r:          10px;
+  --shadow:     0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+  --shadow-md:  0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.05);
+  --fonte:      'Inter', sans-serif;
+  --fonte-mono: 'DM Mono', monospace;
+}
+
+/* ─── Reset ─── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--fonte); background: var(--bg); color: var(--text); font-size: 13px; line-height: 1.5; }
+
+/* ─── Utilities ─── */
+.hidden          { display: none !important; }
+.negrito, .fw6   { font-weight: 600; }
+.fw7             { font-weight: 700; }
+.texto-pequeno   { font-size: 11px; color: var(--text3); }
+.texto-centro    { text-align: center; }
+.w-100           { width: 100%; }
+.mt-8            { margin-top: 8px; }
+.mt-16           { margin-top: 16px; }
+.mt-24           { margin-top: 24px; }
+.mono            { font-family: var(--fonte-mono); }
+
+/* ─── Spinner ─── */
+.spinner {
+  display: inline-block;
+  width: 20px; height: 20px;
+  border: 2px solid rgba(255,255,255,.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin .7s linear infinite;
+}
+.spinner-dark {
+  border-color: var(--border);
+  border-top-color: var(--mp-teal);
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ─── Cards ─── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+.card-head {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.card-title { font-size: 13px; font-weight: 600; }
+.card-sub   { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.card-body  { padding: 20px; }
+
+/* ─── Botões ─── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 18px;
+  border: none;
+  border-radius: 8px;
+  font-family: var(--fonte);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .15s;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.btn-primary   { background: var(--mp-navy); color: #fff; }
+.btn-primary:hover { background: #1E2D45; transform: translateY(-1px); }
+
+.btn-teal      { background: var(--mp-teal); color: #fff; }
+.btn-teal:hover { background: #3aa9b5; }
+
+.btn-outline   { background: transparent; color: var(--text); border: 1px solid var(--border2); }
+.btn-outline:hover { background: var(--bg); }
+
+.btn-danger    { background: var(--red-bg); color: var(--red); border: 1px solid #FECACA; }
+.btn-danger:hover { background: #FEE2E2; }
+
+.btn-success   { background: var(--green-bg); color: var(--green); border: 1px solid #BBF7D0; }
+
+.btn-sm        { padding: 6px 12px; font-size: 11px; }
+.btn-xs        { padding: 4px 8px; font-size: 10px; }
+.btn:disabled  { opacity: .5; cursor: not-allowed; transform: none !important; }
+
+/* ─── Inputs e Formulários ─── */
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 14px;
+}
+.campo label, .login-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+.campo input,
+.campo textarea,
+.campo select,
+.login-input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border2);
+  border-radius: 8px;
+  font-family: var(--fonte);
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg);
+  outline: none;
+  transition: border-color .2s, box-shadow .2s;
+}
+.campo input:focus,
+.campo textarea:focus,
+.campo select:focus,
+.login-input:focus {
+  border-color: var(--mp-teal);
+  box-shadow: 0 0 0 3px rgba(77,188,200,.15);
+  background: #fff;
+}
+.campo textarea { resize: vertical; min-height: 80px; }
+.campo input::placeholder,
+.campo textarea::placeholder { color: var(--text3); }
+
+/* ─── Tags / Badges de status ─── */
+/* ➕ Para adicionar status com nova cor: copie um bloco abaixo */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .03em;
+  white-space: nowrap;
+}
+.tag-gray   { background: #F1F5F9; color: #64748B; }
+.tag-blue   { background: var(--blue-bg); color: var(--blue); }
+.tag-amber  { background: var(--amber-bg); color: var(--amber); }
+.tag-green  { background: var(--green-bg); color: var(--green); }
+.tag-red    { background: var(--red-bg); color: var(--red); }
+.tag-purple { background: var(--purple-bg); color: var(--purple); }
+.tag-teal   { background: #ECFEFF; color: #0E7490; }
+.tag-navy   { background: #EFF6FF; color: var(--mp-navy); }
+
+/* ─── Alertas ─── */
+.alerta {
+  padding: 11px 16px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  display: none;
+  animation: fadeIn .2s ease;
+}
+.alerta.visivel   { display: block; }
+.alerta-sucesso   { background: var(--green-bg); color: #166534; border: 1px solid #BBF7D0; }
+.alerta-erro      { background: var(--red-bg); color: #991B1B; border: 1px solid #FECACA; }
+.alerta-info      { background: var(--blue-bg); color: #1E40AF; border: 1px solid #BFDBFE; }
+.alerta-aviso     { background: var(--amber-bg); color: #92400E; border: 1px solid #FCD34D; }
+
+/* ─── Timeline de mensagens ─── */
+.timeline { display: flex; flex-direction: column; gap: 10px; }
+
+.mensagem-item          { display: flex; gap: 10px; animation: fadeIn .25s ease; }
+.mensagem-item.admin    { flex-direction: row-reverse; }
+
+.mensagem-avatar {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; flex-shrink: 0;
+}
+.mensagem-item.cliente .mensagem-avatar { background: var(--blue-bg); }
+.mensagem-item.admin   .mensagem-avatar { background: var(--green-bg); }
+
+.mensagem-balao {
+  max-width: 78%;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.mensagem-item.cliente .mensagem-balao {
+  background: white;
+  border: 1px solid var(--border);
+  border-top-left-radius: 4px;
+}
+.mensagem-item.admin .mensagem-balao {
+  background: var(--mp-navy);
+  color: white;
+  border-top-right-radius: 4px;
+}
+.mensagem-hora {
+  font-size: 10px;
+  color: var(--text3);
+  margin-top: 4px;
+}
+.mensagem-item.admin .mensagem-hora {
+  text-align: right;
+  color: rgba(255,255,255,.5);
+}
+
+/* ─── Upload de arquivos ─── */
+.upload-area {
+  border: 2px dashed var(--border2);
+  border-radius: var(--r);
+  padding: 28px;
+  text-align: center;
+  cursor: pointer;
+  transition: all .2s;
+  background: var(--bg);
+}
+.upload-area:hover,
+.upload-area.dragover {
+  border-color: var(--mp-teal);
+  background: #F0FDFF;
+}
+
+.arquivo-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-top: 8px;
+  font-size: 12px;
+}
+.arquivo-item a { color: var(--blue); font-weight: 500; }
+.arquivo-item a:hover { text-decoration: underline; }
+
+/* ─── Tabela ─── */
+.tabela { width: 100%; border-collapse: collapse; }
+.tabela th {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--text2);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+.tabela td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  vertical-align: middle;
+}
+.tabela tr:last-child td { border-bottom: none; }
+.tabela tr:hover td { background: #FAFBFC; }
+.tabela .row-link { cursor: pointer; }
+
+/* ─── Histórico (timeline vertical) ─── */
+.historico-item {
+  display: flex;
+  gap: 12px;
+  position: relative;
+  padding-bottom: 16px;
+}
+.historico-item:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 15px;
+  top: 32px;
+  bottom: 0;
+  width: 2px;
+  background: var(--border);
+}
+.historico-dot {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--blue-bg);
+  border: 2px solid var(--blue);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; flex-shrink: 0;
+}
+.historico-conteudo {
+  flex: 1;
+  padding: 10px 14px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.historico-status { font-size: 12px; font-weight: 600; color: var(--text); }
+.historico-obs    { font-size: 11px; color: var(--text2); margin-top: 3px; }
+.historico-hora   { font-size: 10px; color: var(--text3); margin-top: 4px; }
+
+/* ─── Animações ─── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── Responsivo básico ─── */
+@media (max-width: 768px) {
+  .card-body { padding: 14px; }
+  .mensagem-balao { max-width: 90%; }
+  .tabela th, .tabela td { padding: 8px 10px; }
+}
