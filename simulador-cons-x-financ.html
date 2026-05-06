@@ -104,8 +104,15 @@
           <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><span class="toggle-input"><input type="checkbox" id="adesaoOn"><span class="toggle-slider"></span></span>% Taxa de adesão</label>
           <input type="text" id="adesao" placeholder="0,00 %" data-mask="pct2" disabled>
         </div>
+        <div class="field" id="prazoAdesaoField" style="display:none;">
+          <label>Prazo adesão (meses)</label>
+          <input type="text" id="prazoAdesao" placeholder="12" value="12">
+        </div>
       </div>
-      <div style="margin-top:14px;"><div class="result-primary"><strong>Parcela inicial</strong><span class="value" id="parcelaInicial">R$ 0,00</span></div></div>
+      <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="result-primary"><strong id="parcelaInicialLabel">Parcela inicial</strong><span class="value" id="parcelaInicial">R$ 0,00</span></div>
+        <div class="result-primary" id="parcelaDemaisBox" style="display:none;"><strong>Demais parcelas</strong><span class="value" id="parcelaDemais">R$ 0,00</span></div>
+      </div>
     </div>
 
     <div class="group-card" style="margin-bottom:14px;">
@@ -390,11 +397,32 @@ function recalc(){
   const redutorOn = document.getElementById('redutorOn').checked;
   const redutor = redutorOn ? unmaskPct(document.getElementById('redutor').value)/100 : 0;
 
-  // Parcela inicial
+  // Seguro CATEGORIA (default Conkey): seguro_mensal = pct × (1+taxaAdm+fundo) × crédito
+  const seguroOn = document.getElementById('seguroOn').checked;
+  const seguro = seguroOn ? unmaskPct(document.getElementById('seguro').value)/100 : 0;
+  const parcSeguro = seguro * (1+taxaAdm+fundo) * credito;
+
+  // Adesão: pct × crédito diluído nas primeiras N parcelas (prazoAdesao)
+  const adesaoOn = document.getElementById('adesaoOn').checked;
+  const adesao = adesaoOn ? unmaskPct(document.getElementById('adesao').value)/100 : 0;
+  const prazoAdesao = parseInt(document.getElementById('prazoAdesao').value || '12', 10);
+  const parcAdesao = (adesaoOn && prazoAdesao > 0) ? (adesao * credito) / prazoAdesao : 0;
+  // Mostra/esconde campo "Prazo adesão" e box "Demais parcelas"
+  document.getElementById('prazoAdesaoField').style.display = adesaoOn ? '' : 'none';
+  document.getElementById('parcelaDemaisBox').style.display = adesaoOn ? '' : 'none';
+
+  // Parcela inicial (com adesão durante prazoAdesao) e demais (sem adesão)
   const totalDevido = credito*(1+taxaAdm+fundo);
-  const parcelaBruta = prazo>0 ? totalDevido/prazo : 0;
-  const parcelaBase = parcelaBruta * (1 - redutor);
+  const parcelaCota = prazo>0 ? totalDevido/prazo : 0;
+  const parcelaInicialBruta = parcelaCota + parcSeguro + parcAdesao;
+  const parcelaDemaisBruta  = parcelaCota + parcSeguro;
+  const parcelaBase  = parcelaInicialBruta * (1 - redutor); // usada no cronograma
+  const parcelaDemais = parcelaDemaisBruta  * (1 - redutor);
   document.getElementById('parcelaInicial').textContent = fmtMoney(parcelaBase);
+  document.getElementById('parcelaDemais').textContent = fmtMoney(parcelaDemais);
+  // Label dinâmico: "12 parcelas iniciais" quando há adesão, senão "Parcela inicial"
+  document.getElementById('parcelaInicialLabel').textContent =
+    adesaoOn ? (prazoAdesao + ' parcelas iniciais') : 'Parcela inicial';
 
   // Frequência de reajuste em meses (Cota-Anual=12, Semestral=6, Mensal=1)
   function periodoReajusteMeses(tr) {
@@ -416,14 +444,18 @@ function recalc(){
   }
   document.getElementById('creditoAtualizado').value = fmtMoney(creditoAtualizado);
 
-  // Saldo devedor no momento da contemplação (iterativo, com reajuste no mês inclusive)
+  // Saldo devedor no momento da contemplação (iterativo, com reajuste no mês inclusive).
+  // Durante prazoAdesao primeiras parcelas paga parcelaBase (com adesão); depois parcelaDemais.
   let saldoNoMomentoCont = totalDevido;
   let parcelaAtualNoMomento = parcelaBase;
+  let parcelaDemaisAtual = parcelaDemais;
   for(let m = 1; m <= expectativa; m++) {
-    saldoNoMomentoCont -= parcelaAtualNoMomento;
+    const pagaAgora = (adesaoOn && m <= prazoAdesao) ? parcelaAtualNoMomento : parcelaDemaisAtual;
+    saldoNoMomentoCont -= pagaAgora;
     if(reajusteAplicaEm(m)) {
       saldoNoMomentoCont *= (1+reajuste);
       parcelaAtualNoMomento *= (1+reajuste);
+      parcelaDemaisAtual    *= (1+reajuste);
     }
   }
   saldoNoMomentoCont = Math.max(0, saldoNoMomentoCont);
@@ -487,15 +519,22 @@ function recalc(){
     // Convenção Conkey: reajuste fire ANTES da parcela ser paga no mês do aniversário.
     // Pré-cont: parcela_inicial reajusta a cada anniversary até m=expectativa
     // Pós-cont: parcela_pos começa em m=expectativa+1 sem reajuste e reajusta a cada anniversary subsequente
+    // Adesão: durante prazoAdesao primeiras parcelas usa parcelaBase (com adesão);
+    //         depois usa parcelaDemais (sem adesão).
     let sum = 0;
     let pPre = parcelaBase;
+    let pPreDemais = parcelaDemais;
     let pPos = parcelaPos;
     for(let m = 1; m <= prazoFinal; m++) {
       if(reajusteAplicaEm(m)) {
-        if(m <= expectativa) pPre *= (1+reajuste);
-        else                  pPos *= (1+reajuste);
+        if(m <= expectativa) { pPre *= (1+reajuste); pPreDemais *= (1+reajuste); }
+        else                 { pPos *= (1+reajuste); }
       }
-      sum += (m <= expectativa) ? pPre : pPos;
+      if(m <= expectativa) {
+        sum += (adesaoOn && m <= prazoAdesao) ? pPre : pPreDemais;
+      } else {
+        sum += pPos;
+      }
     }
     return sum;
   }
