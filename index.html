@@ -783,11 +783,11 @@ async function enterPortal() {
   const role = currentUser.tipo==='admin'?'Administrador':currentUser.tipo==='socio'?'Socio':'Consultor';
   document.getElementById('sb-user-role').textContent=role;
   document.getElementById('admin-nav').classList.toggle('hidden', currentUser.tipo!=='admin');
-  // Restrição: Erik Goncalves não vê Visão Geral
-  const _restrictedOverview = ['ERIK GONCALVES'];
-  const _isOverviewBlocked = _restrictedOverview.includes((currentUser.nome||'').trim().toUpperCase());
+  // Visão Geral: acesso restrito aos donos da corretora
+  const _OVERVIEW_ALLOWED = ['ALLAN ALMEIDA', 'ADMINISTRADOR'];
+  const _isOverviewAllowed = _OVERVIEW_ALLOWED.includes((currentUser.nome||'').trim().toUpperCase());
   const _ovItem = document.getElementById('ni-admin-overview');
-  if (_ovItem) _ovItem.style.display = _isOverviewBlocked ? 'none' : '';
+  if (_ovItem) _ovItem.style.display = _isOverviewAllowed ? '' : 'none';
   // Restrição: Claudia Barreto não vê Demonstrativo nem Histórico
   const _restrictedDemo = ['CLAUDIA BARRETO'];
   const _isDemoBlocked = _restrictedDemo.includes((currentUser.nome||'').trim().toUpperCase());
@@ -800,14 +800,14 @@ async function enterPortal() {
   document.getElementById('perfil-tipo').innerHTML=`<span class="tag tag-${currentUser.tipo==='admin'?'navy':currentUser.tipo==='socio'?'teal':'blue'}">${role}</span>`;
   nav('dashboard-vendas');
   if (!_isDemoBlocked) { await renderDashboard(); await renderHistorico(); }
-  if (currentUser.tipo==='admin') { await renderAdminMeses(); await renderUsers(); if (!_isOverviewBlocked) { await renderAdminOverview(); } }
+  if (currentUser.tipo==='admin') { await renderAdminMeses(); await renderUsers(); if (_isOverviewAllowed) { await renderAdminOverview(); } }
 }
 
 // ═══ NAV ═══
 function nav(id) {
-  // Restrição: Erik Goncalves não acessa Visão Geral mesmo via URL
-  if (id === 'admin-overview' && currentUser && ['ERIK GONCALVES'].includes((currentUser.nome||'').trim().toUpperCase())) {
-    id = 'dashboard';
+  // Visão Geral: só para os donos. Outros admins/usuários redirecionados.
+  if (id === 'admin-overview' && currentUser && !['ALLAN ALMEIDA', 'ADMINISTRADOR'].includes((currentUser.nome||'').trim().toUpperCase())) {
+    id = 'dashboard-vendas';
   }
   // Restrição: Claudia Barreto não acessa Demonstrativo nem Histórico mesmo via URL
   if ((id === 'dashboard' || id === 'historico') && currentUser && ['CLAUDIA BARRETO'].includes((currentUser.nome||'').trim().toUpperCase())) {
