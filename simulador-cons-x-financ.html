@@ -445,15 +445,18 @@ function recalc(){
   document.getElementById('creditoAtualizado').value = fmtMoney(creditoAtualizado);
 
   // Saldo devedor no momento da contemplação (iterativo, com reajuste no mês inclusive).
-  // Durante prazoAdesao primeiras parcelas paga parcelaBase (com adesão); depois parcelaDemais.
+  // Importante: o saldo da cota amortiza só pela parcela COTA pura (com redutor) — seguro
+  // e adesão NÃO descontam do saldo da cota (são pagos a outras partes: seguradora/admin).
+  const parcelaCotaEfet = parcelaCota * (1 - redutor);
   let saldoNoMomentoCont = totalDevido;
+  let parcelaCotaAtual = parcelaCotaEfet;
   let parcelaAtualNoMomento = parcelaBase;
   let parcelaDemaisAtual = parcelaDemais;
   for(let m = 1; m <= expectativa; m++) {
-    const pagaAgora = (adesaoOn && m <= prazoAdesao) ? parcelaAtualNoMomento : parcelaDemaisAtual;
-    saldoNoMomentoCont -= pagaAgora;
+    saldoNoMomentoCont -= parcelaCotaAtual;
     if(reajusteAplicaEm(m)) {
       saldoNoMomentoCont *= (1+reajuste);
+      parcelaCotaAtual      *= (1+reajuste);
       parcelaAtualNoMomento *= (1+reajuste);
       parcelaDemaisAtual    *= (1+reajuste);
     }
@@ -488,7 +491,10 @@ function recalc(){
   const saldoApoLance = Math.max(0, saldoNoMomentoCont - valorTotalLance);
   const prazoRestante = Math.max(0, prazo - expectativa);
   const parcReducaoParcela = prazoRestante > 0 ? saldoApoLance / prazoRestante : 0;
-  const parcReducaoPrazo = parcelaAtualNoMomento;
+  // Redução de prazo: parcela continua a mesma após contemplação. Como adesão expira
+  // em prazoAdesao, e expectativa>=prazoAdesao na maioria dos casos, usamos parcelaDemais
+  // (= cota + seguro, sem adesão) reajustada até expectativa.
+  const parcReducaoPrazo = parcelaDemaisAtual;
   const novoPrazoReducao = parcReducaoPrazo > 0 ? Math.ceil(saldoApoLance / parcReducaoPrazo) : 0;
 
   // === Helpers ===
