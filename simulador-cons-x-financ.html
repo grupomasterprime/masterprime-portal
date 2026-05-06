@@ -617,6 +617,8 @@ function recalc(){
     let pIni = 0, pFim = 0, sumP = 0;
     const cf = [finFinanciado];
     const parcelas = [];
+    // SAC: amortização FIXA = financiamento / prazo (igual referencial Conkey)
+    const amortFixa = finTipo === 'SAC' ? finFinanciado / finPrazoF : 0;
     for(let m=1; m<=finPrazoF; m++) {
       // Correção monetária do saldo pela TR
       saldo *= (1 + trMensal);
@@ -624,7 +626,7 @@ function recalc(){
       const prazoResta = finPrazoF - m + 1;
       let parcelaBase, amortMes;
       if(finTipo === 'SAC') {
-        amortMes = saldo / prazoResta;
+        amortMes = amortFixa; // amortização constante
         parcelaBase = juros + amortMes;
       } else { // PRICE / CDC: PMT recalculado com saldo atualizado e prazo restante
         parcelaBase = (iMensal > 0)
