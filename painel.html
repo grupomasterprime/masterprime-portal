@@ -1645,19 +1645,23 @@ function parseInd(ind, consultor, multConsultor=0.625) {
   }
 
   // ── Advanced ── (consultores Advanced têm regra especial — tratado em executarCalculo)
-  // ── Strada: "1% STRADA BRUTO / 1% RODRIGUES SILVA" ──
+  // ── Strada: "1% STRADA LIQUIDO / 1% RODRIGUES SILVA" (default LÍQUIDO; BRUTO se explícito) ──
   if (s.includes('STRADA') && s.includes('%')) {
     const partes = [];
     const partsStr = s.split('/').map(p => p.trim());
     partsStr.forEach(p => {
-      const m = p.match(/^(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s]+?)(?:\s+BRUTO)?$/);
+      const m = p.match(/^(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s]+?)(?:\s+(BRUTO|LIQUIDO))?$/);
       if (m) {
         const pct  = parseFloat(m[1].replace(',','.'))/100;
         const quem = normNome(m[2].trim());
+        // Regra geral: BRUTO na OBS = não desconta. LIQUIDO ou ausente = desconta NF+ADM.
+        const ehLiq = m[3] !== 'BRUTO';
         partes.push({
           quem, fracBruto: pctObsToFrac(pct),
           ehParceiro: quem === 'STRADA', masterPaga: quem === 'STRADA',
-          oculto: false, ehCarta: false
+          oculto: false, ehCarta: false,
+          // Só faz sentido para parceiros externos (Strada). Rodrigues etc. é interno.
+          ehLiquido: quem === 'STRADA' ? ehLiq : false
         });
       }
     });
@@ -1694,12 +1698,12 @@ function parseInd(ind, consultor, multConsultor=0.625) {
     /^\d+[,.]?\d*\s*%\s+[A-ZÀ-Ö\s\.]+?\s+(?:LIQUIDO|BRUTO)\s*\//.test(s);
   if (ehRepasse) {
 
-    let pctP=0, nomeP='', resp='RENATO BENEDETTI';
+    let pctP=0, nomeP='', resp='RENATO BENEDETTI', modP='';
 
     // "X% NOME LIQUIDO / RESP" ou "X% NOME LIQUIDO, RESP REPASSA"
-    const mA = s.match(/^(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s\.]+?)\s+(?:LIQUIDO|BRUTO)\s*[,\/\-]\s*([A-ZÀ-Ö\s]+?)(?:\s+REPASSA)?$/);
+    const mA = s.match(/^(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s\.]+?)\s+(LIQUIDO|BRUTO)\s*[,\/\-]\s*([A-ZÀ-Ö\s]+?)(?:\s+REPASSA)?$/);
     // "X% NOME LIQUIDO RESP REPASSA" (espaço como separador — sem barra/traço)
-    const mA2 = s.match(/^(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s\.]+?)\s+(?:LIQUIDO|BRUTO)\s+([A-ZÀ-Ö\s]+?)\s+REPASSA$/);
+    const mA2 = s.match(/^(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s\.]+?)\s+(LIQUIDO|BRUTO)\s+([A-ZÀ-Ö\s]+?)\s+REPASSA$/);
     // "X% NOME - RESP REPASSA" sem LIQUIDO/BRUTO
     const mB = s.match(/^(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s\.]+?)\s*[-]\s*([A-ZÀ-Ö\s]+?)\s+REPASSA$/);
     // "NOME X% - RESP REPASSA"
@@ -1711,18 +1715,20 @@ function parseInd(ind, consultor, multConsultor=0.625) {
     // "NOME X%" onde NOME é parceiro carta
     const mF = s.match(/^([A-ZÀ-Ö\s\.]+?)\s+(\d+[,.]?\d*)\s*%(?:\s+(BRUTO|LIQUIDO))?$/);
 
-    if (mA)  { pctP=parseFloat(mA[1].replace(',','.'))/100;  nomeP=normNome(mA[2].trim());  resp=normNome(mA[3].trim()); }
-    else if (mA2) { pctP=parseFloat(mA2[1].replace(',','.'))/100; nomeP=normNome(mA2[2].trim()); resp=normNome(mA2[3].trim()); }
+    if (mA)  { pctP=parseFloat(mA[1].replace(',','.'))/100;  nomeP=normNome(mA[2].trim());  modP=mA[3]; resp=normNome(mA[4].trim()); }
+    else if (mA2) { pctP=parseFloat(mA2[1].replace(',','.'))/100; nomeP=normNome(mA2[2].trim()); modP=mA2[3]; resp=normNome(mA2[4].trim()); }
     else if (mB) { pctP=parseFloat(mB[1].replace(',','.'))/100; nomeP=normNome(mB[2].trim()); resp=normNome(mB[3].trim()); }
     else if (mD2) { pctP=parseFloat(mD2[1].replace(',','.'))/100; nomeP=normNome(mD2[3].trim()); resp=normNome(mD2[2].trim()); }
     else if (mC) { nomeP=normNome(mC[1].trim()); pctP=parseFloat(mC[2].replace(',','.'))/100; resp=normNome(mC[3].trim()); }
-    else if (mE && PARCEIROS_CARTA.some(p=>normNome(mE[2].trim()).includes(p))) { pctP=parseFloat(mE[1].replace(',','.'))/100; nomeP=normNome(mE[2].trim()); }
-    else if (mF && PARCEIROS_CARTA.some(p=>normNome(mF[1].trim()).includes(p))) { nomeP=normNome(mF[1].trim()); pctP=parseFloat(mF[2].replace(',','.'))/100; }
+    else if (mE && PARCEIROS_CARTA.some(p=>normNome(mE[2].trim()).includes(p))) { pctP=parseFloat(mE[1].replace(',','.'))/100; nomeP=normNome(mE[2].trim()); modP=mE[3]||''; }
+    else if (mF && PARCEIROS_CARTA.some(p=>normNome(mF[1].trim()).includes(p))) { nomeP=normNome(mF[1].trim()); pctP=parseFloat(mF[2].replace(',','.'))/100; modP=mF[3]||''; }
 
     if (pctP > 0 && nomeP) {
       const ehCarta = PARCEIROS_CARTA.some(p => nomeP.includes(p));
+      // Regra geral: BRUTO na OBS = não desconta. LIQUIDO ou ausente = desconta NF+ADM.
+      const ehLiqCarta = modP !== 'BRUTO';
       return { tipo:'ok', partes:[
-        { quem:nomeP, fracBruto:pctObsToFrac(pctP), ehParceiro:true, masterPaga:false, oculto:false, ehCarta, cartaResp:resp, ehLiquido:true },
+        { quem:nomeP, fracBruto:pctObsToFrac(pctP), ehParceiro:true, masterPaga:false, oculto:false, ehCarta, cartaResp:resp, ehLiquido:ehLiqCarta },
         { quem:resp, fracBruto:pctObsToFrac(pctP), ehParceiro:false, masterPaga:false, oculto:false, ehCarta:false },
       ]};
     }
@@ -1790,11 +1796,13 @@ function parseInd(ind, consultor, multConsultor=0.625) {
     const fracSecond = pctObsToFrac(pSecond);   // fração de Renato/Paulo mencionado
     // Consultor (Paulo ou quem registrou) fica com o restante
     const fracCons = Math.max(0, 1 - fracParc - fracSecond);
+    // Regra geral: BRUTO no string da OBS = não desconta tributos do Ricardo.
+    const ricardoLiq = !/\bBRUTO\b/i.test(s);
     const partes = [
       // Ricardo → carta de parceria, responsável = pessoa após /
       { quem:'RICARDO CABEZAOLIAS', fracBruto:fracParc, pctOrig:pParc,
         ehParceiro:true, masterPaga:false, oculto:false, ehCarta:true,
-        cartaResp, ehLiquido:true },
+        cartaResp, ehLiquido:ricardoLiq },
       // Pessoa mencionada após / recebe sua % direto
       { quem:nomeSecond, fracBruto:fracSecond, pctOrig:pSecond,
         ehParceiro:false, masterPaga:false, oculto:false, ehCarta:false },
@@ -2047,32 +2055,27 @@ function processarLinha(linha, match, ciclo, mult, split, isAdvanced=false) {
     }
 
     const brutoPart = rec * (parte.fracBruto||0);
-    let valParc;
-    if (parte.ehLiquido) {
-      const nf  = brutoPart * TRIB_VEND;
-      const adm = (brutoPart - nf) * ADM_PCT;
-      valParc = brutoPart - nf - adm;
-    } else {
-      valParc = brutoPart; // BRUTO: paga limpo
-    }
+    // NF/ADM do PARCEIRO — sempre calculados; ficam 0 quando ehLiquido=false (BRUTO).
+    const nfParc  = parte.ehLiquido ? brutoPart * TRIB_VEND : 0;
+    const admParc = parte.ehLiquido ? (brutoPart - nfParc) * ADM_PCT : 0;
+    const valParc = brutoPart - nfParc - admParc; // = brutoPart se BRUTO
 
     if (!parte.oculto && !parte.silenciaObs) {
       obsParc.push({ quem:parte.quem, frac:parte.fracBruto, valor:valParc,
+        // Valores do PARCEIRO (não do consultor) — usado pela tabela "Carta de Parceria"
+        brutoParc:brutoPart, nfParc, admParc,
         masterPaga:parte.masterPaga, ehLiquido:!!parte.ehLiquido, ehStub:!!parte.ehStub,
         ehCarta:!!parte.ehCarta, cartaResp:parte.cartaResp||'' });
     }
 
     // Parceiro que a Master paga → gera demonstrativo próprio (Enoque, Seguros, Strada, etc.)
     if (parte.masterPaga && !parte.ehCarta && !parte.oculto) {
-      const nfCons  = parte.ehLiquido ? brutoPart * TRIB_VEND : 0;
-      const admCons = parte.ehLiquido ? (brutoPart - nfCons) * ADM_PCT : 0;
-      const liqCons = brutoPart - nfCons - admCons;
       addResultado(parte.quem, 'parceiro', {
         ...linha, dataVenda:dv, ciclo, nomeCliente:nc,
-        mult:parte.fracBruto, brutoCons:brutoPart, nfCons, admCons, liqCons,
+        mult:parte.fracBruto, brutoCons:brutoPart, nfCons:nfParc, admCons:admParc, liqCons:valParc,
         excedente:0, obsParc:[], indicacao: parte.ehLiquido ? 'Líquido' : 'Bruto'
       });
-      addExcedente(-liqCons, linha.adm);
+      addExcedente(-valParc, linha.adm);
     }
 
     // Carta de parceria (vc paga): gera entrada no S.cartas E linha no demo do responsável
@@ -2080,16 +2083,16 @@ function processarLinha(linha, match, ciclo, mult, split, isAdvanced=false) {
     // (ex: Renato paga Ricardo em venda do Paulo → linha no demo do Renato)
     // Quando cartaResp === consultor, a obsParc já registra na linha normal dele
     if (parte.ehCarta && parte.cartaResp) {
-      addCarta(parte.cartaResp, parte.quem, {...linha, dataVenda:dv, nomeCliente:nc, valor:valParc});
+      addCarta(parte.cartaResp, parte.quem, {
+        ...linha, dataVenda:dv, nomeCliente:nc,
+        valor:valParc, brutoParc:brutoPart, nfParc, admParc, ehLiquido:!!parte.ehLiquido
+      });
       if (parte.cartaResp !== consultor) {
-        const nfR  = parte.ehLiquido ? brutoPart * TRIB_VEND : 0;
-        const admR = parte.ehLiquido ? (brutoPart - nfR) * ADM_PCT : 0;
-        const liqR = brutoPart - nfR - admR;
         addResultado(parte.cartaResp, TODOS_SOCIOS.includes(parte.cartaResp)?'socio':'vendedor', {
           ...linha, dataVenda:dv, ciclo, nomeCliente:nc,
-          mult:parte.fracBruto, brutoCons:brutoPart, nfCons:nfR, admCons:admR, liqCons:liqR,
+          mult:parte.fracBruto, brutoCons:brutoPart, nfCons:nfParc, admCons:admParc, liqCons:valParc,
           excedente:0,
-          obsParc:[{quem:'Carta: '+parte.quem, valor:liqR, masterPaga:false, ehInfo:true}],
+          obsParc:[{quem:'Carta: '+parte.quem, valor:valParc, masterPaga:false, ehInfo:true}],
           indicacao:'Carta → '+parte.quem
         });
       }
@@ -3559,6 +3562,8 @@ function buildCartasVcPaga() {
 
         const entry = {
           vendedor, linha: l, valor: p.valor || 0,
+          // Bruto/NF/ADM do PARCEIRO (não do consultor) — guardados em obsParc por processarLinha
+          brutoParc: p.brutoParc, nfParc: p.nfParc, admParc: p.admParc,
           pct: pctDisplay,
           ehLiquido: p.ehLiquido || false,
           ehStub: p.ehStub || false,
@@ -3602,13 +3607,26 @@ function cartaRow(e) {
     return `<td class="mono dim" style="font-size:10px">${parc}</td><td class="mono num dim">—</td><td class="mono num dim">—</td><td class="mono num dim">—</td><td class="mono num dim">—</td><td style="font-size:10px;color:var(--text2)"></td>`;
   }
   const cls = e.valor < 0 ? 'neg' : 'pos';
-  if (e.ehLiquido) {
-    const av = Math.abs(e.valor);
-    const { bruto, nf, adm, liq } = calcBrutoFromLiq(av);
-    const sinal = e.valor < 0 ? -1 : 1;
+  const av  = Math.abs(e.valor);
+  // Usa brutoParc/nfParc/admParc se disponíveis (valores exatos do parceiro);
+  // fallback para calcBrutoFromLiq (reverso do líq) — pode ter erro de centavos.
+  let bruto, nf, adm, liq;
+  if (e.brutoParc !== undefined) {
+    bruto = Math.abs(e.brutoParc);
+    nf    = Math.abs(e.nfParc || 0);
+    adm   = Math.abs(e.admParc || 0);
+    liq   = av;
+  } else if (e.ehLiquido) {
+    const r = calcBrutoFromLiq(av);
+    bruto = r.bruto; nf = r.nf; adm = r.adm; liq = r.liq;
+  } else {
+    bruto = av; nf = 0; adm = 0; liq = av;
+  }
+  if (nf > 0 || adm > 0) {
     return `<td class="mono dim" style="font-size:10px">${parc}</td><td class="mono num ${cls}">${e.valor<0?'(':''}${fmtBRL(bruto)}${e.valor<0?')':''}</td><td class="mono num neg" style="font-size:10px">(${fmtBRL(nf)})</td><td class="mono num dim" style="font-size:10px">(${fmtBRL(adm)})</td><td class="mono num ${cls} fw6">${e.valor<0?'(':''}${fmtBRL(liq)}${e.valor<0?')':''}</td><td style="font-size:10px;color:var(--text2)">${obs}</td>`;
   }
-  return `<td class="mono dim" style="font-size:10px">${parc}</td><td class="mono num ${cls} fw6">${e.valor<0?'(':''}${fmtBRL(Math.abs(e.valor))}${e.valor<0?')':''}</td><td class="mono num dim">—</td><td class="mono num dim">—</td><td class="mono num ${cls} fw6">${e.valor<0?'(':''}${fmtBRL(Math.abs(e.valor))}${e.valor<0?')':''}</td><td style="font-size:10px;color:var(--text2)">${obs}</td>`;
+  // BRUTO (sem desconto): bruto = líq, NF e ADM em traço
+  return `<td class="mono dim" style="font-size:10px">${parc}</td><td class="mono num ${cls} fw6">${e.valor<0?'(':''}${fmtBRL(bruto)}${e.valor<0?')':''}</td><td class="mono num dim">—</td><td class="mono num dim">—</td><td class="mono num ${cls} fw6">${e.valor<0?'(':''}${fmtBRL(liq)}${e.valor<0?')':''}</td><td style="font-size:10px;color:var(--text2)">${obs}</td>`;
 }
 
 function renderCartas() {
@@ -4054,15 +4072,33 @@ function publicarNoPortal() {
               const absVal = Math.abs(e.valor||0);
               // Stub ou sem valor calculado: só mostra info do contrato, colunas de valor em branco
               const ehStub = e.ehStub || (e.valor||0) === 0;
+              // Bruto/NF/ADM do PARCEIRO (vêm de obsParc.brutoParc/nfParc/admParc).
+              // Para cartas BRUTO, NF=ADM=0 e mostramos traço nessas colunas.
+              let bruto, nf, adm;
+              if (e.brutoParc !== undefined) {
+                bruto = Math.abs(e.brutoParc); nf = Math.abs(e.nfParc||0); adm = Math.abs(e.admParc||0);
+              } else if (e.ehLiquido) {
+                // Fallback: reverte o líquido em bruto (erro de centavos possível)
+                bruto = absVal / (1 - TRIB_VEND) / (1 - ADM_PCT);
+                nf = bruto * TRIB_VEND;
+                adm = (bruto - nf) * ADM_PCT;
+              } else {
+                bruto = absVal; nf = 0; adm = 0;
+              }
               const cellsValor = ehStub
                 ? `<td class="mono num dim">&mdash;</td>
                    <td class="mono num dim">&mdash;</td>
                    <td class="mono num dim">&mdash;</td>
                    <td class="mono num dim">&mdash;</td>`
-                : `<td class="mono num">${fmtBRL(e.linha?.brutoCons||0)}</td>
-                   <td class="mono num neg">(${fmtBRL(e.linha?.nfCons||0)})</td>
-                   <td class="mono num" style="color:var(--text2)">(${fmtBRL(e.linha?.admCons||0)})</td>
-                   <td class="mono num ${neg?'neg':'pos'} fw6">${neg?'(':''}${fmtBRL(absVal)}${neg?')':''}</td>`;
+                : (nf > 0 || adm > 0)
+                  ? `<td class="mono num">${fmtBRL(bruto)}</td>
+                     <td class="mono num neg">(${fmtBRL(nf)})</td>
+                     <td class="mono num" style="color:var(--text2)">(${fmtBRL(adm)})</td>
+                     <td class="mono num ${neg?'neg':'pos'} fw6">${neg?'(':''}${fmtBRL(absVal)}${neg?')':''}</td>`
+                  : `<td class="mono num">${fmtBRL(bruto)}</td>
+                     <td class="mono num dim">&mdash;</td>
+                     <td class="mono num dim">&mdash;</td>
+                     <td class="mono num ${neg?'neg':'pos'} fw6">${neg?'(':''}${fmtBRL(absVal)}${neg?')':''}</td>`;
               return `<tr>
                 <td style="font-size:10px">${e.linha?.adm || '&mdash;'}</td>
                 <td class="mono" style="font-size:10px">${(typeof fmtRef==='function'?fmtRef(e.linha):(e.linha?.grupoCota||e.linha?.contrato||'&mdash;'))}</td>
