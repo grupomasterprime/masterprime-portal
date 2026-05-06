@@ -636,7 +636,8 @@ function recalc(){
       if(saldo < 0) saldo = 0;
       let parcelaTotal = parcelaBase;
       if(comTarifa) {
-        parcelaTotal += saldo * mipMensal + finImovel * dfiMensal + finTarifa;
+        // Conkey "PARCELA + TARIFA + TR": TR aditiva sobre saldo + tarifa + MIP + DFI
+        parcelaTotal += saldo * trMensal + saldo * mipMensal + finImovel * dfiMensal + finTarifa;
       }
       if(m === 1) pIni = parcelaTotal;
       pFim = parcelaTotal;
