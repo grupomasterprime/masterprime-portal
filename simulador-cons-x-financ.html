@@ -607,35 +607,36 @@ function recalc(){
   const mipMensal = finMIPpct;
   const dfiMensal = finDFIpct;
 
-  // Calcular cronograma de financiamento
-  // SAC: amort fixa, juros sobre saldo. PRICE: parcela fixa. CDC: PRICE simplificado para veículos
-  // TR como aditivo na parcela com tarifa (não acumula saldo)
+  // Calcular cronograma de financiamento (igual referencial Conkey)
+  // TR é correção monetária do SALDO DEVEDOR (não aditivo na parcela). Parcela cresce ao
+  // longo do tempo porque saldo é corrigido pela TR antes do cálculo de juros/amortização.
+  // SAC: amortização = saldo_atual / prazo_restante. PRICE/CDC: PMT recalculado por mês.
   function calcCronograma(comTarifa) {
     if(finPrazoF <= 0 || finFinanciado <= 0) return {ini:0, fim:0, sumP:0, cf:[], parcelas:[]};
     let saldo = finFinanciado;
     let pIni = 0, pFim = 0, sumP = 0;
     const cf = [finFinanciado];
     const parcelas = [];
-    const amort = finTipo === 'SAC' ? finFinanciado / finPrazoF : 0;
-    const pricePMT = (finTipo === 'PRICE' || finTipo === 'CDC') && iMensal > 0
-      ? finFinanciado * iMensal / (1 - Math.pow(1+iMensal, -finPrazoF))
-      : 0;
     for(let m=1; m<=finPrazoF; m++) {
+      // Correção monetária do saldo pela TR
+      saldo *= (1 + trMensal);
       const juros = saldo * iMensal;
-      const trMes = saldo * trMensal;
+      const prazoResta = finPrazoF - m + 1;
       let parcelaBase, amortMes;
       if(finTipo === 'SAC') {
-        amortMes = amort;
+        amortMes = saldo / prazoResta;
         parcelaBase = juros + amortMes;
-      } else { // PRICE / CDC
-        parcelaBase = pricePMT;
+      } else { // PRICE / CDC: PMT recalculado com saldo atualizado e prazo restante
+        parcelaBase = (iMensal > 0)
+          ? saldo * iMensal / (1 - Math.pow(1+iMensal, -prazoResta))
+          : saldo / prazoResta;
         amortMes = parcelaBase - juros;
       }
       saldo -= amortMes;
       if(saldo < 0) saldo = 0;
       let parcelaTotal = parcelaBase;
       if(comTarifa) {
-        parcelaTotal += trMes + saldo * mipMensal + finImovel * dfiMensal + finTarifa;
+        parcelaTotal += saldo * mipMensal + finImovel * dfiMensal + finTarifa;
       }
       if(m === 1) pIni = parcelaTotal;
       pFim = parcelaTotal;
