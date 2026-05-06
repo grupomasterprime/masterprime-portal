@@ -385,10 +385,15 @@ function recalc(){
   const pP = tipoCont==='lance' ? unmaskPct(document.getElementById('lanceP').value)/100 : 0;
   const pE = tipoCont==='lance' ? unmaskPct(document.getElementById('lanceE').value)/100 : 0;
   const pFGTS = (tipoCont==='lance' && document.getElementById('fgtsOn').checked) ? unmaskPct(document.getElementById('lanceFGTS').value)/100 : 0;
+  // Redutor de parcela: reduz a parcela paga pelo cliente em X% (sobre a parcela total).
+  // Igual referencial Conkey: parcelaInicial = parcela_bruta × (1 − redutor).
+  const redutorOn = document.getElementById('redutorOn').checked;
+  const redutor = redutorOn ? unmaskPct(document.getElementById('redutor').value)/100 : 0;
 
   // Parcela inicial
   const totalDevido = credito*(1+taxaAdm+fundo);
-  const parcelaBase = prazo>0 ? totalDevido/prazo : 0;
+  const parcelaBruta = prazo>0 ? totalDevido/prazo : 0;
+  const parcelaBase = parcelaBruta * (1 - redutor);
   document.getElementById('parcelaInicial').textContent = fmtMoney(parcelaBase);
 
   // Frequência de reajuste em meses (Cota-Anual=12, Semestral=6, Mensal=1)
