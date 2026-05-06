@@ -988,11 +988,9 @@ function fmtPct(v) {
   return (v*100).toFixed(2).replace('.',',') + '%';
 }
 function fracToBase(frac) {
-  // fracBruto → % sobre base 4%: 0.125 → "0,5%", 0.25 → "1%"
+  // fracBruto → % sobre base 4%: 0.125 → "0,50%", 0.25 → "1,00%"
   if (!frac) return '—';
-  const v = frac * 4;
-  const s = v.toFixed(2).replace('.', ',').replace(/,00$/, '').replace(/,(\d)0$/, ',$1');
-  return s + '%';
+  return (frac * 4).toFixed(2).replace('.', ',') + '%';
 }
 
 // ── DATA / CICLO ─────────────────────────────────────────────────────────
@@ -1039,7 +1037,7 @@ function getMult(consultor, ciclo) {
 }
 
 function multToBase(m) {
-  return (m * 4).toFixed(2).replace('.',',').replace(/,00$/,'') + '%';
+  return (m * 4).toFixed(2).replace('.',',') + '%';
 }
 
 function catLabel(m) {
@@ -2060,23 +2058,41 @@ function processarLinha(linha, match, ciclo, mult, split, isAdvanced=false) {
     const admParc = parte.ehLiquido ? (brutoPart - nfParc) * ADM_PCT : 0;
     const valParc = brutoPart - nfParc - admParc; // = brutoPart se BRUTO
 
+    // pctLabel da parte (ex: "1,50%") usado em OBSs de ambos os lados
+    const pctLabel = parte.pctOrig
+      ? ((parte.pctOrig*100).toFixed(2).replace('.',',')+'%')
+      : fracToBase(parte.fracBruto);
+
     if (!parte.oculto && !parte.silenciaObs) {
-      obsParc.push({ quem:parte.quem, frac:parte.fracBruto, valor:valParc,
-        // Valores do PARCEIRO (não do consultor) — usado pela tabela "Carta de Parceria"
-        brutoParc:brutoPart, nfParc, admParc,
-        masterPaga:parte.masterPaga, ehLiquido:!!parte.ehLiquido, ehStub:!!parte.ehStub,
-        ehCarta:!!parte.ehCarta, cartaResp:parte.cartaResp||'' });
+      if (parte.masterPaga && !parte.ehCarta) {
+        // Parceiro masterPaga (CAMINO, SPOLAOR, STRADA, ENOQUE, etc.) → OBS simples
+        // em itálico cinza no demo do consultor: "1,50% CAMINO"
+        obsParc.push({
+          quem: pctLabel + ' ' + parte.quem,
+          ehInfo: true,
+          // metadados (não renderizados, mas úteis para debug/tabelas)
+          frac: parte.fracBruto, valor: valParc, masterPaga: true,
+          ehLiquido: !!parte.ehLiquido, ehStub: !!parte.ehStub, ehCarta: false,
+          brutoParc: brutoPart, nfParc, admParc
+        });
+      } else {
+        // Carta (vc paga) ou outros → formato detalhado (amber)
+        obsParc.push({ quem:parte.quem, frac:parte.fracBruto, valor:valParc,
+          // Valores do PARCEIRO — usados pela tabela "Carta de Parceria"
+          brutoParc:brutoPart, nfParc, admParc,
+          masterPaga:parte.masterPaga, ehLiquido:!!parte.ehLiquido, ehStub:!!parte.ehStub,
+          ehCarta:!!parte.ehCarta, cartaResp:parte.cartaResp||'' });
+      }
     }
 
     // Parceiro que a Master paga → gera demonstrativo próprio (Enoque, Seguros, Strada, etc.)
     if (parte.masterPaga && !parte.ehCarta && !parte.oculto) {
       // OBS no demo do parceiro: "X,X% NOME_DO_CONSULTOR" (ex: "1,50% LEIDIANE RIBEIRO")
-      const pctLabel = parte.pctOrig
-        ? ((parte.pctOrig*100).toFixed(2).replace('.',',').replace(/,00$/,'')+'%')
-        : fracToBase(parte.fracBruto);
       addResultado(parte.quem, 'parceiro', {
         ...linha, dataVenda:dv, ciclo, nomeCliente:nc,
-        mult:parte.fracBruto, brutoCons:brutoPart, nfCons:nfParc, admCons:admParc, liqCons:valParc,
+        // Tier mostrado é o do CONSULTOR que vendeu (Black, Padrão, Sócio etc.) — não a fração
+        mult: mult,
+        brutoCons:brutoPart, nfCons:nfParc, admCons:admParc, liqCons:valParc,
         excedente:0,
         obsParc:[{quem: pctLabel+' '+consultor, valor:0, masterPaga:false, ehInfo:true}],
         indicacao: parte.ehLiquido ? 'Líquido · '+consultor : 'Bruto · '+consultor
@@ -2188,7 +2204,7 @@ function processarLinha(linha, match, ciclo, mult, split, isAdvanced=false) {
     const obsC = [...obsParc,
       ...naoParc.map(p => {
       const qn = p.quem==='CONSULTOR'?consultor:p.quem;
-      const pctLabel = p.pctOrig ? ((p.pctOrig*100).toFixed(2).replace('.',',').replace(/,00$/,'')+'%') : fracToBase(p.fracBruto);
+      const pctLabel = p.pctOrig ? ((p.pctOrig*100).toFixed(2).replace('.',',')+'%') : fracToBase(p.fracBruto);
       return {quem: pctLabel+' '+qn, valor:0, masterPaga:false, ehInfo:true};
     })
     ];
@@ -2206,7 +2222,7 @@ function processarLinha(linha, match, ciclo, mult, split, isAdvanced=false) {
     const bcP  = brutConsTotal * parte.fracBruto;
     const isSocioP = TODOS_SOCIOS.includes(quem);
     const c    = calcDeFrac(bcP, isSocioP);
-    const pctLabelP = parte.pctOrig ? ((parte.pctOrig*100).toFixed(2).replace('.',',').replace(/,00$/,'')+'%') : fracToBase(parte.fracBruto);
+    const pctLabelP = parte.pctOrig ? ((parte.pctOrig*100).toFixed(2).replace('.',',')+'%') : fracToBase(parte.fracBruto);
     const obsP = [{quem: pctLabelP+' '+consultor, valor:0, masterPaga:false, ehInfo:true}];
     addResultado(quem, isSocioP?'socio':'vendedor', {
       ...linha, dataVenda:dv, ciclo, nomeCliente:nc,
