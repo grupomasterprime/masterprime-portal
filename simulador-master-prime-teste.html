@@ -483,6 +483,10 @@
   </div>
 </div>
 
+<!-- Carrega html2canvas e jsPDF SEPARADAMENTE primeiro pra garantir que ficam expostos como globals
+     (html2pdf.bundle nem sempre expõe esses globals dependendo do ambiente) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <script>
