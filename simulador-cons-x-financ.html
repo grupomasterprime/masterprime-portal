@@ -60,6 +60,7 @@
 </style>
 <script>if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('embedded');</script>
 <style>html.embedded header { display: none; } html.embedded main { padding-top: 16px; }</style>
+<script src="analitico-cet.js"></script>
 </head>
 <body>
 <header><div class="brand"><div class="brand-mark">M</div><div class="brand-text"><h1>Master Prime</h1><p>Simulador de Consórcio</p></div></div></header>
@@ -153,14 +154,14 @@
         <div class="pos-row"><span>Parcela</span><span id="reducaoParcela_parc">R$ 0,00</span></div>
         <div class="pos-row"><span>Prazo restante</span><span id="reducaoParcela_prazo">0</span></div>
         <div class="pos-row"><span>Custo efetivo mensal</span><span id="reducaoParcela_cm">0,00 %</span></div>
-        <div class="pos-row"><span>Custo efetivo anual</span><span id="reducaoParcela_ca">0,00 %</span></div>
+        <div class="pos-row"><span>Custo efetivo anual</span><span style="display:inline-flex;align-items:center;gap:8px;"><span id="reducaoParcela_ca">0,00 %</span><button type="button" class="ace-eye" onclick="AnaliticoCet.abrir('cons_parcela')" title="Ver memória de cálculo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></div>
       </div>
       <div class="pos-card">
         <h4>Pós contemplação - Redução de prazo</h4>
         <div class="pos-row"><span>Parcela</span><span id="reducaoPrazo_parc">R$ 0,00</span></div>
         <div class="pos-row"><span>Prazo restante</span><span id="reducaoPrazo_prazo">0</span></div>
         <div class="pos-row"><span>Custo efetivo mensal</span><span id="reducaoPrazo_cm">0,00 %</span></div>
-        <div class="pos-row"><span>Custo efetivo anual</span><span id="reducaoPrazo_ca">0,00 %</span></div>
+        <div class="pos-row"><span>Custo efetivo anual</span><span style="display:inline-flex;align-items:center;gap:8px;"><span id="reducaoPrazo_ca">0,00 %</span><button type="button" class="ace-eye" onclick="AnaliticoCet.abrir('cons_prazo')" title="Ver memória de cálculo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></div>
       </div>
     </div>
   </section>
@@ -209,14 +210,14 @@
         <div class="pos-row"><span>Parcela inicial</span><span id="finParc1Ini">R$ 0,00</span></div>
         <div class="pos-row"><span>Parcela final</span><span id="finParc1Fim">R$ 0,00</span></div>
         <div class="pos-row"><span>CET mensal</span><span id="finParc1CM">0,00 %</span></div>
-        <div class="pos-row"><span>CET anual</span><span id="finParc1CA">0,00 %</span></div>
+        <div class="pos-row"><span>CET anual</span><span style="display:inline-flex;align-items:center;gap:8px;"><span id="finParc1CA">0,00 %</span><button type="button" class="ace-eye" onclick="AnaliticoCet.abrir('fin_sem')" title="Ver memória de cálculo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></div>
       </div>
       <div class="pos-card">
         <h4>Parcela + tarifa + TR</h4>
         <div class="pos-row"><span>Parcela inicial</span><span id="finParc2Ini">R$ 0,00</span></div>
         <div class="pos-row"><span>Parcela final</span><span id="finParc2Fim">R$ 0,00</span></div>
         <div class="pos-row"><span>CET mensal</span><span id="finParc2CM">0,00 %</span></div>
-        <div class="pos-row"><span>CET anual</span><span id="finParc2CA">0,00 %</span></div>
+        <div class="pos-row"><span>CET anual</span><span style="display:inline-flex;align-items:center;gap:8px;"><span id="finParc2CA">0,00 %</span><button type="button" class="ace-eye" onclick="AnaliticoCet.abrir('fin_com')" title="Ver memória de cálculo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></div>
       </div>
     </div>
   </section>
@@ -564,6 +565,55 @@ function recalc(){
   document.getElementById('reducaoPrazo_cm').textContent = fmtPct(cetB.m, 2);
   document.getElementById('reducaoPrazo_ca').textContent = fmtPct(cetB.a, 2);
 
+  // Salva estado para Analítico — Consórcio (Cons-x-Financ)
+  if (window.AnaliticoCet) {
+    const fmt$ = AnaliticoCet.fmt;
+    function memCons(parcelaPos, prazoFinal, cet) {
+      const sumPar = calcSumParcelas(parcelaPos, prazoFinal);
+      const ratio = lanceProprios_v > 0 ? sumPar / lanceProprios_v : 0;
+      return `
+        <div class="ace-mem-step">
+          <span><strong>Σ parcelas</strong> (com reajustes ano a ano até prazo ${prazoFinal})</span>
+          <span class="ace-mem-res">${fmt$(sumPar)}</span>
+        </div>
+        <div class="ace-mem-step">
+          <span><strong>Lance próprios</strong></span>
+          <span class="ace-mem-res">${fmt$(lanceProprios_v)}</span>
+        </div>
+        <div class="ace-mem-step">
+          <span><strong>Razão</strong> = Σ parcelas / lance próprios</span>
+          <span class="ace-mem-res">${ratio.toFixed(4)}</span>
+        </div>
+        <div class="ace-mem-step">
+          <span><strong>CET mensal</strong> = razão^(1/${prazoFinal}) − 1</span>
+          <span class="ace-mem-res">${(cet.m).toFixed(2)} %</span>
+        </div>
+        <div class="ace-mem-step dest">
+          <span><strong>CET anual</strong> = (1 + CET mensal)^12 − 1</span>
+          <span class="ace-mem-res">${(cet.a).toFixed(2)} %</span>
+        </div>
+      `;
+    }
+    AnaliticoCet.set('cons_parcela', {
+      titulo: 'Consórcio · Redução de parcela',
+      credito: credito,
+      parcelaInicial: parcelaAtualNoMomento,
+      expectativa: expectativa,
+      parcelaPos: parcReducaoParcela,
+      prazoRestPos: prazoRestante,
+      memoriaHtml: memCons(parcReducaoParcela, prazo, cetA),
+    });
+    AnaliticoCet.set('cons_prazo', {
+      titulo: 'Consórcio · Redução de prazo',
+      credito: credito,
+      parcelaInicial: parcelaAtualNoMomento,
+      expectativa: expectativa,
+      parcelaPos: parcReducaoPrazo,
+      prazoRestPos: novoPrazoReducao,
+      memoriaHtml: memCons(parcReducaoPrazo, expectativa + novoPrazoReducao, cetB),
+    });
+  }
+
   // === Custo Operação Consórcio (idêntico calcSumParcelas — reajuste fire ANTES de pagar) ===
   // Reusa a função calcSumParcelas que já implementa a convenção Conkey corretamente
   const custoConsorcio = calcSumParcelas(parcReducaoParcela, prazo);
@@ -678,6 +728,52 @@ function recalc(){
   document.getElementById('finParc1CA').textContent = fmtPct(cetFin1.a, 2);
   document.getElementById('finParc2CM').textContent = fmtPct(cetFin2.m, 2);
   document.getElementById('finParc2CA').textContent = fmtPct(cetFin2.a, 2);
+
+  // Salva estado para Analítico — Financiamento (CET via TIR Newton-Raphson)
+  if (window.AnaliticoCet) {
+    const fmt$ = AnaliticoCet.fmt;
+    function memFin(cron, cet, comTarifa) {
+      const desc = comTarifa
+        ? 'inclui TR + MIP + DFI + tarifa mensal'
+        : 'apenas amortização + juros (sem encargos)';
+      return `
+        <div class="ace-mem-step">
+          <span><strong>Capital financiado</strong> = valor do imóvel − entrada</span>
+          <span class="ace-mem-res">${fmt$(finImovel)}</span>
+        </div>
+        <div class="ace-mem-step">
+          <span><strong>Prazo</strong> = ${cron.parcelas.length} meses</span>
+          <span class="ace-mem-res">${cron.parcelas.length}</span>
+        </div>
+        <div class="ace-mem-step">
+          <span><strong>Total pago</strong> (soma das parcelas, ${desc})</span>
+          <span class="ace-mem-res">${fmt$(cron.sumP)}</span>
+        </div>
+        <div class="ace-mem-step">
+          <span><strong>CET mensal</strong> = TIR (taxa interna de retorno) do fluxo de caixa</span>
+          <span class="ace-mem-res">${(cet.m).toFixed(2)} %</span>
+        </div>
+        <div class="ace-mem-step dest">
+          <span><strong>CET anual</strong> = (1 + CET mensal)^12 − 1</span>
+          <span class="ace-mem-res">${(cet.a).toFixed(2)} %</span>
+        </div>
+      `;
+    }
+    // Constrói "anos" a partir do array de parcelas reais do financiamento
+    function setFin(chave, cron, cet, titulo, comTarifa) {
+      AnaliticoCet.set(chave, {
+        titulo: titulo,
+        credito: finImovel,           // mostra valor financiado como "carta"
+        parcelaInicial: cron.parcelas[0] || 0,
+        expectativa: 0,                // financiamento não tem contemplação
+        parcelaPos: cron.parcelas[cron.parcelas.length - 1] || 0,  // só pra ter algo
+        prazoRestPos: cron.parcelas.length,
+        memoriaHtml: memFin(cron, cet, comTarifa),
+      });
+    }
+    setFin('fin_sem', cron1, cetFin1, 'Financiamento · Sem encargos', false);
+    setFin('fin_com', cron2, cetFin2, 'Financiamento · Com TR + MIP + DFI + tarifa', true);
+  }
 
   // Custo Financiamento = soma das parcelas (com tarifa+TR+MIP+DFI)
   const custoFinanciamento = cron2.sumP;

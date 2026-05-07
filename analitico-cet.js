@@ -167,38 +167,46 @@
       pagoAcumulado += totalAno;
     }
 
-    // Memória de cálculo
-    const taxaAdm = d.taxaAdm || 0;
-    const fundo = d.fundo || 0;
-    const lanceProp = d.lanceProprios || 0;
-    const custo = d.credito * (taxaAdm + fundo);
-    const disponivel = d.credito - lanceProp;
-    const ratio = disponivel > 0 ? custo/disponivel : 0;
-    const prazoEf = d.prazoEf || (exp + prazoRestPos);
+    // Memória de cálculo — aceita HTML customizado (memoriaHtml) ou usa fórmula padrão Op Simples
+    let memHTML;
+    if (d.memoriaHtml) {
+      // Caller passou HTML pronto (fórmula específica do simulador)
+      memHTML = `<h4>Memória de cálculo do CET</h4>${d.memoriaHtml}`;
+    } else {
+      // Fórmula padrão Op Simples / Conkey
+      const taxaAdm = d.taxaAdm || 0;
+      const fundo = d.fundo || 0;
+      const lanceProp = d.lanceProprios || 0;
+      const custo = d.credito * (taxaAdm + fundo);
+      const disponivel = d.credito - lanceProp;
+      const ratio = disponivel > 0 ? custo/disponivel : 0;
+      const prazoEf = d.prazoEf || (exp + prazoRestPos);
 
-    document.getElementById('aceMem').innerHTML = `
-      <h4>Memória de cálculo do CET</h4>
-      <div class="ace-mem-step">
-        <span><strong>Custo</strong> = crédito × (taxa adm + fundo) = ${fmt(d.credito)} × ${fmtPct(taxaAdm + fundo, 2)}</span>
-        <span class="ace-mem-res">${fmt(custo)}</span>
-      </div>
-      <div class="ace-mem-step">
-        <span><strong>Disponível</strong> = crédito − lance próprios = ${fmt(d.credito)} − ${fmt(lanceProp)}</span>
-        <span class="ace-mem-res">${fmt(disponivel)}</span>
-      </div>
-      <div class="ace-mem-step">
-        <span><strong>Razão</strong> = custo / disponível = ${fmt(custo)} / ${fmt(disponivel)}</span>
-        <span class="ace-mem-res">${ratio.toFixed(4)}</span>
-      </div>
-      <div class="ace-mem-step">
-        <span><strong>CET mensal</strong> = (1 + razão)^(1/${prazoEf}) − 1</span>
-        <span class="ace-mem-res">${fmtPct(d.cetMensal||0, 2)}</span>
-      </div>
-      <div class="ace-mem-step dest">
-        <span><strong>CET anual</strong> = (1 + CET mensal)^12 − 1</span>
-        <span class="ace-mem-res">${fmtPct(d.cetAnual||0, 2)}</span>
-      </div>
-    `;
+      memHTML = `
+        <h4>Memória de cálculo do CET</h4>
+        <div class="ace-mem-step">
+          <span><strong>Custo</strong> = crédito × (taxa adm + fundo) = ${fmt(d.credito)} × ${fmtPct(taxaAdm + fundo, 2)}</span>
+          <span class="ace-mem-res">${fmt(custo)}</span>
+        </div>
+        <div class="ace-mem-step">
+          <span><strong>Disponível</strong> = crédito − lance próprios = ${fmt(d.credito)} − ${fmt(lanceProp)}</span>
+          <span class="ace-mem-res">${fmt(disponivel)}</span>
+        </div>
+        <div class="ace-mem-step">
+          <span><strong>Razão</strong> = custo / disponível = ${fmt(custo)} / ${fmt(disponivel)}</span>
+          <span class="ace-mem-res">${ratio.toFixed(4)}</span>
+        </div>
+        <div class="ace-mem-step">
+          <span><strong>CET mensal</strong> = (1 + razão)^(1/${prazoEf}) − 1</span>
+          <span class="ace-mem-res">${fmtPct(d.cetMensal||0, 2)}</span>
+        </div>
+        <div class="ace-mem-step dest">
+          <span><strong>CET anual</strong> = (1 + CET mensal)^12 − 1</span>
+          <span class="ace-mem-res">${fmtPct(d.cetAnual||0, 2)}</span>
+        </div>
+      `;
+    }
+    document.getElementById('aceMem').innerHTML = memHTML;
 
     document.getElementById('aceBody').innerHTML = anos.map(a => `
       <tr>
@@ -220,5 +228,5 @@
   }
 
   // expõe global
-  window.AnaliticoCet = { set, abrir, fechar, eyeHTML, SVG_EYE };
+  window.AnaliticoCet = { set, abrir, fechar, eyeHTML, SVG_EYE, fmt, fmtPct };
 })();

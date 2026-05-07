@@ -134,6 +134,7 @@
 <script>if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('embedded');</script>
 <style>html.embedded header { display: none; } html.embedded main { padding-top: 16px; }</style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="analitico-cet.js"></script>
 
 <header>
   <div class="brand">
@@ -208,7 +209,7 @@
       <div class="resumo-row sub"><strong>Recurso Próprio <span style="color:#9CA3AF; font-weight:400;" id="rs_recPropPct">0,00%</span></strong><span class="value" id="rs_recProp">R$ 0,00</span></div>
       <div class="resumo-row sub"><strong>Custo Efetivo Mensal</strong><span class="value" id="rs_cetMensal">0,00 %</span></div>
       <div class="resumo-row sub"><strong>Embutido <span style="color:#9CA3AF; font-weight:400;" id="rs_embPct">0,00%</span></strong><span class="value" id="rs_emb">R$ 0,00</span></div>
-      <div class="resumo-row sub"><strong>Custo Efetivo Anual</strong><span class="value" id="rs_cetAnual">0,00 %</span></div>
+      <div class="resumo-row sub" style="display:flex;align-items:center;justify-content:space-between;"><strong>Custo Efetivo Anual</strong><span style="display:inline-flex;align-items:center;gap:8px;"><span class="value" id="rs_cetAnual">0,00 %</span><button type="button" class="ace-eye" onclick="AnaliticoCet.abrir('agregado')" title="Ver memória de cálculo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></div>
       <div class="resumo-row sub"><strong>FGTS <span style="color:#9CA3AF; font-weight:400;" id="rs_fgtsPct">0,00%</span></strong><span class="value" id="rs_fgts">R$ 0,00</span></div>
     </div>
   </div>
@@ -900,6 +901,40 @@ function renderOps() {
   document.getElementById('rs_prazoRest').textContent = restMed;
   document.getElementById('rs_cetMensal').textContent = formatPct(cetMensalMed, 2);
   document.getElementById('rs_cetAnual').textContent = formatPct(cetAnualMed, 2);
+
+  // Salva estado para Analítico — agregado de N operações
+  if (window.AnaliticoCet) {
+    const fmt$ = AnaliticoCet.fmt;
+    const linhasOps = operacoes.map((op, i) => `
+      <div class="ace-mem-step">
+        <span><strong>Op ${i+1}</strong>${op.grupo? ' · '+op.grupo:''} (${op.qtdCartas||1} carta${(op.qtdCartas||1)>1?'s':''}): CET mensal × peso (${fmt$(op.totalCarta||0)})</span>
+        <span class="ace-mem-res">${(op.cetMensal||0).toFixed(4)} %</span>
+      </div>
+    `).join('');
+    AnaliticoCet.set('agregado', {
+      titulo: 'Operação Estruturada · CET agregado',
+      credito: sumTotal,
+      parcelaInicial: sumParc,
+      expectativa: 1,
+      parcelaPos: sumParcPos,
+      prazoRestPos: restMed,
+      memoriaHtml: `
+        <div class="ace-mem-step">
+          <span><strong>Total de cartas</strong> (soma das ${operacoes.length} operações)</span>
+          <span class="ace-mem-res">${fmt$(sumTotal)}</span>
+        </div>
+        ${linhasOps}
+        <div class="ace-mem-step">
+          <span><strong>CET mensal médio</strong> (ponderado por valor de cada operação)</span>
+          <span class="ace-mem-res">${formatPct(cetMensalMed, 4)}</span>
+        </div>
+        <div class="ace-mem-step dest">
+          <span><strong>CET anual</strong> = (1 + CET mensal médio)^12 − 1</span>
+          <span class="ace-mem-res">${formatPct(cetAnualMed, 2)}</span>
+        </div>
+      `,
+    });
+  }
 }
 
 // ═══════════════════════════════════════════════════════
