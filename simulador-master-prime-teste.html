@@ -418,10 +418,25 @@
      Suporta modo demo via ?preview=1 (mostra inline ao invés de baixar).
      ═══════════════════════════════════════════════════════════════ -->
 <div id="pdfReport" style="display:none; width:1300px; background:#fff; font-family:'Inter',-apple-system,system-ui,sans-serif; color:#1F2937; font-size:18px; line-height:1.5;">
-  <!-- HEADER -->
+  <!-- HEADER (logo SVG inline, em branco — html2canvas não respeita filter:invert) -->
   <div style="background:#2D3F5E; color:#fff; padding:28px 50px; display:flex; justify-content:space-between; align-items:center;">
-    <div style="display:flex; align-items:center;">
-      <img src="logo.png" alt="Master Prime" style="height:64px; width:auto; display:block; filter:brightness(0) invert(1);">
+    <div style="display:flex; align-items:center; gap:18px;">
+      <!-- Símbolo: círculo M -->
+      <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+        <!-- círculo segmentado em 4 quadrantes (cores Master Prime) -->
+        <circle cx="30" cy="30" r="26" fill="none" stroke="#ffffff" stroke-width="3" stroke-opacity="0.55"/>
+        <path d="M 30 4 A 26 26 0 0 1 56 30" fill="none" stroke="#F4C24A" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M 56 30 A 26 26 0 0 1 30 56" fill="none" stroke="#A8B8E8" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M 30 56 A 26 26 0 0 1 4 30" fill="none" stroke="#7B96D4" stroke-width="3.5" stroke-linecap="round"/>
+        <path d="M 4 30 A 26 26 0 0 1 30 4" fill="none" stroke="#4DBCC8" stroke-width="3.5" stroke-linecap="round"/>
+        <!-- letra M -->
+        <text x="30" y="40" font-family="Georgia, serif" font-size="28" font-weight="700" text-anchor="middle" fill="#ffffff">M</text>
+      </svg>
+      <!-- Wordmark -->
+      <div>
+        <div style="font-size:26px; font-weight:700; letter-spacing:0.3px; color:#ffffff; line-height:1.1;">Master Prime</div>
+        <div style="font-size:11px; letter-spacing:1px; color:rgba(255,255,255,0.78); margin-top:4px;">Corretora de Consórcios e Seguros</div>
+      </div>
     </div>
     <div style="font-size:18px; font-weight:600;">Estratégia Simulada: Operação Simples</div>
   </div>
@@ -1236,35 +1251,71 @@ function _gerarPdf(filename) {
   }, 250);
 }
 
-// ─── BOTÃO BAIXAR PDF (via window.print() nativo) ───
-// Usa o sistema nativo de impressão do navegador. CSS @media print esconde
-// o simulador e mostra só o template. O user escolhe "Salvar como PDF" no dialog.
-// É a forma mais robusta (mesma que apps como Conkey usam server-side via Puppeteer).
-document.getElementById('baixarPdf').addEventListener('click', () => {
-  const d = _coletarDados();
-  _renderTemplate(d);
+// ─── BOTÃO BAIXAR PDF (via html2canvas + jsPDF — abordagem testada e validada) ───
+document.getElementById('baixarPdf').addEventListener('click', async () => {
+  const btn = document.getElementById('baixarPdf');
+  const txtOriginal = btn.textContent;
+  btn.textContent = 'Gerando PDF...';
+  btn.disabled = true;
 
-  const report = document.getElementById('pdfReport');
-  // Define título da janela (vira sugestão de nome no dialog "Salvar como PDF")
-  const hoje = new Date();
-  const dd = String(hoje.getDate()).padStart(2, '0');
-  const mm = String(hoje.getMonth() + 1).padStart(2, '0');
-  const yyyy = hoje.getFullYear();
-  const tituloOriginal = document.title;
-  document.title = `master-prime-operacao-simples-${dd}${mm}${yyyy}`;
+  try {
+    const d = _coletarDados();
+    _renderTemplate(d);
 
-  // Torna o template visível pro print
-  report.style.display = 'block';
+    const report = document.getElementById('pdfReport');
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'position:fixed; top:0; left:0; width:1300px; background:#fff; z-index:-99999; pointer-events:none; overflow:hidden;';
+    document.body.appendChild(wrap);
+    report.style.display = 'block';
+    wrap.appendChild(report);
 
-  // Aguarda layout e dispara dialog
-  setTimeout(() => {
-    window.print();
-    // Restaura estado depois (após dialog fechar)
-    setTimeout(() => {
-      report.style.display = 'none';
-      document.title = tituloOriginal;
-    }, 300);
-  }, 100);
+    // Aguarda layout + carregamento de imagens (logo)
+    await new Promise(r => setTimeout(r, 400));
+
+    const canvas = await html2canvas(report, {
+      scale: 2,
+      backgroundColor: '#FFFFFF',
+      width: 1300,
+      windowWidth: 1300,
+      useCORS: true,
+      allowTaint: true,
+      logging: false
+    });
+
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true });
+    const pageW = 210, pageH = 297;
+    const fitW = pageW;
+    const fitH = (canvas.height * fitW) / canvas.width;
+    const imgData = canvas.toDataURL('image/jpeg', 0.96);
+
+    if (fitH <= pageH) {
+      pdf.addImage(imgData, 'JPEG', 0, 0, fitW, fitH);
+    } else {
+      // Conteúdo maior que A4 — escala pra caber em 1 página
+      const fitH2 = pageH;
+      const fitW2 = (canvas.width * fitH2) / canvas.height;
+      const offsetX = (pageW - fitW2) / 2;
+      pdf.addImage(imgData, 'JPEG', offsetX, 0, fitW2, fitH2);
+    }
+
+    const hoje = new Date();
+    const dd = String(hoje.getDate()).padStart(2, '0');
+    const mm = String(hoje.getMonth() + 1).padStart(2, '0');
+    const yyyy = hoje.getFullYear();
+    pdf.save(`master-prime-operacao-simples-${dd}${mm}${yyyy}.pdf`);
+
+    // Cleanup
+    report.style.display = 'none';
+    document.body.appendChild(report);
+    wrap.remove();
+  } catch (err) {
+    console.error('Erro ao gerar PDF:', err);
+    alert('Erro ao gerar PDF: ' + err.message);
+  } finally {
+    btn.textContent = txtOriginal;
+    btn.disabled = false;
+  }
 });
 
 // ─── MODO PREVIEW DEMO (?preview=1) ───
