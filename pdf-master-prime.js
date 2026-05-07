@@ -38,16 +38,22 @@
     'O usuário declara estar ciente de que o contrato de adesão, o regulamento do consórcio e os demais documentos aplicáveis constituem os instrumentos que regem a relação contratual, recomendando-se sua leitura integral, sendo o aceite manifestação inequívoca de ciência e concordância com todos os seus termos.'
   ];
 
-  // ─── Logo SVG inline 100% branco (header navy) ───
-  // Reproduz o logo Master Prime: círculo segmentado em 4 quadrantes (todos brancos
-  // com pequenas variações de opacidade para preservar o efeito visual) + letra M.
+  // ─── Logo SVG inline (versão branca pro header navy) ───
+  // Reproduz o logo Master Prime real: círculo segmentado em 4 quadrantes coloridos
+  // com pequenos gaps entre eles (amarelo, ciano, lilás, azul-periwinkle), letra M
+  // sólida em branco no centro. As cores dos quadrantes mantêm a identidade visual.
   const LOGO_SVG = `
-    <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
-      <path d="M 30 4 A 26 26 0 0 1 56 30" fill="none" stroke="#ffffff" stroke-opacity="1.0" stroke-width="3.5" stroke-linecap="round"/>
-      <path d="M 56 30 A 26 26 0 0 1 30 56" fill="none" stroke="#ffffff" stroke-opacity="0.85" stroke-width="3.5" stroke-linecap="round"/>
-      <path d="M 30 56 A 26 26 0 0 1 4 30" fill="none" stroke="#ffffff" stroke-opacity="0.7" stroke-width="3.5" stroke-linecap="round"/>
-      <path d="M 4 30 A 26 26 0 0 1 30 4" fill="none" stroke="#ffffff" stroke-opacity="0.85" stroke-width="3.5" stroke-linecap="round"/>
-      <text x="30" y="40" font-family="Georgia, serif" font-size="28" font-weight="700" text-anchor="middle" fill="#ffffff">M</text>
+    <svg width="62" height="62" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+      <!-- Quadrante amarelo (top-left) -->
+      <path d="M 4.10 27.73 A 26 26 0 0 1 27.73 4.10" fill="none" stroke="#F4C24A" stroke-width="3.6" stroke-linecap="round"/>
+      <!-- Quadrante ciano (top-right) -->
+      <path d="M 32.27 4.10 A 26 26 0 0 1 55.90 27.73" fill="none" stroke="#7DD3D8" stroke-width="3.6" stroke-linecap="round"/>
+      <!-- Quadrante lilás (bottom-right) -->
+      <path d="M 55.90 32.27 A 26 26 0 0 1 32.27 55.90" fill="none" stroke="#C8B5DC" stroke-width="3.6" stroke-linecap="round"/>
+      <!-- Quadrante azul-periwinkle (bottom-left) -->
+      <path d="M 27.73 55.90 A 26 26 0 0 1 4.10 32.27" fill="none" stroke="#7B96D4" stroke-width="3.6" stroke-linecap="round"/>
+      <!-- Letra M sólida em branco (sans-serif bold) -->
+      <text x="30" y="41" font-family="'Arial Black','Helvetica Neue',Helvetica,sans-serif" font-size="28" font-weight="900" text-anchor="middle" fill="#ffffff">M</text>
     </svg>`;
 
   // ─── HEADER ───
