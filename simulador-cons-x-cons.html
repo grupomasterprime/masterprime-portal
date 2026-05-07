@@ -59,6 +59,7 @@
 </style>
 <script>if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('embedded');</script>
 <style>html.embedded header { display: none; } html.embedded main { padding-top: 16px; }</style>
+<script src="analitico-cet.js"></script>
 </head>
 <body>
 <header><div class="brand"><div class="brand-mark">M</div><div class="brand-text"><h1>Master Prime</h1><p>Simulador de Consórcio</p></div></div></header>
@@ -251,7 +252,7 @@
         <div class="pos-row"><span>Prazo restante</span><span id="rp_prazo_p1">0</span></div>
         <div class="pos-row"><span>Custo da operação</span><span id="rp_custo_p1">R$ 0,00</span></div>
         <div class="pos-row"><span>CET mensal</span><span id="rp_cm_p1">0,00 %</span></div>
-        <div class="pos-row"><span>CET anual</span><span id="rp_ca_p1">0,00 %</span></div>
+        <div class="pos-row"><span>CET anual</span><span style="display:inline-flex;align-items:center;gap:8px;"><span id="rp_ca_p1">0,00 %</span><button type="button" class="ace-eye" onclick="AnaliticoCet.abrir('p1_parcela')" title="Ver memória de cálculo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></div>
       </div>
       <div class="pos-card p2">
         <h4>Proposta 2<span class="tag">P2</span></h4>
@@ -259,7 +260,7 @@
         <div class="pos-row"><span>Prazo restante</span><span id="rp_prazo_p2">0</span></div>
         <div class="pos-row"><span>Custo da operação</span><span id="rp_custo_p2">R$ 0,00</span></div>
         <div class="pos-row"><span>CET mensal</span><span id="rp_cm_p2">0,00 %</span></div>
-        <div class="pos-row"><span>CET anual</span><span id="rp_ca_p2">0,00 %</span></div>
+        <div class="pos-row"><span>CET anual</span><span style="display:inline-flex;align-items:center;gap:8px;"><span id="rp_ca_p2">0,00 %</span><button type="button" class="ace-eye" onclick="AnaliticoCet.abrir('p2_parcela')" title="Ver memória de cálculo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></div>
       </div>
     </div>
 
@@ -271,7 +272,7 @@
         <div class="pos-row"><span>Prazo restante</span><span id="rd_prazo_p1">0</span></div>
         <div class="pos-row"><span>Custo da operação</span><span id="rd_custo_p1">R$ 0,00</span></div>
         <div class="pos-row"><span>CET mensal</span><span id="rd_cm_p1">0,00 %</span></div>
-        <div class="pos-row"><span>CET anual</span><span id="rd_ca_p1">0,00 %</span></div>
+        <div class="pos-row"><span>CET anual</span><span style="display:inline-flex;align-items:center;gap:8px;"><span id="rd_ca_p1">0,00 %</span><button type="button" class="ace-eye" onclick="AnaliticoCet.abrir('p1_prazo')" title="Ver memória de cálculo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></div>
       </div>
       <div class="pos-card p2">
         <h4>Proposta 2<span class="tag">P2</span></h4>
@@ -279,7 +280,7 @@
         <div class="pos-row"><span>Prazo restante</span><span id="rd_prazo_p2">0</span></div>
         <div class="pos-row"><span>Custo da operação</span><span id="rd_custo_p2">R$ 0,00</span></div>
         <div class="pos-row"><span>CET mensal</span><span id="rd_cm_p2">0,00 %</span></div>
-        <div class="pos-row"><span>CET anual</span><span id="rd_ca_p2">0,00 %</span></div>
+        <div class="pos-row"><span>CET anual</span><span style="display:inline-flex;align-items:center;gap:8px;"><span id="rd_ca_p2">0,00 %</span><button type="button" class="ace-eye" onclick="AnaliticoCet.abrir('p2_prazo')" title="Ver memória de cálculo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></div>
       </div>
     </div>
 
@@ -520,6 +521,35 @@ function calcProposta(s) {
   $(`rd_custo_${s}`).textContent = fmtMoney(custoOpB);
   $(`rd_cm_${s}`).textContent = fmtPct(cetB.m, 2);
   $(`rd_ca_${s}`).textContent = fmtPct(cetB.a, 2);
+
+  // Salva estado para o modal Analítico (proposta s = p1 ou p2)
+  if (window.AnaliticoCet) {
+    const baseDados = {
+      credito: credito,
+      taxaAdm: taxaAdm,
+      fundo: fundo,
+      lanceProprios: lanceProprios_v,
+      parcelaInicial: parcelaAtualNoMomento,
+      expectativa: expectativa,
+    };
+    const labelProp = s === 'p1' ? 'Proposta 1' : 'Proposta 2';
+    AnaliticoCet.set(`${s}_parcela`, Object.assign({}, baseDados, {
+      titulo: `${labelProp} · Redução de parcela`,
+      prazoEf: prazo,
+      parcelaPos: parcReducaoParcela,
+      prazoRestPos: prazoRestante,
+      cetMensal: cetA.m / 100,
+      cetAnual: cetA.a / 100,
+    }));
+    AnaliticoCet.set(`${s}_prazo`, Object.assign({}, baseDados, {
+      titulo: `${labelProp} · Redução de prazo`,
+      prazoEf: expectativa + novoPrazoReducao,
+      parcelaPos: parcReducaoPrazo,
+      prazoRestPos: novoPrazoReducao,
+      cetMensal: cetB.m / 100,
+      cetAnual: cetB.a / 100,
+    }));
+  }
 
   return { custoOpA, custoOpB, cetA, cetB };
 }
