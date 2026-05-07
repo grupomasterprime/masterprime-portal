@@ -495,7 +495,7 @@ const ETAPAS = [
 // 3 categorias de anexo (2 obrigatórios + 1 facultativo)
 const CATEGORIAS_ANEXO = [
   { key:'documento_foto',  label:'Documento com foto', sub:'RG ou CNH (frente e verso)', obrigatorio:true,  iconKey:'id' },
-  { key:'comp_residencia', label:'CRLV do bem', sub:'Necessário envio se o bem não for zero', obrigatorio:false, iconKey:'id' },
+  { key:'comp_residencia', label:'CRLV do bem', sub:'Necessário envio se o bem não for zero', obrigatorio:false, iconKey:'car' },
   { key:'outros',          label:'Outros documentos', sub:'Procurações, documentos complementares e etc', obrigatorio:false, iconKey:'docs' },
 ];
 
@@ -521,6 +521,7 @@ const SVG = {
   refresh:'<svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>',
   save:   '<svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>',
   open:   '<svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>',
+  car:    '<svg viewBox="0 0 24 24"><path d="M5 17h14l-1-5-2-4H8L6 12l-1 5z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/><path d="M3 13h18"/></svg>'
 };
 const ico = (key, cls='ico') => `<span class="${cls}">${SVG[key]||''}</span>`;
 
