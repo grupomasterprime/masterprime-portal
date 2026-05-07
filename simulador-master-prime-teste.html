@@ -978,13 +978,13 @@ function _coletarDados() {
     reajuste: _val('reajuste'),
     reajusteN: _numPct(_val('reajuste')),
     parcelaInicial: _txt('parcelaInicial'),
-    // Slots condicionais (preparados pra quando os inputs forem adicionados)
-    redutorPct: window._simState?.redutorPct || 0,
-    redutorSobre: window._simState?.redutorSobre || 'Parcela total',
-    seguroPct: window._simState?.seguroPct || 0,
-    adesaoPct: window._simState?.adesaoPct || 0,
-    adesaoMeses: window._simState?.adesaoMeses || 0,
-    parcelaInicial2: window._simState?.parcelaInicial2 || null,  // demais parcelas (se diferente)
+    // Slots condicionais — lê dos toggles/inputs reais do simulador
+    redutorPct: (() => { const on = document.getElementById('redutorOn')?.checked; return on ? _numPct(_val('redutor')) : 0; })(),
+    redutorSobre: (() => { const sel = document.getElementById('reducaoSobre'); return sel?.options[sel.selectedIndex]?.text || 'Parcela total'; })(),
+    seguroPct: (() => { const on = document.getElementById('seguroOn')?.checked; return on ? _numPct(_val('seguro')) : 0; })(),
+    adesaoPct: (() => { const on = document.getElementById('adesaoOn')?.checked; return on ? _numPct(_val('adesao')) : 0; })(),
+    adesaoMeses: (() => { const on = document.getElementById('adesaoOn')?.checked; return on ? (parseInt(_val('prazoAdesao'),10) || 0) : 0; })(),
+    parcelaInicial2: window._simState?.parcelaInicial2 || null,
 
     // Contemplação
     modalidade: tipoContTxt,
