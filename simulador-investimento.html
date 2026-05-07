@@ -77,7 +77,9 @@
 </style>
 <script>if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('embedded');</script>
 <style>html.embedded header { display: none; } html.embedded main { padding-top: 16px; }</style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="pdf-master-prime.js"></script>
 </head>
 <body>
 <header><div class="brand"><div class="brand-mark">M</div><div class="brand-text"><h1>Master Prime</h1><p>Simulador de Consórcio</p></div></div></header>
@@ -581,17 +583,63 @@ document.getElementById('opsBody').addEventListener('click',e=>{
   else if(btn.dataset.action==='del'){if(confirm('Excluir?')){operacoes=operacoes.filter(o=>o.id!==id); renderOps();}}
 });
 document.getElementById('btnLimpar').addEventListener('click',()=>{if(operacoes.length && !confirm('Limpar tudo?'))return; operacoes=[]; renderOps();});
-document.getElementById('btnPdf').addEventListener('click', () => {
-  document.body.classList.add('pdf-mode');
-  const hoje = new Date(); const dd = String(hoje.getDate()).padStart(2,'0'); const mm = String(hoje.getMonth()+1).padStart(2,'0');
-  html2pdf().set({
-    margin: [10,10,10,10],
-    filename: 'master-prime-investimento-' + dd + mm + hoje.getFullYear() + '.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#FFFFFF' },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    pagebreak: { mode: ['css','legacy'] }
-  }).from(document.body).save().then(() => document.body.classList.remove('pdf-mode'));
+// ─── COLETA DE BLOCOS PARA O PDF ───
+function _coletarBlocosInvestimento() {
+  const _txt = id => (document.getElementById(id)?.textContent || '').trim();
+
+  // Lê linhas da tabela principal (opsBody)
+  const opsLinhas = Array.from(document.querySelectorAll('#opsBody tr')).filter(tr => !tr.classList.contains('empty-row') && !tr.classList.contains('add-row')).map(tr => ({
+    celulas: Array.from(tr.querySelectorAll('td')).slice(0, 11).map(td => (td.textContent || '').trim())
+  }));
+  // Linha total (footer)
+  opsLinhas.push({ celulas: ['Total','-','-','-','-', _txt('ft_credito'), _txt('ft_parcela'), _txt('ft_creditoDisp'), _txt('ft_invCont'), _txt('ft_vendaPrev'), _txt('ft_lucro') ], total:true });
+
+  // Lê linhas da tabela de renda fixa (rfBody)
+  const rfLinhas = Array.from(document.querySelectorAll('#rfBody tr')).filter(tr => !tr.classList.contains('empty-row')).map(tr => ({
+    celulas: Array.from(tr.querySelectorAll('td')).slice(0, 8).map(td => (td.textContent || '').trim())
+  }));
+  rfLinhas.push({ celulas: ['Total','-', _txt('rf_valor'),'-', _txt('rf_bruto'), _txt('rf_ir'), _txt('rf_liquida'), _txt('rf_retorno') ], total:true });
+
+  return [
+    { tipo: 'tabela-ampla',
+      colunas: ['#','GRUPO','PRAZO','EXPECTATIVA','TIPO','CRÉDITO TOTAL','PARCELA','CRÉDITO DISPONÍVEL','VALOR INVESTIDO','VENDA / PREVIDÊNCIA','LUCRO BRUTO'],
+      compact: true,
+      linhas: opsLinhas
+    },
+    { tipo: 'cards-icone', items: [
+      { icone:'venda',  label:'Venda da cota',                    valor: _txt('stVenda') },
+      { icone:'predio', label:'Imóveis alugados',                 valor: _txt('stImoveis') },
+      { icone:'cifrao', label:'Diferença aluguel × parcela',      valor: _txt('stDiferenca') },
+      { icone:'piggy',  label:'Previdência exponencial',          valor: _txt('stPrevidencia') },
+      { icone:'banco',  label:'Patrimônio Total',                 valor: _txt('stPatrimonio'), destaque:true }
+    ]},
+    { tipo: 'tabela-ampla', titulo: 'INVESTIMENTO EM RENDA FIXA',
+      colunas: ['#','% DO CDI','VALOR INVESTIDO','PRAZO','VALOR BRUTO ACUMULADO','IMPOSTO DE RENDA','RENTABILIDADE LÍQUIDA','% DE RETORNO'],
+      linhas: rfLinhas
+    }
+  ];
+}
+
+document.getElementById('btnPdf').addEventListener('click', async () => {
+  const btn = document.getElementById('btnPdf');
+  const t = btn.textContent;
+  btn.textContent = 'Gerando PDF...';
+  btn.disabled = true;
+  try {
+    if (!operacoes.length) { alert('Adicione pelo menos uma operação antes de gerar o PDF.'); return; }
+    await PdfMasterPrime.gerar({
+      tituloEstrategia: 'Consórcio como Investimento',
+      filename: 'master-prime-consorcio-como-investimento',
+      orientation: 'landscape',
+      blocos: _coletarBlocosInvestimento()
+    });
+  } catch (err) {
+    console.error(err);
+    alert('Erro ao gerar PDF: ' + err.message);
+  } finally {
+    btn.textContent = t;
+    btn.disabled = false;
+  }
 });
 renderOps();
 </script>

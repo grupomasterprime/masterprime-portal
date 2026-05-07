@@ -59,6 +59,9 @@
 </style>
 <script>if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('embedded');</script>
 <style>html.embedded header { display: none; } html.embedded main { padding-top: 16px; }</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="pdf-master-prime.js"></script>
 <script src="analitico-cet.js"></script>
 </head>
 <body>
@@ -289,6 +292,7 @@
 
   <div class="actions">
     <button class="secondary" id="btnLimpar">Limpar tudo</button>
+    <button class="primary" id="btnPdf">Baixar PDF</button>
   </div>
 </main>
 
@@ -406,6 +410,67 @@ function resetProposta(s) {
 $('resetP1').addEventListener('click',()=>resetProposta('p1'));
 $('resetP2').addEventListener('click',()=>resetProposta('p2'));
 $('btnLimpar').addEventListener('click',()=>{ resetProposta('p1'); resetProposta('p2'); });
+
+// ─── BAIXAR PDF (PdfMasterPrime, retrato) ───
+function _coletarBlocosConsXCons() {
+  const _v = id => ($(id)?.value || $(id)?.textContent || '').trim() || '-';
+  const _sel = id => $(id)?.options?.[$(id).selectedIndex]?.text || '-';
+  const _both = (id_p1, id_p2, fn = _v) => [fn(id_p1), fn(id_p2)];
+
+  return [
+    { tipo:'tabela-secao', titulo:'DETALHES DA PROPOSTA', linhas:[
+      { label:'Crédito',                 valores: _both('credito_p1','credito_p2') },
+      { label:'Prazo',                   valores: [_v('prazo_p1') + ' meses', _v('prazo_p2') + ' meses'] },
+      { label:'Taxa de administração',   valores: _both('taxaAdm_p1','taxaAdm_p2') },
+      { label:'Fundo de reserva',        valores: _both('fundo_p1','fundo_p2') },
+      { label:'Tipo de reajuste',        valores: _both('tipoReajuste_p1','tipoReajuste_p2', _sel) },
+      { label:'Reajuste',                valores: _both('reajuste_p1','reajuste_p2') },
+      { label:'Parcela inicial',         valores: _both('parcelaInicial_p1','parcelaInicial_p2') }
+    ]},
+    { tipo:'tabela-secao', titulo:'DETALHES DA CONTEMPLAÇÃO', linhas:[
+      { label:'Expectativa',             valores: [_v('expectativa_p1') + ' meses', _v('expectativa_p2') + ' meses'] },
+      { label:'Crédito atualizado',      valores: _both('creditoAtualizado_p1','creditoAtualizado_p2') },
+      { label:'Valor de referência',     valores: _both('valorRef_p1','valorRef_p2') },
+      { label:'Lance recursos próprios', valores: _both('lanceP_v_p1','lanceP_v_p2') },
+      { label:'Total de lance',          valores: _both('lanceTotalCalc_p1','lanceTotalCalc_p2') },
+      { label:'Crédito disponível',      valores: _both('creditoDisponivel_p1','creditoDisponivel_p2') }
+    ]},
+    { tipo:'tabela-secao', titulo:'PÓS CONTEMPLAÇÃO · REDUÇÃO DE PARCELA', linhas:[
+      { label:'Parcela',                 valores: _both('rp_parc_p1','rp_parc_p2') },
+      { label:'Prazo restante',          valores: [_v('rp_prazo_p1') + ' meses', _v('rp_prazo_p2') + ' meses'] },
+      { label:'Custo da operação',       valores: _both('rp_custo_p1','rp_custo_p2') },
+      { label:'Custo efetivo mensal',    valores: _both('rp_cm_p1','rp_cm_p2'), destaque:true },
+      { label:'Custo efetivo anual',     valores: _both('rp_ca_p1','rp_ca_p2'), destaque:true }
+    ]},
+    { tipo:'tabela-secao', titulo:'PÓS CONTEMPLAÇÃO · REDUÇÃO DE PRAZO', linhas:[
+      { label:'Parcela',                 valores: _both('rd_parc_p1','rd_parc_p2') },
+      { label:'Prazo restante',          valores: [_v('rd_prazo_p1') + ' meses', _v('rd_prazo_p2') + ' meses'] },
+      { label:'Custo da operação',       valores: _both('rd_custo_p1','rd_custo_p2') },
+      { label:'Custo efetivo mensal',    valores: _both('rd_cm_p1','rd_cm_p2'), destaque:true },
+      { label:'Custo efetivo anual',     valores: _both('rd_ca_p1','rd_ca_p2'), destaque:true }
+    ]}
+  ];
+}
+
+$('btnPdf').addEventListener('click', async () => {
+  const btn = $('btnPdf');
+  const t = btn.textContent;
+  btn.textContent = 'Gerando PDF...';
+  btn.disabled = true;
+  try {
+    await PdfMasterPrime.gerar({
+      tituloEstrategia: 'Consórcio X Consórcio',
+      filename: 'master-prime-consorcio-x-consorcio',
+      blocos: _coletarBlocosConsXCons()
+    });
+  } catch (err) {
+    console.error(err);
+    alert('Erro ao gerar PDF: ' + err.message);
+  } finally {
+    btn.textContent = t;
+    btn.disabled = false;
+  }
+});
 
 // === Cálculo de uma proposta ===
 function calcProposta(s) {

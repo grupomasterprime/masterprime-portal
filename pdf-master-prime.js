@@ -520,8 +520,19 @@
       });
 
       const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true });
-      const pageW = 210, pageH = 297;
+      // Orientação: 'portrait' (default) | 'landscape' | 'auto'
+      // 'auto' detecta automaticamente baseado em blocos largos (tabela-ampla com 8+ colunas).
+      let orientation = opts.orientation || 'portrait';
+      if (orientation === 'auto') {
+        const blocos = opts.blocos || [];
+        const temTabelaLarga = blocos.some(b =>
+          b.tipo === 'tabela-ampla' && (b.colunas || []).length >= 8
+        );
+        orientation = temTabelaLarga ? 'landscape' : 'portrait';
+      }
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation, compress: true });
+      const pageW = orientation === 'landscape' ? 297 : 210;
+      const pageH = orientation === 'landscape' ? 210 : 297;
       const fitW = pageW;
       const fitH = (canvas.height * fitW) / canvas.width;
       const imgData = canvas.toDataURL('image/jpeg', 0.96);
@@ -529,7 +540,7 @@
       if (fitH <= pageH) {
         pdf.addImage(imgData, 'JPEG', 0, 0, fitW, fitH);
       } else {
-        // Conteúdo maior que A4 — escala pra caber em 1 página inteira
+        // Conteúdo maior que página — escala pra caber em 1 página inteira
         const fitH2 = pageH;
         const fitW2 = (canvas.width * fitH2) / canvas.height;
         const offsetX = (pageW - fitW2) / 2;

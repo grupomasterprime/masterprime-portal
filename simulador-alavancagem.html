@@ -60,6 +60,9 @@
 </style>
 <script>if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('embedded');</script>
 <style>html.embedded header { display: none; } html.embedded main { padding-top: 16px; }</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="pdf-master-prime.js"></script>
 <script src="analitico-cet.js"></script>
 </head>
 <body>
@@ -574,7 +577,89 @@ document.getElementById('btnLimpar').addEventListener('click',()=>{
   document.getElementById('resetConsorcio').click();
   document.getElementById('resetImovel').click();
 });
-document.getElementById('btnPdf').addEventListener('click',()=>alert('Baixar PDF — implementação pendente.'));
+// ─── COLETA DE BLOCOS PARA O PDF ───
+function _coletarBlocosAlavancagem() {
+  const _v = id => (document.getElementById(id)?.value || document.getElementById(id)?.textContent || '').trim() || '-';
+  const _sel = id => { const el = document.getElementById(id); return el?.options?.[el.selectedIndex]?.text || '-'; };
+
+  return [
+    { tipo:'card', titulo:'DADOS DA COTA', linhas:[
+      { campos:[
+        { label:'Crédito',                 value: _v('credito') },
+        { label:'Prazo',                   value: _v('prazo') + ' meses' },
+        { label:'Taxa de administração',   value: _v('taxaAdm') },
+        { label:'Fundo de reserva',        value: _v('fundo') }
+      ], destaque:{ label:'Parcela inicial', value: _v('parcelaInicial') }},
+      { campos:[
+        { label:'Tipo de reajuste',        value: _sel('tipoReajuste') },
+        { label:'Reajuste',                value: _v('reajuste') }
+      ]}
+    ]},
+    { tipo:'card', titulo:'DETALHES DA CONTEMPLAÇÃO', linhas:[
+      { campos:[
+        { label:'Modalidade',              value: _sel('tipoContemplacao') },
+        { label:'Expectativa',             value: _v('expectativa') + ' meses' },
+        { label:'Crédito atualizado',      value: _v('creditoAtualizado') },
+        { label:'Base de cálculo',         value: _sel('tipoLance') }
+      ], destaque:{ label:'Crédito disponível', value: _v('creditoDisponivel') }},
+      { campos:[
+        { label:'Valor de referência',     value: _v('valorRef') },
+        { label:'Recursos próprios',       value: _v('lanceP') + ' | ' + _v('lanceP_v') },
+        { label:'Total de lance',          value: _v('lanceTotalCalc') }
+      ]}
+    ]},
+    { tipo:'tabela', titulo:'COMPARATIVO APÓS CONTEMPLAÇÃO',
+      colunas:['REDUÇÃO DE PARCELA','REDUÇÃO DE PRAZO'],
+      linhas:[
+        { label:'Parcela',                 valores:[_v('reducaoParcela_parc'),  _v('reducaoPrazo_parc')] },
+        { label:'Prazo restante',          valores:[_v('reducaoParcela_prazo')+' meses', _v('reducaoPrazo_prazo')+' meses'] },
+        { label:'CET (Custo Efetivo Total)', valores:[_v('reducaoParcela_cm')+' ao mês | '+_v('reducaoParcela_ca')+' ao ano', _v('reducaoPrazo_cm')+' ao mês | '+_v('reducaoPrazo_ca')+' ao ano'] }
+      ]
+    },
+    { tipo:'card', titulo:'OPERAÇÃO: IMÓVEL', linhas:[
+      { campos:[
+        { label:'Valor de mercado',         value: _v('imValor') },
+        { label:'Valor de compra',          value: _v('imCompra') },
+        { label:'Índice de valorização anual', value: _v('imValorizacao') }
+      ]}
+    ]},
+    { tipo:'card', titulo:'OPERAÇÃO: ALUGUEL', linhas:[
+      { campos:[
+        { label:'Prestação do aluguel',     value: _v('alPrestacao') },
+        { label:'% de aluguel',             value: _v('alPct') },
+        { label:'Índice de correção anual', value: _v('alCorrecao') },
+        { label:'Aluguel × parcela (média)', value: _v('alDiferenca') }
+      ]}
+    ]},
+    { tipo:'card', titulo:'RESULTADO DA ALAVANCAGEM', linhas:[
+      { campos:[
+        { label:'Valor alavancado do imóvel', value: _v('resAlavancado') },
+        { label:'Valorização do imóvel',      value: _v('resValorizacao') },
+        { label:'Aluguel × parcela (período)', value: _v('resDiferenca') }
+      ], destaque:{ label:'Patrimônio total', value: _v('resPatrimonio') }}
+    ]}
+  ];
+}
+
+document.getElementById('btnPdf').addEventListener('click', async () => {
+  const btn = document.getElementById('btnPdf');
+  const t = btn.textContent;
+  btn.textContent = 'Gerando PDF...';
+  btn.disabled = true;
+  try {
+    await PdfMasterPrime.gerar({
+      tituloEstrategia: 'Alavancagem Patrimonial',
+      filename: 'master-prime-alavancagem-patrimonial',
+      blocos: _coletarBlocosAlavancagem()
+    });
+  } catch (err) {
+    console.error(err);
+    alert('Erro ao gerar PDF: ' + err.message);
+  } finally {
+    btn.textContent = t;
+    btn.disabled = false;
+  }
+});
 
 // Init
 ['tipoLance','lanceP','lanceE','lanceFGTS','fpEntrada'].forEach(id=>document.getElementById(id).disabled=true);

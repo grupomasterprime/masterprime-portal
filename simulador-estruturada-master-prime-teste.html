@@ -133,7 +133,9 @@
 <body>
 <script>if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('embedded');</script>
 <style>html.embedded header { display: none; } html.embedded main { padding-top: 16px; }</style>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="pdf-master-prime.js"></script>
 <script src="analitico-cet.js"></script>
 
 <header>
@@ -996,19 +998,113 @@ document.getElementById('btnLimpar').addEventListener('click', () => {
   renderOps();
 });
 
-// PDF placeholder — TODO depois
-document.getElementById('btnPdf').addEventListener('click', () => {
-  document.body.classList.add('pdf-mode');
-  const hoje = new Date(); const dd = String(hoje.getDate()).padStart(2,'0'); const mm = String(hoje.getMonth()+1).padStart(2,'0');
-  html2pdf().set({
-    margin: [10,10,10,10],
-    filename: 'master-prime-estruturada-' + dd + mm + hoje.getFullYear() + '.pdf',
-    image: { type: 'jpeg', quality: 0.98 },
-    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#FFFFFF' },
-    jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-    pagebreak: { mode: ['css','legacy'] }
-  }).from(document.body).save().then(() => document.body.classList.remove('pdf-mode'));
+// ─── COLETA DE BLOCOS PARA O PDF ───
+function _coletarBlocosEstruturada() {
+  const _txt = id => (document.getElementById(id)?.textContent || '').trim();
+
+  // Linhas da tabela: 1 linha por operação cadastrada + linha "Total"
+  const linhas = operacoes.map(o => ({
+    celulas: [
+      String(o.grupo || '—'),
+      (o.adm != null ? o.adm + ' %' : '—'),
+      (o.fr != null ? o.fr + ' %' : '—'),
+      (o.prazo != null ? o.prazo + ' meses' : '—'),
+      o.cotaUnitaria || '—',
+      String(o.qtd || '—'),
+      o.totalCartas || '—',
+      o.parcelaInicial || '—',
+      o.lance || '—',
+      o.creditoDisp || '—',
+      o.parcelaPos || '—'
+    ]
+  }));
+  // Linha total agregada (lê do footer da tabela)
+  linhas.push({
+    celulas: [
+      'Total',
+      _txt('ft_adm'), _txt('ft_fr'), _txt('ft_prazo'),
+      _txt('ft_cota'), _txt('ft_qtd'), _txt('ft_totalCartas'),
+      _txt('ft_parcelaInicial'), _txt('ft_lance'),
+      _txt('ft_creditoDisp'), _txt('ft_parcelaPos')
+    ],
+    total: true
+  });
+
+  return [
+    { tipo: 'tabela-ampla',
+      colunas: ['GRUPO','ADM.','FR','PRAZO','COTA UNITÁRIA','QTD','CRÉDITO TOTAL','PARCELA INICIAL','LANCE','CRÉDITO DISPONÍVEL','PARCELA APÓS'],
+      compact: true,
+      linhas
+    },
+    { tipo: 'resultado-secao', titulo: 'RESULTADO', linhas: [
+      { label: 'Crédito total contratado',           valor: _txt('rs_carta') },
+      { label: 'Parcela inicial',                    valor: _txt('rs_parcelaInicial') },
+      { label: 'Lance total ' + _txt('rs_lancePct'), valor: _txt('rs_lance') },
+      { label: 'Lance recurso próprio ' + _txt('rs_recPropPct'), valor: _txt('rs_recProp') },
+      { label: 'Lance embutido ' + _txt('rs_embPct'), valor: _txt('rs_emb') },
+      { label: 'Lance FGTS ' + _txt('rs_fgtsPct'),    valor: _txt('rs_fgts') },
+      { label: 'Crédito disponível pós-contemplação', valor: _txt('rs_creditoDisp') },
+      { label: 'Parcela pós-contemplação',            valor: _txt('rs_parcelaPos') },
+      { label: 'Prazo médio restante',                valor: _txt('rs_prazoRest') + ' meses' },
+      { label: 'Custo efetivo mensal',                valor: _txt('rs_cetMensal') },
+      { label: 'Custo efetivo anual',                 valor: _txt('rs_cetAnual') }
+    ]}
+  ];
+}
+
+// ─── BOTÃO BAIXAR PDF (PdfMasterPrime, paisagem) ───
+document.getElementById('btnPdf').addEventListener('click', async () => {
+  const btn = document.getElementById('btnPdf');
+  const txt = btn.textContent;
+  btn.textContent = 'Gerando PDF...';
+  btn.disabled = true;
+  try {
+    if (!operacoes.length) {
+      alert('Adicione pelo menos uma operação antes de gerar o PDF.');
+      return;
+    }
+    await PdfMasterPrime.gerar({
+      tituloEstrategia: 'Operação Estruturada',
+      filename: 'master-prime-operacao-estruturada',
+      orientation: 'landscape',
+      blocos: _coletarBlocosEstruturada()
+    });
+  } catch (err) {
+    console.error('Erro ao gerar PDF:', err);
+    alert('Erro ao gerar PDF: ' + err.message);
+  } finally {
+    btn.textContent = txt;
+    btn.disabled = false;
+  }
 });
+
+// Modo preview (?preview=1) — renderiza inline pra validar
+(() => {
+  if (new URLSearchParams(location.search).get('preview') !== '1') return;
+  // injeta dados de demonstração e renderiza
+  PdfMasterPrime.preview({
+    tituloEstrategia: 'Operação Estruturada',
+    orientation: 'landscape',
+    blocos: [
+      { tipo:'tabela-ampla',
+        colunas:['GRUPO','ADM.','FR','PRAZO','COTA UNITÁRIA','QTD','CRÉDITO TOTAL','PARCELA INICIAL','LANCE','CRÉDITO DISPONÍVEL','PARCELA APÓS'],
+        compact:true,
+        linhas:[
+          { celulas:['1','18 %','2 %','100 meses','R$ 6.300.000,00','1','R$ 6.300.000,00','R$ 75.600,00','R$ 1.890.000,00','R$ 6.300.000,00','R$ 54.122,73'] },
+          { celulas:['Total','18 %','2 %','100 meses','R$ 6.300.000,00','1','R$ 6.300.000,00','R$ 75.600,00','R$ 1.890.000,00','R$ 6.300.000,00','R$ 54.122,73'], total:true }
+        ]
+      },
+      { tipo:'resultado-secao', titulo:'RESULTADO', linhas:[
+        { label:'Crédito total contratado', valor:'R$ 6.300.000,00' },
+        { label:'Parcela inicial', valor:'R$ 75.600,00' },
+        { label:'Lance total 30,00%', valor:'R$ 1.890.000,00' },
+        { label:'Crédito disponível pós-contemplação', valor:'R$ 6.300.000,00' },
+        { label:'Parcela pós-contemplação', valor:'R$ 54.122,73' },
+        { label:'CET (mensal | anual)', valor:'0,25 % | 3,04 %' }
+      ]}
+    ]
+  });
+})();
 
 // Inicialização
 renderOps();

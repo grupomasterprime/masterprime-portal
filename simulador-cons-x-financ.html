@@ -60,6 +60,9 @@
 </style>
 <script>if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('embedded');</script>
 <style>html.embedded header { display: none; } html.embedded main { padding-top: 16px; }</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="pdf-master-prime.js"></script>
 <script src="analitico-cet.js"></script>
 </head>
 <body>
@@ -888,7 +891,105 @@ document.getElementById('btnLimpar').addEventListener('click',()=>{
   document.getElementById('resetConsorcio').click();
   document.getElementById('resetFinanc').click();
 });
-document.getElementById('btnPdf').addEventListener('click',()=>alert('Baixar PDF — implementação pendente.'));
+// ─── COLETA DE BLOCOS PARA O PDF ───
+function _coletarBlocosConsXFinanc() {
+  const _v = id => (document.getElementById(id)?.value || document.getElementById(id)?.textContent || '').trim() || '-';
+  const _sel = id => { const el = document.getElementById(id); return el?.options?.[el.selectedIndex]?.text || '-'; };
+
+  return [
+    { tipo:'card', titulo:'CONSÓRCIO', linhas:[
+      { campos:[
+        { label:'Crédito',                value: _v('credito') },
+        { label:'Prazo',                  value: _v('prazo') + ' meses' },
+        { label:'Taxa de administração',  value: _v('taxaAdm') },
+        { label:'Fundo de reserva',       value: _v('fundo') }
+      ], destaque:{ label:'Parcela inicial', value: _v('parcelaInicial') }},
+      { campos:[
+        { label:'Tipo de reajuste',       value: _sel('tipoReajuste') },
+        { label:'Reajuste',               value: _v('reajuste') },
+        { label:'Taxa de adesão',         value: _v('adesao') },
+        { label:'Prazo adesão',           value: _v('prazoAdesao') + ' meses' }
+      ]}
+    ]},
+    { tipo:'card', titulo:'DETALHES DA CONTEMPLAÇÃO', linhas:[
+      { campos:[
+        { label:'Modalidade',             value: _sel('tipoContemplacao') },
+        { label:'Expectativa',            value: _v('expectativa') + ' meses' },
+        { label:'Crédito atualizado',     value: _v('creditoAtualizado') },
+        { label:'Base de cálculo',        value: _sel('tipoLance') }
+      ], destaque:{ label:'Crédito disponível', value: _v('creditoDisponivel') }},
+      { campos:[
+        { label:'Valor de referência',    value: _v('valorRef') },
+        { label:'Recursos próprios',      value: _v('lanceP') + ' | ' + _v('lanceP_v') },
+        { label:'Total de lance',         value: _v('lanceTotalCalc') }
+      ]}
+    ]},
+    { tipo:'tabela', titulo:'COMPARATIVO APÓS CONTEMPLAÇÃO',
+      colunas:['REDUÇÃO DE PARCELA','REDUÇÃO DE PRAZO'],
+      linhas:[
+        { label:'Parcela',                valores:[_v('reducaoParcela_parc'), _v('reducaoPrazo_parc')] },
+        { label:'Prazo restante',         valores:[_v('reducaoParcela_prazo')+' meses', _v('reducaoPrazo_prazo')+' meses'] },
+        { label:'CET (Custo Efetivo Total)', valores:[_v('reducaoParcela_cm')+' ao mês | '+_v('reducaoParcela_ca')+' ao ano', _v('reducaoPrazo_cm')+' ao mês | '+_v('reducaoPrazo_ca')+' ao ano'] }
+      ]
+    },
+    { tipo:'card', titulo:'FINANCIAMENTO IMOBILIÁRIO', linhas:[
+      { campos:[
+        { label:'Tipo de amortização',    value: _sel('finTipo') },
+        { label:'Valor do imóvel',        value: _v('finImovel') },
+        { label:'Entrada',                value: _v('finEntrada') },
+        { label:'Prazo',                  value: _v('finPrazo') + ' meses' }
+      ], destaque:{ label:'Parcela inicial', value: _v('finParc2Ini') }},
+      { campos:[
+        { label:'Juros (ao ano)',         value: _v('finJuros') },
+        { label:'Correção anual (TR)',    value: _v('finTR') },
+        { label:'DFI',                    value: _v('finDFI') },
+        { label:'Tarifa mensal',          value: _v('finTarifa') }
+      ]}
+    ]},
+    { tipo:'tabela', titulo:'COMPARATIVO DE PARCELAS',
+      colunas:['PARCELA AVULSA','PARCELA + TARIFA + TR'],
+      linhas:[
+        { label:'Parcela inicial',        valores:[_v('finParc1Ini'), _v('finParc2Ini')] },
+        { label:'Parcela final',          valores:[_v('finParc1Fim'), _v('finParc2Fim')] },
+        { label:'CET (Custo Efetivo Total)', valores:[_v('finParc1CM')+' ao mês | '+_v('finParc1CA')+' ao ano', _v('finParc2CM')+' ao mês | '+_v('finParc2CA')+' ao ano'] }
+      ]
+    },
+    { tipo:'cards-comparativos', titulo:'RESULTADO DO COMPARATIVO: CONSÓRCIO X FINANCIAMENTO',
+      cards:[
+        { titulo:'Consórcio', cor:'verde', icone:'pessoa', linhas:[
+          { label:'Custo da operação',    valor: _v('resConsCusto') },
+          { label:'Parcela pós-contemplação', valor: _v('resConsParc') }
+        ]},
+        { titulo:'Financiamento', cor:'cinza', linhas:[
+          { label:'Custo da operação',    valor: _v('resFinCusto') },
+          { label:'Parcela final',        valor: _v('resFinParc') }
+        ]}
+      ],
+      separador:'X',
+      fechamento:{ label:'Economia fazendo por consórcio:', valor: _v('resEconomia') }
+    }
+  ];
+}
+
+document.getElementById('btnPdf').addEventListener('click', async () => {
+  const btn = document.getElementById('btnPdf');
+  const t = btn.textContent;
+  btn.textContent = 'Gerando PDF...';
+  btn.disabled = true;
+  try {
+    await PdfMasterPrime.gerar({
+      tituloEstrategia: 'Consórcio X Financiamento',
+      filename: 'master-prime-consorcio-x-financiamento',
+      blocos: _coletarBlocosConsXFinanc()
+    });
+  } catch (err) {
+    console.error(err);
+    alert('Erro ao gerar PDF: ' + err.message);
+  } finally {
+    btn.textContent = t;
+    btn.disabled = false;
+  }
+});
 
 // Init
 ['tipoLance','lanceP','lanceE','lanceFGTS','lanceP_v','lanceE_v','lanceFGTS_v'].forEach(id=>document.getElementById(id).disabled=true);
