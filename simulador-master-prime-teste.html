@@ -92,6 +92,38 @@
   .hidden { display: none !important; }
   .test-banner { background: var(--soft-blue); border: 1px solid #CBD5E1; color: var(--navy); padding: 10px 16px; border-radius: 8px; font-size: 12px; margin-bottom: 16px; text-align: center; }
 
+  /* ═══ CSS PRINT — usado pro Baixar PDF via window.print() ═══ */
+  @media print {
+    @page { size: A4 portrait; margin: 0; }
+    html, body {
+      margin: 0 !important; padding: 0 !important; background: #fff !important;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
+    /* Esconde TUDO da página */
+    body > *:not(#pdfReport) { display: none !important; }
+    /* Mostra apenas o template do PDF */
+    #pdfReport {
+      display: block !important;
+      position: relative !important;
+      width: 210mm !important;          /* largura A4 */
+      max-width: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      box-shadow: none !important;
+      border-radius: 0 !important;
+      overflow: visible !important;
+      font-size: 10px !important;       /* escala texto pra A4 */
+    }
+    #pdfReport * {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+    /* Reduz proporções internas (1300px → 210mm = ~0.6×) */
+    #pdfReport { zoom: 0.6 !important; }
+  }
+
   /* Botão olho (analítico) */
   .btn-eye { background: transparent; border: none; padding: 2px; cursor: pointer; color: var(--navy); display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; transition: background .15s; }
   .btn-eye:hover { background: rgba(45,63,94,.10); }
@@ -1204,15 +1236,35 @@ function _gerarPdf(filename) {
   }, 250);
 }
 
-// ─── BOTÃO BAIXAR PDF ───
+// ─── BOTÃO BAIXAR PDF (via window.print() nativo) ───
+// Usa o sistema nativo de impressão do navegador. CSS @media print esconde
+// o simulador e mostra só o template. O user escolhe "Salvar como PDF" no dialog.
+// É a forma mais robusta (mesma que apps como Conkey usam server-side via Puppeteer).
 document.getElementById('baixarPdf').addEventListener('click', () => {
   const d = _coletarDados();
   _renderTemplate(d);
+
+  const report = document.getElementById('pdfReport');
+  // Define título da janela (vira sugestão de nome no dialog "Salvar como PDF")
   const hoje = new Date();
   const dd = String(hoje.getDate()).padStart(2, '0');
   const mm = String(hoje.getMonth() + 1).padStart(2, '0');
   const yyyy = hoje.getFullYear();
-  _gerarPdf(`master-prime-operacao-simples-${dd}${mm}${yyyy}.pdf`);
+  const tituloOriginal = document.title;
+  document.title = `master-prime-operacao-simples-${dd}${mm}${yyyy}`;
+
+  // Torna o template visível pro print
+  report.style.display = 'block';
+
+  // Aguarda layout e dispara dialog
+  setTimeout(() => {
+    window.print();
+    // Restaura estado depois (após dialog fechar)
+    setTimeout(() => {
+      report.style.display = 'none';
+      document.title = tituloOriginal;
+    }, 300);
+  }, 100);
 });
 
 // ─── MODO PREVIEW DEMO (?preview=1) ───
