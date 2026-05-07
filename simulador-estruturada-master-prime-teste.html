@@ -1002,22 +1002,13 @@ document.getElementById('btnLimpar').addEventListener('click', () => {
 function _coletarBlocosEstruturada() {
   const _txt = id => (document.getElementById(id)?.textContent || '').trim();
 
-  // Linhas da tabela: 1 linha por operação cadastrada + linha "Total"
-  const linhas = operacoes.map(o => ({
-    celulas: [
-      String(o.grupo || '—'),
-      (o.adm != null ? o.adm + ' %' : '—'),
-      (o.fr != null ? o.fr + ' %' : '—'),
-      (o.prazo != null ? o.prazo + ' meses' : '—'),
-      o.cotaUnitaria || '—',
-      String(o.qtd || '—'),
-      o.totalCartas || '—',
-      o.parcelaInicial || '—',
-      o.lance || '—',
-      o.creditoDisp || '—',
-      o.parcelaPos || '—'
-    ]
-  }));
+  // Linhas da tabela: lê direto do DOM da tabela renderizada (uma linha por operação)
+  const linhas = Array.from(document.querySelectorAll('#opsBody tr'))
+    .filter(tr => !tr.classList.contains('empty-row') && !tr.classList.contains('add-row'))
+    .map(tr => {
+      const tds = Array.from(tr.querySelectorAll('td')).slice(0, 11);
+      return { celulas: tds.map(td => (td.textContent || '').trim()) };
+    });
   // Linha total agregada (lê do footer da tabela)
   linhas.push({
     celulas: [
