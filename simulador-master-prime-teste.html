@@ -1143,42 +1143,54 @@ function _renderTemplate(d) {
   document.getElementById('pdf_footer').innerHTML = `Documento gerado em ${dd}/${mm}/${yyyy}<br>Página 1/1`;
 }
 
-// Gera o PDF — html2pdf renderiza o template em 1300px e escala pra A4 (210mm)
-// IMPORTANTE: o html2pdf 0.10.x escala automaticamente a imagem capturada para
-// caber em pageInner.width (210mm − margens). Por isso passamos margin:0 e
-// windowWidth:1300 — o canvas resultante (2600px @ scale 2) é redimensionado
-// para 210mm de largura, com altura proporcional.
+// Gera o PDF — captura via html2canvas (1300px wide) e escala manualmente pra A4 (210mm)
+// FORÇA o conteúdo a caber em UMA ÚNICA página A4 portrait, mantendo proporção.
 function _gerarPdf(filename) {
   const report = document.getElementById('pdfReport');
 
-  // Wrapper visível mas atrás de tudo — html2canvas precisa do elemento DENTRO da viewport
-  // pra capturar coordenadas corretas. Off-screen (left negativo) causa corte/deslocamento.
-  // Solução: top/left = 0, z-index muito baixo, atrás do conteúdo normal da página.
+  // Wrapper visível mas atrás de tudo — html2canvas precisa do elemento na viewport
   const wrap = document.createElement('div');
-  wrap.style.cssText = `position:fixed; top:0; left:0; width:${PDF_WIDTH}px; background:#fff; z-index:-99999; opacity:1; pointer-events:none; overflow:hidden;`;
+  wrap.style.cssText = `position:fixed; top:0; left:0; width:${PDF_WIDTH}px; background:#fff; z-index:-99999; pointer-events:none; overflow:hidden;`;
   document.body.appendChild(wrap);
   report.style.display = 'block';
   wrap.appendChild(report);
 
+  // Aguarda layout/imagens
   setTimeout(() => {
-    html2pdf().set({
-      margin: 0,
-      filename,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#FFFFFF',
-        windowWidth: PDF_WIDTH,
-        width: PDF_WIDTH,
-        scrollX: 0,
-        scrollY: 0,
-        logging: false
-      },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true },
-      pagebreak: { mode: ['avoid-all'] }
-    }).from(report).save().then(() => {
+    html2canvas(report, {
+      scale: 2,
+      backgroundColor: '#FFFFFF',
+      width: PDF_WIDTH,
+      windowWidth: PDF_WIDTH,
+      useCORS: true,
+      allowTaint: true,
+      logging: false,
+      scrollX: 0,
+      scrollY: 0
+    }).then((canvas) => {
+      const imgData = canvas.toDataURL('image/jpeg', 0.96);
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true });
+
+      const pageW = 210;  // A4 portrait largura mm
+      const pageH = 297;  // A4 portrait altura mm
+      // Largura do PDF = pageW. Altura proporcional baseada na relação canvas.h/canvas.w
+      const fitW = pageW;
+      const fitH = (canvas.height * fitW) / canvas.width;
+
+      if (fitH <= pageH) {
+        // Cabe em 1 página — usa toda a largura A4
+        pdf.addImage(imgData, 'JPEG', 0, 0, fitW, fitH);
+      } else {
+        // Conteúdo maior que A4 — escala proporcional pra caber em 1 página inteira
+        const fitH2 = pageH;
+        const fitW2 = (canvas.width * fitH2) / canvas.height;
+        const offsetX = (pageW - fitW2) / 2;  // centraliza horizontalmente
+        pdf.addImage(imgData, 'JPEG', offsetX, 0, fitW2, fitH2);
+      }
+      pdf.save(filename);
+
+      // Cleanup
       report.style.display = 'none';
       document.body.appendChild(report);
       wrap.remove();
@@ -1187,9 +1199,9 @@ function _gerarPdf(filename) {
       report.style.display = 'none';
       document.body.appendChild(report);
       wrap.remove();
-      alert('Erro ao gerar PDF. Tente novamente.');
+      alert('Erro ao gerar PDF: ' + err.message);
     });
-  }, 200);
+  }, 250);
 }
 
 // ─── BOTÃO BAIXAR PDF ───
