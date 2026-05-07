@@ -812,17 +812,15 @@ function abrirAnalitico(modo) {
   const totalGeral = parcelas.reduce((a, b) => a + b, 0);
 
   // Agrupa por ano (12 meses) e calcula saldo devedor decrescente
+  // Padrão Conkey: saldo devedor no INÍCIO do ano = total restante - parcela do mês 1 do ano
   const anos = [];
   let pagoAcumulado = 0;
-  let pago1mesAno = parcelas[0] || 0;
   for (let i = 0; i < parcelas.length; i += 12) {
     const slice = parcelas.slice(i, i + 12);
     const totalAno = slice.reduce((a, b) => a + b, 0);
-    const parcelaMensal = slice[slice.length - 1] || parcPos; // parcela do final do ano (representa o ano)
-    // Saldo devedor no INÍCIO do ano = total restante - parcela do mês 1 do primeiro ano (Conkey)
-    const saldoInicioAno = i === 0
-      ? totalGeral - pago1mesAno
-      : totalGeral - pagoAcumulado;
+    const parcelaMes1 = parcelas[i] || 0;
+    const parcelaMensal = slice[slice.length - 1] || parcPos;
+    const saldoInicioAno = totalGeral - pagoAcumulado - parcelaMes1;
     anos.push({
       ano: anos.length + 1,
       cartaCredito: s.credito,
