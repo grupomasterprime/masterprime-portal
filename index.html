@@ -305,6 +305,23 @@ body.embedded-mode .portal-menu-fab { display:flex; }
 .fat-tabela-titulo { font-size:14px; font-weight:700; color:var(--mp-navy); }
 .fat-tabela-sub { font-size:11.5px; color:var(--text2); margin-top:2px; }
 .fat-tabela-filtros { padding:14px 22px; background:#FAFCFE; border-bottom:1px solid var(--border); }
+.fat-tabela-card .tabela { width:100%; border-collapse:separate; border-spacing:0; font-size:12.5px; }
+.fat-tabela-card .tabela thead th {
+  padding:12px 18px; text-align:left; font-size:10.5px; font-weight:700;
+  text-transform:uppercase; letter-spacing:.5px; color:var(--text2);
+  background:#FAFCFE; border-bottom:1px solid var(--border); white-space:nowrap;
+}
+.fat-tabela-card .tabela thead th:first-child { padding-left:22px; }
+.fat-tabela-card .tabela thead th:last-child { padding-right:22px; }
+.fat-tabela-card .tabela tbody td {
+  padding:14px 18px; border-bottom:1px solid var(--border); vertical-align:middle;
+}
+.fat-tabela-card .tabela tbody td:first-child { padding-left:22px; }
+.fat-tabela-card .tabela tbody td:last-child { padding-right:22px; }
+.fat-tabela-card .tabela tbody tr:last-child td { border-bottom:none; }
+.fat-tabela-card .tabela tbody tr.row-link { cursor:pointer; transition:background .15s; }
+.fat-tabela-card .tabela tbody tr.row-link:hover { background:#FAFCFE; }
+.fat-tabela-card .tabela tbody tr.row-link:hover td:first-child { box-shadow:inset 3px 0 0 var(--mp-teal); }
 .fat-detalhe-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, .55); z-index: 200; align-items: center; justify-content: center; padding: 20px; animation: fadeIn .15s ease; }
 .fat-detalhe-overlay.aberto { display: flex; }
 .fat-detalhe-modal { background: white; border-radius: 14px; width: 100%; max-width: 860px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,.3); animation: slideUp .2s ease; }
@@ -984,6 +1001,11 @@ async function enterPortal() {
   nav('dashboard-vendas');
   if (!_isDemoBlocked) { await renderDashboard(); await renderHistorico(); }
   if (currentUser.tipo==='admin') { await renderAdminMeses(); await renderUsers(); if (_isOverviewAllowed) { await renderAdminOverview(); } }
+  // Atualiza imediatamente o label do menu (Faturamento ou Meus Processos) sem esperar entrar na tela
+  try {
+    const _lblMenu = document.getElementById('ni-admin-faturamento-label');
+    if (_lblMenu) _lblMenu.textContent = (currentUser.tipo === 'admin') ? 'Faturamento' : 'Meus Processos';
+  } catch(e) {}
   await renderAdminFaturamento();
 }
 
