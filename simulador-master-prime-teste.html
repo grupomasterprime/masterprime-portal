@@ -379,105 +379,111 @@
   </div>
 </main>
 
-<!-- ════ TEMPLATE PDF (oculto, usado só na hora de baixar) ════ -->
-<div id="pdfReport" style="display:none; position:absolute; left:-9999px; width:794px; background:#fff; font-family:'Inter',-apple-system,system-ui,sans-serif; color:#1F2937;">
-  <div style="background:#2D3F5E; color:#fff; padding:18px 32px; display:flex; justify-content:space-between; align-items:center;">
-    <div style="display:flex; align-items:center; gap:14px;">
-      <div style="width:36px; height:36px; background:#1E2D45; border:1px solid rgba(255,255,255,0.2); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:14px;">M</div>
+<!-- ═══════════════════════════════════════════════════════════════
+     TEMPLATE PDF — Master Prime, 1300px de largura (Conkey-style).
+     Renderizado em alta resolução e escalado pra A4 (210mm) na geração.
+     Layout adaptativo: campos zerados/inativos não aparecem.
+     Suporta modo demo via ?preview=1 (mostra inline ao invés de baixar).
+     ═══════════════════════════════════════════════════════════════ -->
+<div id="pdfReport" style="display:none; width:1300px; background:#fff; font-family:'Inter',-apple-system,system-ui,sans-serif; color:#1F2937; font-size:18px; line-height:1.5;">
+  <!-- HEADER -->
+  <div style="background:#2D3F5E; color:#fff; padding:28px 50px; display:flex; justify-content:space-between; align-items:center;">
+    <div style="display:flex; align-items:center; gap:20px;">
+      <div style="width:56px; height:56px; background:#1E2D45; border:1.5px solid rgba(255,255,255,0.22); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:22px;">M</div>
       <div>
-        <div style="font-size:18px; font-weight:600; letter-spacing:0.3px;">Master Prime</div>
-        <div style="font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color:rgba(255,255,255,0.7); margin-top:2px;">Simulador de Consórcio</div>
+        <div style="font-size:26px; font-weight:600; letter-spacing:0.4px;">Master Prime</div>
+        <div style="font-size:13px; letter-spacing:1.6px; text-transform:uppercase; color:rgba(255,255,255,0.72); margin-top:3px;">Simulador de Consórcio</div>
       </div>
     </div>
-    <div style="font-size:12px; font-weight:600;">Estratégia Simulada: Operação Simples</div>
+    <div style="font-size:18px; font-weight:600;">Estratégia Simulada: Operação Simples</div>
   </div>
 
-  <div style="padding:32px;">
-    <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; color:#2D3F5E; margin-bottom:12px;">DADOS DA COTA</div>
-    <div style="display:grid; grid-template-columns:repeat(4,1fr) auto; gap:24px; padding:16px 20px; background:#F4F5F7; border-radius:8px; align-items:center;">
-      <div><div style="font-size:10px; color:#6B7280; margin-bottom:4px;">Crédito</div><div id="pdf_credito" style="font-size:13px; font-weight:600;">—</div></div>
-      <div><div style="font-size:10px; color:#6B7280; margin-bottom:4px;">Prazo</div><div id="pdf_prazo" style="font-size:13px; font-weight:600;">—</div></div>
-      <div><div style="font-size:10px; color:#6B7280; margin-bottom:4px;">Taxa de administração</div><div id="pdf_taxaAdm" style="font-size:13px; font-weight:600;">—</div></div>
-      <div><div style="font-size:10px; color:#6B7280; margin-bottom:4px;">Fundo de reserva</div><div id="pdf_fundo" style="font-size:13px; font-weight:600;">—</div></div>
-      <div style="text-align:right;"><div style="font-size:10px; color:#6B7280; margin-bottom:4px;">Parcela inicial</div><div id="pdf_parcelaInicial" style="background:#2D3F5E; color:#fff; font-weight:700; font-size:13px; padding:8px 14px; border-radius:6px; display:inline-block;">—</div></div>
-    </div>
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px; padding:0 20px; margin-top:8px;">
-      <div><div style="font-size:10px; color:#6B7280; margin-bottom:4px;">Tipo de reajuste</div><div id="pdf_tipoReajuste" style="font-size:13px; font-weight:600;">—</div></div>
-      <div><div style="font-size:10px; color:#6B7280; margin-bottom:4px;">Reajuste</div><div id="pdf_reajuste" style="font-size:13px; font-weight:600;">—</div></div>
-    </div>
-
-    <div style="height:1px; background:#E5E7EB; margin:24px 0;"></div>
-
-    <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; color:#2D3F5E; margin-bottom:12px;">DETALHES DA CONTEMPLAÇÃO</div>
-    <div style="display:grid; grid-template-columns:repeat(4,1fr) auto; gap:24px; padding:16px 20px; background:#F4F5F7; border-radius:8px; align-items:center;">
-      <div><div style="font-size:10px; color:#6B7280; margin-bottom:4px;">Modalidade</div><div id="pdf_modalidade" style="font-size:13px; font-weight:600;">—</div></div>
-      <div><div style="font-size:10px; color:#6B7280; margin-bottom:4px;">Expectativa</div><div id="pdf_expectativa" style="font-size:13px; font-weight:600;">—</div></div>
-      <div><div style="font-size:10px; color:#6B7280; margin-bottom:4px;">Crédito atualizado</div><div id="pdf_creditoAtualizado" style="font-size:13px; font-weight:600;">—</div></div>
-      <div><div style="font-size:10px; color:#6B7280; margin-bottom:4px;">Base de cálculo</div><div id="pdf_baseCalculo" style="font-size:13px; font-weight:600;">—</div></div>
-      <div style="text-align:right;"><div style="font-size:10px; color:#6B7280; margin-bottom:4px;">Crédito disponível</div><div id="pdf_creditoDisp" style="background:#2D3F5E; color:#fff; font-weight:700; font-size:13px; padding:8px 14px; border-radius:6px; display:inline-block;">—</div></div>
-    </div>
-    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:24px; padding:0 20px; margin-top:8px;">
-      <div><div style="font-size:10px; color:#6B7280; margin-bottom:4px;">Valor de referência</div><div id="pdf_valorRef" style="font-size:13px; font-weight:600;">—</div></div>
-      <div><div style="font-size:10px; color:#6B7280; margin-bottom:4px;">Recursos próprios</div><div id="pdf_recProprios" style="font-size:13px; font-weight:600;">—</div></div>
-      <div><div style="font-size:10px; color:#6B7280; margin-bottom:4px;">Embutido</div><div id="pdf_embutido" style="font-size:13px; font-weight:600;">—</div></div>
-      <div><div style="font-size:10px; color:#6B7280; margin-bottom:4px;">FGTS</div><div id="pdf_fgts" style="font-size:13px; font-weight:600;">—</div></div>
-    </div>
-    <div style="padding:0 20px; margin-top:8px;">
-      <div style="font-size:10px; color:#6B7280; margin-bottom:4px;">Total de lance</div><div id="pdf_totalLance" style="font-size:13px; font-weight:600;">—</div>
+  <div style="padding:42px 50px;">
+    <!-- ═════════ DADOS DA COTA ═════════ -->
+    <div style="font-size:14px; font-weight:700; letter-spacing:2.5px; color:#2D3F5E; margin-bottom:16px;">DADOS DA COTA</div>
+    <div style="background:#F4F5F7; border-radius:12px; padding:24px 30px;">
+      <!-- Linha 1: sempre presente -->
+      <div id="pdf_cota_l1" style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto; gap:32px; align-items:center;">
+        <div><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Crédito</div><div id="pdf_credito" style="font-size:18px; font-weight:600;">—</div></div>
+        <div><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Prazo</div><div id="pdf_prazo" style="font-size:18px; font-weight:600;">—</div></div>
+        <div><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Taxa de administração</div><div id="pdf_taxaAdm" style="font-size:18px; font-weight:600;">—</div></div>
+        <div><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Fundo de reserva</div><div id="pdf_fundo" style="font-size:18px; font-weight:600;">—</div></div>
+        <div id="pdf_parcelaInicialBox" style="text-align:right;"></div>
+      </div>
+      <!-- Linha 2: dinâmica (Tipo reajuste sempre + Reajuste %, Redutor, Seguro, Adesão se ativos) -->
+      <div id="pdf_cota_extras" style="display:grid; grid-template-columns:repeat(4,1fr); gap:32px; margin-top:18px;"></div>
     </div>
 
+    <!-- ═════════ DETALHES DA CONTEMPLAÇÃO ═════════ -->
+    <div style="font-size:14px; font-weight:700; letter-spacing:2.5px; color:#2D3F5E; margin:28px 0 16px;">DETALHES DA CONTEMPLAÇÃO</div>
+    <div style="background:#F4F5F7; border-radius:12px; padding:24px 30px;">
+      <!-- Linha 1 -->
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto; gap:32px; align-items:center;">
+        <div><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Modalidade</div><div id="pdf_modalidade" style="font-size:18px; font-weight:600;">—</div></div>
+        <div><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Expectativa</div><div id="pdf_expectativa" style="font-size:18px; font-weight:600;">—</div></div>
+        <div><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Crédito atualizado</div><div id="pdf_creditoAtualizado" style="font-size:18px; font-weight:600;">—</div></div>
+        <div><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Base de cálculo</div><div id="pdf_baseCalculo" style="font-size:18px; font-weight:600;">—</div></div>
+        <div style="text-align:right;"><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Crédito disponível</div><div id="pdf_creditoDisp" style="background:#2D3F5E; color:#fff; font-weight:700; font-size:18px; padding:10px 18px; border-radius:7px; display:inline-block;">—</div></div>
+      </div>
+      <!-- Linha 2: dinâmica (Valor referência + Recursos próprios + Embutido/FGTS condicionais + Total de lance) -->
+      <div id="pdf_cont_extras" style="display:grid; grid-template-columns:repeat(4,1fr); gap:32px; margin-top:18px;"></div>
+    </div>
+
+    <!-- ═════════ VALORIZAÇÃO DA COTA APÓS CONTEMPLAÇÃO (condicional) ═════════ -->
     <div id="pdf_evolucaoBlock" style="display:none;">
-      <div style="height:1px; background:#E5E7EB; margin:24px 0;"></div>
-      <div style="font-size:11px; font-weight:700; letter-spacing:1.5px; color:#2D3F5E; margin-bottom:12px;">VALORIZAÇÃO DA COTA APÓS CONTEMPLAÇÃO</div>
-      <div style="display:grid; grid-template-columns:repeat(3,1fr) auto; gap:24px; padding:16px 20px; background:#F4F5F7; border-radius:8px; align-items:center;">
-        <div><div style="font-size:10px; color:#6B7280; margin-bottom:4px;">CDI</div><div id="pdf_cdi" style="font-size:13px; font-weight:600;">—</div></div>
-        <div><div style="font-size:10px; color:#6B7280; margin-bottom:4px;">Período da aplicação</div><div id="pdf_periodo" style="font-size:13px; font-weight:600;">—</div></div>
-        <div><div style="font-size:10px; color:#6B7280; margin-bottom:4px;">Rentabilidade sobre o CDI</div><div id="pdf_rentab" style="font-size:13px; font-weight:600;">—</div></div>
-        <div style="text-align:right;"><div style="font-size:10px; color:#6B7280; margin-bottom:4px;">Crédito disp. + rentabilidade</div><div id="pdf_creditoMaisRent" style="background:#2D3F5E; color:#fff; font-weight:700; font-size:13px; padding:8px 14px; border-radius:6px; display:inline-block;">—</div></div>
+      <div style="font-size:14px; font-weight:700; letter-spacing:2.5px; color:#2D3F5E; margin:28px 0 16px;">VALORIZAÇÃO DA COTA APÓS CONTEMPLAÇÃO</div>
+      <div style="background:#F4F5F7; border-radius:12px; padding:24px 30px;">
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:32px; align-items:center;">
+          <div><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">CDI</div><div id="pdf_cdi" style="font-size:18px; font-weight:600;">—</div></div>
+          <div><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Período da aplicação</div><div id="pdf_periodo" style="font-size:18px; font-weight:600;">—</div></div>
+          <div><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Rentabilidade sobre o CDI</div><div id="pdf_rentab" style="font-size:18px; font-weight:600;">—</div></div>
+          <div style="text-align:right;"><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Crédito disponível + rentabilidade</div><div id="pdf_creditoMaisRent" style="background:#2D3F5E; color:#fff; font-weight:700; font-size:18px; padding:10px 18px; border-radius:7px; display:inline-block;">—</div></div>
+        </div>
       </div>
     </div>
 
-    <div style="height:1px; background:#E5E7EB; margin:24px 0;"></div>
-
-    <table style="width:100%; border-collapse:collapse; font-size:12px;">
+    <!-- ═════════ COMPARATIVO APÓS CONTEMPLAÇÃO ═════════ -->
+    <table style="width:100%; border-collapse:separate; border-spacing:0; margin-top:32px;">
       <thead>
-        <tr style="background:#F4F5F7;">
-          <th style="text-align:left; padding:12px 16px; font-size:10px; font-weight:700; letter-spacing:1px; color:#2D3F5E;">COMPARATIVO APÓS CONTEMPLAÇÃO</th>
-          <th style="text-align:center; padding:12px 16px; font-size:10px; font-weight:700; letter-spacing:1px; color:#2D3F5E;">REDUÇÃO DE PARCELA</th>
-          <th style="width:40px;"></th>
-          <th style="text-align:center; padding:12px 16px; font-size:10px; font-weight:700; letter-spacing:1px; color:#2D3F5E;">REDUÇÃO DE PRAZO</th>
+        <tr>
+          <th style="text-align:left; padding:18px 22px; font-size:13px; font-weight:700; letter-spacing:2px; color:#2D3F5E; background:#F4F5F7; border-radius:12px 0 0 0;">COMPARATIVO APÓS CONTEMPLAÇÃO</th>
+          <th style="text-align:center; padding:18px 22px; font-size:13px; font-weight:700; letter-spacing:2px; color:#2D3F5E; background:#F4F5F7;">REDUÇÃO DE PARCELA</th>
+          <th style="width:60px; background:#F4F5F7;"></th>
+          <th style="text-align:center; padding:18px 22px; font-size:13px; font-weight:700; letter-spacing:2px; color:#2D3F5E; background:#F4F5F7; border-radius:0 12px 0 0;">REDUÇÃO DE PRAZO</th>
         </tr>
       </thead>
       <tbody>
         <tr style="border-bottom:1px solid #E5E7EB;">
-          <td style="padding:10px 16px; color:#6B7280;">Parcela</td>
-          <td style="padding:10px 16px; text-align:center; font-weight:700;" id="pdf_redPar_parcela">—</td>
-          <td rowspan="3" style="text-align:center; color:#6B7280; font-weight:600;">OU</td>
-          <td style="padding:10px 16px; text-align:center; font-weight:700;" id="pdf_redPra_parcela">—</td>
-        </tr>
-        <tr style="border-bottom:1px solid #E5E7EB;">
-          <td style="padding:10px 16px; color:#6B7280;">Prazo restante</td>
-          <td style="padding:10px 16px; text-align:center; font-weight:700;" id="pdf_redPar_prazo">—</td>
-          <td style="padding:10px 16px; text-align:center; font-weight:700;" id="pdf_redPra_prazo">—</td>
+          <td style="padding:16px 22px; color:#6B7280; font-size:16px; border-bottom:1px solid #E5E7EB;">Parcela</td>
+          <td style="padding:16px 22px; text-align:center; font-weight:700; font-size:18px; border-bottom:1px solid #E5E7EB;" id="pdf_redPar_parcela">—</td>
+          <td rowspan="3" style="text-align:center; color:#6B7280; font-weight:600; font-size:14px;">OU</td>
+          <td style="padding:16px 22px; text-align:center; font-weight:700; font-size:18px; border-bottom:1px solid #E5E7EB;" id="pdf_redPra_parcela">—</td>
         </tr>
         <tr>
-          <td style="padding:10px 16px; color:#6B7280;">CET (Custo Efetivo Total)</td>
-          <td style="padding:10px 16px; text-align:center; font-weight:600; font-size:11px;" id="pdf_redPar_cet">—</td>
-          <td style="padding:10px 16px; text-align:center; font-weight:600; font-size:11px;" id="pdf_redPra_cet">—</td>
+          <td style="padding:16px 22px; color:#6B7280; font-size:16px; border-bottom:1px solid #E5E7EB;">Prazo restante</td>
+          <td style="padding:16px 22px; text-align:center; font-weight:700; font-size:18px; border-bottom:1px solid #E5E7EB;" id="pdf_redPar_prazo">—</td>
+          <td style="padding:16px 22px; text-align:center; font-weight:700; font-size:18px; border-bottom:1px solid #E5E7EB;" id="pdf_redPra_prazo">—</td>
+        </tr>
+        <tr>
+          <td style="padding:16px 22px; color:#6B7280; font-size:16px;">CET (Custo Efetivo Total)</td>
+          <td style="padding:16px 22px; text-align:center; font-weight:700; font-size:17px;" id="pdf_redPar_cet">—</td>
+          <td style="padding:16px 22px; text-align:center; font-weight:700; font-size:17px;" id="pdf_redPra_cet">—</td>
         </tr>
       </tbody>
     </table>
 
-    <div style="margin-top:32px; font-size:9px; color:#6B7280; line-height:1.5;">
+    <!-- ═════════ DISCLAIMER ═════════ -->
+    <div style="margin-top:36px; font-size:13px; color:#6B7280; line-height:1.65; text-align:justify;">
       Os resultados apresentados nesta simulação possuem caráter meramente informativo e indicativo, sendo elaborados com base em informações fornecidas pelo usuário, as quais podem ser estimadas, hipotéticas ou não refletir condições reais de mercado, não constituindo promessa, garantia ou obrigação de resultado, tampouco vinculando a administradora ou quaisquer terceiros.<br><br>
       A efetiva contratação do consórcio está condicionada à disponibilidade de vagas nos respectivos grupos, à análise e aprovação da administradora, bem como ao integral atendimento dos requisitos, regras e condições estabelecidos no contrato de adesão e na regulamentação aplicável.<br><br>
       O usuário declara estar ciente de que o contrato de adesão, o regulamento do consórcio e os demais documentos aplicáveis constituem os instrumentos que regem a relação contratual, recomendando-se sua leitura integral, sendo o aceite manifestação inequívoca de ciência e concordância com todos os seus termos.
     </div>
   </div>
 
-  <div style="background:#2D3F5E; color:#fff; padding:14px 32px; display:flex; justify-content:space-between; align-items:center; font-size:11px; margin-top:32px;">
+  <!-- FOOTER -->
+  <div style="background:#2D3F5E; color:#fff; padding:22px 50px; display:flex; justify-content:space-between; align-items:center; font-size:15px;">
     <div style="font-weight:600;">Master Prime · Simulador de Consórcio</div>
-    <div id="pdf_footer" style="text-align:right;">Documento gerado em —<br>Página 1/1</div>
+    <div id="pdf_footer" style="text-align:right; line-height:1.5;">Documento gerado em —<br>Página 1/1</div>
   </div>
 </div>
 
@@ -938,93 +944,287 @@ recalc();
 // ═════════════════════════════════════════════════════
 // EXPORTAR PDF
 // ═════════════════════════════════════════════════════
-document.getElementById('baixarPdf').addEventListener('click', () => {
-  const txt = (id) => document.getElementById(id).textContent || document.getElementById(id).value || '—';
-  const val = (id) => document.getElementById(id).value || '—';
+// ═════════════════════════════════════════════════════════════
+// PDF — render + download em 1300px Conkey-style (escala pra A4)
+// ═════════════════════════════════════════════════════════════
+const PDF_WIDTH = 1300;          // largura do template (px)
+const A4_PORTRAIT_MM = 210;      // largura A4 portrait (mm)
 
+// Helpers globais
+const _txt = (id) => { const el = document.getElementById(id); return (el?.textContent || el?.value || '').trim() || '—'; };
+const _val = (id) => { const el = document.getElementById(id); return (el?.value || '').trim(); };
+const _numPct = (s) => { const m = String(s||'').replace(/\./g,'').replace(',','.').match(/-?\d+(?:\.\d+)?/); return m ? parseFloat(m[0]) : 0; };
+const _numMoney = (s) => { const m = String(s||'').replace(/\./g,'').replace(',','.').match(/-?\d+(?:\.\d+)?/); return m ? parseFloat(m[0]) : 0; };
+
+// Adiciona célula label+valor no container (linha 2 dos cards)
+function _addCell(container, label, value) {
+  const cell = document.createElement('div');
+  cell.innerHTML = `<div style="font-size:13px; color:#6B7280; margin-bottom:6px;">${label}</div><div style="font-size:18px; font-weight:600;">${value}</div>`;
+  container.appendChild(cell);
+}
+
+// Snapshot do estado atual do simulador → objeto data
+function _coletarDados() {
   const tipoReajusteSel = document.getElementById('tipoReajuste');
-  const tipoReajusteTxt = tipoReajusteSel.options[tipoReajusteSel.selectedIndex]?.text || '—';
+  const tipoReajusteTxt = tipoReajusteSel?.options[tipoReajusteSel.selectedIndex]?.text || '—';
   const tipoContSel = document.getElementById('tipoContemplacao');
-  const tipoContTxt = tipoContSel.options[tipoContSel.selectedIndex]?.text || '—';
+  const tipoContTxt = tipoContSel?.options[tipoContSel.selectedIndex]?.text || '—';
   const tipoLanceSel = document.getElementById('tipoLance');
-  const tipoLanceTxt = tipoLanceSel.options[tipoLanceSel.selectedIndex]?.text || '—';
+  const tipoLanceTxt = tipoLanceSel?.options[tipoLanceSel.selectedIndex]?.text || '—';
 
-  // Dados da cota
-  document.getElementById('pdf_credito').textContent = val('credito') || 'R$ 0,00';
-  document.getElementById('pdf_prazo').textContent = (val('prazo') || '0') + ' meses';
-  document.getElementById('pdf_taxaAdm').textContent = val('taxaAdm') || '0,00 %';
-  document.getElementById('pdf_fundo').textContent = val('fundo') || '0,00 %';
-  document.getElementById('pdf_tipoReajuste').textContent = tipoReajusteTxt;
-  document.getElementById('pdf_reajuste').textContent = val('reajuste') || '0,00 %';
-  document.getElementById('pdf_parcelaInicial').textContent = txt('parcelaInicial');
+  return {
+    // Cota
+    credito: _val('credito') || 'R$ 0,00',
+    prazo: (_val('prazo') || '0') + ' meses',
+    taxaAdm: _val('taxaAdm') || '0,00 %',
+    fundo: _val('fundo') || '0,00 %',
+    tipoReajuste: tipoReajusteTxt,
+    reajuste: _val('reajuste'),
+    reajusteN: _numPct(_val('reajuste')),
+    parcelaInicial: _txt('parcelaInicial'),
+    // Slots condicionais (preparados pra quando os inputs forem adicionados)
+    redutorPct: window._simState?.redutorPct || 0,
+    redutorSobre: window._simState?.redutorSobre || 'Parcela total',
+    seguroPct: window._simState?.seguroPct || 0,
+    adesaoPct: window._simState?.adesaoPct || 0,
+    adesaoMeses: window._simState?.adesaoMeses || 0,
+    parcelaInicial2: window._simState?.parcelaInicial2 || null,  // demais parcelas (se diferente)
 
-  // Detalhes da contemplação
-  document.getElementById('pdf_modalidade').textContent = tipoContTxt;
-  document.getElementById('pdf_expectativa').textContent = (val('expectativa') || '1') + ' meses';
-  document.getElementById('pdf_creditoAtualizado').textContent = val('creditoAtualizado') || 'R$ 0,00';
-  document.getElementById('pdf_baseCalculo').textContent = tipoLanceTxt;
-  document.getElementById('pdf_valorRef').textContent = val('valorRef') || 'R$ 0,00';
-  const pP = val('lanceProprios') || '0%';
-  const pE = val('lanceEmbutido') || '0%';
-  const pF = val('lanceFGTS') || '0%';
-  document.getElementById('pdf_recProprios').textContent = pP + ' | ' + (val('lanceProprios_v') || 'R$ 0,00');
-  document.getElementById('pdf_embutido').textContent = pE + ' | ' + (val('lanceEmbutido_v') || 'R$ 0,00');
-  document.getElementById('pdf_fgts').textContent = pF + ' | ' + (val('lanceFGTS_v') || 'R$ 0,00');
-  document.getElementById('pdf_totalLance').textContent = (val('totalLance') || '0%') + ' | ' + (val('valorTotalLance') || 'R$ 0,00');
-  document.getElementById('pdf_creditoDisp').textContent = txt('creditoDisponivel');
+    // Contemplação
+    modalidade: tipoContTxt,
+    expectativa: (_val('expectativa') || '1') + ' meses',
+    creditoAtualizado: _val('creditoAtualizado') || 'R$ 0,00',
+    baseCalculo: tipoLanceTxt,
+    valorRef: _val('valorRef') || 'R$ 0,00',
+    creditoDisp: _txt('creditoDisponivel'),
 
-  // Evolução (só se ligada)
-  const evoOn = document.getElementById('evolucaoOn').checked;
-  document.getElementById('pdf_evolucaoBlock').style.display = evoOn ? 'block' : 'none';
-  if (evoOn) {
-    document.getElementById('pdf_cdi').textContent = val('cdi') || '0,00 %';
-    document.getElementById('pdf_periodo').textContent = (val('mesesPosCont') || '0') + ' meses';
-    document.getElementById('pdf_rentab').textContent = (val('rentab') || '100,00 %') + ' | ' + txt('rentabilidade');
-    document.getElementById('pdf_creditoMaisRent').textContent = txt('creditoMaisRentab');
+    lanceProprios: _val('lanceProprios') || '0,00%',
+    lanceProprios_v: _val('lanceProprios_v') || 'R$ 0,00',
+    lanceEmbutido: _val('lanceEmbutido') || '0,00%',
+    lanceEmbutido_v: _val('lanceEmbutido_v') || 'R$ 0,00',
+    lanceEmbutidoN: _numPct(_val('lanceEmbutido')) + _numMoney(_val('lanceEmbutido_v')),
+    lanceFGTS: _val('lanceFGTS') || '0,00%',
+    lanceFGTS_v: _val('lanceFGTS_v') || 'R$ 0,00',
+    lanceFGTSN: _numPct(_val('lanceFGTS')) + _numMoney(_val('lanceFGTS_v')),
+    totalLance: _val('totalLance') || '0,00%',
+    valorTotalLance: _val('valorTotalLance') || 'R$ 0,00',
+
+    // Evolução
+    evoOn: !!document.getElementById('evolucaoOn')?.checked,
+    cdi: _val('cdi'),
+    mesesPosCont: _val('mesesPosCont'),
+    rentab: _val('rentab') || '100,00 %',
+    rentabilidade: _txt('rentabilidade'),
+    creditoMaisRentab: _txt('creditoMaisRentab'),
+
+    // Comparativo
+    redPar_parc: _txt('reducaoParcela_parc'),
+    redPar_prazo: _txt('reducaoParcela_prazo'),
+    redPar_cm: _txt('reducaoParcela_cm'),
+    redPar_ca: _txt('reducaoParcela_ca'),
+    redPra_parc: _txt('reducaoPrazo_parc'),
+    redPra_prazo: _txt('reducaoPrazo_prazo'),
+    redPra_cm: _txt('reducaoPrazo_cm'),
+    redPra_ca: _txt('reducaoPrazo_ca')
+  };
+}
+
+// Cenário fictício "tudo ligado" pra modo demo
+function _dadosDemo() {
+  return {
+    credito: 'R$ 200.000,00', prazo: '144 meses', taxaAdm: '12,00 %', fundo: '1,50 %',
+    tipoReajuste: 'Aniversário da cota', reajuste: '5,00 %', reajusteN: 5,
+    parcelaInicial: 'R$ 1.860,00',
+    redutorPct: 25, redutorSobre: 'Parcela total',
+    seguroPct: 0.0383,
+    adesaoPct: 1.5, adesaoMeses: 3,
+    parcelaInicial2: 'R$ 1.625,00',
+    modalidade: 'Lance', expectativa: '1 meses', creditoAtualizado: 'R$ 210.000,00',
+    baseCalculo: 'Carta de crédito', valorRef: 'R$ 210.000,00', creditoDisp: 'R$ 350.000,00',
+    lanceProprios: '20,00%', lanceProprios_v: 'R$ 42.000,00',
+    lanceEmbutido: '0,00%', lanceEmbutido_v: 'R$ 0,00', lanceEmbutidoN: 0,
+    lanceFGTS: '0,00%', lanceFGTS_v: 'R$ 0,00', lanceFGTSN: 0,
+    totalLance: '20,00%', valorTotalLance: 'R$ 42.000,00',
+    evoOn: true, cdi: '11,20 %', mesesPosCont: '18',
+    rentab: '100,00 %', rentabilidade: 'R$ 22.500,00', creditoMaisRentab: 'R$ 372.500,00',
+    redPar_parc: 'R$ 1.650,00', redPar_prazo: '144', redPar_cm: '1,15%', redPar_ca: '14,70%',
+    redPra_parc: 'R$ 1.890,00', redPra_prazo: '132', redPra_cm: '1,02%', redPra_ca: '13,60%'
+  };
+}
+
+// Preenche o template com um objeto data
+function _renderTemplate(d) {
+  // ─── CARD 1: parcela inicial (com badge "Demais parcelas" se aplicável) ───
+  const piBox = document.getElementById('pdf_parcelaInicialBox');
+  if (d.parcelaInicial2 && d.parcelaInicial2 !== d.parcelaInicial) {
+    // Mostra "3 parcelas" + "Demais parcelas" como o Conkey faz
+    const nIniciais = d.adesaoMeses || 1;
+    piBox.innerHTML = `
+      <div style="display:flex; gap:14px; align-items:flex-end;">
+        <div>
+          <div style="font-size:13px; color:#6B7280; margin-bottom:6px;">${nIniciais} ${nIniciais > 1 ? 'parcelas' : 'parcela'}</div>
+          <div style="background:#2D3F5E; color:#fff; font-weight:700; font-size:18px; padding:10px 18px; border-radius:7px; display:inline-block;">${d.parcelaInicial}</div>
+        </div>
+        <div>
+          <div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Demais parcelas</div>
+          <div style="background:#2D3F5E; color:#fff; font-weight:700; font-size:18px; padding:10px 18px; border-radius:7px; display:inline-block;">${d.parcelaInicial2}</div>
+        </div>
+      </div>`;
+  } else {
+    piBox.innerHTML = `
+      <div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Parcela inicial</div>
+      <div id="pdf_parcelaInicial" style="background:#2D3F5E; color:#fff; font-weight:700; font-size:18px; padding:10px 18px; border-radius:7px; display:inline-block;">${d.parcelaInicial}</div>`;
   }
 
-  // Comparativo pós contemplação
-  document.getElementById('pdf_redPar_parcela').textContent = txt('reducaoParcela_parc');
-  document.getElementById('pdf_redPar_prazo').textContent = txt('reducaoParcela_prazo') + ' meses';
-  document.getElementById('pdf_redPar_cet').textContent = txt('reducaoParcela_cm') + ' ao mês | ' + txt('reducaoParcela_ca') + ' ao ano';
-  document.getElementById('pdf_redPra_parcela').textContent = txt('reducaoPrazo_parc');
-  document.getElementById('pdf_redPra_prazo').textContent = txt('reducaoPrazo_prazo') + ' meses';
-  document.getElementById('pdf_redPra_cet').textContent = txt('reducaoPrazo_cm') + ' ao mês | ' + txt('reducaoPrazo_ca') + ' ao ano';
+  // ─── CARD 1: linha 1 ───
+  document.getElementById('pdf_credito').textContent = d.credito;
+  document.getElementById('pdf_prazo').textContent = d.prazo;
+  document.getElementById('pdf_taxaAdm').textContent = d.taxaAdm;
+  document.getElementById('pdf_fundo').textContent = d.fundo;
 
-  // Footer com data
+  // ─── CARD 1: linha 2 dinâmica (Tipo reajuste sempre + Reajuste/Redutor/Seguro/Adesão se ativos) ───
+  const cotaExtras = document.getElementById('pdf_cota_extras');
+  cotaExtras.innerHTML = '';
+  _addCell(cotaExtras, 'Tipo de reajuste', d.tipoReajuste);
+  if (d.reajusteN > 0) _addCell(cotaExtras, 'Reajuste', d.reajuste);
+  if (d.redutorPct > 0) {
+    _addCell(cotaExtras, 'Redutor de parcela', `${d.redutorPct.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})} %`);
+    _addCell(cotaExtras, 'Redutor sobre', d.redutorSobre);
+  }
+  if (d.seguroPct > 0) _addCell(cotaExtras, '% Seguro', `${d.seguroPct.toLocaleString('pt-BR',{minimumFractionDigits:4,maximumFractionDigits:4})} %`);
+  if (d.adesaoPct > 0) {
+    _addCell(cotaExtras, 'Taxa de adesão', `${d.adesaoPct.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})} %`);
+    if (d.adesaoMeses > 0) _addCell(cotaExtras, 'Prazo adesão', `${d.adesaoMeses} ${d.adesaoMeses === 1 ? 'mês' : 'meses'}`);
+  }
+  // Ajusta colunas (mín. 4)
+  const nC = Math.max(4, cotaExtras.children.length);
+  cotaExtras.style.gridTemplateColumns = `repeat(${nC}, 1fr)`;
+
+  // ─── CARD 2: linha 1 ───
+  document.getElementById('pdf_modalidade').textContent = d.modalidade;
+  document.getElementById('pdf_expectativa').textContent = d.expectativa;
+  document.getElementById('pdf_creditoAtualizado').textContent = d.creditoAtualizado;
+  document.getElementById('pdf_baseCalculo').textContent = d.baseCalculo;
+  document.getElementById('pdf_creditoDisp').textContent = d.creditoDisp;
+
+  // ─── CARD 2: linha 2 dinâmica ───
+  const contExtras = document.getElementById('pdf_cont_extras');
+  contExtras.innerHTML = '';
+  _addCell(contExtras, 'Valor de referência', d.valorRef);
+  _addCell(contExtras, 'Recursos próprios', `${d.lanceProprios} | ${d.lanceProprios_v}`);
+  if (d.lanceEmbutidoN > 0) _addCell(contExtras, 'Embutido', `${d.lanceEmbutido} | ${d.lanceEmbutido_v}`);
+  if (d.lanceFGTSN > 0) _addCell(contExtras, 'FGTS', `${d.lanceFGTS} | ${d.lanceFGTS_v}`);
+  _addCell(contExtras, 'Total de lance', `${d.totalLance} | ${d.valorTotalLance}`);
+  const nE = contExtras.children.length;
+  contExtras.style.gridTemplateColumns = `repeat(${nE}, 1fr)`;
+
+  // ─── CARD 3: Valorização (condicional) ───
+  document.getElementById('pdf_evolucaoBlock').style.display = d.evoOn ? 'block' : 'none';
+  if (d.evoOn) {
+    document.getElementById('pdf_cdi').textContent = d.cdi;
+    document.getElementById('pdf_periodo').textContent = `${d.mesesPosCont} meses`;
+    document.getElementById('pdf_rentab').textContent = `${d.rentab} | ${d.rentabilidade}`;
+    document.getElementById('pdf_creditoMaisRent').textContent = d.creditoMaisRentab;
+  }
+
+  // ─── COMPARATIVO ───
+  document.getElementById('pdf_redPar_parcela').textContent = d.redPar_parc;
+  document.getElementById('pdf_redPar_prazo').textContent = `${d.redPar_prazo} meses`;
+  document.getElementById('pdf_redPar_cet').innerHTML = `<span>${d.redPar_cm} ao mês</span> <span style="color:#6B7280; font-weight:600; margin:0 6px;">|</span> <span>${d.redPar_ca} ao ano</span>`;
+  document.getElementById('pdf_redPra_parcela').textContent = d.redPra_parc;
+  document.getElementById('pdf_redPra_prazo').textContent = `${d.redPra_prazo} meses`;
+  document.getElementById('pdf_redPra_cet').innerHTML = `<span>${d.redPra_cm} ao mês</span> <span style="color:#6B7280; font-weight:600; margin:0 6px;">|</span> <span>${d.redPra_ca} ao ano</span>`;
+
+  // ─── FOOTER ───
   const hoje = new Date();
   const dd = String(hoje.getDate()).padStart(2, '0');
   const mm = String(hoje.getMonth() + 1).padStart(2, '0');
   const yyyy = hoje.getFullYear();
   document.getElementById('pdf_footer').innerHTML = `Documento gerado em ${dd}/${mm}/${yyyy}<br>Página 1/1`;
+}
 
-  // Mostra temporariamente, gera PDF, esconde
+// Gera o PDF (1300px → escala pra A4 = 210mm largura)
+function _gerarPdf(filename) {
   const report = document.getElementById('pdfReport');
-  // posicionamento que o html2canvas consegue capturar (no topo, sobre o resto)
+
+  // Wrapper fixed off-screen — html2canvas vai renderizar nas dimensões nativas
+  const wrap = document.createElement('div');
+  wrap.style.cssText = `position:fixed; top:0; left:-${PDF_WIDTH + 100}px; width:${PDF_WIDTH}px; background:#fff; z-index:-1; opacity:1; pointer-events:none;`;
+  document.body.appendChild(wrap);
   report.style.display = 'block';
-  report.style.position = 'absolute';
-  report.style.top = '0';
-  report.style.left = '0';
-  report.style.zIndex = '99999';
-  // delay pra garantir reflow antes do html2canvas medir
+  wrap.appendChild(report);
+
   setTimeout(() => {
-    const w = report.scrollWidth || 794;
-    const h = report.scrollHeight || 1123;
+    const w = PDF_WIDTH;
+    const h = report.offsetHeight || (PDF_WIDTH * 1.4142);  // fallback A4 ratio
     html2pdf().set({
       margin: 0,
-      filename: `master-prime-operacao-simples-${dd}${mm}${yyyy}.pdf`,
+      filename,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, backgroundColor: '#FFFFFF', width: w, height: h, windowWidth: w, windowHeight: h },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#FFFFFF',
+        width: w,
+        height: h,
+        windowWidth: w,
+        windowHeight: h,
+        scrollX: 0,
+        scrollY: 0,
+        x: 0,
+        y: 0,
+        logging: false
+      },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', compress: true }
     }).from(report).save().then(() => {
       report.style.display = 'none';
-      report.style.position = 'absolute';
-      report.style.top = '';
-      report.style.left = '-9999px';
-      report.style.zIndex = '';
+      document.body.appendChild(report);
+      wrap.remove();
+    }).catch((err) => {
+      console.error('Erro ao gerar PDF:', err);
+      report.style.display = 'none';
+      document.body.appendChild(report);
+      wrap.remove();
     });
-  }, 100);
+  }, 200);
+}
+
+// ─── BOTÃO BAIXAR PDF ───
+document.getElementById('baixarPdf').addEventListener('click', () => {
+  const d = _coletarDados();
+  _renderTemplate(d);
+  const hoje = new Date();
+  const dd = String(hoje.getDate()).padStart(2, '0');
+  const mm = String(hoje.getMonth() + 1).padStart(2, '0');
+  const yyyy = hoje.getFullYear();
+  _gerarPdf(`master-prime-operacao-simples-${dd}${mm}${yyyy}.pdf`);
 });
+
+// ─── MODO PREVIEW DEMO (?preview=1) ───
+// Renderiza o template inline na página, em escala reduzida pra caber na tela.
+// Usado pra validar visualmente lado a lado com Conkey.
+(() => {
+  const params = new URLSearchParams(location.search);
+  if (params.get('preview') !== '1') return;
+  // Esconde o simulador
+  document.querySelector('main')?.style.setProperty('display', 'none');
+  document.querySelector('header')?.style.setProperty('display', 'none');
+  // Renderiza o template com cenário demo
+  _renderTemplate(_dadosDemo());
+  // Container visível com padding e moldura
+  const previewWrap = document.createElement('div');
+  previewWrap.style.cssText = 'min-height:100vh; background:#E5E7EB; padding:40px 0; display:flex; flex-direction:column; align-items:center; gap:24px;';
+  const previewLabel = document.createElement('div');
+  previewLabel.innerHTML = `<div style="font-family:'Inter',sans-serif; color:#1E2D45; font-size:14px; letter-spacing:1.5px; text-transform:uppercase; font-weight:700;">Pré-visualização do PDF — Master Prime · Operação Simples</div><div style="font-family:'Inter',sans-serif; color:#6B7280; font-size:12px; margin-top:4px; text-align:center;">Cenário demo · todos os campos ativos · escala 1:1 (1300px)</div>`;
+  previewWrap.appendChild(previewLabel);
+  const report = document.getElementById('pdfReport');
+  report.style.display = 'block';
+  report.style.boxShadow = '0 12px 40px rgba(0,0,0,0.12)';
+  report.style.borderRadius = '6px';
+  report.style.overflow = 'hidden';
+  previewWrap.appendChild(report);
+  document.body.appendChild(previewWrap);
+})();
 </script>
 
 </body>
