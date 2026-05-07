@@ -324,40 +324,85 @@ body.embedded-mode .portal-menu-fab { display:flex; }
 .fat-tabela-card .tabela tbody tr.row-link:hover td:first-child { box-shadow:inset 3px 0 0 var(--mp-teal); }
 .fat-detalhe-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, .55); z-index: 200; align-items: center; justify-content: center; padding: 20px; animation: fadeIn .15s ease; }
 .fat-detalhe-overlay.aberto { display: flex; }
-.fat-detalhe-modal { background: white; border-radius: 14px; width: 100%; max-width: 860px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,.3); animation: slideUp .2s ease; }
+.fat-detalhe-modal { background: white; border-radius: 16px; width: 100%; max-width: 920px; max-height: 92vh; overflow-y: auto; box-shadow: 0 25px 60px rgba(15,23,42,.30); animation: slideUp .2s ease; }
 @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-.fat-detalhe-header { padding: 20px 24px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; position: sticky; top: 0; background: white; z-index: 1; }
-.fat-detalhe-body { padding: 24px; }
-.fat-detalhe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 20px; }
-@media (max-width: 640px) { .fat-detalhe-grid { grid-template-columns: 1fr; } }
-.fat-stepper { display: flex; align-items: center; gap: 0; margin: 16px 0 20px; overflow-x: auto; padding: 4px 0 8px; }
-.fat-step { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 60px; position: relative; }
-.fat-step:not(:last-child)::after { content: ''; position: absolute; top: 13px; left: calc(50% + 14px); right: calc(-50% + 14px); height: 2px; background: var(--border); z-index: 0; }
+.fat-detalhe-header { padding: 22px 28px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; position: sticky; top: 0; background: white; z-index: 1; }
+.fat-detalhe-titulo { font-size: 16px; font-weight: 700; color: var(--mp-navy); letter-spacing: -.2px; margin-bottom: 5px; }
+.fat-detalhe-meta { font-size: 11.5px; color: var(--text2); display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.fat-detalhe-meta .dot { color: var(--text3); }
+.fat-detalhe-meta .mono { font-family: 'DM Mono', monospace; color: var(--text); font-weight: 600; }
+.fat-detalhe-body { padding: 22px 28px 28px; }
+.fat-detalhe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 22px; }
+@media (max-width: 720px) { .fat-detalhe-grid { grid-template-columns: 1fr; } }
+
+/* Bloco bloco-amarelo (consultor responsável) refinado */
+.fat-bloco-consultor { display: flex; gap: 12px; align-items: center; padding: 14px 16px; background: #FFF8E6; border: 1px solid #FCD34D; border-radius: 10px; margin-bottom: 16px; }
+.fat-bloco-consultor-ico { width: 32px; height: 32px; border-radius: 8px; background: rgba(244, 194, 74, .25); color: #92400E; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.fat-bloco-consultor-ico svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.fat-bloco-consultor-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #92400E; white-space: nowrap; }
+.fat-bloco-consultor select { flex: 1; font-size: 12.5px; padding: 8px 12px; border: 1px solid var(--border2); border-radius: 8px; background: #fff; }
+
+/* Bloco protocolo refinado */
+.fat-bloco-prot { display: flex; gap: 8px; align-items: center; padding: 12px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+.fat-bloco-prot-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text2); white-space: nowrap; }
+.fat-bloco-prot input { flex: 1; min-width: 200px; font-size: 12.5px; padding: 8px 12px; border: 1px solid var(--border2); border-radius: 8px; font-family: 'DM Mono', monospace; }
+
+/* Form de dados refinado (admin) */
+.fat-form-dados { padding: 18px 20px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.fat-form-dados .span-2 { grid-column: 1 / -1; }
+.fat-form-dados label.login-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--text2); margin-bottom: 4px; display: block; }
+.fat-form-dados input.login-input, .fat-form-dados textarea.login-input { font-size: 12.5px; padding: 9px 12px; border: 1px solid var(--border2); border-radius: 8px; background: #fff; width: 100%; }
+.fat-form-dados textarea.login-input { min-height: 56px; resize: vertical; }
+.fat-form-dados .actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 8px; }
+
+/* Stepper refinado */
+.fat-stepper { display: flex; align-items: flex-start; gap: 0; margin: 18px 0 22px; overflow-x: auto; padding: 8px 4px 12px; }
+.fat-step { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 80px; position: relative; }
+.fat-step:not(:last-child)::after { content: ''; position: absolute; top: 14px; left: calc(50% + 16px); right: calc(-50% + 16px); height: 2px; background: var(--border); z-index: 0; }
 .fat-step.ok:not(:last-child)::after { background: var(--mp-teal); }
-.fat-step-dot { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--border); background: white; display: flex; align-items: center; justify-content: center; font-size: 11px; z-index: 1; position: relative; transition: all .25s; }
+.fat-step-dot { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--border); background: white; display: flex; align-items: center; justify-content: center; font-size: 11px; z-index: 1; position: relative; transition: all .25s; color: var(--text3); }
+.fat-step-dot svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 .fat-step.ok .fat-step-dot { background: var(--mp-teal); border-color: var(--mp-teal); color: white; }
-.fat-step.now .fat-step-dot { background: var(--mp-navy); border-color: var(--mp-navy); color: white; box-shadow: 0 0 0 3px rgba(45,63,94,.15); }
-.fat-step-lbl { font-size: 8px; font-weight: 600; color: var(--text3); text-align: center; margin-top: 5px; max-width: 60px; line-height: 1.2; text-transform: uppercase; }
+.fat-step.now .fat-step-dot { background: var(--mp-navy); border-color: var(--mp-navy); color: white; box-shadow: 0 0 0 4px rgba(45,63,94,.12); }
+.fat-step-lbl { font-size: 9.5px; font-weight: 600; color: var(--text3); text-align: center; margin-top: 7px; max-width: 90px; line-height: 1.25; text-transform: uppercase; letter-spacing: .3px; }
 .fat-step.ok .fat-step-lbl { color: var(--mp-teal); }
 .fat-step.now .fat-step-lbl { color: var(--mp-navy); }
+
+/* Cards das colunas direita/esquerda */
+.fat-col-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; margin-bottom: 14px; }
+.fat-col-titulo { font-size: 11.5px; font-weight: 700; color: var(--mp-navy); letter-spacing: -.1px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: .4px; }
+.fat-col-titulo svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .fat-dado { display: flex; flex-direction: column; gap: 2px; margin-bottom: 12px; }
-.fat-dado-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text2); }
+.fat-dado-label { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text2); }
 .fat-dado-valor { font-size: 13px; color: var(--text); }
-.fat-hist-item { display: flex; gap: 10px; padding-bottom: 12px; position: relative; }
-.fat-hist-item:not(:last-child)::before { content: ''; position: absolute; left: 13px; top: 28px; bottom: 0; width: 2px; background: var(--border); }
-.fat-hist-dot { width: 28px; height: 28px; border-radius: 50%; background: var(--blue-bg); border: 2px solid var(--blue); display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; z-index: 1; }
-.fat-hist-corpo { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; }
-.fat-msgs-wrap { max-height: 220px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-.fat-msg { display: flex; gap: 8px; }
-.fat-msg.admin { flex-direction: row-reverse; }
-.fat-msg-av { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; }
-.fat-msg.cliente .fat-msg-av { background: var(--blue-bg); }
-.fat-msg.admin .fat-msg-av { background: var(--green-bg); }
-.fat-msg-balao { max-width: 80%; padding: 8px 12px; border-radius: 10px; font-size: 11px; line-height: 1.4; }
-.fat-msg.cliente .fat-msg-balao { background: white; border: 1px solid var(--border); border-top-left-radius: 3px; }
+
+/* Histórico timeline */
+.fat-hist-item { display: flex; gap: 12px; padding-bottom: 14px; position: relative; }
+.fat-hist-item:not(:last-child)::before { content: ''; position: absolute; left: 14px; top: 30px; bottom: 0; width: 2px; background: var(--border); }
+.fat-hist-dot { width: 30px; height: 30px; border-radius: 50%; background: var(--blue-bg); color: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; z-index: 1; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--blue); }
+.fat-hist-dot svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.fat-hist-corpo { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; }
+
+/* Mensagens / chat refinado */
+.fat-msgs-wrap { max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 4px 0; }
+.fat-msg { display: flex; gap: 8px; max-width: 88%; }
+.fat-msg.admin { flex-direction: row-reverse; align-self: flex-end; }
+.fat-msg-av { width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: white; }
+.fat-msg.cliente .fat-msg-av { background: var(--mp-teal); }
+.fat-msg.admin .fat-msg-av { background: var(--mp-navy); }
+.fat-msg-balao { padding: 9px 13px; border-radius: 12px; font-size: 12.5px; line-height: 1.45; }
+.fat-msg.cliente .fat-msg-balao { background: #F1F5F9; color: var(--text); border-top-left-radius: 3px; }
 .fat-msg.admin .fat-msg-balao { background: var(--mp-navy); color: white; border-top-right-radius: 3px; }
-.fat-msg-hora { font-size: 9px; color: var(--text3); margin-top: 3px; }
-.fat-msg.admin .fat-msg-hora { text-align: right; color: rgba(255,255,255,.45); }
+.fat-msg-hora { font-size: 10.5px; color: var(--text3); margin-top: 4px; padding: 0 4px; }
+.fat-msg.admin .fat-msg-hora { text-align: right; }
+
+/* Arquivo card no detalhe */
+.fat-arq-item { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: #fff; margin-bottom: 6px; font-size: 12.5px; transition: border-color .15s; }
+.fat-arq-item:hover { border-color: var(--mp-teal); }
+.fat-arq-ico { width: 32px; height: 32px; border-radius: 7px; background: var(--blue-bg); color: var(--blue); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.fat-arq-ico svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.fat-arq-nome { flex: 1; font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-decoration: none; }
+.fat-arq-nome:hover { color: var(--mp-navy); text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -1828,39 +1873,47 @@ async function fatVerProcesso(id) {
     `<option value="${e.status}" ${proc.status === e.status ? 'selected' : ''}>${e.icone} ${e.status}</option>`
   ).join('') + `<option value="Cancelado" ${proc.status === 'Cancelado' ? 'selected' : ''}>❌ Cancelado</option>`;
 
+  // SVG icons reusados na lista
+  const _SVG_FILE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+  const _SVG_X_SM = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="width:11px;height:11px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+  const _SVG_DOT_HIST = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+
   const arqsHtml = (arqs||[]).length === 0
-    ? '<p class="fat-dado-valor" style="color:var(--text3);font-size:11px;">Nenhum arquivo</p>'
+    ? '<p style="font-size:11.5px;color:var(--text3);padding:6px 0;">Nenhum arquivo enviado.</p>'
     : (arqs||[]).map(a => {
         const url = sb.storage.from(FAT_CONFIG.storageBucket).getPublicUrl(a.storage_path).data.publicUrl;
-        return `<div class="arquivo-item" style="margin-top:6px;">
-          <span>${fatIconeArq(a.nome_original)}</span>
-          <a href="${url}" target="_blank" style="flex:1;font-size:11px;">${esc(a.nome_original)}</a>
-          <button class="btn btn-xs btn-danger" onclick='fatDeletarArquivo(${fatJsArg(a.id)}, ${procIdArg})' title="Remover">✕</button>
+        return `<div class="fat-arq-item">
+          <div class="fat-arq-ico">${_SVG_FILE}</div>
+          <a class="fat-arq-nome" href="${url}" target="_blank">${esc(a.nome_original)}</a>
+          <span style="font-size:10.5px;color:var(--text3);">${fmtDataBR(a.criado_em)}</span>
+          ${isAdm ? `<button class="btn btn-outline btn-xs" onclick='fatDeletarArquivo(${fatJsArg(a.id)}, ${procIdArg})' title="Remover" style="padding:5px 8px;">${_SVG_X_SM}</button>` : ''}
         </div>`;
       }).join('');
 
+  const _ini = (n) => String(n||'').trim().split(/\s+/).map(p=>p[0]).slice(0,2).join('').toUpperCase() || '?';
   const msgsHtml = (msgs||[]).length === 0
-    ? '<p style="font-size:11px;color:var(--text3);text-align:center;padding:12px 0;">Sem mensagens ainda</p>'
+    ? '<p style="font-size:11.5px;color:var(--text3);text-align:center;padding:14px 0;">Sem mensagens ainda.</p>'
     : (msgs||[]).map(m => {
         const lado = m.autor === 'admin' ? 'admin' : 'cliente';
+        const av = lado === 'admin' ? 'M' : _ini(proc.nome);
         return `<div class="fat-msg ${lado}">
-          <div class="fat-msg-av">${lado === 'admin' ? '👤' : '🙋'}</div>
+          <div class="fat-msg-av">${av}</div>
           <div>
             <div class="fat-msg-balao">${esc(m.texto)}</div>
-            <div class="fat-msg-hora">${lado === 'admin' ? 'Equipe' : 'Cliente'} · ${fmtDataHoraBR(m.criado_em)}</div>
+            <div class="fat-msg-hora">${lado === 'admin' ? 'Equipe Master Prime' : esc(proc.nome)} · ${fmtDataHoraBR(m.criado_em)}</div>
           </div>
         </div>`;
       }).join('');
 
   const histHtml = (hist||[]).length === 0
-    ? '<p style="font-size:11px;color:var(--text3);">Sem histórico</p>'
+    ? '<p style="font-size:11.5px;color:var(--text3);">Sem histórico ainda.</p>'
     : (hist||[]).map(h => `
         <div class="fat-hist-item">
-          <div class="fat-hist-dot">${fatStatusIcone(h.status_novo)}</div>
+          <div class="fat-hist-dot">${_SVG_DOT_HIST}</div>
           <div class="fat-hist-corpo">
-            <span class="tag ${fatTagClass(h.status_novo)}" style="font-size:9px;">${h.status_novo}</span>
-            ${h.observacao ? `<p style="font-size:11px;color:var(--text2);margin-top:4px;">${esc(h.observacao)}</p>` : ''}
-            <p style="font-size:9px;color:var(--text3);margin-top:3px;">${fmtDataHoraBR(h.criado_em)}</p>
+            <span class="tag ${fatTagClass(h.status_novo)}" style="font-size:10px;">${esc(h.status_novo||'-')}</span>
+            ${h.observacao ? `<p style="font-size:12px;color:var(--text);margin-top:5px;line-height:1.5;">${esc(h.observacao)}</p>` : ''}
+            <p style="font-size:10px;color:var(--text3);margin-top:4px;font-family:'DM Mono',monospace;">${fmtDataHoraBR(h.criado_em)}</p>
           </div>
         </div>`).join('');
 
@@ -1869,66 +1922,73 @@ async function fatVerProcesso(id) {
     `<option value="${esc(c.auth_id)}" ${proc.consultor_id === c.auth_id ? 'selected':''}>${esc(c.nome)}${c.tipo==='admin'?' (admin)':c.tipo==='socio'?' (sócio)':''}</option>`
   ).join('');
 
+  // SVG inline helpers (sem emojis)
+  const SVG_LINK   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+  const SVG_TRASH  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>';
+  const SVG_X      = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;display:inline-block;vertical-align:middle;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
+  const SVG_USER   = '<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+  const SVG_DOC    = '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+  const SVG_CLOCK  = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
+  const SVG_CHAT   = '<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
+  const SVG_REFRESH= '<svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>';
+
   modal.innerHTML = `
     <div class="fat-detalhe-header">
       <div>
-        <div style="font-size:13px;font-weight:800;color:var(--mp-navy);">${esc(proc.nome)}</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:3px;">
-          Protocolo: ${proc.protocolo
-            ? `<span class="mono" style="font-weight:700;">${esc(proc.protocolo)}</span>`
-            : `<span style="color:var(--amber);font-weight:700;">pendente</span>`
-          }
-          &nbsp;·&nbsp; CPF: ${fmtCPF(proc.cpf)}
-          &nbsp;·&nbsp; Aberto em ${fmtDataBR(proc.criado_em)}
-          ${proc.consultor_nome ? `&nbsp;·&nbsp; Consultor: <strong>${esc(proc.consultor_nome)}</strong>` : ''}
+        <div class="fat-detalhe-titulo">${esc(proc.nome)}</div>
+        <div class="fat-detalhe-meta">
+          ${proc.protocolo
+            ? `<span>Protocolo</span> <span class="mono">${esc(proc.protocolo)}</span>`
+            : `<span style="color:var(--amber);font-weight:600;">Protocolo pendente</span>`}
+          <span class="dot">·</span>
+          <span>CPF</span> <span class="mono">${fmtCPF(proc.cpf)}</span>
+          <span class="dot">·</span>
+          <span>Aberto em ${fmtDataBR(proc.criado_em)}</span>
+          ${proc.consultor_nome ? `<span class="dot">·</span><span>Consultor</span> <strong style="color:var(--text);">${esc(proc.consultor_nome)}</strong>` : ''}
         </div>
       </div>
       <div style="display:flex;gap:6px;flex-shrink:0;">
-        <button class="btn btn-outline btn-sm" onclick='fatCopiarLink(${procTokenArg})'>🔗 Link cliente</button>
-        ${isAdm ? `<button class="btn btn-danger btn-sm" onclick='fatDeletarProcesso(${procIdArg})'>🗑 Excluir</button>` : ''}
-        <button class="btn btn-outline btn-sm" onclick="fatFecharDetalhe()">✕</button>
+        <button class="btn btn-outline btn-sm" onclick='fatCopiarLink(${procTokenArg})'>${SVG_LINK} Link cliente</button>
+        ${isAdm ? `<button class="btn btn-danger btn-sm" onclick='fatDeletarProcesso(${procIdArg})'>${SVG_TRASH} Excluir</button>` : ''}
+        <button class="btn btn-outline btn-sm" onclick="fatFecharDetalhe()">${SVG_X}</button>
       </div>
     </div>
     <div class="fat-detalhe-body">
       ${avisosHtml}
 
       ${isAdm ? `
-      <!-- Atribuir consultor responsável (admin) -->
-      <div style="display:flex; gap:8px; align-items:center; margin-bottom:14px; padding:12px 14px; background:#FFF8E6; border:1px solid #FCD34D; border-radius:8px;">
-        <span style="font-size:14px;">👤</span>
-        <label style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--text2);white-space:nowrap;">Consultor responsável:</label>
-        <select id="fat-consultor-${proc.id}" style="flex:1;font-size:12px;padding:6px 10px;border:1px solid var(--border2);border-radius:6px;background:#fff;">${consultorOpts}</select>
-        <button class="btn btn-xs btn-primary" onclick='fatAtribuirConsultor(${procIdArg})'>Atribuir</button>
+      <div class="fat-bloco-consultor">
+        <div class="fat-bloco-consultor-ico">${SVG_USER}</div>
+        <div class="fat-bloco-consultor-label">Consultor responsável</div>
+        <select id="fat-consultor-${proc.id}">${consultorOpts}</select>
+        <button class="btn btn-primary btn-sm" onclick='fatAtribuirConsultor(${procIdArg})'>Atribuir</button>
       </div>
 
-      <!-- Campo de protocolo (admin) -->
-      <div style="display:flex; gap:8px; align-items:center; margin-bottom:16px;">
-        <label style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text2);">Protocolo:</label>
-        <input type="text" id="fat-protocolo-${proc.id}" value="${esc(proc.protocolo || '')}" placeholder="Informe ou gere automaticamente" style="font-size:12px;padding:6px 10px;border:1px solid var(--border2);border-radius:6px;width:240px;">
-        <button class="btn btn-xs btn-outline" onclick='fatSalvarProtocolo(${procIdArg})'>Salvar</button>
-        <button class="btn btn-xs btn-outline" onclick='fatGerarProtocoloCampo(${procIdArg})'>Gerar</button>
-        <button class="btn btn-xs btn-outline" onclick='fatCopiarLink(${procTokenArg})'>🔗 Link</button>
+      <div class="fat-bloco-prot">
+        <span class="fat-bloco-prot-label">Protocolo</span>
+        <input type="text" id="fat-protocolo-${proc.id}" value="${esc(proc.protocolo || '')}" placeholder="Informe ou gere automaticamente">
+        <button class="btn btn-outline btn-sm" onclick='fatSalvarProtocolo(${procIdArg})'>Salvar</button>
+        <button class="btn btn-outline btn-sm" onclick='fatGerarProtocoloCampo(${procIdArg})'>Gerar</button>
       </div>
 
-      <!-- Edição dos dados do processo (admin) -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px;padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;">
-        <div><label class="login-label">Nome</label><input class="login-input" id="fat-edit-nome-${proc.id}" value="${esc(proc.nome || '')}" style="font-size:12px;padding:8px 10px;"></div>
-        <div><label class="login-label">CPF</label><input class="login-input" id="fat-edit-cpf-${proc.id}" value="${fmtCPF(proc.cpf || '')}" maxlength="14" oninput="maskCPF(this)" style="font-size:12px;padding:8px 10px;"></div>
-        <div><label class="login-label">Grupo</label><input class="login-input" id="fat-edit-grupo-${proc.id}" value="${esc(proc.grupo || '')}" style="font-size:12px;padding:8px 10px;"></div>
-        <div><label class="login-label">Cota</label><input class="login-input" id="fat-edit-cota-${proc.id}" value="${esc(proc.cota || '')}" style="font-size:12px;padding:8px 10px;"></div>
-        <div><label class="login-label">E-mail</label><input class="login-input" id="fat-edit-email-${proc.id}" value="${esc(proc.email || '')}" style="font-size:12px;padding:8px 10px;"></div>
-        <div><label class="login-label">WhatsApp</label><input class="login-input" id="fat-edit-telefone-${proc.id}" value="${esc(proc.telefone || '')}" style="font-size:12px;padding:8px 10px;"></div>
-        <div style="grid-column:1/-1;"><label class="login-label">Corretor (opcional)</label><input class="login-input" id="fat-edit-corretor-${proc.id}" value="${esc(proc.corretor || '')}" placeholder="Nome do corretor responsavel" style="font-size:12px;padding:8px 10px;"></div>
-        <div style="grid-column:1/-1;"><label class="login-label">Observacoes</label><textarea class="login-input" id="fat-edit-descricao-${proc.id}" style="font-size:12px;padding:8px 10px;min-height:54px;">${esc(proc.descricao || '')}</textarea></div>
-        <div style="grid-column:1/-1;display:flex;justify-content:flex-end;"><button class="btn btn-outline btn-sm" onclick='fatSalvarDadosProcesso(${procIdArg})'>Salvar dados do processo</button></div>
+      <div class="fat-form-dados">
+        <div><label class="login-label">Nome</label><input class="login-input" id="fat-edit-nome-${proc.id}" value="${esc(proc.nome || '')}"></div>
+        <div><label class="login-label">CPF</label><input class="login-input" id="fat-edit-cpf-${proc.id}" value="${fmtCPF(proc.cpf || '')}" maxlength="14" oninput="maskCPF(this)"></div>
+        <div><label class="login-label">Grupo</label><input class="login-input" id="fat-edit-grupo-${proc.id}" value="${esc(proc.grupo || '')}"></div>
+        <div><label class="login-label">Cota</label><input class="login-input" id="fat-edit-cota-${proc.id}" value="${esc(proc.cota || '')}"></div>
+        <div><label class="login-label">E-mail</label><input class="login-input" id="fat-edit-email-${proc.id}" value="${esc(proc.email || '')}"></div>
+        <div><label class="login-label">WhatsApp</label><input class="login-input" id="fat-edit-telefone-${proc.id}" value="${esc(proc.telefone || '')}"></div>
+        <div class="span-2"><label class="login-label">Corretor (opcional)</label><input class="login-input" id="fat-edit-corretor-${proc.id}" value="${esc(proc.corretor || '')}" placeholder="Nome do corretor responsavel"></div>
+        <div class="span-2"><label class="login-label">Observações</label><textarea class="login-input" id="fat-edit-descricao-${proc.id}">${esc(proc.descricao || '')}</textarea></div>
+        <div class="actions"><button class="btn btn-outline btn-sm" onclick='fatSalvarDadosProcesso(${procIdArg})'>Salvar dados do processo</button></div>
       </div>
       ` : ''}
 
       <div class="fat-stepper">
         ${FAT_ETAPAS.map((e, i) => `
           <div class="fat-step ${i < idxAtual ? 'ok' : i === idxAtual ? 'now' : ''}">
-            <div class="fat-step-dot">${i < idxAtual ? '✓' : e.icone}</div>
-            <div class="fat-step-lbl">${e.status}</div>
+            <div class="fat-step-dot">${i < idxAtual ? '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' : (i+1)}</div>
+            <div class="fat-step-lbl">${esc(e.status)}</div>
           </div>`).join('')}
       </div>
 
@@ -1945,37 +2005,48 @@ async function fatVerProcesso(id) {
 
       <div class="fat-detalhe-grid">
         <div>
-          <h4 style="font-size:12px;font-weight:700;margin-bottom:10px;">📎 Documentos</h4>
-          ${arqsHtml}
-          ${isAdm ? `
-          <div style="margin-top:12px;">
-            <label style="font-size:10px;font-weight:700;text-transform:uppercase;color:var(--text2);">Adicionar arquivos</label>
-            <input type="file" id="fat-upload-${proc.id}" accept=".pdf,.jpg,.jpeg,.png" multiple onchange='fatUploadArquivos(${procIdArg}, ${procTokenArg}, this)' style="width:100%;margin-top:6px;font-size:11px;">
+          <div class="fat-col-card">
+            <div class="fat-col-titulo">${SVG_DOC} Documentos</div>
+            ${arqsHtml}
+            ${isAdm ? `
+            <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
+              <label style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text2);display:block;margin-bottom:6px;">Adicionar arquivos</label>
+              <input type="file" id="fat-upload-${proc.id}" accept=".pdf,.jpg,.jpeg,.png" multiple onchange='fatUploadArquivos(${procIdArg}, ${procTokenArg}, this)' style="width:100%;font-size:11.5px;">
+            </div>
+            ` : ''}
           </div>
-          ` : ''}
-          <h4 style="font-size:12px;font-weight:700;margin:20px 0 10px;">🕐 Histórico</h4>
-          ${histHtml}
+
+          <div class="fat-col-card">
+            <div class="fat-col-titulo">${SVG_CLOCK} Histórico</div>
+            ${histHtml}
+          </div>
         </div>
 
         <div>
           ${isAdm ? `
-          <h4 style="font-size:12px;font-weight:700;margin-bottom:10px;">🔄 Atualizar status</h4>
-          <select id="fat-novo-status-${proc.id}" class="login-input" style="font-size:12px;padding:8px 12px;margin-bottom:8px;">${statusOpts}</select>
-          <textarea id="fat-obs-status-${proc.id}" placeholder="Observação para o histórico (opcional)..." style="padding:8px 12px;border:1.5px solid var(--border2);border-radius:8px;font-family:'Inter';font-size:11px;min-height:60px;resize:vertical;outline:none;width:100%;margin-bottom:8px;"></textarea>
-          <button class="btn btn-primary btn-sm" onclick='fatAtualizarStatus(${procIdArg})'>Salvar status</button>
+          <div class="fat-col-card">
+            <div class="fat-col-titulo">${SVG_REFRESH} Atualizar status</div>
+            <select id="fat-novo-status-${proc.id}" class="login-input" style="font-size:12.5px;padding:9px 12px;margin-bottom:8px;border:1px solid var(--border2);border-radius:8px;width:100%;">${statusOpts}</select>
+            <textarea id="fat-obs-status-${proc.id}" placeholder="Observação para o histórico (opcional)..." style="padding:9px 12px;border:1px solid var(--border2);border-radius:8px;font-family:'Inter';font-size:12px;min-height:64px;resize:vertical;outline:none;width:100%;margin-bottom:10px;"></textarea>
+            <button class="btn btn-primary btn-sm" onclick='fatAtualizarStatus(${procIdArg})'>Salvar status</button>
+          </div>
           ` : `
-          <h4 style="font-size:12px;font-weight:700;margin-bottom:10px;">📋 Status atual</h4>
-          <div style="padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-bottom:8px;">
-            <span class="tag ${fatTagClass(proc.status)}">${fatStatusIcone(proc.status)} ${esc(proc.status)}</span>
-            <p style="font-size:11px;color:var(--text2);margin-top:6px;">Apenas o administrador pode alterar o status.</p>
+          <div class="fat-col-card">
+            <div class="fat-col-titulo">${SVG_DOC} Status atual</div>
+            <div style="padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;">
+              <span class="tag ${fatTagClass(proc.status)}">${esc(proc.status)}</span>
+              <p style="font-size:11.5px;color:var(--text2);margin-top:8px;line-height:1.5;">Apenas o administrador pode alterar o status.</p>
+            </div>
           </div>
           `}
 
-          <h4 style="font-size:12px;font-weight:700;margin:20px 0 10px;">💬 Comunicação</h4>
-          <div class="fat-msgs-wrap" id="fat-msgs-${proc.id}">${msgsHtml}</div>
-          <div style="display:flex;gap:6px;margin-top:10px;">
-            <textarea id="fat-nova-msg-${proc.id}" placeholder="Responder ao cliente..." style="flex:1;min-height:38px;padding:8px 12px;border:1.5px solid var(--border2);border-radius:8px;font-family:'Inter';font-size:11px;resize:none;outline:none;"></textarea>
-            <button class="btn btn-primary btn-sm" onclick='fatEnviarMsg(${procIdArg})'>Enviar</button>
+          <div class="fat-col-card">
+            <div class="fat-col-titulo">${SVG_CHAT} Comunicação</div>
+            <div class="fat-msgs-wrap" id="fat-msgs-${proc.id}">${msgsHtml}</div>
+            <div style="display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
+              <textarea id="fat-nova-msg-${proc.id}" placeholder="Responder ao cliente..." style="flex:1;min-height:42px;padding:9px 12px;border:1px solid var(--border2);border-radius:8px;font-family:'Inter';font-size:12px;resize:none;outline:none;"></textarea>
+              <button class="btn btn-primary btn-sm" onclick='fatEnviarMsg(${procIdArg})'>Enviar</button>
+            </div>
           </div>
         </div>
       </div>
