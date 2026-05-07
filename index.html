@@ -261,18 +261,50 @@ body.embedded-mode .portal-menu-fab { display:flex; }
 @media (max-width:768px) { .sidebar.open ~ .sidebar-backdrop { display:block; } }
 /* ═══ Faturamento (módulo de processos/protocolos do cliente) ═══ */
 .fat-filtros { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: flex-end; }
-.fat-filtros input, .fat-filtros select { padding: 8px 12px; border: 1.5px solid var(--border2); border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 12px; color: var(--text); background: var(--card); outline: none; transition: border-color .2s; }
-.fat-filtros input:focus, .fat-filtros select:focus { border-color: var(--mp-teal); }
-.fat-filtros input { min-width: 200px; }
-.fat-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; margin-bottom: 24px; }
-.fat-stat { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; box-shadow: var(--shadow); }
-.fat-stat-label { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text2); margin-bottom: 6px; }
-.fat-stat-valor { font-size: 26px; font-weight: 800; color: var(--mp-navy); font-family: 'DM Mono', monospace; line-height: 1; }
-.fat-stat-sub { font-size: 9px; color: var(--text3); margin-top: 4px; }
-.fat-stat.borda-teal { border-top: 3px solid var(--mp-teal); }
-.fat-stat.borda-amber { border-top: 3px solid var(--amber); }
-.fat-stat.borda-purple { border-top: 3px solid var(--purple); }
-.fat-stat.borda-green { border-top: 3px solid var(--green); }
+.fat-filtros input, .fat-filtros select { padding: 9px 12px; border: 1.5px solid var(--border2); border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 12px; color: var(--text); background: var(--card); outline: none; transition: border-color .2s, box-shadow .2s; }
+.fat-filtros input:focus, .fat-filtros select:focus { border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,.12); }
+.fat-filtros input { min-width: 220px; }
+
+/* HERO do faturamento */
+.fat-hero { display:grid; grid-template-columns:1.4fr 1fr; gap:22px; align-items:center; margin-bottom:22px; padding:28px 32px; border-radius:18px; background:linear-gradient(135deg, var(--mp-navy) 0%, #344A6E 100%); color:#fff; box-shadow:0 18px 44px rgba(45,63,94,.24); position:relative; overflow:hidden; }
+.fat-hero::before { content:""; position:absolute; right:-80px; top:-80px; width:280px; height:280px; border-radius:50%; background:radial-gradient(circle, rgba(77,188,200,.20), transparent 60%); pointer-events:none; }
+.fat-hero h2 { font-size:22px; font-weight:800; letter-spacing:-.3px; margin-bottom:6px; line-height:1.15; }
+.fat-hero p { font-size:13px; color:rgba(255,255,255,.78); line-height:1.55; max-width:520px; }
+.fat-hero-side { position:relative; z-index:1; display:flex; flex-direction:column; gap:10px; align-items:flex-end; }
+.fat-hero-tag { display:inline-flex; align-items:center; gap:6px; padding:5px 11px; border-radius:999px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); font-size:11px; font-weight:600; color:#fff; }
+
+/* KPIs modernos */
+.fat-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 22px; }
+.fat-stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow); display:flex; gap:12px; align-items:center; transition:all .15s; position:relative; overflow:hidden; }
+.fat-stat:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(15,23,42,.08); border-color:var(--border2); }
+.fat-stat-ico { width:36px; height:36px; border-radius:10px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:#F1F5F9; color:var(--text2); }
+.fat-stat-ico svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.fat-stat-body { flex:1; min-width:0; }
+.fat-stat-label { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .55px; color: var(--text2); margin-bottom: 3px; }
+.fat-stat-valor { font-size: 22px; font-weight: 800; color: var(--mp-navy); font-family: 'DM Mono', monospace; line-height: 1; }
+.fat-stat-sub { font-size: 10px; color: var(--text3); margin-top: 3px; }
+.fat-stat.borda-teal { border-top: 3px solid var(--mp-teal); } .fat-stat.borda-teal .fat-stat-ico { background:#CFFAFE; color:#0E7490; }
+.fat-stat.borda-amber { border-top: 3px solid var(--amber); } .fat-stat.borda-amber .fat-stat-ico { background:#FEF3C7; color:#92400E; }
+.fat-stat.borda-purple { border-top: 3px solid var(--purple); } .fat-stat.borda-purple .fat-stat-ico { background:#EDE9FE; color:#5B21B6; }
+.fat-stat.borda-green { border-top: 3px solid var(--green); } .fat-stat.borda-green .fat-stat-ico { background:#DCFCE7; color:#166534; }
+.fat-stat.borda-red { border-top: 3px solid var(--red); cursor:pointer; }
+.fat-stat.borda-red .fat-stat-ico { background:#FEE2E2; color:#991B1B; }
+.fat-stat.borda-red .fat-stat-valor { color:var(--red); }
+
+/* Card link fixo polido */
+.fat-link-card { background:linear-gradient(135deg, #F8FCFD 0%, #FFFFFF 100%); border:1px solid var(--border); border-left:4px solid var(--mp-teal); border-radius:14px; box-shadow:var(--shadow); padding:18px 22px; margin-bottom:18px; }
+.fat-link-card-head { display:flex; align-items:flex-start; gap:14px; margin-bottom:14px; }
+.fat-link-card-ico { width:42px; height:42px; border-radius:11px; background:linear-gradient(135deg, var(--mp-teal) 0%, var(--mp-teal-2,#3AA7B3) 100%); color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 4px 12px rgba(77,188,200,.30); }
+.fat-link-card-ico svg { width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.fat-link-card-title { font-size:14px; font-weight:700; color:var(--mp-navy); margin-bottom:2px; }
+.fat-link-card-sub { font-size:11.5px; color:var(--text2); line-height:1.5; }
+
+/* Tabela polida */
+.fat-tabela-card { background:var(--card); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow); overflow:hidden; margin-bottom:24px; }
+.fat-tabela-head { padding:18px 22px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.fat-tabela-titulo { font-size:14px; font-weight:700; color:var(--mp-navy); }
+.fat-tabela-sub { font-size:11.5px; color:var(--text2); margin-top:2px; }
+.fat-tabela-filtros { padding:14px 22px; background:#FAFCFE; border-bottom:1px solid var(--border); }
 .fat-detalhe-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, .55); z-index: 200; align-items: center; justify-content: center; padding: 20px; animation: fadeIn .15s ease; }
 .fat-detalhe-overlay.aberto { display: flex; }
 .fat-detalhe-modal { background: white; border-radius: 14px; width: 100%; max-width: 860px; max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 60px rgba(0,0,0,.3); animation: slideUp .2s ease; }
@@ -447,43 +479,62 @@ body.embedded-mode .portal-menu-fab { display:flex; }
 
       <!-- ADMIN: FATURAMENTO -->
       <div class="screen" id="s-admin-faturamento">
-        <div class="page-title">Processos de Faturamento</div>
-        <div class="page-sub" id="fat-subtitulo">Acompanhe os processos enviados pelos clientes e atualize protocolo, status e documentos.</div>
+
+        <!-- Hero -->
+        <div class="fat-hero">
+          <div style="position:relative;z-index:1;">
+            <h2 id="fat-hero-titulo" class="page-title" style="color:#fff;font-size:22px;letter-spacing:-.3px;margin:0 0 6px;">Processos de Faturamento</h2>
+            <p id="fat-subtitulo" style="font-size:13px;color:rgba(255,255,255,.78);line-height:1.55;max-width:560px;margin:0;">Acompanhe os processos enviados pelos clientes e atualize protocolo, status e documentos.</p>
+          </div>
+          <div class="fat-hero-side">
+            <span class="fat-hero-tag">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              Faturamento
+            </span>
+            <button class="btn btn-sm fat-admin-only" style="background:#fff;color:var(--mp-navy);border:none;font-weight:700;" onclick="fatCopiarLinkFixo()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              Copiar link do cliente
+            </button>
+          </div>
+        </div>
 
         <!-- Métricas -->
         <div class="fat-stats" id="fat-stats"></div>
 
-        <div class="card fat-admin-only" style="border-left:4px solid var(--mp-teal);">
-          <div class="card-head">
-            <div>
-              <div class="card-title">Link fixo para iniciar processo</div>
-              <div class="card-sub">Use este link em WhatsApp, site, assinatura de e-mail ou campanha. O próprio cliente preenche e envia os documentos.</div>
+        <div class="fat-link-card fat-admin-only">
+          <div class="fat-link-card-head">
+            <div class="fat-link-card-ico">
+              <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            </div>
+            <div style="flex:1">
+              <div class="fat-link-card-title">Link fixo para iniciar processo</div>
+              <div class="fat-link-card-sub">Use em WhatsApp, site, assinatura de e-mail ou campanha. O próprio cliente preenche e envia os documentos. O protocolo é atribuído pela equipe após contato com o banco.</div>
             </div>
           </div>
-          <div class="card-body" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
-            <input id="fat-link-fixo" class="login-input" readonly onclick="this.select()" style="flex:1;min-width:260px;font-size:12px;padding:10px 12px;font-family:'DM Mono',monospace;">
-            <button class="btn btn-primary btn-sm" onclick="fatCopiarLinkFixo()">Copiar link</button>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <input id="fat-link-fixo" class="login-input" readonly onclick="this.select()" style="flex:1;min-width:260px;font-size:12px;padding:10px 12px;font-family:'DM Mono',monospace;background:#fff;">
+            <button class="btn btn-primary btn-sm" onclick="fatCopiarLinkFixo()">Copiar</button>
             <button class="btn btn-outline btn-sm" onclick="window.open(fatLinkInicioCliente(), '_blank')">Abrir</button>
-            <div style="width:100%;font-size:11px;color:var(--text2);">
-              O protocolo continua sendo atribuído pelo ADM depois do contato com o banco.
-            </div>
           </div>
         </div>
 
         <!-- Lista de processos -->
-        <div class="card">
-          <div class="card-head">
+        <div class="fat-tabela-card">
+          <div class="fat-tabela-head">
             <div>
-              <div class="card-title">Lista de processos</div>
-              <div class="card-sub" id="fat-contagem">—</div>
+              <div class="fat-tabela-titulo">Lista de processos</div>
+              <div class="fat-tabela-sub" id="fat-contagem">—</div>
             </div>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
-              <button class="btn btn-outline btn-sm" onclick="fatExportarCSV()">⬇ Exportar CSV</button>
+              <button class="btn btn-outline btn-sm" onclick="fatExportarCSV()">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Exportar CSV
+              </button>
             </div>
           </div>
-          <div style="padding:14px 20px; border-bottom:1px solid var(--border);">
+          <div class="fat-tabela-filtros">
             <div class="fat-filtros">
-              <input type="text" id="fat-busca" placeholder="🔍 Buscar por nome, CPF, protocolo..." oninput="fatFiltrar()">
+              <input type="text" id="fat-busca" placeholder="Buscar por nome, CPF, protocolo, consultor..." oninput="fatFiltrar()">
               <select id="fat-status-filtro" onchange="fatFiltrar()">
                 <option value="">Todos os status</option>
                 <option>Recebido</option>
@@ -493,7 +544,7 @@ body.embedded-mode .portal-menu-fab { display:flex; }
                 <option>Finalizado</option>
                 <option>Cancelado</option>
               </select>
-              <button class="btn btn-outline btn-sm" onclick="fatLimparFiltros()">✕ Limpar</button>
+              <button class="btn btn-outline btn-sm" onclick="fatLimparFiltros()">Limpar</button>
             </div>
           </div>
           <div style="overflow-x:auto;">
@@ -1546,7 +1597,7 @@ async function renderAdminFaturamento() {
       ? 'Acompanhe os processos enviados pelos clientes e atualize protocolo, status e documentos.'
       : 'Acompanhe os processos atribuídos a você. Você pode comunicar-se com o cliente e ver o andamento.';
   }
-  const titulo = document.querySelector('#s-admin-faturamento .page-title');
+  const titulo = document.getElementById('fat-hero-titulo');
   if (titulo) titulo.textContent = isAdm ? 'Processos de Faturamento' : 'Meus Processos';
 
   await fatCarregarConsultores();
@@ -1588,36 +1639,63 @@ function fatRenderStats() {
   const finalizados = fatProcessos.filter(p => p.status === 'Finalizado').length;
   const semProtocolo = fatProcessos.filter(p => !p.protocolo).length;
 
+  const I = {
+    total: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>',
+    receb: '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+    anali: '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>',
+    retor: '<svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>',
+    final: '<svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+    semp:  '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+  };
+
   document.getElementById('fat-stats').innerHTML = `
     <div class="fat-stat borda-teal">
-      <div class="fat-stat-label">Total</div>
-      <div class="fat-stat-valor">${total}</div>
-      <div class="fat-stat-sub">processos</div>
+      <div class="fat-stat-ico">${I.total}</div>
+      <div class="fat-stat-body">
+        <div class="fat-stat-label">Total</div>
+        <div class="fat-stat-valor">${total}</div>
+        <div class="fat-stat-sub">processos</div>
+      </div>
     </div>
     <div class="fat-stat borda-amber">
-      <div class="fat-stat-label">Recebidos</div>
-      <div class="fat-stat-valor">${recebidos}</div>
-      <div class="fat-stat-sub">aguardando análise</div>
+      <div class="fat-stat-ico">${I.receb}</div>
+      <div class="fat-stat-body">
+        <div class="fat-stat-label">Recebidos</div>
+        <div class="fat-stat-valor">${recebidos}</div>
+        <div class="fat-stat-sub">aguardando análise</div>
+      </div>
     </div>
     <div class="fat-stat borda-purple">
-      <div class="fat-stat-label">Em análise</div>
-      <div class="fat-stat-valor">${emAnalise}</div>
-      <div class="fat-stat-sub">em andamento</div>
+      <div class="fat-stat-ico">${I.anali}</div>
+      <div class="fat-stat-body">
+        <div class="fat-stat-label">Em análise</div>
+        <div class="fat-stat-valor">${emAnalise}</div>
+        <div class="fat-stat-sub">em andamento</div>
+      </div>
     </div>
     <div class="fat-stat borda-amber">
-      <div class="fat-stat-label">Retorno adm.</div>
-      <div class="fat-stat-valor">${emRetorno}</div>
-      <div class="fat-stat-sub">em retorno</div>
+      <div class="fat-stat-ico">${I.retor}</div>
+      <div class="fat-stat-body">
+        <div class="fat-stat-label">Retorno adm.</div>
+        <div class="fat-stat-valor">${emRetorno}</div>
+        <div class="fat-stat-sub">em retorno</div>
+      </div>
     </div>
     <div class="fat-stat borda-green">
-      <div class="fat-stat-label">Finalizados</div>
-      <div class="fat-stat-valor">${finalizados}</div>
-      <div class="fat-stat-sub">concluídos</div>
+      <div class="fat-stat-ico">${I.final}</div>
+      <div class="fat-stat-body">
+        <div class="fat-stat-label">Finalizados</div>
+        <div class="fat-stat-valor">${finalizados}</div>
+        <div class="fat-stat-sub">concluídos</div>
+      </div>
     </div>
-    <div class="fat-stat" style="border-top:3px solid var(--red);cursor:pointer;" onclick="fatFiltrarSemProtocolo()" title="Filtrar processos sem protocolo">
-      <div class="fat-stat-label" style="color:var(--red);">Sem protocolo</div>
-      <div class="fat-stat-valor" style="color:var(--red);">${semProtocolo}</div>
-      <div class="fat-stat-sub">aguardando o banco</div>
+    <div class="fat-stat borda-red" onclick="fatFiltrarSemProtocolo()" title="Filtrar processos sem protocolo">
+      <div class="fat-stat-ico">${I.semp}</div>
+      <div class="fat-stat-body">
+        <div class="fat-stat-label" style="color:var(--red);">Sem protocolo</div>
+        <div class="fat-stat-valor">${semProtocolo}</div>
+        <div class="fat-stat-sub">aguardando o banco</div>
+      </div>
     </div>
   `;
 }
