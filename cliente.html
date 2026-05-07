@@ -96,6 +96,35 @@
     .card-sub{font-size:11.5px;color:var(--text2);margin-top:3px;line-height:1.45}
     .card-body{padding:20px 22px}
 
+    /* ─── Rodapé informativo ─── */
+    .footer-info{
+      margin-top: 28px;
+      padding: 24px;
+      background: #FFFFFF;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      font-size: 12px;
+      color: var(--text2);
+      line-height: 1.7;
+      box-shadow: var(--shadow);
+    }
+    .footer-info h3{
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--mp-navy);
+      margin-bottom: 12px;
+    }
+    .footer-info strong{ color: var(--text); }
+    .footer-info ul{ padding-left: 20px; margin-bottom: 12px; }
+    .footer-info li{ margin-bottom: 4px; }
+    .footer-info .lgpd{
+      margin-top: 16px;
+      font-size: 11px;
+      color: var(--text3);
+      border-top: 1px solid var(--border);
+      padding-top: 12px;
+    }
+
     /* Ícones SVG inline */
     .ico{width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;color:currentColor}
     .ico svg{width:100%;height:100%;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -296,6 +325,8 @@
 
     /* ─── Form cadastro inicial ─── */
     .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+    .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 18px}
+    .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:0 18px}
 
     /* ─── Upload categorizado (cliente novo) ─── */
     .doc-slots{display:flex;flex-direction:column;gap:14px}
@@ -441,13 +472,30 @@
       align-items:center;justify-content:center;gap:16px;
     }
 
+    /* ─── NOVO: Cards de seleção (banco / sub‑operação) ─── */
+    .banco-grid{
+      display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+      gap:18px; margin:24px 0;
+    }
+    .banco-card{
+      background:#fff; border:2px solid var(--border);
+      border-radius:16px; padding:28px 20px;
+      text-align:center; cursor:pointer;
+      transition:all .2s; box-shadow:var(--shadow);
+    }
+    .banco-card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(0,0,0,.08);}
+    .banco-card .banco-emoji{font-size:42px;margin-bottom:12px}
+    .banco-card .banco-nome{font-size:18px;font-weight:800;margin-bottom:6px}
+    .banco-card .banco-desc{font-size:12px;color:var(--text2)}
+    .banco-card .banco-seta{margin-top:14px;font-weight:600;font-size:13px;color:var(--text3)}
+
     /* ─── Responsivo ─── */
     @media (max-width:680px){
       .container{padding:24px 14px 60px}
       .cliente-hero{grid-template-columns:1fr;padding:24px}
       .protocolo-bar{grid-template-columns:1fr;gap:14px}
       .protocolo-actions{align-items:flex-start}
-      .grid-2{grid-template-columns:1fr;gap:0}
+      .grid-2, .grid-3, .grid-4{grid-template-columns:1fr;gap:0}
       .tabs{flex-wrap:wrap}
       .tab-btn{flex:1 1 calc(50% - 1px);min-width:120px}
       .stepper{padding:18px 14px}
@@ -483,7 +531,6 @@
 const SUPABASE_URL = 'https://jhwciwvgagnuxakukyob.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx';
 
-// Etapas do processo (ordem)
 const ETAPAS = [
   { status:'Recebido' },
   { status:'Em análise' },
@@ -492,14 +539,83 @@ const ETAPAS = [
   { status:'Finalizado' },
 ];
 
-// 3 categorias de anexo (2 obrigatórios + 1 facultativo)
-const CATEGORIAS_ANEXO = [
-  { key:'documento_foto',  label:'Documento com foto', sub:'RG ou CNH (frente e verso)', obrigatorio:true,  iconKey:'id' },
-  { key:'comp_residencia', label:'CRLV do bem', sub:'Necessário envio se o bem não for zero', obrigatorio:false, iconKey:'car' },
-  { key:'outros',          label:'Outros documentos', sub:'Procurações, documentos complementares e etc', obrigatorio:false, iconKey:'docs' },
+const BANCOS = [
+  {
+    id: 'itau',
+    nome: 'Itaú',
+    icone: '🏦',
+    corPrimaria: '#EC7000',
+    corPrimariaDark: '#C85E00',
+    corSecundaria: '#FF8C2E',
+    descricao: 'Processo de faturamento de cotas administradas pelo Itaú.',
+    subOperacoes: [
+      {
+        id: 'faturamento',
+        nome: 'Faturamento',
+        descricao: 'Envio de faturamento de cota(s) para administração.',
+        documentos: [
+          { key: 'documento_foto',  label: 'Documento com foto', sub: 'RG ou CNH (frente e verso)', obrigatorio: true, iconKey: 'id' },
+          { key: 'crlv',            label: 'CRLV do bem',        sub: 'Obrigatório apenas para veículos usados', obrigatorio: false, iconKey: 'car' },
+          { key: 'outros',          label: 'Outros documentos',  sub: 'Procurações, documentos complementares e etc', obrigatorio: false, iconKey: 'docs' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'bradesco',
+    nome: 'Bradesco',
+    icone: '🏛️',
+    corPrimaria: '#CC092F',
+    corPrimariaDark: '#A30022',
+    corSecundaria: '#E8304F',
+    descricao: 'Processo de faturamento para grupos administrados pelo Bradesco.',
+    subOperacoes: [
+      {
+        id: 'faturamento',
+        nome: 'Faturamento',
+        descricao: 'Envio de faturamento de cota(s) para administração.',
+        documentos: [
+          { key: 'documento_foto',  label: 'Documento com foto', sub: 'RG ou CNH (frente e verso)', obrigatorio: true, iconKey: 'id' },
+          { key: 'Doc.CRLV', label: 'CRLV do bem', sub: 'Documento do Veículo', obrigatorio: false, iconKey: 'car' },
+          { key: 'outros',          label: 'Outros documentos', sub: 'Declarações, comprovantes adicionais (opcional)', obrigatorio: false, iconKey: 'docs' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'porto',
+    nome: 'Porto Seguro',
+    icone: '🏢',
+    corPrimaria: '#003C8A',
+    corPrimariaDark: '#002A61',
+    corSecundaria: '#005BBC',
+    descricao: 'Processos de faturamento e transferência junto à Porto Seguro.',
+    subOperacoes: [
+      {
+        id: 'transferencia',
+        nome: 'Transferência de Cota',
+        descricao: 'Transferência de titularidade da cota para outra pessoa.',
+        documentos: [
+          { key: 'documento_foto_cedente',    label: 'Documento com foto do Cedente ',       sub: 'Atual proprietário da cota',            obrigatorio: true,  iconKey: 'id' },
+          { key: 'documento_foto_cessionario',label: 'Documento com foto do Cessionário ',   sub: 'Pessoa que está adquirindo/comprando a cota',             obrigatorio: true,  iconKey: 'id' },
+          { key: 'comp_residencia_cessionario',label: 'Comprovante de residência do cessionário ', sub: 'Pessoa que está adquirindo/comprando a cota', obrigatorio: true,  iconKey: 'home' },
+          { key: 'outros',                    label: 'Outros documentos',              sub: 'Procurações, declarações (opcional)',    obrigatorio: false, iconKey: 'docs' }
+        ]
+      },
+      {
+        id: 'faturamento',
+        nome: 'Faturamento',
+        descricao: 'Envio de faturamento de cota(s) para administração.',
+        documentos: [
+          { key: 'documento_foto',  label: 'Documento com foto', sub: 'RG ou CNH (frente e verso)', obrigatorio: true, iconKey: 'id' },
+          { key: 'Doc.CRLV', label: 'CRLV do bem', sub: 'Documento do Veículo', obrigatorio: false, iconKey: 'car' },
+          { key: 'outros',          label: 'Outros documentos', sub: 'Procurações, comprovantes e etc', obrigatorio: false, iconKey: 'docs' }
+        ]
+      }
+    ]
+  }
 ];
 
-// SVGs reutilizados
 const SVG = {
   search: '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>',
   user:   '<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
@@ -521,20 +637,19 @@ const SVG = {
   refresh:'<svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>',
   save:   '<svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>',
   open:   '<svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>',
-  car:    '<svg viewBox="0 0 24 24"><path d="M5 17h14l-1-5-2-4H8L6 12l-1 5z"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/><path d="M3 13h18"/></svg>'
+  car: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="7" rx="2"/><path d="M5 9L7 5h10l2 4"/><line x1="8" y1="9" x2="8" y2="5"/><line x1="16" y1="9" x2="16" y2="5"/><circle cx="7" cy="17" r="1.5"/><circle cx="17" cy="17" r="1.5"/></svg>',
 };
 const ico = (key, cls='ico') => `<span class="${cls}">${SVG[key]||''}</span>`;
 
-// ════════════════════════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════════════════════════
 const sb     = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const root   = document.getElementById('root');
 const params = new URLSearchParams(window.location.search);
 const TOKEN  = params.get('token');
 
-let arquivosPendentes = {};   // { categoria: File }
+let arquivosPendentes = {};
 let processoAtual = null;
+let bancoSelecionado = null;
+let operacaoSelecionada = null;
 let _pollingInterval = null;
 
 window.addEventListener('DOMContentLoaded', async () => {
@@ -542,9 +657,6 @@ window.addEventListener('DOMContentLoaded', async () => {
   else renderTelaConsulta();
 });
 
-// ════════════════════════════════════════════════════════════
-// TELA 1 — CONSULTA POR CPF / INICIAR
-// ════════════════════════════════════════════════════════════
 function renderTelaConsulta(){
   root.innerHTML = `
     <div class="container">
@@ -566,15 +678,12 @@ function renderTelaConsulta(){
             <button class="btn btn-primary w-100" onclick="consultarProcesso()">
               ${ico('search')} Consultar processo
             </button>
-
             <div class="start-divider">ou</div>
-
-            <button class="btn btn-outline w-100" onclick="renderTelaCadastro()">
+            <button class="btn btn-outline w-100" onclick="renderTelaSelecaoBanco()">
               ${ico('doc')} Iniciar novo processo
             </button>
           </div>
         </div>
-
         <div id="lista-processos-cpf" style="margin-top:18px"></div>
       </div>
     </div>`;
@@ -583,29 +692,17 @@ function renderTelaConsulta(){
 async function consultarProcesso(){
   const cpf = (document.getElementById('cpf-consulta').value||'').replace(/\D/g,'');
   if (cpf.length<11){ alerta('alerta-consulta','Informe um CPF válido com 11 dígitos.','erro'); return; }
-
   const btn = document.querySelector('button.btn.btn-primary.w-100');
   if (btn){ btn.disabled=true; btn.innerHTML = '<span class="spinner"></span> Buscando...'; }
-
-  // RPC segura: cliente_listar_por_cpf
   const { data, error } = await sb.rpc('cliente_listar_por_cpf', { p_cpf: cpf });
-
   if (btn){ btn.disabled=false; btn.innerHTML = ico('search')+' Consultar processo'; }
-
-  if (error){ alerta('alerta-consulta','Erro ao buscar. Tente novamente.','erro'); console.error(error); return; }
+  if (error){ alerta('alerta-consulta','Erro ao buscar. Tente novamente.','erro'); return; }
   if (!data || data.length===0){ alerta('alerta-consulta','Nenhum processo encontrado para este CPF.','erro'); return; }
-
   if (data.length===1){ window.location.href = `?token=${data[0].token}`; return; }
-
   const lista = document.getElementById('lista-processos-cpf');
   lista.innerHTML = `
     <div class="card">
-      <div class="card-head">
-        <div>
-          <div class="card-title">Processos encontrados (${data.length})</div>
-          <div class="card-sub">Selecione qual deseja acompanhar</div>
-        </div>
-      </div>
+      <div class="card-head"><div><div class="card-title">Processos encontrados (${data.length})</div><div class="card-sub">Selecione qual deseja acompanhar</div></div></div>
       <div class="card-body" style="padding:14px">
         <div class="proc-card-list">
           ${data.map(p => `
@@ -613,11 +710,9 @@ async function consultarProcesso(){
               <div class="proc-info">
                 <div class="proc-name">${esc(p.nome)}</div>
                 <div class="proc-meta">
-                  ${p.protocolo
-                    ? `<span class="mono">${esc(p.protocolo)}</span>`
-                    : `<span style="color:var(--amber);font-weight:700">Protocolo pendente</span>`}
-                  ${p.grupo ? `<span>· Grupo ${esc(p.grupo)}</span>` : ''}
-                  ${p.cota  ? `<span>· Cota ${esc(p.cota)}</span>`  : ''}
+                  ${p.protocolo?`<span class="mono">${esc(p.protocolo)}</span>`:`<span style="color:var(--amber);font-weight:700">Protocolo pendente</span>`}
+                  ${p.grupo?`<span>· Grupo ${esc(p.grupo)}</span>`:''}
+                  ${p.cota?`<span>· Cota ${esc(p.cota)}</span>`:''}
                   <span>· ${fmtData(p.criado_em)}</span>
                 </div>
               </div>
@@ -630,131 +725,461 @@ async function consultarProcesso(){
     </div>`;
 }
 
-// ════════════════════════════════════════════════════════════
-// TELA 2 — CADASTRO INICIAL
-// ════════════════════════════════════════════════════════════
-function renderTelaCadastro(){
-  arquivosPendentes = {};
+function renderTelaSelecaoBanco(){
+  bancoSelecionado = null; operacaoSelecionada = null;
   root.innerHTML = `
     <div class="container">
-      <div class="cliente-hero">
-        <div>
-          <h1>Iniciar processo de faturamento</h1>
-          <p>Envie seus dados e documentos com segurança para a equipe Master Prime acompanhar o processo junto ao banco.</p>
+      <div class="start-wrap" style="max-width:600px">
+        <div style="text-align:center; margin-bottom:24px">
+          <h2 style="font-size:20px; font-weight:800; color:var(--mp-navy); margin-bottom:6px">Selecione a Administradora</h2>
+          <p style="font-size:13px; color:var(--text2)">Escolha a Administradora.</p>
         </div>
-        <div class="cliente-hero-panel">
-          <strong>Antes de enviar</strong>
-          Confira CPF, grupo e cota. O protocolo é atribuído pela equipe após validação com a administradora.
+        <div class="banco-grid">
+          ${BANCOS.map(b => `
+            <div class="banco-card" style="border-top:4px solid ${b.corPrimaria}" onclick="selecionarBanco('${b.id}')">
+              <div class="banco-emoji">${b.icone}</div>
+              <div class="banco-nome" style="color:${b.corPrimaria}">${b.nome}</div>
+              <div class="banco-desc">${b.descricao}</div>
+              <div class="banco-seta">Avançar →</div>
+            </div>
+          `).join('')}
+        </div>
+        <div style="text-align:center; margin-top:18px">
+          <a href="#" onclick="renderTelaConsulta();return false;" style="font-size:12px;color:var(--text2);display:inline-flex;align-items:center;gap:5px">
+            ${ico('back')} Voltar
+          </a>
         </div>
       </div>
+    </div>`;
+}
 
+function selecionarBanco(bancoId){
+  const banco = BANCOS.find(b => b.id === bancoId);
+  if (!banco) return;
+  bancoSelecionado = banco;
+  if (banco.subOperacoes.length > 1) renderTelaSubOperacao(banco);
+  else { operacaoSelecionada = banco.subOperacoes[0]; renderTelaCadastro(banco, operacaoSelecionada); }
+}
+
+function renderTelaSubOperacao(banco){
+  root.innerHTML = `
+    <div class="container">
+      <div class="start-wrap" style="max-width:550px">
+        <div style="text-align:center; margin-bottom:24px">
+          <h2 style="font-size:20px; font-weight:800; color:${banco.corPrimaria}; margin-bottom:6px">${banco.nome}</h2>
+          <p style="font-size:13px; color:var(--text2)">Selecione o tipo de processo desejado.</p>
+        </div>
+        <div class="banco-grid">
+          ${banco.subOperacoes.map(op => `
+            <div class="banco-card" style="border-top:4px solid ${banco.corPrimaria}" onclick="selecionarSubOperacao('${op.id}')">
+              <div class="banco-emoji">📋</div>
+              <div class="banco-nome" style="color:${banco.corPrimaria}">${op.nome}</div>
+              <div class="banco-desc">${op.descricao}</div>
+              <div class="banco-seta">Iniciar →</div>
+            </div>
+          `).join('')}
+        </div>
+        <div style="text-align:center; margin-top:18px">
+          <a href="#" onclick="renderTelaSelecaoBanco();return false;" style="font-size:12px;color:var(--text2);display:inline-flex;align-items:center;gap:5px">
+            ${ico('back')} Escolher outro banco
+          </a>
+        </div>
+      </div>
+    </div>`;
+}
+
+function selecionarSubOperacao(opId){
+  if (!bancoSelecionado) return;
+  const op = bancoSelecionado.subOperacoes.find(o => o.id === opId);
+  if (!op) return;
+  operacaoSelecionada = op;
+  renderTelaCadastro(bancoSelecionado, operacaoSelecionada);
+}
+
+function renderTelaCadastro(banco, operacao){
+  if (!banco || !operacao) { renderTelaSelecaoBanco(); return; }
+  arquivosPendentes = {};
+  const cor = banco.corPrimaria;
+  const corDark = banco.corPrimariaDark;
+
+  let html = `
+    <div class="container">
+      <div class="cliente-hero" style="background:linear-gradient(135deg, ${cor} 0%, ${corDark} 100%)">
+        <div>
+          <h1>${banco.nome} – ${operacao.nome}</h1>
+          <p>${operacao.descricao}</p>
+        </div>
+      </div>
       <div style="margin-bottom:14px">
-        <a href="#" onclick="renderTelaConsulta();return false;" style="font-size:12px;color:var(--text2);display:inline-flex;align-items:center;gap:5px">
+        <a href="#" onclick="voltarEtapaAnterior();return false;" style="font-size:12px;color:var(--text2);display:inline-flex;align-items:center;gap:5px">
           ${ico('back')} Voltar
         </a>
       </div>
+      <div id="alerta-cadastro" class="alerta"></div>`;
 
-      <div id="alerta-cadastro" class="alerta"></div>
+  if (operacao.id === 'transferencia') {
+    html += `
+        <div class="card">
+          <div class="card-head"><div class="card-title">${ico('user')} Cedente (titular atual)</div></div>
+          <div class="card-body">
+            <div class="grid-2">
+              <div class="campo"><label>Nome completo <span class="req">*</span></label><input type="text" id="f-cedente-nome" placeholder="Nome do cedente"></div>
+              <div class="campo"><label>CPF <span class="req">*</span></label><input type="text" id="f-cedente-cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)" style="font-family:var(--fonte-mono)"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>Grupo <span class="req">*</span></label><input type="text" id="f-cedente-grupo" placeholder="Ex: 12"></div>
+              <div class="campo"><label>Cota <span class="req">*</span></label><input type="text" id="f-cedente-cota" placeholder="Ex: 0042"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>E-mail</label><input type="email" id="f-cedente-email" placeholder="email@exemplo.com"></div>
+              <div class="campo"><label>Telefone</label><input type="text" id="f-cedente-telefone" placeholder="(00) 00000-0000" maxlength="15" oninput="mascaraTel(this)"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">${ico('user')} Cessionário (novo titular)</div></div>
+          <div class="card-body">
+            <div class="grid-2">
+              <div class="campo"><label>Nome completo <span class="req">*</span></label><input type="text" id="f-cessionario-nome" placeholder="Nome do cessionário"></div>
+              <div class="campo"><label>CPF <span class="req">*</span></label><input type="text" id="f-cessionario-cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)" style="font-family:var(--fonte-mono)"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>Grupo <span class="req">*</span></label><input type="text" id="f-cessionario-grupo" placeholder="Ex: 12"></div>
+              <div class="campo"><label>Cota <span class="req">*</span></label><input type="text" id="f-cessionario-cota" placeholder="Ex: 0042"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>E-mail</label><input type="email" id="f-cessionario-email" placeholder="email@exemplo.com"></div>
+              <div class="campo"><label>Telefone</label><input type="text" id="f-cessionario-telefone" placeholder="(00) 00000-0000" maxlength="15" oninput="mascaraTel(this)"></div>
+            </div>
+            <div class="campo"><label>Endereço</label><input type="text" id="f-cessionario-endereco" placeholder="Rua, número, bairro, cidade - UF"></div>
+            <div class="campo"><label>Estado Civil</label>
+              <select id="f-cessionario-estado_civil">
+                <option value="">Selecione...</option>
+                <option value="solteiro">Solteiro(a)</option>
+                <option value="casado">Casado(a)</option>
+                <option value="divorciado">Divorciado(a)</option>
+                <option value="viuvo">Viúvo(a)</option>
+                <option value="uniao_estavel">União Estável</option>
+              </select>
+            </div>
+          </div>
+        </div>`;
+  } else if (banco.id === 'bradesco') {
+    html += `
+        <div class="card">
+          <div class="card-head"><div class="card-title">${ico('user')} Dados do Consorciado</div></div>
+          <div class="card-body">
+            <div class="grid-2">
+              <div class="campo"><label>CPF/CNPJ <span class="req">*</span></label><input type="text" id="f-cpf" placeholder="000.000.000-00" maxlength="18" oninput="mascaraCPF(this)"></div>
+              <div class="campo"><label>Data Nascimento</label><input type="date" id="f-data_nasc"></div>
+            </div>
+            <div class="campo"><label>NOME COMPLETO <span class="req">*</span></label><input type="text" id="f-nome" placeholder="Nome completo"></div>
+            <div class="grid-3">
+              <div class="campo"><label>Estado Civil</label><select id="f-estado_civil"><option value="">Selecione...</option><option value="solteiro">Solteiro(a)</option><option value="casado">Casado(a)</option><option value="divorciado">Divorciado(a)</option><option value="viuvo">Viúvo(a)</option><option value="uniao_estavel">União Estável</option></select></div>
+              <div class="campo"><label>Nº Documento Identificação</label><input type="text" id="f-doc_id" placeholder="Nº do documento"></div>
+              <div class="campo"><label>Tipo de Documento</label><select id="f-tipo_doc"><option value="">Selecione...</option><option value="rg">RG</option><option value="cnh">CNH</option><option value="outro">Outro</option></select></div>
+            </div>
+            <div class="grid-3">
+              <div class="campo"><label>Data de Expedição</label><input type="date" id="f-data_expedicao"></div>
+              <div class="campo"><label>Órgão Emissor</label><input type="text" id="f-orgao_emissor"></div>
+              <div class="campo">
+          <label>Valor da Renda</label>
+          <input type="text" id="f-renda" placeholder="R$ 0,00" oninput="mascaraValor(this)">
+    </div>
+            <div class="grid-2">
+              <div class="campo"><label>Cargo</label><input type="text" id="f-cargo"></div>
+              <div class="campo"><label>Nacionalidade</label><input type="text" id="f-nacionalidade" value="Brasileiro(a)"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>Estado de Naturalidade</label><input type="text" id="f-estado_naturalidade"></div>
+              <div class="campo"><label>Celular</label><input type="text" id="f-telefone" placeholder="(00) 00000-0000" maxlength="15" oninput="mascaraTel(this)"></div>
+            </div>
+            <div class="campo"><label>Email</label><input type="email" id="f-email" placeholder="email@exemplo.com"></div>
+            <div class="campo"><label>Endereço Completo</label><input type="text" id="f-endereco" placeholder="Logradouro, número, bairro, cidade - UF, CEP"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">${ico('docs')} Dados Bancários do Consorciado</div></div>
+          <div class="card-body">
+            <div class="campo"><label>Nome do Consorciado</label><input type="text" id="f-banco-nome" placeholder="Nome do titular da conta"></div>
+            <div class="grid-3">
+              <div class="campo"><label>Banco</label><input type="text" id="f-banco" placeholder="Ex: 001 - Banco do Brasil"></div>
+              <div class="campo"><label>Agência</label><input type="text" id="f-agencia"></div>
+              <div class="campo"><label>Conta</label><input type="text" id="f-conta"></div>
+            </div>
+            <div class="campo"><label>Tipo de Conta</label><select id="f-tipo_conta"><option value="">Selecione...</option><option value="corrente">Corrente</option><option value="poupanca">Poupança</option></select></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">${ico('user')} Grupo(s) e Cota(s)</div><button type="button" class="btn btn-outline btn-sm" onclick="adicionarGrupoCota()">+ Adicionar</button></div>
+          <div class="card-body" id="grupo-cota-container">
+            <div class="grid-2 grupo-cota-linha" style="margin-bottom:10px">
+              <div class="campo"><label>Grupo <span class="req">*</span></label><input type="text" class="f-grupo" placeholder="Ex: 12"></div>
+              <div class="campo"><label>Cota <span class="req">*</span></label><input type="text" class="f-cota" placeholder="Ex: 0042"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">${ico('car')} Dados do Veículo (Aquisição)</div></div>
+          <div class="card-body">
+            <div class="grid-3">
+              <div class="campo"><label>Chassi</label><input type="text" id="f-chassi"></div>
+              <div class="campo"><label>Placa</label><input type="text" id="f-placa"></div>
+              <div class="campo"><label>Renavam</label><input type="text" id="f-renavam"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>UF Licenciamento</label><input type="text" id="f-uf_lic"></div>
+              <div class="campo"><label>Marca</label><input type="text" id="f-marca"></div>
+            </div>
+            <div class="grid-3">
+              <div class="campo"><label>Modelo</label><input type="text" id="f-modelo"></div>
+              <div class="campo"><label>Cor do Veículo</label><input type="text" id="f-cor_veiculo"></div>
+              <div class="campo"><label>Ano Fabricação</label><input type="text" id="f-ano_fab"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>Ano Modelo</label><input type="text" id="f-ano_modelo"></div>
+              <div class="campo"><label>Valor de Venda R$</label><input type="text" id="f-valor_venda" placeholder="R$ 0,00" oninput="mascaraValor(this)"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">${ico('user')} Dados do Vendedor do Veículo</div></div>
+          <div class="card-body">
+            <div class="grid-2">
+              <div class="campo"><label>Nome do Vendedor</label><input type="text" id="f-vend-nome"></div>
+              <div class="campo"><label>CPF/CNPJ</label><input type="text" id="f-vend-cpf" placeholder="000.000.000-00" maxlength="18" oninput="mascaraCPF(this)"></div>
+            </div>
+            <div class="campo"><label>Endereço</label><input type="text" id="f-vend-endereco"></div>
+            <div class="grid-3">
+              <div class="campo"><label>Banco</label><input type="text" id="f-vend-banco"></div>
+              <div class="campo"><label>Agência e Conta</label><input type="text" id="f-vend-agconta"></div>
+              <div class="campo"><label>Tipo de Conta</label><select id="f-vend-tipo_conta"><option value="">Selecione...</option><option value="corrente">Corrente</option><option value="poupanca">Poupança</option></select></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>Email</label><input type="email" id="f-vend-email"></div>
+              <div class="campo"><label>Telefone para contato</label><input type="text" id="f-vend-telefone" placeholder="(00) 00000-0000" maxlength="15" oninput="mascaraTel(this)"></div>
+            </div>
+          </div>
+        </div>`;
+        
+  } else if (banco.id === 'porto' && operacao.id === 'faturamento') {
+    // Porto Seguro - Faturamento (com condição do bem)
+    html += `
+        <div class="card">
+          <div class="card-head"><div class="card-title">${ico('user')} Dados pessoais</div></div>
+          <div class="card-body">
+            <div class="grid-2">
+              <div class="campo"><label>NOME COMPLETO <span class="req">*</span></label><input type="text" id="f-nome" placeholder="Seu nome completo"></div>
+              <div class="campo"><label>CPF <span class="req">*</span></label><input type="text" id="f-cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)" style="font-family:var(--fonte-mono)"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>GRUPO <span class="req">*</span></label><input type="text" id="f-grupo" placeholder="Ex: Grupo A, Grupo 12..."></div>
+              <div class="campo"><label>COTA <span class="req">*</span></label><input type="text" id="f-cota" placeholder="Ex: 0042"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>E-MAIL (NOTIFICAÇÕES)</label><input type="email" id="f-email" placeholder="seu@email.com"></div>
+              <div class="campo"><label>WHATSAPP (NOTIFICAÇÕES)</label><input type="text" id="f-telefone" placeholder="(00) 00000-0000" maxlength="15" oninput="mascaraTel(this)"></div>
+            </div>
 
+            <!-- Condição do bem -->
+            <div class="campo">
+              <label>Condição do bem <span class="req">*</span></label>
+              <select id="f-condicao-bem" onchange="toggleCamposBem()">
+                <option value="">Selecione...</option>
+                <option value="novo">Novo</option>
+                <option value="usado">Usado</option>
+              </select>
+            </div>
+
+            <!-- Campos para bem NOVO (ocultos inicialmente) -->
+            <div id="campos-bem-novo" style="display:none;">
+              <div class="grid-2">
+                <div class="campo"><label>Modelo <span class="req">*</span></label><input type="text" id="f-modelo"></div>
+                <div class="campo"><label>Versão <span class="req">*</span></label><input type="text" id="f-versao"></div>
+              </div>
+              <div class="grid-2">
+                <div class="campo"><label>Cor <span class="req">*</span></label><input type="text" id="f-cor-veiculo"></div>
+                <div class="campo"><label>Ano Mod/Fab <span class="req">*</span></label><input type="text" id="f-ano-modfab" placeholder="Ex: 2024/2025"></div>
+              </div>
+            </div>
+
+            <div class="campo">
+              <label>Valor de Venda R$</label>
+              <input type="text" id="f-valor_venda" placeholder="R$ 0,00" oninput="mascaraValor(this)">
+            </div>
+            <div class="campo"><label>CORRETOR (OPCIONAL)</label><input type="text" id="f-corretor" placeholder="Nome do corretor, se houver"></div>
+            <div class="campo"><label>OBSERVAÇÕES</label><textarea id="f-descricao" placeholder="Descreva detalhes do seu caso (opcional)..."></textarea></div>
+          </div>
+        </div>`;
+  } else if (banco.id === 'itau') {
+    // Itaú - Faturamento (com condição do bem e taxa 710)
+    html += `
+        <div class="card">
+          <div class="card-head"><div class="card-title">${ico('user')} Dados pessoais</div></div>
+          <div class="card-body">
+            <div class="grid-2">
+              <div class="campo"><label>NOME COMPLETO <span class="req">*</span></label><input type="text" id="f-nome" placeholder="Seu nome completo"></div>
+              <div class="campo"><label>CPF <span class="req">*</span></label><input type="text" id="f-cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)" style="font-family:var(--fonte-mono)"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>GRUPO <span class="req">*</span></label><input type="text" id="f-grupo" placeholder="Ex: Grupo A, Grupo 12..."></div>
+              <div class="campo"><label>COTA <span class="req">*</span></label><input type="text" id="f-cota" placeholder="Ex: 0042"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>E-MAIL (NOTIFICAÇÕES)</label><input type="email" id="f-email" placeholder="seu@email.com"></div>
+              <div class="campo"><label>WHATSAPP (NOTIFICAÇÕES)</label><input type="text" id="f-telefone" placeholder="(00) 00000-0000" maxlength="15" oninput="mascaraTel(this)"></div>
+            </div>
+
+            <!-- Condição do bem -->
+            <div class="campo">
+              <label>Condição do bem <span class="req">*</span></label>
+              <select id="f-condicao-bem" onchange="toggleCamposBem()">
+                <option value="">Selecione...</option>
+                <option value="novo">Novo</option>
+                <option value="usado">Usado</option>
+              </select>
+            </div>
+
+            <!-- Campos para bem NOVO (ocultos inicialmente) -->
+            <div id="campos-bem-novo" style="display:none;">
+              <div class="grid-2">
+                <div class="campo"><label>Modelo <span class="req">*</span></label><input type="text" id="f-modelo"></div>
+                <div class="campo"><label>Versão <span class="req">*</span></label><input type="text" id="f-versao"></div>
+              </div>
+              <div class="grid-2">
+                <div class="campo"><label>Cor <span class="req">*</span></label><input type="text" id="f-cor-veiculo"></div>
+                <div class="campo"><label>Ano Mod/Fab <span class="req">*</span></label><input type="text" id="f-ano-modfab" placeholder="Ex: 2024/2025"></div>
+              </div>
+            </div>
+
+            <div class="campo">
+              <label>Valor de Venda R$</label>
+              <input type="text" id="f-valor_venda" placeholder="R$ 0,00" oninput="mascaraValor(this)">
+            </div>
+
+            <!-- Pergunta específica do Itaú -->
+            <div class="campo">
+              <label>Deseja realizar o pagamento da taxa de faturamento (710) com o crédito?</label>
+              <select id="f-pagar-taxa-credito">
+                <option value="nao">Não</option>
+                <option value="sim">Sim</option>
+              </select>
+            </div>
+
+            <div class="campo"><label>CORRETOR (OPCIONAL)</label><input type="text" id="f-corretor" placeholder="Nome do corretor, se houver"></div>
+            <div class="campo"><label>OBSERVAÇÕES</label><textarea id="f-descricao" placeholder="Descreva detalhes do seu caso (opcional)..."></textarea></div>
+          </div>
+        </div>`;
+  } else {
+    // Outros bancos (não deve cair aqui, mas mantido por segurança)
+    html += `
+        <div class="card">
+          <div class="card-head"><div class="card-title">${ico('user')} Dados pessoais</div></div>
+          <div class="card-body">
+            <div class="grid-2">
+              <div class="campo"><label>NOME COMPLETO <span class="req">*</span></label><input type="text" id="f-nome" placeholder="Seu nome completo"></div>
+              <div class="campo"><label>CPF <span class="req">*</span></label><input type="text" id="f-cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)" style="font-family:var(--fonte-mono)"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>GRUPO <span class="req">*</span></label><input type="text" id="f-grupo" placeholder="Ex: Grupo A, Grupo 12..."></div>
+              <div class="campo"><label>COTA <span class="req">*</span></label><input type="text" id="f-cota" placeholder="Ex: 0042"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>E-MAIL (NOTIFICAÇÕES)</label><input type="email" id="f-email" placeholder="seu@email.com"></div>
+              <div class="campo"><label>WHATSAPP (NOTIFICAÇÕES)</label><input type="text" id="f-telefone" placeholder="(00) 00000-0000" maxlength="15" oninput="mascaraTel(this)"></div>
+            </div>
+            <div class="campo"><label>Valor de Venda R$</label><input type="text" id="f-valor_venda" placeholder="R$ 0,00" oninput="mascaraValor(this)"></div>
+            <div class="campo"><label>CORRETOR (OPCIONAL)</label><input type="text" id="f-corretor" placeholder="Nome do corretor, se houver"></div>
+            <div class="campo"><label>OBSERVAÇÕES</label><textarea id="f-descricao" placeholder="Descreva detalhes do seu caso (opcional)..."></textarea></div>
+          </div>
+        </div>`;
+  }
+
+  html += `
       <div class="card">
-        <div class="card-head"><div class="card-title">${ico('user')} Dados pessoais</div></div>
-        <div class="card-body">
-          <div class="grid-2">
-            <div class="campo"><label>Nome completo <span class="req">*</span></label>
-              <input type="text" id="f-nome" placeholder="Seu nome completo"></div>
-            <div class="campo"><label>CPF <span class="req">*</span></label>
-              <input type="text" id="f-cpf" placeholder="000.000.000-00" maxlength="14"
-                oninput="mascaraCPF(this)" style="font-family:var(--fonte-mono)"></div>
-          </div>
-          <div class="grid-2">
-            <div class="campo"><label>Grupo <span class="req">*</span></label>
-              <input type="text" id="f-grupo" placeholder="Ex: Grupo A, Grupo 12..."></div>
-            <div class="campo"><label>Cota <span class="req">*</span></label>
-              <input type="text" id="f-cota" placeholder="Ex: 0042"></div>
-          </div>
-          <div class="grid-2">
-            <div class="campo"><label>E-mail (notificações)</label>
-              <input type="email" id="f-email" placeholder="seu@email.com"></div>
-            <div class="campo"><label>WhatsApp (notificações)</label>
-              <input type="text" id="f-telefone" placeholder="(00) 00000-0000" maxlength="15"
-                oninput="mascaraTel(this)"></div>
-          </div>
-          <div class="campo"><label>Corretor (opcional)</label>
-            <input type="text" id="f-corretor" placeholder="Nome do corretor, se houver"></div>
-          <div class="campo"><label>Observações</label>
-            <textarea id="f-descricao" placeholder="Descreva detalhes do seu caso (opcional)..."></textarea></div>
-        </div>
+        <div class="card-head"><div><div class="card-title">${ico('upload')} Documentos</div><div class="card-sub">PDF, JPG ou PNG — até 16MB cada</div></div></div>
+        <div class="card-body"><div class="doc-slots" id="doc-slots"></div></div>
       </div>
-
-      <div class="card">
-        <div class="card-head">
-          <div>
-            <div class="card-title">${ico('upload')} Documentos</div>
-            <div class="card-sub">PDF, JPG ou PNG — até 16MB cada</div>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="doc-slots" id="doc-slots"></div>
-        </div>
-      </div>
-
-      <button class="btn btn-primary w-100" id="btn-enviar" onclick="enviarCadastro()" style="padding:14px;font-size:13px">
+      <button class="btn btn-primary w-100" id="btn-enviar" onclick="enviarCadastro()" style="background:${cor}; box-shadow:0 2px 8px ${cor}40; padding:14px;font-size:13px">
         Enviar processo ${ico('arrow')}
       </button>
     </div>`;
 
-  renderSlotsAnexo();
+  root.innerHTML = html;
+  renderSlotsAnexo(operacao.documentos);
 }
 
-function renderSlotsAnexo(){
+function adicionarGrupoCota(){
+  const container = document.getElementById('grupo-cota-container');
+  if (!container) return;
+  const linha = document.createElement('div');
+  linha.className = 'grid-2 grupo-cota-linha';
+  linha.style.marginBottom = '10px';
+  linha.innerHTML = `
+    <div class="campo"><label>Grupo</label><input type="text" class="f-grupo" placeholder="Ex: 12"></div>
+    <div class="campo"><label>Cota</label><input type="text" class="f-cota" placeholder="Ex: 0042"></div>`;
+  container.appendChild(linha);
+}
+
+function mascaraValor(el) {
+  let v = el.value.replace(/\D/g, '');
+  v = (parseInt(v, 10) || 0).toString();
+  const reais = v.slice(0, -2).replace(/\B(?=(\d{3})+(?!\d))/g, '.') || '0';
+  const centavos = v.slice(-2).padStart(2, '0');
+  el.value = `R$ ${reais},${centavos}`;
+}
+
+function toggleCamposBem() {
+  const select = document.getElementById('f-condicao-bem');
+  const divNovo = document.getElementById('campos-bem-novo');
+  if (!select || !divNovo) return;
+  const valor = select.value;
+  divNovo.style.display = (valor === 'novo') ? 'block' : 'none';
+}
+
+function obterValorReal(id) {
+  const el = document.getElementById(id);
+  const raw = el.value.replace(/\D/g, '');
+  return parseFloat(raw) / 100;
+}
+
+function voltarEtapaAnterior(){
+  if (bancoSelecionado && bancoSelecionado.subOperacoes.length > 1) renderTelaSubOperacao(bancoSelecionado);
+  else renderTelaSelecaoBanco();
+}
+
+function renderSlotsAnexo(documentos){
   const slots = document.getElementById('doc-slots');
   if (!slots) return;
-  slots.innerHTML = CATEGORIAS_ANEXO.map(cat => {
+  slots.innerHTML = documentos.map(cat => {
     const arq = arquivosPendentes[cat.key];
     return `
       <div class="doc-slot ${arq?'preenchido':''} ${cat.obrigatorio?'':'opcional'}" data-cat="${cat.key}">
         <div class="doc-slot-head">
           <div class="doc-slot-icon">${ico(cat.iconKey,'ico ico-lg')}</div>
           <div style="flex:1">
-            <div class="doc-slot-title">
-              ${esc(cat.label)}
-              ${cat.obrigatorio
-                ? '<span class="tag tag-red" style="font-size:9.5px">Obrigatório</span>'
-                : '<span class="tag tag-gray" style="font-size:9.5px">Opcional</span>'}
-            </div>
+            <div class="doc-slot-title">${esc(cat.label)} ${cat.obrigatorio?'<span class="tag tag-red" style="font-size:9.5px">Obrigatório</span>':'<span class="tag tag-gray" style="font-size:9.5px">Opcional</span>'}</div>
             <div class="doc-slot-sub">${esc(cat.sub)}</div>
           </div>
           <div class="doc-slot-action">
-            <input type="file" id="f-${cat.key}" accept=".pdf,.jpg,.jpeg,.png"
-              onchange="setArquivoSlot('${cat.key}', this)">
-            <button class="btn btn-outline btn-sm" type="button"
-              onclick="document.getElementById('f-${cat.key}').click()">
-              ${arq ? 'Trocar' : 'Selecionar'}
-            </button>
+            <input type="file" id="f-${cat.key}" accept=".pdf,.jpg,.jpeg,.png" onchange="setArquivoSlot('${cat.key}', this)">
+            <button class="btn btn-outline btn-sm" type="button" onclick="document.getElementById('f-${cat.key}').click()">${arq?'Trocar':'Selecionar'}</button>
           </div>
         </div>
-        ${arq ? `
-          <div class="doc-slot-arquivo">
-            ${ico('doc')}
-            <span class="nome">${esc(arq.name)}</span>
-            <span style="color:var(--text3);font-size:11px">${(arq.size/1024).toFixed(0)} KB</span>
-            <button class="remover" onclick="removerArquivoSlot('${cat.key}')" title="Remover">✕</button>
-          </div>` : ''}
+        ${arq?`<div class="doc-slot-arquivo">${ico('doc')} <span class="nome">${esc(arq.name)}</span> <span style="color:var(--text3);font-size:11px">${(arq.size/1024).toFixed(0)} KB</span> <button class="remover" onclick="removerArquivoSlot('${cat.key}')" title="Remover">✕</button></div>`:''}
       </div>`;
   }).join('');
 
-  // Drag and drop em cada slot
-  CATEGORIAS_ANEXO.forEach(cat => {
+  documentos.forEach(cat => {
     const el = document.querySelector(`.doc-slot[data-cat="${cat.key}"]`);
     if (!el) return;
     el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('dragover'); });
     el.addEventListener('dragleave', () => el.classList.remove('dragover'));
     el.addEventListener('drop', e => {
       e.preventDefault(); el.classList.remove('dragover');
-      const f = e.dataTransfer.files;
-      if (f.length){
+      if (e.dataTransfer.files.length){
         const inp = document.getElementById(`f-${cat.key}`);
-        if (inp){ inp.files = f; setArquivoSlot(cat.key, inp); }
+        if (inp){ inp.files = e.dataTransfer.files; setArquivoSlot(cat.key, inp); }
       }
     });
   });
@@ -765,50 +1190,156 @@ function setArquivoSlot(catKey, input){
   if (!f) return;
   if (f.size > 16*1024*1024){ alerta('alerta-cadastro', `"${f.name}" passa de 16MB.`, 'erro'); return; }
   arquivosPendentes[catKey] = f;
-  renderSlotsAnexo();
+  if (operacaoSelecionada) renderSlotsAnexo(operacaoSelecionada.documentos);
 }
 function removerArquivoSlot(catKey){
   delete arquivosPendentes[catKey];
-  renderSlotsAnexo();
+  if (operacaoSelecionada) renderSlotsAnexo(operacaoSelecionada.documentos);
 }
 
 async function enviarCadastro(){
-  const nome  = v('f-nome')?.trim();
-  const cpf   = (v('f-cpf')||'').replace(/\D/g,'');
-  const grupo = v('f-grupo')?.trim();
-  const cota  = v('f-cota')?.trim();
-  const email = v('f-email')?.trim()||null;
-  const tel   = v('f-telefone')?.trim()||null;
-  const corretor = v('f-corretor')?.trim()||null;
-  const desc  = v('f-descricao')?.trim()||null;
+  if (!bancoSelecionado || !operacaoSelecionada) {
+    alerta('alerta-cadastro','Selecione banco e tipo de operação.','erro'); return;
+  }
 
-  if (!nome)  return alerta('alerta-cadastro','Nome é obrigatório.','erro');
-  if (cpf.length<11) return alerta('alerta-cadastro','CPF inválido.','erro');
-  if (!grupo) return alerta('alerta-cadastro','Grupo é obrigatório.','erro');
-  if (!cota)  return alerta('alerta-cadastro','Cota é obrigatória.','erro');
+  let nome, cpf, grupo, cota, email, tel, corretor=null, descricao=null, cedente=null, cessionario=null;
+  let dadosExtras = null;
 
-  // Validar anexos obrigatórios
-  for (const cat of CATEGORIAS_ANEXO){
-    if (cat.obrigatorio && !arquivosPendentes[cat.key]){
-      return alerta('alerta-cadastro', `Anexo obrigatório: ${cat.label}.`, 'erro');
+  if (operacaoSelecionada.id === 'transferencia') {
+    const cedNome = v('f-cedente-nome')?.trim();
+    const cedCpf  = (v('f-cedente-cpf')||'').replace(/\D/g,'');
+    const cedGrupo = v('f-cedente-grupo')?.trim();
+    const cedCota  = v('f-cedente-cota')?.trim();
+    if (!cedNome || cedCpf.length<11 || !cedGrupo || !cedCota) return alerta('alerta-cadastro','Preencha todos os campos obrigatórios do Cedente.','erro');
+    cedente = { nome: cedNome, cpf: cedCpf, grupo: cedGrupo, cota: cedCota, email: v('f-cedente-email')?.trim()||null, telefone: v('f-cedente-telefone')?.trim()||null };
+
+    const cesNome = v('f-cessionario-nome')?.trim();
+    const cesCpf  = (v('f-cessionario-cpf')||'').replace(/\D/g,'');
+    const cesGrupo = v('f-cessionario-grupo')?.trim();
+    const cesCota  = v('f-cessionario-cota')?.trim();
+    if (!cesNome || cesCpf.length<11 || !cesGrupo || !cesCota) return alerta('alerta-cadastro','Preencha todos os campos obrigatórios do Cessionário.','erro');
+    cessionario = { nome: cesNome, cpf: cesCpf, grupo: cesGrupo, cota: cesCota, email: v('f-cessionario-email')?.trim()||null, telefone: v('f-cessionario-telefone')?.trim()||null, endereco: v('f-cessionario-endereco')?.trim()||null, estado_civil: v('f-cessionario-estado_civil')||null };
+
+    nome = cessionario.nome; cpf = cessionario.cpf; grupo = cessionario.grupo; cota = cessionario.cota;
+    email = cessionario.email; tel = cessionario.telefone;
+    dadosExtras = { banco: bancoSelecionado.id, tipo_operacao: operacaoSelecionada.id, cedente, cessionario };
+  }
+  else if (bancoSelecionado.id === 'bradesco') {
+    nome = v('f-nome')?.trim();
+    cpf  = (v('f-cpf')||'').replace(/\D/g,'');
+    if (!nome) return alerta('alerta-cadastro','Nome é obrigatório.','erro');
+    if (cpf.length<11) return alerta('alerta-cadastro','CPF inválido.','erro');
+    email = v('f-email')?.trim()||null;
+    tel   = v('f-telefone')?.trim()||null;
+
+    const primeiraLinha = document.querySelector('.grupo-cota-linha');
+    grupo = primeiraLinha?.querySelector('.f-grupo')?.value?.trim() || '';
+    cota  = primeiraLinha?.querySelector('.f-cota')?.value?.trim() || '';
+    if (!grupo || !cota) return alerta('alerta-cadastro','Preencha ao menos um Grupo e uma Cota.','erro');
+
+    const linhas = document.querySelectorAll('.grupo-cota-linha');
+    const gruposCotas = [];
+    linhas.forEach(l => {
+      const g = l.querySelector('.f-grupo')?.value?.trim();
+      const c = l.querySelector('.f-cota')?.value?.trim();
+      if (g && c) gruposCotas.push({ grupo: g, cota: c });
+    });
+
+    dadosExtras = {
+      banco: bancoSelecionado.id,
+      tipo_operacao: operacaoSelecionada.id,
+      consorciado: {
+        nome, cpf, data_nasc: v('f-data_nasc'), estado_civil: v('f-estado_civil'),
+        doc_id: v('f-doc_id'), tipo_doc: v('f-tipo_doc'), data_expedicao: v('f-data_expedicao'),
+        orgao_emissor: v('f-orgao_emissor'), renda: obterValorReal('f-renda'), cargo: v('f-cargo'),
+        nacionalidade: v('f-nacionalidade'), estado_naturalidade: v('f-estado_naturalidade'),
+        celular: tel, email, endereco: v('f-endereco')
+      },
+      dados_bancarios: {
+        nome: v('f-banco-nome') || nome,
+        banco: v('f-banco'), agencia: v('f-agencia'), conta: v('f-conta'), tipo_conta: v('f-tipo_conta')
+      },
+      grupos_cotas: gruposCotas,
+      veiculo: {
+        chassi: v('f-chassi'), placa: v('f-placa'), renavam: v('f-renavam'),
+        uf_lic: v('f-uf_lic'), marca: v('f-marca'), modelo: v('f-modelo'),
+        cor: v('f-cor_veiculo'), ano_fab: v('f-ano_fab'), ano_modelo: v('f-ano_modelo'),
+        valor_venda: obterValorReal('f-valor_venda')
+      },
+      vendedor: {
+        nome: v('f-vend-nome'), cpf: (v('f-vend-cpf')||'').replace(/\D/g,''),
+        endereco: v('f-vend-endereco'), banco: v('f-vend-banco'),
+        ag_conta: v('f-vend-agconta'), tipo_conta: v('f-vend-tipo_conta'),
+        email: v('f-vend-email'), telefone: v('f-vend-telefone')
+      }
+    };
+  }
+  else {
+    nome   = v('f-nome')?.trim();
+    cpf    = (v('f-cpf')||'').replace(/\D/g,'');
+    grupo  = v('f-grupo')?.trim();
+    cota   = v('f-cota')?.trim();
+    email  = v('f-email')?.trim()||null;
+    tel    = v('f-telefone')?.trim()||null;
+    corretor = v('f-corretor')?.trim()||null;
+    descricao = v('f-descricao')?.trim()||null;
+
+    if (!nome) return alerta('alerta-cadastro','Nome é obrigatório.','erro');
+    if (cpf.length<11) return alerta('alerta-cadastro','CPF inválido.','erro');
+    if (!grupo) return alerta('alerta-cadastro','Grupo é obrigatório.','erro');
+    if (!cota)  return alerta('alerta-cadastro','Cota é obrigatória.','erro');
+
+    // Validação condicional para Itaú e Porto Seguro (faturamento)
+    if ((bancoSelecionado.id === 'porto' || bancoSelecionado.id === 'itau') && operacaoSelecionada.id === 'faturamento') {
+      const condicaoBem = document.getElementById('f-condicao-bem')?.value;
+      if (!condicaoBem) return alerta('alerta-cadastro', 'Informe se o bem é novo ou usado.', 'erro');
+
+      if (condicaoBem === 'usado') {
+        // CRLV obrigatório para bem usado
+        const crlvKey = bancoSelecionado.id === 'itau' ? 'crlv' : 'Doc.CRLV';
+        if (!arquivosPendentes[crlvKey]) {
+          return alerta('alerta-cadastro', 'Para bem usado, o CRLV do bem é obrigatório.', 'erro');
+        }
+      } else if (condicaoBem === 'novo') {
+        const modelo = document.getElementById('f-modelo')?.value?.trim();
+        const versao = document.getElementById('f-versao')?.value?.trim();
+        const corVei = document.getElementById('f-cor-veiculo')?.value?.trim();
+        const anoModFab = document.getElementById('f-ano-modfab')?.value?.trim();
+        if (!modelo || !versao || !corVei || !anoModFab) {
+          return alerta('alerta-cadastro', 'Preencha todos os campos do veículo novo.', 'erro');
+        }
+      }
     }
+
+    dadosExtras = { banco: bancoSelecionado.id, tipo_operacao: operacaoSelecionada.id };
+  }
+
+  const descricaoFinal = JSON.stringify({ ...dadosExtras, descricao: descricao || '' });
+
+  const docsObrigatorios = operacaoSelecionada.documentos.filter(d => d.obrigatorio);
+  for (const cat of docsObrigatorios){
+    if (!arquivosPendentes[cat.key]) return alerta('alerta-cadastro', `Anexo obrigatório: ${cat.label}.`, 'erro');
   }
 
   const btn = document.getElementById('btn-enviar');
   btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Enviando...';
 
   try{
-    // 1) Criar processo via RPC
     const { data: criado, error: errC } = await sb.rpc('cliente_criar_processo', {
-      p_nome:nome, p_cpf:cpf, p_email:email, p_telefone:tel,
-      p_grupo:grupo, p_cota:cota, p_corretor:corretor, p_descricao:desc
+      p_nome: nome,
+      p_cpf: cpf,
+      p_email: email,
+      p_telefone: tel,
+      p_grupo: grupo,
+      p_cota: cota,
+      p_corretor: corretor,
+      p_descricao: descricaoFinal
     });
     if (errC) throw new Error(errC.message);
     const novoToken = criado?.token;
     if (!novoToken) throw new Error('Falha ao gerar token do processo.');
 
-    // 2) Upload de anexos categorizados
-    for (const cat of CATEGORIAS_ANEXO){
+    for (const cat of operacaoSelecionada.documentos){
       const f = arquivosPendentes[cat.key];
       if (!f) continue;
       const path = `${novoToken}/${cat.key}_${Date.now()}_${f.name}`;
@@ -822,453 +1353,259 @@ async function enviarCadastro(){
 
     arquivosPendentes = {};
     window.location.href = `?token=${novoToken}`;
-
   } catch(e){
     alerta('alerta-cadastro', 'Erro ao enviar: '+e.message, 'erro');
     btn.disabled=false; btn.innerHTML='Enviar processo '+ico('arrow');
   }
 }
 
-// ════════════════════════════════════════════════════════════
-// TELA 3 — PORTAL DO PROCESSO (após token)
-// ════════════════════════════════════════════════════════════
+// ════════════════ PORTAL DO PROCESSO ════════════════
 async function carregarProcesso(token){
-  if (_pollingInterval) clearInterval(_pollingInterval);
-
-  // RPC: traz processo + arquivos + mensagens + historico
-  const { data, error } = await sb.rpc('cliente_buscar_por_token', { p_token: token });
-
-  if (error || !data || !data.processo){
-    root.innerHTML = `
-      <div class="container">
-        <div class="start-wrap" style="margin-top:60px">
-          <div class="card" style="text-align:center;padding:48px 28px">
-            <div style="width:64px;height:64px;border-radius:50%;background:var(--red-bg);color:var(--red);
-                        display:flex;align-items:center;justify-content:center;margin:0 auto 18px">
-              ${ico('alert','ico ico-xl')}
-            </div>
-            <h2 style="color:var(--mp-navy);font-size:18px;margin-bottom:8px">Processo não encontrado</h2>
-            <p style="font-size:13px;color:var(--text2)">O link pode estar expirado ou incorreto.</p>
-            <a href="?" class="btn btn-outline" style="margin-top:22px">${ico('back')} Consultar outro processo</a>
-          </div>
-        </div>
-      </div>`;
+  root.innerHTML = `<div class="container" style="max-width:720px;margin:0 auto;padding:30px 18px 80px"><div class="card"><div class="card-body" style="text-align:center"><div class="spinner spinner-dark spinner-lg" style="margin-bottom:10px"></div><p style="color:var(--text2)">Carregando processo...</p></div></div></div>`;
+  const { data, error } = await sb.rpc('cliente_obter_por_token', { p_token: token });
+  if (error || !data){
+    root.innerHTML = `<div class="container" style="max-width:500px;margin-top:60px"><div class="card"><div class="card-body">${ico('alert')} Processo não encontrado.</div></div></div>`;
     return;
   }
-
-  const proc = data.processo;
-  const arquivos  = data.arquivos  || [];
-  const mensagens = data.mensagens || [];
-  const historico = data.historico || [];
-  processoAtual = proc;
-
-  renderPortalProcesso(proc, arquivos, mensagens, historico);
-
-  // Polling silencioso a cada 30s
-  _pollingInterval = setInterval(() => verificarAtualizacoes(token), 30000);
+  processoAtual = data;
+  renderPortalProcesso();
 }
 
-async function verificarAtualizacoes(token){
-  const { data } = await sb.rpc('cliente_buscar_por_token', { p_token: token });
-  if (!data || !data.processo || !processoAtual) return;
-  const proc = data.processo;
-  const mudou = proc.atualizado_em !== processoAtual.atualizado_em
-             || proc.status !== processoAtual.status
-             || proc.protocolo !== processoAtual.protocolo;
-  if (!mudou) return;
-  processoAtual = proc;
-  atualizarCabecalho(proc);
-  atualizarStepper(proc);
-  atualizarContadoresAbas(data.arquivos||[], data.mensagens||[], data.historico||[]);
-  atualizarPainelDocumentos(data.arquivos||[]);
-  atualizarPainelMensagens(data.mensagens||[]);
-  atualizarPainelHistorico(data.historico||[]);
-  mostrarNotif('Processo atualizado pela equipe');
-}
-
-function renderPortalProcesso(proc, arquivos, mensagens, historico){
-  const idxAtual = ETAPAS.findIndex(e => e.status === proc.status);
+function renderPortalProcesso(){
+  const p = processoAtual;
+  if (!p) return;
+  const idxEtapa = ETAPAS.findIndex(e => e.status === p.status);
+  const protocolo = p.protocolo || '---';
+  const bancoObj = BANCOS.find(b => b.id === p.banco) || { nome: 'Banco', corPrimaria: '#2D3F5E' };
 
   root.innerHTML = `
     <div class="container">
-      <div id="alerta-portal" class="alerta"></div>
-
-      <!-- Bloco protocolo -->
-      <div class="protocolo-bar">
+      <div class="cliente-hero" style="background:linear-gradient(135deg, ${bancoObj.corPrimaria} 0%, ${bancoObj.corPrimariaDark||'#1E2D45'} 100%)">
         <div>
-          <div class="protocolo-label">Protocolo</div>
-          ${proc.protocolo
-            ? `<div class="protocolo-num">${esc(proc.protocolo)}</div>`
-            : `<div class="protocolo-pendente">${ico('clock')} Aguardando atribuição da equipe</div>`}
+          <h1>${esc(p.nome)}</h1>
+          <p>${esc(p.banco_to_nome || bancoObj.nome)} · ${esc(p.tipo_operacao)}</p>
         </div>
-        <div>
-          <div class="protocolo-label">Status atual</div>
-          <span class="tag ${tagClass(proc.status)}" style="font-size:11.5px">${esc(proc.status)}</span>
-        </div>
-        <div class="protocolo-actions">
-          <button class="btn btn-outline btn-xs" onclick="copiarLink()">${ico('copy')} Copiar link</button>
-          <span style="font-size:10.5px;color:var(--text3)">Aberto em ${fmtData(proc.criado_em)}</span>
+        <div class="cliente-hero-panel">
+          <strong>Protocolo</strong>
+          <span style="font-family:var(--fonte-mono);font-size:16px">${esc(protocolo)}</span>
         </div>
       </div>
 
-      <!-- Stepper -->
       <div class="stepper">
-        ${ETAPAS.map((e,i) => `
-          <div class="step ${i<idxAtual?'concluido':i===idxAtual?'atual':''}">
-            <div class="step-dot">${i<idxAtual ? ico('check') : (i+1)}</div>
-            <div class="step-label">${esc(e.status)}</div>
-          </div>`).join('')}
+        ${ETAPAS.map((etapa, i) => `
+          <div class="step ${i<idxEtapa?'concluido':''} ${i===idxEtapa?'atual':''}">
+            <div class="step-dot">${i<idxEtapa?ico('check'):i+1}</div>
+            <div class="step-label">${etapa.status}</div>
+          </div>
+        `).join('')}
       </div>
 
-      <!-- Abas -->
       <div class="tabs">
-        <button class="tab-btn ativa" onclick="trocarTab('dados')">${ico('user')} Meus Dados</button>
-        <button class="tab-btn" onclick="trocarTab('documentos')">${ico('doc')} Documentos <span class="tab-count">${arquivos.length}</span></button>
-        <button class="tab-btn" onclick="trocarTab('mensagens')">${ico('msg')} Mensagens <span class="tab-count">${mensagens.length}</span></button>
-        <button class="tab-btn" onclick="trocarTab('historico')">${ico('clock')} Histórico <span class="tab-count">${historico.length}</span></button>
+        <button class="tab-btn ativa" onclick="abrirTab('painel-docs')">${ico('doc')} Documentos <span class="tab-count" id="count-docs">0</span></button>
+        <button class="tab-btn" onclick="abrirTab('painel-msg')">${ico('msg')} Conversa</button>
+        <button class="tab-btn" onclick="abrirTab('painel-hist')">${ico('clock')} Histórico</button>
       </div>
 
-      <!-- DADOS -->
-      <div class="painel ativo" id="painel-dados">
+      <div class="painel ativo" id="painel-docs">
         <div class="card">
-          <div class="card-head"><div class="card-title">Dados cadastrais</div></div>
-          <div class="card-body">
-            <div class="grid-2">
-              <div class="campo"><label>Nome completo <span class="req">*</span></label>
-                <input type="text" id="edit-nome" value="${esc(proc.nome)}"></div>
-              <div class="campo"><label>CPF</label>
-                <input type="text" value="${fmtCPF(proc.cpf)}" disabled title="CPF não pode ser alterado"></div>
-              <div class="campo"><label>Grupo <span class="req">*</span></label>
-                <input type="text" id="edit-grupo" value="${esc(proc.grupo||'')}"></div>
-              <div class="campo"><label>Cota <span class="req">*</span></label>
-                <input type="text" id="edit-cota" value="${esc(proc.cota||'')}"></div>
-              <div class="campo"><label>E-mail</label>
-                <input type="email" id="edit-email" value="${esc(proc.email||'')}"></div>
-              <div class="campo"><label>WhatsApp</label>
-                <input type="text" id="edit-telefone" value="${esc(proc.telefone||'')}" oninput="mascaraTel(this)"></div>
-              <div class="campo"><label>Corretor (opcional)</label>
-                <input type="text" id="edit-corretor" value="${esc(proc.corretor||'')}"></div>
-            </div>
-            <div class="campo"><label>Observações</label>
-              <textarea id="edit-desc">${esc(proc.descricao||'')}</textarea></div>
-            <button class="btn btn-primary" id="btn-salvar-dados" onclick="salvarDados()">
-              ${ico('save')} Salvar alterações
-            </button>
-          </div>
+          <div class="card-head"><div class="card-title">${ico('upload')} Arquivos enviados</div></div>
+          <div class="card-body" id="lista-arquivos"><div class="empty"><div class="empty-icon">${ico('doc')}</div><div class="empty-msg">Nenhum documento</div></div></div>
         </div>
       </div>
 
-      <!-- DOCUMENTOS -->
-      <div class="painel" id="painel-documentos">
+      <div class="painel" id="painel-msg">
         <div class="card">
-          <div class="card-head"><div class="card-title">Documentos enviados</div></div>
-          <div class="card-body">
-            <div id="lista-arquivos">${renderListaArquivos(arquivos)}</div>
-            <div style="margin-top:24px;padding-top:18px;border-top:1px solid var(--border)">
-              <p style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px">
-                Adicionar mais documentos
-              </p>
-              <div class="doc-slot" id="upload-extra" style="cursor:pointer" onclick="document.getElementById('input-extra').click()">
-                <input type="file" id="input-extra" accept=".pdf,.jpg,.jpeg,.png" multiple
-                  onchange="uploadMaisArquivos(this)" style="display:none">
-                <div class="doc-slot-head" style="margin-bottom:0;justify-content:center">
-                  <div class="doc-slot-icon">${ico('upload','ico ico-lg')}</div>
-                  <div>
-                    <div style="font-size:13px;font-weight:600">Clique ou arraste arquivos aqui</div>
-                    <div style="font-size:11px;color:var(--text3);margin-top:2px">PDF, JPG ou PNG — até 16MB cada</div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- MENSAGENS -->
-      <div class="painel" id="painel-mensagens">
-        <div class="card">
-          <div class="card-head"><div class="card-title">Comunicação com a equipe</div></div>
-          <div class="card-body">
-            <div class="timeline" id="timeline-msgs">${renderListaMensagens(mensagens)}</div>
+          <div class="card-body" style="padding:16px">
+            <div class="timeline" id="chat-messages"><div class="empty">Carregando...</div></div>
             <div class="msg-input-wrap">
-              <textarea id="campo-msg" placeholder="Digite sua mensagem para a equipe..."></textarea>
-              <button class="btn btn-primary" onclick="enviarMensagem()">${ico('send')}</button>
+              <textarea id="nova-msg" placeholder="Digite sua mensagem..." rows="1"></textarea>
+              <button class="btn btn-teal btn-sm" onclick="enviarMensagem()">${ico('send')}</button>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- HISTORICO -->
-      <div class="painel" id="painel-historico">
+      <div class="painel" id="painel-hist">
         <div class="card">
-          <div class="card-head"><div class="card-title">Histórico do processo</div></div>
-          <div class="card-body">${renderListaHistorico(historico)}</div>
+          <div class="card-body" id="historico"><div class="empty">Carregando...</div></div>
         </div>
+      </div>
+
+      <!-- Rodapé informativo -->
+      <div class="footer-info">
+        <h3>Termos e Responsabilidades</h3>
+        <p><strong>Prezado Consorciado,</strong> nossa assessoria no processo de faturamento é uma cortesia da Master Prime para facilitar o seu processo de utilização da carta de crédito na aquisição do bem selecionado.</p>
+        <br>
+        <p><strong>Responsabilidades Master Prime:</strong></p>
+        <ul>
+          <li>Fornecer o checklist de documentos necessários.</li>
+          <li>Abrir o processo junto a administradora e monitorar as etapas posicionando o consorciado quanto à sua evolução.</li>
+          <li>Guiar o consorciado durante o processo esclarecendo as possíveis dúvidas e intermediar a comunicação entre a administradora e consorciado.</li>
+        </ul>
+        <p><strong>Responsabilidades do Consorciado:</strong></p>
+        <ul>
+          <li>Enviar a documentação informada completa e legível.</li>
+          <li>Fornecer as informações solicitadas pela nossa equipe para evolução do processo.</li>
+          <li>Efetivar prontamente as ações apontadas pelo nosso time, tais como, realização de biometrias, assinaturas, entre outras para manter o bom andamento do processo.</li>
+        </ul>
+        <p><strong>Responsabilidades da Administradora:</strong></p>
+        <ul>
+          <li>Cumprimento dos prazos em cada etapa do processo.</li>
+          <li>Análise da documentação do veículo ou imóvel e do perfil financeiro do consorciado para garantir a viabilidade da concessão do crédito com segurança para todas as partes.</li>
+          <li>Efetivar o pagamento diretamente ao vendedor, finalizando o processo.</li>
+        </ul>
+        <p><strong>Horário de Atendimento:</strong> Segunda a sexta-feira, das 09:00 às 18:00</p>
+        <br>
+        <p><em>Para dar início, precisamos dos seguintes dados e documentos: CRLV do bem (se usado) e valor da venda. Se o bem for zero, informar marca, ano, modelo, versão e ano mod/fab.</em></p>
+        <div class="lgpd">Em conformidade com a Lei Geral de Proteção de Dados (LGPD), todos os dados fornecidos são utilizados exclusivamente para a finalidade do processo e protegidos conforme a legislação vigente.</div>
       </div>
     </div>`;
 
-  setTimeout(() => {
-    const tl = document.getElementById('timeline-msgs');
-    if (tl) tl.scrollTop = tl.scrollHeight;
-  }, 100);
-
-  configDropExtra();
+  carregarDocumentos();
+  carregarMensagens();
+  carregarHistorico();
+  iniciarPolling();
 }
 
-function configDropExtra(){
-  const el = document.getElementById('upload-extra');
-  if (!el) return;
-  el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('dragover'); });
-  el.addEventListener('dragleave', () => el.classList.remove('dragover'));
-  el.addEventListener('drop', e => {
-    e.preventDefault(); el.classList.remove('dragover');
-    const inp = document.getElementById('input-extra');
-    inp.files = e.dataTransfer.files;
-    uploadMaisArquivos(inp);
-  });
+async function carregarDocumentos(){
+  const { data } = await sb.rpc('cliente_listar_arquivos', { p_token: processoAtual.token });
+  const container = document.getElementById('lista-arquivos');
+  if (!container) return;
+  if (!data?.length){
+    container.innerHTML = '<div class="empty"><div class="empty-icon">'+ico('doc')+'</div><div class="empty-msg">Nenhum documento</div></div>';
+    atualizarCountDocs(0);
+    return;
+  }
+  container.innerHTML = data.map(arq => `
+    <div class="arquivo-item">
+      <div class="file-ico">${ico('doc')}</div>
+      <div class="file-info">
+        <div class="file-name">${esc(arq.nome_original)}</div>
+        <div class="file-meta">${arq.categoria} · ${fmtData(arq.criado_em)}</div>
+      </div>
+    </div>
+  `).join('');
+  atualizarCountDocs(data.length);
 }
 
-function renderListaArquivos(arquivos){
-  if (!arquivos.length) return `
-    <div class="empty">
-      <div class="empty-icon">${ico('doc','ico ico-lg')}</div>
-      <div class="empty-msg">Nenhum documento enviado ainda.</div>
-    </div>`;
-  // Agrupar por categoria
-  const cats = {};
-  arquivos.forEach(a => { const k = a.categoria || 'outros'; (cats[k] = cats[k] || []).push(a); });
-  const ordem = ['documento_foto','comp_residencia','outros'];
-  const todasKeys = ordem.concat(Object.keys(cats).filter(k => !ordem.includes(k)));
-  return todasKeys.filter(k => cats[k]).map(k => {
-    const cat = CATEGORIAS_ANEXO.find(c => c.key === k);
-    const titulo = cat ? cat.label : 'Outros documentos';
-    return `
-      <div style="margin-bottom:18px">
-        <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">
-          ${esc(titulo)}
-        </div>
-        ${cats[k].map(a => `
-          <div class="arquivo-item">
-            <div class="file-ico">${ico(iconeKey(a.nome_original))}</div>
-            <div class="file-info">
-              <div class="file-name">${esc(a.nome_original)}</div>
-              <div class="file-meta">${fmtData(a.criado_em)}</div>
-            </div>
-            <a href="${sb.storage.from('arquivos').getPublicUrl(a.storage_path).data.publicUrl}"
-              target="_blank" class="btn btn-outline btn-xs">${ico('open')} Abrir</a>
-          </div>`).join('')}
-      </div>`;
-  }).join('');
-}
-
-function renderListaMensagens(mensagens){
-  if (!mensagens.length) return `
-    <div class="empty">
-      <div class="empty-icon">${ico('msg','ico ico-lg')}</div>
-      <div class="empty-msg">Nenhuma mensagem ainda.<br>Use o campo abaixo para falar com a equipe.</div>
-    </div>`;
-  return mensagens.map(m => `
-    <div class="msg-item ${m.autor==='admin'?'admin':'cliente'}">
-      <div class="msg-avatar">${m.autor==='admin' ? 'M' : 'V'}</div>
+async function carregarMensagens(){
+  const { data } = await sb.rpc('cliente_listar_mensagens', { p_token: processoAtual.token });
+  const timeline = document.getElementById('chat-messages');
+  if (!timeline) return;
+  if (!data?.length){
+    timeline.innerHTML = '<div class="empty">Nenhuma mensagem ainda.</div>';
+    return;
+  }
+  timeline.innerHTML = data.map(m => `
+    <div class="msg-item ${m.remetente==='cliente'?'cliente':'admin'}">
+      <div class="msg-avatar">${m.remetente==='cliente'? 'C' : 'A'}</div>
       <div>
         <div class="msg-balao">${esc(m.texto)}</div>
-        <div class="msg-hora" style="${m.autor==='admin'?'':'text-align:right'}">
-          ${m.autor==='admin' ? 'Equipe Master Prime' : 'Você'} · ${fmtDataHora(m.criado_em)}
-        </div>
+        <div class="msg-hora">${fmtData(m.criado_em)}</div>
       </div>
-    </div>`).join('');
+    </div>
+  `).join('');
+  timeline.scrollTop = timeline.scrollHeight;
 }
 
-function renderListaHistorico(historico){
-  if (!historico.length) return `<div class="empty"><div class="empty-msg">Nenhum registro ainda.</div></div>`;
-  return historico.map(h => `
+async function carregarHistorico(){
+  const { data } = await sb.rpc('cliente_listar_historico_status', { p_token: processoAtual.token });
+  const hist = document.getElementById('historico');
+  if (!hist) return;
+  if (!data?.length){
+    hist.innerHTML = '<div class="empty">Sem histórico.</div>';
+    return;
+  }
+  hist.innerHTML = data.map(h => `
     <div class="hist-item">
       <div class="hist-dot">${ico('clock')}</div>
       <div class="hist-content">
-        <div class="hist-status"><span class="tag ${tagClass(h.status_novo)}">${esc(h.status_novo||'-')}</span></div>
-        ${h.observacao ? `<div class="hist-obs">${esc(h.observacao)}</div>` : ''}
-        <div class="hist-hora">${fmtDataHora(h.criado_em)}</div>
+        <div class="hist-status"><span class="tag ${tagClass(h.status)}">${esc(h.status)}</span></div>
+        ${h.observacao?`<div class="hist-obs">${esc(h.observacao)}</div>`:''}
+        <div class="hist-hora">${fmtData(h.criado_em)}</div>
       </div>
-    </div>`).join('');
-}
-
-function atualizarCabecalho(proc){
-  const el = document.querySelector('.protocolo-bar');
-  if (!el) return;
-  el.innerHTML = `
-    <div>
-      <div class="protocolo-label">Protocolo</div>
-      ${proc.protocolo
-        ? `<div class="protocolo-num">${esc(proc.protocolo)}</div>`
-        : `<div class="protocolo-pendente">${ico('clock')} Aguardando atribuição da equipe</div>`}
     </div>
-    <div>
-      <div class="protocolo-label">Status atual</div>
-      <span class="tag ${tagClass(proc.status)}" style="font-size:11.5px">${esc(proc.status)}</span>
-    </div>
-    <div class="protocolo-actions">
-      <button class="btn btn-outline btn-xs" onclick="copiarLink()">${ico('copy')} Copiar link</button>
-      <span style="font-size:10.5px;color:var(--text3)">Aberto em ${fmtData(proc.criado_em)}</span>
-    </div>`;
-}
-function atualizarStepper(proc){
-  const stepper = document.querySelector('.stepper');
-  if (!stepper) return;
-  const idxAtual = ETAPAS.findIndex(e => e.status === proc.status);
-  stepper.innerHTML = ETAPAS.map((e,i) => `
-    <div class="step ${i<idxAtual?'concluido':i===idxAtual?'atual':''}">
-      <div class="step-dot">${i<idxAtual ? ico('check') : (i+1)}</div>
-      <div class="step-label">${esc(e.status)}</div>
-    </div>`).join('');
-}
-function atualizarContadoresAbas(arq, msg, hist){
-  const tabs = document.querySelectorAll('.tab-btn .tab-count');
-  if (tabs[0]) tabs[0].textContent = arq.length;
-  if (tabs[1]) tabs[1].textContent = msg.length;
-  if (tabs[2]) tabs[2].textContent = hist.length;
-}
-function atualizarPainelDocumentos(arq){
-  const lista = document.getElementById('lista-arquivos');
-  if (lista) lista.innerHTML = renderListaArquivos(arq);
-}
-function atualizarPainelMensagens(msg){
-  const tl = document.getElementById('timeline-msgs');
-  if (!tl) return;
-  const noFim = tl.scrollTop + tl.clientHeight >= tl.scrollHeight - 10;
-  tl.innerHTML = renderListaMensagens(msg);
-  if (noFim) tl.scrollTop = tl.scrollHeight;
-}
-function atualizarPainelHistorico(hist){
-  const cb = document.querySelector('#painel-historico .card-body');
-  if (cb) cb.innerHTML = renderListaHistorico(hist);
+  `).join('');
 }
 
-// ─── Salvar dados ───
-async function salvarDados(){
-  const nome  = v('edit-nome')?.trim();
-  const grupo = v('edit-grupo')?.trim();
-  const cota  = v('edit-cota')?.trim();
-  if (!nome)  return alerta('alerta-portal','Nome é obrigatório.','erro');
-  if (!grupo) return alerta('alerta-portal','Grupo é obrigatório.','erro');
-  if (!cota)  return alerta('alerta-portal','Cota é obrigatória.','erro');
-
-  const btn = document.getElementById('btn-salvar-dados');
-  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Salvando...';
-
-  const { error } = await sb.rpc('cliente_atualizar_processo', {
-    p_token: TOKEN,
-    p_nome:nome, p_email:v('edit-email')||null, p_telefone:v('edit-telefone')||null,
-    p_grupo:grupo, p_cota:cota, p_corretor:v('edit-corretor')||null, p_descricao:v('edit-desc')||null
-  });
-  btn.disabled=false; btn.innerHTML=ico('save')+' Salvar alterações';
-  if (error) alerta('alerta-portal','Erro ao salvar: '+error.message,'erro');
-  else { alerta('alerta-portal','Dados salvos com sucesso!','sucesso'); processoAtual.nome=nome; }
-}
-
-// ─── Upload extras ───
-async function uploadMaisArquivos(input){
-  const files = Array.from(input.files||[]);
-  if (!files.length) return;
-  for (const f of files){
-    if (f.size > 16*1024*1024){ alerta('alerta-portal',`"${f.name}" passa de 16MB.`,'aviso'); continue; }
-    const path = `${TOKEN}/extra_${Date.now()}_${f.name}`;
-    const { error: errUp } = await sb.storage.from('arquivos').upload(path, f);
-    if (errUp){ alerta('alerta-portal','Erro no upload: '+errUp.message,'erro'); continue; }
-    await sb.rpc('cliente_registrar_arquivo', {
-      p_token:TOKEN, p_nome_original:f.name, p_storage_path:path, p_categoria:'outros'
-    });
-  }
-  input.value='';
-  alerta('alerta-portal','Arquivos enviados!','sucesso');
-  await carregarProcesso(TOKEN);
-  trocarTab('documentos');
-}
-
-// ─── Mensagem ───
 async function enviarMensagem(){
-  const c = document.getElementById('campo-msg');
-  const t = (c?.value||'').trim();
-  if (!t) return;
-  const { error } = await sb.rpc('cliente_enviar_mensagem', { p_token:TOKEN, p_texto:t });
-  if (error){ alerta('alerta-portal','Erro ao enviar mensagem.','erro'); return; }
-  c.value='';
-  await carregarProcesso(TOKEN);
-  trocarTab('mensagens');
+  const txt = document.getElementById('nova-msg')?.value.trim();
+  if (!txt || !processoAtual) return;
+  await sb.rpc('cliente_enviar_mensagem', {
+    p_token: processoAtual.token,
+    p_texto: txt,
+    p_remetente: 'cliente'
+  });
+  document.getElementById('nova-msg').value = '';
+  carregarMensagens();
 }
 
-function copiarLink(){
-  navigator.clipboard.writeText(window.location.href)
-    .then(() => alerta('alerta-portal','Link copiado! Guarde para consultar.','sucesso'));
+function iniciarPolling(){
+  if (_pollingInterval) clearInterval(_pollingInterval);
+  _pollingInterval = setInterval(() => {
+    if (!processoAtual) return;
+    sb.rpc('cliente_obter_por_token', { p_token: processoAtual.token }).then(({ data }) => {
+      if (data && data.status !== processoAtual.status){
+        processoAtual.status = data.status;
+        renderPortalProcesso();
+      }
+    });
+    carregarMensagens();
+    carregarHistorico();
+  }, 30000);
 }
 
-// ════════════════════════════════════════════════════════════
-// HELPERS
-// ════════════════════════════════════════════════════════════
-function trocarTab(tab){
-  const nomes = ['dados','documentos','mensagens','historico'];
-  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('ativa', nomes[i]===tab));
+function abrirTab(id){
   document.querySelectorAll('.painel').forEach(p => p.classList.remove('ativo'));
-  document.getElementById(`painel-${tab}`)?.classList.add('ativo');
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('ativa'));
+  const painel = document.getElementById(id);
+  if (painel) painel.classList.add('ativo');
+  const btn = [...document.querySelectorAll('.tab-btn')].find(b => b.onclick.toString().includes(id));
+  if (btn) btn.classList.add('ativa');
 }
 
+function atualizarCountDocs(n){
+  const el = document.getElementById('count-docs');
+  if (el) el.textContent = n;
+}
+
+// ════════════════ UTILITÁRIOS ════════════════
+function esc(s){ return (s||'').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function v(id){ return document.getElementById(id)?.value; }
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function fmtCPF(c){ return String(c||'').replace(/\D/g,'').replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'); }
-function fmtData(d){ return d ? new Date(d).toLocaleDateString('pt-BR') : '-'; }
-function fmtDataHora(d){ return d ? new Date(d).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '-'; }
-
-function mascaraCPF(i){
-  let v = i.value.replace(/\D/g,'').slice(0,11);
-  v = v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})\.(\d{3})(\d)/,'$1.$2.$3').replace(/\.(\d{3})(\d)/,'.$1-$2');
-  i.value = v;
+function fmtData(d){
+  if (!d) return '';
+  const dt = new Date(d);
+  return dt.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
 }
-function mascaraTel(i){
-  let v = i.value.replace(/\D/g,'').slice(0,11);
-  v = v.replace(/(\d{2})(\d)/,'($1) $2').replace(/(\d{4,5})(\d{4})$/,'$1-$2');
-  i.value = v;
-}
-
 function tagClass(s){
-  return ({
-    'Recebido':'tag-blue',
-    'Em análise':'tag-amber',
-    'Enviado para administradora':'tag-purple',
-    'Em retorno da administradora':'tag-teal',
-    'Finalizado':'tag-green',
-    'Cancelado':'tag-red',
-  })[s] || 'tag-gray';
+  const map = {
+    'Recebido':'tag-blue','Em análise':'tag-amber','Enviado para administradora':'tag-teal',
+    'Em retorno da administradora':'tag-purple','Finalizado':'tag-green','Cancelado':'tag-red'
+  };
+  return map[s] || '';
 }
-
-function iconeKey(nome){
-  const ext = String(nome||'').split('.').pop().toLowerCase();
-  if (ext==='pdf') return 'doc';
-  if (['jpg','jpeg','png'].includes(ext)) return 'doc';
-  return 'doc';
+function mascaraCPF(el){
+  let v = el.value.replace(/\D/g,'');
+  v = v.substring(0,14);
+  v = v.replace(/^(\d{3})(\d)/, '$1.$2');
+  v = v.replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3');
+  v = v.replace(/\.(\d{3})(\d)/, '.$1-$2');
+  el.value = v;
 }
-
+function mascaraTel(el){
+  let v = el.value.replace(/\D/g,'');
+  v = v.substring(0,11);
+  if (v.length>2) v = `(${v.substring(0,2)}) ${v.substring(2)}`;
+  if (v.length>10) v = v.substring(0,10)+'-'+v.substring(10);
+  el.value = v;
+}
 function alerta(id, msg, tipo){
   const el = document.getElementById(id);
   if (!el) return;
-  el.innerHTML = `${ico(tipo==='erro'?'alert':tipo==='sucesso'?'check':'alert')} <span>${esc(msg)}</span>`;
   el.className = `alerta alerta-${tipo} visivel`;
-  setTimeout(() => el.classList.remove('visivel'), 6000);
+  el.innerHTML = `${SVG[tipo==='erro'?'alert':'check']} ${msg}`;
+  setTimeout(() => el.classList.remove('visivel'), 4000);
 }
-
-function mostrarNotif(texto){
-  document.getElementById('notif-atualizacao')?.remove();
-  const n = document.createElement('div');
-  n.id='notif-atualizacao'; n.className='notif';
-  n.innerHTML = ico('refresh') + ' ' + esc(texto);
-  document.body.appendChild(n);
-  setTimeout(() => n?.remove(), 4000);
-}
-
-document.addEventListener('keydown', e => {
-  const c = document.getElementById('campo-msg');
-  if (e.key==='Enter' && !e.shiftKey && document.activeElement===c){
-    e.preventDefault(); enviarMensagem();
-  }
-});
 </script>
 </body>
 </html>
