@@ -91,6 +91,38 @@
   /* Helpers */
   .hidden { display: none !important; }
   .test-banner { background: var(--soft-blue); border: 1px solid #CBD5E1; color: var(--navy); padding: 10px 16px; border-radius: 8px; font-size: 12px; margin-bottom: 16px; text-align: center; }
+
+  /* Botão olho (analítico) */
+  .btn-eye { background: transparent; border: none; padding: 2px; cursor: pointer; color: var(--navy); display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; transition: background .15s; }
+  .btn-eye:hover { background: rgba(45,63,94,.10); }
+
+  /* Modal Analítico */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,.55); z-index: 1000; align-items: center; justify-content: center; padding: 20px; animation: fadeIn .15s ease; }
+  .modal-overlay.aberto { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal-box { background: #fff; border-radius: 14px; width: 100%; max-width: 880px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 25px 60px rgba(0,0,0,.30); animation: slideUp .2s ease; overflow: hidden; }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal-head { padding: 20px 26px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+  .modal-title { font-size: 17px; font-weight: 700; color: var(--navy); letter-spacing: -.2px; }
+  .modal-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .btn-close { background: transparent; border: 1px solid var(--border); width: 30px; height: 30px; border-radius: 8px; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; justify-content: center; }
+  .btn-close:hover { background: var(--bg); border-color: var(--text-muted); }
+  .modal-body { flex: 1; overflow-y: auto; padding: 16px 26px; }
+  .modal-foot { padding: 14px 26px; border-top: 1px solid var(--border); display: flex; justify-content: center; }
+
+  /* Tabela analítica */
+  .tab-analitico { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+  .tab-analitico thead th { background: var(--navy); color: #fff; padding: 12px 14px; font-weight: 600; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .6px; }
+  .tab-analitico thead th:first-child { border-top-left-radius: 10px; }
+  .tab-analitico thead th:last-child { border-top-right-radius: 10px; text-align: right; }
+  .tab-analitico thead th:not(:first-child):not(:last-child) { text-align: right; }
+  .tab-analitico tbody td { padding: 11px 14px; border-bottom: 1px solid var(--border); }
+  .tab-analitico tbody td:first-child { font-weight: 600; color: var(--navy); }
+  .tab-analitico tbody td:not(:first-child) { text-align: right; font-family: 'DM Mono', ui-monospace, monospace; }
+  .tab-analitico tbody tr:hover { background: var(--bg); }
+  .tab-analitico tfoot td { background: var(--navy); color: #fff; padding: 12px 14px; font-weight: 700; font-size: 12px; }
+  .tab-analitico tfoot td:first-child { text-align: left; border-bottom-left-radius: 10px; }
+  .tab-analitico tfoot td:last-child { text-align: right; border-bottom-right-radius: 10px; font-family: 'DM Mono', ui-monospace, monospace; }
 </style>
 </head>
 <body>
@@ -277,7 +309,7 @@
       <div class="pos-row highlight"><span>Parcela</span><span class="pos-value" id="reducaoParcela_parc">R$ 0,00</span></div>
       <div class="pos-row"><span>Prazo restante</span><span class="pos-value" id="reducaoParcela_prazo">0</span></div>
       <div class="pos-row"><span>Custo efetivo mensal</span><span class="pos-value" id="reducaoParcela_cm">0,00 %</span></div>
-      <div class="pos-row"><span>Custo efetivo anual</span><span class="pos-value" id="reducaoParcela_ca">0,00 %</span></div>
+      <div class="pos-row"><span style="display:flex;align-items:center;gap:6px;">Custo efetivo anual<button type="button" class="btn-eye" onclick="abrirAnalitico('parcela')" title="Ver memória de cálculo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span><span class="pos-value" id="reducaoParcela_ca">0,00 %</span></div>
     </div>
     <div class="pos-or">OU</div>
     <div class="pos-card">
@@ -285,7 +317,45 @@
       <div class="pos-row highlight"><span>Parcela</span><span class="pos-value" id="reducaoPrazo_parc">R$ 0,00</span></div>
       <div class="pos-row"><span>Prazo restante</span><span class="pos-value" id="reducaoPrazo_prazo">0</span></div>
       <div class="pos-row"><span>Custo efetivo mensal</span><span class="pos-value" id="reducaoPrazo_cm">0,00 %</span></div>
-      <div class="pos-row"><span>Custo efetivo anual</span><span class="pos-value" id="reducaoPrazo_ca">0,00 %</span></div>
+      <div class="pos-row"><span style="display:flex;align-items:center;gap:6px;">Custo efetivo anual<button type="button" class="btn-eye" onclick="abrirAnalitico('prazo')" title="Ver memória de cálculo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span><span class="pos-value" id="reducaoPrazo_ca">0,00 %</span></div>
+    </div>
+  </div>
+
+  <!-- ════ MODAL ANALÍTICO (memória de cálculo) ════ -->
+  <div id="modalAnalitico" class="modal-overlay" onclick="if(event.target===this)fecharAnalitico()">
+    <div class="modal-box">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title">Analítico</div>
+          <div class="modal-sub" id="analiticoSub">Memória de cálculo ano a ano</div>
+        </div>
+        <button type="button" class="btn-close" onclick="fecharAnalitico()" title="Fechar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <table class="tab-analitico">
+          <thead>
+            <tr>
+              <th>Ano</th>
+              <th>Carta de crédito</th>
+              <th>Saldo devedor</th>
+              <th>Parcela</th>
+              <th>Total pago</th>
+            </tr>
+          </thead>
+          <tbody id="analiticoBody"></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4">TOTAL</td>
+              <td id="analiticoTotal">R$ 0,00</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="primary" onclick="fecharAnalitico()">Fechar</button>
+      </div>
     </div>
   </div>
 
@@ -701,6 +771,86 @@ function recalc() {
   document.getElementById('reducaoPrazo_prazo').textContent = novoPrazoReducao;
   document.getElementById('reducaoPrazo_cm').textContent = formatPct(cePrazo.mensal * 100, 2);
   document.getElementById('reducaoPrazo_ca').textContent = formatPct(cePrazo.anual * 100, 2);
+
+  // Salva estado pra modal Analítico (memória de cálculo)
+  window._simState = {
+    credito: credito,
+    parcelaInicial: parcelaAtualNoMomento,
+    valorTotalLance: valorTotalLance,
+    expectativa: expectativa,
+    parcReducaoParcela: parcReducaoParcela,
+    prazoRestParcela: prazoRestante,
+    parcReducaoPrazo: parcReducaoPrazo,
+    prazoRestPrazo: novoPrazoReducao,
+    cetParcMensal: ceParcela.mensal,
+    cetParcAnual: ceParcela.anual,
+    cetPrazoMensal: cePrazo.mensal,
+    cetPrazoAnual: cePrazo.anual,
+  };
+}
+
+// ═════════════════════════════════════════════════════
+// MODAL ANALÍTICO (memória de cálculo ano a ano)
+// ═════════════════════════════════════════════════════
+function abrirAnalitico(modo) {
+  const s = window._simState;
+  if (!s || !s.credito) { alert('Preencha primeiro a simulação.'); return; }
+
+  // Modo 'parcela' = reducao de parcela | 'prazo' = reducao de prazo
+  const parcPos = modo === 'parcela' ? s.parcReducaoParcela : s.parcReducaoPrazo;
+  const prazoRest = modo === 'parcela' ? s.prazoRestParcela : s.prazoRestPrazo;
+  const titulo = modo === 'parcela' ? 'Pós contemplação · Redução de parcela' : 'Pós contemplação · Redução de prazo';
+
+  // Constroi array de parcelas mês a mês
+  // Pré-contemplação: meses 1 até (expectativa-1) com parcela inicial
+  // Mês expectativa: contempla (paga parcela inicial nesse mês também)
+  // Pós contemplação: meses (expectativa+1) até (expectativa+prazoRest) com parcPos
+  const parcelas = [];
+  for (let m = 1; m <= s.expectativa; m++) parcelas.push(s.parcelaInicial);
+  for (let m = 1; m <= prazoRest; m++) parcelas.push(parcPos);
+
+  const totalGeral = parcelas.reduce((a, b) => a + b, 0);
+
+  // Agrupa por ano (12 meses) e calcula saldo devedor decrescente
+  const anos = [];
+  let pagoAcumulado = 0;
+  let pago1mesAno = parcelas[0] || 0;
+  for (let i = 0; i < parcelas.length; i += 12) {
+    const slice = parcelas.slice(i, i + 12);
+    const totalAno = slice.reduce((a, b) => a + b, 0);
+    const parcelaMensal = slice[slice.length - 1] || parcPos; // parcela do final do ano (representa o ano)
+    // Saldo devedor no INÍCIO do ano = total restante - parcela do mês 1 do primeiro ano (Conkey)
+    const saldoInicioAno = i === 0
+      ? totalGeral - pago1mesAno
+      : totalGeral - pagoAcumulado;
+    anos.push({
+      ano: anos.length + 1,
+      cartaCredito: s.credito,
+      saldoDevedor: saldoInicioAno,
+      parcela: parcelaMensal,
+      totalPago: totalAno,
+    });
+    pagoAcumulado += totalAno;
+  }
+
+  // Renderiza
+  const fmt = (v) => 'R$ ' + Number(v||0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const tbody = document.getElementById('analiticoBody');
+  tbody.innerHTML = anos.map(a => `
+    <tr>
+      <td>${a.ano}</td>
+      <td>${fmt(a.cartaCredito)}</td>
+      <td>${fmt(a.saldoDevedor)}</td>
+      <td>${fmt(a.parcela)}</td>
+      <td>${fmt(a.totalPago)}</td>
+    </tr>
+  `).join('');
+  document.getElementById('analiticoTotal').textContent = fmt(totalGeral);
+  document.getElementById('analiticoSub').textContent = titulo + ' · memória de cálculo ano a ano';
+  document.getElementById('modalAnalitico').classList.add('aberto');
+}
+function fecharAnalitico() {
+  document.getElementById('modalAnalitico').classList.remove('aberto');
 }
 
 // ═════════════════════════════════════════════════════
