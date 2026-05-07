@@ -38,14 +38,15 @@
     'O usuário declara estar ciente de que o contrato de adesão, o regulamento do consórcio e os demais documentos aplicáveis constituem os instrumentos que regem a relação contratual, recomendando-se sua leitura integral, sendo o aceite manifestação inequívoca de ciência e concordância com todos os seus termos.'
   ];
 
-  // ─── Logo SVG inline (branco/dourado, fica no header navy) ───
+  // ─── Logo SVG inline 100% branco (header navy) ───
+  // Reproduz o logo Master Prime: círculo segmentado em 4 quadrantes (todos brancos
+  // com pequenas variações de opacidade para preservar o efeito visual) + letra M.
   const LOGO_SVG = `
     <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
-      <circle cx="30" cy="30" r="26" fill="none" stroke="#ffffff" stroke-width="3" stroke-opacity="0.55"/>
-      <path d="M 30 4 A 26 26 0 0 1 56 30" fill="none" stroke="#F4C24A" stroke-width="3.5" stroke-linecap="round"/>
-      <path d="M 56 30 A 26 26 0 0 1 30 56" fill="none" stroke="#A8B8E8" stroke-width="3.5" stroke-linecap="round"/>
-      <path d="M 30 56 A 26 26 0 0 1 4 30" fill="none" stroke="#7B96D4" stroke-width="3.5" stroke-linecap="round"/>
-      <path d="M 4 30 A 26 26 0 0 1 30 4" fill="none" stroke="#4DBCC8" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 30 4 A 26 26 0 0 1 56 30" fill="none" stroke="#ffffff" stroke-opacity="1.0" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 56 30 A 26 26 0 0 1 30 56" fill="none" stroke="#ffffff" stroke-opacity="0.85" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 30 56 A 26 26 0 0 1 4 30" fill="none" stroke="#ffffff" stroke-opacity="0.7" stroke-width="3.5" stroke-linecap="round"/>
+      <path d="M 4 30 A 26 26 0 0 1 30 4" fill="none" stroke="#ffffff" stroke-opacity="0.85" stroke-width="3.5" stroke-linecap="round"/>
       <text x="30" y="40" font-family="Georgia, serif" font-size="28" font-weight="700" text-anchor="middle" fill="#ffffff">M</text>
     </svg>`;
 
