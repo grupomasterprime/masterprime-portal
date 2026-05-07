@@ -92,37 +92,6 @@
   .hidden { display: none !important; }
   .test-banner { background: var(--soft-blue); border: 1px solid #CBD5E1; color: var(--navy); padding: 10px 16px; border-radius: 8px; font-size: 12px; margin-bottom: 16px; text-align: center; }
 
-  /* ═══ CSS PRINT — usado pro Baixar PDF via window.print() ═══ */
-  @media print {
-    @page { size: A4 portrait; margin: 0; }
-    html, body {
-      margin: 0 !important; padding: 0 !important; background: #fff !important;
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-      color-adjust: exact !important;
-    }
-    /* Esconde TUDO da página */
-    body > *:not(#pdfReport) { display: none !important; }
-    /* Mostra apenas o template do PDF */
-    #pdfReport {
-      display: block !important;
-      position: relative !important;
-      width: 210mm !important;          /* largura A4 */
-      max-width: none !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      box-shadow: none !important;
-      border-radius: 0 !important;
-      overflow: visible !important;
-      font-size: 10px !important;       /* escala texto pra A4 */
-    }
-    #pdfReport * {
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-    }
-    /* Reduz proporções internas (1300px → 210mm = ~0.6×) */
-    #pdfReport { zoom: 0.6 !important; }
-  }
 
   /* Botão olho (analítico) */
   .btn-eye { background: transparent; border: none; padding: 2px; cursor: pointer; color: var(--navy); display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; transition: background .15s; }
@@ -411,130 +380,10 @@
   </div>
 </main>
 
-<!-- ═══════════════════════════════════════════════════════════════
-     TEMPLATE PDF — Master Prime, 1300px de largura (Conkey-style).
-     Renderizado em alta resolução e escalado pra A4 (210mm) na geração.
-     Layout adaptativo: campos zerados/inativos não aparecem.
-     Suporta modo demo via ?preview=1 (mostra inline ao invés de baixar).
-     ═══════════════════════════════════════════════════════════════ -->
-<div id="pdfReport" style="display:none; width:1300px; background:#fff; font-family:'Inter',-apple-system,system-ui,sans-serif; color:#1F2937; font-size:18px; line-height:1.5;">
-  <!-- HEADER (logo SVG inline, em branco — html2canvas não respeita filter:invert) -->
-  <div style="background:#2D3F5E; color:#fff; padding:28px 50px; display:flex; justify-content:space-between; align-items:center;">
-    <div style="display:flex; align-items:center; gap:18px;">
-      <!-- Símbolo: círculo M -->
-      <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
-        <!-- círculo segmentado em 4 quadrantes (cores Master Prime) -->
-        <circle cx="30" cy="30" r="26" fill="none" stroke="#ffffff" stroke-width="3" stroke-opacity="0.55"/>
-        <path d="M 30 4 A 26 26 0 0 1 56 30" fill="none" stroke="#F4C24A" stroke-width="3.5" stroke-linecap="round"/>
-        <path d="M 56 30 A 26 26 0 0 1 30 56" fill="none" stroke="#A8B8E8" stroke-width="3.5" stroke-linecap="round"/>
-        <path d="M 30 56 A 26 26 0 0 1 4 30" fill="none" stroke="#7B96D4" stroke-width="3.5" stroke-linecap="round"/>
-        <path d="M 4 30 A 26 26 0 0 1 30 4" fill="none" stroke="#4DBCC8" stroke-width="3.5" stroke-linecap="round"/>
-        <!-- letra M -->
-        <text x="30" y="40" font-family="Georgia, serif" font-size="28" font-weight="700" text-anchor="middle" fill="#ffffff">M</text>
-      </svg>
-      <!-- Wordmark -->
-      <div>
-        <div style="font-size:26px; font-weight:700; letter-spacing:0.3px; color:#ffffff; line-height:1.1;">Master Prime</div>
-        <div style="font-size:11px; letter-spacing:1px; color:rgba(255,255,255,0.78); margin-top:4px;">Corretora de Consórcios e Seguros</div>
-      </div>
-    </div>
-    <div style="font-size:18px; font-weight:600;">Estratégia Simulada: Operação Simples</div>
-  </div>
-
-  <div style="padding:42px 50px;">
-    <!-- ═════════ DADOS DA COTA ═════════ -->
-    <div style="font-size:14px; font-weight:700; letter-spacing:2.5px; color:#2D3F5E; margin-bottom:16px;">DADOS DA COTA</div>
-    <div style="background:#F4F5F7; border-radius:12px; padding:24px 30px;">
-      <!-- Linha 1: sempre presente -->
-      <div id="pdf_cota_l1" style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto; gap:32px; align-items:center;">
-        <div><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Crédito</div><div id="pdf_credito" style="font-size:18px; font-weight:600;">—</div></div>
-        <div><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Prazo</div><div id="pdf_prazo" style="font-size:18px; font-weight:600;">—</div></div>
-        <div><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Taxa de administração</div><div id="pdf_taxaAdm" style="font-size:18px; font-weight:600;">—</div></div>
-        <div><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Fundo de reserva</div><div id="pdf_fundo" style="font-size:18px; font-weight:600;">—</div></div>
-        <div id="pdf_parcelaInicialBox" style="text-align:right;"></div>
-      </div>
-      <!-- Linha 2: dinâmica (Tipo reajuste sempre + Reajuste %, Redutor, Seguro, Adesão se ativos) -->
-      <div id="pdf_cota_extras" style="display:grid; grid-template-columns:repeat(4,1fr); gap:32px; margin-top:18px;"></div>
-    </div>
-
-    <!-- ═════════ DETALHES DA CONTEMPLAÇÃO ═════════ -->
-    <div style="font-size:14px; font-weight:700; letter-spacing:2.5px; color:#2D3F5E; margin:28px 0 16px;">DETALHES DA CONTEMPLAÇÃO</div>
-    <div style="background:#F4F5F7; border-radius:12px; padding:24px 30px;">
-      <!-- Linha 1 -->
-      <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr auto; gap:32px; align-items:center;">
-        <div><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Modalidade</div><div id="pdf_modalidade" style="font-size:18px; font-weight:600;">—</div></div>
-        <div><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Expectativa</div><div id="pdf_expectativa" style="font-size:18px; font-weight:600;">—</div></div>
-        <div><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Crédito atualizado</div><div id="pdf_creditoAtualizado" style="font-size:18px; font-weight:600;">—</div></div>
-        <div><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Base de cálculo</div><div id="pdf_baseCalculo" style="font-size:18px; font-weight:600;">—</div></div>
-        <div style="text-align:right;"><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Crédito disponível</div><div id="pdf_creditoDisp" style="background:#2D3F5E; color:#fff; font-weight:700; font-size:18px; padding:10px 18px; border-radius:7px; display:inline-block;">—</div></div>
-      </div>
-      <!-- Linha 2: dinâmica (Valor referência + Recursos próprios + Embutido/FGTS condicionais + Total de lance) -->
-      <div id="pdf_cont_extras" style="display:grid; grid-template-columns:repeat(4,1fr); gap:32px; margin-top:18px;"></div>
-    </div>
-
-    <!-- ═════════ VALORIZAÇÃO DA COTA APÓS CONTEMPLAÇÃO (condicional) ═════════ -->
-    <div id="pdf_evolucaoBlock" style="display:none;">
-      <div style="font-size:14px; font-weight:700; letter-spacing:2.5px; color:#2D3F5E; margin:28px 0 16px;">VALORIZAÇÃO DA COTA APÓS CONTEMPLAÇÃO</div>
-      <div style="background:#F4F5F7; border-radius:12px; padding:24px 30px;">
-        <div style="display:grid; grid-template-columns:1fr 1fr 1fr auto; gap:32px; align-items:center;">
-          <div><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">CDI</div><div id="pdf_cdi" style="font-size:18px; font-weight:600;">—</div></div>
-          <div><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Período da aplicação</div><div id="pdf_periodo" style="font-size:18px; font-weight:600;">—</div></div>
-          <div><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Rentabilidade sobre o CDI</div><div id="pdf_rentab" style="font-size:18px; font-weight:600;">—</div></div>
-          <div style="text-align:right;"><div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Crédito disponível + rentabilidade</div><div id="pdf_creditoMaisRent" style="background:#2D3F5E; color:#fff; font-weight:700; font-size:18px; padding:10px 18px; border-radius:7px; display:inline-block;">—</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═════════ COMPARATIVO APÓS CONTEMPLAÇÃO ═════════ -->
-    <table style="width:100%; border-collapse:separate; border-spacing:0; margin-top:32px;">
-      <thead>
-        <tr>
-          <th style="text-align:left; padding:18px 22px; font-size:13px; font-weight:700; letter-spacing:2px; color:#2D3F5E; background:#F4F5F7; border-radius:12px 0 0 0;">COMPARATIVO APÓS CONTEMPLAÇÃO</th>
-          <th style="text-align:center; padding:18px 22px; font-size:13px; font-weight:700; letter-spacing:2px; color:#2D3F5E; background:#F4F5F7;">REDUÇÃO DE PARCELA</th>
-          <th style="width:60px; background:#F4F5F7;"></th>
-          <th style="text-align:center; padding:18px 22px; font-size:13px; font-weight:700; letter-spacing:2px; color:#2D3F5E; background:#F4F5F7; border-radius:0 12px 0 0;">REDUÇÃO DE PRAZO</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr style="border-bottom:1px solid #E5E7EB;">
-          <td style="padding:16px 22px; color:#6B7280; font-size:16px; border-bottom:1px solid #E5E7EB;">Parcela</td>
-          <td style="padding:16px 22px; text-align:center; font-weight:700; font-size:18px; border-bottom:1px solid #E5E7EB;" id="pdf_redPar_parcela">—</td>
-          <td rowspan="3" style="text-align:center; color:#6B7280; font-weight:600; font-size:14px;">OU</td>
-          <td style="padding:16px 22px; text-align:center; font-weight:700; font-size:18px; border-bottom:1px solid #E5E7EB;" id="pdf_redPra_parcela">—</td>
-        </tr>
-        <tr>
-          <td style="padding:16px 22px; color:#6B7280; font-size:16px; border-bottom:1px solid #E5E7EB;">Prazo restante</td>
-          <td style="padding:16px 22px; text-align:center; font-weight:700; font-size:18px; border-bottom:1px solid #E5E7EB;" id="pdf_redPar_prazo">—</td>
-          <td style="padding:16px 22px; text-align:center; font-weight:700; font-size:18px; border-bottom:1px solid #E5E7EB;" id="pdf_redPra_prazo">—</td>
-        </tr>
-        <tr>
-          <td style="padding:16px 22px; color:#6B7280; font-size:16px;">CET (Custo Efetivo Total)</td>
-          <td style="padding:16px 22px; text-align:center; font-weight:700; font-size:17px;" id="pdf_redPar_cet">—</td>
-          <td style="padding:16px 22px; text-align:center; font-weight:700; font-size:17px;" id="pdf_redPra_cet">—</td>
-        </tr>
-      </tbody>
-    </table>
-
-    <!-- ═════════ DISCLAIMER ═════════ -->
-    <div style="margin-top:36px; font-size:13px; color:#6B7280; line-height:1.65; text-align:justify;">
-      Os resultados apresentados nesta simulação possuem caráter meramente informativo e indicativo, sendo elaborados com base em informações fornecidas pelo usuário, as quais podem ser estimadas, hipotéticas ou não refletir condições reais de mercado, não constituindo promessa, garantia ou obrigação de resultado, tampouco vinculando a administradora ou quaisquer terceiros.<br><br>
-      A efetiva contratação do consórcio está condicionada à disponibilidade de vagas nos respectivos grupos, à análise e aprovação da administradora, bem como ao integral atendimento dos requisitos, regras e condições estabelecidos no contrato de adesão e na regulamentação aplicável.<br><br>
-      O usuário declara estar ciente de que o contrato de adesão, o regulamento do consórcio e os demais documentos aplicáveis constituem os instrumentos que regem a relação contratual, recomendando-se sua leitura integral, sendo o aceite manifestação inequívoca de ciência e concordância com todos os seus termos.
-    </div>
-  </div>
-
-  <!-- FOOTER -->
-  <div style="background:#2D3F5E; color:#fff; padding:22px 50px; display:flex; justify-content:space-between; align-items:center; font-size:15px;">
-    <div style="font-weight:600;">Master Prime · Simulador de Consórcio</div>
-    <div id="pdf_footer" style="text-align:right; line-height:1.5;">Documento gerado em —<br>Página 1/1</div>
-  </div>
-</div>
-
-<!-- Carrega html2canvas e jsPDF SEPARADAMENTE primeiro pra garantir que ficam expostos como globals
-     (html2pdf.bundle nem sempre expõe esses globals dependendo do ambiente) -->
+<!-- Bibliotecas para geração do PDF (módulo compartilhado pdf-master-prime.js cuida do template) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="pdf-master-prime.js"></script>
 
 <script>
 // ═════════════════════════════════════════════════════
@@ -992,323 +841,234 @@ recalc();
 // EXPORTAR PDF
 // ═════════════════════════════════════════════════════
 // ═════════════════════════════════════════════════════════════
-// PDF — render + download em 1300px Conkey-style (escala pra A4)
+// PDF — usa módulo compartilhado pdf-master-prime.js
 // ═════════════════════════════════════════════════════════════
-const PDF_WIDTH = 1300;          // largura do template (px)
-const A4_PORTRAIT_MM = 210;      // largura A4 portrait (mm)
 
-// Helpers globais
+// Helpers
 const _txt = (id) => { const el = document.getElementById(id); return (el?.textContent || el?.value || '').trim() || '—'; };
 const _val = (id) => { const el = document.getElementById(id); return (el?.value || '').trim(); };
 const _numPct = (s) => { const m = String(s||'').replace(/\./g,'').replace(',','.').match(/-?\d+(?:\.\d+)?/); return m ? parseFloat(m[0]) : 0; };
 const _numMoney = (s) => { const m = String(s||'').replace(/\./g,'').replace(',','.').match(/-?\d+(?:\.\d+)?/); return m ? parseFloat(m[0]) : 0; };
 
-// Adiciona célula label+valor no container (linha 2 dos cards)
-function _addCell(container, label, value) {
-  const cell = document.createElement('div');
-  cell.innerHTML = `<div style="font-size:13px; color:#6B7280; margin-bottom:6px;">${label}</div><div style="font-size:18px; font-weight:600;">${value}</div>`;
-  container.appendChild(cell);
-}
-
-// Snapshot do estado atual do simulador → objeto data
-function _coletarDados() {
+// Snapshot do estado atual do simulador → blocos pro módulo PDF
+function _coletarBlocos() {
   const tipoReajusteSel = document.getElementById('tipoReajuste');
   const tipoReajusteTxt = tipoReajusteSel?.options[tipoReajusteSel.selectedIndex]?.text || '—';
   const tipoContSel = document.getElementById('tipoContemplacao');
   const tipoContTxt = tipoContSel?.options[tipoContSel.selectedIndex]?.text || '—';
   const tipoLanceSel = document.getElementById('tipoLance');
   const tipoLanceTxt = tipoLanceSel?.options[tipoLanceSel.selectedIndex]?.text || '—';
+  const reducaoSobreSel = document.getElementById('reducaoSobre');
+  const reducaoSobreTxt = reducaoSobreSel?.options[reducaoSobreSel.selectedIndex]?.text || 'Parcela total';
 
-  return {
-    // Cota
-    credito: _val('credito') || 'R$ 0,00',
-    prazo: (_val('prazo') || '0') + ' meses',
-    taxaAdm: _val('taxaAdm') || '0,00 %',
-    fundo: _val('fundo') || '0,00 %',
-    tipoReajuste: tipoReajusteTxt,
-    reajuste: _val('reajuste'),
-    reajusteN: _numPct(_val('reajuste')),
-    parcelaInicial: _txt('parcelaInicial'),
-    // Slots condicionais — lê dos toggles/inputs reais do simulador
-    redutorPct: (() => { const on = document.getElementById('redutorOn')?.checked; return on ? _numPct(_val('redutor')) : 0; })(),
-    redutorSobre: (() => { const sel = document.getElementById('reducaoSobre'); return sel?.options[sel.selectedIndex]?.text || 'Parcela total'; })(),
-    seguroPct: (() => { const on = document.getElementById('seguroOn')?.checked; return on ? _numPct(_val('seguro')) : 0; })(),
-    adesaoPct: (() => { const on = document.getElementById('adesaoOn')?.checked; return on ? _numPct(_val('adesao')) : 0; })(),
-    adesaoMeses: (() => { const on = document.getElementById('adesaoOn')?.checked; return on ? (parseInt(_val('prazoAdesao'),10) || 0) : 0; })(),
-    parcelaInicial2: window._simState?.parcelaInicial2 || null,
+  // Estados
+  const reajusteN = _numPct(_val('reajuste'));
+  const seguroOn = !!document.getElementById('seguroOn')?.checked;
+  const seguroN = seguroOn ? _numPct(_val('seguro')) : 0;
+  const redutorOn = !!document.getElementById('redutorOn')?.checked;
+  const redutorN = redutorOn ? _numPct(_val('redutor')) : 0;
+  const adesaoOn = !!document.getElementById('adesaoOn')?.checked;
+  const adesaoN = adesaoOn ? _numPct(_val('adesao')) : 0;
+  const adesaoMeses = adesaoOn ? (parseInt(_val('prazoAdesao'),10) || 0) : 0;
+  const evoOn = !!document.getElementById('evolucaoOn')?.checked;
+  const lanceEmbN = _numPct(_val('lanceEmbutido')) + _numMoney(_val('lanceEmbutido_v'));
+  const lanceFgtsN = _numPct(_val('lanceFGTS')) + _numMoney(_val('lanceFGTS_v'));
 
-    // Contemplação
-    modalidade: tipoContTxt,
-    expectativa: (() => { const n = parseInt(_val('expectativa')||'1',10) || 1; return `${n} ${n === 1 ? 'mês' : 'meses'}`; })(),
-    creditoAtualizado: _val('creditoAtualizado') || 'R$ 0,00',
-    baseCalculo: tipoLanceTxt,
-    valorRef: _val('valorRef') || 'R$ 0,00',
-    creditoDisp: _txt('creditoDisponivel'),
+  // ─── DADOS DA COTA ───
+  const linhaCota1Campos = [
+    { label: 'Crédito', value: _val('credito') || 'R$ 0,00' },
+    { label: 'Prazo', value: (_val('prazo') || '0') + ' meses' },
+    { label: 'Taxa de administração', value: _val('taxaAdm') || '0,00 %' },
+    { label: 'Fundo de reserva', value: _val('fundo') || '0,00 %' }
+  ];
 
-    lanceProprios: _val('lanceProprios') || '0,00%',
-    lanceProprios_v: _val('lanceProprios_v') || 'R$ 0,00',
-    lanceEmbutido: _val('lanceEmbutido') || '0,00%',
-    lanceEmbutido_v: _val('lanceEmbutido_v') || 'R$ 0,00',
-    lanceEmbutidoN: _numPct(_val('lanceEmbutido')) + _numMoney(_val('lanceEmbutido_v')),
-    lanceFGTS: _val('lanceFGTS') || '0,00%',
-    lanceFGTS_v: _val('lanceFGTS_v') || 'R$ 0,00',
-    lanceFGTSN: _numPct(_val('lanceFGTS')) + _numMoney(_val('lanceFGTS_v')),
-    totalLance: _val('totalLance') || '0,00%',
-    valorTotalLance: _val('valorTotalLance') || 'R$ 0,00',
-
-    // Evolução
-    evoOn: !!document.getElementById('evolucaoOn')?.checked,
-    cdi: _val('cdi'),
-    mesesPosCont: _val('mesesPosCont'),
-    rentab: _val('rentab') || '100,00 %',
-    rentabilidade: _txt('rentabilidade'),
-    creditoMaisRentab: _txt('creditoMaisRentab'),
-
-    // Comparativo
-    redPar_parc: _txt('reducaoParcela_parc'),
-    redPar_prazo: _txt('reducaoParcela_prazo'),
-    redPar_cm: _txt('reducaoParcela_cm'),
-    redPar_ca: _txt('reducaoParcela_ca'),
-    redPra_parc: _txt('reducaoPrazo_parc'),
-    redPra_prazo: _txt('reducaoPrazo_prazo'),
-    redPra_cm: _txt('reducaoPrazo_cm'),
-    redPra_ca: _txt('reducaoPrazo_ca')
-  };
-}
-
-// Cenário fictício "tudo ligado" pra modo demo
-function _dadosDemo() {
-  return {
-    credito: 'R$ 200.000,00', prazo: '144 meses', taxaAdm: '12,00 %', fundo: '1,50 %',
-    tipoReajuste: 'Aniversário da cota', reajuste: '5,00 %', reajusteN: 5,
-    parcelaInicial: 'R$ 1.860,00',
-    redutorPct: 25, redutorSobre: 'Parcela total',
-    seguroPct: 0.0383,
-    adesaoPct: 1.5, adesaoMeses: 3,
-    parcelaInicial2: 'R$ 1.625,00',
-    modalidade: 'Lance', expectativa: '1 mês', creditoAtualizado: 'R$ 210.000,00',
-    baseCalculo: 'Carta de crédito', valorRef: 'R$ 210.000,00', creditoDisp: 'R$ 350.000,00',
-    lanceProprios: '20,00%', lanceProprios_v: 'R$ 42.000,00',
-    lanceEmbutido: '0,00%', lanceEmbutido_v: 'R$ 0,00', lanceEmbutidoN: 0,
-    lanceFGTS: '0,00%', lanceFGTS_v: 'R$ 0,00', lanceFGTSN: 0,
-    totalLance: '20,00%', valorTotalLance: 'R$ 42.000,00',
-    evoOn: true, cdi: '11,20 %', mesesPosCont: '18',
-    rentab: '100,00 %', rentabilidade: 'R$ 22.500,00', creditoMaisRentab: 'R$ 372.500,00',
-    redPar_parc: 'R$ 1.650,00', redPar_prazo: '144', redPar_cm: '1,15%', redPar_ca: '14,70%',
-    redPra_parc: 'R$ 1.890,00', redPra_prazo: '132', redPra_cm: '1,02%', redPra_ca: '13,60%'
-  };
-}
-
-// Preenche o template com um objeto data
-function _renderTemplate(d) {
-  // ─── CARD 1: parcela inicial (com badge "Demais parcelas" se aplicável) ───
-  const piBox = document.getElementById('pdf_parcelaInicialBox');
-  if (d.parcelaInicial2 && d.parcelaInicial2 !== d.parcelaInicial) {
-    // Mostra "3 parcelas" + "Demais parcelas" como o Conkey faz
-    const nIniciais = d.adesaoMeses || 1;
-    piBox.innerHTML = `
-      <div style="display:flex; gap:14px; align-items:flex-end;">
-        <div>
-          <div style="font-size:13px; color:#6B7280; margin-bottom:6px;">${nIniciais} ${nIniciais > 1 ? 'parcelas' : 'parcela'}</div>
-          <div style="background:#2D3F5E; color:#fff; font-weight:700; font-size:18px; padding:10px 18px; border-radius:7px; display:inline-block;">${d.parcelaInicial}</div>
-        </div>
-        <div>
-          <div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Demais parcelas</div>
-          <div style="background:#2D3F5E; color:#fff; font-weight:700; font-size:18px; padding:10px 18px; border-radius:7px; display:inline-block;">${d.parcelaInicial2}</div>
-        </div>
-      </div>`;
+  // Parcela inicial (com badge "Demais parcelas" se redutor ou adesão ativos com adesaoMeses > 0)
+  let parcelaInicial2 = window._simState?.parcelaInicial2 || null;
+  let destaque;
+  if (parcelaInicial2 && parcelaInicial2 !== _txt('parcelaInicial')) {
+    const nIniciais = adesaoMeses || 1;
+    destaque = {
+      multi: [
+        { label: `${nIniciais} ${nIniciais > 1 ? 'parcelas' : 'parcela'}`, value: _txt('parcelaInicial') },
+        { label: 'Demais parcelas', value: parcelaInicial2 }
+      ]
+    };
   } else {
-    piBox.innerHTML = `
-      <div style="font-size:13px; color:#6B7280; margin-bottom:6px;">Parcela inicial</div>
-      <div id="pdf_parcelaInicial" style="background:#2D3F5E; color:#fff; font-weight:700; font-size:18px; padding:10px 18px; border-radius:7px; display:inline-block;">${d.parcelaInicial}</div>`;
+    destaque = { label: 'Parcela inicial', value: _txt('parcelaInicial') };
   }
 
-  // ─── CARD 1: linha 1 ───
-  document.getElementById('pdf_credito').textContent = d.credito;
-  document.getElementById('pdf_prazo').textContent = d.prazo;
-  document.getElementById('pdf_taxaAdm').textContent = d.taxaAdm;
-  document.getElementById('pdf_fundo').textContent = d.fundo;
-
-  // ─── CARD 1: linha 2 dinâmica (Tipo reajuste sempre + Reajuste/Redutor/Seguro/Adesão se ativos) ───
-  const cotaExtras = document.getElementById('pdf_cota_extras');
-  cotaExtras.innerHTML = '';
-  _addCell(cotaExtras, 'Tipo de reajuste', d.tipoReajuste);
-  if (d.reajusteN > 0) _addCell(cotaExtras, 'Reajuste', d.reajuste);
-  if (d.redutorPct > 0) {
-    _addCell(cotaExtras, 'Redutor de parcela', `${d.redutorPct.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})} %`);
-    _addCell(cotaExtras, 'Redutor sobre', d.redutorSobre);
+  // Linha 2 da Cota (dinâmica)
+  const linhaCota2Campos = [
+    { label: 'Tipo de reajuste', value: tipoReajusteTxt }
+  ];
+  if (reajusteN > 0) linhaCota2Campos.push({ label: 'Reajuste', value: _val('reajuste') });
+  if (redutorN > 0) {
+    linhaCota2Campos.push({ label: 'Redutor de parcela', value: `${redutorN.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})} %` });
+    linhaCota2Campos.push({ label: 'Redutor sobre', value: reducaoSobreTxt });
   }
-  if (d.seguroPct > 0) _addCell(cotaExtras, '% Seguro', `${d.seguroPct.toLocaleString('pt-BR',{minimumFractionDigits:4,maximumFractionDigits:4})} %`);
-  if (d.adesaoPct > 0) {
-    _addCell(cotaExtras, 'Taxa de adesão', `${d.adesaoPct.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})} %`);
-    if (d.adesaoMeses > 0) _addCell(cotaExtras, 'Prazo adesão', `${d.adesaoMeses} ${d.adesaoMeses === 1 ? 'mês' : 'meses'}`);
-  }
-  // Ajusta colunas (mín. 4)
-  const nC = Math.max(4, cotaExtras.children.length);
-  cotaExtras.style.gridTemplateColumns = `repeat(${nC}, 1fr)`;
-
-  // ─── CARD 2: linha 1 ───
-  document.getElementById('pdf_modalidade').textContent = d.modalidade;
-  document.getElementById('pdf_expectativa').textContent = d.expectativa;
-  document.getElementById('pdf_creditoAtualizado').textContent = d.creditoAtualizado;
-  document.getElementById('pdf_baseCalculo').textContent = d.baseCalculo;
-  document.getElementById('pdf_creditoDisp').textContent = d.creditoDisp;
-
-  // ─── CARD 2: linha 2 dinâmica ───
-  const contExtras = document.getElementById('pdf_cont_extras');
-  contExtras.innerHTML = '';
-  _addCell(contExtras, 'Valor de referência', d.valorRef);
-  _addCell(contExtras, 'Recursos próprios', `${d.lanceProprios} | ${d.lanceProprios_v}`);
-  if (d.lanceEmbutidoN > 0) _addCell(contExtras, 'Embutido', `${d.lanceEmbutido} | ${d.lanceEmbutido_v}`);
-  if (d.lanceFGTSN > 0) _addCell(contExtras, 'FGTS', `${d.lanceFGTS} | ${d.lanceFGTS_v}`);
-  _addCell(contExtras, 'Total de lance', `${d.totalLance} | ${d.valorTotalLance}`);
-  const nE = contExtras.children.length;
-  contExtras.style.gridTemplateColumns = `repeat(${nE}, 1fr)`;
-
-  // ─── CARD 3: Valorização (condicional) ───
-  document.getElementById('pdf_evolucaoBlock').style.display = d.evoOn ? 'block' : 'none';
-  if (d.evoOn) {
-    document.getElementById('pdf_cdi').textContent = d.cdi;
-    document.getElementById('pdf_periodo').textContent = `${d.mesesPosCont} meses`;
-    document.getElementById('pdf_rentab').textContent = `${d.rentab} | ${d.rentabilidade}`;
-    document.getElementById('pdf_creditoMaisRent').textContent = d.creditoMaisRentab;
+  if (seguroN > 0) linhaCota2Campos.push({ label: '% Seguro', value: `${seguroN.toLocaleString('pt-BR',{minimumFractionDigits:4,maximumFractionDigits:4})} %` });
+  if (adesaoN > 0) {
+    linhaCota2Campos.push({ label: 'Taxa de adesão', value: `${adesaoN.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})} %` });
+    if (adesaoMeses > 0) linhaCota2Campos.push({ label: 'Prazo adesão', value: `${adesaoMeses} ${adesaoMeses === 1 ? 'mês' : 'meses'}` });
   }
 
-  // ─── COMPARATIVO ───
-  document.getElementById('pdf_redPar_parcela').textContent = d.redPar_parc;
-  document.getElementById('pdf_redPar_prazo').textContent = `${d.redPar_prazo} meses`;
-  document.getElementById('pdf_redPar_cet').innerHTML = `<span>${d.redPar_cm} ao mês</span> <span style="color:#6B7280; font-weight:600; margin:0 6px;">|</span> <span>${d.redPar_ca} ao ano</span>`;
-  document.getElementById('pdf_redPra_parcela').textContent = d.redPra_parc;
-  document.getElementById('pdf_redPra_prazo').textContent = `${d.redPra_prazo} meses`;
-  document.getElementById('pdf_redPra_cet').innerHTML = `<span>${d.redPra_cm} ao mês</span> <span style="color:#6B7280; font-weight:600; margin:0 6px;">|</span> <span>${d.redPra_ca} ao ano</span>`;
+  // ─── DETALHES DA CONTEMPLAÇÃO ───
+  const expectN = parseInt(_val('expectativa')||'1',10) || 1;
+  const linhaCont1Campos = [
+    { label: 'Modalidade', value: tipoContTxt },
+    { label: 'Expectativa', value: `${expectN} ${expectN === 1 ? 'mês' : 'meses'}` },
+    { label: 'Crédito atualizado', value: _val('creditoAtualizado') || 'R$ 0,00' },
+    { label: 'Base de cálculo', value: tipoLanceTxt }
+  ];
+  const linhaCont2Campos = [
+    { label: 'Valor de referência', value: _val('valorRef') || 'R$ 0,00' },
+    { label: 'Recursos próprios', value: `${_val('lanceProprios') || '0,00%'} | ${_val('lanceProprios_v') || 'R$ 0,00'}` }
+  ];
+  if (lanceEmbN > 0) linhaCont2Campos.push({ label: 'Embutido', value: `${_val('lanceEmbutido') || '0,00%'} | ${_val('lanceEmbutido_v') || 'R$ 0,00'}` });
+  if (lanceFgtsN > 0) linhaCont2Campos.push({ label: 'FGTS', value: `${_val('lanceFGTS') || '0,00%'} | ${_val('lanceFGTS_v') || 'R$ 0,00'}` });
+  linhaCont2Campos.push({ label: 'Total de lance', value: `${_val('totalLance') || '0,00%'} | ${_val('valorTotalLance') || 'R$ 0,00'}` });
 
-  // ─── FOOTER ───
-  const hoje = new Date();
-  const dd = String(hoje.getDate()).padStart(2, '0');
-  const mm = String(hoje.getMonth() + 1).padStart(2, '0');
-  const yyyy = hoje.getFullYear();
-  document.getElementById('pdf_footer').innerHTML = `Documento gerado em ${dd}/${mm}/${yyyy}<br>Página 1/1`;
-}
+  // ─── BLOCOS ───
+  const blocos = [
+    {
+      tipo: 'card',
+      titulo: 'DADOS DA COTA',
+      linhas: [
+        { campos: linhaCota1Campos, destaque },
+        { campos: linhaCota2Campos }
+      ]
+    },
+    {
+      tipo: 'card',
+      titulo: 'DETALHES DA CONTEMPLAÇÃO',
+      linhas: [
+        { campos: linhaCont1Campos, destaque: { label: 'Crédito disponível', value: _txt('creditoDisponivel') } },
+        { campos: linhaCont2Campos }
+      ]
+    }
+  ];
 
-// Gera o PDF — captura via html2canvas (1300px wide) e escala manualmente pra A4 (210mm)
-// FORÇA o conteúdo a caber em UMA ÚNICA página A4 portrait, mantendo proporção.
-function _gerarPdf(filename) {
-  const report = document.getElementById('pdfReport');
-
-  // Wrapper visível mas atrás de tudo — html2canvas precisa do elemento na viewport
-  const wrap = document.createElement('div');
-  wrap.style.cssText = `position:fixed; top:0; left:0; width:${PDF_WIDTH}px; background:#fff; z-index:-99999; pointer-events:none; overflow:hidden;`;
-  document.body.appendChild(wrap);
-  report.style.display = 'block';
-  wrap.appendChild(report);
-
-  // Aguarda layout/imagens
-  setTimeout(() => {
-    html2canvas(report, {
-      scale: 2,
-      backgroundColor: '#FFFFFF',
-      width: PDF_WIDTH,
-      windowWidth: PDF_WIDTH,
-      useCORS: true,
-      allowTaint: true,
-      logging: false,
-      scrollX: 0,
-      scrollY: 0
-    }).then((canvas) => {
-      const imgData = canvas.toDataURL('image/jpeg', 0.96);
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true });
-
-      const pageW = 210;  // A4 portrait largura mm
-      const pageH = 297;  // A4 portrait altura mm
-      // Largura do PDF = pageW. Altura proporcional baseada na relação canvas.h/canvas.w
-      const fitW = pageW;
-      const fitH = (canvas.height * fitW) / canvas.width;
-
-      if (fitH <= pageH) {
-        // Cabe em 1 página — usa toda a largura A4
-        pdf.addImage(imgData, 'JPEG', 0, 0, fitW, fitH);
-      } else {
-        // Conteúdo maior que A4 — escala proporcional pra caber em 1 página inteira
-        const fitH2 = pageH;
-        const fitW2 = (canvas.width * fitH2) / canvas.height;
-        const offsetX = (pageW - fitW2) / 2;  // centraliza horizontalmente
-        pdf.addImage(imgData, 'JPEG', offsetX, 0, fitW2, fitH2);
-      }
-      pdf.save(filename);
-
-      // Cleanup
-      report.style.display = 'none';
-      document.body.appendChild(report);
-      wrap.remove();
-    }).catch((err) => {
-      console.error('Erro ao gerar PDF:', err);
-      report.style.display = 'none';
-      document.body.appendChild(report);
-      wrap.remove();
-      alert('Erro ao gerar PDF: ' + err.message);
+  // Card de Valorização (se ativo)
+  if (evoOn) {
+    blocos.push({
+      tipo: 'card',
+      titulo: 'VALORIZAÇÃO DA COTA APÓS CONTEMPLAÇÃO',
+      linhas: [{
+        campos: [
+          { label: 'CDI', value: _val('cdi') || '0,00 %' },
+          { label: 'Período da aplicação', value: `${_val('mesesPosCont') || '0'} meses` },
+          { label: 'Rentabilidade sobre o CDI', value: `${_val('rentab') || '100,00 %'} | ${_txt('rentabilidade')}` }
+        ],
+        destaque: { label: 'Crédito disponível + rentabilidade', value: _txt('creditoMaisRentab') }
+      }]
     });
-  }, 250);
+  }
+
+  // Tabela comparativo
+  blocos.push({
+    tipo: 'tabela',
+    titulo: 'COMPARATIVO APÓS CONTEMPLAÇÃO',
+    colunas: ['REDUÇÃO DE PARCELA', 'REDUÇÃO DE PRAZO'],
+    separador: 'OU',
+    linhas: [
+      { label: 'Parcela', valores: [_txt('reducaoParcela_parc'), _txt('reducaoPrazo_parc')] },
+      { label: 'Prazo restante', valores: [`${_txt('reducaoParcela_prazo')} meses`, `${_txt('reducaoPrazo_prazo')} meses`] },
+      { label: 'CET (Custo Efetivo Total)', valores: [
+        `${_txt('reducaoParcela_cm')} ao mês <span style="color:#6B7280; margin:0 6px;">|</span> ${_txt('reducaoParcela_ca')} ao ano`,
+        `${_txt('reducaoPrazo_cm')} ao mês <span style="color:#6B7280; margin:0 6px;">|</span> ${_txt('reducaoPrazo_ca')} ao ano`
+      ]}
+    ]
+  });
+
+  return blocos;
 }
 
-// ─── BOTÃO BAIXAR PDF (via html2canvas + jsPDF — abordagem testada e validada) ───
+// Cenário fictício "tudo ligado" pra modo preview
+function _blocosDemo() {
+  return [
+    {
+      tipo: 'card', titulo: 'DADOS DA COTA',
+      linhas: [
+        { campos: [
+            { label: 'Crédito', value: 'R$ 200.000,00' },
+            { label: 'Prazo', value: '144 meses' },
+            { label: 'Taxa de administração', value: '12,00 %' },
+            { label: 'Fundo de reserva', value: '1,50 %' }
+          ],
+          destaque: { multi: [
+            { label: '3 parcelas', value: 'R$ 1.860,00' },
+            { label: 'Demais parcelas', value: 'R$ 1.625,00' }
+          ]}
+        },
+        { campos: [
+            { label: 'Tipo de reajuste', value: 'Cota - anual' },
+            { label: 'Reajuste', value: '5,00 %' },
+            { label: 'Redutor de parcela', value: '25,00 %' },
+            { label: 'Redutor sobre', value: 'Parcela total' },
+            { label: '% Seguro', value: '0,0383 %' },
+            { label: 'Taxa de adesão', value: '1,50 %' },
+            { label: 'Prazo adesão', value: '3 meses' }
+          ]
+        }
+      ]
+    },
+    {
+      tipo: 'card', titulo: 'DETALHES DA CONTEMPLAÇÃO',
+      linhas: [
+        { campos: [
+            { label: 'Modalidade', value: 'Lance' },
+            { label: 'Expectativa', value: '1 mês' },
+            { label: 'Crédito atualizado', value: 'R$ 210.000,00' },
+            { label: 'Base de cálculo', value: 'Carta de crédito' }
+          ],
+          destaque: { label: 'Crédito disponível', value: 'R$ 350.000,00' }
+        },
+        { campos: [
+            { label: 'Valor de referência', value: 'R$ 210.000,00' },
+            { label: 'Recursos próprios', value: '20,00% | R$ 42.000,00' },
+            { label: 'Total de lance', value: '20,00% | R$ 42.000,00' }
+          ]
+        }
+      ]
+    },
+    {
+      tipo: 'card', titulo: 'VALORIZAÇÃO DA COTA APÓS CONTEMPLAÇÃO',
+      linhas: [{
+        campos: [
+          { label: 'CDI', value: '11,20 %' },
+          { label: 'Período da aplicação', value: '18 meses' },
+          { label: 'Rentabilidade sobre o CDI', value: '100,00 % | R$ 22.500,00' }
+        ],
+        destaque: { label: 'Crédito disponível + rentabilidade', value: 'R$ 372.500,00' }
+      }]
+    },
+    {
+      tipo: 'tabela', titulo: 'COMPARATIVO APÓS CONTEMPLAÇÃO',
+      colunas: ['REDUÇÃO DE PARCELA', 'REDUÇÃO DE PRAZO'], separador: 'OU',
+      linhas: [
+        { label: 'Parcela', valores: ['R$ 1.650,00', 'R$ 1.890,00'] },
+        { label: 'Prazo restante', valores: ['144 meses', '132 meses'] },
+        { label: 'CET (Custo Efetivo Total)', valores: [
+          '1,15% ao mês <span style="color:#6B7280; margin:0 6px;">|</span> 14,70% ao ano',
+          '1,02% ao mês <span style="color:#6B7280; margin:0 6px;">|</span> 13,60% ao ano'
+        ]}
+      ]
+    }
+  ];
+}
+
+// ─── BOTÃO BAIXAR PDF ───
 document.getElementById('baixarPdf').addEventListener('click', async () => {
   const btn = document.getElementById('baixarPdf');
   const txtOriginal = btn.textContent;
   btn.textContent = 'Gerando PDF...';
   btn.disabled = true;
-
   try {
-    const d = _coletarDados();
-    _renderTemplate(d);
-
-    const report = document.getElementById('pdfReport');
-    const wrap = document.createElement('div');
-    wrap.style.cssText = 'position:fixed; top:0; left:0; width:1300px; background:#fff; z-index:-99999; pointer-events:none; overflow:hidden;';
-    document.body.appendChild(wrap);
-    report.style.display = 'block';
-    wrap.appendChild(report);
-
-    // Aguarda layout + carregamento de imagens (logo)
-    await new Promise(r => setTimeout(r, 400));
-
-    const canvas = await html2canvas(report, {
-      scale: 2,
-      backgroundColor: '#FFFFFF',
-      width: 1300,
-      windowWidth: 1300,
-      useCORS: true,
-      allowTaint: true,
-      logging: false
+    await PdfMasterPrime.gerar({
+      tituloEstrategia: 'Operação Simples',
+      filename: 'master-prime-operacao-simples',
+      blocos: _coletarBlocos()
     });
-
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true });
-    const pageW = 210, pageH = 297;
-    const fitW = pageW;
-    const fitH = (canvas.height * fitW) / canvas.width;
-    const imgData = canvas.toDataURL('image/jpeg', 0.96);
-
-    if (fitH <= pageH) {
-      pdf.addImage(imgData, 'JPEG', 0, 0, fitW, fitH);
-    } else {
-      // Conteúdo maior que A4 — escala pra caber em 1 página
-      const fitH2 = pageH;
-      const fitW2 = (canvas.width * fitH2) / canvas.height;
-      const offsetX = (pageW - fitW2) / 2;
-      pdf.addImage(imgData, 'JPEG', offsetX, 0, fitW2, fitH2);
-    }
-
-    const hoje = new Date();
-    const dd = String(hoje.getDate()).padStart(2, '0');
-    const mm = String(hoje.getMonth() + 1).padStart(2, '0');
-    const yyyy = hoje.getFullYear();
-    pdf.save(`master-prime-operacao-simples-${dd}${mm}${yyyy}.pdf`);
-
-    // Cleanup
-    report.style.display = 'none';
-    document.body.appendChild(report);
-    wrap.remove();
   } catch (err) {
     console.error('Erro ao gerar PDF:', err);
     alert('Erro ao gerar PDF: ' + err.message);
@@ -1318,31 +1078,16 @@ document.getElementById('baixarPdf').addEventListener('click', async () => {
   }
 });
 
-// ─── MODO PREVIEW DEMO (?preview=1) ───
-// Renderiza o template inline na página, em escala reduzida pra caber na tela.
-// Usado pra validar visualmente lado a lado com Conkey.
+// ─── MODO PREVIEW (?preview=1) — renderiza inline com cenário demo ───
 (() => {
   const params = new URLSearchParams(location.search);
   if (params.get('preview') !== '1') return;
-  // Esconde o simulador
-  document.querySelector('main')?.style.setProperty('display', 'none');
-  document.querySelector('header')?.style.setProperty('display', 'none');
-  // Renderiza o template com cenário demo
-  _renderTemplate(_dadosDemo());
-  // Container visível com padding e moldura
-  const previewWrap = document.createElement('div');
-  previewWrap.style.cssText = 'min-height:100vh; background:#E5E7EB; padding:40px 0; display:flex; flex-direction:column; align-items:center; gap:24px;';
-  const previewLabel = document.createElement('div');
-  previewLabel.innerHTML = `<div style="font-family:'Inter',sans-serif; color:#1E2D45; font-size:14px; letter-spacing:1.5px; text-transform:uppercase; font-weight:700;">Pré-visualização do PDF — Master Prime · Operação Simples</div><div style="font-family:'Inter',sans-serif; color:#6B7280; font-size:12px; margin-top:4px; text-align:center;">Cenário demo · todos os campos ativos · escala 1:1 (1300px)</div>`;
-  previewWrap.appendChild(previewLabel);
-  const report = document.getElementById('pdfReport');
-  report.style.display = 'block';
-  report.style.boxShadow = '0 12px 40px rgba(0,0,0,0.12)';
-  report.style.borderRadius = '6px';
-  report.style.overflow = 'hidden';
-  previewWrap.appendChild(report);
-  document.body.appendChild(previewWrap);
+  PdfMasterPrime.preview({
+    tituloEstrategia: 'Operação Simples',
+    blocos: _blocosDemo()
+  });
 })();
+
 </script>
 
 </body>
