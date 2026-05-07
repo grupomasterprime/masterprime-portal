@@ -1151,9 +1151,11 @@ function _renderTemplate(d) {
 function _gerarPdf(filename) {
   const report = document.getElementById('pdfReport');
 
-  // Wrapper off-screen com 1300px — html2canvas mede o offsetWidth real
+  // Wrapper visível mas atrás de tudo — html2canvas precisa do elemento DENTRO da viewport
+  // pra capturar coordenadas corretas. Off-screen (left negativo) causa corte/deslocamento.
+  // Solução: top/left = 0, z-index muito baixo, atrás do conteúdo normal da página.
   const wrap = document.createElement('div');
-  wrap.style.cssText = `position:fixed; top:0; left:-${PDF_WIDTH + 200}px; width:${PDF_WIDTH}px; background:#fff; z-index:-1; opacity:1; pointer-events:none;`;
+  wrap.style.cssText = `position:fixed; top:0; left:0; width:${PDF_WIDTH}px; background:#fff; z-index:-99999; opacity:1; pointer-events:none; overflow:hidden;`;
   document.body.appendChild(wrap);
   report.style.display = 'block';
   wrap.appendChild(report);
