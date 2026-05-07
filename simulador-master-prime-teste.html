@@ -110,6 +110,16 @@
   .modal-body { flex: 1; overflow-y: auto; padding: 16px 26px; }
   .modal-foot { padding: 14px 26px; border-top: 1px solid var(--border); display: flex; justify-content: center; }
 
+  /* Memória de cálculo do CET */
+  .memoria-cet { background: #FAFCFE; border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; margin-bottom: 18px; }
+  .memoria-cet h4 { font-size: 12px; font-weight: 700; color: var(--navy); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
+  .memoria-cet-step { display: grid; grid-template-columns: 1fr auto; gap: 8px 14px; padding: 7px 0; border-bottom: 1px solid var(--border); align-items: center; font-size: 12.5px; }
+  .memoria-cet-step:last-child { border-bottom: none; padding-bottom: 0; }
+  .memoria-cet-formula { color: var(--text-muted); font-family: 'DM Mono', ui-monospace, monospace; font-size: 11.5px; }
+  .memoria-cet-resultado { color: var(--navy); font-weight: 700; font-family: 'DM Mono', ui-monospace, monospace; }
+  .memoria-cet-step.destaque .memoria-cet-resultado { color: var(--navy); font-size: 14px; }
+  .memoria-cet-step.destaque { background: rgba(45,63,94,.04); margin: 0 -18px; padding-left: 18px; padding-right: 18px; }
+
   /* Tabela analítica */
   .tab-analitico { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
   .tab-analitico thead th { background: var(--navy); color: #fff; padding: 12px 14px; font-weight: 600; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .6px; }
@@ -309,7 +319,7 @@
       <div class="pos-row highlight"><span>Parcela</span><span class="pos-value" id="reducaoParcela_parc">R$ 0,00</span></div>
       <div class="pos-row"><span>Prazo restante</span><span class="pos-value" id="reducaoParcela_prazo">0</span></div>
       <div class="pos-row"><span>Custo efetivo mensal</span><span class="pos-value" id="reducaoParcela_cm">0,00 %</span></div>
-      <div class="pos-row"><span style="display:flex;align-items:center;gap:6px;">Custo efetivo anual<button type="button" class="btn-eye" onclick="abrirAnalitico('parcela')" title="Ver memória de cálculo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span><span class="pos-value" id="reducaoParcela_ca">0,00 %</span></div>
+      <div class="pos-row"><span>Custo efetivo anual</span><span style="display:inline-flex;align-items:center;gap:8px;"><span class="pos-value" id="reducaoParcela_ca">0,00 %</span><button type="button" class="btn-eye" onclick="abrirAnalitico('parcela')" title="Ver memória de cálculo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></div>
     </div>
     <div class="pos-or">OU</div>
     <div class="pos-card">
@@ -317,7 +327,7 @@
       <div class="pos-row highlight"><span>Parcela</span><span class="pos-value" id="reducaoPrazo_parc">R$ 0,00</span></div>
       <div class="pos-row"><span>Prazo restante</span><span class="pos-value" id="reducaoPrazo_prazo">0</span></div>
       <div class="pos-row"><span>Custo efetivo mensal</span><span class="pos-value" id="reducaoPrazo_cm">0,00 %</span></div>
-      <div class="pos-row"><span style="display:flex;align-items:center;gap:6px;">Custo efetivo anual<button type="button" class="btn-eye" onclick="abrirAnalitico('prazo')" title="Ver memória de cálculo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span><span class="pos-value" id="reducaoPrazo_ca">0,00 %</span></div>
+      <div class="pos-row"><span>Custo efetivo anual</span><span style="display:inline-flex;align-items:center;gap:8px;"><span class="pos-value" id="reducaoPrazo_ca">0,00 %</span><button type="button" class="btn-eye" onclick="abrirAnalitico('prazo')" title="Ver memória de cálculo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></div>
     </div>
   </div>
 
@@ -334,6 +344,10 @@
         </button>
       </div>
       <div class="modal-body">
+        <!-- Memória de cálculo do CET -->
+        <div class="memoria-cet" id="memoriaCet"></div>
+
+        <!-- Tabela ano a ano -->
         <table class="tab-analitico">
           <thead>
             <tr>
@@ -775,6 +789,10 @@ function recalc() {
   // Salva estado pra modal Analítico (memória de cálculo)
   window._simState = {
     credito: credito,
+    taxaAdm: taxaAdm,
+    fundo: fundo,
+    lanceProprios_v: lanceProprios_v,
+    prazoTotal: prazo,
     parcelaInicial: parcelaAtualNoMomento,
     valorTotalLance: valorTotalLance,
     expectativa: expectativa,
@@ -833,6 +851,41 @@ function abrirAnalitico(modo) {
 
   // Renderiza
   const fmt = (v) => 'R$ ' + Number(v||0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmtPct = (v, casas) => Number(v*100||0).toLocaleString('pt-BR', { minimumFractionDigits: casas||2, maximumFractionDigits: casas||2 }) + ' %';
+
+  // Memória de cálculo do CET
+  const taxaAdm = s.taxaAdm, fundo = s.fundo, lanceProprios_v = s.lanceProprios_v;
+  const custo = s.credito * (taxaAdm + fundo);
+  const disponivel = s.credito - lanceProprios_v;
+  const ratio = disponivel > 0 ? custo / disponivel : 0;
+  const prazoEf = modo === 'parcela' ? s.prazoTotal : (s.expectativa + s.prazoRestPrazo);
+  const cetMensal = modo === 'parcela' ? s.cetParcMensal : s.cetPrazoMensal;
+  const cetAnual = modo === 'parcela' ? s.cetParcAnual : s.cetPrazoAnual;
+
+  document.getElementById('memoriaCet').innerHTML = `
+    <h4>Memória de cálculo do CET</h4>
+    <div class="memoria-cet-step">
+      <span><strong>Custo</strong> = crédito × (taxa adm + fundo) = ${fmt(s.credito)} × ${fmtPct(taxaAdm + fundo, 2)}</span>
+      <span class="memoria-cet-resultado">${fmt(custo)}</span>
+    </div>
+    <div class="memoria-cet-step">
+      <span><strong>Disponível</strong> = crédito − lance próprios = ${fmt(s.credito)} − ${fmt(lanceProprios_v)}</span>
+      <span class="memoria-cet-resultado">${fmt(disponivel)}</span>
+    </div>
+    <div class="memoria-cet-step">
+      <span><strong>Razão</strong> = custo / disponível = ${fmt(custo)} / ${fmt(disponivel)}</span>
+      <span class="memoria-cet-resultado">${(ratio).toFixed(4)}</span>
+    </div>
+    <div class="memoria-cet-step">
+      <span><strong>CET mensal</strong> = (1 + razão)^(1/${prazoEf}) − 1</span>
+      <span class="memoria-cet-resultado">${fmtPct(cetMensal, 2)}</span>
+    </div>
+    <div class="memoria-cet-step destaque">
+      <span><strong>CET anual</strong> = (1 + CET mensal)^12 − 1</span>
+      <span class="memoria-cet-resultado">${fmtPct(cetAnual, 2)}</span>
+    </div>
+  `;
+
   const tbody = document.getElementById('analiticoBody');
   tbody.innerHTML = anos.map(a => `
     <tr>
