@@ -265,24 +265,24 @@ body.embedded-mode .portal-menu-fab { display:flex; }
 .fat-filtros input:focus, .fat-filtros select:focus { border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,.12); }
 .fat-filtros input { min-width: 220px; }
 
-/* HERO do faturamento */
-.fat-hero { display:grid; grid-template-columns:1.4fr 1fr; gap:22px; align-items:center; margin-bottom:22px; padding:28px 32px; border-radius:18px; background:linear-gradient(135deg, var(--mp-navy) 0%, #344A6E 100%); color:#fff; box-shadow:0 18px 44px rgba(45,63,94,.24); position:relative; overflow:hidden; }
-.fat-hero::before { content:""; position:absolute; right:-80px; top:-80px; width:280px; height:280px; border-radius:50%; background:radial-gradient(circle, rgba(77,188,200,.20), transparent 60%); pointer-events:none; }
-.fat-hero h2 { font-size:22px; font-weight:800; letter-spacing:-.3px; margin-bottom:6px; line-height:1.15; }
-.fat-hero p { font-size:13px; color:rgba(255,255,255,.78); line-height:1.55; max-width:520px; }
-.fat-hero-side { position:relative; z-index:1; display:flex; flex-direction:column; gap:10px; align-items:flex-end; }
-.fat-hero-tag { display:inline-flex; align-items:center; gap:6px; padding:5px 11px; border-radius:999px; background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.18); font-size:11px; font-weight:600; color:#fff; }
+/* HERO do faturamento (compacto e elegante) */
+.fat-hero { display:grid; grid-template-columns:1.5fr auto; gap:20px; align-items:center; margin-bottom:18px; padding:18px 24px; border-radius:14px; background:linear-gradient(135deg, var(--mp-navy) 0%, #344A6E 100%); color:#fff; box-shadow:0 8px 20px rgba(45,63,94,.16); position:relative; overflow:hidden; }
+.fat-hero::before { content:""; position:absolute; right:-60px; top:-60px; width:200px; height:200px; border-radius:50%; background:radial-gradient(circle, rgba(77,188,200,.16), transparent 60%); pointer-events:none; }
+.fat-hero h2 { font-size:18px; font-weight:600; letter-spacing:-.2px; margin-bottom:4px; line-height:1.2; }
+.fat-hero p { font-size:12.5px; color:rgba(255,255,255,.74); line-height:1.45; max-width:520px; }
+.fat-hero-side { position:relative; z-index:1; display:flex; flex-direction:column; gap:8px; align-items:flex-end; }
+.fat-hero-tag { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:999px; background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.18); font-size:10.5px; font-weight:500; color:#fff; }
 
-/* KPIs modernos */
-.fat-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-bottom: 22px; }
-.fat-stat { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; box-shadow: var(--shadow); display:flex; gap:12px; align-items:center; transition:all .15s; position:relative; overflow:hidden; }
-.fat-stat:hover { transform:translateY(-1px); box-shadow:0 6px 18px rgba(15,23,42,.08); border-color:var(--border2); }
-.fat-stat-ico { width:36px; height:36px; border-radius:10px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:#F1F5F9; color:var(--text2); }
-.fat-stat-ico svg { width:18px; height:18px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+/* KPIs (compactos, ícone+número) */
+.fat-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 18px; }
+.fat-stat { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; display:flex; gap:10px; align-items:center; transition:all .15s; }
+.fat-stat:hover { border-color:var(--border2); }
+.fat-stat-ico { width:32px; height:32px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:#F1F5F9; color:var(--text2); }
+.fat-stat-ico svg { width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
 .fat-stat-body { flex:1; min-width:0; }
-.fat-stat-label { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .55px; color: var(--text2); margin-bottom: 3px; }
-.fat-stat-valor { font-size: 22px; font-weight: 800; color: var(--mp-navy); font-family: 'DM Mono', monospace; line-height: 1; }
-.fat-stat-sub { font-size: 10px; color: var(--text3); margin-top: 3px; }
+.fat-stat-label { font-size: 9.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--text2); margin-bottom: 2px; }
+.fat-stat-valor { font-size: 18px; font-weight: 600; color: var(--mp-navy); line-height: 1; letter-spacing:-.3px; }
+.fat-stat-sub { font-size: 10px; color: var(--text3); margin-top: 2px; }
 .fat-stat.borda-teal { border-top: 3px solid var(--mp-teal); } .fat-stat.borda-teal .fat-stat-ico { background:#CFFAFE; color:#0E7490; }
 .fat-stat.borda-amber { border-top: 3px solid var(--amber); } .fat-stat.borda-amber .fat-stat-ico { background:#FEF3C7; color:#92400E; }
 .fat-stat.borda-purple { border-top: 3px solid var(--purple); } .fat-stat.borda-purple .fat-stat-ico { background:#EDE9FE; color:#5B21B6; }
@@ -397,7 +397,7 @@ body.embedded-mode .portal-menu-fab { display:flex; }
       <div class="sb-item" onclick="nav('dashboard')" id="ni-dashboard"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></span> Demonstrativo</div>
       <div class="sb-item" onclick="nav('historico')" id="ni-historico"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg></span> Historico</div>
       <div class="sb-item" onclick="nav('perfil')" id="ni-perfil"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> Meu Perfil</div>
-      <div class="sb-item" onclick="nav('admin-faturamento')" id="ni-admin-faturamento"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span> Faturamento</div>
+      <div class="sb-item" onclick="nav('admin-faturamento')" id="ni-admin-faturamento"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span> <span id="ni-admin-faturamento-label">Faturamento</span></div>
       <div id="admin-nav" class="hidden">
         <div class="sb-section">Administracao</div>
         <div class="sb-item" onclick="nav('admin-overview')" id="ni-admin-overview"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg></span> Visao Geral</div>
@@ -1591,6 +1591,9 @@ async function renderAdminFaturamento() {
   // Esconde itens só-admin se não for admin
   const isAdm = fatIsAdmin();
   document.querySelectorAll('.fat-admin-only').forEach(el => el.style.display = isAdm ? '' : 'none');
+  // Renomeia o item do menu para o consultor
+  const lbl = document.getElementById('ni-admin-faturamento-label');
+  if (lbl) lbl.textContent = isAdm ? 'Faturamento' : 'Meus Processos';
   const subtitulo = document.getElementById('fat-subtitulo');
   if (subtitulo) {
     subtitulo.textContent = isAdm
@@ -1906,6 +1909,8 @@ async function fatVerProcesso(id) {
             <div class="fat-step-lbl">${e.status}</div>
           </div>`).join('')}
       </div>
+
+      ${!isAdm ? `
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0 20px;padding:16px;background:var(--bg);border-radius:8px;margin-bottom:20px;">
         <div class="fat-dado"><div class="fat-dado-label">Grupo</div><div class="fat-dado-valor">${esc(proc.grupo || '—')}</div></div>
         <div class="fat-dado"><div class="fat-dado-label">Cota</div><div class="fat-dado-valor">${esc(proc.cota || '—')}</div></div>
@@ -1914,6 +1919,7 @@ async function fatVerProcesso(id) {
         <div class="fat-dado"><div class="fat-dado-label">Corretor</div><div class="fat-dado-valor">${esc(proc.corretor || '—')}</div></div>
         <div class="fat-dado" style="grid-column:1/-1;"><div class="fat-dado-label">Observações</div><div class="fat-dado-valor" style="font-size:11px;color:var(--text2);">${esc(proc.descricao || '—')}</div></div>
       </div>
+      ` : ''}
 
       <div class="fat-detalhe-grid">
         <div>

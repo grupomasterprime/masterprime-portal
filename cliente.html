@@ -39,19 +39,13 @@
     /* ─── Header ─── */
     .header{
       background:linear-gradient(135deg, var(--mp-navy) 0%, var(--mp-navy-2) 100%);
-      padding:0 28px; height:62px;
+      padding:0 28px; height:68px;
       display:flex; align-items:center; justify-content:space-between;
       box-shadow:0 2px 14px rgba(45,63,94,.18);
       position:sticky; top:0; z-index:20;
     }
-    .header-logo{font-size:16px;font-weight:800;color:#fff;letter-spacing:-.4px;display:flex;align-items:center;gap:10px}
-    .header-logo .logo-mark{
-      width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.12);
-      display:flex;align-items:center;justify-content:center;
-      font-weight:900;font-size:13px;color:var(--mp-yellow);
-      border:1px solid rgba(255,255,255,.16);
-    }
-    .header-logo span{color:var(--mp-teal)}
+    .header-logo{display:flex;align-items:center;gap:10px}
+    .header-logo img{height:38px;width:auto;display:block;filter:brightness(0) invert(1);}
     .header-right{display:flex;align-items:center;gap:14px}
     .header-tag{
       font-size:10px;font-weight:700;
@@ -468,8 +462,7 @@
 
 <header class="header">
   <div class="header-logo">
-    <div class="logo-mark">M</div>
-    <div>Master<span>Prime</span></div>
+    <img src="logo.png" alt="Master Prime">
   </div>
   <div class="header-right">
     <span class="header-tag">Portal do Cliente</span>
