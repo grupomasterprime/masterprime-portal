@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="pdf-master-prime.js"></script>
 <style>
   :root {
     --mp-navy: #2D3F5E;
@@ -325,6 +326,7 @@
   </div>
 
   <div class="actions">
+    <button type="button" id="baixarPdfPorto" class="primary" style="margin-right:8px;">Baixar PDF</button>
     <button class="secondary" id="btnLimparTudo">Limpar tudo</button>
   </div>
 </main>
@@ -733,6 +735,159 @@ get('pi-modal-pctLivre').addEventListener('keydown', e => {
 
 // inicial
 recalc();
+
+// ═════════════════════════════════════════════════════════════
+// PDF — usa módulo compartilhado pdf-master-prime.js
+// ═════════════════════════════════════════════════════════════
+function _coletarBlocosPortoImovel() {
+  const _v = (id) => { const el = document.getElementById(id); return (el?.value || '').trim(); };
+  const _t = (id) => { const el = document.getElementById(id); return (el?.textContent || '').trim(); };
+  const _selTxt = (id) => { const el = document.getElementById(id); return (el?.selectedOptions?.[0]?.textContent || '').trim() || '—'; };
+  const _has = (s) => s && s !== '—' && s !== '?' && s !== '';
+
+  const tipoTxt = _selTxt('pi-tipo');
+  const redutorTxt = _selTxt('pi-redutor');
+  const prazoVal = _v('pi-prazo');
+  const adesaoQtd = _v('pi-qtdAdesao');
+  const contemplaN = parseInt(_v('pi-contempla') || '0', 10) || 0;
+
+  // ─── BLOCO 1: PROPOSTA ───
+  const propostaLinha1Campos = [
+    { label: 'Crédito Contratado', value: _v('pi-credito') || 'R$ 0,00' },
+    { label: 'Tipo', value: tipoTxt },
+    { label: 'Prazo total', value: (prazoVal || '0') + ' meses' },
+    { label: 'Redutor', value: redutorTxt }
+  ];
+
+  const propostaLinha2Campos = [];
+  if (_has(adesaoQtd)) propostaLinha2Campos.push({ label: 'Decomposição adesão', value: adesaoQtd + ' primeiras parcelas' });
+  if (contemplaN > 0) propostaLinha2Campos.push({ label: 'Contemplação na parcela', value: String(contemplaN) });
+  const saldoDevedor = _t('pi-saldoDevedor');
+  if (_has(saldoDevedor)) propostaLinha2Campos.push({ label: 'Saldo devedor', value: saldoDevedor });
+
+  const propostaLinhas = [
+    { campos: propostaLinha1Campos, destaque: { label: 'Categoria', value: _t('pi-categoria') || '—' } }
+  ];
+  if (propostaLinha2Campos.length) propostaLinhas.push({ campos: propostaLinha2Campos });
+
+  // ─── BLOCO 2: TAXAS DO GRUPO ───
+  const taxaMes = _t('pi-taxaMes');
+  const taxaAno = _t('pi-taxaAno');
+  const taxaCombo = (_has(taxaMes) || _has(taxaAno))
+    ? `${taxaMes || '—'} a.m. · ${taxaAno || '—'} a.a.`
+    : '—';
+
+  const taxasLinhas = [{
+    campos: [
+      { label: 'Taxa antecipada (adesão)', value: _v('pi-adesao') || '0,00 %' },
+      { label: 'Taxa administrativa', value: _v('pi-taxaAdm') || '0,00 %' },
+      { label: 'Fundo de reserva', value: _v('pi-fundo') || '0,00 %' },
+      { label: 'Seguro de vida (PF)', value: _v('pi-seguro') || '0,0000 %' }
+    ],
+    destaque: { label: 'Taxa por mês / ano', value: taxaCombo }
+  }];
+
+  // ─── BLOCO 3: OFERTA DE LANCE ───
+  const lanceCampos = [
+    { label: 'Recurso próprio', value: _v('pi-recProp') || 'R$ 0,00' },
+    { label: 'FGTS', value: _v('pi-fgts') || 'R$ 0,00' },
+    { label: 'Embutido', value: _v('pi-embutido') || 'R$ 0,00' }
+  ];
+  const lanceLinhas = [{
+    campos: lanceCampos,
+    destaque: { label: 'Representatividade', value: _t('pi-representatividade') || '—' }
+  }];
+
+  // ─── BLOCOS ───
+  const blocos = [
+    { tipo: 'card', titulo: 'PROPOSTA', linhas: propostaLinhas },
+    { tipo: 'card', titulo: 'TAXAS DO GRUPO', linhas: taxasLinhas },
+    { tipo: 'card', titulo: 'OFERTA DE LANCE', linhas: lanceLinhas }
+  ];
+
+  // ─── BLOCO 4: ESTIMATIVA PÓS-CONTEMPLAÇÃO (só se contempla > 0) ───
+  if (contemplaN > 0) {
+    const credLib = _t('pi-creditoLiberado');
+    const saldoPos = _t('pi-saldoPos');
+    const novoSeg = _t('pi-novoSeguro');
+    const novaParc = _t('pi-novaParcela');
+    const novoPrazo = _t('pi-novoPrazo');
+    const prazoRed = _t('pi-prazoReduzido');
+    const parcSeRedPrazo = _t('pi-parcelaSeReduzPrazo');
+
+    const posCampos1 = [];
+    if (_has(credLib)) posCampos1.push({ label: 'Crédito liberado', value: credLib });
+    if (_has(saldoPos)) posCampos1.push({ label: 'Saldo devedor pós', value: saldoPos });
+    if (_has(novoSeg)) posCampos1.push({ label: 'Novo seguro mensal (PF)', value: novoSeg });
+
+    const posLinhas = [];
+    if (posCampos1.length) posLinhas.push({ campos: posCampos1 });
+    posLinhas.push({
+      campos: [
+        { label: 'Nova parcela', value: novaParc || '—' },
+        { label: 'Prazo restante (referência)', value: novoPrazo || '—' }
+      ],
+      destaque: { label: 'Abatimento na parcela', value: novaParc || '—' }
+    });
+    posLinhas.push({
+      campos: [
+        { label: 'Prazo restante (reduzir prazo)', value: prazoRed || '—' },
+        { label: 'Com parcela de', value: parcSeRedPrazo || '—' }
+      ],
+      destaque: { label: 'Reduzir somente o prazo', value: prazoRed || '—' }
+    });
+
+    blocos.push({ tipo: 'card', titulo: 'ESTIMATIVA PÓS-CONTEMPLAÇÃO', linhas: posLinhas });
+  }
+
+  // ─── BLOCO 5: RESUMO DE PARCELAS ───
+  const lblInicial = _t('pi-lblParcelaInicial') || '1ª a 12ª (com adesão)';
+  const lblDemais = _t('pi-lblParcelaDemais') || 'Demais parcelas';
+  const resumoLinhas = [
+    { campos: [
+        { label: 'Parcela integral · PF', value: _t('pi-parcelaPF') || '—' },
+        { label: 'Parcela integral · PJ', value: _t('pi-parcelaPJ') || '—' }
+      ]
+    },
+    { campos: [
+        { label: 'Parcela reduzida · PF', value: _t('pi-parcelaReduzPF') || '—' },
+        { label: 'Parcela reduzida · PJ', value: _t('pi-parcelaReduzPJ') || '—' }
+      ]
+    },
+    { campos: [
+        { label: lblInicial, value: _t('pi-parcelaInicial') || '—' },
+        { label: lblDemais, value: _t('pi-parcelaDemais') || '—' }
+      ],
+      destaque: { multi: [
+        { label: lblInicial, value: _t('pi-parcelaInicial') || '—' },
+        { label: lblDemais, value: _t('pi-parcelaDemais') || '—' }
+      ]}
+    }
+  ];
+  blocos.push({ tipo: 'card', titulo: 'RESUMO DE PARCELAS', linhas: resumoLinhas });
+
+  return blocos;
+}
+
+document.getElementById('baixarPdfPorto').addEventListener('click', async () => {
+  const btn = document.getElementById('baixarPdfPorto');
+  const txt = btn.textContent;
+  btn.textContent = 'Gerando PDF...';
+  btn.disabled = true;
+  try {
+    await PdfMasterPrime.gerar({
+      tituloEstrategia: 'Porto · Consórcio Imóvel',
+      filename: 'porto-consorcio-imovel',
+      blocos: _coletarBlocosPortoImovel()
+    });
+  } catch (err) {
+    console.error(err);
+    alert('Erro ao gerar PDF: ' + err.message);
+  } finally {
+    btn.textContent = txt;
+    btn.disabled = false;
+  }
+});
 </script>
 
 </body>
