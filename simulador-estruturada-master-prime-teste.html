@@ -926,13 +926,13 @@ function renderOps() {
   document.getElementById('rs_cetMensal').textContent = formatPct(cetMensalMed, 2);
   document.getElementById('rs_cetAnual').textContent = formatPct(cetAnualMed, 2);
 
-  // Salva estado para Analítico — agregado de N operações
+  // Salva estado para Analítico — agregado de N operações (formato narrativo)
   if (window.AnaliticoCet) {
     const fmt$ = AnaliticoCet.fmt;
     const linhasOps = operacoes.map((op, i) => `
       <div class="ace-mem-step">
-        <span><strong>Op ${i+1}</strong>${op.grupo? ' · '+op.grupo:''} (${op.qtdCartas||1} carta${(op.qtdCartas||1)>1?'s':''}): CET mensal × peso (${fmt$(op.totalCarta||0)})</span>
-        <span class="ace-mem-res">${(op.cetMensal||0).toFixed(4)} %</span>
+        <span>&nbsp;&nbsp;&nbsp;<strong>Op ${i+1}</strong>${op.grupo? ' · grupo '+op.grupo:''} (${op.qtdCartas||1} carta${(op.qtdCartas||1)>1?'s':''}, total ${fmt$(op.totalCarta||0)})</span>
+        <span class="ace-mem-res">${(op.cetMensal||0).toFixed(4)} % a.m.</span>
       </div>
     `).join('');
     AnaliticoCet.set('agregado', {
@@ -944,17 +944,25 @@ function renderOps() {
       prazoRestPos: restMed,
       memoriaHtml: `
         <div class="ace-mem-step">
-          <span><strong>Total de cartas</strong> (soma das ${operacoes.length} operações)</span>
-          <span class="ace-mem-res">${fmt$(sumTotal)}</span>
+          <span><strong>1.</strong> Você está estruturando <strong>${operacoes.length} operação${operacoes.length>1?'ões':''}</strong>:</span>
+          <span class="ace-mem-res"></span>
         </div>
         ${linhasOps}
         <div class="ace-mem-step">
-          <span><strong>CET mensal médio</strong> (ponderado por valor de cada operação)</span>
+          <span><strong>2.</strong> Soma de todos os créditos:</span>
+          <span class="ace-mem-res">${fmt$(sumTotal)}</span>
+        </div>
+        <div class="ace-mem-step">
+          <span><strong>3.</strong> CET mensal médio, ponderado pelo valor de cada operação:</span>
           <span class="ace-mem-res">${formatPct(cetMensalMed, 4)}</span>
         </div>
         <div class="ace-mem-step dest">
-          <span><strong>CET anual</strong> = (1 + CET mensal médio)^12 − 1</span>
+          <span><strong>4.</strong> A mesma taxa, expressa em base <strong>anual</strong>:</span>
           <span class="ace-mem-res">${formatPct(cetAnualMed, 2)}</span>
+        </div>
+        <div class="ace-mem-step" style="border-bottom:none;font-size:11.5px;color:#6B7280;font-style:italic;padding-top:10px;">
+          <span>Cada operação tem seu próprio CET (clique no olho de cada card para ver o detalhe). Esta vista mostra a taxa equivalente do conjunto.</span>
+          <span></span>
         </div>
       `,
     });

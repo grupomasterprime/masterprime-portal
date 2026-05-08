@@ -579,33 +579,56 @@ function recalc(){
     const fmt$ = AnaliticoCet.fmt;
     function memCons(parcelaPos, prazoFinal, cet) {
       const sumPar = calcSumParcelas(parcelaPos, prazoFinal);
-      const custo = sumPar + valorTotalLance - credito;
+      const totalDesembolso = sumPar + valorTotalLance;
+      const custo = totalDesembolso - credito;
       const disponivel = credito - lanceProprios_v;
-      const ratio = disponivel > 0 ? custo / disponivel : 0;
+      const proporcao = disponivel > 0 ? custo / disponivel : 0;
+      const reajPct = (reajuste || 0) * 100;
+      const reajPer = tipoReajuste && tipoReajuste.includes('mensal') ? 'mensal'
+                     : tipoReajuste && tipoReajuste.includes('semestral') ? 'semestral'
+                     : 'anual';
+      const reajTxt = reajPct > 0 ? `, com reajuste ${reajPer} de ${reajPct.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:2})} %` : '';
+      const propPct = (proporcao*100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
       return `
         <div class="ace-mem-step">
-          <span><strong>Σ parcelas</strong> (com reajustes ano a ano até prazo ${prazoFinal})</span>
+          <span><strong>1.</strong> Você vai pagar <strong>${prazoFinal} parcelas</strong>${reajTxt}. Somando todas:</span>
           <span class="ace-mem-res">${fmt$(sumPar)}</span>
         </div>
         <div class="ace-mem-step">
-          <span><strong>Custo</strong> = Σ parcelas + lance total − crédito</span>
+          <span><strong>2.</strong> Lance que você vai dar:</span>
+          <span class="ace-mem-res">${fmt$(valorTotalLance)}</span>
+        </div>
+        <div class="ace-mem-step">
+          <span><strong>3.</strong> Total que vai sair do seu bolso (1 + 2):</span>
+          <span class="ace-mem-res">${fmt$(totalDesembolso)}</span>
+        </div>
+        <div class="ace-mem-step">
+          <span><strong>4.</strong> Crédito que você vai receber:</span>
+          <span class="ace-mem-res">${fmt$(credito)}</span>
+        </div>
+        <div class="ace-mem-step">
+          <span><strong>5.</strong> Custo da operação para você (3 − 4):</span>
           <span class="ace-mem-res">${fmt$(custo)}</span>
         </div>
         <div class="ace-mem-step">
-          <span><strong>Disponível</strong> = crédito − lance próprios</span>
+          <span><strong>6.</strong> Capital líquido que efetivamente entrou pra você (crédito − seu lance próprio):</span>
           <span class="ace-mem-res">${fmt$(disponivel)}</span>
         </div>
         <div class="ace-mem-step">
-          <span><strong>Razão</strong> = custo / disponível</span>
-          <span class="ace-mem-res">${ratio.toFixed(4)}</span>
+          <span><strong>7.</strong> O custo representa <strong>${propPct} %</strong> do capital líquido (${fmt$(custo)} ÷ ${fmt$(disponivel)}).</span>
+          <span class="ace-mem-res">${propPct} %</span>
         </div>
         <div class="ace-mem-step">
-          <span><strong>CET mensal</strong> = (1 + razão)^(1/${prazoFinal}) − 1</span>
+          <span><strong>8.</strong> Distribuindo esse custo proporcionalmente ao longo de ${prazoFinal} meses, chegamos à taxa <strong>mensal</strong>:</span>
           <span class="ace-mem-res">${(cet.m).toFixed(2)} %</span>
         </div>
         <div class="ace-mem-step dest">
-          <span><strong>CET anual</strong> = (1 + CET mensal)^12 − 1</span>
+          <span><strong>9.</strong> A mesma taxa, expressa em base <strong>anual</strong>:</span>
           <span class="ace-mem-res">${(cet.a).toFixed(2)} %</span>
+        </div>
+        <div class="ace-mem-step" style="border-bottom:none;font-size:11.5px;color:#6B7280;font-style:italic;padding-top:10px;">
+          <span>Esta é a taxa equivalente — comparável diretamente com a taxa de um financiamento bancário.</span>
+          <span></span>
         </div>
       `;
     }

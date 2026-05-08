@@ -797,41 +797,63 @@ function abrirAnalitico(modo) {
   const fmt = (v) => 'R$ ' + Number(v||0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const fmtPct = (v, casas) => Number(v*100||0).toLocaleString('pt-BR', { minimumFractionDigits: casas||2, maximumFractionDigits: casas||2 }) + ' %';
 
-  // Memória de cálculo do CET (v2 — com reajuste cumulativo)
+  // Memória de cálculo do CET (formato narrativo, didático para apresentar ao cliente)
   const lanceProprios_v = s.lanceProprios_v;
   const totalPagas = (modo === 'parcela' ? s.totalPagasParcela : s.totalPagasPrazo) || totalGeral;
-  const custo = totalPagas + s.valorTotalLance - s.credito;
+  const totalDesembolso = totalPagas + s.valorTotalLance;
+  const custo = totalDesembolso - s.credito;
   const disponivel = s.credito - lanceProprios_v;
-  const ratio = disponivel > 0 ? custo / disponivel : 0;
+  const proporcao = disponivel > 0 ? custo / disponivel : 0;
   const prazoEf = modo === 'parcela' ? s.prazoTotal : (s.expectativa + s.prazoRestPrazo);
   const cetMensal = modo === 'parcela' ? s.cetParcMensal : s.cetPrazoMensal;
   const cetAnual = modo === 'parcela' ? s.cetParcAnual : s.cetPrazoAnual;
+  const reajPct = (s.reajuste || 0) * 100;
+  const reajPer = s.tipoReajuste && s.tipoReajuste.includes('mensal') ? 'mensal'
+                 : s.tipoReajuste && s.tipoReajuste.includes('semestral') ? 'semestral'
+                 : 'anual';
+  const reajTxt = reajPct > 0 ? `, com reajuste ${reajPer} de ${reajPct.toLocaleString('pt-BR', {minimumFractionDigits:0, maximumFractionDigits:2})} %` : '';
 
   document.getElementById('memoriaCet').innerHTML = `
-    <h4>Memória de cálculo do CET</h4>
+    <h4>Como chegamos no seu CET</h4>
     <div class="memoria-cet-step">
-      <span><strong>Total parcelas pagas</strong> = Σ parcelas com reajuste cumulativo (${prazoEf} meses)</span>
+      <span><strong>1.</strong> Você vai pagar <strong>${prazoEf} parcelas</strong>${reajTxt}. Somando todas:</span>
       <span class="memoria-cet-resultado">${fmt(totalPagas)}</span>
     </div>
     <div class="memoria-cet-step">
-      <span><strong>Custo</strong> = total pagas + lance total − crédito = ${fmt(totalPagas)} + ${fmt(s.valorTotalLance)} − ${fmt(s.credito)}</span>
+      <span><strong>2.</strong> Lance que você vai dar:</span>
+      <span class="memoria-cet-resultado">${fmt(s.valorTotalLance)}</span>
+    </div>
+    <div class="memoria-cet-step">
+      <span><strong>3.</strong> Total que vai sair do seu bolso (1 + 2):</span>
+      <span class="memoria-cet-resultado">${fmt(totalDesembolso)}</span>
+    </div>
+    <div class="memoria-cet-step">
+      <span><strong>4.</strong> Crédito que você vai receber:</span>
+      <span class="memoria-cet-resultado">${fmt(s.credito)}</span>
+    </div>
+    <div class="memoria-cet-step">
+      <span><strong>5.</strong> Custo da operação para você (3 − 4):</span>
       <span class="memoria-cet-resultado">${fmt(custo)}</span>
     </div>
     <div class="memoria-cet-step">
-      <span><strong>Disponível</strong> = crédito − lance próprios = ${fmt(s.credito)} − ${fmt(lanceProprios_v)}</span>
+      <span><strong>6.</strong> Capital líquido que efetivamente entrou pra você (crédito − seu lance próprio):</span>
       <span class="memoria-cet-resultado">${fmt(disponivel)}</span>
     </div>
     <div class="memoria-cet-step">
-      <span><strong>Razão</strong> = custo / disponível</span>
-      <span class="memoria-cet-resultado">${(ratio).toFixed(4)}</span>
+      <span><strong>7.</strong> O custo representa <strong>${(proporcao*100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})} %</strong> do capital líquido (${fmt(custo)} ÷ ${fmt(disponivel)}).</span>
+      <span class="memoria-cet-resultado">${(proporcao*100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})} %</span>
     </div>
     <div class="memoria-cet-step">
-      <span><strong>CET mensal</strong> = (1 + razão)^(1/${prazoEf}) − 1</span>
+      <span><strong>8.</strong> Distribuindo esse custo proporcionalmente ao longo de ${prazoEf} meses, chegamos à taxa <strong>mensal</strong>:</span>
       <span class="memoria-cet-resultado">${fmtPct(cetMensal, 2)}</span>
     </div>
     <div class="memoria-cet-step destaque">
-      <span><strong>CET anual</strong> = (1 + CET mensal)^12 − 1</span>
+      <span><strong>9.</strong> A mesma taxa, expressa em base <strong>anual</strong>:</span>
       <span class="memoria-cet-resultado">${fmtPct(cetAnual, 2)}</span>
+    </div>
+    <div class="memoria-cet-step" style="border-bottom:none;font-size:11.5px;color:#6B7280;font-style:italic;padding-top:10px;">
+      <span>Esta é a taxa equivalente — comparável diretamente com a taxa de um financiamento bancário.</span>
+      <span></span>
     </div>
   `;
 

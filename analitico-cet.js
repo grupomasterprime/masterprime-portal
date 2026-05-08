@@ -192,42 +192,61 @@
       // Caller passou HTML pronto (fórmula específica do simulador)
       memHTML = `<h4>Memória de cálculo do CET</h4>${d.memoriaHtml}`;
     } else {
-      // Fórmula padrão Conkey v2 (com reajuste cumulativo)
-      //   custo      = Σ parcelas (com reaj) + lance total − crédito
-      //   disponível = crédito − lance próprios
-      //   mensal     = (1 + custo / disponível)^(1 / prazoEf) − 1
+      // Memória narrativa (formato didático para apresentar ao cliente)
       const lanceProp = d.lanceProprios || 0;
       const lanceTotal = d.valorTotalLance != null ? d.valorTotalLance : lanceProp;
-      const custo = totalGeral + lanceTotal - d.credito;
+      const totalDesembolso = totalGeral + lanceTotal;
+      const custo = totalDesembolso - d.credito;
       const disponivel = d.credito - lanceProp;
-      const ratio = disponivel > 0 ? custo/disponivel : 0;
+      const proporcao = disponivel > 0 ? custo/disponivel : 0;
       const prazoEf = d.prazoEf || (exp + prazoRestPos);
+      const reajPct = (d.reajuste || 0) * 100;
+      const reajPer = d.tipoReajuste && d.tipoReajuste.includes('mensal') ? 'mensal'
+                     : d.tipoReajuste && d.tipoReajuste.includes('semestral') ? 'semestral'
+                     : 'anual';
+      const reajTxt = reajPct > 0 ? `, com reajuste ${reajPer} de ${reajPct.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:2})} %` : '';
 
       memHTML = `
-        <h4>Memória de cálculo do CET</h4>
+        <h4>Como chegamos no CET</h4>
         <div class="ace-mem-step">
-          <span><strong>Total parcelas pagas</strong> = Σ parcelas com reajuste cumulativo (${prazoEf} meses)</span>
+          <span><strong>1.</strong> Você vai pagar <strong>${prazoEf} parcelas</strong>${reajTxt}. Somando todas:</span>
           <span class="ace-mem-res">${fmt(totalGeral)}</span>
         </div>
         <div class="ace-mem-step">
-          <span><strong>Custo</strong> = total pagas + lance total − crédito = ${fmt(totalGeral)} + ${fmt(lanceTotal)} − ${fmt(d.credito)}</span>
+          <span><strong>2.</strong> Lance que você vai dar:</span>
+          <span class="ace-mem-res">${fmt(lanceTotal)}</span>
+        </div>
+        <div class="ace-mem-step">
+          <span><strong>3.</strong> Total que vai sair do seu bolso (1 + 2):</span>
+          <span class="ace-mem-res">${fmt(totalDesembolso)}</span>
+        </div>
+        <div class="ace-mem-step">
+          <span><strong>4.</strong> Crédito que você vai receber:</span>
+          <span class="ace-mem-res">${fmt(d.credito)}</span>
+        </div>
+        <div class="ace-mem-step">
+          <span><strong>5.</strong> Custo da operação para você (3 − 4):</span>
           <span class="ace-mem-res">${fmt(custo)}</span>
         </div>
         <div class="ace-mem-step">
-          <span><strong>Disponível</strong> = crédito − lance próprios = ${fmt(d.credito)} − ${fmt(lanceProp)}</span>
+          <span><strong>6.</strong> Capital líquido que efetivamente entrou pra você (crédito − seu lance próprio):</span>
           <span class="ace-mem-res">${fmt(disponivel)}</span>
         </div>
         <div class="ace-mem-step">
-          <span><strong>Razão</strong> = custo / disponível</span>
-          <span class="ace-mem-res">${ratio.toFixed(4)}</span>
+          <span><strong>7.</strong> O custo representa <strong>${(proporcao*100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})} %</strong> do capital líquido (${fmt(custo)} ÷ ${fmt(disponivel)}).</span>
+          <span class="ace-mem-res">${(proporcao*100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})} %</span>
         </div>
         <div class="ace-mem-step">
-          <span><strong>CET mensal</strong> = (1 + razão)^(1/${prazoEf}) − 1</span>
+          <span><strong>8.</strong> Distribuindo esse custo proporcionalmente ao longo de ${prazoEf} meses, chegamos à taxa <strong>mensal</strong>:</span>
           <span class="ace-mem-res">${fmtPct(d.cetMensal||0, 2)}</span>
         </div>
         <div class="ace-mem-step dest">
-          <span><strong>CET anual</strong> = (1 + CET mensal)^12 − 1</span>
+          <span><strong>9.</strong> A mesma taxa, expressa em base <strong>anual</strong>:</span>
           <span class="ace-mem-res">${fmtPct(d.cetAnual||0, 2)}</span>
+        </div>
+        <div class="ace-mem-step" style="border-bottom:none;font-size:11.5px;color:#6B7280;font-style:italic;padding-top:10px;">
+          <span>Esta é a taxa equivalente — comparável diretamente com a taxa de um financiamento bancário.</span>
+          <span></span>
         </div>
       `;
     }
