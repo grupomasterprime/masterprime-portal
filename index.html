@@ -2032,7 +2032,7 @@ async function fatVerProcesso(id) {
           <div class="fat-col-card">
             <div class="fat-col-titulo">${SVG_REFRESH} Atualizar status</div>
             <select id="fat-novo-status-${proc.id}" class="login-input" style="font-size:12.5px;padding:9px 12px;margin-bottom:8px;border:1px solid var(--border2);border-radius:8px;width:100%;">${statusOpts}</select>
-            <textarea id="fat-obs-status-${proc.id}" placeholder="Observação para o histórico (opcional)..." style="padding:9px 12px;border:1px solid var(--border2);border-radius:8px;font-family:'Inter';font-size:12px;min-height:64px;resize:vertical;outline:none;width:100%;margin-bottom:10px;"></textarea>
+            <textarea id="fat-obs-status-${proc.id}" placeholder="Dados bancários..." style="padding:9px 12px;border:1px solid var(--border2);border-radius:8px;font-family:'Inter';font-size:12px;min-height:64px;resize:vertical;outline:none;width:100%;margin-bottom:10px;"></textarea>
             <button class="btn btn-primary btn-sm" onclick='fatAtualizarStatus(${procIdArg})'>Salvar status</button>
           </div>
           ` : `
