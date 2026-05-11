@@ -1120,6 +1120,7 @@ async function adminUpload(evt) {
     msg += ` &middot; <a href="#" onclick="nav('admin-users');return false;" style="color:var(--mp-navy);font-weight:600">Ver usuários &rarr;</a></div>`;
     res.innerHTML = msg;
     await renderAdminMeses(); await renderUsers(); await renderDashboard(); await renderHistorico(); await renderAdminOverview();
+    iniciarNotificacoesRealtime();
   } catch(e) { res.innerHTML = `<div class="alert alert-err">Erro: ${e.message}</div>`; }
 }
 async function renderAdminMeses() {
