@@ -733,11 +733,9 @@
     document.body.appendChild(wrap);
 
     try {
-      // Aguarda fonts (Source Serif via Google Fonts) carregarem
-      if (document.fonts && document.fonts.ready) {
-        try { await document.fonts.ready; } catch (e) {}
-      }
-      await new Promise(r => setTimeout(r, 800));
+      // Aguarda layout + fonts. Não usa document.fonts.ready (pode travar).
+      // 1200ms dá tempo do Google Fonts (Source Serif 4) baixar e aplicar.
+      await new Promise(r => setTimeout(r, 1200));
 
       const target = wrap.firstElementChild;
       const canvas = await html2canvas(target, {
