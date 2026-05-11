@@ -86,6 +86,9 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
 .sim-card.cat-itau::before { background: #EC7000; }
 .sim-card.cat-itau .sim-icon { background: linear-gradient(135deg, #FFF4E8, #FFE6CB); color: #EC7000; }
 .sim-card.cat-itau:hover { border-color: #EC7000; }
+.sim-card.cat-bradesco::before { background: #CC092F; }
+.sim-card.cat-bradesco .sim-icon { background: linear-gradient(135deg, #FFE9EC, #FFD0D5); color: #CC092F; }
+.sim-card.cat-bradesco:hover { border-color: #CC092F; }
 .sim-icon-img { background: transparent !important; padding: 0 !important; overflow: hidden; }
 .sim-icon-img img { width: 100%; height: 100%; object-fit: contain; display: block; }
 
@@ -172,6 +175,13 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
       <div class="sim-icon sim-icon-img"><img src="logo-itau.png" alt="Itaú" onerror="this.style.display='none'"></div>
       <div class="name">Itaú Consórcio</div>
       <div class="desc">Simuladores Itaú: Parcela Integral e Parcela Reduzida (até a contemplação).</div>
+      <div class="arrow">Abrir &rarr;</div>
+    </div>
+
+    <div class="sim-card cat-bradesco" onclick="openSim('bradesco', 'Bradesco · Consórcio', 'simulador-bradesco.html')">
+      <div class="sim-icon sim-icon-img"><img src="logo-bradesco.png" alt="Bradesco" onerror="this.style.display='none'"></div>
+      <div class="name">Bradesco Consórcio</div>
+      <div class="desc">Simulador Bradesco: lance com Diluir nas Parcelas ou Antecipar Parcelas.</div>
       <div class="arrow">Abrir &rarr;</div>
     </div>
 
