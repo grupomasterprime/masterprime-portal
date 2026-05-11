@@ -3,1072 +3,1159 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Master Prime — Faturamento</title>
+<title>Master Prime — Solicitar Adesão</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-/* ══════════════════════════════════════════════════════
-   FATURAMENTO — Tela Standalone (carregada via iframe)
-   Compartilha o design system do Portal do Consultor.
-   ══════════════════════════════════════════════════════ */
 :root {
-  --mp-navy:    #2D3F5E;
-  --mp-yellow:  #C8C84A;
-  --mp-teal:    #4DBCC8;
-  --mp-blue:    #7A9BC8;
-  --mp-white:   #FFFFFF;
-  --bg:         #F4F6FA;
-  --card:       #FFFFFF;
-  --border:     #E2E8F0;
-  --border2:    #CBD5E1;
-  --text:       #1E293B;
-  --text2:      #64748B;
-  --text3:      #94A3B8;
-  --green:  #16A34A;  --green-bg: #F0FDF4;
-  --red:    #DC2626;  --red-bg: #FEF2F2;
-  --amber:  #D97706;  --amber-bg: #FFFBEB;
-  --blue:   #2563EB;  --blue-bg:#EFF6FF;
-  --purple: #7C3AED;
+  --mp-navy:   #e7eb16dc;
+  --mp-yellow: #C8C84A;
+  --mp-teal:   #4DBCC8;
+  --bg:        #F4F6FA;
+  --card:      #FFFFFF;
+  --border:    #E2E8F0;
+  --border2:   #CBD5E1;
+  --text:      #1E293B;
+  --text2:     #64748B;
+  --text3:     #94A3B8;
+  --green:     #16A34A; --green-bg: #F0FDF4;
+  --red:       #DC2626; --red-bg:   #FEF2F2;
+  --amber:     #D97706; --amber-bg: #FFFBEB;
+  --blue:      #2563EB; --blue-bg:  #EFF6FF;
   --r: 10px;
   --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
-  --shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.05);
+  --shadow-md: 0 4px 16px rgba(0,0,0,.10);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; min-height: 100vh; padding: 28px 24px 60px; }
-.mono { font-family: 'DM Mono', monospace; }
-.hidden { display: none !important; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; min-height: 100vh; }
 
-/* Page title / sub */
-.page-title { font-size: 22px; font-weight: 700; color: var(--mp-navy); margin-bottom: 4px; }
-.page-sub { font-size: 12px; color: var(--text2); margin-bottom: 28px; }
+.pub-header {
+  background: linear-gradient(135deg, var(--mp-navy) 0%, #1a2a42 100%);
+  color: #fff; padding: 0 24px;
+  position: sticky; top: 0; z-index: 50;
+  box-shadow: 0 2px 12px rgba(0,0,0,.2);
+}
+.pub-header-inner {
+  max-width: 860px; margin: 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 60px;
+}
+.pub-logo { display: flex; align-items: center; gap: 12px; }
+.pub-logo img { height: 80px; display: block; }
+.pub-badge {
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
+  border-radius: 6px; padding: 5px 10px; font-size: 10px; color: rgba(255,255,255,.7);
+  display: flex; align-items: center; gap: 6px;
+}
+.pub-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #22C55E; }
 
-/* Spinner */
-.spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--mp-teal); border-radius: 50%; animation: spin .8s linear infinite; }
-.spinner-dark { border-color: #E2E8F0; border-top-color: var(--mp-navy); }
-@keyframes spin { to { transform: rotate(360deg); } }
+.pub-hero {
+  background: linear-gradient(135deg, var(--mp-navy) 0%, #1a2a42 60%, #243651 100%);
+  color: #fff; padding: 48px 24px 40px; text-align: center;
+}
+.pub-hero-title { font-size: 28px; font-weight: 800; letter-spacing: -.5px; margin-bottom: 10px; }
+.pub-hero-sub { font-size: 14px; color: rgba(255,255,255,.6); max-width: 500px; margin: 0 auto 28px; line-height: 1.6; }
 
-/* Inputs (mesmo visual do login do Portal) */
-.login-label { display: block; font-size: 11px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
-.login-input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--border2); border-radius: 8px; font-size: 13px; color: var(--text); font-family: 'Inter', sans-serif; outline: none; transition: border-color .15s, box-shadow .15s; background: #fff; }
-.login-input:focus { border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,.12); }
-.login-input::placeholder { color: var(--text3); }
-select.login-input { cursor: pointer; }
+.pub-main { max-width: 860px; margin: 0 auto; padding: 32px 24px 80px; }
 
-/* Tabela base */
-.tabela { width: 100%; border-collapse: collapse; font-size: 12px; }
-.tabela th { text-align: left; padding: 10px 12px; background: #F8FAFC; color: var(--text2); font-size: 10px; text-transform: uppercase; letter-spacing: .5px; font-weight: 600; border-bottom: 1px solid var(--border); white-space: nowrap; }
-.tabela td { padding: 10px 12px; border-bottom: 1px solid #F1F5F9; vertical-align: middle; }
-.tabela tr:last-child td { border-bottom: none; }
+.adm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
+.adm-card {
+  background: var(--card); border: 2px solid var(--border);
+  border-radius: var(--r); padding: 20px; text-align: center;
+  cursor: pointer; transition: all .2s;
+}
+.adm-card:hover { border-color: var(--mp-teal); transform: translateY(-2px); box-shadow: var(--shadow-md); }
+.adm-card.selected { border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,.15), var(--shadow-md); }
+.adm-icon {
+  width: 56px; height: 56px; border-radius: 50%;
+  margin: 0 auto 12px; display: flex; align-items: center; justify-content: center;
+  font-size: 22px; font-weight: 800; transition: all .2s;
+}
+.adm-bradesco .adm-icon { background: #FEE2E2; color: #DC2626; }
+.adm-itau     .adm-icon { background: #FEF3C7; color: #D97706; }
+.adm-porto    .adm-icon { background: #EFF6FF; color: #2563EB; }
+.adm-card.selected .adm-icon { transform: scale(1.1); }
+.adm-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.adm-desc { font-size: 11px; color: var(--text2); }
+.adm-badge {
+  display: inline-block; margin-top: 10px; padding: 3px 8px;
+  border-radius: 20px; font-size: 9px; font-weight: 700;
+  background: rgba(77,188,200,.12); color: #1A7A84; letter-spacing: .5px;
+  text-transform: uppercase; opacity: 0; transition: opacity .2s;
+}
+.adm-card.selected .adm-badge { opacity: 1; }
 
-/* Tags */
-.tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px; font-size: 9.5px; font-weight: 600; font-family: 'DM Mono', monospace; }
-.tag-navy { background: rgba(45,63,94,.1); color: var(--mp-navy); }
-.tag-teal { background: rgba(77,188,200,.15); color: #1A7A84; }
-.tag-green { background: var(--green-bg); color: var(--green); }
-.tag-red { background: var(--red-bg); color: var(--red); }
-.tag-amber { background: var(--amber-bg); color: var(--amber); }
-.tag-blue { background: var(--blue-bg); color: var(--blue); }
-.tag-gray { background: #F1F5F9; color: var(--text2); }
-.tag-yellow { background: rgba(200,200,74,.15); color: #6B6B00; }
-.tag-purple { background: #EDE9FE; color: #5B21B6; }
+.section-title {
+  font-size: 12px; font-weight: 700; color: var(--text2);
+  text-transform: uppercase; letter-spacing: .8px;
+  margin: 0 0 16px; padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.section-title svg { color: var(--mp-teal); }
 
-/* Alerts */
-.alert { display: flex; align-items: flex-start; gap: 10px; padding: 12px 16px; border-radius: 8px; font-size: 12px; line-height: 1.5; margin-bottom: 12px; }
-.alert-warn { background: var(--amber-bg); color: #92400E; border: 1px solid #FDE68A; }
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r); box-shadow: var(--shadow);
+  margin-bottom: 16px; overflow: hidden;
+}
+.card-head {
+  padding: 16px 22px 14px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.card-title { font-size: 14px; font-weight: 700; color: var(--text); }
+.card-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.card-body { padding: 22px; }
 
-/* Buttons */
-.btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; border: none; font-family: 'Inter', sans-serif; transition: all .15s; }
+.tipo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.tipo-card {
+  border: 2px solid var(--border); border-radius: 8px;
+  padding: 16px; cursor: pointer; transition: all .2s;
+  display: flex; align-items: center; gap: 12px;
+}
+.tipo-card:hover { border-color: var(--mp-teal); background: #F8FDFE; }
+.tipo-card.selected { border-color: var(--mp-teal); background: #F0FBFC; }
+.tipo-icon {
+  width: 40px; height: 40px; border-radius: 8px;
+  background: var(--bg); display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: background .2s;
+}
+.tipo-card.selected .tipo-icon { background: rgba(77,188,200,.15); }
+.tipo-label { font-size: 13px; font-weight: 600; }
+.tipo-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.field { display: flex; flex-direction: column; }
+.field.span-2 { grid-column: span 2; }
+.field-label {
+  font-size: 10px; font-weight: 600; color: var(--text2);
+  text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px;
+  display: flex; align-items: center; gap: 4px;
+}
+.field-label .req { color: var(--red); }
+.field-input, .field-select {
+  width: 100%; padding: 10px 12px;
+  border: 1.5px solid var(--border2); border-radius: 8px;
+  font-size: 13px; color: var(--text); font-family: 'Inter', sans-serif;
+  outline: none; background: #fff;
+  transition: border-color .15s, box-shadow .15s;
+}
+.field-input:focus, .field-select:focus {
+  border-color: var(--mp-teal);
+  box-shadow: 0 0 0 3px rgba(77,188,200,.12);
+}
+.field-input::placeholder { color: var(--text3); }
+.field-input.error { border-color: var(--red); box-shadow: 0 0 0 3px rgba(220,38,38,.08); }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 22px; border: none; border-radius: 8px;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  font-family: 'Inter', sans-serif; transition: all .15s;
+}
 .btn-primary { background: var(--mp-navy); color: #fff; }
-.btn-primary:hover { background: #1E2D45; }
-.btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border2); }
+.btn-primary:hover { background: #1E2D45; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(45,63,94,.25); }
+.btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.btn-teal { background: var(--mp-teal); color: #fff; }
+.btn-teal:hover { background: #3AABB8; transform: translateY(-1px); }
+.btn-outline { background: transparent; color: var(--text); border: 1.5px solid var(--border2); }
 .btn-outline:hover { background: var(--bg); }
-.btn-sm { padding: 6px 12px; font-size: 11px; }
-.btn-xs { padding: 6px 11px; font-size: 11px; border-radius: 6px; }
-.btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid #FECACA; }
-.btn-danger:hover { background: #FEE2E2; }
 
-/* ═══ Faturamento (módulo de processos/protocolos do cliente) ═══ */
-.fat-filtros { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: flex-end; }
-.fat-filtros input, .fat-filtros select { padding: 9px 12px; border: 1.5px solid var(--border2); border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 12px; color: var(--text); background: var(--card); outline: none; transition: border-color .2s, box-shadow .2s; }
-.fat-filtros input:focus, .fat-filtros select:focus { border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,.12); }
-.fat-filtros input { min-width: 220px; }
-
-/* HERO do faturamento (compacto e elegante) */
-.fat-hero { display:grid; grid-template-columns:1.5fr auto; gap:20px; align-items:center; margin-bottom:18px; padding:18px 24px; border-radius:14px; background:linear-gradient(135deg, var(--mp-navy) 0%, #344A6E 100%); color:#fff; box-shadow:0 8px 20px rgba(45,63,94,.16); position:relative; overflow:hidden; }
-.fat-hero::before { content:""; position:absolute; right:-60px; top:-60px; width:200px; height:200px; border-radius:50%; background:radial-gradient(circle, rgba(77,188,200,.16), transparent 60%); pointer-events:none; }
-.fat-hero h2 { font-size:18px; font-weight:600; letter-spacing:-.2px; margin-bottom:4px; line-height:1.2; }
-.fat-hero p { font-size:12.5px; color:rgba(255,255,255,.74); line-height:1.45; max-width:520px; }
-.fat-hero-side { position:relative; z-index:1; display:flex; flex-direction:column; gap:8px; align-items:flex-end; }
-.fat-hero-tag { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:999px; background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.18); font-size:10.5px; font-weight:500; color:#fff; }
-
-/* KPIs (compactos, ícone+número) */
-.fat-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 18px; }
-.fat-stat { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; display:flex; gap:10px; align-items:center; transition:all .15s; }
-.fat-stat:hover { border-color:var(--border2); }
-.fat-stat-ico { width:32px; height:32px; border-radius:8px; flex-shrink:0; display:flex; align-items:center; justify-content:center; background:#F1F5F9; color:var(--text2); }
-.fat-stat-ico svg { width:15px; height:15px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
-.fat-stat-body { flex:1; min-width:0; }
-.fat-stat-label { font-size: 9.5px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--text2); margin-bottom: 2px; }
-.fat-stat-valor { font-size: 18px; font-weight: 600; color: var(--mp-navy); line-height: 1; letter-spacing:-.3px; }
-.fat-stat-sub { font-size: 10px; color: var(--text3); margin-top: 2px; }
-.fat-stat.borda-teal { border-top: 3px solid var(--mp-teal); } .fat-stat.borda-teal .fat-stat-ico { background:#CFFAFE; color:#0E7490; }
-.fat-stat.borda-amber { border-top: 3px solid var(--amber); } .fat-stat.borda-amber .fat-stat-ico { background:#FEF3C7; color:#92400E; }
-.fat-stat.borda-purple { border-top: 3px solid var(--purple); } .fat-stat.borda-purple .fat-stat-ico { background:#EDE9FE; color:#5B21B6; }
-.fat-stat.borda-green { border-top: 3px solid var(--green); } .fat-stat.borda-green .fat-stat-ico { background:#DCFCE7; color:#166534; }
-.fat-stat.borda-red { border-top: 3px solid var(--red); cursor:pointer; }
-.fat-stat.borda-red .fat-stat-ico { background:#FEE2E2; color:#991B1B; }
-.fat-stat.borda-red .fat-stat-valor { color:var(--red); }
-
-/* Card link fixo polido */
-.fat-link-card { background:linear-gradient(135deg, #F8FCFD 0%, #FFFFFF 100%); border:1px solid var(--border); border-left:4px solid var(--mp-teal); border-radius:14px; box-shadow:var(--shadow); padding:18px 22px; margin-bottom:18px; }
-.fat-link-card-head { display:flex; align-items:flex-start; gap:14px; margin-bottom:14px; }
-.fat-link-card-ico { width:42px; height:42px; border-radius:11px; background:linear-gradient(135deg, var(--mp-teal) 0%, var(--mp-teal-2,#3AA7B3) 100%); color:#fff; display:flex; align-items:center; justify-content:center; flex-shrink:0; box-shadow:0 4px 12px rgba(77,188,200,.30); }
-.fat-link-card-ico svg { width:20px; height:20px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
-.fat-link-card-title { font-size:14px; font-weight:700; color:var(--mp-navy); margin-bottom:2px; }
-.fat-link-card-sub { font-size:11.5px; color:var(--text2); line-height:1.5; }
-
-/* Tabela polida */
-.fat-tabela-card { background:var(--card); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow); overflow:hidden; margin-bottom:24px; }
-.fat-tabela-head { padding:18px 22px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
-.fat-tabela-titulo { font-size:14px; font-weight:700; color:var(--mp-navy); }
-.fat-tabela-sub { font-size:11.5px; color:var(--text2); margin-top:2px; }
-.fat-tabela-filtros { padding:14px 22px; background:#FAFCFE; border-bottom:1px solid var(--border); }
-.fat-tabela-card .tabela { width:100%; border-collapse:separate; border-spacing:0; font-size:12.5px; }
-.fat-tabela-card .tabela thead th {
-  padding:12px 18px; text-align:left; font-size:10.5px; font-weight:700;
-  text-transform:uppercase; letter-spacing:.5px; color:var(--text2);
-  background:#FAFCFE; border-bottom:1px solid var(--border); white-space:nowrap;
+.msg {
+  padding: 12px 16px; border-radius: 8px; margin-bottom: 16px;
+  font-size: 12px; font-weight: 500; display: flex; align-items: flex-start; gap: 10px;
 }
-.fat-tabela-card .tabela thead th:first-child { padding-left:22px; }
-.fat-tabela-card .tabela thead th:last-child { padding-right:22px; }
-.fat-tabela-card .tabela tbody td {
-  padding:14px 18px; border-bottom:1px solid var(--border); vertical-align:middle;
+.msg.success { background: var(--green-bg); color: var(--green); border: 1px solid #BBF7D0; }
+.msg.error   { background: var(--red-bg);   color: var(--red);   border: 1px solid #FECACA; }
+.msg.info    { background: var(--blue-bg);  color: var(--blue);  border: 1px solid #BFDBFE; }
+.msg.warn    { background: var(--amber-bg); color: var(--amber); border: 1px solid #FCD34D; }
+
+.success-screen {
+  text-align: center; padding: 60px 24px;
+  background: var(--card); border-radius: var(--r);
+  box-shadow: var(--shadow-md); margin: 0 auto;
 }
-.fat-tabela-card .tabela tbody td:first-child { padding-left:22px; }
-.fat-tabela-card .tabela tbody td:last-child { padding-right:22px; }
-.fat-tabela-card .tabela tbody tr:last-child td { border-bottom:none; }
-.fat-tabela-card .tabela tbody tr.row-link { cursor:pointer; transition:background .15s; }
-.fat-tabela-card .tabela tbody tr.row-link:hover { background:#FAFCFE; }
-.fat-tabela-card .tabela tbody tr.row-link:hover td:first-child { box-shadow:inset 3px 0 0 var(--mp-teal); }
-.fat-detalhe-overlay { display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, .55); z-index: 200; align-items: center; justify-content: center; padding: 20px; animation: fadeIn .15s ease; }
-.fat-detalhe-overlay.aberto { display: flex; }
-.fat-detalhe-modal { background: white; border-radius: 16px; width: 100%; max-width: 920px; max-height: 92vh; overflow-y: auto; box-shadow: 0 25px 60px rgba(15,23,42,.30); animation: slideUp .2s ease; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-.fat-detalhe-header { padding: 22px 28px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; position: sticky; top: 0; background: white; z-index: 1; }
-.fat-detalhe-titulo { font-size: 16px; font-weight: 700; color: var(--mp-navy); letter-spacing: -.2px; margin-bottom: 5px; }
-.fat-detalhe-meta { font-size: 11.5px; color: var(--text2); display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-.fat-detalhe-meta .dot { color: var(--text3); }
-.fat-detalhe-meta .mono { font-family: 'DM Mono', monospace; color: var(--text); font-weight: 600; }
-.fat-detalhe-body { padding: 22px 28px 28px; }
-.fat-detalhe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 22px; }
-@media (max-width: 720px) { .fat-detalhe-grid { grid-template-columns: 1fr; } }
+.success-icon {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: var(--green-bg); margin: 0 auto 20px;
+  display: flex; align-items: center; justify-content: center;
+  animation: popIn .4s cubic-bezier(.175,.885,.32,1.275);
+}
+@keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.success-title { font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+.success-sub { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 24px; }
 
-/* Bloco bloco-amarelo (consultor responsável) refinado */
-.fat-bloco-consultor { display: flex; gap: 12px; align-items: center; padding: 14px 16px; background: #FFF8E6; border: 1px solid #FCD34D; border-radius: 10px; margin-bottom: 16px; }
-.fat-bloco-consultor-ico { width: 32px; height: 32px; border-radius: 8px; background: rgba(244, 194, 74, .25); color: #92400E; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-.fat-bloco-consultor-ico svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.fat-bloco-consultor-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: #92400E; white-space: nowrap; }
-.fat-bloco-consultor select { flex: 1; font-size: 12.5px; padding: 8px 12px; border: 1px solid var(--border2); border-radius: 8px; background: #fff; }
+.checkbox-container {
+  display: flex; align-items: flex-start; gap: 10px; margin: 20px 0;
+  background: var(--blue-bg); border: 1px solid #BFDBFE; border-radius: 8px; padding: 16px;
+}
+.checkbox-container input[type="checkbox"] {
+  width: 18px; height: 18px; accent-color: var(--mp-teal); margin-top: 2px; flex-shrink: 0;
+}
+.checkbox-container label { font-size: 12px; color: #1E40AF; line-height: 1.5; }
 
-/* Bloco protocolo refinado */
-.fat-bloco-prot { display: flex; gap: 8px; align-items: center; padding: 12px 16px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px; flex-wrap: wrap; }
-.fat-bloco-prot-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text2); white-space: nowrap; }
-.fat-bloco-prot input { flex: 1; min-width: 200px; font-size: 12.5px; padding: 8px 12px; border: 1px solid var(--border2); border-radius: 8px; font-family: 'DM Mono', monospace; }
+.form-step { display: none; }
+.form-step.active { display: block; animation: fadeIn .25s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.progress-bar {
+  background: var(--border); border-radius: 4px; height: 4px;
+  margin-bottom: 28px; overflow: hidden;
+}
+.progress-fill {
+  height: 100%; background: linear-gradient(90deg, var(--mp-teal), var(--mp-yellow));
+  border-radius: 4px; transition: width .4s ease;
+}
+.form-nav {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border);
+}
 
-/* Form de dados refinado (admin) */
-.fat-form-dados { padding: 18px 20px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.fat-form-dados .span-2 { grid-column: 1 / -1; }
-.fat-form-dados label.login-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--text2); margin-bottom: 4px; display: block; }
-.fat-form-dados input.login-input, .fat-form-dados textarea.login-input { font-size: 12.5px; padding: 9px 12px; border: 1px solid var(--border2); border-radius: 8px; background: #fff; width: 100%; }
-.fat-form-dados textarea.login-input { min-height: 56px; resize: vertical; }
-.fat-form-dados .actions { grid-column: 1 / -1; display: flex; justify-content: flex-end; gap: 8px; }
+/* ═══ CAMPO DE BANCO COM CÓDIGO + NOME ABAIXO ═══ */
+.banco-auto-fill {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.banco-auto-fill .field-input {
+  width: 100%;
+}
+.banco-nome {
+  font-size: 13px;
+  color: var(--text);
+  background: var(--bg);
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  word-break: break-word;
+}
 
-/* Stepper refinado */
-.fat-stepper { display: flex; align-items: flex-start; gap: 0; margin: 18px 0 22px; overflow-x: auto; padding: 8px 4px 12px; }
-.fat-step { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 80px; position: relative; }
-.fat-step:not(:last-child)::after { content: ''; position: absolute; top: 14px; left: calc(50% + 16px); right: calc(-50% + 16px); height: 2px; background: var(--border); z-index: 0; }
-.fat-step.ok:not(:last-child)::after { background: var(--mp-teal); }
-.fat-step-dot { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--border); background: white; display: flex; align-items: center; justify-content: center; font-size: 11px; z-index: 1; position: relative; transition: all .25s; color: var(--text3); }
-.fat-step-dot svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
-.fat-step.ok .fat-step-dot { background: var(--mp-teal); border-color: var(--mp-teal); color: white; }
-.fat-step.now .fat-step-dot { background: var(--mp-navy); border-color: var(--mp-navy); color: white; box-shadow: 0 0 0 4px rgba(45,63,94,.12); }
-.fat-step-lbl { font-size: 9.5px; font-weight: 600; color: var(--text3); text-align: center; margin-top: 7px; max-width: 90px; line-height: 1.25; text-transform: uppercase; letter-spacing: .3px; }
-.fat-step.ok .fat-step-lbl { color: var(--mp-teal); }
-.fat-step.now .fat-step-lbl { color: var(--mp-navy); }
-
-/* Cards das colunas direita/esquerda */
-.fat-col-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; margin-bottom: 14px; }
-.fat-col-titulo { font-size: 11.5px; font-weight: 700; color: var(--mp-navy); letter-spacing: -.1px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px; text-transform: uppercase; letter-spacing: .4px; }
-.fat-col-titulo svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.fat-dado { display: flex; flex-direction: column; gap: 2px; margin-bottom: 12px; }
-.fat-dado-label { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; color: var(--text2); }
-.fat-dado-valor { font-size: 13px; color: var(--text); }
-
-/* Histórico timeline */
-.fat-hist-item { display: flex; gap: 12px; padding-bottom: 14px; position: relative; }
-.fat-hist-item:not(:last-child)::before { content: ''; position: absolute; left: 14px; top: 30px; bottom: 0; width: 2px; background: var(--border); }
-.fat-hist-dot { width: 30px; height: 30px; border-radius: 50%; background: var(--blue-bg); color: var(--blue); display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; z-index: 1; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--blue); }
-.fat-hist-dot svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.fat-hist-corpo { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; }
-
-/* Mensagens / chat refinado */
-.fat-msgs-wrap { max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 4px 0; }
-.fat-msg { display: flex; gap: 8px; max-width: 88%; }
-.fat-msg.admin { flex-direction: row-reverse; align-self: flex-end; }
-.fat-msg-av { width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; color: white; }
-.fat-msg.cliente .fat-msg-av { background: var(--mp-teal); }
-.fat-msg.admin .fat-msg-av { background: var(--mp-navy); }
-.fat-msg-balao { padding: 9px 13px; border-radius: 12px; font-size: 12.5px; line-height: 1.45; }
-.fat-msg.cliente .fat-msg-balao { background: #F1F5F9; color: var(--text); border-top-left-radius: 3px; }
-.fat-msg.admin .fat-msg-balao { background: var(--mp-navy); color: white; border-top-right-radius: 3px; }
-.fat-msg-hora { font-size: 10.5px; color: var(--text3); margin-top: 4px; padding: 0 4px; }
-.fat-msg.admin .fat-msg-hora { text-align: right; }
-
-/* Arquivo card no detalhe */
-.fat-arq-item { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: #fff; margin-bottom: 6px; font-size: 12.5px; transition: border-color .15s; }
-.fat-arq-item:hover { border-color: var(--mp-teal); }
-.fat-arq-ico { width: 32px; height: 32px; border-radius: 7px; background: var(--blue-bg); color: var(--blue); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.fat-arq-ico svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.fat-arq-nome { flex: 1; font-weight: 500; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-decoration: none; }
-.fat-arq-nome:hover { color: var(--mp-navy); text-decoration: underline; }
-
-/* Loading inicial */
-#fat-loading { min-height: 60vh; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; color: var(--text2); font-size: 12px; }
+@media (max-width: 680px) {
+  .adm-grid { grid-template-columns: 1fr; }
+  .field-grid { grid-template-columns: 1fr !important; }
+  .field.span-2 { grid-column: span 1; }
+  .tipo-grid { grid-template-columns: 1fr; }
+  .pub-hero-title { font-size: 22px; }
+}
 </style>
 </head>
 <body>
 
-<div id="fat-loading">
-  <div class="spinner spinner-dark"></div>
-  <div>Carregando processos...</div>
+<header class="pub-header">
+  <div class="pub-header-inner">
+    <div class="pub-logo">
+      <img src="logo.png" alt="Master Prime">
+    </div>
+    <div class="pub-badge">
+      <div class="pub-badge-dot"></div>
+      Formulário seguro
+    </div>
+  </div>
+</header>
+
+<div class="pub-hero">
+  <div class="pub-hero-title">Dados da Proposta</div>
+  <div class="pub-hero-sub">Preencha os dados abaixo para iniciar sua adesão ao consórcio.</div>
 </div>
 
-<div id="fat-app" style="display:none;">
+<div class="pub-main" id="pub-main">
+  <div class="progress-bar"><div class="progress-fill" id="progress" style="width:50%"></div></div>
 
-  <!-- Hero -->
-  <div class="fat-hero">
-    <div style="position:relative;z-index:1;">
-      <h2 id="fat-hero-titulo" class="page-title" style="color:#fff;font-size:22px;letter-spacing:-.3px;margin:0 0 6px;">Processos de Faturamento</h2>
-      <p id="fat-subtitulo" style="font-size:13px;color:rgba(255,255,255,.78);line-height:1.55;max-width:560px;margin:0;">Acompanhe os processos enviados pelos clientes e atualize protocolo, status e documentos.</p>
-    </div>
-    <div class="fat-hero-side">
-      <span class="fat-hero-tag">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        Faturamento
-      </span>
-      <button class="btn btn-sm" style="background:#fff;color:var(--mp-navy);border:none;font-weight:700;" onclick="fatCopiarLinkFixo()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-        Copiar link do cliente
-      </button>
+  <!-- STEP 1 -->
+  <div class="form-step active" id="step-1">
+    <div class="card">
+      <div class="card-head"><div class="card-title">Escolha a Administradora</div></div>
+      <div class="card-body">
+        <div id="msg-step1"></div>
+        <div class="adm-grid">
+          <div class="adm-card adm-bradesco" id="adm-bradesco" onclick="selectAdm('bradesco')"><div class="adm-icon">B</div><div class="adm-name">Bradesco</div><div class="adm-desc">Consórcio Nacional Bradesco</div><div class="adm-badge">Selecionado ✓</div></div>
+          <div class="adm-card adm-itau" id="adm-itau" onclick="selectAdm('itau')"><div class="adm-icon">I</div><div class="adm-name">Itaú Consórcios</div><div class="adm-desc">Itaú Administradora de Consórcios</div><div class="adm-badge">Selecionado ✓</div></div>
+          <div class="adm-card adm-porto" id="adm-porto" onclick="selectAdm('porto')"><div class="adm-icon">P</div><div class="adm-name">Porto Seguro</div><div class="adm-desc">Porto Seguro Consórcio</div><div class="adm-badge">Selecionado ✓</div></div>
+        </div>
+        <div class="form-nav"><div></div><button class="btn btn-teal" onclick="goStep(2)">Continuar →</button></div>
+      </div>
     </div>
   </div>
 
-  <!-- Métricas -->
-  <div class="fat-stats" id="fat-stats"></div>
-
-  <div class="fat-link-card">
-    <div class="fat-link-card-head">
-      <div class="fat-link-card-ico">
-        <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+  <!-- STEP 2 -->
+  <div class="form-step" id="step-2">
+    <div class="card">
+      <div class="card-head"><div class="card-title" id="step2-title">Dados do Cliente</div><span id="adm-chip" style="padding:4px 12px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;"></span></div>
+      <div class="card-body">
+        <div id="msg-step2"></div>
+        <div class="section-title">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Tipo de Pessoa
+        </div>
+        <div class="tipo-grid">
+          <div class="tipo-card selected" id="tipo-pf" onclick="selectTipo('pf')">
+            <div class="tipo-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4DBCC8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div><div class="tipo-label">Pessoa Física</div><div class="tipo-sub">CPF • Uso pessoal</div></div>
+          </div>
+          <div class="tipo-card" id="tipo-pj" onclick="selectTipo('pj')">
+            <div class="tipo-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            </div>
+            <div><div class="tipo-label">Pessoa Jurídica</div><div class="tipo-sub">CNPJ • Empresarial</div></div>
+          </div>
+        </div>
+        <div id="form-fields-container"></div>
+        <div class="checkbox-container">
+          <input type="checkbox" id="lgpd-check" required>
+          <label for="lgpd-check">Autorizo o compartilhamento e tratamento dos meus dados pessoais pela Master Prime Corretora e pela administradora selecionada, para fins de análise, andamento e conclusão do processo de consórcio, conforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018).</label>
+        </div>
+        <div class="form-nav">
+          <button class="btn btn-outline" onclick="goStep(1)">Voltar</button>
+          <button class="btn btn-outline" id="btn-submit" onclick="submitForm()">Enviar Adesão</button>
+        </div>
       </div>
-      <div style="flex:1">
-        <div class="fat-link-card-title">Link fixo para iniciar processo</div>
-        <div class="fat-link-card-sub">Use em WhatsApp, site, assinatura de e-mail ou campanha. O próprio cliente preenche e envia os documentos. O protocolo é atribuído pela equipe após contato com o banco.</div>
-      </div>
-    </div>
-    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-      <input id="fat-link-fixo" class="login-input" readonly onclick="this.select()" style="flex:1;min-width:260px;font-size:12px;padding:10px 12px;font-family:'DM Mono',monospace;background:#fff;">
-      <button class="btn btn-primary btn-sm" onclick="fatCopiarLinkFixo()">Copiar</button>
-      <button class="btn btn-outline btn-sm" onclick="window.open(fatLinkInicioCliente(), '_blank')">Abrir</button>
     </div>
   </div>
 
-  <!-- Lista de processos -->
-  <div class="fat-tabela-card">
-    <div class="fat-tabela-head">
-      <div>
-        <div class="fat-tabela-titulo">Lista de processos</div>
-        <div class="fat-tabela-sub" id="fat-contagem">—</div>
+  <!-- SUCCESS -->
+  <div class="form-step" id="step-success">
+    <div class="success-screen">
+      <div class="success-icon">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
       </div>
-      <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        <button class="btn btn-outline btn-sm" onclick="fatExportarCSV()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          Exportar CSV
-        </button>
-      </div>
-    </div>
-    <div class="fat-tabela-filtros">
-      <div class="fat-filtros">
-        <input type="text" id="fat-busca" placeholder="Buscar por nome, CPF, protocolo, consultor..." oninput="fatFiltrar()">
-        <select id="fat-status-filtro" onchange="fatFiltrar()">
-          <option value="">Todos os status</option>
-          <option>Recebido</option>
-          <option>Em análise</option>
-          <option>Enviado para administradora</option>
-          <option>Em retorno da administradora</option>
-          <option>Finalizado</option>
-          <option>Cancelado</option>
-        </select>
-        <button class="btn btn-outline btn-sm" onclick="fatLimparFiltros()">Limpar</button>
-      </div>
-    </div>
-    <div style="overflow-x:auto;">
-      <table class="tabela">
-        <thead>
-          <tr>
-            <th>Protocolo</th>
-            <th>Cliente</th>
-            <th>CPF</th>
-            <th>Grupo / Cota</th>
-            <th>Consultor</th>
-            <th>Status</th>
-            <th>Criado em</th>
-            <th>Ações</th>
-          </tr>
-        </thead>
-        <tbody id="fat-tbody">
-          <tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text3);">
-            <div class="spinner spinner-dark" style="margin:0 auto 12px;"></div>
-            Carregando processos...
-          </td></tr>
-        </tbody>
-      </table>
+      <div class="success-title">Obrigado!</div>
+      <div class="success-sub">Seus dados foram enviados com sucesso.<br>Em breve entraremos em contato.</div>
+      <button class="btn btn-outline" onclick="resetForm()">Nova Adesão</button>
     </div>
   </div>
-
-  <!-- MODAL DE DETALHE DO PROCESSO -->
-  <div class="fat-detalhe-overlay" id="fat-overlay" onclick="fatFecharDetalhe(event)">
-    <div class="fat-detalhe-modal" id="fat-modal"></div>
-  </div>
-
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════
-// SUPABASE — usa a mesma sessão do Portal do Consultor
-// (mesmo origin → localStorage compartilhado)
-// ═══════════════════════════════════════════════════════
 const SUPABASE_URL = 'https://jhwciwvgagnuxakukyob.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-let currentUser = null;
+let STATE = { step: 1, adm: null, tipo: 'pf' };
+const UF_LIST = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
 
-// ═══════════════════════════════════════════════════════
-// HELPERS COMPARTILHADOS (vindos do index.html)
-// ═══════════════════════════════════════════════════════
-function fmtCPF(c) { c=String(c||'').replace(/\D/g,''); if(c.length!==11)return c; return c.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'); }
-function maskCPF(el) { let v=el.value.replace(/\D/g,''); if(v.length>11)v=v.slice(0,11); if(v.length>9)v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4'); else if(v.length>6)v=v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3'); else if(v.length>3)v=v.replace(/(\d{3})(\d{1,3})/,'$1.$2'); el.value=v; }
-function cleanCPF(v) { return (v||'').replace(/\D/g,''); }
-function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function fmtDataBR(d) { return d ? new Date(d).toLocaleDateString('pt-BR') : '—'; }
-function fmtDataHoraBR(d) { return d ? new Date(d).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—'; }
-
-// ═══════════════════════════════════════════════════════
-//  MÓDULO FATURAMENTO (Erik/Leo)
-//  Sistema de processos/protocolos enviados pelo cliente
-// ═══════════════════════════════════════════════════════
-const FAT_ETAPAS = [
-  { status: 'Recebido',                     icone: '📥' },
-  { status: 'Em análise',                   icone: '🔍' },
-  { status: 'Enviado para administradora',  icone: '📤' },
-  { status: 'Em retorno da administradora', icone: '🔄' },
-  { status: 'Finalizado',                   icone: '✅' },
-];
-
-const FAT_CONFIG = {
-  clientePath: 'cliente.html',
-  storageBucket: 'arquivos',
-  protocoloPrefixo: 'MP'
+// ═══ LISTA DE BANCOS (CÓDIGO → NOME) ═══
+const BANCOS_CODIGOS = {
+  '001': 'Banco do Brasil',
+  '003': 'Banco da Amazônia',
+  '004': 'Banco do Nordeste',
+  '012': 'Banco Inbursa',
+  '014': 'Natixis Brasil',
+  '019': 'Banco Azteca',
+  '021': 'BANESTES',
+  '024': 'Banco Bandepe',
+  '025': 'Banco Alfa',
+  '029': 'Banco Banerj',
+  '031': 'Banco Beg',
+  '033': 'Santander',
+  '036': 'Banco Bradesco BBI',
+  '037': 'Banco do Est. do Pará',
+  '040': 'Banco Cargill',
+  '041': 'Banrisul',
+  '044': 'Banco BVA',
+  '045': 'Banco Opportunity',
+  '047': 'Banco do Est. de Sergipe',
+  '062': 'Hipercard',
+  '063': 'Banco Ibi',
+  '065': 'Banco Lemon',
+  '066': 'Banco Morgan Stanley',
+  '069': 'Banco Cacique',
+  '070': 'BRB - Banco de Brasília',
+  '072': 'Banco Rural',
+  '073': 'Banco do Nordeste (BNB)',
+  '074': 'Banco J. Safra',
+  '075': 'Banco ABN AMRO',
+  '076': 'Banco KDB',
+  '077': 'Banco Inter',
+  '078': 'Banco Bonsucesso',
+  '079': 'Banco Original',
+  '080': 'Banco Modal',
+  '081': 'Banco BBM',
+  '082': 'Banco Topázio',
+  '083': 'Banco da China Brasil',
+  '084': 'Unicred',
+  '085': 'Cooperativa Central',
+  '087': 'Banco Cooperativo Sicredi',
+  '088': 'Banco Randon',
+  '089': 'Banco Renner',
+  '091': 'Central das Cooperativas',
+  '092': 'Banco BRJ',
+  '093': 'Banco Pólo',
+  '094': 'Banco Petra',
+  '095': 'Banco Confidence',
+  '096': 'Banco BM&F',
+  '097': 'Banco Cooperativo do Brasil',
+  '098': 'BancoCalJohn',
+  '099': 'Banco Original',
+  '100': 'Planner Corretora',
+  '101': 'Banco Renner',
+  '102': 'Banco Sogeral',
+  '104': 'Caixa Econômica Federal',
+  '107': 'Banco BBM',
+  '109': 'Banco Credibel',
+  '111': 'Banco Fibra',
+  '114': 'Banco Central do Brasil',
+  '117': 'Banco do Nordeste',
+  '119': 'Banco Western Union',
+  '120': 'Banco Rodobens',
+  '122': 'Banco AgriInvest',
+  '125': 'Banco Genial',
+  '127': 'Banco Codepe',
+  '128': 'Banco MS',
+  '129': 'Banco Itaucard',
+  '130': 'Banco Caruana',
+  '133': 'Banco Cresol',
+  '134': 'Banco Bradesco BBI',
+  '136': 'Banco Mutti',
+  '137': 'Banco Multisafra',
+  '139': 'Banco Intesa Sanpaolo',
+  '140': 'Banco Credit Suisse',
+  '141': 'Banco Nossa Caixa',
+  '142': 'Banco Alfa',
+  '143': 'Banco Treviso',
+  '144': 'Banco Bradesco BBI',
+  '145': 'Banco Sumitomo Mitsui',
+  '146': 'Banco de Crédito Brasil',
+  '147': 'Banco Fibra',
+  '148': 'Banco MultiStock',
+  '149': 'Banco Factual',
+  '150': 'Banco Indusval',
+  '151': 'Banco Nossa Caixa',
+  '152': 'Banco J. P. Morgan',
+  '153': 'Banco Investcorp',
+  '154': 'Banco BVA',
+  '157': 'Banco Capital',
+  '159': 'Banco Cifra',
+  '163': 'Banco Commerzbank',
+  '166': 'Banco Industrial do Brasil',
+  '168': 'Banco HSBC Brasil',
+  '169': 'Banco Ole',
+  '170': 'Banco Intercap',
+  '171': 'Banco Cooperativo Sicoob',
+  '172': 'Banco Alfa Invest',
+  '173': 'Banco Bradesco Private',
+  '174': 'Banco Bradesco Seguros',
+  '175': 'Banco Banrisul',
+  '177': 'Banco Guide',
+  '179': 'Banco Indusval',
+  '180': 'Banco Société Générale',
+  '183': 'Banco Intermedium',
+  '184': 'Banco BBM',
+  '188': 'Banco AT&T',
+  '190': 'Banco Servinvest',
+  '191': 'Banco Banrisul',
+  '193': 'Banco BTG Pactual',
+  '195': 'Banco Intercap',
+  '196': 'Banco Fair',
+  '197': 'Banco Fator',
+  '200': 'Banco Ficsa',
+  '201': 'Banco Intercap',
+  '204': 'Banco Western Union',
+  '205': 'Banco Bankpar',
+  '208': 'Banco Pactual',
+  '209': 'Banco Qualibank',
+  '213': 'Banco Arbi',
+  '214': 'Banco Ambev',
+  '215': 'Banco BBM',
+  '216': 'Banco Holandês',
+  '217': 'Banco John Deere',
+  '219': 'Banco BBM',
+  '220': 'Banco MultiStock',
+  '222': 'Banco Petrobas',
+  '223': 'Banco Rodobens',
+  '233': 'Banco Pine',
+  '237': 'Bradesco',
+  '241': 'Banco Clássico',
+  '243': 'Banco Mercantil do Brasil',
+  '246': 'Banco ABC Brasil',
+  '249': 'Banco Investcred',
+  '250': 'Banco Schahin',
+  '254': 'Banco Paraná',
+  '263': 'Banco Fator',
+  '265': 'Banco Inter-Atlântico',
+  '266': 'Banco Fibra',
+  '318': 'Banco BMG',
+  '320': 'Banco Industrial e Comercial',
+  '341': 'Itaú Unibanco',
+  '356': 'Banco ABN AMRO Real',
+  '366': 'Banco Société Générale',
+  '370': 'Banco WestLB',
+  '376': 'Banco J. P. Morgan',
+  '389': 'Banco Mercantil do Brasil',
+  '394': 'Banco BMG',
+  '399': 'Banco HSBC',
+  '409': 'Unibanco',
+  '412': 'Banco Capital',
+  '422': 'Banco Safra',
+  '453': 'Banco Rural',
+  '456': 'Banco Tokyo-Mitsubishi',
+  '464': 'Banco Sumitomo',
+  '477': 'Citibank',
+  '479': 'Banco Itaú BBA',
+  '487': 'Deutsche Bank',
+  '488': 'Banco Morgan Stanley',
+  '492': 'Banco ING',
+  '494': 'Banco de La Nación Argentina',
+  '495': 'Banco de La Provincia de Bs As',
+  '505': 'Banco Crédit Suisse',
+  '600': 'Banco Luso Brasileiro',
+  '604': 'Banco Industrial do Brasil',
+  '610': 'Banco VR',
+  '611': 'Banco Paulista',
+  '612': 'Banco Guanabara',
+  '613': 'Banco Pecúnia',
+  '623': 'Banco Pan',
+  '626': 'Banco Ficsa',
+  '630': 'Banco Intercap',
+  '633': 'Banco Rendimento',
+  '634': 'Banco Triângulo',
+  '637': 'Banco Sofisa',
+  '641': 'Banco Alvorada',
+  '643': 'Banco Pine',
+  '652': 'Banco BBM',
+  '653': 'Banco Indusval',
+  '654': 'Banco A. J. Renner',
+  '655': 'Banco Votorantim',
+  '707': 'Banco Daycoval',
+  '712': 'Banco Ourinvest',
+  '719': 'Banco Banif',
+  '720': 'Banco Maxinvest',
+  '721': 'Banco Credibel',
+  '724': 'Banco Porto Seguro',
+  '725': 'Banco Finansinos',
+  '726': 'Banco Santander Meridional',
+  '727': 'Banco United',
+  '728': 'Banco Kit Finance',
+  '729': 'Banco Fonte',
+  '730': 'Banco Comercial Uruguai',
+  '731': 'Banco Itapema',
+  '733': 'Banco das Nações',
+  '734': 'Banco Gerdau',
+  '735': 'Banco Pottencial',
+  '736': 'Banco Cooperforte',
+  '737': 'Banco Bonsucesso',
+  '738': 'Banco Morada',
+  '739': 'Banco BGN',
+  '740': 'Banco Barclays',
+  '741': 'Banco Ribeirão Preto',
+  '742': 'Banco Semear',
+  '743': 'Banco Sigma',
+  '744': 'Banco Itaú',
+  '745': 'Banco Citibank',
+  '746': 'Banco Modal',
+  '747': 'Banco Rabobank',
+  '748': 'Banco Cooperativo Sicredi',
+  '749': 'Banco La Nación Argentina',
+  '751': 'Scotiabank Brasil',
+  '752': 'Banco BNP Paribas',
+  '753': 'Banco Commerzbank',
+  '754': 'Banco BHD',
+  '755': 'Banco Merrill Lynch',
+  '756': 'Banco Cooperativo do Brasil',
+  '757': 'Banco KEB',
+  '758': 'Banco Safra',
+  '759': 'Banco Banif',
+  '760': 'Banco VR',
+  '761': 'Banco Bonsucesso',
+  '762': 'Banco do Japão',
+  '763': 'Banco Banrisul',
+  '764': 'Banco Morada',
+  '765': 'Banco Daycoval',
+  '766': 'Banco Triângulo',
+  '767': 'Banco Ourinvest',
+  '768': 'Banco Bradesco BBI',
+  '769': 'Banco Interunion',
+  '770': 'Banco BBM',
+  '771': 'Banco Rendimento',
+  '772': 'Banco Indusval',
+  '773': 'Banco Pecúnia',
+  '774': 'Banco Alfa',
+  '775': 'Banco Fibra',
+  '776': 'Banco Western Union',
+  '777': 'Banco Intercap',
+  '778': 'Banco Semear',
+  '779': 'Banco Cargill',
+  '780': 'Banco Topázio',
+  '781': 'Banco DaimlerChrysler',
+  '782': 'Banco BVA',
+  '783': 'Banco Petra',
+  '784': 'Banco Bradesco BBI',
+  '785': 'Banco BGN',
+  '786': 'Banco PSA Finance',
+  '787': 'Banco Pactual',
+  '788': 'Banco Modell',
+  '789': 'Banco Ceres',
+  '790': 'Banco BRJ',
+  '791': 'Banco BM&F',
+  '792': 'Banco Original',
+  '793': 'Banco Triunfo',
+  '794': 'Banco BVA',
+  '795': 'Banco Emblema',
+  '796': 'Banco John Deere',
+  '797': 'Banco Mercantil do Brasil',
+  '798': 'Banco Inter-Atlântico',
+  '799': 'Banco HSBC Brasil'
 };
 
-let fatProcessos = [];
-let fatFiltrados = [];
-let fatConsultores = []; // lista de portal_users (consultor/socio) para o dropdown
+// ═══ MÁSCARAS ═══
+function maskCPF(el) { let v=el.value.replace(/\D/g,'').slice(0,11); if(v.length>9) v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4'); else if(v.length>6) v=v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3'); else if(v.length>3) v=v.replace(/(\d{3})(\d{1,3})/,'$1.$2'); el.value=v; }
+function maskCNPJ(el) { let v=el.value.replace(/\D/g,'').slice(0,14); if(v.length>12) v=v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{1,2})/,'$1.$2.$3/$4-$5'); else if(v.length>8) v=v.replace(/(\d{2})(\d{3})(\d{3})(\d{1,4})/,'$1.$2.$3/$4'); else if(v.length>5) v=v.replace(/(\d{2})(\d{3})(\d{1,3})/,'$1.$2.$3'); else if(v.length>2) v=v.replace(/(\d{2})(\d{1,3})/,'$1.$2'); el.value=v; }
+function maskPhone(el) { let v=el.value.replace(/\D/g,'').slice(0,11); if(v.length===11) el.value=v.replace(/(\d{2})(\d{5})(\d{4})/,'($1) $2-$3'); else if(v.length===10) el.value=v.replace(/(\d{2})(\d{4})(\d{4})/,'($1) $2-$3'); else if(v.length>5) el.value=v.replace(/(\d{2})(\d{0,4})(\d{0,4})/,'($1) $2-$3'); else if(v.length>2) el.value=v.replace(/(\d{2})/,'($1) '); else el.value=v; }
+function maskCurrency(el) { let v=el.value.replace(/\D/g,''); if(!v){el.value='';return;} const intVal=parseInt(v,10); const formatted=(intVal/100).toFixed(2).replace('.',','); const parts=formatted.split(','); parts[0]=parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.'); el.value='R$ '+parts.join(','); }
+function maskCEP(el) { let v=el.value.replace(/\D/g,'').slice(0,8); if(v.length>5) v=v.replace(/(\d{5})(\d{1,3})/,'$1-$2'); el.value=v; }
 
-// É admin de verdade?
-function fatIsAdmin() {
-  return currentUser && (currentUser.tipo === 'admin');
+// ═══ BUSCAR BANCO POR CÓDIGO ═══
+function buscarBancoPorCodigo(codigo) {
+  if (!codigo) return null;
+  const nome = BANCOS_CODIGOS[codigo];
+  return nome || null;
 }
 
-// Carrega a lista de consultores (somente admin precisa para o dropdown)
-async function fatCarregarConsultores() {
-  if (!fatIsAdmin()) { fatConsultores = []; return; }
-  const { data } = await sb.from('portal_users').select('auth_id, nome, tipo').order('nome');
-  fatConsultores = (data || []).filter(u => u.auth_id && ['consultor','socio','admin'].includes(u.tipo));
-}
-
-async function renderAdminFaturamento() {
-  const linkFixo = document.getElementById('fat-link-fixo');
-  if (linkFixo) linkFixo.value = fatLinkInicioCliente();
-
-  // Esconde itens só-admin se não for admin
-  const isAdm = fatIsAdmin();
-  document.querySelectorAll('.fat-admin-only').forEach(el => el.style.display = isAdm ? '' : 'none');
-  const subtitulo = document.getElementById('fat-subtitulo');
-  if (subtitulo) {
-    subtitulo.textContent = isAdm
-      ? 'Acompanhe os processos enviados pelos clientes e atualize protocolo, status e documentos.'
-      : 'Acompanhe os processos atribuídos a você. Você pode comunicar-se com o cliente e ver o andamento.';
-  }
-  const titulo = document.getElementById('fat-hero-titulo');
-  if (titulo) titulo.textContent = isAdm ? 'Processos de Faturamento' : 'Meus Processos';
-
-  await fatCarregarConsultores();
-
-  // Monta a query — admin vê tudo, demais só os processos atribuídos a si
-  let q = sb
-    .from('portal_processos')
-    .select(`*, portal_arquivos(count), portal_mensagens(count)`)
-    .order('criado_em', { ascending: false });
-
-  if (!isAdm) {
-    // currentUser.auth_id deve existir após sb.auth.signInWithPassword
-    const myAuthId = (currentUser && currentUser.auth_id) || null;
-    if (myAuthId) q = q.eq('consultor_id', myAuthId);
-    else { fatProcessos = []; fatFiltrados = []; fatRenderStats(); fatRenderTabela([]); return; }
-  }
-
-  const { data, error } = await q;
-
-  if (error) {
-    document.getElementById('fat-tbody').innerHTML = `
-      <tr><td colspan="8" style="text-align:center;color:var(--red);padding:24px;">
-        Erro ao carregar: ${error.message}
-      </td></tr>`;
-    return;
-  }
-
-  fatProcessos = data || [];
-  fatFiltrados = [...fatProcessos];
-  fatRenderStats();
-  fatRenderTabela(fatFiltrados);
-}
-
-function fatRenderStats() {
-  const total       = fatProcessos.length;
-  const recebidos   = fatProcessos.filter(p => p.status === 'Recebido').length;
-  const emAnalise   = fatProcessos.filter(p => p.status === 'Em análise').length;
-  const emRetorno   = fatProcessos.filter(p => p.status === 'Em retorno da administradora').length;
-  const finalizados = fatProcessos.filter(p => p.status === 'Finalizado').length;
-  const semProtocolo = fatProcessos.filter(p => !p.protocolo).length;
-
-  const I = {
-    total: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>',
-    receb: '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
-    anali: '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>',
-    retor: '<svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>',
-    final: '<svg viewBox="0 0 24 24"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
-    semp:  '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
-  };
-
-  document.getElementById('fat-stats').innerHTML = `
-    <div class="fat-stat borda-teal">
-      <div class="fat-stat-ico">${I.total}</div>
-      <div class="fat-stat-body">
-        <div class="fat-stat-label">Total</div>
-        <div class="fat-stat-valor">${total}</div>
-        <div class="fat-stat-sub">processos</div>
-      </div>
-    </div>
-    <div class="fat-stat borda-amber">
-      <div class="fat-stat-ico">${I.receb}</div>
-      <div class="fat-stat-body">
-        <div class="fat-stat-label">Recebidos</div>
-        <div class="fat-stat-valor">${recebidos}</div>
-        <div class="fat-stat-sub">aguardando análise</div>
-      </div>
-    </div>
-    <div class="fat-stat borda-purple">
-      <div class="fat-stat-ico">${I.anali}</div>
-      <div class="fat-stat-body">
-        <div class="fat-stat-label">Em análise</div>
-        <div class="fat-stat-valor">${emAnalise}</div>
-        <div class="fat-stat-sub">em andamento</div>
-      </div>
-    </div>
-    <div class="fat-stat borda-amber">
-      <div class="fat-stat-ico">${I.retor}</div>
-      <div class="fat-stat-body">
-        <div class="fat-stat-label">Retorno adm.</div>
-        <div class="fat-stat-valor">${emRetorno}</div>
-        <div class="fat-stat-sub">em retorno</div>
-      </div>
-    </div>
-    <div class="fat-stat borda-green">
-      <div class="fat-stat-ico">${I.final}</div>
-      <div class="fat-stat-body">
-        <div class="fat-stat-label">Finalizados</div>
-        <div class="fat-stat-valor">${finalizados}</div>
-        <div class="fat-stat-sub">concluídos</div>
-      </div>
-    </div>
-    <div class="fat-stat borda-red" onclick="fatFiltrarSemProtocolo()" title="Filtrar processos sem protocolo">
-      <div class="fat-stat-ico">${I.semp}</div>
-      <div class="fat-stat-body">
-        <div class="fat-stat-label" style="color:var(--red);">Sem protocolo</div>
-        <div class="fat-stat-valor">${semProtocolo}</div>
-        <div class="fat-stat-sub">aguardando o banco</div>
-      </div>
-    </div>
-  `;
-}
-
-function fatFiltrarSemProtocolo() {
-  fatFiltrados = fatProcessos.filter(p => !p.protocolo);
-  document.getElementById('fat-busca').value = '';
-  document.getElementById('fat-status-filtro').value = '';
-  fatRenderTabela(fatFiltrados);
-}
-
-function fatRenderTabela(lista) {
-  const tbody = document.getElementById('fat-tbody');
-  document.getElementById('fat-contagem').textContent = `${lista.length} processo${lista.length !== 1 ? 's' : ''} - link do cliente sempre disponivel`;
-
-  if (lista.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--text3);">Nenhum processo encontrado</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = lista.map(p => {
-    const link = fatLinkCliente(p.token);
-    const idArg = fatJsArg(p.id);
-    const tokenArg = fatJsArg(p.token);
-    return `
-    <tr class="row-link" onclick='fatVerProcesso(${idArg})' style="${!p.protocolo ? 'background:#FFFBEB;' : ''}">
-      <td>
-        ${p.protocolo
-          ? `<span class="mono" style="font-size:11px;font-weight:700;color:var(--mp-navy);">${esc(p.protocolo)}</span>`
-          : `<button class="btn btn-xs btn-outline" style="color:var(--amber);border-color:var(--amber);" onclick='event.stopPropagation(); fatAtribuirProtocolo(${idArg})'>Atribuir</button>`
-        }
-      </td>
-      <td><div style="font-weight:600;font-size:12px;">${esc(p.nome)}</div></td>
-      <td><span class="mono" style="font-size:11px;">${fmtCPF(p.cpf)}</span></td>
-      <td style="font-size:12px;">
-        ${p.grupo ? `<span style="color:var(--text2)">G:</span> ${esc(p.grupo)}` : '—'}
-        ${p.cota  ? ` &nbsp;<span style="color:var(--text2)">C:</span> ${esc(p.cota)}` : ''}
-      </td>
-      <td style="font-size:12px;">
-        ${p.consultor_nome
-          ? `<span style="font-weight:600">${esc(p.consultor_nome)}</span>`
-          : `<span class="tag tag-amber" style="font-size:10px;">Não atribuído</span>`}
-      </td>
-      <td><span class="tag ${fatTagClass(p.status)}">${p.status}</span></td>
-      <td><span style="font-size:11px;color:var(--text2);">${fmtDataBR(p.criado_em)}</span></td>
-      <td>
-        <div style="display:flex; gap:4px; flex-wrap:wrap;">
-          <button class="btn btn-outline btn-xs" onclick='event.stopPropagation(); fatVerProcesso(${idArg})'>Ver</button>
-          <button class="btn btn-xs btn-outline" onclick='event.stopPropagation(); fatCopiarLink(${tokenArg})' title="${esc(link)}">Link</button>
-        </div>
-      </td>
-    </tr>
-  `}).join('');
-}
-
-function fatFiltrar() {
-  const busca  = document.getElementById('fat-busca')?.value.toLowerCase() || '';
-  const status = document.getElementById('fat-status-filtro')?.value || '';
-  fatFiltrados = fatProcessos.filter(p => {
-    const texto = `${p.nome} ${p.cpf} ${p.protocolo} ${p.grupo||''} ${p.cota||''} ${p.corretor||''}`.toLowerCase();
-    const bateBusca  = !busca  || texto.includes(busca);
-    const bateStatus = !status || p.status === status;
-    return bateBusca && bateStatus;
-  });
-  fatRenderTabela(fatFiltrados);
-}
-
-function fatLimparFiltros() {
-  document.getElementById('fat-busca').value = '';
-  document.getElementById('fat-status-filtro').value = '';
-  fatFiltrar();
-}
-
-async function fatVerProcesso(id) {
-  const overlay = document.getElementById('fat-overlay');
-  const modal   = document.getElementById('fat-modal');
-  overlay.classList.add('aberto');
-  modal.innerHTML = `<div style="padding:40px;text-align:center;"><div class="spinner spinner-dark" style="margin:0 auto 12px;width:36px;height:36px;border-width:3px;"></div><p style="color:var(--text2);font-size:12px;">Carregando processo...</p></div>`;
-
-  const [procRes, arqsRes, msgsRes, histRes] = await Promise.all([
-    sb.from('portal_processos').select('*').eq('id', id).single(),
-    sb.from('portal_arquivos').select('*').eq('processo_id', id).order('criado_em'),
-    sb.from('portal_mensagens').select('*').eq('processo_id', id).order('criado_em'),
-    sb.from('portal_historico').select('*').eq('processo_id', id).order('criado_em', { ascending: false })
-  ]);
-  const proc = procRes.data;
-  const arqs = arqsRes.data || [];
-  const msgs = msgsRes.data || [];
-  const hist = histRes.data || [];
-
-  if (procRes.error || !proc) {
-    modal.innerHTML = `<div style="padding:32px;text-align:center;color:var(--red);">Processo nao encontrado ou sem permissao.<br><small>${esc(procRes.error?.message || '')}</small></div>`;
-    return;
-  }
-
-  const isAdm = fatIsAdmin();
-
-  const avisos = [arqsRes.error, msgsRes.error, histRes.error].filter(Boolean);
-  const avisosHtml = avisos.length
-    ? `<div class="alert alert-warn" style="margin-bottom:12px;">Alguns dados auxiliares nao carregaram: ${avisos.map(e => esc(e.message)).join(' | ')}</div>`
-    : '';
-  const procIdArg = fatJsArg(proc.id);
-  const procTokenArg = fatJsArg(proc.token);
-
-  const idxAtual = FAT_ETAPAS.findIndex(e => e.status === proc.status);
-  const statusOpts = FAT_ETAPAS.map(e =>
-    `<option value="${e.status}" ${proc.status === e.status ? 'selected' : ''}>${e.icone} ${e.status}</option>`
-  ).join('') + `<option value="Cancelado" ${proc.status === 'Cancelado' ? 'selected' : ''}>❌ Cancelado</option>`;
-
-  // SVG icons reusados na lista
-  const _SVG_FILE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
-  const _SVG_X_SM = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="width:11px;height:11px;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
-  const _SVG_DOT_HIST = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
-
-  const arqsHtml = (arqs||[]).length === 0
-    ? '<p style="font-size:11.5px;color:var(--text3);padding:6px 0;">Nenhum arquivo enviado.</p>'
-    : (arqs||[]).map(a => {
-        const url = sb.storage.from(FAT_CONFIG.storageBucket).getPublicUrl(a.storage_path).data.publicUrl;
-        return `<div class="fat-arq-item">
-          <div class="fat-arq-ico">${_SVG_FILE}</div>
-          <a class="fat-arq-nome" href="${url}" target="_blank">${esc(a.nome_original)}</a>
-          <span style="font-size:10.5px;color:var(--text3);">${fmtDataBR(a.criado_em)}</span>
-          ${isAdm ? `<button class="btn btn-outline btn-xs" onclick='fatDeletarArquivo(${fatJsArg(a.id)}, ${procIdArg})' title="Remover" style="padding:5px 8px;">${_SVG_X_SM}</button>` : ''}
-        </div>`;
-      }).join('');
-
-  const _ini = (n) => String(n||'').trim().split(/\s+/).map(p=>p[0]).slice(0,2).join('').toUpperCase() || '?';
-  const msgsHtml = (msgs||[]).length === 0
-    ? '<p style="font-size:11.5px;color:var(--text3);text-align:center;padding:14px 0;">Sem mensagens ainda.</p>'
-    : (msgs||[]).map(m => {
-        const lado = m.autor === 'admin' ? 'admin' : 'cliente';
-        const av = lado === 'admin' ? 'M' : _ini(proc.nome);
-        return `<div class="fat-msg ${lado}">
-          <div class="fat-msg-av">${av}</div>
-          <div>
-            <div class="fat-msg-balao">${esc(m.texto)}</div>
-            <div class="fat-msg-hora">${lado === 'admin' ? 'Equipe Master Prime' : esc(proc.nome)} · ${fmtDataHoraBR(m.criado_em)}</div>
-          </div>
-        </div>`;
-      }).join('');
-
-  const histHtml = (hist||[]).length === 0
-    ? '<p style="font-size:11.5px;color:var(--text3);">Sem histórico ainda.</p>'
-    : (hist||[]).map(h => `
-        <div class="fat-hist-item">
-          <div class="fat-hist-dot">${_SVG_DOT_HIST}</div>
-          <div class="fat-hist-corpo">
-            <span class="tag ${fatTagClass(h.status_novo)}" style="font-size:10px;">${esc(h.status_novo||'-')}</span>
-            ${h.observacao ? `<p style="font-size:12px;color:var(--text);margin-top:5px;line-height:1.5;">${esc(h.observacao)}</p>` : ''}
-            <p style="font-size:10px;color:var(--text3);margin-top:4px;font-family:'DM Mono',monospace;">${fmtDataHoraBR(h.criado_em)}</p>
-          </div>
-        </div>`).join('');
-
-  const consultorOpts = `<option value="">— Não atribuído —</option>` + fatConsultores.map(c =>
-    `<option value="${esc(c.auth_id)}" ${proc.consultor_id === c.auth_id ? 'selected':''}>${esc(c.nome)}${c.tipo==='admin'?' (admin)':c.tipo==='socio'?' (sócio)':''}</option>`
-  ).join('');
-
-  // SVG inline helpers (sem emojis)
-  const SVG_LINK   = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
-  const SVG_TRASH  = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px;display:inline-block;vertical-align:middle;"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>';
-  const SVG_X      = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width:13px;height:13px;display:inline-block;vertical-align:middle;"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>';
-  const SVG_USER   = '<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
-  const SVG_DOC    = '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
-  const SVG_CLOCK  = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
-  const SVG_CHAT   = '<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
-  const SVG_REFRESH= '<svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14"/></svg>';
-
-  modal.innerHTML = `
-    <div class="fat-detalhe-header">
-      <div>
-        <div class="fat-detalhe-titulo">${esc(proc.nome)}</div>
-        <div class="fat-detalhe-meta">
-          ${proc.protocolo
-            ? `<span>Protocolo</span> <span class="mono">${esc(proc.protocolo)}</span>`
-            : `<span style="color:var(--amber);font-weight:600;">Protocolo pendente</span>`}
-          <span class="dot">·</span>
-          <span>CPF</span> <span class="mono">${fmtCPF(proc.cpf)}</span>
-          <span class="dot">·</span>
-          <span>Aberto em ${fmtDataBR(proc.criado_em)}</span>
-          ${proc.consultor_nome ? `<span class="dot">·</span><span>Consultor</span> <strong style="color:var(--text);">${esc(proc.consultor_nome)}</strong>` : ''}
-        </div>
-      </div>
-      <div style="display:flex;gap:6px;flex-shrink:0;">
-        <button class="btn btn-outline btn-sm" onclick='fatCopiarLink(${procTokenArg})'>${SVG_LINK} Link cliente</button>
-        ${isAdm ? `<button class="btn btn-danger btn-sm" onclick='fatDeletarProcesso(${procIdArg})'>${SVG_TRASH} Excluir</button>` : ''}
-        <button class="btn btn-outline btn-sm" onclick="fatFecharDetalhe()">${SVG_X}</button>
-      </div>
-    </div>
-    <div class="fat-detalhe-body">
-      ${avisosHtml}
-
-      ${isAdm ? `
-      <div class="fat-bloco-consultor">
-        <div class="fat-bloco-consultor-ico">${SVG_USER}</div>
-        <div class="fat-bloco-consultor-label">Consultor responsável</div>
-        <select id="fat-consultor-${proc.id}">${consultorOpts}</select>
-        <button class="btn btn-primary btn-sm" onclick='fatAtribuirConsultor(${procIdArg})'>Atribuir</button>
-      </div>
-
-      <div class="fat-bloco-prot">
-        <span class="fat-bloco-prot-label">Protocolo</span>
-        <input type="text" id="fat-protocolo-${proc.id}" value="${esc(proc.protocolo || '')}" placeholder="Informe ou gere automaticamente">
-        <button class="btn btn-outline btn-sm" onclick='fatSalvarProtocolo(${procIdArg})'>Salvar</button>
-        <button class="btn btn-outline btn-sm" onclick='fatGerarProtocoloCampo(${procIdArg})'>Gerar</button>
-      </div>
-
-      <div class="fat-form-dados">
-        <div><label class="login-label">Nome</label><input class="login-input" id="fat-edit-nome-${proc.id}" value="${esc(proc.nome || '')}"></div>
-        <div><label class="login-label">CPF</label><input class="login-input" id="fat-edit-cpf-${proc.id}" value="${fmtCPF(proc.cpf || '')}" maxlength="14" oninput="maskCPF(this)"></div>
-        <div><label class="login-label">Grupo</label><input class="login-input" id="fat-edit-grupo-${proc.id}" value="${esc(proc.grupo || '')}"></div>
-        <div><label class="login-label">Cota</label><input class="login-input" id="fat-edit-cota-${proc.id}" value="${esc(proc.cota || '')}"></div>
-        <div><label class="login-label">E-mail</label><input class="login-input" id="fat-edit-email-${proc.id}" value="${esc(proc.email || '')}"></div>
-        <div><label class="login-label">WhatsApp</label><input class="login-input" id="fat-edit-telefone-${proc.id}" value="${esc(proc.telefone || '')}"></div>
-        <div class="span-2"><label class="login-label">Corretor (opcional)</label><input class="login-input" id="fat-edit-corretor-${proc.id}" value="${esc(proc.corretor || '')}" placeholder="Nome do corretor responsavel"></div>
-        <div class="span-2"><label class="login-label">Observações</label><textarea class="login-input" id="fat-edit-descricao-${proc.id}">${esc(proc.descricao || '')}</textarea></div>
-        <div class="actions"><button class="btn btn-outline btn-sm" onclick='fatSalvarDadosProcesso(${procIdArg})'>Salvar dados do processo</button></div>
-      </div>
-      ` : ''}
-
-      <div class="fat-stepper">
-        ${FAT_ETAPAS.map((e, i) => `
-          <div class="fat-step ${i < idxAtual ? 'ok' : i === idxAtual ? 'now' : ''}">
-            <div class="fat-step-dot">${i < idxAtual ? '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' : (i+1)}</div>
-            <div class="fat-step-lbl">${esc(e.status)}</div>
-          </div>`).join('')}
-      </div>
-
-      ${!isAdm ? `
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0 20px;padding:16px;background:var(--bg);border-radius:8px;margin-bottom:20px;">
-        <div class="fat-dado"><div class="fat-dado-label">Grupo</div><div class="fat-dado-valor">${esc(proc.grupo || '—')}</div></div>
-        <div class="fat-dado"><div class="fat-dado-label">Cota</div><div class="fat-dado-valor">${esc(proc.cota || '—')}</div></div>
-        <div class="fat-dado"><div class="fat-dado-label">E-mail</div><div class="fat-dado-valor" style="font-size:11px;">${esc(proc.email || '—')}</div></div>
-        <div class="fat-dado"><div class="fat-dado-label">WhatsApp</div><div class="fat-dado-valor">${esc(proc.telefone || '—')}</div></div>
-        <div class="fat-dado"><div class="fat-dado-label">Corretor</div><div class="fat-dado-valor">${esc(proc.corretor || '—')}</div></div>
-        <div class="fat-dado" style="grid-column:1/-1;"><div class="fat-dado-label">Observações</div><div class="fat-dado-valor" style="font-size:11px;color:var(--text2);">${esc(proc.descricao || '—')}</div></div>
-      </div>
-      ` : ''}
-
-      <div class="fat-detalhe-grid">
-        <div>
-          <div class="fat-col-card">
-            <div class="fat-col-titulo">${SVG_DOC} Documentos</div>
-            ${arqsHtml}
-            ${isAdm ? `
-            <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
-              <label style="font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text2);display:block;margin-bottom:6px;">Adicionar arquivos</label>
-              <input type="file" id="fat-upload-${proc.id}" accept=".pdf,.jpg,.jpeg,.png" multiple onchange='fatUploadArquivos(${procIdArg}, ${procTokenArg}, this)' style="width:100%;font-size:11.5px;">
-            </div>
-            ` : ''}
-          </div>
-
-          <div class="fat-col-card">
-            <div class="fat-col-titulo">${SVG_CLOCK} Histórico</div>
-            ${histHtml}
-          </div>
-        </div>
-
-        <div>
-          ${isAdm ? `
-          <div class="fat-col-card">
-            <div class="fat-col-titulo">${SVG_REFRESH} Atualizar status</div>
-            <select id="fat-novo-status-${proc.id}" class="login-input" style="font-size:12.5px;padding:9px 12px;margin-bottom:8px;border:1px solid var(--border2);border-radius:8px;width:100%;">${statusOpts}</select>
-            <textarea id="fat-obs-status-${proc.id}" placeholder="Observação para o histórico (opcional)..." style="padding:9px 12px;border:1px solid var(--border2);border-radius:8px;font-family:'Inter';font-size:12px;min-height:64px;resize:vertical;outline:none;width:100%;margin-bottom:10px;"></textarea>
-            <button class="btn btn-primary btn-sm" onclick='fatAtualizarStatus(${procIdArg})'>Salvar status</button>
-          </div>
-          ` : `
-          <div class="fat-col-card">
-            <div class="fat-col-titulo">${SVG_DOC} Status atual</div>
-            <div style="padding:12px 14px;background:var(--bg);border:1px solid var(--border);border-radius:8px;">
-              <span class="tag ${fatTagClass(proc.status)}">${esc(proc.status)}</span>
-              <p style="font-size:11.5px;color:var(--text2);margin-top:8px;line-height:1.5;">Apenas o administrador pode alterar o status.</p>
-            </div>
-          </div>
-          `}
-
-          <div class="fat-col-card">
-            <div class="fat-col-titulo">${SVG_CHAT} Comunicação</div>
-            <div class="fat-msgs-wrap" id="fat-msgs-${proc.id}">${msgsHtml}</div>
-            <div style="display:flex;gap:8px;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);">
-              <textarea id="fat-nova-msg-${proc.id}" placeholder="Responder ao cliente..." style="flex:1;min-height:42px;padding:9px 12px;border:1px solid var(--border2);border-radius:8px;font-family:'Inter';font-size:12px;resize:none;outline:none;"></textarea>
-              <button class="btn btn-primary btn-sm" onclick='fatEnviarMsg(${procIdArg})'>Enviar</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>`;
-
-  setTimeout(() => {
-    const el = document.getElementById(`fat-msgs-${proc.id}`);
-    if (el) el.scrollTop = el.scrollHeight;
-  }, 100);
-}
-
-function fatFecharDetalhe(event) {
-  if (event && event.target !== document.getElementById('fat-overlay')) return;
-  document.getElementById('fat-overlay').classList.remove('aberto');
-}
-
-async function fatSalvarProtocolo(processoId) {
-  const novoProtocolo = document.getElementById(`fat-protocolo-${processoId}`).value.trim().toUpperCase();
-  if (!novoProtocolo) return;
-  const { data: existente } = await sb.from('portal_processos').select('id').eq('protocolo', novoProtocolo).neq('id', processoId).maybeSingle();
-  if (existente) { alert('Este protocolo ja esta vinculado a outro processo.'); return; }
-  const { error } = await sb.from('portal_processos').update({ protocolo: novoProtocolo, atualizado_em: new Date() }).eq('id', processoId);
-  if (error) { alert('Erro ao salvar protocolo: ' + error.message); return; }
-  await sb.from('portal_historico').insert({
-    processo_id: processoId,
-    status_novo: 'Protocolo atribuido',
-    observacao: `Protocolo ${novoProtocolo}`,
-    autor: currentUser?.nome || 'admin'
-  });
-  await fatVerProcesso(processoId);
-  await renderAdminFaturamento();
-}
-
-async function fatGerarProtocoloCampo(processoId) {
-  document.getElementById(`fat-protocolo-${processoId}`).value = await fatGerarProtocolo();
-}
-
-async function fatAtribuirProtocolo(processoId) {
-  await fatVerProcesso(processoId);
-  const campo = document.getElementById(`fat-protocolo-${processoId}`);
-  if (campo) {
-    campo.value = await fatGerarProtocolo();
-    campo.focus();
-    campo.select();
+function handleBancoCodigo(input) {
+  const codigo = input.value.replace(/\D/g,'');
+  const spanNome = input.parentNode.querySelector('.banco-nome');
+  if (spanNome) {
+    const nome = buscarBancoPorCodigo(codigo);
+    if (nome) {
+      spanNome.textContent = nome;
+      spanNome.style.color = 'var(--text)';
+    } else {
+      spanNome.textContent = codigo ? 'Banco não encontrado (código salvo)' : '';
+      spanNome.style.color = 'var(--text3)';
+    }
   }
 }
 
-async function fatSalvarDadosProcesso(processoId) {
-  const nome = document.getElementById(`fat-edit-nome-${processoId}`).value.trim();
-  const cpf = cleanCPF(document.getElementById(`fat-edit-cpf-${processoId}`).value);
-  if (!nome) { alert('Nome obrigatorio.'); return; }
-  if (cpf.length !== 11) { alert('CPF invalido.'); return; }
-
-  const updates = {
-    nome,
-    cpf,
-    grupo: document.getElementById(`fat-edit-grupo-${processoId}`).value.trim() || null,
-    cota: document.getElementById(`fat-edit-cota-${processoId}`).value.trim() || null,
-    email: document.getElementById(`fat-edit-email-${processoId}`).value.trim() || null,
-    telefone: document.getElementById(`fat-edit-telefone-${processoId}`).value.trim() || null,
-    corretor: document.getElementById(`fat-edit-corretor-${processoId}`).value.trim() || null,
-    descricao: document.getElementById(`fat-edit-descricao-${processoId}`).value.trim() || null,
-    atualizado_em: new Date()
-  };
-
-  const { error } = await sb.from('portal_processos').update(updates).eq('id', processoId);
-  if (error) { alert('Erro ao salvar dados: ' + error.message); return; }
-  await fatVerProcesso(processoId);
-  await renderAdminFaturamento();
+// ═══ PREENCHIMENTO AUTOMÁTICO DE ENDEREÇO VIA CEP ═══
+async function buscarCEP(cepValue) {
+  const cep = cepValue.replace(/\D/g, '');
+  if (cep.length !== 8) return;
+  const fields = ['logradouro', 'endereco', 'bairro', 'cidade', 'estado', 'complemento', 'tipo_logradouro'];
+  fields.forEach(id => { const el=document.getElementById('f-'+id); if(el&&!el.value) el.placeholder='Carregando...'; });
+  try {
+    const resp = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
+    const data = await resp.json();
+    if (data.erro) return;
+    const setVal = (id, val) => { const el=document.getElementById('f-'+id); if(el&&!el.value) el.value=val||''; };
+    setVal('logradouro', data.logradouro); setVal('endereco', data.logradouro); setVal('bairro', data.bairro);
+    setVal('cidade', data.localidade); setVal('complemento', data.complemento||'');
+    const estadoEl = document.getElementById('f-estado');
+    if(estadoEl){ if(estadoEl.tagName==='SELECT'){ const uf=data.uf.toUpperCase(); if(UF_LIST.includes(uf)) estadoEl.value=uf; } else estadoEl.value=data.uf.toUpperCase(); }
+  } catch(e){}
 }
 
-async function fatAtualizarStatus(processoId) {
-  const novoStatus = document.getElementById(`fat-novo-status-${processoId}`).value;
-  const obs = document.getElementById(`fat-obs-status-${processoId}`).value.trim();
-  const { error } = await sb.from('portal_processos').update({
-    status: novoStatus,
-    atualizado_em: new Date()
-  }).eq('id', processoId);
-  if (error) { alert('Erro ao atualizar status: ' + error.message); return; }
+// ═══ CONFIGURAÇÃO DAS ADMINISTRADORAS ═══
+const ADM_CONFIG = {
+  bradesco: { label:'Bradesco',     bg:'#FEE2E2', color:'#DC2626' },
+  itau:     { label:'Itaú',         bg:'#FEF3C7', color:'#D97706' },
+  porto:    { label:'Porto Seguro', bg:'#EFF6FF', color:'#2563EB' },
+};
 
-  await sb.from('portal_historico').insert({
-    processo_id: processoId,
-    status_novo: novoStatus,
-    observacao: obs || null,
-    autor: currentUser?.nome || 'admin'
-  });
+// ═══ CAMPOS POR ADMINISTRADORA + TIPO ═══
+const CAMPOS = {
+  bradesco_pf: [
+    { section: 'Dados Pessoais' },
+    { id:'cpf',               label:'CPF',                  type:'text',   placeholder:'000.000.000-00', required:true, mask:'cpf' },
+    { id:'nome_completo',     label:'Nome Completo',         type:'text',   placeholder:'Nome completo',  required:true },
+    { id:'data_nascimento',   label:'Data de Nascimento',    type:'date',   required:true },
+    { id:'nacionalidade',     label:'Nacionalidade',         type:'text',   placeholder:'Brasileira',     required:true },
+    { id:'nome_pai',          label:'Nome do Pai',           type:'text',   placeholder:'Se ausente, escreva Ausente' },
+    { id:'nome_mae',          label:'Nome da Mãe',           type:'text',   placeholder:'Nome da mãe',    required:true },
+    { section: 'Estado Civil' },
+    { id:'estado_civil',      label:'Estado Civil',          type:'select', options:['Solteiro(a)','Casado(a)','Divorciado(a)','Viúvo(a)','Outros'], required:true },
+    { conjugeBlock: true },
+    { id:'nome_conjuge',           label:'Nome do Cônjuge',        type:'text',   placeholder:'Nome completo' },
+    { id:'cpf_conjuge',            label:'CPF do Cônjuge',         type:'text',   placeholder:'000.000.000-00', mask:'cpf' },
+    { id:'rg_conjuge',             label:'RG do Cônjuge',          type:'text',   placeholder:'Número do RG' },
+    { id:'data_nascimento_conjuge',label:'Data Nasc. Cônjuge',     type:'date' },
+    { conjugeBlockEnd: true },
+    { section: 'Profissão e Renda' },
+    { id:'nome_empresa',      label:'Empresa onde Trabalha', type:'text',   placeholder:'Nome da empresa', required:true },
+    { id:'data_admissao',     label:'Data de Admissão',      type:'date',   required:true },
+    { id:'renda_mensal',      label:'Renda Mensal',          type:'text',   placeholder:'R$ 0,00',         required:true, mask:'currency' },
+    { section: 'Endereço' },
+    { id:'cep',               label:'CEP',                   type:'text',   placeholder:'00000-000',       required:true, cep:true },
+    { id:'logradouro',        label:'Logradouro',            type:'text',   placeholder:'Rua, Avenida...', required:true },
+    { id:'numero',            label:'Número',                type:'text',   placeholder:'123',             required:true },
+    { id:'complemento',       label:'Complemento',           type:'text',   placeholder:'Apto, Bloco...' },
+    { id:'bairro',            label:'Bairro',                type:'text',   placeholder:'Bairro',          required:true },
+    { id:'cidade',            label:'Cidade',                type:'text',   placeholder:'Cidade',          required:true },
+    { id:'estado',            label:'Estado',                type:'text',   placeholder:'SP',              required:true, maxlen:2 },
+    { id:'tempo_residencia',  label:'Tempo de Residência',   type:'text',   placeholder:'ex: 2 anos',      required:true },
+    { section: 'Contato e Pagamento' },
+    { id:'email',             label:'E-mail',                type:'email',  placeholder:'email@exemplo.com', required:true },
+    { id:'celular',           label:'Celular',               type:'text',   placeholder:'(11) 99999-9999',   required:true, mask:'phone' },
+    { id:'forma_pagamento',   label:'Forma de Pagamento',    type:'text',   placeholder:'Débito em conta, boleto...', required:true },
+    { id:'deseja_seguro',     label:'Deseja Seguro?',        type:'select', options:['Sim','Não'],           required:true },
+  ],
+  bradesco_pj: [
+    { section: 'Dados da Empresa' },
+    { id:'cnpj',                    label:'CNPJ',                            type:'text',   placeholder:'00.000.000/0001-00', required:true, mask:'cnpj' },
+    { id:'razao_social',            label:'Razão Social',                    type:'text',   placeholder:'Razão Social',       required:true },
+    { id:'nome_fantasia',           label:'Nome Fantasia',                   type:'text',   placeholder:'Nome Fantasia',      required:true },
+    { id:'ramo_atividade',          label:'Ramo de Atividade / O que fazem',type:'text',   placeholder:'Descreva a atividade', required:true },
+    { section: 'Sócio Administrador' },
+    { id:'socio_nome',              label:'Nome Completo do Sócio',         type:'text',   placeholder:'Nome completo',      required:true },
+    { id:'socio_cpf',               label:'CPF do Sócio',                   type:'text',   placeholder:'000.000.000-00',     required:true, mask:'cpf' },
+    { id:'socio_data_nascimento',   label:'Data de Nascimento do Sócio',   type:'date',   required:true },
+    { id:'socio_tipo_documento',    label:'Tipo de Documento',              type:'select', options:['RG','CNH'],           required:true },
+    { id:'socio_numero_documento',  label:'Número do Documento',            type:'text',   placeholder:'Número',             required:true },
+    { id:'socio_percentual_empresa',label:'Percentual na Empresa (%)',      type:'text',   placeholder:'50',                 required:true },
+    { id:'socio_estado_civil',      label:'Estado Civil do Sócio',          type:'select', options:['Solteiro(a)','Casado(a)','Divorciado(a)','Viúvo(a)','Outros'], required:true },
+    { id:'socio_nome_conjuge',      label:'Nome do Cônjuge',                type:'text',   placeholder:'Se aplicável' },
+    { id:'socio_cpf_conjuge',       label:'CPF do Cônjuge',                 type:'text',   placeholder:'000.000.000-00', mask:'cpf' },
+    { section: 'Contato' },
+    { id:'email',                   label:'E-mail',                         type:'email',  placeholder:'email@exemplo.com', required:true },
+    { id:'celular',                 label:'Celular',                        type:'text',   placeholder:'(11) 99999-9999',   required:true, mask:'phone' },
+    { section: 'Endereço' },
+    { id:'cep',                     label:'CEP',                            type:'text',   placeholder:'00000-000',          required:true, cep:true },
+    { id:'logradouro',              label:'Logradouro',                     type:'text',   placeholder:'Rua, Avenida...',    required:true },
+    { id:'numero',                  label:'Número',                         type:'text',   placeholder:'123',                required:true },
+    { id:'complemento',             label:'Complemento',                    type:'text',   placeholder:'Apto, Bloco...' },
+    { id:'bairro',                  label:'Bairro',                         type:'text',   placeholder:'Bairro',             required:true },
+    { id:'cidade',                  label:'Cidade',                         type:'text',   placeholder:'Cidade',             required:true },
+    { id:'estado',                  label:'Estado',                         type:'text',   placeholder:'SP',                 required:true, maxlen:2 },
+    { section: 'Pagamento' },
+    { id:'forma_pagamento',         label:'Forma de Pagamento',             type:'text',   placeholder:'Débito em conta, boleto...', required:true },
+    { id:'deseja_seguro',           label:'Deseja Seguro?',                 type:'select', options:['Sim','Não'],           required:true },
+  ],
+  itau_pf: [
+    { section: 'Dados Pessoais' },
+    { id:'cpf',               label:'CPF',                  type:'text',   placeholder:'000.000.000-00', required:true, mask:'cpf' },
+    { id:'nome_completo',     label:'Nome Completo',         type:'text',   placeholder:'Nome completo',  required:true },
+    { id:'data_nascimento',   label:'Data de Nascimento',    type:'date',   required:true },
+    { id:'tipo_documento',    label:'Tipo de Documento',     type:'select', options:['RG','CNH','Outros'], required:true },
+    { id:'numero_documento',  label:'Número do Documento',   type:'text',   placeholder:'Número',        required:true },
+    { id:'data_emissao',      label:'Data de Emissão',       type:'date',   required:true },
+    { id:'orgao_expedidor',   label:'Órgão Expedidor',       type:'text',   placeholder:'Ex.: SSP/SP',  required:true },
+    { id:'sexo',              label:'Sexo',                  type:'select', options:['Masculino','Feminino','Outro'], required:true },
+    { id:'nacionalidade',     label:'Nacionalidade',         type:'select', options:['Brasileiro(a)','Estrangeiro(a)'], required:true },
+    { section: 'Estado Civil' },
+    { id:'estado_civil',      label:'Estado Civil',          type:'select', options:['Solteiro(a)','Casado(a)','Divorciado(a)','Viúvo(a)','União Estável','Outros'], required:true },
+    { conjugeBlock: true },
+    { id:'nome_conjuge',           label:'Nome do Cônjuge',        type:'text',   placeholder:'Nome completo' },
+    { id:'cpf_conjuge',            label:'CPF do Cônjuge',         type:'text',   placeholder:'000.000.000-00', mask:'cpf' },
+    { id:'rg_conjuge',             label:'RG do Cônjuge',          type:'text',   placeholder:'Número do RG' },
+    { id:'data_nascimento_conjuge',label:'Data Nasc. Cônjuge',     type:'date' },
+    { conjugeBlockEnd: true },
+    { section: 'Endereço Residencial' },
+    { id:'cep',               label:'CEP',                   type:'text',   placeholder:'00000-000',       required:true, cep:true },
+    { id:'tipo_residencia',   label:'Tipo de Residência',    type:'select', options:['Própria','Alugada','Financiada','Outros'], required:true },
+    { id:'logradouro',        label:'Logradouro',            type:'text',   placeholder:'Rua, Avenida...', required:true },
+    { id:'numero',            label:'Número',                type:'text',   placeholder:'123',             required:true },
+    { id:'complemento',       label:'Complemento',           type:'text',   placeholder:'Apto, Bloco...' },
+    { id:'bairro',            label:'Bairro',                type:'text',   placeholder:'Bairro',          required:true },
+    { id:'estado',            label:'Estado',                type:'select', options:UF_LIST,               required:true },
+    { id:'cidade',            label:'Cidade',                type:'text',   placeholder:'Cidade',          required:true },
+    { section: 'Contato' },
+    { id:'ddd',               label:'DDD',                   type:'text',   placeholder:'11', maxlen:2, required:true },
+    { id:'celular',           label:'Celular',               type:'text',   placeholder:'99999-9999',     required:true, mask:'phone' },
+    { id:'email',             label:'E-mail',                type:'email',  placeholder:'email@exemplo.com', required:true },
+    { section: 'Dados Comerciais' },
+    { id:'profissao',         label:'Profissão',             type:'text',   placeholder:'Sua profissão',  required:true },
+    { id:'renda_mensal',      label:'Renda Mensal',          type:'text',   placeholder:'R$ 0,00',         required:true, mask:'currency' },
+    { id:'patrimonio',        label:'Patrimônio',            type:'text',   placeholder:'R$ 0,00',         required:true, mask:'currency' },
+    { section: '1° Pagamento' },
+    { id:'forma_pagamento_1', label:'Forma de Pagamento',    type:'select', options:['Boleto','Débito em Conta','Cartão de Crédito'], required:true },
+    { section: 'Pagamento do Plano (exceto 1°)' },
+    { id:'forma_pagamento_plano', label:'Forma de Pagamento',type:'select', options:['Boleto Bancário','Débito em Conta','Cartão de Crédito'], required:true },
+    { section: 'Resgate (Encerramento do Grupo) — Opcional' },
+    { id:'banco_resgate',     label:'Código do Banco',       type:'text',   placeholder:'000', maxlen:1, autocompleteBanco: true },
+    { id:'agencia_resgate',   label:'Agência',               type:'text',   placeholder:'0000' },
+    { id:'conta_resgate',     label:'Conta Corrente',        type:'text',   placeholder:'00000-0' },
+    { section: 'Seguro Consórcio' },
+    { id:'aceita_seguro',     label:'Está de acordo com o seguro?', type:'select', options:['Sim','Não'], required:true },
+  ],
+  itau_pj: [
+    { section: 'Dados da Empresa' },
+    { id:'cnpj',                 label:'CNPJ',                            type:'text',   placeholder:'00.000.000/0001-00', required:true, mask:'cnpj' },
+    { id:'data_constituicao',    label:'Data de Constituição',            type:'date',   required:true },
+    { id:'ramo_atividade',       label:'Ramo de Atividade',               type:'select', options:['Comércio','Indústria','Serviços','Outros'], required:true },
+    { id:'razao_social',         label:'Razão Social',                    type:'text',   placeholder:'Razão Social',       required:true },
+    { id:'faturamento_12m',      label:'Faturamento (Últ. 12 meses)',     type:'text',   placeholder:'R$ 0,00',          required:true, mask:'currency' },
+    { id:'inscricao_estadual',   label:'Inscrição Estadual',              type:'text',   placeholder:'Inscrição Estadual' },
+    { id:'inscricao_municipal',  label:'Inscrição Municipal',             type:'text',   placeholder:'Inscrição Municipal' },
+    { id:'valor_capital',        label:'Valor Capital',                   type:'text',   placeholder:'R$ 0,00', mask:'currency' },
+    { id:'cnae_principal',       label:'Atividade Principal (CNAE)',      type:'text',   placeholder:'0000-0/00',         required:true },
+    { id:'natureza_juridica',    label:'Natureza Jurídica',               type:'text',   placeholder:'Natureza Jurídica',  required:true },
+    { section: '1° Sócio (Obrigatório)' },
+    { id:'socio1_nome',                label:'Nome do Sócio',                   type:'text',   required:true },
+    { id:'socio1_administrador',       label:'Sócio Administrador',             type:'select', options:['Sim','Não'], required:true },
+    { id:'socio1_cpf_cnpj',            label:'CPF/CNPJ',                        type:'text',   placeholder:'000.000.000-00', required:true, mask:'cpf' },
+    { id:'socio1_rg',                  label:'RG',                              type:'text',   required:true },
+    { id:'socio1_data_emissao_rg',     label:'Data de Emissão RG',              type:'date',   required:true },
+    { id:'socio1_orgao_expedidor',     label:'Órgão Expedidor',                 type:'text',   placeholder:'SSP/SP', required:true },
+    { id:'socio1_data_nascimento',     label:'Data de Nascimento',              type:'date',   required:true },
+    { id:'socio1_nome_pai',            label:'Nome do Pai',                     type:'text',   required:true },
+    { id:'socio1_nome_mae',            label:'Nome da Mãe',                     type:'text',   required:true },
+    { id:'socio1_data_entrada',        label:'Data de Entrada como Sócio',      type:'date',   required:true },
+    { id:'socio1_participacao',        label:'Participação (%)',                type:'text',   placeholder:'50', required:true },
+    { section: '2° Sócio (Opcional)' },
+    { id:'socio2_nome',                label:'Nome do Sócio',                   type:'text' },
+    { id:'socio2_administrador',       label:'Sócio Administrador',             type:'select', options:['Sim','Não'] },
+    { id:'socio2_cpf_cnpj',            label:'CPF/CNPJ',                        type:'text',   placeholder:'000.000.000-00', mask:'cpf' },
+    { id:'socio2_rg',                  label:'RG',                              type:'text' },
+    { id:'socio2_data_emissao_rg',     label:'Data de Emissão RG',              type:'date' },
+    { id:'socio2_orgao_expedidor',     label:'Órgão Expedidor',                 type:'text',   placeholder:'SSP/SP' },
+    { id:'socio2_data_nascimento',     label:'Data de Nascimento',              type:'date' },
+    { id:'socio2_nome_pai',            label:'Nome do Pai',                     type:'text' },
+    { id:'socio2_nome_mae',            label:'Nome da Mãe',                     type:'text' },
+    { id:'socio2_data_entrada',        label:'Data de Entrada como Sócio',      type:'date' },
+    { id:'socio2_participacao',        label:'Participação (%)',                type:'text',   placeholder:'50' },
+    { section: 'Dados do Endereço' },
+    { id:'cep',                         label:'CEP',                            type:'text',   placeholder:'00000-000', required:true, cep:true },
+    { id:'endereco_exterior',           label:'Possui Endereço Fiscal no Exterior?', type:'select', options:['Não','Sim'], required:true },
+    { id:'logradouro',                  label:'Logradouro',                     type:'text',   placeholder:'Rua, Avenida...', required:true },
+    { id:'numero',                      label:'Número',                         type:'text',   placeholder:'123',          required:true },
+    { id:'complemento',                 label:'Complemento',                    type:'text',   placeholder:'Apto, Bloco...' },
+    { id:'bairro',                      label:'Bairro',                         type:'text',   placeholder:'Bairro',       required:true },
+    { id:'estado',                      label:'Estado',                         type:'select', options:UF_LIST,               required:true },
+    { id:'cidade',                      label:'Cidade',                         type:'text',   placeholder:'Cidade',       required:true },
+    { section: 'Contato' },
+    { id:'ddd_telefone',                label:'DDD',                            type:'text',   placeholder:'11', maxlen:2 },
+    { id:'telefone',                    label:'Telefone',                       type:'text',   placeholder:'3333-4444', mask:'phone' },
+    { id:'ramal',                       label:'Ramal',                          type:'text',   placeholder:'1234' },
+    { id:'ddd_fax',                     label:'DDD (FAX)',                      type:'text',   placeholder:'11', maxlen:2 },
+    { id:'fax',                         label:'FAX',                            type:'text',   placeholder:'3333-4444', mask:'phone' },
+    { id:'ramal_fax',                   label:'Ramal FAX',                      type:'text',   placeholder:'1234' },
+    { id:'ddd_celular',                 label:'DDD (Celular)',                  type:'text',   placeholder:'11', maxlen:2 },
+    { id:'celular',                     label:'Celular',                        type:'text',   placeholder:'99999-9999', required:true, mask:'phone' },
+    { id:'email',                       label:'E-mail',                         type:'email',  placeholder:'email@exemplo.com', required:true },
+    { section: '1° Pagamento' },
+    { id:'forma_pagamento_1',           label:'Forma de Pagamento',             type:'select', options:['Boleto','Débito em Conta'], required:true },
+    { section: 'Pagamento do Plano (Exceto 1° Pagamento)' },
+    { id:'forma_pagamento_plano',       label:'Forma de Pagamento',             type:'select', options:['Boleto Bancário','Débito em Conta'], required:true },
+    { section: 'Resgate (Encerramento do Grupo) — Opcional' },
+    { id:'banco_resgate',               label:'Código do Banco',                type:'text',   placeholder:'000', maxlen:3, autocompleteBanco: true },
+    { id:'agencia_resgate',             label:'Agência',                        type:'text',   placeholder:'0000' },
+    { id:'conta_resgate',               label:'Conta Corrente',                 type:'text',   placeholder:'00000-0' },
+  ],
+  porto_pf: [
+    { section: 'Ficha Cadastral' },
+    { id:'cpf',               label:'CPF',                  type:'text',   placeholder:'000.000.000-00', required:true, mask:'cpf' },
+    { id:'nome_completo',     label:'Nome Completo',         type:'text',   placeholder:'Nome completo',  required:true, pattern:'[A-Za-zÀ-ÿ ]+' },
+    { id:'data_nascimento',   label:'Data de Nascimento',    type:'date',   required:true },
+    { section: 'Estado Civil' },
+    { id:'estado_civil',      label:'Estado Civil',          type:'select', options:['Solteiro(a)','Casado(a)','Divorciado(a)','Viúvo(a)','União Estável','Outros'], required:true },
+    { conjugeBlock: true },
+    { id:'nome_conjuge',           label:'Nome do Cônjuge',        type:'text',   placeholder:'Nome completo' },
+    { id:'cpf_conjuge',            label:'CPF do Cônjuge',         type:'text',   placeholder:'000.000.000-00', mask:'cpf' },
+    { id:'rg_conjuge',             label:'RG do Cônjuge',          type:'text',   placeholder:'Número do RG' },
+    { id:'data_nascimento_conjuge',label:'Data Nasc. Cônjuge',     type:'date' },
+    { conjugeBlockEnd: true },
+    { id:'email',             label:'E-mail',                type:'email',  placeholder:'email@exemplo.com', required:true },
+    { id:'confirme_email',    label:'Confirme seu e-mail',   type:'email',  placeholder:'Confirme o e-mail', required:true },
+    { section: 'Contato (preencha ao menos o Celular)' },
+    { id:'tel_residencial',   label:'Telefone Residencial',  type:'text',   placeholder:'(11) 3333-4444', mask:'phone' },
+    { id:'tel_comercial',     label:'Telefone Comercial',    type:'text',   placeholder:'(11) 3333-4444', mask:'phone' },
+    { id:'celular',           label:'Celular',               type:'text',   placeholder:'(11) 99999-9999', required:true, mask:'phone' },
+    { id:'celular2',          label:'Celular 2',             type:'text',   placeholder:'(11) 99999-9999', mask:'phone' },
+    { section: 'Documento de Identificação' },
+    { id:'tipo_documento',    label:'Documento',             type:'select', options:['RG','CNH','Outros'], required:true },
+    { id:'numero_documento',  label:'Número do documento',   type:'text',   required:true },
+    { id:'orgao_emissor_uf',  label:'Órgão emissor/UF',      type:'text',   placeholder:'Ex.: SSP/SP', required:true },
+    { id:'data_emissao',      label:'Data de Emissão',       type:'date',   required:true },
+    { id:'nacionalidade',     label:'Nacionalidade',         type:'select', options:['Brasileiro(a)','Estrangeiro(a)'], required:true },
+    { id:'cidade_nascimento', label:'Cidade de Nascimento',  type:'text',   required:true },
+    { id:'nome_mae',          label:'Nome da Mãe',           type:'text',   required:true, pattern:'[A-Za-zÀ-ÿ ]+' },
+    { section: 'Remuneração e Profissão' },
+    { id:'remuneracao',       label:'Remuneração',           type:'text',   placeholder:'R$ 0,00', required:true, mask:'currency' },
+    { id:'profissao',         label:'Profissão',             type:'text',   required:true },
+    { section: 'Endereço Residencial' },
+    { id:'cep',               label:'CEP',                   type:'text',   placeholder:'00000-000', required:true, cep:true },
+    { id:'tipo_logradouro',   label:'Tipo Logradouro',       type:'text',   placeholder:'Ex.: Rua', required:true },
+    { id:'endereco',          label:'Endereço',              type:'text',   placeholder:'Ex.: Alves da Silva', required:true },
+    { id:'numero',            label:'Número',                type:'text',   placeholder:'123', required:true },
+    { id:'complemento',       label:'Complemento',           type:'text',   placeholder:'Apto, Bloco...' },
+    { id:'bairro',            label:'Bairro',                type:'text',   required:true },
+    { id:'cidade',            label:'Cidade',                type:'text',   required:true },
+    { id:'estado',            label:'Estado',                type:'select', options:UF_LIST, required:true },
+    { section: 'Pagamento' },
+    { id:'forma_pagamento_1', label:'Forma de Pagamento da 1° parcela', type:'select', options:['Boleto','Pix'], required:true },
+    { id:'forma_pagamento_2', label:'Forma de pagamento da 2° parcela em diante', type:'select', options:['Débito automático em conta corrente','Boleto Bancário'], required:true },
+    { section: 'Dados Bancários do 1° Titular (obrigatório)' },
+    { id:'nome_correntista',  label:'Nome Correntista',      type:'text',   required:true },
+    { id:'cpf_correntista',   label:'CPF do Correntista',    type:'text',   placeholder:'000.000.000-00', required:true, mask:'cpf' },
+    { id:'banco_codigo',      label:'Banco (código)',         type:'banco_codigo', placeholder:'000', required:true },
+    { id:'agencia',           label:'Agência (sem dígito)',  type:'text',   required:true },
+    { id:'conta_corrente',    label:'Conta Corrente',        type:'text',   required:true },
+    { section: 'Seguro' },
+    { id:'aceita_seguro',     label:'Está de acordo com o seguro?', type:'select', options:['Sim','Não'], required:true },
+  ],
+  porto_pj: [
+    { section: 'Ficha Cadastral' },
+    { id:'cnpj',               label:'CNPJ',                            type:'text',   placeholder:'00.000.000/0001-00', required:true, mask:'cnpj' },
+    { id:'razao_social',       label:'Razão Social',                    type:'text',   required:true, pattern:'[A-Za-zÀ-ÿ ]+' },
+    { id:'inscricao_estadual', label:'Inscrição Estadual (somente números)', type:'text', placeholder:'Inscrição Estadual' },
+    { id:'data_constituicao',  label:'Data Constituição',               type:'date',   required:true },
+    { id:'email',              label:'E-mail',                          type:'email',  required:true },
+    { id:'confirme_email',     label:'Confirme seu e-mail',             type:'email',  required:true },
+    { section: 'Contato' },
+    { id:'tel_comercial',      label:'Telefone Comercial',              type:'text',   placeholder:'(11) 3333-4444', mask:'phone' },
+    { id:'celular',            label:'Celular',                         type:'text',   placeholder:'(11) 99999-9999', required:true, mask:'phone' },
+    { id:'celular2',           label:'Celular 2',                       type:'text',   placeholder:'(11) 99999-9999', mask:'phone' },
+    { section: 'Atividade' },
+    { id:'ramo_atividade',     label:'Ramo de Atividade',               type:'select', options:['Consultoria','Comércio','Indústria','Serviços','Outros'], required:true },
+    { id:'receita_mensal',     label:'Receita Mensal',                  type:'text',   placeholder:'R$ 0,00', required:true, mask:'currency' },
+    { section: 'Endereço' },
+    { id:'cep',                label:'CEP',                             type:'text',   placeholder:'00000-000', required:true, cep:true },
+    { id:'tipo_logradouro',    label:'Tipo Logradouro',                 type:'text',   placeholder:'Ex.: Rua', required:true },
+    { id:'endereco',           label:'Endereço',                        type:'text',   placeholder:'Ex.: Alves da Silva', required:true },
+    { id:'numero',             label:'Número',                          type:'text',   placeholder:'123', required:true },
+    { id:'complemento',        label:'Complemento',                     type:'text',   placeholder:'Apto, Bloco...' },
+    { id:'bairro',             label:'Bairro',                          type:'text',   required:true },
+    { id:'cidade',             label:'Cidade',                          type:'text',   required:true },
+    { id:'estado',             label:'Estado',                          type:'select', options:UF_LIST, required:true },
+    { section: 'Sócio Administrador (obrigatório)' },
+    { id:'socio_nome',         label:'Nome do Sócio',                   type:'text',   required:true },
+    { id:'socio_cpf',          label:'CPF do Sócio',                    type:'text',   placeholder:'000.000.000-00', required:true, mask:'cpf' },
+    { section: 'Pagamento' },
+    { id:'forma_pagamento_1',  label:'Forma de Pagamento da 1° parcela', type:'select', options:['Boleto','Pix'], required:true },
+    { id:'forma_pagamento_2',  label:'Forma de pagamento 2° parcela em diante', type:'select', options:['Débito automático em conta corrente','Boleto bancário'], required:true },
+    { section: 'Dados Bancários do Contratante' },
+    { id:'nome_correntista',   label:'Nome Correntista',                type:'text',   required:true },
+    { id:'cnpj_correntista',   label:'CNPJ do Correntista',             type:'text',   placeholder:'00.000.000/0001-00', required:true, mask:'cnpj' },
+    { id:'banco_codigo',       label:'Banco (código)',                   type:'banco_codigo', placeholder:'000', required:true },
+    { id:'agencia',            label:'Agência',                         type:'text',   required:true },
+    { id:'conta_corrente',     label:'Conta Corrente',                  type:'text',   required:true },
+  ],
+};
 
-  await fatVerProcesso(processoId);
-  await renderAdminFaturamento();
+// ═══ FUNÇÕES DE NAVEGAÇÃO E RENDERIZAÇÃO ═══
+function showMsg(elId, text, type) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  el.innerHTML = text ? `<div class="msg ${type}">${text}</div>` : '';
+}
+function genProtocol() {
+  const d = new Date();
+  const yy = String(d.getFullYear()).slice(2);
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  const rnd = String(Math.floor(Math.random()*100000)).padStart(5,'0');
+  return `MA${yy}${mm}${dd}-${rnd}`;
 }
 
-async function fatAtribuirConsultor(processoId) {
-  const sel = document.getElementById(`fat-consultor-${processoId}`);
-  if (!sel) return;
-  const consultorAuthId = sel.value || null;
-  const consultor = fatConsultores.find(c => c.auth_id === consultorAuthId);
-  const consultorNome = consultor ? consultor.nome : null;
-
-  const { error } = await sb.from('portal_processos').update({
-    consultor_id: consultorAuthId,
-    consultor_nome: consultorNome,
-    atualizado_em: new Date()
-  }).eq('id', processoId);
-  if (error) { alert('Erro ao atribuir consultor: ' + error.message); return; }
-
-  await sb.from('portal_historico').insert({
-    processo_id: processoId,
-    status_novo: 'Consultor atribuído',
-    observacao: consultorNome ? `Atribuído a ${consultorNome}` : 'Consultor removido',
-    autor: currentUser?.nome || 'admin'
-  });
-
-  await fatVerProcesso(processoId);
-  await renderAdminFaturamento();
+function updateProgressUI(step) {
+  document.getElementById('progress').style.width = (step === 1 ? '50%' : '100%');
 }
 
-async function fatEnviarMsg(processoId) {
-  const campo = document.getElementById(`fat-nova-msg-${processoId}`);
-  const texto = campo.value.trim();
-  if (!texto) return;
-  const { error } = await sb.from('portal_mensagens').insert({
-    processo_id: processoId,
-    autor: 'admin',
-    texto
-  });
-  if (error) { alert('Erro: ' + error.message); return; }
-  campo.value = '';
-  await fatVerProcesso(processoId);
+function goStep(n) {
+  if (n > STATE.step) {
+    if (STATE.step === 1 && !STATE.adm) { showMsg('msg-step1','Selecione uma administradora.','error'); return; }
+  }
+  document.getElementById('step-'+STATE.step).classList.remove('active');
+  STATE.step = n;
+  const target = document.getElementById('step-'+n) || document.getElementById('step-success');
+  target.classList.add('active');
+  updateProgressUI(n);
+  window.scrollTo({top:0, behavior:'smooth'});
+  if (n === 2 && STATE.adm) renderFormFields();
 }
 
-async function fatUploadArquivos(processoId, token, input) {
-  for (const arquivo of Array.from(input.files)) {
-    if (arquivo.size > 16*1024*1024) { alert(`${arquivo.name} muito grande`); continue; }
-    const path = `${token}/${Date.now()}_${arquivo.name}`;
-    const { error: upErr } = await sb.storage.from(FAT_CONFIG.storageBucket).upload(path, arquivo);
-    if (upErr) { alert('Erro upload: ' + upErr.message); continue; }
-    await sb.from('portal_arquivos').insert({
-      processo_id: processoId,
-      nome_original: arquivo.name,
-      storage_path: path
+function selectAdm(adm) {
+  STATE.adm = adm;
+  document.querySelectorAll('.adm-card').forEach(c => c.classList.remove('selected'));
+  document.getElementById('adm-'+adm).classList.add('selected');
+  showMsg('msg-step1','','');
+}
+
+function selectTipo(tipo) {
+  STATE.tipo = tipo;
+  document.getElementById('tipo-pf').className = 'tipo-card' + (tipo==='pf'?' selected':'');
+  document.getElementById('tipo-pj').className = 'tipo-card' + (tipo==='pj'?' selected':'');
+  const pfIcon = document.querySelector('#tipo-pf .tipo-icon svg');
+  const pjIcon = document.querySelector('#tipo-pj .tipo-icon svg');
+  if (pfIcon) pfIcon.setAttribute('stroke', tipo==='pf'?'#4DBCC8':'var(--text3)');
+  if (pjIcon) pjIcon.setAttribute('stroke', tipo==='pj'?'#4DBCC8':'var(--text3)');
+  renderFormFields();
+}
+
+function toggleConjugeFields() {
+  const estadoCivil = document.getElementById('f-estado_civil');
+  const conjugeDiv = document.getElementById('conjuge-fields');
+  if (!estadoCivil || !conjugeDiv) return;
+  if (estadoCivil.value === 'Casado(a)') {
+    conjugeDiv.style.display = 'block';
+  } else {
+    conjugeDiv.style.display = 'none';
+    ['f-nome_conjuge','f-cpf_conjuge','f-rg_conjuge','f-data_nascimento_conjuge'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
     });
   }
-  input.value = '';
-  await fatVerProcesso(processoId);
 }
 
-async function fatDeletarArquivo(arquivoId, processoId) {
-  if (!confirm('Remover arquivo?')) return;
-  await sb.from('portal_arquivos').delete().eq('id', arquivoId);
-  await fatVerProcesso(processoId);
+function renderFormFields() {
+  if (!STATE.adm) return;
+  const key = `${STATE.adm}_${STATE.tipo}`;
+  const campos = CAMPOS[key] || [];
+  const container = document.getElementById('form-fields-container');
+  const cfg = ADM_CONFIG[STATE.adm] || {};
+  const chip = document.getElementById('adm-chip');
+  if (chip) { chip.textContent=cfg.label||STATE.adm; chip.style.background=cfg.bg; chip.style.color=cfg.color; }
+
+  let html = '';
+  let inGrid = false;
+  let inConjugeBlock = false;
+
+  campos.forEach(c => {
+    if (c.conjugeBlock) {
+      if (inGrid) { html += '</div>'; inGrid = false; }
+      html += '<div id="conjuge-fields" style="display:none;"><div class="field-grid">';
+      inGrid = true;
+      inConjugeBlock = true;
+      return;
+    }
+    if (c.conjugeBlockEnd) {
+      if (inGrid) { html += '</div>'; inGrid = false; }
+      html += '</div>';
+      inConjugeBlock = false;
+      return;
+    }
+    if (c.section) {
+      if (inGrid) { html += '</div>'; inGrid = false; }
+      html += `<div class="section-title" style="margin-top:20px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>${c.section}</div>`;
+      html += '<div class="field-grid">';
+      inGrid = true;
+      return;
+    }
+    if (!inGrid) { html += '<div class="field-grid">'; inGrid = true; }
+    const req = c.required ? '<span class="req">*</span>' : '';
+    const cls = c.span2 ? ' field span-2' : ' field';
+    
+    // Caso especial: campo de banco com código
+    if (c.type === 'banco_codigo') {
+      html += `<div class="${cls}">
+        <label class="field-label" for="f-${c.id}">${c.label} ${req}</label>
+        <div class="banco-auto-fill">
+          <input class="field-input" id="f-${c.id}" type="text" placeholder="${c.placeholder||'000'}" maxlength="3" oninput="this.value=this.value.replace(/\\D/g,''); handleBancoCodigo(this)" onblur="handleBancoCodigo(this)">
+          <span class="banco-nome" id="banco-nome-${c.id}"></span>
+        </div>
+      </div>`;
+      return;
+    }
+
+    // Campo com autocompleteBanco (ex: banco_resgate)
+    if (c.autocompleteBanco) {
+      html += `<div class="${cls}">
+        <label class="field-label" for="f-${c.id}">${c.label} ${req}</label>
+        <div class="banco-auto-fill">
+          <input class="field-input" id="f-${c.id}" type="text" placeholder="${c.placeholder||'000'}" maxlength="${c.maxlen||3}" oninput="this.value=this.value.replace(/\\D/g,''); handleBancoCodigo(this)" onblur="handleBancoCodigo(this)">
+          <span class="banco-nome" id="banco-nome-${c.id}"></span>
+        </div>
+      </div>`;
+      return;
+    }
+
+    let maskHandler = '';
+    if (c.mask === 'phone') maskHandler = 'oninput="maskPhone(this)"';
+    else if (c.mask === 'currency') maskHandler = 'oninput="maskCurrency(this)"';
+    else if (c.mask === 'cpf') maskHandler = 'oninput="maskCPF(this)"';
+    else if (c.mask === 'cnpj') maskHandler = 'oninput="maskCNPJ(this)"';
+    else if (c.cep) maskHandler = 'oninput="maskCEP(this)"';
+
+    if (c.type === 'select') {
+      const opts = (c.options||[]).map(o => `<option value="${o}">${o}</option>`).join('');
+      const onChange = (c.id === 'estado_civil') ? 'onchange="toggleConjugeFields()"' : '';
+      html += `<div class="${cls}"><label class="field-label" for="f-${c.id}">${c.label} ${req}</label><select class="field-select" id="f-${c.id}" ${onChange}><option value="">Selecione...</option>${opts}</select></div>`;
+    } else {
+      const maxl = c.maxlen ? `maxlength="${c.maxlen}"` : '';
+      const pattern = c.pattern ? `pattern="${c.pattern}"` : '';
+      html += `<div class="${cls}"><label class="field-label" for="f-${c.id}">${c.label} ${req}</label><input class="field-input" id="f-${c.id}" type="${c.type}" placeholder="${c.placeholder||''}" ${maskHandler} ${maxl} ${pattern}></div>`;
+    }
+  });
+  if (inGrid) html += '</div>';
+  container.innerHTML = html;
+
+  toggleConjugeFields();
+
+  campos.forEach(c => {
+    if (c.cep) {
+      const el = document.getElementById('f-' + c.id);
+      if (el) el.addEventListener('blur', function() { buscarCEP(this.value); });
+    }
+  });
 }
 
-async function fatDeletarProcesso(id) {
-  if (!confirm('Excluir processo e todos os dados? Essa ação não pode ser desfeita.')) return;
-  await sb.from('portal_mensagens').delete().eq('processo_id', id);
-  await sb.from('portal_historico').delete().eq('processo_id', id);
-  await sb.from('portal_arquivos').delete().eq('processo_id', id);
-  const { error } = await sb.from('portal_processos').delete().eq('id', id);
-  if (error) { alert('Erro: ' + error.message); return; }
-  document.getElementById('fat-overlay').classList.remove('aberto');
-  await renderAdminFaturamento();
-}
-
-function fatCopiarLink(token) {
-  const link = fatLinkCliente(token);
-  if (navigator.clipboard?.writeText) {
-    navigator.clipboard.writeText(link).then(() => alert('Link copiado para o cliente!'));
-  } else {
-    prompt('Copie o link do cliente:', link);
+function validateStep2() {
+  if (!STATE.adm) { showMsg('msg-step2','Selecione uma administradora.','error'); return false; }
+  const key = `${STATE.adm}_${STATE.tipo}`;
+  const campos = CAMPOS[key] || [];
+  const missing = [];
+  campos.forEach(c => {
+    if (c.section || c.conjugeBlock || c.conjugeBlockEnd || !c.required) return;
+    const el = document.getElementById('f-'+c.id);
+    if (!el || !el.value.trim()) missing.push(c.label);
+  });
+  if (missing.length) {
+    showMsg('msg-step2',`Preencha os campos obrigatórios: <strong>${missing.slice(0,4).join(', ')}${missing.length>4?'...':''}</strong>`,'error');
+    return false;
   }
-}
-
-function fatCopiarLinkFixo() {
-  const link = fatLinkInicioCliente();
-  if (navigator.clipboard?.writeText) {
-    navigator.clipboard.writeText(link).then(() => alert('Link fixo copiado!'));
-  } else {
-    prompt('Copie o link fixo:', link);
+  const emailEl = document.getElementById('f-email');
+  const confEmailEl = document.getElementById('f-confirme_email');
+  if (emailEl && confEmailEl && emailEl.value.trim() !== confEmailEl.value.trim()) {
+    showMsg('msg-step2','Os e-mails não conferem.','error');
+    return false;
   }
+  if (!document.getElementById('lgpd-check').checked) {
+    showMsg('msg-step2','Você precisa autorizar o tratamento dos dados (LGPD) para continuar.','error');
+    return false;
+  }
+  showMsg('msg-step2','','');
+  return true;
 }
 
-function fatExportarCSV() {
-  const lista = fatFiltrados.length ? fatFiltrados : fatProcessos;
-  if (!lista.length) { alert('Nenhum processo para exportar.'); return; }
-  const header = ['Protocolo','Nome','CPF','Grupo','Cota','Corretor','Email','Telefone','Status','Criado em'];
-  const linhas = lista.map(p => [
-    p.protocolo || 'Pendente', p.nome, fmtCPF(p.cpf), p.grupo||'', p.cota||'', p.corretor||'',
-    p.email||'', p.telefone||'', p.status,
-    fmtDataBR(p.criado_em)
-  ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
-  const csv = [header.join(','), ...linhas].join('\n');
-  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = `processos-${new Date().toISOString().slice(0,10)}.csv`; a.click();
-  URL.revokeObjectURL(url);
-}
-
-// Funções auxiliares
-function fatTagClass(s) {
-  const m = { 'Recebido':'tag-blue', 'Em análise':'tag-amber', 'Enviado para administradora':'tag-purple', 'Em retorno da administradora':'tag-teal', 'Finalizado':'tag-green', 'Cancelado':'tag-red' };
-  return m[s] || 'tag-gray';
-}
-function fatStatusIcone(s) { return FAT_ETAPAS.find(e => e.status === s)?.icone || '📌'; }
-function fatIconeArq(nome) {
-  const ext = (nome||'').split('.').pop().toLowerCase();
-  return ext === 'pdf' ? '📄' : ['jpg','jpeg','png'].includes(ext) ? '🖼️' : '📎';
-}
-function fatJsArg(v) {
-  return JSON.stringify(String(v ?? '')).replace(/'/g, '\\u0027');
-}
-function fatLinkCliente(token) {
-  // Usa o origin do parent para que o link gerado aponte para o site público,
-  // não para a URL interna do iframe.
-  const baseHref = (window.parent && window.parent !== window)
-    ? window.parent.location.href
-    : window.location.href;
-  const base = baseHref.replace(/\/[^\/?#]*([?#].*)?$/, '/');
-  return `${base}${FAT_CONFIG.clientePath}?token=${encodeURIComponent(token)}`;
-}
-function fatLinkInicioCliente() {
-  const baseHref = (window.parent && window.parent !== window)
-    ? window.parent.location.href
-    : window.location.href;
-  const base = baseHref.replace(/\/[^\/?#]*([?#].*)?$/, '/');
-  return `${base}${FAT_CONFIG.clientePath}`;
-}
-function fatGerarToken() {
-  const cryptoPart = window.crypto?.getRandomValues
-    ? Array.from(window.crypto.getRandomValues(new Uint32Array(2))).map(n => n.toString(36)).join('')
-    : Math.random().toString(36).slice(2, 12);
-  return `${cryptoPart}${Date.now().toString(36)}`;
-}
-async function fatGerarProtocolo() {
-  const ano = new Date().getFullYear();
-  const prefixo = `${FAT_CONFIG.protocoloPrefixo}-${ano}-`;
-  const { data } = await sb.from('portal_processos').select('protocolo').like('protocolo', `${prefixo}%`);
-  const usados = (data || [])
-    .map(p => parseInt(String(p.protocolo || '').replace(prefixo, ''), 10))
-    .filter(n => Number.isFinite(n));
-  const proximo = String(Math.max(0, ...usados) + 1).padStart(4, '0');
-  return `${prefixo}${proximo}`;
-}
-
-// ═══════════════════════════════════════════════════════
-// INIT — checa sessão e busca currentUser do portal_users
-// ═══════════════════════════════════════════════════════
-(async function init() {
+async function submitForm() {
+  const btn = document.getElementById('btn-submit');
+  if (!validateStep2()) return;
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  showMsg('msg-step2','Enviando sua adesão...','info');
   try {
-    const { data: sess } = await sb.auth.getSession();
-    if (!sess?.session?.user) {
-      // Sem sessão: redireciona o portal pai para login
-      if (window.parent && window.parent !== window) {
-        window.parent.location.href = '/';
-      } else {
-        window.location.href = '/';
-      }
-      return;
-    }
-    const authId = sess.session.user.id;
-    const { data: user } = await sb.from('portal_users').select('*').eq('auth_id', authId).maybeSingle();
-    if (!user) {
-      document.getElementById('fat-loading').innerHTML = '<div style="color:var(--red);font-size:13px;">Perfil não encontrado. Contate o administrador.</div>';
-      return;
-    }
-    currentUser = user;
-
-    // Mostra a UI
-    document.getElementById('fat-loading').style.display = 'none';
-    document.getElementById('fat-app').style.display = 'block';
-
-    await renderAdminFaturamento();
-  } catch (e) {
-    document.getElementById('fat-loading').innerHTML = `<div style="color:var(--red);font-size:13px;">Erro ao carregar: ${(e.message||e)}</div>`;
+    const key = `${STATE.adm}_${STATE.tipo}`;
+    const campos = CAMPOS[key] || [];
+    const dados = {};
+    campos.forEach(c => {
+      if (c.section || c.conjugeBlock || c.conjugeBlockEnd) return;
+      const el = document.getElementById('f-'+c.id);
+      let valor = el ? el.value.trim() : '';
+      dados[c.id] = valor;
+    });
+    if (dados.banco_codigo) dados.banco = dados.banco_codigo;
+    const protocolo = genProtocol();
+    const payload = {
+      protocolo,
+      administradora: STATE.adm,
+      tipo_pessoa: STATE.tipo,
+      dados,
+      status: 'recebido',
+      criado_em: new Date().toISOString(),
+      nome_cliente: dados.nome_completo || dados.razao_social || '',
+      cpf_cnpj: dados.cpf || dados.cnpj || '',
+    };
+    const { error } = await sb.from('portal_adesoes').insert(payload);
+    if (error) throw error;
+    document.getElementById('step-2').classList.remove('active');
+    document.getElementById('step-success').classList.add('active');
+    updateProgressUI(3);
+    window.scrollTo({top:0, behavior:'smooth'});
+  } catch(e) {
+    showMsg('msg-step2','Erro ao enviar: '+(e.message||'tente novamente')+'.<br>Se o problema persistir, entre em contato com nossa equipe.','error');
+    btn.disabled = false; btn.textContent = 'Enviar Adesão';
   }
-})();
+}
+
+function resetForm() {
+  STATE = { step:1, adm:null, tipo:'pf' };
+  document.querySelectorAll('.form-step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('step-1').classList.add('active');
+  document.querySelectorAll('.adm-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('form-fields-container').innerHTML = '';
+  document.getElementById('lgpd-check').checked = false;
+  showMsg('msg-step1','',''); showMsg('msg-step2','','');
+  updateProgressUI(1);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
 </script>
 </body>
 </html>
