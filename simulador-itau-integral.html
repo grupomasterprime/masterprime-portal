@@ -660,18 +660,48 @@ function _coletarBlocosItauIntegral() {
   return blocos;
 }
 
+function _montarPdfComercialItauIntegral() {
+  const _v = (id) => { const el = document.getElementById(id); return (el?.value || '').trim(); };
+  const _t = (id) => { const el = document.getElementById(id); return (el?.textContent || '').trim(); };
+
+  return {
+    filename: 'itau-parcela-integral',
+    logoAdmin: 'itau',
+    titulo: 'Simulador de Crédito',
+    subtitulo: 'Parcela Integral',
+    subtituloSecundario: '(Parcela cheia desde a 1ª)',
+    representanteTexto: 'Consórcio Itaú',
+    inputs: [
+      { label: 'Taxa de adm. do Grupo', value: _v('ii-taxaAdm') || '0,00 %' },
+      { label: 'Fundo Reserva', value: _v('ii-fundo') || '0,00 %' },
+      { label: 'Seguro Prestamista', value: _v('ii-seguro') || '0,0000 %' },
+      { label: 'Valor do crédito', value: _v('ii-credito') || 'R$ 0,00' },
+      { label: 'Prazo do Grupo', value: (_v('ii-prazo') || '0') + ' Meses' },
+    ],
+    lance: {
+      embutido: { pct: _v('ii-pctEmbutido').replace(' %','') || '0,00', rs: (_t('ii-lanceEmbutido') || 'R$ 0,00').replace('R$ ','') },
+      apagar:   { pct: _v('ii-pctAPagar').replace(' %','') || '0,00',   rs: (_t('ii-lanceAPagar') || 'R$ 0,00').replace('R$ ','') },
+      total:    {
+        pct: (((parseFloat((_v('ii-pctEmbutido')||'0').replace(',','.')) || 0) + (parseFloat((_v('ii-pctAPagar')||'0').replace(',','.')) || 0)).toFixed(2).replace('.', ',')),
+        rs: (_t('ii-totalLance') || 'R$ 0,00').replace('R$ ','')
+      }
+    },
+    outputs: [
+      { label: 'Valor parcela (antes contemplação)', value: _t('ii-parcelaIntegral') || '—' },
+      { label: 'Valor parcela (pós-contemplado)',    value: _t('ii-novaParcela') || '—' },
+      { label: 'Crédito Líquido',                    value: _t('ii-creditoLiquido') || '—' },
+      { label: 'Prazo Restante',                     value: _t('ii-prazoRestante') || '—' },
+    ]
+  };
+}
+
 document.getElementById('baixarPdfItau').addEventListener('click', async () => {
   const btn = document.getElementById('baixarPdfItau');
   const txt = btn.textContent;
   btn.textContent = 'Gerando PDF...';
   btn.disabled = true;
   try {
-    await PdfMasterPrime.gerar({
-      tituloEstrategia: 'Itaú · Parcela Integral',
-      filename: 'itau-parcela-integral',
-      logoAdmin: 'itau',
-      blocos: _coletarBlocosItauIntegral()
-    });
+    await PdfMasterPrime.gerarComercial(_montarPdfComercialItauIntegral());
   } catch (err) {
     console.error(err);
     alert('Erro ao gerar PDF: ' + err.message);

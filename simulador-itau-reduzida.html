@@ -688,18 +688,51 @@ function _coletarBlocosItauReduzida() {
   return blocos;
 }
 
+function _montarPdfComercialItauReduzida() {
+  const _v = (id) => { const el = document.getElementById(id); return (el?.value || '').trim(); };
+  const _t = (id) => { const el = document.getElementById(id); return (el?.textContent || '').trim(); };
+  const _selTxt = (id) => { const el = document.getElementById(id); return (el?.selectedOptions?.[0]?.textContent || '').trim(); };
+
+  const reducaoTxt = _selTxt('ir-reducao') || '—';
+  const reducaoPct = reducaoTxt.replace(/[^\d%]/g, '');
+  return {
+    filename: 'itau-parcela-reduzida',
+    logoAdmin: 'itau',
+    titulo: 'Simulador de Crédito',
+    subtitulo: 'Parcela Reduzida',
+    subtituloSecundario: `(Redução de ${reducaoPct || '30%'} até a Contemplação)`,
+    representanteTexto: 'Consórcio Itaú',
+    inputs: [
+      { label: 'Taxa de adm. do Grupo', value: _v('ir-taxaAdm') || '0,00 %' },
+      { label: 'Fundo Reserva', value: _v('ir-fundo') || '0,00 %' },
+      { label: 'Seguro Prestamista', value: _v('ir-seguro') || '0,0000 %' },
+      { label: 'Valor do crédito', value: _v('ir-credito') || 'R$ 0,00' },
+      { label: 'Prazo do Grupo', value: (_v('ir-prazo') || '0') + ' Meses' },
+    ],
+    lance: {
+      embutido: { pct: _v('ir-pctEmbutido').replace(' %','') || '0,00', rs: (_t('ir-lanceEmbutido') || 'R$ 0,00').replace('R$ ','') },
+      apagar:   { pct: _v('ir-pctAPagar').replace(' %','') || '0,00',   rs: (_t('ir-lanceAPagar') || 'R$ 0,00').replace('R$ ','') },
+      total:    {
+        pct: (((parseFloat((_v('ir-pctEmbutido')||'0').replace(',','.')) || 0) + (parseFloat((_v('ir-pctAPagar')||'0').replace(',','.')) || 0)).toFixed(2).replace('.', ',')),
+        rs: (_t('ir-totalLance') || 'R$ 0,00').replace('R$ ','')
+      }
+    },
+    outputs: [
+      { label: 'Valor parcela (antes contemplação)', value: _t('ir-parcelaReduzida') || '—' },
+      { label: 'Valor parcela (pós-contemplado)',    value: _t('ir-novaParcela') || '—' },
+      { label: 'Crédito Líquido',                    value: _t('ir-creditoLiquido') || '—' },
+      { label: 'Prazo Restante',                     value: _t('ir-prazoRestante') || '—' },
+    ]
+  };
+}
+
 document.getElementById('baixarPdfItau').addEventListener('click', async () => {
   const btn = document.getElementById('baixarPdfItau');
   const txt = btn.textContent;
   btn.textContent = 'Gerando PDF...';
   btn.disabled = true;
   try {
-    await PdfMasterPrime.gerar({
-      tituloEstrategia: 'Itaú · Parcela Reduzida',
-      filename: 'itau-parcela-reduzida',
-      logoAdmin: 'itau',
-      blocos: _coletarBlocosItauReduzida()
-    });
+    await PdfMasterPrime.gerarComercial(_montarPdfComercialItauReduzida());
   } catch (err) {
     console.error(err);
     alert('Erro ao gerar PDF: ' + err.message);

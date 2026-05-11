@@ -835,18 +835,54 @@ function _coletarBlocosPortoAuto() {
   return blocos;
 }
 
+function _montarPdfComercialPortoAuto() {
+  const _v = (id) => { const el = document.getElementById(id); return (el?.value || '').trim(); };
+  const _t = (id) => { const el = document.getElementById(id); return (el?.textContent || '').trim(); };
+  const _selTxt = (id) => { const el = document.getElementById(id); return (el?.selectedOptions?.[0]?.textContent || '').trim(); };
+
+  const tipoTxt = _selTxt('pa-tipo') || 'PF';
+  const isPF = (tipoTxt === 'Física' || tipoTxt.includes('PF'));
+  const parcelaAntes = isPF ? _t('pa-parcelaReduzPF') : _t('pa-parcelaReduzPJ');
+  const redutorTxt = _selTxt('pa-redutor') || '';
+  const redutorPct = redutorTxt.replace(/[^\d%]/g, '');
+
+  return {
+    filename: 'porto-consorcio-auto',
+    logoAdmin: 'porto',
+    titulo: 'Simulador de Crédito',
+    subtitulo: 'Porto · Auto',
+    subtituloSecundario: redutorPct && redutorPct !== '0%'
+      ? `(Redução de ${redutorPct} até a Contemplação)`
+      : '(Sem redutor de parcela)',
+    representanteTexto: 'Consórcio Porto',
+    inputs: [
+      { label: 'Taxa Administrativa', value: _v('pa-taxaAdm') || '0,00 %' },
+      { label: 'Fundo Reserva', value: _v('pa-fundo') || '0,00 %' },
+      { label: 'Seguro Prestamista', value: _v('pa-seguro') || '0,0000 %', highlight: 'Somente PF' },
+      { label: 'Valor do crédito', value: _v('pa-credito') || 'R$ 0,00' },
+      { label: 'Prazo do Grupo', value: (_v('pa-prazo') || '0') + ' Meses' },
+    ],
+    lance: {
+      embutido: { pct: _v('pa-pctEmbutido').replace(' %','') || '0,00', rs: (_v('pa-embutido') || 'R$ 0,00').replace('R$ ','') },
+      apagar:   { pct: '—', rs: (_v('pa-recProp') || 'R$ 0,00').replace('R$ ','') },
+      total:    { pct: _t('pa-representatividade').replace(' %','') || '0,00', rs: 'R$ —' }
+    },
+    outputs: [
+      { label: 'Valor parcela (antes contemplação)', value: parcelaAntes || _t('pa-parcelaDemais') || '—' },
+      { label: 'Valor parcela (pós-contemplado)',    value: _t('pa-novaParcela') || '—' },
+      { label: 'Crédito Líquido',                    value: _t('pa-creditoLiberado') || '—' },
+      { label: 'Prazo Restante',                     value: _t('pa-novoPrazo') || '—' },
+    ]
+  };
+}
+
 document.getElementById('baixarPdfPorto').addEventListener('click', async () => {
   const btn = document.getElementById('baixarPdfPorto');
   const txt = btn.textContent;
   btn.textContent = 'Gerando PDF...';
   btn.disabled = true;
   try {
-    await PdfMasterPrime.gerar({
-      tituloEstrategia: 'Porto · Consórcio Auto',
-      filename: 'porto-consorcio-auto',
-      logoAdmin: 'porto',
-      blocos: _coletarBlocosPortoAuto()
-    });
+    await PdfMasterPrime.gerarComercial(_montarPdfComercialPortoAuto());
   } catch (err) {
     console.error(err);
     alert('Erro ao gerar PDF: ' + err.message);

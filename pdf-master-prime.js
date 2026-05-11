@@ -591,6 +591,167 @@
     document.body.appendChild(wrap);
   }
 
+  // ═════════════════════════════════════════════════════════════════════
+  // PDF COMERCIAL (formato simplificado estilo cartão de oferta)
+  // Substitui o gerar() detalhado. Layout: header com logo + caixa
+  // azul arredondada com inputs/lance à esquerda e outputs à direita.
+  // ═════════════════════════════════════════════════════════════════════
+
+  const ADMIN_THEME = {
+    porto:    { corPrimaria: '#003A8B', corLanceFundo: '#A9BCD9', corAcento: '#003A8B', repTexto: 'Consórcio Porto' },
+    itau:     { corPrimaria: '#1A237E', corLanceFundo: '#A9BCD9', corAcento: '#EC7000', repTexto: 'Consórcio Itaú' },
+    bradesco: { corPrimaria: '#CC092F', corLanceFundo: '#E8B4BC', corAcento: '#CC092F', repTexto: 'Consórcio Bradesco' },
+  };
+
+  function _renderInputComercial(inp) {
+    const highlight = inp.highlight
+      ? `<div style="font-size:14px; color:#DC2626; font-weight:600; margin-bottom:2px; font-style:italic;">${inp.highlight}</div>`
+      : '';
+    return `
+      <div>
+        ${highlight}
+        <div style="font-size:17px; font-weight:700; color:#1F2937; margin-bottom:6px;">${inp.label}</div>
+        <div style="border:1.5px solid #1F2937; padding:9px 14px; border-radius:6px; font-size:18px; font-weight:500; background:#fff; min-height:42px; display:flex; align-items:center;">${inp.value || ''}</div>
+      </div>`;
+  }
+
+  function _renderLanceCaixa(lance, fundoCor) {
+    if (!lance) return '';
+    const linha = (lbl, valorPct, lblValor, valorRs) => `
+      <div>
+        <div style="font-size:17px; font-weight:700; color:#fff; margin-bottom:6px;">${lbl}</div>
+        <div style="display:flex; align-items:center; background:#fff; border-radius:6px; padding:6px 12px; gap:8px; min-height:36px;">
+          <span style="flex:1; font-size:17px; font-weight:500;">${valorPct}</span>
+          <span style="color:#6B7280; font-size:14px;">%</span>
+        </div>
+      </div>
+      <div>
+        <div style="font-size:17px; font-weight:700; color:#fff; margin-bottom:6px;">${lblValor}</div>
+        <div style="display:flex; align-items:center; background:#fff; border-radius:6px; padding:6px 12px; gap:8px; min-height:36px;">
+          <span style="color:#6B7280; font-size:14px;">R$</span>
+          <span style="flex:1; font-size:17px; font-weight:500;">${valorRs}</span>
+        </div>
+      </div>`;
+    return `
+      <div style="background:${fundoCor}; border-radius:14px; padding:22px 24px; margin-top:24px;">
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px 22px;">
+          ${linha('% Lance embutido', lance.embutido?.pct || '0,00', 'Valor Embutido', lance.embutido?.rs || '0,00')}
+          ${linha('% Lance a pagar', lance.apagar?.pct || '0,00', 'Valor Lance', lance.apagar?.rs || '0,00')}
+          ${linha('% Lance Total', lance.total?.pct || '0,00', 'Valor Total', lance.total?.rs || '0,00')}
+        </div>
+      </div>`;
+  }
+
+  function _renderOutputComercial(o) {
+    const subAcima = o.subAcima
+      ? `<div style="font-size:13px; color:#DC2626; font-weight:600; margin-bottom:2px; font-style:italic;">${o.subAcima}</div>`
+      : '';
+    return `
+      <div style="margin-bottom:22px;">
+        ${subAcima}
+        <div style="font-size:21px; font-weight:700; color:#1F2937; margin-bottom:4px; line-height:1.25;">${o.label}</div>
+        <div style="font-size:22px; color:#1F2937; font-weight:400;">${o.value || '—'}</div>
+      </div>`;
+  }
+
+  function buildTemplateComercial(opts) {
+    const theme = ADMIN_THEME[opts.logoAdmin] || ADMIN_THEME.porto;
+    const logoUrl = LOGO_ADMIN_DATA[opts.logoAdmin] || '';
+    const inputsHtml = (opts.inputs || []).map(_renderInputComercial).join('');
+    const outputsHtml = (opts.outputs || []).map(_renderOutputComercial).join('');
+    const lanceHtml = _renderLanceCaixa(opts.lance, theme.corLanceFundo);
+
+    return `
+      <div style="width:1300px; background:#fff; font-family:'Inter',-apple-system,system-ui,sans-serif; color:#1F2937; padding:50px 64px;">
+
+        <!-- HEADER -->
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px;">
+          <div style="max-width:55%;">
+            <div style="font-size:46px; font-weight:800; color:#1F2937; line-height:1.05; margin-bottom:6px;">${opts.titulo || 'Simulador de Crédito'}</div>
+            <div style="font-size:36px; font-weight:500; color:#1F2937; line-height:1.1; margin-bottom:8px;">${opts.subtitulo || ''}</div>
+            ${opts.subtituloSecundario ? `<div style="font-size:18px; color:#DC2626; font-style:italic;">${opts.subtituloSecundario}</div>` : ''}
+          </div>
+          <div style="display:flex; align-items:flex-start; gap:24px;">
+            <div style="background:${theme.corPrimaria}; width:120px; height:120px; border-radius:18px; display:flex; align-items:center; justify-content:center; padding:14px;">
+              <img src="${logoUrl}" style="width:100%; height:100%; object-fit:contain;">
+            </div>
+            <div>
+              <div style="font-size:34px; font-weight:800; color:#1F2937; line-height:1.1; margin-bottom:6px;">Representante<br>Autorizado</div>
+              <div style="font-size:22px; color:${theme.corAcento}; font-weight:600;">${opts.representanteTexto || theme.repTexto}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CAIXA PRINCIPAL com borda colorida -->
+        <div style="border:3px solid ${theme.corPrimaria}; border-radius:22px; padding:36px; display:grid; grid-template-columns:1.15fr 1fr; gap:42px; background:#fff;">
+
+          <!-- COLUNA ESQUERDA: inputs + lance -->
+          <div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:22px 28px;">
+              ${inputsHtml}
+            </div>
+            ${lanceHtml}
+          </div>
+
+          <!-- COLUNA DIREITA: outputs -->
+          <div style="background:#EFF0F4; border-radius:14px; padding:30px 32px;">
+            ${outputsHtml}
+          </div>
+        </div>
+
+      </div>`;
+  }
+
+  async function gerarComercial(opts) {
+    if (typeof html2canvas !== 'function') throw new Error('html2canvas não está carregado');
+    if (!window.jspdf || !window.jspdf.jsPDF) throw new Error('jsPDF não está carregado');
+
+    const wrap = document.createElement('div');
+    wrap.style.cssText = `position:fixed; top:0; left:0; width:${PDF_WIDTH}px; background:#fff; z-index:-99999; pointer-events:none; overflow:hidden;`;
+    wrap.innerHTML = buildTemplateComercial(opts);
+    document.body.appendChild(wrap);
+
+    try {
+      await new Promise(r => setTimeout(r, 350));
+
+      const target = wrap.firstElementChild;
+      const canvas = await html2canvas(target, {
+        scale: 2,
+        backgroundColor: '#FFFFFF',
+        width: PDF_WIDTH,
+        windowWidth: PDF_WIDTH,
+        useCORS: true,
+        allowTaint: true,
+        logging: false
+      });
+
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true });
+      const pageW = 210, pageH = 297;
+      const fitW = pageW;
+      const fitH = (canvas.height * fitW) / canvas.width;
+      const imgData = canvas.toDataURL('image/jpeg', 0.96);
+
+      if (fitH <= pageH) {
+        pdf.addImage(imgData, 'JPEG', 0, (pageH - fitH) / 2, fitW, fitH);
+      } else {
+        const fitH2 = pageH;
+        const fitW2 = (canvas.width * fitH2) / canvas.height;
+        const offsetX = (pageW - fitW2) / 2;
+        pdf.addImage(imgData, 'JPEG', offsetX, 0, fitW2, fitH2);
+      }
+
+      const hoje = new Date();
+      const dd = String(hoje.getDate()).padStart(2, '0');
+      const mm = String(hoje.getMonth() + 1).padStart(2, '0');
+      const yyyy = hoje.getFullYear();
+      const filename = (opts.filename || 'master-prime-simulacao') + `-${dd}${mm}${yyyy}.pdf`;
+      pdf.save(filename);
+    } finally {
+      wrap.remove();
+    }
+  }
+
   // ─── EXPORT PUBLIC API ───
-  window.PdfMasterPrime = { gerar, preview, buildTemplate, _internals: { DISCLAIMER_PADRAO, NAVY, CARD_BG } };
+  window.PdfMasterPrime = { gerar, gerarComercial, preview, buildTemplate, buildTemplateComercial, _internals: { DISCLAIMER_PADRAO, NAVY, CARD_BG } };
 })();

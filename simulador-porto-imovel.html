@@ -874,18 +874,55 @@ function _coletarBlocosPortoImovel() {
   return blocos;
 }
 
+function _montarPdfComercialPortoImovel() {
+  const _v = (id) => { const el = document.getElementById(id); return (el?.value || '').trim(); };
+  const _t = (id) => { const el = document.getElementById(id); return (el?.textContent || '').trim(); };
+  const _selTxt = (id) => { const el = document.getElementById(id); return (el?.selectedOptions?.[0]?.textContent || '').trim(); };
+
+  const tipoTxt = _selTxt('pi-tipo') || 'PF';
+  const isPF = (tipoTxt === 'Física' || tipoTxt.includes('PF'));
+  const parcelaAntes = isPF ? _t('pi-parcelaReduzPF') : _t('pi-parcelaReduzPJ');
+  const redutorTxt = _selTxt('pi-redutor') || 'Sem redutor';
+  const redutorPct = redutorTxt.replace(/[^\d%]/g, '');
+  const qtdAdesao = _v('pi-qtdAdesao') || '12';
+
+  return {
+    filename: 'porto-consorcio-imovel',
+    logoAdmin: 'porto',
+    titulo: 'Simulador de Crédito',
+    subtitulo: 'Porto · Imóvel',
+    subtituloSecundario: redutorPct && redutorPct !== '0%'
+      ? `(Redução de ${redutorPct} até a Contemplação)`
+      : '(Sem redutor de parcela)',
+    representanteTexto: 'Consórcio Porto',
+    inputs: [
+      { label: 'Taxa Administrativa', value: _v('pi-taxaAdm') || '0,00 %' },
+      { label: 'Fundo Reserva', value: _v('pi-fundo') || '0,00 %' },
+      { label: 'Seguro Prestamista', value: _v('pi-seguro') || '0,0000 %', highlight: 'Somente PF' },
+      { label: 'Valor do crédito', value: _v('pi-credito') || 'R$ 0,00' },
+      { label: 'Prazo do Grupo', value: (_v('pi-prazo') || '0') + ' Meses' },
+    ],
+    lance: {
+      embutido: { pct: '—', rs: (_v('pi-embutido') || 'R$ 0,00').replace('R$ ','') },
+      apagar:   { pct: '—', rs: (_v('pi-recProp') || 'R$ 0,00').replace('R$ ','') },
+      total:    { pct: _t('pi-representatividade').replace(' %','') || '0,00', rs: 'R$ —' }
+    },
+    outputs: [
+      { label: 'Primeiras ' + qtdAdesao + ' parcelas', subAcima: '(Adesão + parcela do mês)', value: _t('pi-parcelaInicial') || '—' },
+      { label: 'Demais Parcelas',                       subAcima: '(antes da contemplação)',   value: parcelaAntes || _t('pi-parcelaDemais') || '—' },
+      { label: 'Valor parcela (pós-contemplado)',                                                value: _t('pi-novaParcela') || '—' },
+      { label: 'Prazo Restante',                                                                 value: _t('pi-novoPrazo') || '—' },
+    ]
+  };
+}
+
 document.getElementById('baixarPdfPorto').addEventListener('click', async () => {
   const btn = document.getElementById('baixarPdfPorto');
   const txt = btn.textContent;
   btn.textContent = 'Gerando PDF...';
   btn.disabled = true;
   try {
-    await PdfMasterPrime.gerar({
-      tituloEstrategia: 'Porto · Consórcio Imóvel',
-      filename: 'porto-consorcio-imovel',
-      logoAdmin: 'porto',
-      blocos: _coletarBlocosPortoImovel()
-    });
+    await PdfMasterPrime.gerarComercial(_montarPdfComercialPortoImovel());
   } catch (err) {
     console.error(err);
     alert('Erro ao gerar PDF: ' + err.message);
