@@ -673,6 +673,9 @@ function _montarPdfComercialBradesco() {
   const redutorPct = redutorTxt.replace(/[^\d%]/g, '');
   const qtdAntec = _v('br-qtdAntecipacao') || '8';
 
+  // Crédito Líquido no Bradesco = Crédito Contratado (lance abate no saldo devedor, não reduz o crédito recebido)
+  const creditoLiquido = _v('br-credito') || 'R$ 0,00';
+
   return {
     filename: 'bradesco-consorcio',
     logoAdmin: 'bradesco',
@@ -692,6 +695,7 @@ function _montarPdfComercialBradesco() {
       total:    { pct: _v('br-pctLance').replace(' %','') || '0,00', rs: (_t('br-lanceTotal') || 'R$ 0,00').replace('R$ ','') }
     },
     outputs: [
+      { label: 'Crédito Líquido',                                                          value: creditoLiquido },
       { label: 'Parcela Inicial', subAcima: '(1ª a ' + qtdAntec + 'ª com antecipação)', value: _t('br-parcelaInicial') || '—' },
       { label: 'Demais Parcelas',  subAcima: '(antes da contemplação)',                  value: _t('br-parcelaPosAnt') || '—' },
       { label: 'Valor parcela (pós-contemplado)', subAcima: '(Diluir nas Parcelas)',     value: _t('br-parcDiluir') || '—' },

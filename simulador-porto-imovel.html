@@ -351,7 +351,7 @@
     <div class="modal-body">
       <div class="field">
         <label>Percentual (%)</label>
-        <input type="text" id="pi-modal-pctLivre" placeholder="58,00 %" data-mask="pct2" value="58,00 %" autofocus>
+        <input type="text" id="pi-modal-pctLivre" placeholder="0,00 %" data-mask="pct2" autofocus>
       </div>
     </div>
     <div class="modal-foot">
@@ -886,6 +886,13 @@ function _montarPdfComercialPortoImovel() {
   const redutorPct = redutorTxt.replace(/[^\d%]/g, '');
   const qtdAdesao = _v('pi-qtdAdesao') || '12';
 
+  // Crédito Líquido = Crédito Contratado - Lance Embutido (R$)
+  const _parseRS = (s) => parseFloat(String(s||'').replace(/[R$\s.]/g,'').replace(',','.')) || 0;
+  const _fmtRS = (n) => 'R$ ' + n.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const _credito = _parseRS(_v('pi-credito'));
+  const _embutido = _parseRS(_v('pi-embutido'));
+  const creditoLiquido = _credito > 0 ? _fmtRS(_credito - _embutido) : '—';
+
   return {
     filename: 'porto-consorcio-imovel',
     logoAdmin: 'porto',
@@ -908,6 +915,7 @@ function _montarPdfComercialPortoImovel() {
       total:    { pct: _t('pi-representatividade').replace(' %','') || '0,00', rs: 'R$ —' }
     },
     outputs: [
+      { label: 'Crédito Líquido',                                                                value: creditoLiquido },
       { label: 'Primeiras ' + qtdAdesao + ' parcelas', subAcima: '(Adesão + parcela do mês)', value: _t('pi-parcelaInicial') || '—' },
       { label: 'Demais Parcelas',                       subAcima: '(antes da contemplação)',   value: parcelaAntes || _t('pi-parcelaDemais') || '—' },
       { label: 'Valor parcela (pós-contemplado)',                                                value: _t('pi-novaParcela') || '—' },
