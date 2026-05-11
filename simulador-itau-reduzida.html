@@ -290,7 +290,7 @@
     </div>
 
     <div class="resumo-grid">
-      <div class="resumo-row highlight"><span class="lbl">Parcela reduzida (até contempla)</span><span class="val" id="ir-parcelaReduzida">—</span></div>
+      <div class="resumo-row highlight"><span class="lbl">Parcela reduzida (até contemplação)</span><span class="val" id="ir-parcelaReduzida">—</span></div>
       <div class="resumo-row highlight"><span class="lbl">% de redução aplicada</span><span class="val" id="ir-pctReducao">—</span></div>
     </div>
   </section>
@@ -584,7 +584,7 @@ function _coletarBlocosItauReduzida() {
   const propostaLinha1 = [
     { label: 'Crédito Contratado', value: _v('ir-credito') || 'R$ 0,00' },
     { label: 'Prazo total', value: (prazoVal || '0') + ' meses' },
-    { label: 'Redução até contempla', value: reducaoTxt }
+    { label: 'Redução até contemplação', value: reducaoTxt }
   ];
   const saldoDevedor = _t('ir-saldoDevedor');
   const propostaLinhas = [
@@ -672,7 +672,7 @@ function _coletarBlocosItauReduzida() {
         { label: 'Seguro mensal (incluso)', value: _t('ir-seguroMensal') || '—' }
       ],
       destaque: { multi: [
-        { label: 'Parcela reduzida (até contempla)', value: _t('ir-parcelaReduzida') || '—' },
+        { label: 'Parcela reduzida (até contemplação)', value: _t('ir-parcelaReduzida') || '—' },
         { label: 'Parcela integral (após contempla)', value: _t('ir-parcelaIntegral') || '—' }
       ]}
     }

@@ -683,7 +683,7 @@
         <!-- HEADER PRINCIPAL: título serif + logo admin -->
         <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:28px;">
           <div style="max-width:62%;">
-            <div style="display:inline-block; font-size:11px; font-weight:600; color:${theme.corAcento}; letter-spacing:1.8px; text-transform:uppercase; margin-bottom:14px; padding:4px 12px; background:#fff; border:1px solid ${theme.corAcento}33; border-radius:999px;">Simulação de Crédito</div>
+            <div style="display:inline-block; font-size:11px; font-weight:600; color:${theme.corAcento}; letter-spacing:1.8px; text-transform:uppercase; margin-bottom:14px; padding:4px 12px; background:#fff; border:1px solid #E5E7EB; border-radius:999px;">Simulação de Crédito</div>
             <div style="font-family:Georgia,'Times New Roman',serif; font-size:46px; font-weight:600; color:#0F172A; line-height:1.05; margin-bottom:6px; letter-spacing:-0.8px;">${opts.subtitulo || 'Consórcio'}</div>
             ${opts.subtituloSecundario ? `<div style="font-family:Georgia,'Times New Roman',serif; font-size:17px; color:#64748B; font-style:italic; font-weight:400; margin-top:4px;">${opts.subtituloSecundario}</div>` : ''}
           </div>
@@ -732,7 +732,7 @@
 
     try {
       // Aguarda layout (fontes serif são nativas: Georgia)
-      await new Promise(r => setTimeout(r, 350));
+      await new Promise(r => setTimeout(r, 400));
 
       const target = wrap.firstElementChild;
       const canvas = await html2canvas(target, {
@@ -745,11 +745,21 @@
         logging: false
       });
 
+      // Validação do canvas (jsPDF dá erro com width/height inválido)
+      if (!canvas || !canvas.width || !canvas.height || !isFinite(canvas.width) || !isFinite(canvas.height)) {
+        throw new Error(`Canvas inválido (w=${canvas?.width} h=${canvas?.height}). Tente novamente.`);
+      }
+
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait', compress: true });
       const pageW = 210, pageH = 297;
       const fitW = pageW;
       const fitH = (canvas.height * fitW) / canvas.width;
+
+      if (!isFinite(fitH) || fitH <= 0) {
+        throw new Error(`Dimensões PDF inválidas (fitH=${fitH}).`);
+      }
+
       const imgData = canvas.toDataURL('image/jpeg', 0.96);
 
       // Conteúdo cola no topo da página (não centralizado verticalmente)
