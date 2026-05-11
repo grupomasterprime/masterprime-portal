@@ -598,20 +598,20 @@
   // ═════════════════════════════════════════════════════════════════════
 
   const ADMIN_THEME = {
-    porto:    { corPrimaria: '#003A8B', corLanceFundo: '#A9BCD9', corAcento: '#003A8B', repTexto: 'Consórcio Porto' },
-    itau:     { corPrimaria: '#1A237E', corLanceFundo: '#A9BCD9', corAcento: '#EC7000', repTexto: 'Consórcio Itaú' },
-    bradesco: { corPrimaria: '#CC092F', corLanceFundo: '#E8B4BC', corAcento: '#CC092F', repTexto: 'Consórcio Bradesco' },
+    porto:    { corPrimaria: '#003A8B', corLanceFundo: '#E0E9F7', corAcento: '#003A8B', repTexto: 'Consórcio Porto' },
+    itau:     { corPrimaria: '#1A237E', corLanceFundo: '#E0E5F5', corAcento: '#EC7000', repTexto: 'Consórcio Itaú' },
+    bradesco: { corPrimaria: '#CC092F', corLanceFundo: '#FCE4E8', corAcento: '#CC092F', repTexto: 'Consórcio Bradesco' },
   };
 
   function _renderInputComercial(inp) {
     const highlight = inp.highlight
-      ? `<div style="font-size:14px; color:#DC2626; font-weight:600; margin-bottom:2px; font-style:italic;">${inp.highlight}</div>`
+      ? `<div style="font-size:11px; color:#94A3B8; font-weight:600; margin-bottom:2px; letter-spacing:0.6px; text-transform:uppercase;">${inp.highlight}</div>`
       : '';
     return `
       <div>
         ${highlight}
-        <div style="font-size:17px; font-weight:700; color:#1F2937; margin-bottom:6px;">${inp.label}</div>
-        <div style="border:1.5px solid #1F2937; padding:9px 14px; border-radius:6px; font-size:18px; font-weight:500; background:#fff; min-height:42px; display:flex; align-items:center;">${inp.value || ''}</div>
+        <div style="font-size:12.5px; font-weight:600; color:#64748B; margin-bottom:6px; letter-spacing:0.5px; text-transform:uppercase;">${inp.label}</div>
+        <div style="border:1px solid #E2E8F0; padding:11px 14px; border-radius:8px; font-size:18px; font-weight:600; color:#0F172A; background:#F8FAFC; min-height:46px; display:flex; align-items:center;">${inp.value || ''}</div>
       </div>`;
   }
 
@@ -619,22 +619,23 @@
     if (!lance) return '';
     const linha = (lbl, valorPct, lblValor, valorRs) => `
       <div>
-        <div style="font-size:17px; font-weight:700; color:#fff; margin-bottom:6px;">${lbl}</div>
-        <div style="display:flex; align-items:center; background:#fff; border-radius:6px; padding:6px 12px; gap:8px; min-height:36px;">
-          <span style="flex:1; font-size:17px; font-weight:500;">${valorPct}</span>
-          <span style="color:#6B7280; font-size:14px;">%</span>
+        <div style="font-size:11px; font-weight:700; color:#0F172A; margin-bottom:5px; letter-spacing:0.6px; text-transform:uppercase; opacity:0.85;">${lbl}</div>
+        <div style="display:flex; align-items:center; background:#fff; border-radius:8px; padding:8px 12px; gap:8px; min-height:38px;">
+          <span style="flex:1; font-size:16px; font-weight:600; color:#0F172A;">${valorPct}</span>
+          <span style="color:#94A3B8; font-size:13px;">%</span>
         </div>
       </div>
       <div>
-        <div style="font-size:17px; font-weight:700; color:#fff; margin-bottom:6px;">${lblValor}</div>
-        <div style="display:flex; align-items:center; background:#fff; border-radius:6px; padding:6px 12px; gap:8px; min-height:36px;">
-          <span style="color:#6B7280; font-size:14px;">R$</span>
-          <span style="flex:1; font-size:17px; font-weight:500;">${valorRs}</span>
+        <div style="font-size:11px; font-weight:700; color:#0F172A; margin-bottom:5px; letter-spacing:0.6px; text-transform:uppercase; opacity:0.85;">${lblValor}</div>
+        <div style="display:flex; align-items:center; background:#fff; border-radius:8px; padding:8px 12px; gap:8px; min-height:38px;">
+          <span style="color:#94A3B8; font-size:13px;">R$</span>
+          <span style="flex:1; font-size:16px; font-weight:600; color:#0F172A;">${valorRs}</span>
         </div>
       </div>`;
     return `
-      <div style="background:${fundoCor}; border-radius:14px; padding:22px 24px; margin-top:24px;">
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px 22px;">
+      <div style="background:${fundoCor}; border-radius:14px; padding:18px 20px; margin-top:22px;">
+        <div style="font-size:11px; color:#0F172A; opacity:0.7; letter-spacing:1.6px; text-transform:uppercase; font-weight:700; margin-bottom:14px;">Oferta de Lance</div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px 18px;">
           ${linha('% Lance embutido', lance.embutido?.pct || '0,00', 'Valor Embutido', lance.embutido?.rs || '0,00')}
           ${linha('% Lance a pagar', lance.apagar?.pct || '0,00', 'Valor Lance', lance.apagar?.rs || '0,00')}
           ${linha('% Lance Total', lance.total?.pct || '0,00', 'Valor Total', lance.total?.rs || '0,00')}
@@ -644,13 +645,13 @@
 
   function _renderOutputComercial(o) {
     const subAcima = o.subAcima
-      ? `<div style="font-size:13px; color:#DC2626; font-weight:600; margin-bottom:2px; font-style:italic;">${o.subAcima}</div>`
+      ? `<div style="font-size:10.5px; color:#94A3B8; font-weight:600; margin-bottom:3px; letter-spacing:1.2px; text-transform:uppercase;">${o.subAcima}</div>`
       : '';
     return `
-      <div style="margin-bottom:22px;">
+      <div style="margin-bottom:18px;">
         ${subAcima}
-        <div style="font-size:21px; font-weight:700; color:#1F2937; margin-bottom:4px; line-height:1.25;">${o.label}</div>
-        <div style="font-size:22px; color:#1F2937; font-weight:400;">${o.value || '—'}</div>
+        <div style="font-size:13.5px; font-weight:600; color:#64748B; margin-bottom:4px; letter-spacing:0.3px;">${o.label}</div>
+        <div style="font-size:22px; color:#0F172A; font-weight:700; line-height:1.2;">${o.value || '—'}</div>
       </div>`;
   }
 
@@ -662,41 +663,59 @@
     const lanceHtml = _renderLanceCaixa(opts.lance, theme.corLanceFundo);
 
     return `
-      <div style="width:1300px; background:#fff; font-family:'Inter',-apple-system,system-ui,sans-serif; color:#1F2937; padding:50px 64px;">
+      <div style="width:1300px; background:#fff; font-family:'Inter',-apple-system,system-ui,sans-serif; color:#1F2937; padding:42px 56px 38px;">
 
-        <!-- HEADER -->
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:32px;">
-          <div style="max-width:55%;">
-            <div style="font-size:46px; font-weight:800; color:#1F2937; line-height:1.05; margin-bottom:6px;">${opts.titulo || 'Simulador de Crédito'}</div>
-            <div style="font-size:36px; font-weight:500; color:#1F2937; line-height:1.1; margin-bottom:8px;">${opts.subtitulo || ''}</div>
-            ${opts.subtituloSecundario ? `<div style="font-size:18px; color:#DC2626; font-style:italic;">${opts.subtituloSecundario}</div>` : ''}
+        <!-- BARRA TOPO: logo Master Prime à esquerda + pílula admin à direita -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; padding-bottom:18px; border-bottom:1px solid #E5E7EB;">
+          <div style="display:flex; align-items:center; gap:14px;">
+            <img src="${LOGO_DATA_URL}" alt="Master Prime" style="height:44px; width:auto;">
+            <div style="display:flex; flex-direction:column;">
+              <span style="font-size:17px; font-weight:700; color:${theme.corPrimaria}; letter-spacing:0.3px;">Master Prime</span>
+              <span style="font-size:11px; color:#6B7280; letter-spacing:1.4px; text-transform:uppercase;">Corretora de Consórcios e Seguros</span>
+            </div>
           </div>
-          <div style="display:flex; align-items:flex-start; gap:24px;">
-            <div style="background:${theme.corPrimaria}; width:120px; height:120px; border-radius:18px; display:flex; align-items:center; justify-content:center; padding:14px;">
-              <img src="${logoUrl}" style="width:100%; height:100%; object-fit:contain;">
-            </div>
-            <div>
-              <div style="font-size:34px; font-weight:800; color:#1F2937; line-height:1.1; margin-bottom:6px;">Representante<br>Autorizado</div>
-              <div style="font-size:22px; color:${theme.corAcento}; font-weight:600;">${opts.representanteTexto || theme.repTexto}</div>
-            </div>
+          <div style="display:inline-flex; align-items:center; gap:8px; background:${theme.corPrimaria}; color:#fff; padding:7px 16px; border-radius:999px; font-size:12.5px; font-weight:700; letter-spacing:1.6px; text-transform:uppercase;">
+            <span style="width:6px; height:6px; border-radius:50%; background:#fff; opacity:0.85;"></span>
+            ${opts.representanteTexto || theme.repTexto}
           </div>
         </div>
 
-        <!-- CAIXA PRINCIPAL com borda colorida -->
-        <div style="border:3px solid ${theme.corPrimaria}; border-radius:22px; padding:36px; display:grid; grid-template-columns:1.15fr 1fr; gap:42px; background:#fff;">
+        <!-- HEADER PRINCIPAL: título + logo admin -->
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:24px;">
+          <div style="max-width:62%;">
+            <div style="font-size:12.5px; font-weight:600; color:${theme.corAcento}; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px;">Simulação de Crédito</div>
+            <div style="font-size:42px; font-weight:800; color:#0F172A; line-height:1.02; margin-bottom:6px; letter-spacing:-0.5px;">${opts.subtitulo || 'Consórcio'}</div>
+            ${opts.subtituloSecundario ? `<div style="font-size:16px; color:#94A3B8; font-weight:500; margin-top:2px;">${opts.subtituloSecundario}</div>` : ''}
+          </div>
+          <div style="display:flex; flex-direction:column; align-items:flex-end;">
+            <img src="${logoUrl}" alt="Admin" style="width:88px; height:88px; object-fit:contain; border-radius:14px;">
+            <div style="font-size:11px; color:#94A3B8; letter-spacing:1.6px; text-transform:uppercase; margin-top:8px; font-weight:600;">Representante Autorizado</div>
+          </div>
+        </div>
+
+        <!-- CAIXA PRINCIPAL -->
+        <div style="border:1.5px solid ${theme.corPrimaria}; border-radius:18px; padding:30px; display:grid; grid-template-columns:1.15fr 1fr; gap:34px; background:#fff; box-shadow:0 2px 16px rgba(15,23,42,0.04);">
 
           <!-- COLUNA ESQUERDA: inputs + lance -->
           <div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:22px 28px;">
+            <div style="font-size:11px; color:#94A3B8; letter-spacing:1.8px; text-transform:uppercase; font-weight:700; margin-bottom:16px;">Dados da proposta</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px 26px;">
               ${inputsHtml}
             </div>
             ${lanceHtml}
           </div>
 
           <!-- COLUNA DIREITA: outputs -->
-          <div style="background:#EFF0F4; border-radius:14px; padding:30px 32px;">
+          <div style="background:#F8FAFC; border-radius:14px; padding:26px 28px; border:1px solid #E5E7EB;">
+            <div style="font-size:11px; color:${theme.corAcento}; letter-spacing:1.8px; text-transform:uppercase; font-weight:700; margin-bottom:16px;">Resultado da simulação</div>
             ${outputsHtml}
           </div>
+        </div>
+
+        <!-- RODAPÉ -->
+        <div style="margin-top:22px; padding-top:16px; border-top:1px solid #E5E7EB; display:flex; justify-content:space-between; align-items:center; color:#94A3B8; font-size:11px;">
+          <div>Simulação meramente informativa · valores sujeitos às condições do grupo</div>
+          <div style="font-weight:600;">grupomasterprime.com.br</div>
         </div>
 
       </div>`;
@@ -732,8 +751,9 @@
       const fitH = (canvas.height * fitW) / canvas.width;
       const imgData = canvas.toDataURL('image/jpeg', 0.96);
 
+      // Conteúdo cola no topo da página (não centralizado verticalmente)
       if (fitH <= pageH) {
-        pdf.addImage(imgData, 'JPEG', 0, (pageH - fitH) / 2, fitW, fitH);
+        pdf.addImage(imgData, 'JPEG', 0, 0, fitW, fitH);
       } else {
         const fitH2 = pageH;
         const fitW2 = (canvas.width * fitH2) / canvas.height;
