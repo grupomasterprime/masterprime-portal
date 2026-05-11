@@ -265,12 +265,12 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 
 <!-- Estado: conteúdo principal -->
 <div id="main-state" style="display:none;">
-  <header class="page-header">
-    <div class="logo">
-  
-      <div>
-        <h1>Formulários cadastrados</h1>
+<header class="page-header">
+  <div class="logo">
+    <div>
+      <h1>Formulários cadastrados</h1>
     </div>
+  </div>
     <button class="btn btn-outline" onclick="loadAdesoes()" style="color:#fff;border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.1);">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
       Atualizar
@@ -348,10 +348,17 @@ async function checkSession() {
       document.getElementById('loading-state').style.display = 'none';
       document.getElementById('main-state').style.display = 'block';
       // Define o link do formulário
-      const formUrl = new URL(
-  'formulario.html',
-  window.location.href
-).href;
+      const currentPath = window.location.pathname;
+
+const basePath = currentPath.substring(
+  0,
+  currentPath.lastIndexOf('/') + 1
+);
+
+const formUrl =
+  window.location.origin +
+  basePath +
+  'formulario.html';
 
 const formLink = document.getElementById('form-link');
 
