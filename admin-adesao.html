@@ -268,7 +268,30 @@ async function checkSession() {
       document.getElementById('loading-state').style.display = 'none';
       document.getElementById('main-state').style.display = 'block';
       // Define o link do formulário (FIXO)
-      document.getElementById('form-link').textContent = window.location.origin + '/formulario.html';
+      function copyFormLink() {
+  const linkEl = document.getElementById('form-link');
+  const btn = document.getElementById('btn-copy-link');  // <-- corrigido
+  if (!linkEl) return;
+  const url = linkEl.textContent.trim();
+  navigator.clipboard.writeText(url).then(() => {
+    if (btn) {
+      const orig = btn.innerHTML;
+      btn.innerHTML = '✓ Link copiado!';
+      btn.style.background = '#16A34A';
+      setTimeout(() => {
+        btn.innerHTML = orig;
+        btn.style.background = '';
+      }, 2000);
+    }
+    const toast = document.createElement('div');
+    toast.textContent = 'Link do formulário copiado!';
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--mp-navy);color:#fff;padding:10px 20px;border-radius:8px;font-weight:600;z-index:999;';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2200);
+  }).catch(() => {
+    alert('Erro ao copiar. Tente novamente.');
+  });
+}
       loadAdesoes();
       return;
     }
@@ -280,7 +303,7 @@ async function checkSession() {
 // ═══ COPIAR LINK DO FORMULÁRIO ═══
 function copyFormLink() {
   const linkEl = document.getElementById('form-link');
-  const btn = document.querySelector('#s-admin-adesao .btn-white');
+  const btn = document.getElementById('btn-copy-link');
   if (!linkEl) return;
   const url = linkEl.textContent.trim();
   navigator.clipboard.writeText(url).then(() => {
