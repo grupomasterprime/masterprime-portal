@@ -663,42 +663,44 @@
     const lanceHtml = _renderLanceCaixa(opts.lance, theme.corLanceFundo);
 
     return `
-      <div style="width:1300px; background:#fff; font-family:'Inter',-apple-system,system-ui,sans-serif; color:#1F2937; padding:42px 56px 38px;">
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;500;600;700&display=swap" rel="stylesheet">
+      <div style="width:1300px; background:#fff; font-family:'Inter',-apple-system,system-ui,sans-serif; color:#1F2937; padding:44px 56px 38px;">
 
         <!-- BARRA TOPO: logo Master Prime à esquerda + pílula admin à direita -->
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; padding-bottom:18px; border-bottom:1px solid #E5E7EB;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:32px;">
           <div style="display:flex; align-items:center; gap:14px;">
-            <img src="${LOGO_DATA_URL}" alt="Master Prime" style="height:44px; width:auto;">
-            <div style="display:flex; flex-direction:column;">
-              <span style="font-size:17px; font-weight:700; color:${theme.corPrimaria}; letter-spacing:0.3px;">Master Prime</span>
-              <span style="font-size:11px; color:#6B7280; letter-spacing:1.4px; text-transform:uppercase;">Corretora de Consórcios e Seguros</span>
+            <img src="${LOGO_DATA_URL}" alt="Master Prime" style="height:42px; width:auto;">
+            <div style="display:flex; flex-direction:column; gap:2px;">
+              <span style="font-family:'Source Serif 4',Georgia,serif; font-size:21px; font-weight:600; color:#0F172A; letter-spacing:-0.2px; line-height:1;">Master Prime</span>
+              <span style="font-size:10.5px; color:#94A3B8; letter-spacing:1.2px; text-transform:uppercase; font-weight:500;">Corretora de Consórcios e Seguros</span>
             </div>
           </div>
-          <div style="display:inline-flex; align-items:center; gap:8px; background:${theme.corPrimaria}; color:#fff; padding:7px 16px; border-radius:999px; font-size:12.5px; font-weight:700; letter-spacing:1.6px; text-transform:uppercase;">
-            <span style="width:6px; height:6px; border-radius:50%; background:#fff; opacity:0.85;"></span>
+          <div style="display:inline-flex; align-items:center; gap:8px; background:#F8FAFC; border:1px solid #E5E7EB; color:#0F172A; padding:6px 14px 6px 10px; border-radius:999px; font-size:12px; font-weight:600;">
+            <span style="width:7px; height:7px; border-radius:50%; background:${theme.corAcento};"></span>
             ${opts.representanteTexto || theme.repTexto}
           </div>
         </div>
 
-        <!-- HEADER PRINCIPAL: título + logo admin -->
-        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:24px;">
+        <!-- HEADER PRINCIPAL: título serif + logo admin -->
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:28px;">
           <div style="max-width:62%;">
-            <div style="font-size:12.5px; font-weight:600; color:${theme.corAcento}; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px;">Simulação de Crédito</div>
-            <div style="font-size:42px; font-weight:800; color:#0F172A; line-height:1.02; margin-bottom:6px; letter-spacing:-0.5px;">${opts.subtitulo || 'Consórcio'}</div>
-            ${opts.subtituloSecundario ? `<div style="font-size:16px; color:#94A3B8; font-weight:500; margin-top:2px;">${opts.subtituloSecundario}</div>` : ''}
+            <div style="display:inline-block; font-size:11px; font-weight:600; color:${theme.corAcento}; letter-spacing:1.8px; text-transform:uppercase; margin-bottom:14px; padding:4px 12px; background:#fff; border:1px solid ${theme.corAcento}33; border-radius:999px;">Simulação de Crédito</div>
+            <div style="font-family:'Source Serif 4',Georgia,serif; font-size:46px; font-weight:600; color:#0F172A; line-height:1.05; margin-bottom:6px; letter-spacing:-0.8px;">${opts.subtitulo || 'Consórcio'}</div>
+            ${opts.subtituloSecundario ? `<div style="font-family:'Source Serif 4',Georgia,serif; font-size:17px; color:#64748B; font-style:italic; font-weight:400; margin-top:4px;">${opts.subtituloSecundario}</div>` : ''}
           </div>
           <div style="display:flex; flex-direction:column; align-items:flex-end;">
-            <img src="${logoUrl}" alt="Admin" style="width:88px; height:88px; object-fit:contain; border-radius:14px;">
-            <div style="font-size:11px; color:#94A3B8; letter-spacing:1.6px; text-transform:uppercase; margin-top:8px; font-weight:600;">Representante Autorizado</div>
+            <img src="${logoUrl}" alt="Admin" style="width:84px; height:84px; object-fit:contain; border-radius:16px;">
+            <div style="font-size:10.5px; color:#94A3B8; letter-spacing:1.4px; text-transform:uppercase; margin-top:10px; font-weight:600;">Representante Autorizado</div>
           </div>
         </div>
 
         <!-- CAIXA PRINCIPAL -->
-        <div style="border:1.5px solid ${theme.corPrimaria}; border-radius:18px; padding:30px; display:grid; grid-template-columns:1.15fr 1fr; gap:34px; background:#fff; box-shadow:0 2px 16px rgba(15,23,42,0.04);">
+        <div style="border:1px solid #E5E7EB; border-radius:20px; padding:32px; display:grid; grid-template-columns:1.15fr 1fr; gap:34px; background:#fff; box-shadow:0 1px 3px rgba(15,23,42,0.04), 0 8px 24px rgba(15,23,42,0.04);">
 
           <!-- COLUNA ESQUERDA: inputs + lance -->
           <div>
-            <div style="font-size:11px; color:#94A3B8; letter-spacing:1.8px; text-transform:uppercase; font-weight:700; margin-bottom:16px;">Dados da proposta</div>
+            <div style="font-size:10.5px; color:#94A3B8; letter-spacing:1.6px; text-transform:uppercase; font-weight:600; margin-bottom:18px;">Dados da proposta</div>
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px 26px;">
               ${inputsHtml}
             </div>
@@ -706,16 +708,16 @@
           </div>
 
           <!-- COLUNA DIREITA: outputs -->
-          <div style="background:#F8FAFC; border-radius:14px; padding:26px 28px; border:1px solid #E5E7EB;">
-            <div style="font-size:11px; color:${theme.corAcento}; letter-spacing:1.8px; text-transform:uppercase; font-weight:700; margin-bottom:16px;">Resultado da simulação</div>
+          <div style="background:#F8FAFC; border-radius:16px; padding:26px 28px;">
+            <div style="font-size:10.5px; color:${theme.corAcento}; letter-spacing:1.6px; text-transform:uppercase; font-weight:600; margin-bottom:18px;">Resultado da simulação</div>
             ${outputsHtml}
           </div>
         </div>
 
         <!-- RODAPÉ -->
-        <div style="margin-top:22px; padding-top:16px; border-top:1px solid #E5E7EB; display:flex; justify-content:space-between; align-items:center; color:#94A3B8; font-size:11px;">
+        <div style="margin-top:22px; padding-top:14px; display:flex; justify-content:space-between; align-items:center; color:#94A3B8; font-size:11px;">
           <div>Simulação meramente informativa · valores sujeitos às condições do grupo</div>
-          <div style="font-weight:600;">grupomasterprime.com.br</div>
+          <div style="font-weight:600; color:#64748B;">grupomasterprime.com.br</div>
         </div>
 
       </div>`;
@@ -731,7 +733,11 @@
     document.body.appendChild(wrap);
 
     try {
-      await new Promise(r => setTimeout(r, 350));
+      // Aguarda fonts (Source Serif via Google Fonts) carregarem
+      if (document.fonts && document.fonts.ready) {
+        try { await document.fonts.ready; } catch (e) {}
+      }
+      await new Promise(r => setTimeout(r, 800));
 
       const target = wrap.firstElementChild;
       const canvas = await html2canvas(target, {
