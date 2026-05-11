@@ -669,7 +669,7 @@ document.getElementById('baixarPdfItau').addEventListener('click', async () => {
     await PdfMasterPrime.gerar({
       tituloEstrategia: 'Itaú · Parcela Integral',
       filename: 'itau-parcela-integral',
-      logoAdmin: 'logo-itau.png',
+      logoAdmin: 'itau',
       blocos: _coletarBlocosItauIntegral()
     });
   } catch (err) {
