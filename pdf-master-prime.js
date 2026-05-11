@@ -663,8 +663,6 @@
     const lanceHtml = _renderLanceCaixa(opts.lance, theme.corLanceFundo);
 
     return `
-      <link rel="preconnect" href="https://fonts.googleapis.com">
-      <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;500;600;700&display=swap" rel="stylesheet">
       <div style="width:1300px; background:#fff; font-family:'Inter',-apple-system,system-ui,sans-serif; color:#1F2937; padding:44px 56px 38px;">
 
         <!-- BARRA TOPO: logo Master Prime à esquerda + pílula admin à direita -->
@@ -672,7 +670,7 @@
           <div style="display:flex; align-items:center; gap:14px;">
             <img src="${LOGO_DATA_URL}" alt="Master Prime" style="height:42px; width:auto;">
             <div style="display:flex; flex-direction:column; gap:2px;">
-              <span style="font-family:'Source Serif 4',Georgia,serif; font-size:21px; font-weight:600; color:#0F172A; letter-spacing:-0.2px; line-height:1;">Master Prime</span>
+              <span style="font-family:Georgia,'Times New Roman',serif; font-size:21px; font-weight:600; color:#0F172A; letter-spacing:-0.2px; line-height:1;">Master Prime</span>
               <span style="font-size:10.5px; color:#94A3B8; letter-spacing:1.2px; text-transform:uppercase; font-weight:500;">Corretora de Consórcios e Seguros</span>
             </div>
           </div>
@@ -686,8 +684,8 @@
         <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:28px;">
           <div style="max-width:62%;">
             <div style="display:inline-block; font-size:11px; font-weight:600; color:${theme.corAcento}; letter-spacing:1.8px; text-transform:uppercase; margin-bottom:14px; padding:4px 12px; background:#fff; border:1px solid ${theme.corAcento}33; border-radius:999px;">Simulação de Crédito</div>
-            <div style="font-family:'Source Serif 4',Georgia,serif; font-size:46px; font-weight:600; color:#0F172A; line-height:1.05; margin-bottom:6px; letter-spacing:-0.8px;">${opts.subtitulo || 'Consórcio'}</div>
-            ${opts.subtituloSecundario ? `<div style="font-family:'Source Serif 4',Georgia,serif; font-size:17px; color:#64748B; font-style:italic; font-weight:400; margin-top:4px;">${opts.subtituloSecundario}</div>` : ''}
+            <div style="font-family:Georgia,'Times New Roman',serif; font-size:46px; font-weight:600; color:#0F172A; line-height:1.05; margin-bottom:6px; letter-spacing:-0.8px;">${opts.subtitulo || 'Consórcio'}</div>
+            ${opts.subtituloSecundario ? `<div style="font-family:Georgia,'Times New Roman',serif; font-size:17px; color:#64748B; font-style:italic; font-weight:400; margin-top:4px;">${opts.subtituloSecundario}</div>` : ''}
           </div>
           <div style="display:flex; flex-direction:column; align-items:flex-end;">
             <img src="${logoUrl}" alt="Admin" style="width:84px; height:84px; object-fit:contain; border-radius:16px;">
@@ -733,9 +731,8 @@
     document.body.appendChild(wrap);
 
     try {
-      // Aguarda layout + fonts. Não usa document.fonts.ready (pode travar).
-      // 1200ms dá tempo do Google Fonts (Source Serif 4) baixar e aplicar.
-      await new Promise(r => setTimeout(r, 1200));
+      // Aguarda layout (fontes serif são nativas: Georgia)
+      await new Promise(r => setTimeout(r, 350));
 
       const target = wrap.firstElementChild;
       const canvas = await html2canvas(target, {
