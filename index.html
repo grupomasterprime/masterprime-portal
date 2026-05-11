@@ -319,6 +319,8 @@ body.embedded-mode .portal-menu-fab { display:flex; }
     <div class="login-footer">Sem acesso? Solicite ao administrador.</div>
   </div>
 </div>
+<!-- Container de notificações (toast) -->
+<div id="mp-toast-container" style="position:fixed; top:16px; right:16px; z-index:9999; display:flex; flex-direction:column; gap:10px; pointer-events:none;"></div>
 
 <div id="portal-screen" style="display:none">
   <button class="mobile-toggle" onclick="toggleSidebar()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
@@ -796,7 +798,113 @@ async function enterPortal() {
     if (lblMenu) lblMenu.textContent = (currentUser.tipo === 'admin') ? 'Faturamento' : 'Meus Processos';
   } catch(e) {}
 }
+    // ═══ NOTIFICAÇÕES EM TEMPO REAL ═══
+function showToastNotification(titulo, mensagem, tipo = 'info', duracao = 5000) {
+  const container = document.getElementById('mp-toast-container');
+  if (!container) return;
+  
+  const cores = {
+    success: { bg: '#F0FDF4', border: '#BBF7D0', icone: '✅' },
+    info:    { bg: '#EFF6FF', border: '#BFDBFE', icone: 'ℹ️' },
+    warning: { bg: '#FFFBEB', border: '#FDE68A', icone: '⚠️' },
+  };
+  const c = cores[tipo] || cores.info;
+  
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    background:${c.bg}; border:1px solid ${c.border}; border-radius:12px;
+    padding:14px 18px; box-shadow:0 12px 30px rgba(0,0,0,.15);
+    display:flex; gap:10px; align-items:flex-start; pointer-events:auto;
+    animation: slideInRight .3s ease; font-family:'Inter',sans-serif;
+    max-width:380px; word-break:break-word; font-size:13px;
+  `;
+  toast.innerHTML = `
+    <span style="font-size:20px;">${c.icone}</span>
+    <div style="flex:1;">
+      <div style="font-weight:700; color:#1E293B; margin-bottom:4px;">${titulo}</div>
+      <div style="color:#475569; line-height:1.4;">${mensagem}</div>
+    </div>
+    <button onclick="this.parentElement.remove()" style="background:none;border:none;cursor:pointer;color:#94A3B8;font-size:16px;padding:0;line-height:1;">×</button>
+  `;
+  container.appendChild(toast);
+  setTimeout(() => { toast.style.opacity='0'; toast.style.transition='opacity .3s'; setTimeout(()=>toast.remove(),300); }, duracao);
+}
 
+// Adicione este CSS dinâmico para a animação
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slideInRight {
+    from { transform: translateX(120%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+`;
+document.head.appendChild(style);
+
+// Iniciar listeners Supabase Realtime
+function iniciarNotificacoesRealtime() {
+  if (!USE_SUPABASE || !sb) return;
+
+  // Canal de novos processos
+  const processoChannel = sb.channel('new-processos-notify')
+    .on('postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'portal_processos' },
+      (payload) => {
+        const novo = payload.new;
+        // Se o usuário for consultor, só notifica se for atribuído a ele
+        if (currentUser && currentUser.tipo === 'consultor') {
+          if (novo.consultor_id !== currentUser.auth_id) return;
+        }
+        const nome = novo.nome || 'Novo cliente';
+        const protocolo = novo.protocolo || 'Pendente';
+        showToastNotification('Novo processo', `${nome} acabou de enviar um faturamento (${protocolo})`, 'success');
+        
+        // Se o iframe de faturamento estiver aberto, manda recarregar
+        const iframe = document.getElementById('iframe-admin-faturamento');
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.postMessage({ tipo: 'refresh-faturamento' }, '*');
+        }
+      }
+    )
+    .subscribe();
+
+  // Canal de novas mensagens
+  const msgChannel = sb.channel('new-mensagens-notify')
+    .on('postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'portal_mensagens' },
+      async (payload) => {
+        const msg = payload.new;
+        // Se for mensagem enviada pelo admin, não notifica (pois o admin já sabe)
+        if (msg.autor === 'admin') return;
+        
+        // Buscar o nome do processo para exibir na notificação
+        const { data: processo } = await sb.from('portal_processos')
+          .select('nome, consultor_id, protocolo')
+          .eq('id', msg.processo_id)
+          .maybeSingle();
+          
+        if (!processo) return;
+        
+        // Se for consultor, verificar se o processo pertence a ele
+        if (currentUser && currentUser.tipo === 'consultor') {
+          if (processo.consultor_id !== currentUser.auth_id) return;
+        }
+        
+        const nome = processo.nome || 'Cliente';
+        showToastNotification('Nova mensagem', `${nome} enviou uma mensagem no processo ${processo.protocolo || 'sem protocolo'}`, 'warning');
+        
+        // Notificar o iframe para atualizar se estiver aberto
+        const iframe = document.getElementById('iframe-admin-faturamento');
+        if (iframe && iframe.contentWindow) {
+          iframe.contentWindow.postMessage({ tipo: 'refresh-faturamento' }, '*');
+        }
+      }
+    )
+    .subscribe();
+}
+
+// Chamar a inicialização após o login
+// Dentro da função enterPortal(), logo após definir currentUser, adicione:
+// iniciarNotificacoesRealtime();
 // ═══ NAV ═══
 function nav(id) {
   if (id === 'admin-overview' && currentUser && !['ALLAN ALMEIDA', 'ADMINISTRADOR'].includes((currentUser.nome||'').trim().toUpperCase())) id = 'dashboard-vendas';
