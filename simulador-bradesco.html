@@ -690,16 +690,14 @@ function _montarPdfComercialBradesco() {
       { label: 'Prazo do Grupo', value: (_v('br-prazo') || '0') + ' Meses' },
     ],
     lance: {
-      embutido: { pct: _v('br-pctLance').replace(' %','') || '0,00', rs: (_t('br-lanceTotal') || 'R$ 0,00').replace('R$ ','') },
-      apagar:   { pct: '—', rs: (_v('br-lanceManual') || 'R$ 0,00').replace('R$ ','') },
-      total:    { pct: _v('br-pctLance').replace(' %','') || '0,00', rs: (_t('br-lanceTotal') || 'R$ 0,00').replace('R$ ','') }
+      modo: 'simples',
+      total: { pct: _v('br-pctLance').replace(' %','') || '0,00', rs: (_t('br-lanceTotal') || 'R$ 0,00').replace('R$ ','') }
     },
     outputs: [
-      { label: 'Crédito Líquido',                                                          value: creditoLiquido },
-      { label: 'Parcela Inicial', subAcima: '(1ª a ' + qtdAntec + 'ª com antecipação)', value: _t('br-parcelaInicial') || '—' },
-      { label: 'Demais Parcelas',  subAcima: '(antes da contemplação)',                  value: _t('br-parcelaPosAnt') || '—' },
-      { label: 'Valor parcela (pós-contemplado)', subAcima: '(Diluir nas Parcelas)',     value: _t('br-parcDiluir') || '—' },
-      { label: 'Prazo Restante',                                                          value: _t('br-prazoDiluir') || '—' },
+      { label: 'Crédito Líquido',                                                      value: creditoLiquido },
+      { label: 'Parcela Inicial',                                                       value: _t('br-parcelaInicial') || '—' },
+      { label: 'Valor parcela (pós-contemplado)', subAcima: '(Diluir nas Parcelas)', value: _t('br-parcDiluir') || '—' },
+      { label: 'Prazo Restante',                                                        value: _t('br-prazoDiluir') || '—' },
     ]
   };
 }

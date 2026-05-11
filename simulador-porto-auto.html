@@ -846,6 +846,18 @@ function _montarPdfComercialPortoAuto() {
   const redutorTxt = _selTxt('pa-redutor') || '';
   const redutorPct = redutorTxt.replace(/[^\d%]/g, '');
 
+  // Computa % de cada parte do lance a partir do R$ sobre a Categoria
+  const _parseRS = (s) => parseFloat(String(s||'').replace(/[R$\s.]/g,'').replace(',','.')) || 0;
+  const _fmtRS = (n) => 'R$ ' + n.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const _categoria = _parseRS(_t('pa-categoria'));
+  const _embRS = _parseRS(_v('pa-embutido'));
+  const _apgRS = _parseRS(_v('pa-recProp'));
+  const _totRS = _embRS + _apgRS;
+  const _fmtPct = (n) => n.toFixed(2).replace('.', ',');
+  const _pctEmb = _categoria > 0 ? _fmtPct((_embRS / _categoria) * 100) : '0,00';
+  const _pctApg = _categoria > 0 ? _fmtPct((_apgRS / _categoria) * 100) : '0,00';
+  const _pctTot = _categoria > 0 ? _fmtPct((_totRS / _categoria) * 100) : '0,00';
+
   return {
     filename: 'porto-consorcio-auto',
     logoAdmin: 'porto',
@@ -863,9 +875,9 @@ function _montarPdfComercialPortoAuto() {
       { label: 'Prazo do Grupo', value: (_v('pa-prazo') || '0') + ' Meses' },
     ],
     lance: {
-      embutido: { pct: _v('pa-pctEmbutido').replace(' %','') || '0,00', rs: (_v('pa-embutido') || 'R$ 0,00').replace('R$ ','') },
-      apagar:   { pct: '—', rs: (_v('pa-recProp') || 'R$ 0,00').replace('R$ ','') },
-      total:    { pct: _t('pa-representatividade').replace(' %','') || '0,00', rs: 'R$ —' }
+      embutido: { pct: _pctEmb, rs: _fmtRS(_embRS).replace('R$ ','') },
+      apagar:   { pct: _pctApg, rs: _fmtRS(_apgRS).replace('R$ ','') },
+      total:    { pct: _pctTot, rs: _fmtRS(_totRS).replace('R$ ','') }
     },
     outputs: [
       { label: 'Valor parcela (antes contemplação)', value: parcelaAntes || _t('pa-parcelaDemais') || '—' },

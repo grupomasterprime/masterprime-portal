@@ -893,6 +893,18 @@ function _montarPdfComercialPortoImovel() {
   const _embutido = _parseRS(_v('pi-embutido'));
   const creditoLiquido = _credito > 0 ? _fmtRS(_credito - _embutido) : '—';
 
+  // Computa % de cada parte do lance (Embutido, A pagar, Total) a partir do R$ sobre a Categoria
+  const _categoria = _parseRS(_t('pi-categoria'));
+  const _apagarRS = _parseRS(_v('pi-recProp'));
+  const _totalRS = _embutido + _apagarRS;
+  const _fmtPct = (n) => n.toFixed(2).replace('.', ',');
+  const _pctEmb = _categoria > 0 ? _fmtPct((_embutido / _categoria) * 100) : '0,00';
+  const _pctApg = _categoria > 0 ? _fmtPct((_apagarRS / _categoria) * 100) : '0,00';
+  const _pctTot = _categoria > 0 ? _fmtPct((_totalRS / _categoria) * 100) : '0,00';
+  const _rsEmb  = _fmtRS(_embutido).replace('R$ ','');
+  const _rsApg  = _fmtRS(_apagarRS).replace('R$ ','');
+  const _rsTot  = _fmtRS(_totalRS).replace('R$ ','');
+
   return {
     filename: 'porto-consorcio-imovel',
     logoAdmin: 'porto',
@@ -910,9 +922,9 @@ function _montarPdfComercialPortoImovel() {
       { label: 'Prazo do Grupo', value: (_v('pi-prazo') || '0') + ' Meses' },
     ],
     lance: {
-      embutido: { pct: '—', rs: (_v('pi-embutido') || 'R$ 0,00').replace('R$ ','') },
-      apagar:   { pct: '—', rs: (_v('pi-recProp') || 'R$ 0,00').replace('R$ ','') },
-      total:    { pct: _t('pi-representatividade').replace(' %','') || '0,00', rs: 'R$ —' }
+      embutido: { pct: _pctEmb, rs: _rsEmb },
+      apagar:   { pct: _pctApg, rs: _rsApg },
+      total:    { pct: _pctTot, rs: _rsTot }
     },
     outputs: [
       { label: 'Crédito Líquido',                                                                value: creditoLiquido },
