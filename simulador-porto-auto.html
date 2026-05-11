@@ -199,6 +199,34 @@
     </div>
   </section>
 
+  <!-- ════════ TAXAS DO GRUPO ════════ -->
+  <section class="card">
+    <div class="card-header">
+      <span class="badge-teal"></span>
+      <h3>Taxas do grupo</h3>
+      <button type="button" class="reset-btn" id="btnTaxasDefault">Restaurar padrão</button>
+    </div>
+    <div class="grid grid-3">
+      <div class="field">
+        <label>Taxa administrativa</label>
+        <input type="text" id="pa-taxaAdm" data-mask="pct2" placeholder="0,00 %">
+      </div>
+      <div class="field">
+        <label>Fundo de reserva</label>
+        <input type="text" id="pa-fundo" data-mask="pct2" placeholder="0,00 %">
+      </div>
+      <div class="field">
+        <label>Seguro de vida (PF)</label>
+        <input type="text" id="pa-seguro" data-mask="pct4" placeholder="0,0000 %">
+      </div>
+    </div>
+
+    <div class="grid grid-2" style="margin-top: 16px;">
+      <div class="result"><strong>Taxa por mês</strong><span class="value" id="pa-taxaMes">—</span></div>
+      <div class="result"><strong>Taxa por ano</strong><span class="value" id="pa-taxaAno">—</span></div>
+    </div>
+  </section>
+
   <!-- ════════ OFERTA DE LANCE ════════ -->
   <section class="card">
     <div class="card-header">
@@ -272,34 +300,6 @@
         <div class="pos-row"><span class="lbl">Com parcela de</span><span class="val" id="pa-parcelaSeReduzPrazo">—</span></div>
         <div class="pos-row"><span class="lbl">(parcela mantém o valor da integral)</span><span class="val">&nbsp;</span></div>
       </div>
-    </div>
-  </section>
-
-  <!-- ════════ TAXAS DO GRUPO ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-teal"></span>
-      <h3>Taxas do grupo</h3>
-      <button type="button" class="reset-btn" id="btnTaxasDefault">Restaurar padrão</button>
-    </div>
-    <div class="grid grid-3">
-      <div class="field">
-        <label>Taxa administrativa</label>
-        <input type="text" id="pa-taxaAdm" data-mask="pct2" placeholder="0,00 %">
-      </div>
-      <div class="field">
-        <label>Fundo de reserva</label>
-        <input type="text" id="pa-fundo" data-mask="pct2" placeholder="0,00 %">
-      </div>
-      <div class="field">
-        <label>Seguro de vida (PF)</label>
-        <input type="text" id="pa-seguro" data-mask="pct4" placeholder="0,0000 %">
-      </div>
-    </div>
-
-    <div class="grid grid-2" style="margin-top: 16px;">
-      <div class="result"><strong>Taxa por mês</strong><span class="value" id="pa-taxaMes">—</span></div>
-      <div class="result"><strong>Taxa por ano</strong><span class="value" id="pa-taxaAno">—</span></div>
     </div>
   </section>
 
