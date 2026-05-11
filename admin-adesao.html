@@ -30,131 +30,72 @@
 body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; min-height: 100vh; }
 .mono { font-family: 'DM Mono', monospace; }
 
-/* Cabeçalho */
 .page-header {
-  background: var(--mp-navy);
-  color: #fff;
-  padding: 20px 24px;
-  display: flex; align-items: center; justify-content: space-between;
-  flex-wrap: wrap; gap: 12px;
-  position: sticky; top: 0; z-index: 10;
+  background: var(--mp-navy); color: #fff;
+  padding: 20px 24px; display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px; position: sticky; top: 0; z-index: 10;
   box-shadow: 0 2px 8px rgba(0,0,0,.15);
 }
-.page-header .logo {
-  display: flex; align-items: center; gap: 12px;
-}
-.page-header .logo img { height: 50px; }
+.page-header .logo { display: flex; align-items: center; gap: 12px; }
+.page-header .logo img { height: 36px; }
 .page-header h1 { font-size: 20px; font-weight: 700; letter-spacing: -.3px; }
 .page-header .sub { font-size: 12px; color: rgba(255,255,255,.6); margin-top: 2px; }
-.page-header .btn { white-space: nowrap; }
 
 .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
 
-/* Caixa de link do formulário */
 .link-card {
   background: linear-gradient(135deg, var(--mp-navy) 0%, #1a2a42 100%);
-  color: #fff;
-  border-radius: var(--r);
-  padding: 16px 20px;
-  margin-bottom: 24px;
-  display: flex; align-items: center; gap: 12px;
-  flex-wrap: wrap;
-  box-shadow: var(--shadow-md);
+  color: #fff; border-radius: var(--r); padding: 16px 20px;
+  margin-bottom: 24px; display: flex; align-items: center; gap: 12px;
+  flex-wrap: wrap; box-shadow: var(--shadow-md);
 }
 .link-card .link-icon {
-  background: var(--mp-yellow);
-  width: 42px; height: 42px; border-radius: 8px;
-  display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0;
+  background: var(--mp-yellow); width: 42px; height: 42px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
-.link-card .link-info {
-  flex: 1; min-width: 200px;
-}
+.link-card .link-info { flex: 1; min-width: 200px; }
 .link-card .link-label {
   font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
   color: rgba(255,255,255,.6); margin-bottom: 4px;
 }
 .link-card .link-url {
-  font-size: 13px;
-  font-family: 'DM Mono', monospace;
-  background: rgba(255,255,255,.1);
-  border: 1px solid rgba(255,255,255,.2);
-  padding: 8px 12px;
-  border-radius: 6px;
-  word-break: break-all;
-  display: block;
-  color: #fff;
-  text-decoration: none;
-  transition: all .2s;
+  font-size: 13px; font-family: 'DM Mono', monospace;
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+  padding: 8px 12px; border-radius: 6px; word-break: break-all;
 }
-
-.link-card .link-url:hover {
-  background: rgba(255,255,255,.18);
-  border-color: rgba(255,255,255,.35);
-}
-
 .link-card .btn-copy-link {
-  background: var(--mp-teal);
-  color: #fff;
-  border: none;
-  padding: 10px 18px;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 12px;
-  cursor: pointer;
-  display: flex; align-items: center; gap: 6px;
-  transition: background .2s, transform .1s;
-  white-space: nowrap;
+  background: var(--mp-teal); color: #fff; border: none;
+  padding: 10px 18px; border-radius: 6px; font-weight: 600;
+  font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px;
+  transition: background .2s, transform .1s; white-space: nowrap;
 }
-.link-card .btn-copy-link:hover {
-  background: #3AABB8;
-  transform: translateY(-1px);
-}
+.link-card .btn-copy-link:hover { background: #3AABB8; transform: translateY(-1px); }
 
-/* Barra de busca */
 .search-box {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  padding: 16px 20px;
-  margin-bottom: 20px;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 16px 20px; margin-bottom: 20px;
   display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
   box-shadow: var(--shadow);
 }
 .search-input {
-  flex: 1; min-width: 250px;
-  padding: 10px 14px;
-  border: 1.5px solid var(--border2);
-  border-radius: var(--r);
+  flex: 1; min-width: 250px; padding: 10px 14px;
+  border: 1.5px solid var(--border2); border-radius: var(--r);
   font-size: 13px; font-family: 'Inter', sans-serif; outline: none;
   transition: border-color .15s, box-shadow .15s;
 }
-.search-input:focus {
-  border-color: var(--mp-teal);
-  box-shadow: 0 0 0 3px rgba(77,188,200,.12);
-}
+.search-input:focus { border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,.12); }
 .search-info { font-size: 11px; color: var(--text2); white-space: nowrap; }
 
-/* Cards de adesão */
 .ad-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--r);
-  box-shadow: var(--shadow);
-  margin-bottom: 12px;
-  overflow: hidden;
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r); box-shadow: var(--shadow); margin-bottom: 12px; overflow: hidden;
 }
 .ad-card-header {
-  padding: 14px 20px;
-  display: flex; align-items: center; justify-content: space-between;
-  cursor: pointer; user-select: none;
-  transition: background .1s;
+  padding: 14px 20px; display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; user-select: none; transition: background .1s;
   border-left: 4px solid transparent;
 }
-.ad-card.open .ad-card-header {
-  border-left-color: var(--mp-teal);
-  background: #F8FDFE;
-}
+.ad-card.open .ad-card-header { border-left-color: var(--mp-teal); background: #F8FDFE; }
 .ad-card-header:hover { background: #F8FAFC; }
 .ad-card-header-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .ad-card-header-right { display: flex; align-items: center; gap: 8px; }
@@ -181,31 +122,27 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 .detail-item-label { font-size: 9.5px; color: var(--text3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; font-weight: 600; }
 .detail-item-value { font-size: 13px; font-weight: 500; color: var(--text); word-break: break-word; }
 .copy-btn {
-  position: absolute; top: 6px; right: 8px;
-  background: none; border: none; cursor: pointer; color: var(--text3); padding: 4px;
-  border-radius: 4px; display: flex; align-items: center; transition: all .15s;
+  position: absolute; top: 6px; right: 8px; background: none; border: none; cursor: pointer;
+  color: var(--text3); padding: 4px; border-radius: 4px; display: flex; align-items: center; transition: all .15s;
 }
 .copy-btn:hover { background: #fff; color: var(--mp-navy); }
 .copy-all-btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 16px; background: var(--mp-navy); color: #fff;
-  border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer;
-  font-family: 'Inter', sans-serif; transition: all .15s;
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+  background: var(--mp-navy); color: #fff; border: none; border-radius: 6px;
+  font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all .15s;
 }
 .copy-all-btn:hover { background: #1E2D45; }
 
 .section-label {
   font-size: 10px; font-weight: 700; color: var(--text2);
   text-transform: uppercase; letter-spacing: .7px;
-  margin: 20px 0 10px; padding-bottom: 6px;
-  border-bottom: 1px solid var(--border);
+  margin: 20px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border);
 }
 
 .btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 16px; border: none; border-radius: 6px;
-  font-size: 12px; font-weight: 600; cursor: pointer;
-  font-family: 'Inter', sans-serif; transition: all .15s;
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+  border: none; border-radius: 6px; font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: 'Inter', sans-serif; transition: all .15s;
 }
 .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border2); }
 .btn-outline:hover { background: var(--bg); }
@@ -224,7 +161,6 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
   background: #fff; padding: 40px; border-radius: 12px; box-shadow: var(--shadow-md);
 }
 
-/* Toast */
 @keyframes fadeInOut {
   0% { opacity: 0; transform: translateY(10px); }
   20% { opacity: 1; transform: translateY(0); }
@@ -265,12 +201,14 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 
 <!-- Estado: conteúdo principal -->
 <div id="main-state" style="display:none;">
-<header class="page-header">
-  <div class="logo">
-    <div>
-      <h1>Formulários cadastrados</h1>
+  <header class="page-header">
+    <div class="logo">
+      <img src="logo.png" alt="Master Prime">
+      <div>
+        <h1>Adesões</h1>
+        <div class="sub">Visualize e copie os dados das fichas de adesão</div>
+      </div>
     </div>
-  </div>
     <button class="btn btn-outline" onclick="loadAdesoes()" style="color:#fff;border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.1);">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
       Atualizar
@@ -280,41 +218,18 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
   <div class="container">
     <!-- LINK DO FORMULÁRIO -->
     <div class="link-card">
-  <div class="link-icon">
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--mp-navy)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
-      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
-    </svg>
-  </div>
-
-  <div class="link-info">
-    <div class="link-label">
-      Link do formulário para clientes
+      <div class="link-icon">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--mp-navy)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      </div>
+      <div class="link-info">
+        <div class="link-label">Link do formulário para clientes</div>
+        <div class="link-url" id="form-link">Carregando...</div>
+      </div>
+      <button class="btn-copy-link" id="btn-copy-link" onclick="copyFormLink()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Copiar link
+      </button>
     </div>
-
-    <a
-      class="link-url"
-      id="form-link"
-      href="#"
-      target="_blank"
-    >
-      Carregando...
-    </a>
-  </div>
-
-  <button
-    class="btn-copy-link"
-    id="btn-copy-link"
-    onclick="copyFormLink()"
-  >
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <rect x="9" y="9" width="13" height="13" rx="2"/>
-      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-    </svg>
-
-    Copiar link
-  </button>
-</div>
 
     <!-- BUSCA -->
     <div class="search-box">
@@ -335,6 +250,11 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let allAdesoes = [];
 let filteredAdesoes = [];
 
+// ═══════════════════════════════════════════════════
+// LINK DO FORMULÁRIO (CORRIGIDO)
+// ═══════════════════════════════════════════════════
+const FORMULARIO_URL = 'https://grupomasterprime.github.io/masterprime-portal/formulario.html';
+
 // ═══ VERIFICA SESSÃO ═══
 async function checkSession() {
   document.getElementById('loading-state').style.display = 'flex';
@@ -347,23 +267,8 @@ async function checkSession() {
     if (profile && profile.tipo === 'admin') {
       document.getElementById('loading-state').style.display = 'none';
       document.getElementById('main-state').style.display = 'block';
-      // Define o link do formulário
-      const currentPath = window.location.pathname;
-
-const basePath = currentPath.substring(
-  0,
-  currentPath.lastIndexOf('/') + 1
-);
-
-const formUrl =
-  window.location.origin +
-  basePath +
-  'formulario.html';
-
-const formLink = document.getElementById('form-link');
-
-formLink.textContent = formUrl;
-formLink.href = formUrl;
+      // Define o link do formulário (FIXO)
+      document.getElementById('form-link').textContent = FORMULARIO_URL;
       loadAdesoes();
       return;
     }
@@ -373,41 +278,21 @@ formLink.href = formUrl;
 }
 
 // ═══ COPIAR LINK DO FORMULÁRIO ═══
-async function copyFormLink() {
-  const linkEl = document.getElementById('form-link');
+function copyFormLink() {
   const btn = document.getElementById('btn-copy-link');
-
-  if (!linkEl || !btn) {
-    showToast('Link não encontrado', 'error');
-    return;
-  }
-
-  const url = linkEl.href;
-
-  if (!url || url === '#') {
-    showToast('URL inválida', 'error');
-    return;
-  }
-
-  try {
-    await navigator.clipboard.writeText(url);
-
+  if (!btn) return;
+  navigator.clipboard.writeText(FORMULARIO_URL).then(() => {
     const originalHTML = btn.innerHTML;
-
     btn.innerHTML = '✓ Link copiado!';
     btn.style.background = '#16A34A';
-
     setTimeout(() => {
       btn.innerHTML = originalHTML;
       btn.style.background = '';
     }, 2000);
-
-    showToast('Link copiado com sucesso!');
-
-  } catch (error) {
-    console.error(error);
-    showToast('Erro ao copiar link', 'error');
-  }
+    showToast('Link do formulário copiado!');
+  }).catch(() => {
+    showToast('Erro ao copiar. Tente novamente.', 'error');
+  });
 }
 
 // ═══ TOAST ═══
@@ -448,7 +333,7 @@ function applyFilter() {
       return nome.includes(query) || cpfCnpj.includes(q) || proto.includes(query);
     });
   }
-  document.getElementById('search-info').textContent = `${filteredAdesoes.length} de ${allAdesoes.length} Cadastros`;
+  document.getElementById('search-info').textContent = `${filteredAdesoes.length} de ${allAdesoes.length} adesões`;
   renderList();
 }
 
@@ -484,7 +369,7 @@ function renderList() {
       detailHtml += `
         <div class="detail-item">
           <button class="copy-btn" title="Copiar ${c.label}" onclick="copyText('${val.replace(/'/g, "\\'")}')">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           </button>
           <div class="detail-item-label">${c.label}</div>
           <div class="detail-item-value">${val}</div>
@@ -512,11 +397,11 @@ function renderList() {
         ${detailHtml}
         <div style="margin-top:16px; display:flex; gap:12px; flex-wrap:wrap;">
           <button class="copy-all-btn" onclick="copyText(\`${jsonStr.replace(/`/g,'\\`')}\`)">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             Copiar todos os dados (JSON)
           </button>
           <button class="copy-all-btn" style="background:var(--mp-teal);" onclick="copyTextAsPlain('${a.id}')">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             Copiar como texto (WhatsApp)
           </button>
         </div>
@@ -567,7 +452,7 @@ function getCamposPorAdmTipo(adm, tipo) {
       { id:'cpf', label:'CPF' }, { id:'nome_completo', label:'Nome Completo' }, { id:'data_nascimento', label:'Data Nasc.' },
       { id:'nacionalidade', label:'Nacionalidade' }, { id:'nome_pai', label:'Nome do Pai' }, { id:'nome_mae', label:'Nome da Mãe' },
       { section: 'Estado Civil' },
-      { id:'estado_civil', label:'Estado Civil' }, { id:'nome_conjuge', label:'Nome do Cônjuge' }, { id:'cpf_conjuge', label:'CPF do Cônjuge' }, { id:'data_nascimento_conjuge', label:'Data Nasc. Cônjuge' },
+      { id:'estado_civil', label:'Estado Civil' }, { id:'nome_conjuge', label:'Cônjuge' }, { id:'cpf_conjuge', label:'CPF Cônjuge' }, { id:'data_nascimento_conjuge', label:'Data Nasc. Cônjuge' },
       { section: 'Profissão e Renda' },
       { id:'nome_empresa', label:'Empresa' }, { id:'data_admissao', label:'Data Admissão' }, { id:'renda_mensal', label:'Renda Mensal' },
       { section: 'Endereço' },
@@ -615,12 +500,12 @@ function getCamposPorAdmTipo(adm, tipo) {
       { id:'cnpj', label:'CNPJ' }, { id:'data_constituicao', label:'Data Constituição' }, { id:'ramo_atividade', label:'Ramo Atividade' },
       { id:'razao_social', label:'Razão Social' }, { id:'faturamento_12m', label:'Faturamento 12m' }, { id:'inscricao_estadual', label:'Inscrição Estadual' },
       { id:'inscricao_municipal', label:'Inscrição Municipal' }, { id:'valor_capital', label:'Valor Capital' }, { id:'cnae_principal', label:'CNAE' }, { id:'natureza_juridica', label:'Natureza Jurídica' },
-      { section: '1º Sócio' },
+      { section: '1° Sócio' },
       { id:'socio1_nome', label:'Nome' }, { id:'socio1_administrador', label:'Administrador' }, { id:'socio1_cpf_cnpj', label:'CPF/CNPJ' },
       { id:'socio1_rg', label:'RG' }, { id:'socio1_data_emissao_rg', label:'Data Emissão RG' }, { id:'socio1_orgao_expedidor', label:'Órgão Expedidor' },
       { id:'socio1_data_nascimento', label:'Data Nasc.' }, { id:'socio1_nome_pai', label:'Pai' }, { id:'socio1_nome_mae', label:'Mãe' },
       { id:'socio1_data_entrada', label:'Data Entrada' }, { id:'socio1_participacao', label:'Participação %' },
-      { section: '2º Sócio' },
+      { section: '2° Sócio' },
       { id:'socio2_nome', label:'Nome' }, { id:'socio2_administrador', label:'Administrador' }, { id:'socio2_cpf_cnpj', label:'CPF/CNPJ' },
       { id:'socio2_rg', label:'RG' }, { id:'socio2_data_emissao_rg', label:'Data Emissão RG' }, { id:'socio2_orgao_expedidor', label:'Órgão Expedidor' },
       { id:'socio2_data_nascimento', label:'Data Nasc.' }, { id:'socio2_nome_pai', label:'Pai' }, { id:'socio2_nome_mae', label:'Mãe' },
