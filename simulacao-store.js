@@ -379,5 +379,45 @@
     return { refresh: refreshSelect, getCurrentId: () => currentSavedId };
   }
 
-  global.SimulacaoStore = { init };
+  // ── Helpers genéricos para form simples (inputs / selects / textareas) ──
+  function snapshotForm(options) {
+    options = options || {};
+    const skipPrefixes = options.skipPrefixes || ['ss', 'simStore'];
+    const skipIds = new Set(options.skipIds || []);
+    const result = {};
+    document.querySelectorAll('input[id], select[id], textarea[id]').forEach(function (el) {
+      const id = el.id;
+      if (skipIds.has(id)) return;
+      if (skipPrefixes.some(function (p) { return id.indexOf(p) === 0; })) return;
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        result[id] = el.checked;
+      } else {
+        result[id] = el.value;
+      }
+    });
+    return result;
+  }
+
+  function restoreForm(data, opts) {
+    opts = opts || {};
+    const recalcFn = opts.recalc;
+    if (!data || typeof data !== 'object') return;
+    Object.keys(data).forEach(function (id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      const val = data[id];
+      if (el.type === 'checkbox' || el.type === 'radio') {
+        el.checked = !!val;
+      } else {
+        el.value = (val == null ? '' : val);
+      }
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    if (typeof recalcFn === 'function') {
+      try { recalcFn(); } catch (e) { console.error(e); }
+    }
+  }
+
+  global.SimulacaoStore = { init, snapshotForm, restoreForm };
 })(window);
