@@ -768,6 +768,16 @@
           </div>
         </div>
 
+        ${opts.observacoes && String(opts.observacoes).trim() ? `
+        <!-- OBSERVAÇÕES -->
+        <div style="margin-top:26px; background:#fff; border:1px solid #E2E8F0; border-radius:20px; padding:24px 28px; box-shadow:0 1px 3px rgba(15,23,42,0.04);">
+          <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
+            <span style="width:6px; height:22px; background:${theme.corAcento}; border-radius:3px;"></span>
+            <div style="font-size:12.5px; color:#0F172A; letter-spacing:2px; text-transform:uppercase; font-weight:700;">Observações</div>
+          </div>
+          <div style="font-size:13.5px; color:#334155; line-height:1.55; white-space:pre-wrap; word-wrap:break-word;">${String(opts.observacoes).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+        </div>` : ''}
+
         <!-- RODAPÉ -->
         <div style="margin-top:30px; padding-top:18px; border-top:1px solid #EEF2F6; display:flex; justify-content:space-between; align-items:center; color:#94A3B8; font-size:11.5px;">
           <div>Simulação meramente informativa · valores sujeitos às condições do grupo e à análise da administradora</div>
