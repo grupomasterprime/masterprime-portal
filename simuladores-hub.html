@@ -104,6 +104,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
 #porto-screen.active { display: block; }
 #itau-screen { padding: 32px 40px 40px; display: none; }
 #itau-screen.active { display: block; }
+#bradesco-screen { padding: 32px 40px 40px; display: none; }
+#bradesco-screen.active { display: block; }
 .porto-back {
   display: inline-flex; align-items: center; gap: 6px;
   margin-bottom: 18px;
@@ -178,17 +180,10 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
       <div class="arrow">Abrir &rarr;</div>
     </div>
 
-    <div class="sim-card cat-bradesco" onclick="openSim('bradesco-imovel', 'Bradesco · Imóvel', 'simulador-bradesco.html')">
+    <div class="sim-card cat-bradesco" onclick="openBradesco()">
       <div class="sim-icon sim-icon-img"><img src="logo-bradesco.png" alt="Bradesco" onerror="this.style.display='none'"></div>
-      <div class="name">Bradesco Imóvel</div>
-      <div class="desc">Bradesco Imóvel: antecipação 4,25% em 8 parcelas. Lance com Diluir ou Antecipar Parcelas.</div>
-      <div class="arrow">Abrir &rarr;</div>
-    </div>
-
-    <div class="sim-card cat-bradesco" onclick="openSim('bradesco-auto', 'Bradesco · Auto', 'simulador-bradesco-auto.html')">
-      <div class="sim-icon sim-icon-img"><img src="logo-bradesco.png" alt="Bradesco" onerror="this.style.display='none'"></div>
-      <div class="name">Bradesco Auto</div>
-      <div class="desc">Bradesco Auto: antecipação 5,25% em 6 parcelas. Lance com Diluir ou Antecipar Parcelas.</div>
+      <div class="name">Bradesco Consórcio</div>
+      <div class="desc">Simuladores Bradesco: Imóvel e Auto. Lance com Diluir ou Antecipar Parcelas.</div>
       <div class="arrow">Abrir &rarr;</div>
     </div>
 
@@ -306,6 +301,34 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
   </div>
 </div>
 
+<!-- Sub-hub Bradesco -->
+<div id="bradesco-screen">
+  <button class="porto-back" onclick="closeBradesco()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Voltar aos Simuladores
+  </button>
+  <div class="hub-header">
+    <div class="hub-title">Bradesco Consórcio</div>
+    <div class="hub-sub">Simuladores específicos da administradora Bradesco, com taxa de antecipação configurada por modalidade.</div>
+  </div>
+
+  <div class="cards-grid">
+    <div class="sim-card cat-bradesco" onclick="openSim('bradesco-imovel', 'Bradesco · Imóvel', 'simulador-bradesco.html')">
+      <div class="sim-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+      <div class="name">Imóvel</div>
+      <div class="desc">Bradesco Imóvel: antecipação 4,25% em 8 parcelas. Lance com Diluir ou Antecipar Parcelas.</div>
+      <div class="arrow">Abrir &rarr;</div>
+    </div>
+
+    <div class="sim-card cat-bradesco" onclick="openSim('bradesco-auto', 'Bradesco · Auto', 'simulador-bradesco-auto.html')">
+      <div class="sim-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/><circle cx="6.5" cy="16.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg></div>
+      <div class="name">Auto</div>
+      <div class="desc">Bradesco Auto: antecipação 5,25% em 6 parcelas. Lance com Diluir ou Antecipar Parcelas.</div>
+      <div class="arrow">Abrir &rarr;</div>
+    </div>
+  </div>
+</div>
+
 <!-- Iframe View -->
 <div id="sim-view">
   <div class="sim-toolbar">
@@ -321,6 +344,7 @@ function openSim(slug, title, file) {
   document.getElementById('hub-screen').classList.add('hidden');
   document.getElementById('porto-screen').classList.remove('active');
   document.getElementById('itau-screen').classList.remove('active');
+  document.getElementById('bradesco-screen')?.classList.remove('active');
   const view = document.getElementById('sim-view');
   view.classList.add('active');
   document.getElementById('sim-title-bar').textContent = title;
@@ -332,12 +356,14 @@ function openSim(slug, title, file) {
 function closeSim() {
   document.getElementById('sim-view').classList.remove('active');
   document.getElementById('sim-iframe').src = 'about:blank';
-  // Se veio de um Porto, volta pro sub-hub Porto; se Itaú pro sub-hub Itaú; senão pro hub principal
+  // Se veio de um Porto, volta pro sub-hub Porto; se Itaú pro sub-hub Itaú; se Bradesco pro sub-hub Bradesco; senão pro hub principal
   const slug = (new URLSearchParams(location.search).get('sim') || '');
   if (slug.startsWith('porto-')) {
     document.getElementById('porto-screen').classList.add('active');
   } else if (slug.startsWith('itau-')) {
     document.getElementById('itau-screen').classList.add('active');
+  } else if (slug.startsWith('bradesco-')) {
+    document.getElementById('bradesco-screen').classList.add('active');
   } else {
     document.getElementById('hub-screen').classList.remove('hidden');
   }
@@ -347,6 +373,7 @@ function closeSim() {
 function openPorto() {
   document.getElementById('hub-screen').classList.add('hidden');
   document.getElementById('itau-screen').classList.remove('active');
+  document.getElementById('bradesco-screen')?.classList.remove('active');
   document.getElementById('porto-screen').classList.add('active');
   try { history.replaceState({}, '', '?sim=porto'); } catch(e) {}
 }
@@ -360,6 +387,7 @@ function closePorto() {
 function openItau() {
   document.getElementById('hub-screen').classList.add('hidden');
   document.getElementById('porto-screen').classList.remove('active');
+  document.getElementById('bradesco-screen')?.classList.remove('active');
   document.getElementById('itau-screen').classList.add('active');
   try { history.replaceState({}, '', '?sim=itau'); } catch(e) {}
 }
@@ -370,13 +398,28 @@ function closeItau() {
   try { history.replaceState({}, '', location.pathname); } catch(e) {}
 }
 
+function openBradesco() {
+  document.getElementById('hub-screen').classList.add('hidden');
+  document.getElementById('porto-screen').classList.remove('active');
+  document.getElementById('itau-screen').classList.remove('active');
+  document.getElementById('bradesco-screen').classList.add('active');
+  try { history.replaceState({}, '', '?sim=bradesco'); } catch(e) {}
+}
+
+function closeBradesco() {
+  document.getElementById('bradesco-screen').classList.remove('active');
+  document.getElementById('hub-screen').classList.remove('hidden');
+  try { history.replaceState({}, '', location.pathname); } catch(e) {}
+}
+
 // Deep-link: abre direto se ?sim=slug estiver na URL
 (function () {
   const params = new URLSearchParams(location.search);
   const slug = params.get('sim');
   if (!slug) return;
-  if (slug === 'porto') { openPorto(); return; }
-  if (slug === 'itau')  { openItau();  return; }
+  if (slug === 'porto')    { openPorto();    return; }
+  if (slug === 'itau')     { openItau();     return; }
+  if (slug === 'bradesco') { openBradesco(); return; }
   const cards = document.querySelectorAll('.sim-card');
   for (const c of cards) {
     const onclick = c.getAttribute('onclick') || '';
