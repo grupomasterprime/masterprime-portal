@@ -10,6 +10,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="pdf-master-prime.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="simulacao-store.js"></script>
 <style>
   :root {
     --mp-navy: #2D3F5E;
@@ -151,6 +153,7 @@
 </header>
 
 <main>
+  <div id="simStoreMount" style="max-width:1400px; margin:16px auto 0; padding:0 32px;"></div>
 
   <h2 class="section-title">Porto · Consórcio Imóvel</h2>
   <p class="subtitle">Cálculo de proposta, contemplação e estratégias de lance</p>
@@ -969,6 +972,21 @@ document.getElementById('baixarPdfPorto').addEventListener('click', async () => 
     btn.disabled = false;
   }
 });
+
+// ═══════════════════════════════════════════════════════
+// SIMULAÇÕES SALVAS (48h) — SimulacaoStore
+// ═══════════════════════════════════════════════════════
+(function initSimStore() {
+  if (!window.SimulacaoStore) return;
+  window.SimulacaoStore.init({
+    supabaseUrl: 'https://jhwciwvgagnuxakukyob.supabase.co',
+    supabaseKey: 'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx',
+    simulador:   'porto-imovel',
+    mountPoint:  document.getElementById('simStoreMount'),
+    serialize:   () => window.SimulacaoStore.snapshotForm(),
+    restore:     (dados) => window.SimulacaoStore.restoreForm(dados, { recalc: recalc })
+  });
+})();
 </script>
 
 </body>
