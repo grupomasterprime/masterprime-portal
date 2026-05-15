@@ -225,6 +225,17 @@
       <div class="result"><strong>Taxa por mês</strong><span class="value" id="pa-taxaMes">—</span></div>
       <div class="result"><strong>Taxa por ano</strong><span class="value" id="pa-taxaAno">—</span></div>
     </div>
+
+    <div class="grid grid-2" style="margin-top: 16px;">
+      <div class="result-primary">
+        <strong>Parcela inicial · PF</strong>
+        <span class="value" id="pa-parcelaInicialPFDestaque">—</span>
+      </div>
+      <div class="result-primary">
+        <strong>Parcela inicial · PJ</strong>
+        <span class="value" id="pa-parcelaInicialPJDestaque">—</span>
+      </div>
+    </div>
   </section>
 
   <!-- ════════ OFERTA DE LANCE ════════ -->
@@ -556,7 +567,7 @@ function recalc() {
   const i = readInputs();
 
   if (!(i.credito > 0) || !(i.prazo > 0)) {
-    const ids = ['pa-categoria','pa-saldoDevedor','pa-parcelaPF','pa-parcelaPJ','pa-parcelaReduzPF','pa-parcelaReduzPJ','pa-representatividade','pa-creditoLiberado','pa-novaParcela','pa-novoPrazo','pa-saldoPos','pa-novoSeguro','pa-prazoReduzido','pa-parcelaSeReduzPrazo','pa-taxaMes','pa-taxaAno'];
+    const ids = ['pa-categoria','pa-saldoDevedor','pa-parcelaPF','pa-parcelaPJ','pa-parcelaInicialPFDestaque','pa-parcelaInicialPJDestaque','pa-parcelaReduzPF','pa-parcelaReduzPJ','pa-representatividade','pa-creditoLiberado','pa-novaParcela','pa-novoPrazo','pa-saldoPos','pa-novoSeguro','pa-prazoReduzido','pa-parcelaSeReduzPrazo','pa-taxaMes','pa-taxaAno'];
     ids.forEach(id => setOut(id, '—'));
     return;
   }
@@ -570,6 +581,8 @@ function recalc() {
   setOut('pa-parcelaPJ', formatMoney(r.parcelaPJ));
   setOut('pa-parcelaReduzPF', formatMoney(r.parcelaReduzidaPF));
   setOut('pa-parcelaReduzPJ', formatMoney(r.parcelaReduzidaPJ));
+  setOut('pa-parcelaInicialPFDestaque', formatMoney(r.parcelaPF));
+  setOut('pa-parcelaInicialPJDestaque', formatMoney(r.parcelaPJ));
 
   setOut('pa-representatividade', Number.isFinite(r.representatividade) ? formatPct(r.representatividade * 100, 2) : '—');
 

@@ -234,6 +234,17 @@
       <div class="result"><strong>Taxa por mês</strong><span class="value" id="pi-taxaMes">—</span></div>
       <div class="result"><strong>Taxa por ano</strong><span class="value" id="pi-taxaAno">—</span></div>
     </div>
+
+    <div class="grid grid-2" style="margin-top: 16px;">
+      <div class="result-primary">
+        <strong>Parcela inicial · PF</strong>
+        <span class="value" id="pi-parcelaInicialPFDestaque">—</span>
+      </div>
+      <div class="result-primary">
+        <strong>Parcela inicial · PJ</strong>
+        <span class="value" id="pi-parcelaInicialPJDestaque">—</span>
+      </div>
+    </div>
   </section>
 
   <!-- ════════ OFERTA DE LANCE ════════ -->
@@ -568,7 +579,7 @@ function recalc() {
 
   // Mostra "—" se não tem o suficiente
   if (!(i.credito > 0) || !(i.prazo > 0)) {
-    const ids = ['pi-categoria','pi-saldoDevedor','pi-parcelaPF','pi-parcelaPJ','pi-parcelaReduzPF','pi-parcelaReduzPJ','pi-parcelaInicial','pi-parcelaDemais','pi-representatividade','pi-creditoLiberado','pi-novaParcela','pi-novoPrazo','pi-saldoPos','pi-novoSeguro','pi-prazoReduzido','pi-parcelaSeReduzPrazo','pi-taxaMes','pi-taxaAno'];
+    const ids = ['pi-categoria','pi-saldoDevedor','pi-parcelaPF','pi-parcelaPJ','pi-parcelaInicialPFDestaque','pi-parcelaInicialPJDestaque','pi-parcelaReduzPF','pi-parcelaReduzPJ','pi-parcelaInicial','pi-parcelaDemais','pi-representatividade','pi-creditoLiberado','pi-novaParcela','pi-novoPrazo','pi-saldoPos','pi-novoSeguro','pi-prazoReduzido','pi-parcelaSeReduzPrazo','pi-taxaMes','pi-taxaAno'];
     ids.forEach(id => setOut(id, '—'));
     atualizaLabelsParcelaInicial(i);
     return;
@@ -586,6 +597,8 @@ function recalc() {
   setOut('pi-parcelaReduzPJ', formatMoney(r.parcelaReduzidaPJ));
   setOut('pi-parcelaInicial', formatMoney(r.parcelaInicial));
   setOut('pi-parcelaDemais', formatMoney(r.parcelaDemais));
+  setOut('pi-parcelaInicialPFDestaque', formatMoney(r.parcelaPF));
+  setOut('pi-parcelaInicialPJDestaque', formatMoney(r.parcelaPJ));
   atualizaLabelsParcelaInicial(i);
 
   // Lance

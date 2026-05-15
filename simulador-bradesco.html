@@ -216,6 +216,17 @@
       <div class="result"><strong>Taxa por mês</strong><span class="value" id="br-taxaMes">—</span></div>
       <div class="result"><strong>Taxa por ano</strong><span class="value" id="br-taxaAno">—</span></div>
     </div>
+
+    <div class="grid grid-2" style="margin-top: 16px;">
+      <div class="result-primary">
+        <strong>Parcela inicial</strong>
+        <span class="value" id="br-parcelaInicialDestaque">—</span>
+      </div>
+      <div class="result-primary">
+        <strong>Demais parcelas</strong>
+        <span class="value" id="br-parcelaDemaisDestaque">—</span>
+      </div>
+    </div>
   </section>
 
   <!-- ════════ OFERTA DE LANCE ════════ -->
@@ -509,7 +520,7 @@ function recalc() {
   const i = readInputs();
 
   if (!(i.credito > 0) || !(i.prazo > 0)) {
-    const ids = ['br-saldoDevedor','br-seguroMensal','br-parcelaInicial','br-parcelaPosAnt','br-lanceTotal','br-saldoPos','br-parcDiluir','br-prazoDiluir','br-parcAntecipar','br-prazoAntecipar','br-taxaMes','br-taxaAno'];
+    const ids = ['br-saldoDevedor','br-seguroMensal','br-parcelaInicial','br-parcelaInicialDestaque','br-parcelaPosAnt','br-parcelaDemaisDestaque','br-lanceTotal','br-saldoPos','br-parcDiluir','br-prazoDiluir','br-parcAntecipar','br-prazoAntecipar','br-taxaMes','br-taxaAno'];
     ids.forEach(id => setOut(id, '—'));
     atualizaLabelsParcela(i);
     return;
@@ -520,7 +531,9 @@ function recalc() {
   setOut('br-saldoDevedor', formatMoney(r.saldoDevedor));
   setOut('br-seguroMensal', i.seguro > 0 ? formatMoney(r.seguroMensal) : '—');
   setOut('br-parcelaInicial', formatMoney(r.parcelaInicial));
+  setOut('br-parcelaInicialDestaque', formatMoney(r.parcelaInicial));
   setOut('br-parcelaPosAnt', formatMoney(r.parcelaPosAnt));
+  setOut('br-parcelaDemaisDestaque', formatMoney(r.parcelaPosAnt));
   setOut('br-lanceTotal', formatMoney(r.lanceTotal));
   setOut('br-saldoPos', formatMoney(r.saldoPos));
   setOut('br-parcDiluir', formatMoney(r.parcDiluir));

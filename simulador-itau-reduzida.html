@@ -198,6 +198,17 @@
       <div class="result"><strong>Taxa por mês</strong><span class="value" id="ir-taxaMes">—</span></div>
       <div class="result"><strong>Taxa por ano</strong><span class="value" id="ir-taxaAno">—</span></div>
     </div>
+
+    <div class="grid grid-2" style="margin-top: 16px;">
+      <div class="result-primary">
+        <strong>Parcela integral</strong>
+        <span class="value" id="ir-parcelaIntegralDestaque">—</span>
+      </div>
+      <div class="result-primary">
+        <strong>Parcela reduzida</strong>
+        <span class="value" id="ir-parcelaReduzidaDestaque">—</span>
+      </div>
+    </div>
   </section>
 
   <!-- ════════ OFERTA DE LANCE ════════ -->
@@ -206,6 +217,12 @@
       <span class="badge-orange"></span>
       <h3>Oferta de Lance</h3>
       <button type="button" class="reset-btn" id="btnLimparLance">Limpar</button>
+    </div>
+
+    <div class="lance-presets" style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; padding:10px 14px; background:#FFF7E6; border:1px solid #FBE3B5; border-radius:8px;">
+      <span style="font-size:11px; color:var(--text-muted); font-weight:600; letter-spacing:.5px; text-transform:uppercase;">Lance Fixo 40%:</span>
+      <button type="button" id="btnPresetFixo40Proprio" style="background:#fff; border:1px solid var(--border); border-radius:6px; padding:6px 12px; font-size:12px; color:var(--mp-navy); cursor:pointer; font-weight:600;">100% recursos próprios</button>
+      <button type="button" id="btnPresetFixo40Emb" style="background:#fff; border:1px solid var(--border); border-radius:6px; padding:6px 12px; font-size:12px; color:var(--mp-navy); cursor:pointer; font-weight:600;">30% embutido + 10% próprios</button>
     </div>
 
     <div class="grid grid-2">
@@ -489,7 +506,7 @@ function recalc() {
   const i = readInputs();
 
   if (!(i.credito > 0) || !(i.prazo > 0)) {
-    const ids = ['ir-categoria','ir-saldoDevedor','ir-parcelaIntegral','ir-parcelaReduzida','ir-pctReducao','ir-seguroMensal','ir-lanceEmbutido','ir-lanceAPagar','ir-totalLance','ir-creditoLiquido','ir-novaParcela','ir-prazoRestante','ir-saldoPos','ir-novoPrazo','ir-parcelaMantida','ir-saldoPosPrazo','ir-taxaMes','ir-taxaAno'];
+    const ids = ['ir-categoria','ir-saldoDevedor','ir-parcelaIntegral','ir-parcelaIntegralDestaque','ir-parcelaReduzida','ir-parcelaReduzidaDestaque','ir-pctReducao','ir-seguroMensal','ir-lanceEmbutido','ir-lanceAPagar','ir-totalLance','ir-creditoLiquido','ir-novaParcela','ir-prazoRestante','ir-saldoPos','ir-novoPrazo','ir-parcelaMantida','ir-saldoPosPrazo','ir-taxaMes','ir-taxaAno'];
     ids.forEach(id => setOut(id, '—'));
     return;
   }
@@ -500,7 +517,9 @@ function recalc() {
   setOut('ir-categoria', formatMoney(r.categoria));
   setOut('ir-saldoDevedor', formatMoney(r.saldoDevedor));
   setOut('ir-parcelaIntegral', formatMoney(r.parcelaIntegral));
+  setOut('ir-parcelaIntegralDestaque', formatMoney(r.parcelaIntegral));
   setOut('ir-parcelaReduzida', formatMoney(r.parcelaReduzida));
+  setOut('ir-parcelaReduzidaDestaque', formatMoney(r.parcelaReduzida));
   setOut('ir-pctReducao', r.pctReducao > 0 ? formatPct(r.pctReducao * 100, 0) : '—');
   setOut('ir-seguroMensal', formatMoney(r.seguroMensal));
 
@@ -546,6 +565,18 @@ document.getElementById('btnLimparProposta').addEventListener('click', () => {
 
 document.getElementById('btnLimparLance').addEventListener('click', () => {
   ['ir-pctEmbutido','ir-pctAPagar'].forEach(id => get(id).value = '');
+  recalc();
+});
+
+document.getElementById('btnPresetFixo40Proprio').addEventListener('click', () => {
+  get('ir-pctEmbutido').value = '0,00 %';
+  get('ir-pctAPagar').value = '40,00 %';
+  recalc();
+});
+
+document.getElementById('btnPresetFixo40Emb').addEventListener('click', () => {
+  get('ir-pctEmbutido').value = '30,00 %';
+  get('ir-pctAPagar').value = '10,00 %';
   recalc();
 });
 

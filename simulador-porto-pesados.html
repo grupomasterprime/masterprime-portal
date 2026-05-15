@@ -232,6 +232,17 @@
       <div class="result"><strong>Taxa por mês</strong><span class="value" id="pp-taxaMes">—</span></div>
       <div class="result"><strong>Taxa por ano</strong><span class="value" id="pp-taxaAno">—</span></div>
     </div>
+
+    <div class="grid grid-2" style="margin-top: 16px;">
+      <div class="result-primary">
+        <strong>Parcela inicial · PF</strong>
+        <span class="value" id="pp-parcelaInicialPFDestaque">—</span>
+      </div>
+      <div class="result-primary">
+        <strong>Parcela inicial · PJ</strong>
+        <span class="value" id="pp-parcelaInicialPJDestaque">—</span>
+      </div>
+    </div>
   </section>
 
   <!-- ════════ OFERTA DE LANCE ════════ -->
@@ -557,7 +568,7 @@ function recalc() {
   const i = readInputs();
 
   if (!(i.credito > 0) || !(i.prazo > 0)) {
-    const ids = ['pp-categoria','pp-saldoDevedor','pp-parcelaPF','pp-parcelaPJ','pp-parcelaReduzPF','pp-parcelaReduzPJ','pp-representatividade','pp-creditoLiberado','pp-novaParcela','pp-novoPrazo','pp-saldoPos','pp-novoSeguro','pp-prazoReduzido','pp-parcelaSeReduzPrazo','pp-taxaMes','pp-taxaAno'];
+    const ids = ['pp-categoria','pp-saldoDevedor','pp-parcelaPF','pp-parcelaPJ','pp-parcelaInicialPFDestaque','pp-parcelaInicialPJDestaque','pp-parcelaReduzPF','pp-parcelaReduzPJ','pp-representatividade','pp-creditoLiberado','pp-novaParcela','pp-novoPrazo','pp-saldoPos','pp-novoSeguro','pp-prazoReduzido','pp-parcelaSeReduzPrazo','pp-taxaMes','pp-taxaAno'];
     ids.forEach(id => setOut(id, '—'));
     return;
   }
@@ -569,6 +580,8 @@ function recalc() {
   setOut('pp-saldoDevedor', formatMoney(r.saldoDevedor));
   setOut('pp-parcelaPF', formatMoney(r.parcelaPF));
   setOut('pp-parcelaPJ', formatMoney(r.parcelaPJ));
+  setOut('pp-parcelaInicialPFDestaque', formatMoney(r.parcelaPF));
+  setOut('pp-parcelaInicialPJDestaque', formatMoney(r.parcelaPJ));
   setOut('pp-parcelaReduzPF', formatMoney(r.parcelaReduzidaPF));
   setOut('pp-parcelaReduzPJ', formatMoney(r.parcelaReduzidaPJ));
 

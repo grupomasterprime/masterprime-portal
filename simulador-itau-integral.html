@@ -195,6 +195,11 @@
       <div class="result"><strong>Taxa por mês</strong><span class="value" id="ii-taxaMes">—</span></div>
       <div class="result"><strong>Taxa por ano</strong><span class="value" id="ii-taxaAno">—</span></div>
     </div>
+
+    <div class="result-primary" style="margin-top: 16px;">
+      <strong>Parcela inicial</strong>
+      <span class="value" id="ii-parcelaInicialDestaque">—</span>
+    </div>
   </section>
 
   <!-- ════════ OFERTA DE LANCE ════════ -->
@@ -203,6 +208,12 @@
       <span class="badge-orange"></span>
       <h3>Oferta de Lance</h3>
       <button type="button" class="reset-btn" id="btnLimparLance">Limpar</button>
+    </div>
+
+    <div class="lance-presets" style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; padding:10px 14px; background:#FFF7E6; border:1px solid #FBE3B5; border-radius:8px;">
+      <span style="font-size:11px; color:var(--text-muted); font-weight:600; letter-spacing:.5px; text-transform:uppercase;">Lance Fixo 40%:</span>
+      <button type="button" id="btnPresetFixo40Proprio" style="background:#fff; border:1px solid var(--border); border-radius:6px; padding:6px 12px; font-size:12px; color:var(--mp-navy); cursor:pointer; font-weight:600;">100% recursos próprios</button>
+      <button type="button" id="btnPresetFixo40Emb" style="background:#fff; border:1px solid var(--border); border-radius:6px; padding:6px 12px; font-size:12px; color:var(--mp-navy); cursor:pointer; font-weight:600;">30% embutido + 10% próprios</button>
     </div>
 
     <div class="grid grid-2">
@@ -473,7 +484,7 @@ function recalc() {
 
   // Mostra "—" se faltar dado básico
   if (!(i.credito > 0) || !(i.prazo > 0)) {
-    const ids = ['ii-categoria','ii-saldoDevedor','ii-parcelaIntegral','ii-seguroMensal','ii-lanceEmbutido','ii-lanceAPagar','ii-totalLance','ii-creditoLiquido','ii-novaParcela','ii-prazoRestante','ii-saldoPos','ii-novoPrazo','ii-parcelaMantida','ii-saldoPosPrazo','ii-taxaMes','ii-taxaAno'];
+    const ids = ['ii-categoria','ii-saldoDevedor','ii-parcelaIntegral','ii-parcelaInicialDestaque','ii-seguroMensal','ii-lanceEmbutido','ii-lanceAPagar','ii-totalLance','ii-creditoLiquido','ii-novaParcela','ii-prazoRestante','ii-saldoPos','ii-novoPrazo','ii-parcelaMantida','ii-saldoPosPrazo','ii-taxaMes','ii-taxaAno'];
     ids.forEach(id => setOut(id, '—'));
     return;
   }
@@ -484,6 +495,7 @@ function recalc() {
   setOut('ii-categoria', formatMoney(r.categoria));
   setOut('ii-saldoDevedor', formatMoney(r.saldoDevedor));
   setOut('ii-parcelaIntegral', formatMoney(r.parcelaIntegral));
+  setOut('ii-parcelaInicialDestaque', formatMoney(r.parcelaIntegral));
   setOut('ii-seguroMensal', formatMoney(r.seguroMensal));
 
   // Lance
@@ -526,6 +538,18 @@ document.getElementById('btnLimparProposta').addEventListener('click', () => {
 
 document.getElementById('btnLimparLance').addEventListener('click', () => {
   ['ii-pctEmbutido','ii-pctAPagar'].forEach(id => get(id).value = '');
+  recalc();
+});
+
+document.getElementById('btnPresetFixo40Proprio').addEventListener('click', () => {
+  get('ii-pctEmbutido').value = '0,00 %';
+  get('ii-pctAPagar').value = '40,00 %';
+  recalc();
+});
+
+document.getElementById('btnPresetFixo40Emb').addEventListener('click', () => {
+  get('ii-pctEmbutido').value = '30,00 %';
+  get('ii-pctAPagar').value = '10,00 %';
   recalc();
 });
 
