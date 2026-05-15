@@ -81,9 +81,10 @@
 
   /* Lance buttons - 6 estratégias + limpar */
   .lance-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 18px; }
-  .lance-buttons .lance-btn[data-strat="so-embutido"] { grid-column: 1 / -1; }
   .lance-pct-mirror { width: 100%; padding: 8px 12px; border: 1px solid #E5E7EB; border-radius: 6px; font-size: 12px; font-family: inherit; background: #F8FAFC; color: var(--mp-teal-dark); margin-top: 6px; outline: none; transition: border-color 0.15s; }
   .lance-pct-mirror:focus { border-color: var(--mp-teal); box-shadow: 0 0 0 2px rgba(77,188,200,0.12); background: #fff; }
+  .lance-max-hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; padding-left: 4px; letter-spacing: 0.2px; font-style: italic; }
+  .lance-max-hint strong { color: var(--mp-teal-dark); font-weight: 600; font-style: normal; }
   .lance-buttons .clear-btn-row { grid-column: 1 / -1; display: flex; justify-content: flex-end; }
   @media (max-width: 1024px) { .lance-buttons { grid-template-columns: repeat(2, 1fr); } }
   @media (max-width: 600px) { .lance-buttons { grid-template-columns: 1fr; } }
@@ -267,7 +268,6 @@
       <button type="button" class="lance-btn fixo30" data-strat="fixo30-embutido">Lance Fixo 30% + Embutido</button>
       <button type="button" class="lance-btn fixo40" data-strat="fixo40-bolso">Lance Fixo 40% + recursos próprios</button>
       <button type="button" class="lance-btn fixo40" data-strat="fixo40-embutido">Lance Fixo 40% + Embutido</button>
-      <button type="button" class="lance-btn" data-strat="so-embutido">Embutido</button>
       <div class="clear-btn-row">
         <button type="button" class="clear-btn" data-strat="limpar">Limpar dados</button>
       </div>
@@ -288,6 +288,7 @@
         <label>Embutido</label>
         <input type="text" id="pp-embutido" placeholder="R$ 0,00" data-mask="money">
         <input type="text" id="pp-embutido-pct" class="lance-pct-mirror" placeholder="0,00 % do crédito">
+        <div class="lance-max-hint" id="pp-embutidoMaxHint">Máx. R$ 0,00 · verificar característica do grupo</div>
       </div>
     </div>
 
@@ -584,6 +585,11 @@ function recalc() {
 
   setOut('pp-categoria', formatMoney(r.categoria));
   setOut('pp-saldoDevedor', formatMoney(r.saldoDevedor));
+  var hintEl = document.getElementById('pp-embutidoMaxHint');
+  if (hintEl) {
+    var pctTxt = i.pctEmbutido > 0 ? (i.pctEmbutido * 100).toFixed(2).replace('.', ',') + '%' : '—';
+    hintEl.innerHTML = 'Máx. <strong>' + formatMoney(r.maxEmbutido) + '</strong> (' + pctTxt + ' do crédito) · verificar característica do grupo';
+  }
   setOut('pp-parcelaPF', formatMoney(r.parcelaPF));
   setOut('pp-parcelaPJ', formatMoney(r.parcelaPJ));
   setOut('pp-parcelaInicialPFDestaque', formatMoney(r.parcelaPF));
@@ -662,11 +668,6 @@ function aplicaEstrategia(strat, pctLivre = null) {
       embutido = maxEmb;
       recProp = fixo - maxEmb;
       if (recProp < 0) recProp = 0;
-      break;
-    }
-    case 'so-embutido': {
-      embutido = maxEmb;
-      recProp = 0;
       break;
     }
   }
