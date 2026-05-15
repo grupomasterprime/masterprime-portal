@@ -39,15 +39,22 @@ body{background:#F4F6FA;color:#1E293B;font-family:'Inter','Segoe UI',system-ui,A
 .filter-select{width:100%;padding:9px 12px;background:#fff;border:1px solid #CBD5E1;border-radius:6px;color:#1E293B;font-size:13px;cursor:pointer;transition:.15s}
 .filter-select:hover{border-color:#2D3F5E}
 .filter-select:focus{outline:none;border-color:#2D3F5E;box-shadow:0 0 0 3px rgba(45,63,94,.1)}
-.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:20px}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:12px}
+.kpis-row2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px}
+@media (max-width: 900px){ .kpis{grid-template-columns:repeat(2,1fr)} .kpis-row2{grid-template-columns:1fr} }
 .kpi{background:#fff;border-radius:10px;padding:18px 20px;border:1px solid #E2E8F0;border-left:4px solid #2D3F5E;box-shadow:0 1px 3px rgba(0,0,0,.04);min-height:110px;display:flex;flex-direction:column;justify-content:center}
 .kpi.green{border-left-color:#16A34A}
 .kpi.amber{border-left-color:#C8C84A}
 .kpi.purple{border-left-color:#7A9BC8}
 .kpi.rose{border-left-color:#DC2626}
+.kpi.teal{border-left-color:#4DBCC8}
+.kpi.orange{border-left-color:#EC7000}
+.kpi-multi{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.kpi-multi .mini{font-size:11px;color:#64748B;letter-spacing:.5px;text-transform:uppercase;font-weight:600}
+.kpi-multi .mini-val{font-size:14px;color:#2D3F5E;font-weight:700;font-family:'Inter','DM Mono',ui-monospace,monospace;margin-left:4px}
 .kpi-label{font-size:10px;color:#64748B;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:6px}
-.kpi-val{font-size:22px;font-weight:800;color:#2D3F5E;line-height:1.1;white-space:nowrap}
-.kpi-val.small{font-size:18px}
+.kpi-val{font-size:20px;font-weight:800;color:#2D3F5E;line-height:1.1;white-space:nowrap}
+.kpi-val.small{font-size:20px}
 .kpi-sub{font-size:11px;color:#94A3B8;margin-top:4px}
 .charts-row{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px}
 .chart-card{background:#fff;border-radius:10px;padding:18px;border:1px solid #E2E8F0;box-shadow:0 1px 3px rgba(0,0,0,.04)}
@@ -154,6 +161,26 @@ tbody td:nth-child(4){font-weight:700;color:#16A34A}
       <div class="kpi amber"><div class="kpi-label">Ticket Medio</div><div class="kpi-val" id="kTicket">-</div><div class="kpi-sub" id="kTicketSub"></div></div>
       <div class="kpi purple"><div class="kpi-label">Consultores Ativos</div><div class="kpi-val" id="kConsultores">-</div><div class="kpi-sub" id="kConsultoresSub"></div></div>
       <div class="kpi rose"><div class="kpi-label">Administradoras</div><div class="kpi-val" id="kAdms">-</div><div class="kpi-sub" id="kAdmsSub"></div></div>
+    </div>
+
+    <!-- KPIs Apropriação -->
+    <div class="kpis-row2">
+      <div class="kpi teal">
+        <div class="kpi-label">Apropriadas</div>
+        <div class="kpi-multi">
+          <span class="mini">Cotas:<span class="mini-val" id="kAprCotas">-</span></span>
+          <span class="mini">Crédito:<span class="mini-val" id="kAprCredito">-</span></span>
+        </div>
+        <div class="kpi-sub" id="kAprSub"></div>
+      </div>
+      <div class="kpi orange">
+        <div class="kpi-label">Pendente Apropriação</div>
+        <div class="kpi-multi">
+          <span class="mini">Cotas:<span class="mini-val" id="kPenCotas">-</span></span>
+          <span class="mini">Crédito:<span class="mini-val" id="kPenCredito">-</span></span>
+        </div>
+        <div class="kpi-sub" id="kPenSub"></div>
+      </div>
     </div>
 
     <!-- CHARTS ROW 1 -->
@@ -595,6 +622,28 @@ function renderKPIs(data) {
   document.getElementById('kTicket').innerHTML = fmtFull(ticket) + ' <span style="font-size:10px">' + varChip(ticket, prev.ticket) + '</span>';
   document.getElementById('kConsultores').innerHTML = consultores.size + ' ' + varChip(consultores.size, prev.consultores, true);
   document.getElementById('kAdms').textContent = adms.size;
+
+  // KPIs de apropriação (SITUAÇÃO === 'APROPRIADO' vs outras)
+  const normSit = s => (s||'').toString().toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+  let aprCotas = 0, aprCredito = 0, penCotas = 0, penCredito = 0;
+  data.forEach(d => {
+    if (normSit(d.sit) === 'APROPRIADO') {
+      aprCotas++;
+      aprCredito += d.credito;
+    } else {
+      penCotas++;
+      penCredito += d.credito;
+    }
+  });
+  document.getElementById('kAprCotas').textContent = aprCotas.toLocaleString('pt-BR');
+  document.getElementById('kAprCredito').textContent = fmtFull(aprCredito);
+  document.getElementById('kPenCotas').textContent = penCotas.toLocaleString('pt-BR');
+  document.getElementById('kPenCredito').textContent = fmtFull(penCredito);
+  const totalRegs = data.length;
+  const pctApr = totalRegs > 0 ? (aprCotas/totalRegs*100).toFixed(1) : '0';
+  const pctPen = totalRegs > 0 ? (penCotas/totalRegs*100).toFixed(1) : '0';
+  document.getElementById('kAprSub').textContent = pctApr + '% do total';
+  document.getElementById('kPenSub').textContent = pctPen + '% do total';
 }
 
 function varChip(cur, prev, small) {
