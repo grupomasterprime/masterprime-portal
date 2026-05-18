@@ -2,13 +2,14 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Master Prime — Solicitar Adesão</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Solicitação de Adesão · Master Prime</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 :root {
-  --mp-navy:   #e7eb16dc;
+  --mp-navy:   #2D3F5E;
   --mp-yellow: #C8C84A;
   --mp-teal:   #4DBCC8;
   --bg:        #F4F6FA;
@@ -18,1144 +19,1272 @@
   --text:      #1E293B;
   --text2:     #64748B;
   --text3:     #94A3B8;
-  --green:     #16A34A; --green-bg: #F0FDF4;
-  --red:       #DC2626; --red-bg:   #FEF2F2;
-  --amber:     #D97706; --amber-bg: #FFFBEB;
-  --blue:      #2563EB; --blue-bg:  #EFF6FF;
+  --green:     #16A34A;  --green-bg: #F0FDF4;
+  --red:       #DC2626;  --red-bg:   #FEF2F2;
   --r: 10px;
-  --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
-  --shadow-md: 0 4px 16px rgba(0,0,0,.10);
+  --shadow:    0 1px 3px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.08);
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; min-height: 100vh; }
-
-.pub-header {
-  background: linear-gradient(135deg, var(--mp-navy) 0%, #1a2a42 100%);
-  color: #fff; padding: 0 24px;
-  position: sticky; top: 0; z-index: 50;
-  box-shadow: 0 2px 12px rgba(0,0,0,.2);
-}
-.pub-header-inner {
-  max-width: 860px; margin: 0 auto;
-  display: flex; align-items: center; justify-content: space-between;
-  height: 60px;
-}
-.pub-logo { display: flex; align-items: center; gap: 12px; }
-.pub-logo img { height: 80px; display: block; }
-.pub-badge {
-  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.15);
-  border-radius: 6px; padding: 5px 10px; font-size: 10px; color: rgba(255,255,255,.7);
-  display: flex; align-items: center; gap: 6px;
-}
-.pub-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: #22C55E; }
-
-.pub-hero {
-  background: linear-gradient(135deg, var(--mp-navy) 0%, #1a2a42 60%, #243651 100%);
-  color: #fff; padding: 48px 24px 40px; text-align: center;
-}
-.pub-hero-title { font-size: 28px; font-weight: 800; letter-spacing: -.5px; margin-bottom: 10px; }
-.pub-hero-sub { font-size: 14px; color: rgba(255,255,255,.6); max-width: 500px; margin: 0 auto 28px; line-height: 1.6; }
-
-.pub-main { max-width: 860px; margin: 0 auto; padding: 32px 24px 80px; }
-
-.adm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
-.adm-card {
-  background: var(--card); border: 2px solid var(--border);
-  border-radius: var(--r); padding: 20px; text-align: center;
-  cursor: pointer; transition: all .2s;
-}
-.adm-card:hover { border-color: var(--mp-teal); transform: translateY(-2px); box-shadow: var(--shadow-md); }
-.adm-card.selected { border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,.15), var(--shadow-md); }
-.adm-icon {
-  width: 56px; height: 56px; border-radius: 50%;
-  margin: 0 auto 12px; display: flex; align-items: center; justify-content: center;
-  font-size: 22px; font-weight: 800; transition: all .2s;
-}
-.adm-bradesco .adm-icon { background: #FEE2E2; color: #DC2626; }
-.adm-itau     .adm-icon { background: #FEF3C7; color: #D97706; }
-.adm-porto    .adm-icon { background: #EFF6FF; color: #2563EB; }
-.adm-card.selected .adm-icon { transform: scale(1.1); }
-.adm-name { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-.adm-desc { font-size: 11px; color: var(--text2); }
-.adm-badge {
-  display: inline-block; margin-top: 10px; padding: 3px 8px;
-  border-radius: 20px; font-size: 9px; font-weight: 700;
-  background: rgba(77,188,200,.12); color: #1A7A84; letter-spacing: .5px;
-  text-transform: uppercase; opacity: 0; transition: opacity .2s;
-}
-.adm-card.selected .adm-badge { opacity: 1; }
-
-.section-title {
-  font-size: 12px; font-weight: 700; color: var(--text2);
-  text-transform: uppercase; letter-spacing: .8px;
-  margin: 0 0 16px; padding-bottom: 10px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 8px;
-}
-.section-title svg { color: var(--mp-teal); }
-
-.card {
-  background: var(--card); border: 1px solid var(--border);
-  border-radius: var(--r); box-shadow: var(--shadow);
-  margin-bottom: 16px; overflow: hidden;
-}
-.card-head {
-  padding: 16px 22px 14px; border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-}
-.card-title { font-size: 14px; font-weight: 700; color: var(--text); }
-.card-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
-.card-body { padding: 22px; }
-
-.tipo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-.tipo-card {
-  border: 2px solid var(--border); border-radius: 8px;
-  padding: 16px; cursor: pointer; transition: all .2s;
-  display: flex; align-items: center; gap: 12px;
-}
-.tipo-card:hover { border-color: var(--mp-teal); background: #F8FDFE; }
-.tipo-card.selected { border-color: var(--mp-teal); background: #F0FBFC; }
-.tipo-icon {
-  width: 40px; height: 40px; border-radius: 8px;
-  background: var(--bg); display: flex; align-items: center; justify-content: center;
-  flex-shrink: 0; transition: background .2s;
-}
-.tipo-card.selected .tipo-icon { background: rgba(77,188,200,.15); }
-.tipo-label { font-size: 13px; font-weight: 600; }
-.tipo-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
-
-.field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.field { display: flex; flex-direction: column; }
-.field.span-2 { grid-column: span 2; }
-.field-label {
-  font-size: 10px; font-weight: 600; color: var(--text2);
-  text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px;
-  display: flex; align-items: center; gap: 4px;
-}
-.field-label .req { color: var(--red); }
-.field-input, .field-select {
-  width: 100%; padding: 10px 12px;
-  border: 1.5px solid var(--border2); border-radius: 8px;
-  font-size: 13px; color: var(--text); font-family: 'Inter', sans-serif;
-  outline: none; background: #fff;
-  transition: border-color .15s, box-shadow .15s;
-}
-.field-input:focus, .field-select:focus {
-  border-color: var(--mp-teal);
-  box-shadow: 0 0 0 3px rgba(77,188,200,.12);
-}
-.field-input::placeholder { color: var(--text3); }
-.field-input.error { border-color: var(--red); box-shadow: 0 0 0 3px rgba(220,38,38,.08); }
-
-.btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 12px 22px; border: none; border-radius: 8px;
-  font-size: 13px; font-weight: 700; cursor: pointer;
-  font-family: 'Inter', sans-serif; transition: all .15s;
-}
-.btn-primary { background: var(--mp-navy); color: #fff; }
-.btn-primary:hover { background: #1E2D45; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(45,63,94,.25); }
-.btn-primary:disabled { opacity: .5; cursor: not-allowed; transform: none; }
-.btn-teal { background: var(--mp-teal); color: #fff; }
-.btn-teal:hover { background: #3AABB8; transform: translateY(-1px); }
-.btn-outline { background: transparent; color: var(--text); border: 1.5px solid var(--border2); }
-.btn-outline:hover { background: var(--bg); }
-
-.msg {
-  padding: 12px 16px; border-radius: 8px; margin-bottom: 16px;
-  font-size: 12px; font-weight: 500; display: flex; align-items: flex-start; gap: 10px;
-}
-.msg.success { background: var(--green-bg); color: var(--green); border: 1px solid #BBF7D0; }
-.msg.error   { background: var(--red-bg);   color: var(--red);   border: 1px solid #FECACA; }
-.msg.info    { background: var(--blue-bg);  color: var(--blue);  border: 1px solid #BFDBFE; }
-.msg.warn    { background: var(--amber-bg); color: var(--amber); border: 1px solid #FCD34D; }
-
-.success-screen {
-  text-align: center; padding: 60px 24px;
-  background: var(--card); border-radius: var(--r);
-  box-shadow: var(--shadow-md); margin: 0 auto;
-}
-.success-icon {
-  width: 72px; height: 72px; border-radius: 50%;
-  background: var(--green-bg); margin: 0 auto 20px;
-  display: flex; align-items: center; justify-content: center;
-  animation: popIn .4s cubic-bezier(.175,.885,.32,1.275);
-}
-@keyframes popIn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-.success-title { font-size: 22px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
-.success-sub { font-size: 13px; color: var(--text2); line-height: 1.6; margin-bottom: 24px; }
-
-.checkbox-container {
-  display: flex; align-items: flex-start; gap: 10px; margin: 20px 0;
-  background: var(--blue-bg); border: 1px solid #BFDBFE; border-radius: 8px; padding: 16px;
-}
-.checkbox-container input[type="checkbox"] {
-  width: 18px; height: 18px; accent-color: var(--mp-teal); margin-top: 2px; flex-shrink: 0;
-}
-.checkbox-container label { font-size: 12px; color: #1E40AF; line-height: 1.5; }
-
-.form-step { display: none; }
-.form-step.active { display: block; animation: fadeIn .25s ease; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-.progress-bar {
-  background: var(--border); border-radius: 4px; height: 4px;
-  margin-bottom: 28px; overflow: hidden;
-}
-.progress-fill {
-  height: 100%; background: linear-gradient(90deg, var(--mp-teal), var(--mp-yellow));
-  border-radius: 4px; transition: width .4s ease;
-}
-.form-nav {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border);
-}
-
-/* ═══ CAMPO DE BANCO COM CÓDIGO + NOME ABAIXO ═══ */
-.banco-auto-fill {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.banco-auto-fill .field-input {
-  width: 100%;
-}
-.banco-nome {
+body {
+  background: var(--bg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 13px;
   color: var(--text);
-  background: var(--bg);
-  padding: 8px 12px;
-  border-radius: 6px;
+  min-height: 100vh;
+}
+.mono { font-family: 'DM Mono', monospace; }
+
+/* HEADER */
+.header {
+  background: linear-gradient(135deg, var(--mp-navy) 0%, #1A2A42 100%);
+  color: #fff;
+  padding: 28px 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.12);
+}
+.header-inner {
+  max-width: 900px; margin: 0 auto;
+  display: flex; align-items: center; gap: 16px;
+  flex-wrap: wrap;
+}
+.header-logo {
+  height: 52px;
+  width: auto;
+  display: block;
+  filter: brightness(0) invert(1);
+  flex-shrink: 0;
+}
+.header-text h1 { font-size: 22px; font-weight: 700; letter-spacing: -.3px; margin-bottom: 2px; }
+.header-text p { font-size: 12.5px; color: rgba(255,255,255,.7); }
+.header-consultor {
+  margin-left: auto;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12px;
+  color: rgba(255,255,255,.85);
+}
+.header-consultor strong { color: #fff; }
+
+/* CONTAINER */
+.container { max-width: 900px; margin: 24px auto; padding: 0 16px 40px; }
+
+/* CARD */
+.card {
+  background: var(--card);
   border: 1px solid var(--border);
-  word-break: break-word;
+  border-radius: var(--r);
+  padding: 22px 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.card h3 {
+  font-size: 13px; font-weight: 700; color: var(--mp-navy);
+  text-transform: uppercase; letter-spacing: .6px;
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px;
+  padding-bottom: 10px; border-bottom: 1px solid var(--border);
+}
+.card h3::before {
+  content: ''; width: 4px; height: 18px;
+  background: var(--mp-teal); border-radius: 2px;
 }
 
-@media (max-width: 680px) {
-  .adm-grid { grid-template-columns: 1fr; }
-  .field-grid { grid-template-columns: 1fr !important; }
-  .field.span-2 { grid-column: span 1; }
-  .tipo-grid { grid-template-columns: 1fr; }
-  .pub-hero-title { font-size: 22px; }
+/* GRID */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.grid-4 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 14px; }
+@media (max-width: 640px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
 }
+
+/* FIELD */
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label {
+  font-size: 10.5px; font-weight: 600; color: var(--text2);
+  text-transform: uppercase; letter-spacing: .4px;
+}
+.field label .req { color: var(--red); margin-left: 2px; }
+.field input, .field select, .field textarea {
+  font-family: inherit; font-size: 13.5px; color: var(--text);
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: #fff;
+  transition: border-color .12s, box-shadow .12s;
+  text-transform: uppercase;
+}
+/* Email e bancário tem chars que precisam case-sensitive — mantém */
+.field input[type="email"] { text-transform: lowercase; }
+.field input[data-no-upper] { text-transform: none; }
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none; border-color: var(--mp-teal);
+  box-shadow: 0 0 0 3px rgba(77,188,200,.18);
+}
+.field input::placeholder { color: var(--text3); }
+.field .help { font-size: 11px; color: var(--text3); }
+.field.invalid input, .field.invalid select { border-color: var(--red); }
+.field.invalid label { color: var(--red); }
+
+/* BUTTONS */
+.btn {
+  font-family: inherit; font-weight: 600; font-size: 13px;
+  border: 0; border-radius: 8px; cursor: pointer;
+  padding: 11px 22px;
+  transition: transform .08s, background .12s;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.btn-navy   { background: var(--mp-navy);   color: #fff; }
+.btn-navy:hover   { background: #1F2D45; }
+.btn-yellow { background: var(--mp-navy); color: #fff; font-weight: 700; }
+.btn-yellow:hover { background: #1F2D45; }
+.btn-teal   { background: var(--mp-teal);   color: #fff; }
+.btn-outline {
+  background: #fff; color: var(--mp-navy);
+  border: 1px solid var(--border2);
+}
+.btn-outline:hover { border-color: var(--mp-teal); color: var(--mp-teal); }
+.btn-danger {
+  background: #fff; color: var(--red);
+  border: 1px solid var(--border);
+  font-size: 11px; padding: 5px 10px;
+}
+.btn-block { width: 100%; padding: 16px 24px; font-size: 14.5px; }
+.btn-lg    { padding: 14px 28px; font-size: 14px; }
+
+/* TIPO SELECTOR */
+.tipo-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  padding: 8px 0 4px;
+}
+@media (max-width: 540px) { .tipo-grid { grid-template-columns: 1fr; } }
+.tipo-btn {
+  background: #fff; border: 2px solid var(--border);
+  border-radius: 12px; padding: 28px 22px;
+  cursor: pointer; transition: all .15s;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  text-align: center;
+}
+.tipo-btn:hover {
+  border-color: var(--mp-teal);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.tipo-btn .ico {
+  width: 64px; height: 64px;
+  background: var(--mp-navy); color: #fff;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 6px;
+}
+.tipo-btn .ico svg { width: 32px; height: 32px; }
+.tipo-btn .ttl { font-size: 16px; font-weight: 700; color: var(--mp-navy); }
+.tipo-btn .sub { font-size: 12px; color: var(--text2); }
+
+/* CÔNJUGE BLOCK */
+.bloc-conjuge {
+  background: #F8FAFC;
+  border-left: 3px solid var(--mp-teal);
+  padding: 14px 16px;
+  border-radius: 6px;
+  margin-top: 4px;
+  display: none;
+}
+.bloc-conjuge.show { display: block; }
+.bloc-conjuge-title {
+  font-size: 11px; font-weight: 700; color: var(--mp-teal);
+  text-transform: uppercase; letter-spacing: .4px;
+  margin-bottom: 12px;
+}
+
+/* SÓCIO BLOCK */
+.socio-block {
+  background: #FAFBFD;
+  border: 1px dashed var(--border2);
+  border-radius: 8px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  position: relative;
+}
+.socio-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.socio-titulo {
+  font-size: 12px; font-weight: 700; color: var(--mp-navy);
+  text-transform: uppercase; letter-spacing: .4px;
+}
+
+/* SUCCESS */
+.success-card {
+  text-align: center;
+  padding: 50px 24px;
+}
+.success-icon {
+  width: 72px; height: 72px;
+  background: var(--green-bg); color: var(--green);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  margin: 0 auto 18px;
+}
+.success-card h2 {
+  color: var(--mp-navy);
+  font-size: 22px;
+  margin-bottom: 10px;
+}
+.success-card p { color: var(--text2); font-size: 14px; margin-bottom: 4px; }
+.success-protocolo {
+  display: inline-block;
+  background: var(--mp-navy); color: #fff;
+  padding: 14px 24px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 18px;
+  font-family: 'DM Mono', monospace;
+  margin: 18px 0;
+  letter-spacing: 1px;
+}
+
+/* LGPD */
+.lgpd {
+  background: #F0FBFC;
+  border-left: 3px solid var(--mp-teal);
+  padding: 14px 18px;
+  border-radius: 6px;
+}
+.lgpd label {
+  display: flex; align-items: flex-start; gap: 10px;
+  cursor: pointer;
+  font-size: 12px; color: var(--text2);
+  line-height: 1.5;
+}
+.lgpd input[type=checkbox] {
+  margin-top: 3px; flex-shrink: 0;
+  width: 16px; height: 16px;
+  cursor: pointer;
+}
+
+/* FOOTER */
+.footer {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text3);
+  padding: 20px;
+  letter-spacing: .8px;
+}
+
+/* MSG ERRO */
+.alert {
+  background: var(--red-bg); color: var(--red);
+  border: 1px solid #FCA5A5;
+  padding: 12px 16px; border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+.alert.warn {
+  background: #FFFBEB; color: #92400E;
+  border-color: #FDE68A;
+}
+
+.hidden { display: none !important; }
+
+.actions {
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  margin-top: 8px;
+}
+.actions .spacer { flex: 1; }
 </style>
 </head>
 <body>
 
-<header class="pub-header">
-  <div class="pub-header-inner">
-    <div class="pub-logo">
-      <img src="logo.png" alt="Master Prime">
+<div class="header">
+  <div class="header-inner">
+    <img src="logo.png" alt="Master Prime" class="header-logo">
+    <div class="header-text">
+      <h1>Solicitação de Adesão</h1>
+      <p>Master Prime · Corretora de Consórcios e Seguros</p>
     </div>
-    <div class="pub-badge">
-      <div class="pub-badge-dot"></div>
-      Formulário seguro
+    <div class="header-consultor hidden" id="header-consultor">
+      Indicado por <strong id="consultor-nome">—</strong>
     </div>
   </div>
-</header>
-
-<div class="pub-hero">
-  <div class="pub-hero-title">Dados da Proposta</div>
-  <div class="pub-hero-sub">Preencha os dados abaixo para iniciar sua adesão ao consórcio.</div>
 </div>
 
-<div class="pub-main" id="pub-main">
-  <div class="progress-bar"><div class="progress-fill" id="progress" style="width:50%"></div></div>
+<div class="container">
 
-  <!-- STEP 1 -->
-  <div class="form-step active" id="step-1">
-    <div class="card">
-      <div class="card-head"><div class="card-title">Escolha a Administradora</div></div>
-      <div class="card-body">
-        <div id="msg-step1"></div>
-        <div class="adm-grid">
-          <div class="adm-card adm-bradesco" id="adm-bradesco" onclick="selectAdm('bradesco')"><div class="adm-icon">B</div><div class="adm-name">Bradesco</div><div class="adm-desc">Consórcio Nacional Bradesco</div><div class="adm-badge">Selecionado ✓</div></div>
-          <div class="adm-card adm-itau" id="adm-itau" onclick="selectAdm('itau')"><div class="adm-icon">I</div><div class="adm-name">Itaú Consórcios</div><div class="adm-desc">Itaú Administradora de Consórcios</div><div class="adm-badge">Selecionado ✓</div></div>
-          <div class="adm-card adm-porto" id="adm-porto" onclick="selectAdm('porto')"><div class="adm-icon">P</div><div class="adm-name">Porto Seguro</div><div class="adm-desc">Porto Seguro Consórcio</div><div class="adm-badge">Selecionado ✓</div></div>
-        </div>
-        <div class="form-nav"><div></div><button class="btn btn-teal" onclick="goStep(2)">Continuar →</button></div>
-      </div>
+<!-- ════════ TELA: ESCOLHA TIPO ════════ -->
+<div id="tela-tipo">
+  <div class="card">
+    <h3>Vamos começar — você é Pessoa Física ou Jurídica?</h3>
+    <p style="color:var(--text2);margin-bottom:18px;font-size:13px">Selecione o tipo de cadastro para iniciar o preenchimento. O processo leva cerca de 5 a 10 minutos.</p>
+    <div class="tipo-grid">
+      <button class="tipo-btn" onclick="iniciarForm('pf')">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        <div class="ttl">Pessoa Física</div>
+        <div class="sub">Cadastro com CPF, para você mesmo</div>
+      </button>
+      <button class="tipo-btn" onclick="iniciarForm('pj')">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/><path d="M9 18v.01"/></svg></div>
+        <div class="ttl">Pessoa Jurídica</div>
+        <div class="sub">Cadastro com CNPJ, para sua empresa</div>
+      </button>
     </div>
   </div>
+</div>
 
-  <!-- STEP 2 -->
-  <div class="form-step" id="step-2">
-    <div class="card">
-      <div class="card-head"><div class="card-title" id="step2-title">Dados do Cliente</div><span id="adm-chip" style="padding:4px 12px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;"></span></div>
-      <div class="card-body">
-        <div id="msg-step2"></div>
-        <div class="section-title">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-          Tipo de Pessoa
-        </div>
-        <div class="tipo-grid">
-          <div class="tipo-card selected" id="tipo-pf" onclick="selectTipo('pf')">
-            <div class="tipo-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4DBCC8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-            </div>
-            <div><div class="tipo-label">Pessoa Física</div><div class="tipo-sub">CPF • Uso pessoal</div></div>
-          </div>
-          <div class="tipo-card" id="tipo-pj" onclick="selectTipo('pj')">
-            <div class="tipo-icon">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-            </div>
-            <div><div class="tipo-label">Pessoa Jurídica</div><div class="tipo-sub">CNPJ • Empresarial</div></div>
-          </div>
-        </div>
-        <div id="form-fields-container"></div>
-        <div class="checkbox-container">
-          <input type="checkbox" id="lgpd-check" required>
-          <label for="lgpd-check">Autorizo o compartilhamento e tratamento dos meus dados pessoais pela Master Prime Corretora e pela administradora selecionada, para fins de análise, andamento e conclusão do processo de consórcio, conforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018).</label>
-        </div>
-        <div class="form-nav">
-          <button class="btn btn-outline" onclick="goStep(1)">Voltar</button>
-          <button class="btn btn-outline" id="btn-submit" onclick="submitForm()">Enviar Adesão</button>
-        </div>
-      </div>
-    </div>
-  </div>
+<!-- ════════ TELA: FORM PF — populado dinamicamente em buildFormPF() ════════ -->
+<div id="form-pf" class="hidden"></div>
 
-  <!-- SUCCESS -->
-  <div class="form-step" id="step-success">
-    <div class="success-screen">
-      <div class="success-icon">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-      </div>
-      <div class="success-title">Obrigado!</div>
-      <div class="success-sub">Seus dados foram enviados com sucesso.<br>Em breve entraremos em contato.</div>
-      <button class="btn btn-outline" onclick="resetForm()">Nova Adesão</button>
-    </div>
+<!-- ════════ TELA: FORM PJ — populado dinamicamente em buildFormPJ() ════════ -->
+<div id="form-pj" class="hidden"></div>
+
+<!-- ════════ TELA: SUCESSO ════════ -->
+<div id="tela-sucesso" class="hidden">
+  <div class="card success-card">
+    <div class="success-icon">✓</div>
+    <h2>Recebemos sua proposta!</h2>
+    <p>Em breve a Master Prime entrará em contato para os próximos passos.</p>
+    <div class="success-protocolo" id="protocolo-display">—</div>
+    <p style="font-size:12px">Guarde este protocolo para consultas futuras.</p>
   </div>
+</div>
+
+</div>
+
+<div class="footer">
+  MASTER PRIME · CORRETORA DE CONSÓRCIOS E SEGUROS
 </div>
 
 <script>
+// ════════ CONFIG ════════
 const SUPABASE_URL = 'https://jhwciwvgagnuxakukyob.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { persistSession: false }
+});
 
-let STATE = { step: 1, adm: null, tipo: 'pf' };
-const UF_LIST = ['AC','AL','AP','AM','BA','CE','DF','ES','GO','MA','MT','MS','MG','PA','PB','PR','PE','PI','RJ','RN','RS','RO','RR','SC','SP','SE','TO'];
+// Estado civil que ativa cônjuge
+const ESTADOS_CONJUGE = ['Casado(a)','União Estável'];
 
-// ═══ LISTA DE BANCOS (CÓDIGO → NOME) ═══
-const BANCOS_CODIGOS = {
-  '001': 'Banco do Brasil',
-  '003': 'Banco da Amazônia',
-  '004': 'Banco do Nordeste',
-  '012': 'Banco Inbursa',
-  '014': 'Natixis Brasil',
-  '019': 'Banco Azteca',
-  '021': 'BANESTES',
-  '024': 'Banco Bandepe',
-  '025': 'Banco Alfa',
-  '029': 'Banco Banerj',
-  '031': 'Banco Beg',
-  '033': 'Santander',
-  '036': 'Banco Bradesco BBI',
-  '037': 'Banco do Est. do Pará',
-  '040': 'Banco Cargill',
-  '041': 'Banrisul',
-  '044': 'Banco BVA',
-  '045': 'Banco Opportunity',
-  '047': 'Banco do Est. de Sergipe',
-  '062': 'Hipercard',
-  '063': 'Banco Ibi',
-  '065': 'Banco Lemon',
-  '066': 'Banco Morgan Stanley',
-  '069': 'Banco Cacique',
-  '070': 'BRB - Banco de Brasília',
-  '072': 'Banco Rural',
-  '073': 'Banco do Nordeste (BNB)',
-  '074': 'Banco J. Safra',
-  '075': 'Banco ABN AMRO',
-  '076': 'Banco KDB',
-  '077': 'Banco Inter',
-  '078': 'Banco Bonsucesso',
-  '079': 'Banco Original',
-  '080': 'Banco Modal',
-  '081': 'Banco BBM',
-  '082': 'Banco Topázio',
-  '083': 'Banco da China Brasil',
-  '084': 'Unicred',
-  '085': 'Cooperativa Central',
-  '087': 'Banco Cooperativo Sicredi',
-  '088': 'Banco Randon',
-  '089': 'Banco Renner',
-  '091': 'Central das Cooperativas',
-  '092': 'Banco BRJ',
-  '093': 'Banco Pólo',
-  '094': 'Banco Petra',
-  '095': 'Banco Confidence',
-  '096': 'Banco BM&F',
-  '097': 'Banco Cooperativo do Brasil',
-  '098': 'BancoCalJohn',
-  '099': 'Banco Original',
-  '100': 'Planner Corretora',
-  '101': 'Banco Renner',
-  '102': 'Banco Sogeral',
-  '104': 'Caixa Econômica Federal',
-  '107': 'Banco BBM',
-  '109': 'Banco Credibel',
-  '111': 'Banco Fibra',
-  '114': 'Banco Central do Brasil',
-  '117': 'Banco do Nordeste',
-  '119': 'Banco Western Union',
-  '120': 'Banco Rodobens',
-  '122': 'Banco AgriInvest',
-  '125': 'Banco Genial',
-  '127': 'Banco Codepe',
-  '128': 'Banco MS',
-  '129': 'Banco Itaucard',
-  '130': 'Banco Caruana',
-  '133': 'Banco Cresol',
-  '134': 'Banco Bradesco BBI',
-  '136': 'Banco Mutti',
-  '137': 'Banco Multisafra',
-  '139': 'Banco Intesa Sanpaolo',
-  '140': 'Banco Credit Suisse',
-  '141': 'Banco Nossa Caixa',
-  '142': 'Banco Alfa',
-  '143': 'Banco Treviso',
-  '144': 'Banco Bradesco BBI',
-  '145': 'Banco Sumitomo Mitsui',
-  '146': 'Banco de Crédito Brasil',
-  '147': 'Banco Fibra',
-  '148': 'Banco MultiStock',
-  '149': 'Banco Factual',
-  '150': 'Banco Indusval',
-  '151': 'Banco Nossa Caixa',
-  '152': 'Banco J. P. Morgan',
-  '153': 'Banco Investcorp',
-  '154': 'Banco BVA',
-  '157': 'Banco Capital',
-  '159': 'Banco Cifra',
-  '163': 'Banco Commerzbank',
-  '166': 'Banco Industrial do Brasil',
-  '168': 'Banco HSBC Brasil',
-  '169': 'Banco Ole',
-  '170': 'Banco Intercap',
-  '171': 'Banco Cooperativo Sicoob',
-  '172': 'Banco Alfa Invest',
-  '173': 'Banco Bradesco Private',
-  '174': 'Banco Bradesco Seguros',
-  '175': 'Banco Banrisul',
-  '177': 'Banco Guide',
-  '179': 'Banco Indusval',
-  '180': 'Banco Société Générale',
-  '183': 'Banco Intermedium',
-  '184': 'Banco BBM',
-  '188': 'Banco AT&T',
-  '190': 'Banco Servinvest',
-  '191': 'Banco Banrisul',
-  '193': 'Banco BTG Pactual',
-  '195': 'Banco Intercap',
-  '196': 'Banco Fair',
-  '197': 'Banco Fator',
-  '200': 'Banco Ficsa',
-  '201': 'Banco Intercap',
-  '204': 'Banco Western Union',
-  '205': 'Banco Bankpar',
-  '208': 'Banco Pactual',
-  '209': 'Banco Qualibank',
-  '213': 'Banco Arbi',
-  '214': 'Banco Ambev',
-  '215': 'Banco BBM',
-  '216': 'Banco Holandês',
-  '217': 'Banco John Deere',
-  '219': 'Banco BBM',
-  '220': 'Banco MultiStock',
-  '222': 'Banco Petrobas',
-  '223': 'Banco Rodobens',
-  '233': 'Banco Pine',
-  '237': 'Bradesco',
-  '241': 'Banco Clássico',
-  '243': 'Banco Mercantil do Brasil',
-  '246': 'Banco ABC Brasil',
-  '249': 'Banco Investcred',
-  '250': 'Banco Schahin',
-  '254': 'Banco Paraná',
-  '263': 'Banco Fator',
-  '265': 'Banco Inter-Atlântico',
-  '266': 'Banco Fibra',
-  '318': 'Banco BMG',
-  '320': 'Banco Industrial e Comercial',
-  '341': 'Itaú Unibanco',
-  '356': 'Banco ABN AMRO Real',
-  '366': 'Banco Société Générale',
-  '370': 'Banco WestLB',
-  '376': 'Banco J. P. Morgan',
-  '389': 'Banco Mercantil do Brasil',
-  '394': 'Banco BMG',
-  '399': 'Banco HSBC',
-  '409': 'Unibanco',
-  '412': 'Banco Capital',
-  '422': 'Banco Safra',
-  '453': 'Banco Rural',
-  '456': 'Banco Tokyo-Mitsubishi',
-  '464': 'Banco Sumitomo',
-  '477': 'Citibank',
-  '479': 'Banco Itaú BBA',
-  '487': 'Deutsche Bank',
-  '488': 'Banco Morgan Stanley',
-  '492': 'Banco ING',
-  '494': 'Banco de La Nación Argentina',
-  '495': 'Banco de La Provincia de Bs As',
-  '505': 'Banco Crédit Suisse',
-  '600': 'Banco Luso Brasileiro',
-  '604': 'Banco Industrial do Brasil',
-  '610': 'Banco VR',
-  '611': 'Banco Paulista',
-  '612': 'Banco Guanabara',
-  '613': 'Banco Pecúnia',
-  '623': 'Banco Pan',
-  '626': 'Banco Ficsa',
-  '630': 'Banco Intercap',
-  '633': 'Banco Rendimento',
-  '634': 'Banco Triângulo',
-  '637': 'Banco Sofisa',
-  '641': 'Banco Alvorada',
-  '643': 'Banco Pine',
-  '652': 'Banco BBM',
-  '653': 'Banco Indusval',
-  '654': 'Banco A. J. Renner',
-  '655': 'Banco Votorantim',
-  '707': 'Banco Daycoval',
-  '712': 'Banco Ourinvest',
-  '719': 'Banco Banif',
-  '720': 'Banco Maxinvest',
-  '721': 'Banco Credibel',
-  '724': 'Banco Porto Seguro',
-  '725': 'Banco Finansinos',
-  '726': 'Banco Santander Meridional',
-  '727': 'Banco United',
-  '728': 'Banco Kit Finance',
-  '729': 'Banco Fonte',
-  '730': 'Banco Comercial Uruguai',
-  '731': 'Banco Itapema',
-  '733': 'Banco das Nações',
-  '734': 'Banco Gerdau',
-  '735': 'Banco Pottencial',
-  '736': 'Banco Cooperforte',
-  '737': 'Banco Bonsucesso',
-  '738': 'Banco Morada',
-  '739': 'Banco BGN',
-  '740': 'Banco Barclays',
-  '741': 'Banco Ribeirão Preto',
-  '742': 'Banco Semear',
-  '743': 'Banco Sigma',
-  '744': 'Banco Itaú',
-  '745': 'Banco Citibank',
-  '746': 'Banco Modal',
-  '747': 'Banco Rabobank',
-  '748': 'Banco Cooperativo Sicredi',
-  '749': 'Banco La Nación Argentina',
-  '751': 'Scotiabank Brasil',
-  '752': 'Banco BNP Paribas',
-  '753': 'Banco Commerzbank',
-  '754': 'Banco BHD',
-  '755': 'Banco Merrill Lynch',
-  '756': 'Banco Cooperativo do Brasil',
-  '757': 'Banco KEB',
-  '758': 'Banco Safra',
-  '759': 'Banco Banif',
-  '760': 'Banco VR',
-  '761': 'Banco Bonsucesso',
-  '762': 'Banco do Japão',
-  '763': 'Banco Banrisul',
-  '764': 'Banco Morada',
-  '765': 'Banco Daycoval',
-  '766': 'Banco Triângulo',
-  '767': 'Banco Ourinvest',
-  '768': 'Banco Bradesco BBI',
-  '769': 'Banco Interunion',
-  '770': 'Banco BBM',
-  '771': 'Banco Rendimento',
-  '772': 'Banco Indusval',
-  '773': 'Banco Pecúnia',
-  '774': 'Banco Alfa',
-  '775': 'Banco Fibra',
-  '776': 'Banco Western Union',
-  '777': 'Banco Intercap',
-  '778': 'Banco Semear',
-  '779': 'Banco Cargill',
-  '780': 'Banco Topázio',
-  '781': 'Banco DaimlerChrysler',
-  '782': 'Banco BVA',
-  '783': 'Banco Petra',
-  '784': 'Banco Bradesco BBI',
-  '785': 'Banco BGN',
-  '786': 'Banco PSA Finance',
-  '787': 'Banco Pactual',
-  '788': 'Banco Modell',
-  '789': 'Banco Ceres',
-  '790': 'Banco BRJ',
-  '791': 'Banco BM&F',
-  '792': 'Banco Original',
-  '793': 'Banco Triunfo',
-  '794': 'Banco BVA',
-  '795': 'Banco Emblema',
-  '796': 'Banco John Deere',
-  '797': 'Banco Mercantil do Brasil',
-  '798': 'Banco Inter-Atlântico',
-  '799': 'Banco HSBC Brasil'
-};
-
-// ═══ MÁSCARAS ═══
-function maskCPF(el) { let v=el.value.replace(/\D/g,'').slice(0,11); if(v.length>9) v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4'); else if(v.length>6) v=v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3'); else if(v.length>3) v=v.replace(/(\d{3})(\d{1,3})/,'$1.$2'); el.value=v; }
-function maskCNPJ(el) { let v=el.value.replace(/\D/g,'').slice(0,14); if(v.length>12) v=v.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{1,2})/,'$1.$2.$3/$4-$5'); else if(v.length>8) v=v.replace(/(\d{2})(\d{3})(\d{3})(\d{1,4})/,'$1.$2.$3/$4'); else if(v.length>5) v=v.replace(/(\d{2})(\d{3})(\d{1,3})/,'$1.$2.$3'); else if(v.length>2) v=v.replace(/(\d{2})(\d{1,3})/,'$1.$2'); el.value=v; }
-function maskPhone(el) { let v=el.value.replace(/\D/g,'').slice(0,11); if(v.length===11) el.value=v.replace(/(\d{2})(\d{5})(\d{4})/,'($1) $2-$3'); else if(v.length===10) el.value=v.replace(/(\d{2})(\d{4})(\d{4})/,'($1) $2-$3'); else if(v.length>5) el.value=v.replace(/(\d{2})(\d{0,4})(\d{0,4})/,'($1) $2-$3'); else if(v.length>2) el.value=v.replace(/(\d{2})/,'($1) '); else el.value=v; }
-function maskCurrency(el) { let v=el.value.replace(/\D/g,''); if(!v){el.value='';return;} const intVal=parseInt(v,10); const formatted=(intVal/100).toFixed(2).replace('.',','); const parts=formatted.split(','); parts[0]=parts[0].replace(/\B(?=(\d{3})+(?!\d))/g,'.'); el.value='R$ '+parts.join(','); }
-function maskCEP(el) { let v=el.value.replace(/\D/g,'').slice(0,8); if(v.length>5) v=v.replace(/(\d{5})(\d{1,3})/,'$1-$2'); el.value=v; }
-
-// ═══ BUSCAR BANCO POR CÓDIGO ═══
-function buscarBancoPorCodigo(codigo) {
-  if (!codigo) return null;
-  const nome = BANCOS_CODIGOS[codigo];
-  return nome || null;
+// ════════ HELPERS ════════
+function $(id) { return document.getElementById(id); }
+function $$(sel, root = document) { return [...root.querySelectorAll(sel)]; }
+function getCodigoConsultor() {
+  return new URLSearchParams(location.search).get('c') || '';
+}
+function getAdminLocked() {
+  const a = (new URLSearchParams(location.search).get('admin') || '').toLowerCase();
+  return ['porto','itau','bradesco'].includes(a) ? a : '';
 }
 
-function handleBancoCodigo(input) {
-  const codigo = input.value.replace(/\D/g,'');
-  const spanNome = input.parentNode.querySelector('.banco-nome');
-  if (spanNome) {
-    const nome = buscarBancoPorCodigo(codigo);
-    if (nome) {
-      spanNome.textContent = nome;
-      spanNome.style.color = 'var(--text)';
-    } else {
-      spanNome.textContent = codigo ? 'Banco não encontrado (código salvo)' : '';
-      spanNome.style.color = 'var(--text3)';
-    }
-  }
+// MÁSCARAS
+function maskCPF(v) { v=v.replace(/\D/g,'').slice(0,11); return v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2'); }
+function maskCNPJ(v) { v=v.replace(/\D/g,'').slice(0,14); return v.replace(/^(\d{2})(\d)/,'$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/,'$1.$2.$3').replace(/\.(\d{3})(\d)/,'.$1/$2').replace(/(\d{4})(\d)/,'$1-$2'); }
+function maskCEP(v) { v=v.replace(/\D/g,'').slice(0,8); return v.replace(/(\d{5})(\d)/,'$1-$2'); }
+function maskPhone(v) {
+  v = v.replace(/\D/g,'').slice(0,11);
+  if (v.length <= 10) return v.replace(/(\d{2})(\d)/,'($1) $2').replace(/(\d{4})(\d)/,'$1-$2');
+  return v.replace(/(\d{2})(\d)/,'($1) $2').replace(/(\d{5})(\d)/,'$1-$2');
+}
+function maskMoney(v) {
+  v = v.replace(/\D/g,'');
+  if (!v) return '';
+  return 'R$ ' + (parseInt(v,10)/100).toLocaleString('pt-BR',{minimumFractionDigits:2});
+}
+function maskDate(v) {
+  v = v.replace(/\D/g,'').slice(0,8);
+  return v.replace(/^(\d{2})(\d)/,'$1/$2').replace(/^(\d{2}\/\d{2})(\d)/,'$1/$2');
+}
+function parseMoney(s) {
+  if (!s) return '';
+  return s.replace(/[R$\s.]/g,'').replace(',','.');
+}
+function unmaskNum(s) { return (s||'').replace(/\D/g,''); }
+// Converte dd/mm/aaaa -> aaaa-mm-dd (ISO pro Postgres)
+function brDateToISO(s) {
+  if (!s) return '';
+  const m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  return m ? `${m[3]}-${m[2]}-${m[1]}` : '';
+}
+// Remove acentos e converte pra maiúscula
+function upperNoAccent(s) {
+  return (s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase();
 }
 
-// ═══ PREENCHIMENTO AUTOMÁTICO DE ENDEREÇO VIA CEP ═══
-async function buscarCEP(cepValue) {
-  const cep = cepValue.replace(/\D/g, '');
+function bindMasks(root = document) {
+  $$('[data-mask="cpf"]', root).forEach(el => el.addEventListener('input', e => e.target.value = maskCPF(e.target.value)));
+  $$('[data-mask="cnpj"]', root).forEach(el => el.addEventListener('input', e => e.target.value = maskCNPJ(e.target.value)));
+  $$('[data-mask="cep"]', root).forEach(el => {
+    el.addEventListener('input', e => e.target.value = maskCEP(e.target.value));
+    el.addEventListener('blur', () => lookupCEP(el));
+  });
+  $$('[data-mask="phone"]', root).forEach(el => el.addEventListener('input', e => e.target.value = maskPhone(e.target.value)));
+  $$('[data-mask="money"]', root).forEach(el => el.addEventListener('input', e => e.target.value = maskMoney(e.target.value)));
+  $$('[data-mask="date"]', root).forEach(el => el.addEventListener('input', e => e.target.value = maskDate(e.target.value)));
+  // Uppercase sem acentos pra inputs de texto comum (exclui email, money, e que tenham data-no-upper)
+  $$('input[type="text"]:not([data-mask="money"]):not([data-no-upper]), input:not([type])', root).forEach(el => {
+    el.addEventListener('input', e => {
+      const pos = e.target.selectionStart;
+      const novoValor = upperNoAccent(e.target.value);
+      if (novoValor !== e.target.value) {
+        e.target.value = novoValor;
+        try { e.target.setSelectionRange(pos, pos); } catch(_) {}
+      }
+    });
+  });
+}
+
+// ViaCEP
+async function lookupCEP(input) {
+  const cep = unmaskNum(input.value);
   if (cep.length !== 8) return;
-  const fields = ['logradouro', 'endereco', 'bairro', 'cidade', 'estado', 'complemento', 'tipo_logradouro'];
-  fields.forEach(id => { const el=document.getElementById('f-'+id); if(el&&!el.value) el.placeholder='Carregando...'; });
   try {
-    const resp = await fetch(`https://viacep.com.br/ws/${cep}/json/`);
-    const data = await resp.json();
-    if (data.erro) return;
-    const setVal = (id, val) => { const el=document.getElementById('f-'+id); if(el&&!el.value) el.value=val||''; };
-    setVal('logradouro', data.logradouro); setVal('endereco', data.logradouro); setVal('bairro', data.bairro);
-    setVal('cidade', data.localidade); setVal('complemento', data.complemento||'');
-    const estadoEl = document.getElementById('f-estado');
-    if(estadoEl){ if(estadoEl.tagName==='SELECT'){ const uf=data.uf.toUpperCase(); if(UF_LIST.includes(uf)) estadoEl.value=uf; } else estadoEl.value=data.uf.toUpperCase(); }
-  } catch(e){}
+    const r = await fetch('https://viacep.com.br/ws/'+cep+'/json/');
+    const d = await r.json();
+    if (d.erro) return;
+    const pf = input.dataset.cepPrefix || '';
+    const set = (sufix, val) => { const el = $(pf+sufix); if (el && !el.value && val) el.value = val; };
+    set('logradouro', d.logradouro);
+    set('bairro', d.bairro);
+    set('cidade', d.localidade);
+    set('estado', d.uf);
+  } catch(e) { /* silencioso */ }
 }
 
-// ═══ CONFIGURAÇÃO DAS ADMINISTRADORAS ═══
-const ADM_CONFIG = {
-  bradesco: { label:'Bradesco',     bg:'#FEE2E2', color:'#DC2626' },
-  itau:     { label:'Itaú',         bg:'#FEF3C7', color:'#D97706' },
-  porto:    { label:'Porto Seguro', bg:'#EFF6FF', color:'#2563EB' },
-};
-
-// ═══ CAMPOS POR ADMINISTRADORA + TIPO ═══
-const CAMPOS = {
-  bradesco_pf: [
-    { section: 'Dados Pessoais' },
-    { id:'cpf',               label:'CPF',                  type:'text',   placeholder:'000.000.000-00', required:true, mask:'cpf' },
-    { id:'nome_completo',     label:'Nome Completo',         type:'text',   placeholder:'Nome completo',  required:true },
-    { id:'data_nascimento',   label:'Data de Nascimento',    type:'date',   required:true },
-    { id:'nacionalidade',     label:'Nacionalidade',         type:'text',   placeholder:'Brasileira',     required:true },
-    { id:'nome_pai',          label:'Nome do Pai',           type:'text',   placeholder:'Se ausente, escreva Ausente' },
-    { id:'nome_mae',          label:'Nome da Mãe',           type:'text',   placeholder:'Nome da mãe',    required:true },
-    { section: 'Estado Civil' },
-    { id:'estado_civil',      label:'Estado Civil',          type:'select', options:['Solteiro(a)','Casado(a)','Divorciado(a)','Viúvo(a)','Outros'], required:true },
-    { conjugeBlock: true },
-    { id:'nome_conjuge',           label:'Nome do Cônjuge',        type:'text',   placeholder:'Nome completo' },
-    { id:'cpf_conjuge',            label:'CPF do Cônjuge',         type:'text',   placeholder:'000.000.000-00', mask:'cpf' },
-    { id:'rg_conjuge',             label:'RG do Cônjuge',          type:'text',   placeholder:'Número do RG' },
-    { id:'data_nascimento_conjuge',label:'Data Nasc. Cônjuge',     type:'date' },
-    { conjugeBlockEnd: true },
-    { section: 'Profissão e Renda' },
-    { id:'nome_empresa',      label:'Empresa onde Trabalha', type:'text',   placeholder:'Nome da empresa', required:true },
-    { id:'data_admissao',     label:'Data de Admissão',      type:'date',   required:true },
-    { id:'renda_mensal',      label:'Renda Mensal',          type:'text',   placeholder:'R$ 0,00',         required:true, mask:'currency' },
-    { section: 'Endereço' },
-    { id:'cep',               label:'CEP',                   type:'text',   placeholder:'00000-000',       required:true, cep:true },
-    { id:'logradouro',        label:'Logradouro',            type:'text',   placeholder:'Rua, Avenida...', required:true },
-    { id:'numero',            label:'Número',                type:'text',   placeholder:'123',             required:true },
-    { id:'complemento',       label:'Complemento',           type:'text',   placeholder:'Apto, Bloco...' },
-    { id:'bairro',            label:'Bairro',                type:'text',   placeholder:'Bairro',          required:true },
-    { id:'cidade',            label:'Cidade',                type:'text',   placeholder:'Cidade',          required:true },
-    { id:'estado',            label:'Estado',                type:'text',   placeholder:'SP',              required:true, maxlen:2 },
-    { id:'tempo_residencia',  label:'Tempo de Residência',   type:'text',   placeholder:'ex: 2 anos',      required:true },
-    { section: 'Contato e Pagamento' },
-    { id:'email',             label:'E-mail',                type:'email',  placeholder:'email@exemplo.com', required:true },
-    { id:'celular',           label:'Celular',               type:'text',   placeholder:'(11) 99999-9999',   required:true, mask:'phone' },
-    { id:'forma_pagamento',   label:'Forma de Pagamento',    type:'text',   placeholder:'Débito em conta, boleto...', required:true },
-    { id:'deseja_seguro',     label:'Deseja Seguro?',        type:'select', options:['Sim','Não'],           required:true },
-  ],
-  bradesco_pj: [
-    { section: 'Dados da Empresa' },
-    { id:'cnpj',                    label:'CNPJ',                            type:'text',   placeholder:'00.000.000/0001-00', required:true, mask:'cnpj' },
-    { id:'razao_social',            label:'Razão Social',                    type:'text',   placeholder:'Razão Social',       required:true },
-    { id:'nome_fantasia',           label:'Nome Fantasia',                   type:'text',   placeholder:'Nome Fantasia',      required:true },
-    { id:'ramo_atividade',          label:'Ramo de Atividade / O que fazem',type:'text',   placeholder:'Descreva a atividade', required:true },
-    { section: 'Sócio Administrador' },
-    { id:'socio_nome',              label:'Nome Completo do Sócio',         type:'text',   placeholder:'Nome completo',      required:true },
-    { id:'socio_cpf',               label:'CPF do Sócio',                   type:'text',   placeholder:'000.000.000-00',     required:true, mask:'cpf' },
-    { id:'socio_data_nascimento',   label:'Data de Nascimento do Sócio',   type:'date',   required:true },
-    { id:'socio_tipo_documento',    label:'Tipo de Documento',              type:'select', options:['RG','CNH'],           required:true },
-    { id:'socio_numero_documento',  label:'Número do Documento',            type:'text',   placeholder:'Número',             required:true },
-    { id:'socio_percentual_empresa',label:'Percentual na Empresa (%)',      type:'text',   placeholder:'50',                 required:true },
-    { id:'socio_estado_civil',      label:'Estado Civil do Sócio',          type:'select', options:['Solteiro(a)','Casado(a)','Divorciado(a)','Viúvo(a)','Outros'], required:true },
-    { id:'socio_nome_conjuge',      label:'Nome do Cônjuge',                type:'text',   placeholder:'Se aplicável' },
-    { id:'socio_cpf_conjuge',       label:'CPF do Cônjuge',                 type:'text',   placeholder:'000.000.000-00', mask:'cpf' },
-    { section: 'Contato' },
-    { id:'email',                   label:'E-mail',                         type:'email',  placeholder:'email@exemplo.com', required:true },
-    { id:'celular',                 label:'Celular',                        type:'text',   placeholder:'(11) 99999-9999',   required:true, mask:'phone' },
-    { section: 'Endereço' },
-    { id:'cep',                     label:'CEP',                            type:'text',   placeholder:'00000-000',          required:true, cep:true },
-    { id:'logradouro',              label:'Logradouro',                     type:'text',   placeholder:'Rua, Avenida...',    required:true },
-    { id:'numero',                  label:'Número',                         type:'text',   placeholder:'123',                required:true },
-    { id:'complemento',             label:'Complemento',                    type:'text',   placeholder:'Apto, Bloco...' },
-    { id:'bairro',                  label:'Bairro',                         type:'text',   placeholder:'Bairro',             required:true },
-    { id:'cidade',                  label:'Cidade',                         type:'text',   placeholder:'Cidade',             required:true },
-    { id:'estado',                  label:'Estado',                         type:'text',   placeholder:'SP',                 required:true, maxlen:2 },
-    { section: 'Pagamento' },
-    { id:'forma_pagamento',         label:'Forma de Pagamento',             type:'text',   placeholder:'Débito em conta, boleto...', required:true },
-    { id:'deseja_seguro',           label:'Deseja Seguro?',                 type:'select', options:['Sim','Não'],           required:true },
-  ],
-  itau_pf: [
-    { section: 'Dados Pessoais' },
-    { id:'cpf',               label:'CPF',                  type:'text',   placeholder:'000.000.000-00', required:true, mask:'cpf' },
-    { id:'nome_completo',     label:'Nome Completo',         type:'text',   placeholder:'Nome completo',  required:true },
-    { id:'data_nascimento',   label:'Data de Nascimento',    type:'date',   required:true },
-    { id:'tipo_documento',    label:'Tipo de Documento',     type:'select', options:['RG','CNH','Outros'], required:true },
-    { id:'numero_documento',  label:'Número do Documento',   type:'text',   placeholder:'Número',        required:true },
-    { id:'data_emissao',      label:'Data de Emissão',       type:'date',   required:true },
-    { id:'orgao_expedidor',   label:'Órgão Expedidor',       type:'text',   placeholder:'Ex.: SSP/SP',  required:true },
-    { id:'sexo',              label:'Sexo',                  type:'select', options:['Masculino','Feminino','Outro'], required:true },
-    { id:'nacionalidade',     label:'Nacionalidade',         type:'select', options:['Brasileiro(a)','Estrangeiro(a)'], required:true },
-    { section: 'Estado Civil' },
-    { id:'estado_civil',      label:'Estado Civil',          type:'select', options:['Solteiro(a)','Casado(a)','Divorciado(a)','Viúvo(a)','União Estável','Outros'], required:true },
-    { conjugeBlock: true },
-    { id:'nome_conjuge',           label:'Nome do Cônjuge',        type:'text',   placeholder:'Nome completo' },
-    { id:'cpf_conjuge',            label:'CPF do Cônjuge',         type:'text',   placeholder:'000.000.000-00', mask:'cpf' },
-    { id:'rg_conjuge',             label:'RG do Cônjuge',          type:'text',   placeholder:'Número do RG' },
-    { id:'data_nascimento_conjuge',label:'Data Nasc. Cônjuge',     type:'date' },
-    { conjugeBlockEnd: true },
-    { section: 'Endereço Residencial' },
-    { id:'cep',               label:'CEP',                   type:'text',   placeholder:'00000-000',       required:true, cep:true },
-    { id:'tipo_residencia',   label:'Tipo de Residência',    type:'select', options:['Própria','Alugada','Financiada','Outros'], required:true },
-    { id:'logradouro',        label:'Logradouro',            type:'text',   placeholder:'Rua, Avenida...', required:true },
-    { id:'numero',            label:'Número',                type:'text',   placeholder:'123',             required:true },
-    { id:'complemento',       label:'Complemento',           type:'text',   placeholder:'Apto, Bloco...' },
-    { id:'bairro',            label:'Bairro',                type:'text',   placeholder:'Bairro',          required:true },
-    { id:'estado',            label:'Estado',                type:'select', options:UF_LIST,               required:true },
-    { id:'cidade',            label:'Cidade',                type:'text',   placeholder:'Cidade',          required:true },
-    { section: 'Contato' },
-    { id:'ddd',               label:'DDD',                   type:'text',   placeholder:'11', maxlen:2, required:true },
-    { id:'celular',           label:'Celular',               type:'text',   placeholder:'99999-9999',     required:true, mask:'phone' },
-    { id:'email',             label:'E-mail',                type:'email',  placeholder:'email@exemplo.com', required:true },
-    { section: 'Dados Comerciais' },
-    { id:'profissao',         label:'Profissão',             type:'text',   placeholder:'Sua profissão',  required:true },
-    { id:'renda_mensal',      label:'Renda Mensal',          type:'text',   placeholder:'R$ 0,00',         required:true, mask:'currency' },
-    { id:'patrimonio',        label:'Patrimônio',            type:'text',   placeholder:'R$ 0,00',         required:true, mask:'currency' },
-    { section: '1° Pagamento' },
-    { id:'forma_pagamento_1', label:'Forma de Pagamento',    type:'select', options:['Boleto','Débito em Conta','Cartão de Crédito'], required:true },
-    { section: 'Pagamento do Plano (exceto 1°)' },
-    { id:'forma_pagamento_plano', label:'Forma de Pagamento',type:'select', options:['Boleto Bancário','Débito em Conta','Cartão de Crédito'], required:true },
-    { section: 'Resgate (Encerramento do Grupo) — Opcional' },
-    { id:'banco_resgate',     label:'Código do Banco',       type:'text',   placeholder:'000', maxlen:3, autocompleteBanco: true },
-    { id:'agencia_resgate',   label:'Agência',               type:'text',   placeholder:'0000' },
-    { id:'conta_resgate',     label:'Conta Corrente',        type:'text',   placeholder:'00000-0' },
-    { section: 'Seguro Consórcio' },
-    { id:'aceita_seguro',     label:'Está de acordo com o seguro?', type:'select', options:['Sim','Não'], required:true },
-  ],
-  itau_pj: [
-    { section: 'Dados da Empresa' },
-    { id:'cnpj',                 label:'CNPJ',                            type:'text',   placeholder:'00.000.000/0001-00', required:true, mask:'cnpj' },
-    { id:'data_constituicao',    label:'Data de Constituição',            type:'date',   required:true },
-    { id:'ramo_atividade',       label:'Ramo de Atividade',               type:'select', options:['Comércio','Indústria','Serviços','Outros'], required:true },
-    { id:'razao_social',         label:'Razão Social',                    type:'text',   placeholder:'Razão Social',       required:true },
-    { id:'faturamento_12m',      label:'Faturamento (Últ. 12 meses)',     type:'text',   placeholder:'R$ 0,00',          required:true, mask:'currency' },
-    { id:'inscricao_estadual',   label:'Inscrição Estadual',              type:'text',   placeholder:'Inscrição Estadual' },
-    { id:'inscricao_municipal',  label:'Inscrição Municipal',             type:'text',   placeholder:'Inscrição Municipal' },
-    { id:'valor_capital',        label:'Valor Capital',                   type:'text',   placeholder:'R$ 0,00', mask:'currency' },
-    { id:'cnae_principal',       label:'Atividade Principal (CNAE)',      type:'text',   placeholder:'0000-0/00',         required:true },
-    { id:'natureza_juridica',    label:'Natureza Jurídica',               type:'text',   placeholder:'Natureza Jurídica',  required:true },
-    { section: '1° Sócio (Obrigatório)' },
-    { id:'socio1_nome',                label:'Nome do Sócio',                   type:'text',   required:true },
-    { id:'socio1_administrador',       label:'Sócio Administrador',             type:'select', options:['Sim','Não'], required:true },
-    { id:'socio1_cpf_cnpj',            label:'CPF/CNPJ',                        type:'text',   placeholder:'000.000.000-00', required:true, mask:'cpf' },
-    { id:'socio1_rg',                  label:'RG',                              type:'text',   required:true },
-    { id:'socio1_data_emissao_rg',     label:'Data de Emissão RG',              type:'date',   required:true },
-    { id:'socio1_orgao_expedidor',     label:'Órgão Expedidor',                 type:'text',   placeholder:'SSP/SP', required:true },
-    { id:'socio1_data_nascimento',     label:'Data de Nascimento',              type:'date',   required:true },
-    { id:'socio1_nome_pai',            label:'Nome do Pai',                     type:'text',   required:true },
-    { id:'socio1_nome_mae',            label:'Nome da Mãe',                     type:'text',   required:true },
-    { id:'socio1_data_entrada',        label:'Data de Entrada como Sócio',      type:'date',   required:true },
-    { id:'socio1_participacao',        label:'Participação (%)',                type:'text',   placeholder:'50', required:true },
-    { section: '2° Sócio (Opcional)' },
-    { id:'socio2_nome',                label:'Nome do Sócio',                   type:'text' },
-    { id:'socio2_administrador',       label:'Sócio Administrador',             type:'select', options:['Sim','Não'] },
-    { id:'socio2_cpf_cnpj',            label:'CPF/CNPJ',                        type:'text',   placeholder:'000.000.000-00', mask:'cpf' },
-    { id:'socio2_rg',                  label:'RG',                              type:'text' },
-    { id:'socio2_data_emissao_rg',     label:'Data de Emissão RG',              type:'date' },
-    { id:'socio2_orgao_expedidor',     label:'Órgão Expedidor',                 type:'text',   placeholder:'SSP/SP' },
-    { id:'socio2_data_nascimento',     label:'Data de Nascimento',              type:'date' },
-    { id:'socio2_nome_pai',            label:'Nome do Pai',                     type:'text' },
-    { id:'socio2_nome_mae',            label:'Nome da Mãe',                     type:'text' },
-    { id:'socio2_data_entrada',        label:'Data de Entrada como Sócio',      type:'date' },
-    { id:'socio2_participacao',        label:'Participação (%)',                type:'text',   placeholder:'50' },
-    { section: 'Dados do Endereço' },
-    { id:'cep',                         label:'CEP',                            type:'text',   placeholder:'00000-000', required:true, cep:true },
-    { id:'endereco_exterior',           label:'Possui Endereço Fiscal no Exterior?', type:'select', options:['Não','Sim'], required:true },
-    { id:'logradouro',                  label:'Logradouro',                     type:'text',   placeholder:'Rua, Avenida...', required:true },
-    { id:'numero',                      label:'Número',                         type:'text',   placeholder:'123',          required:true },
-    { id:'complemento',                 label:'Complemento',                    type:'text',   placeholder:'Apto, Bloco...' },
-    { id:'bairro',                      label:'Bairro',                         type:'text',   placeholder:'Bairro',       required:true },
-    { id:'estado',                      label:'Estado',                         type:'select', options:UF_LIST,               required:true },
-    { id:'cidade',                      label:'Cidade',                         type:'text',   placeholder:'Cidade',       required:true },
-    { section: 'Contato' },
-    { id:'ddd_telefone',                label:'DDD',                            type:'text',   placeholder:'11', maxlen:2 },
-    { id:'telefone',                    label:'Telefone',                       type:'text',   placeholder:'3333-4444', mask:'phone' },
-    { id:'ramal',                       label:'Ramal',                          type:'text',   placeholder:'1234' },
-    { id:'ddd_fax',                     label:'DDD (FAX)',                      type:'text',   placeholder:'11', maxlen:2 },
-    { id:'fax',                         label:'FAX',                            type:'text',   placeholder:'3333-4444', mask:'phone' },
-    { id:'ramal_fax',                   label:'Ramal FAX',                      type:'text',   placeholder:'1234' },
-    { id:'ddd_celular',                 label:'DDD (Celular)',                  type:'text',   placeholder:'11', maxlen:2 },
-    { id:'celular',                     label:'Celular',                        type:'text',   placeholder:'99999-9999', required:true, mask:'phone' },
-    { id:'email',                       label:'E-mail',                         type:'email',  placeholder:'email@exemplo.com', required:true },
-    { section: '1° Pagamento' },
-    { id:'forma_pagamento_1',           label:'Forma de Pagamento',             type:'select', options:['Boleto','Débito em Conta'], required:true },
-    { section: 'Pagamento do Plano (Exceto 1° Pagamento)' },
-    { id:'forma_pagamento_plano',       label:'Forma de Pagamento',             type:'select', options:['Boleto Bancário','Débito em Conta'], required:true },
-    { section: 'Resgate (Encerramento do Grupo) — Opcional' },
-    { id:'banco_resgate',               label:'Código do Banco',                type:'text',   placeholder:'000', maxlen:3, autocompleteBanco: true },
-    { id:'agencia_resgate',             label:'Agência',                        type:'text',   placeholder:'0000' },
-    { id:'conta_resgate',               label:'Conta Corrente',                 type:'text',   placeholder:'00000-0' },
-  ],
-  porto_pf: [
-    { section: 'Ficha Cadastral' },
-    { id:'cpf',               label:'CPF',                  type:'text',   placeholder:'000.000.000-00', required:true, mask:'cpf' },
-    { id:'nome_completo',     label:'Nome Completo',         type:'text',   placeholder:'Nome completo',  required:true, pattern:'[A-Za-zÀ-ÿ ]+' },
-    { id:'data_nascimento',   label:'Data de Nascimento',    type:'date',   required:true },
-    { section: 'Estado Civil' },
-    { id:'estado_civil',      label:'Estado Civil',          type:'select', options:['Solteiro(a)','Casado(a)','Divorciado(a)','Viúvo(a)','União Estável','Outros'], required:true },
-    { conjugeBlock: true },
-    { id:'nome_conjuge',           label:'Nome do Cônjuge',        type:'text',   placeholder:'Nome completo' },
-    { id:'cpf_conjuge',            label:'CPF do Cônjuge',         type:'text',   placeholder:'000.000.000-00', mask:'cpf' },
-    { id:'rg_conjuge',             label:'RG do Cônjuge',          type:'text',   placeholder:'Número do RG' },
-    { id:'data_nascimento_conjuge',label:'Data Nasc. Cônjuge',     type:'date' },
-    { conjugeBlockEnd: true },
-    { id:'email',             label:'E-mail',                type:'email',  placeholder:'email@exemplo.com', required:true },
-    { id:'confirme_email',    label:'Confirme seu e-mail',   type:'email',  placeholder:'Confirme o e-mail', required:true },
-    { section: 'Contato (preencha ao menos o Celular)' },
-    { id:'tel_residencial',   label:'Telefone Residencial',  type:'text',   placeholder:'(11) 3333-4444', mask:'phone' },
-    { id:'tel_comercial',     label:'Telefone Comercial',    type:'text',   placeholder:'(11) 3333-4444', mask:'phone' },
-    { id:'celular',           label:'Celular',               type:'text',   placeholder:'(11) 99999-9999', required:true, mask:'phone' },
-    { id:'celular2',          label:'Celular 2',             type:'text',   placeholder:'(11) 99999-9999', mask:'phone' },
-    { section: 'Documento de Identificação' },
-    { id:'tipo_documento',    label:'Documento',             type:'select', options:['RG','CNH','Outros'], required:true },
-    { id:'numero_documento',  label:'Número do documento',   type:'text',   required:true },
-    { id:'orgao_emissor_uf',  label:'Órgão emissor/UF',      type:'text',   placeholder:'Ex.: SSP/SP', required:true },
-    { id:'data_emissao',      label:'Data de Emissão',       type:'date',   required:true },
-    { id:'nacionalidade',     label:'Nacionalidade',         type:'select', options:['Brasileiro(a)','Estrangeiro(a)'], required:true },
-    { id:'cidade_nascimento', label:'Cidade de Nascimento',  type:'text',   required:true },
-    { id:'nome_mae',          label:'Nome da Mãe',           type:'text',   required:true, pattern:'[A-Za-zÀ-ÿ ]+' },
-    { section: 'Remuneração e Profissão' },
-    { id:'remuneracao',       label:'Remuneração',           type:'text',   placeholder:'R$ 0,00', required:true, mask:'currency' },
-    { id:'profissao',         label:'Profissão',             type:'text',   required:true },
-    { section: 'Endereço Residencial' },
-    { id:'cep',               label:'CEP',                   type:'text',   placeholder:'00000-000', required:true, cep:true },
-    { id:'tipo_logradouro',   label:'Tipo Logradouro',       type:'text',   placeholder:'Ex.: Rua', required:true },
-    { id:'endereco',          label:'Endereço',              type:'text',   placeholder:'Ex.: Alves da Silva', required:true },
-    { id:'numero',            label:'Número',                type:'text',   placeholder:'123', required:true },
-    { id:'complemento',       label:'Complemento',           type:'text',   placeholder:'Apto, Bloco...' },
-    { id:'bairro',            label:'Bairro',                type:'text',   required:true },
-    { id:'cidade',            label:'Cidade',                type:'text',   required:true },
-    { id:'estado',            label:'Estado',                type:'select', options:UF_LIST, required:true },
-    { section: 'Pagamento' },
-    { id:'forma_pagamento_1', label:'Forma de Pagamento da 1° parcela', type:'select', options:['Boleto','Pix'], required:true },
-    { id:'forma_pagamento_2', label:'Forma de pagamento da 2° parcela em diante', type:'select', options:['Débito automático em conta corrente','Boleto Bancário'], required:true },
-    { section: 'Dados Bancários do 1° Titular (obrigatório)' },
-    { id:'nome_correntista',  label:'Nome Correntista',      type:'text',   required:true },
-    { id:'cpf_correntista',   label:'CPF do Correntista',    type:'text',   placeholder:'000.000.000-00', required:true, mask:'cpf' },
-    { id:'banco_codigo',      label:'Banco (código)',         type:'banco_codigo', placeholder:'000', maxlen:3, required:true },
-    { id:'agencia',           label:'Agência (sem dígito)',  type:'text',   required:true },
-    { id:'conta_corrente',    label:'Conta Corrente',        type:'text',   required:true },
-    { section: 'Seguro' },
-    { id:'aceita_seguro',     label:'Está de acordo com o seguro?', type:'select', options:['Sim','Não'], required:true },
-  ],
-  porto_pj: [
-    { section: 'Ficha Cadastral' },
-    { id:'cnpj',               label:'CNPJ',                            type:'text',   placeholder:'00.000.000/0001-00', required:true, mask:'cnpj' },
-    { id:'razao_social',       label:'Razão Social',                    type:'text',   required:true, pattern:'[A-Za-zÀ-ÿ ]+' },
-    { id:'inscricao_estadual', label:'Inscrição Estadual (somente números)', type:'text', placeholder:'Inscrição Estadual' },
-    { id:'data_constituicao',  label:'Data Constituição',               type:'date',   required:true },
-    { id:'email',              label:'E-mail',                          type:'email',  required:true },
-    { id:'confirme_email',     label:'Confirme seu e-mail',             type:'email',  required:true },
-    { section: 'Contato' },
-    { id:'tel_comercial',      label:'Telefone Comercial',              type:'text',   placeholder:'(11) 3333-4444', mask:'phone' },
-    { id:'celular',            label:'Celular',                         type:'text',   placeholder:'(11) 99999-9999', required:true, mask:'phone' },
-    { id:'celular2',           label:'Celular 2',                       type:'text',   placeholder:'(11) 99999-9999', mask:'phone' },
-    { section: 'Atividade' },
-    { id:'ramo_atividade',     label:'Ramo de Atividade',               type:'select', options:['Consultoria','Comércio','Indústria','Serviços','Outros'], required:true },
-    { id:'receita_mensal',     label:'Receita Mensal',                  type:'text',   placeholder:'R$ 0,00', required:true, mask:'currency' },
-    { section: 'Endereço' },
-    { id:'cep',                label:'CEP',                             type:'text',   placeholder:'00000-000', required:true, cep:true },
-    { id:'tipo_logradouro',    label:'Tipo Logradouro',                 type:'text',   placeholder:'Ex.: Rua', required:true },
-    { id:'endereco',           label:'Endereço',                        type:'text',   placeholder:'Ex.: Alves da Silva', required:true },
-    { id:'numero',             label:'Número',                          type:'text',   placeholder:'123', required:true },
-    { id:'complemento',        label:'Complemento',                     type:'text',   placeholder:'Apto, Bloco...' },
-    { id:'bairro',             label:'Bairro',                          type:'text',   required:true },
-    { id:'cidade',             label:'Cidade',                          type:'text',   required:true },
-    { id:'estado',             label:'Estado',                          type:'select', options:UF_LIST, required:true },
-    { section: 'Sócio Administrador (obrigatório)' },
-    { id:'socio_nome',         label:'Nome do Sócio',                   type:'text',   required:true },
-    { id:'socio_cpf',          label:'CPF do Sócio',                    type:'text',   placeholder:'000.000.000-00', required:true, mask:'cpf' },
-    { section: 'Pagamento' },
-    { id:'forma_pagamento_1',  label:'Forma de Pagamento da 1° parcela', type:'select', options:['Boleto','Pix'], required:true },
-    { id:'forma_pagamento_2',  label:'Forma de pagamento 2° parcela em diante', type:'select', options:['Débito automático em conta corrente','Boleto bancário'], required:true },
-    { section: 'Dados Bancários do Contratante' },
-    { id:'nome_correntista',   label:'Nome Correntista',                type:'text',   required:true },
-    { id:'cnpj_correntista',   label:'CNPJ do Correntista',             type:'text',   placeholder:'00.000.000/0001-00', required:true, mask:'cnpj' },
-    { id:'banco_codigo',       label:'Banco (código)',                   type:'banco_codigo', placeholder:'000', maxlen:3, required:true },
-    { id:'agencia',            label:'Agência',                         type:'text',   required:true },
-    { id:'conta_corrente',     label:'Conta Corrente',                  type:'text',   required:true },
-  ],
-};
-
-// ═══ FUNÇÕES DE NAVEGAÇÃO E RENDERIZAÇÃO ═══
-function showMsg(elId, text, type) {
-  const el = document.getElementById(elId);
-  if (!el) return;
-  el.innerHTML = text ? `<div class="msg ${type}">${text}</div>` : '';
-}
-function genProtocol() {
-  const d = new Date();
-  const yy = String(d.getFullYear()).slice(2);
-  const mm = String(d.getMonth()+1).padStart(2,'0');
-  const dd = String(d.getDate()).padStart(2,'0');
-  const rnd = String(Math.floor(Math.random()*100000)).padStart(5,'0');
-  return `MA${yy}${mm}${dd}-${rnd}`;
-}
-
-function updateProgressUI(step) {
-  document.getElementById('progress').style.width = (step === 1 ? '50%' : '100%');
-}
-
-function goStep(n) {
-  if (n > STATE.step) {
-    if (STATE.step === 1 && !STATE.adm) { showMsg('msg-step1','Selecione uma administradora.','error'); return; }
+// ════════ INIT ════════
+async function init() {
+  const codigo = getCodigoConsultor();
+  const admin = getAdminLocked();
+  // Se admin travado, atualiza título no header
+  if (admin) {
+    const h1 = document.querySelector('.header-text h1');
+    if (h1) h1.textContent = 'Solicitação de Adesão · Consórcio ' + ADMINS_LABEL[admin];
   }
-  document.getElementById('step-'+STATE.step).classList.remove('active');
-  STATE.step = n;
-  const target = document.getElementById('step-'+n) || document.getElementById('step-success');
-  target.classList.add('active');
-  updateProgressUI(n);
-  window.scrollTo({top:0, behavior:'smooth'});
-  if (n === 2 && STATE.adm) renderFormFields();
+  if (codigo) {
+    try {
+      const r = await fetch(SUPABASE_URL + '/rest/v1/portal_users?select=nome&codigo_link=eq.' + encodeURIComponent(codigo.toUpperCase()), {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer '+SUPABASE_KEY }
+      });
+      const data = await r.json();
+      if (Array.isArray(data) && data[0]?.nome) {
+        $('consultor-nome').textContent = data[0].nome;
+        $('header-consultor').classList.remove('hidden');
+      }
+    } catch(e) {}
+  }
+}
+init();
+
+// Aplica lock do admin no select de Consórcio depois que o form é renderizado
+function aplicarAdminLock(prefix) {
+  const admin = getAdminLocked();
+  if (!admin) return;
+  const sel = $(prefix+'-administradora');
+  if (!sel) return;
+  sel.value = admin;
+  sel.disabled = true;
+  // Esconde label de "selecione consórcio" e força preenchimento das opções de pagamento
+  onAdminChange(prefix);
+  // Estiliza o select pra mostrar que está bloqueado
+  sel.style.background = '#F1F5F9';
+  sel.style.color = 'var(--text2)';
+  sel.style.cursor = 'not-allowed';
+  // Adiciona aviso visual abaixo
+  const helpEl = sel.closest('.field').querySelector('.help-lock');
+  if (!helpEl) {
+    const help = document.createElement('span');
+    help.className = 'help help-lock';
+    help.style.color = 'var(--mp-teal)';
+    help.style.fontWeight = '600';
+    help.textContent = 'Pré-selecionado pelo link do vendedor';
+    sel.closest('.field').appendChild(help);
+  }
 }
 
-function selectAdm(adm) {
-  STATE.adm = adm;
-  document.querySelectorAll('.adm-card').forEach(c => c.classList.remove('selected'));
-  document.getElementById('adm-'+adm).classList.add('selected');
-  showMsg('msg-step1','','');
-}
-
-function selectTipo(tipo) {
-  STATE.tipo = tipo;
-  document.getElementById('tipo-pf').className = 'tipo-card' + (tipo==='pf'?' selected':'');
-  document.getElementById('tipo-pj').className = 'tipo-card' + (tipo==='pj'?' selected':'');
-  const pfIcon = document.querySelector('#tipo-pf .tipo-icon svg');
-  const pjIcon = document.querySelector('#tipo-pj .tipo-icon svg');
-  if (pfIcon) pfIcon.setAttribute('stroke', tipo==='pf'?'#4DBCC8':'var(--text3)');
-  if (pjIcon) pjIcon.setAttribute('stroke', tipo==='pj'?'#4DBCC8':'var(--text3)');
-  renderFormFields();
-}
-
-function toggleConjugeFields() {
-  const estadoCivil = document.getElementById('f-estado_civil');
-  const conjugeDiv = document.getElementById('conjuge-fields');
-  if (!estadoCivil || !conjugeDiv) return;
-  if (estadoCivil.value === 'Casado(a)') {
-    conjugeDiv.style.display = 'block';
+// ════════ FORM BUILDERS (PF e PJ injetados via JS pra reduzir tamanho do HTML) ════════
+// será expandido no próximo chunk
+function iniciarForm(tipo) {
+  $('tela-tipo').classList.add('hidden');
+  if (tipo === 'pf') {
+    if (!$('form-pf').innerHTML.trim()) buildFormPF();
+    $('form-pf').classList.remove('hidden');
   } else {
-    conjugeDiv.style.display = 'none';
-    ['f-nome_conjuge','f-cpf_conjuge','f-rg_conjuge','f-data_nascimento_conjuge'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.value = '';
-    });
+    if (!$('form-pj').innerHTML.trim()) buildFormPJ();
+    $('form-pj').classList.remove('hidden');
+  }
+  bindMasks();
+  aplicarAdminLock(tipo);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function voltarTipo() {
+  $('form-pf').classList.add('hidden');
+  $('form-pj').classList.add('hidden');
+  $('tela-tipo').classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleConjuge(prefix) {
+  const sel = $(prefix+'estado_civil');
+  const bloco = $(prefix+'bloc-conjuge');
+  if (!sel || !bloco) return;
+  bloco.classList.toggle('show', ESTADOS_CONJUGE.includes(sel.value));
+}
+
+// Opções de pagamento por administradora
+const PAGAMENTO_OPCOES = {
+  porto:    ['Boleto', 'Cartão de Crédito', 'Cartão Porto'],
+  bradesco: ['Boleto', 'Débito Automático'],
+  itau:     ['Boleto', 'Débito Automático']
+};
+const ADMINS_LABEL = { porto: 'Porto', bradesco: 'Bradesco', itau: 'Itaú' };
+
+// Quando muda administradora, atualiza opções de pagamento
+function onAdminChange(prefix) {
+  const admin = $(prefix+'-administradora').value;
+  const select = $(prefix+'-forma_pagamento_1');
+  if (!admin) {
+    select.innerHTML = '<option value="">Selecione o consórcio primeiro</option>';
+    select.disabled = true;
+    $(prefix+'-bloc-debito').classList.remove('show');
+    return;
+  }
+  const opts = PAGAMENTO_OPCOES[admin] || [];
+  select.innerHTML = '<option value="">—</option>' + opts.map(o => `<option value="${o}">${o}</option>`).join('');
+  select.disabled = false;
+  // Esconde bloco débito ao trocar admin
+  $(prefix+'-bloc-debito').classList.remove('show');
+  // Atualiza texto explicativo do débito
+  const aviso = $(prefix+'-debito-aviso');
+  if (aviso && (admin === 'bradesco' || admin === 'itau')) {
+    aviso.innerHTML = `Para débito automático no Consórcio ${ADMINS_LABEL[admin]}, é obrigatório informar uma conta corrente <strong>do próprio ${ADMINS_LABEL[admin]}</strong>.`;
+    $(prefix+'-debito-titulo').textContent = `Conta ${ADMINS_LABEL[admin]} para Débito Automático`;
   }
 }
 
-function renderFormFields() {
-  if (!STATE.adm) return;
-  const key = `${STATE.adm}_${STATE.tipo}`;
-  const campos = CAMPOS[key] || [];
-  const container = document.getElementById('form-fields-container');
-  const cfg = ADM_CONFIG[STATE.adm] || {};
-  const chip = document.getElementById('adm-chip');
-  if (chip) { chip.textContent=cfg.label||STATE.adm; chip.style.background=cfg.bg; chip.style.color=cfg.color; }
+// Quando muda forma de pagamento, mostra/esconde bloco débito
+function onPagamentoChange(prefix) {
+  const forma = $(prefix+'-forma_pagamento_1').value;
+  const admin = $(prefix+'-administradora').value;
+  const showDebito = (forma === 'Débito Automático') && (admin === 'bradesco' || admin === 'itau');
+  $(prefix+'-bloc-debito').classList.toggle('show', showDebito);
+  // Toggle required nos campos do débito
+  ['debito_agencia','debito_conta','debito_dac'].forEach(id => {
+    const el = $(prefix+'-'+id);
+    if (el) { if (showDebito) el.setAttribute('required','required'); else el.removeAttribute('required'); }
+  });
+}
 
-  let html = '';
-  let inGrid = false;
-  let inConjugeBlock = false;
+// ════════ COLETA, VALIDAÇÃO E SUBMIT — também populado no próximo chunk ════════
+function buildFormPF() {
+  $('form-pf').innerHTML = `
+    <div class="card">
+      <h3>Dados Pessoais</h3>
+      <div class="grid-3">
+        <div class="field"><label>CPF<span class="req">*</span></label><input id="pf-cpf" data-mask="cpf" placeholder="000.000.000-00" required></div>
+        <div class="field"><label>Data de Nascimento<span class="req">*</span></label><input id="pf-data_nascimento" type="text" data-mask="date" placeholder="dd/mm/aaaa" maxlength="10" required></div>
+        <div class="field"><label>Sexo<span class="req">*</span></label><select id="pf-sexo" required><option value="">—</option><option>Masculino</option><option>Feminino</option><option>Outro</option></select></div>
+      </div>
+      <div class="grid-2" style="margin-top:14px">
+        <div class="field" style="grid-column: span 2"><label>Nome Completo<span class="req">*</span></label><input id="pf-nome" placeholder="Como está no documento" required></div>
+      </div>
+      <div class="grid-3" style="margin-top:14px">
+        <div class="field"><label>Nacionalidade<span class="req">*</span></label><select id="pf-nacionalidade" required><option value="">—</option><option>Brasileira</option><option>Estrangeira</option><option>Naturalizada</option></select></div>
+        <div class="field"><label>Cidade de Nascimento<span class="req">*</span></label><input id="pf-cidade_nascimento" placeholder="Ex: São Paulo" required></div>
+        <div class="field"><label>Nome da Mãe<span class="req">*</span></label><input id="pf-nome_mae" placeholder="Nome completo" required></div>
+      </div>
+      <div class="grid-2" style="margin-top:14px">
+        <div class="field"><label>Nome do Pai</label><input id="pf-nome_pai" placeholder="Se ausente, escreva Ausente"></div>
+      </div>
+    </div>
 
-  campos.forEach(c => {
-    if (c.conjugeBlock) {
-      if (inGrid) { html += '</div>'; inGrid = false; }
-      html += '<div id="conjuge-fields" style="display:none;"><div class="field-grid">';
-      inGrid = true;
-      inConjugeBlock = true;
-      return;
-    }
-    if (c.conjugeBlockEnd) {
-      if (inGrid) { html += '</div>'; inGrid = false; }
-      html += '</div>';
-      inConjugeBlock = false;
-      return;
-    }
-    if (c.section) {
-      if (inGrid) { html += '</div>'; inGrid = false; }
-      html += `<div class="section-title" style="margin-top:20px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>${c.section}</div>`;
-      html += '<div class="field-grid">';
-      inGrid = true;
-      return;
-    }
-    if (!inGrid) { html += '<div class="field-grid">'; inGrid = true; }
-    const req = c.required ? '<span class="req">*</span>' : '';
-    const cls = c.span2 ? ' field span-2' : ' field';
-    
-    // Caso especial: campo de banco com código (Porto Seguro)
-    if (c.type === 'banco_codigo') {
-      html += `<div class="${cls}">
-        <label class="field-label" for="f-${c.id}">${c.label} ${req}</label>
-        <div class="banco-auto-fill">
-          <input class="field-input" id="f-${c.id}" type="text" placeholder="${c.placeholder||'000'}" maxlength="${c.maxlen||3}" oninput="this.value=this.value.replace(/\\D/g,''); handleBancoCodigo(this)" onblur="handleBancoCodigo(this)">
-          <span class="banco-nome" id="banco-nome-${c.id}"></span>
+    <div class="card">
+      <h3>Documento de Identificação</h3>
+      <div class="grid-4">
+        <div class="field"><label>Tipo de Documento<span class="req">*</span></label><select id="pf-tipo_documento" required><option value="">—</option><option>RG</option><option>CNH</option><option>Outros</option></select></div>
+        <div class="field"><label>Número do Documento<span class="req">*</span></label><input id="pf-numero_documento" placeholder="Ex: 12.345.678-9" required></div>
+        <div class="field"><label>Data de Emissão<span class="req">*</span></label><input id="pf-data_emissao" type="text" data-mask="date" placeholder="dd/mm/aaaa" maxlength="10" required></div>
+      </div>
+      <div class="grid-2" style="margin-top:14px">
+        <div class="field"><label>Órgão Expedidor<span class="req">*</span></label><input id="pf-orgao_expedidor" placeholder="Ex: SSP/SP" required></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Estado Civil</h3>
+      <div class="grid-2">
+        <div class="field"><label>Estado Civil<span class="req">*</span></label><select id="pf-estado_civil" onchange="toggleConjuge('pf-')" required>
+          <option value="">—</option><option>Solteiro(a)</option><option>Casado(a)</option><option>Divorciado(a)</option><option>Viúvo(a)</option><option>União Estável</option><option>Separado(a) Judicialmente</option>
+        </select></div>
+      </div>
+      <div id="pf-bloc-conjuge" class="bloc-conjuge">
+        <div class="bloc-conjuge-title">Dados do Cônjuge</div>
+        <div class="grid-2">
+          <div class="field"><label>Nome do Cônjuge</label><input id="pf-nome_conjuge" placeholder="Nome completo"></div>
+          <div class="field"><label>CPF do Cônjuge</label><input id="pf-cpf_conjuge" data-mask="cpf" placeholder="000.000.000-00"></div>
         </div>
-      </div>`;
-      return;
-    }
-
-    // Campo com autocompleteBanco (ex: banco_resgate) - Itaú
-    if (c.autocompleteBanco) {
-      html += `<div class="${cls}">
-        <label class="field-label" for="f-${c.id}">${c.label} ${req}</label>
-        <div class="banco-auto-fill">
-          <input class="field-input" id="f-${c.id}" type="text" placeholder="${c.placeholder||'000'}" maxlength="${c.maxlen||3}" oninput="this.value=this.value.replace(/\\D/g,''); handleBancoCodigo(this)" onblur="handleBancoCodigo(this)">
-          <span class="banco-nome" id="banco-nome-${c.id}"></span>
+        <div class="grid-2" style="margin-top:12px">
+          <div class="field"><label>RG do Cônjuge</label><input id="pf-rg_conjuge" placeholder="Número do RG"></div>
+          <div class="field"><label>Data de Nascimento do Cônjuge</label><input id="pf-data_nascimento_conjuge" type="text" data-mask="date" placeholder="dd/mm/aaaa" maxlength="10"></div>
         </div>
-      </div>`;
-      return;
-    }
+      </div>
+    </div>
 
-    let maskHandler = '';
-    if (c.mask === 'phone') maskHandler = 'oninput="maskPhone(this)"';
-    else if (c.mask === 'currency') maskHandler = 'oninput="maskCurrency(this)"';
-    else if (c.mask === 'cpf') maskHandler = 'oninput="maskCPF(this)"';
-    else if (c.mask === 'cnpj') maskHandler = 'oninput="maskCNPJ(this)"';
-    else if (c.cep) maskHandler = 'oninput="maskCEP(this)"';
+    <div class="card">
+      <h3>Endereço Residencial</h3>
+      <div class="grid-3">
+        <div class="field"><label>CEP<span class="req">*</span></label><input id="pf-cep" data-mask="cep" data-cep-prefix="pf-" placeholder="00000-000" required></div>
+        <div class="field"><label>Tipo de Residência<span class="req">*</span></label><select id="pf-tipo_residencia" required><option value="">—</option><option>Própria</option><option>Alugada</option><option>Financiada</option><option>Dos Pais/Parentes</option><option>Outros</option></select></div>
+        <div class="field"><label>Tempo de Residência</label><input id="pf-tempo_residencia" placeholder="Ex: 2 anos"></div>
+      </div>
+      <div class="grid-4" style="margin-top:14px">
+        <div class="field" style="grid-column: span 2"><label>Logradouro<span class="req">*</span></label><input id="pf-logradouro" placeholder="Rua, Avenida..." required></div>
+        <div class="field"><label>Número<span class="req">*</span></label><input id="pf-numero" placeholder="123" required></div>
+        <div class="field"><label>Complemento</label><input id="pf-complemento" placeholder="Apto, Bloco..."></div>
+      </div>
+      <div class="grid-3" style="margin-top:14px">
+        <div class="field"><label>Bairro<span class="req">*</span></label><input id="pf-bairro" required></div>
+        <div class="field"><label>Cidade<span class="req">*</span></label><input id="pf-cidade" required></div>
+        <div class="field"><label>UF<span class="req">*</span></label><select id="pf-estado" required><option value="">—</option><option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option><option>SE</option><option>TO</option></select></div>
+      </div>
+    </div>
 
-    if (c.type === 'select') {
-      const opts = (c.options||[]).map(o => `<option value="${o}">${o}</option>`).join('');
-      const onChange = (c.id === 'estado_civil') ? 'onchange="toggleConjugeFields()"' : '';
-      html += `<div class="${cls}"><label class="field-label" for="f-${c.id}">${c.label} ${req}</label><select class="field-select" id="f-${c.id}" ${onChange}><option value="">Selecione...</option>${opts}</select></div>`;
-    } else {
-      const maxl = c.maxlen ? `maxlength="${c.maxlen}"` : '';
-      const pattern = c.pattern ? `pattern="${c.pattern}"` : '';
-      html += `<div class="${cls}"><label class="field-label" for="f-${c.id}">${c.label} ${req}</label><input class="field-input" id="f-${c.id}" type="${c.type}" placeholder="${c.placeholder||''}" ${maskHandler} ${maxl} ${pattern}></div>`;
-    }
-  });
-  if (inGrid) html += '</div>';
-  container.innerHTML = html;
+    <div class="card">
+      <h3>Profissão e Renda</h3>
+      <div class="grid-3">
+        <div class="field"><label>Profissão</label><input id="pf-profissao" placeholder="Sua profissão"></div>
+        <div class="field"><label>Empresa onde Trabalha</label><input id="pf-nome_empresa"></div>
+        <div class="field"><label>Data de Admissão</label><input id="pf-data_admissao" type="text" data-mask="date" placeholder="dd/mm/aaaa" maxlength="10"></div>
+      </div>
+      <div class="grid-2" style="margin-top:14px">
+        <div class="field"><label>Renda Mensal<span class="req">*</span></label><input id="pf-renda_mensal" data-mask="money" placeholder="R$ 0,00" required></div>
+      </div>
+    </div>
 
-  toggleConjugeFields();
+    <div class="card">
+      <h3>Contato</h3>
+      <div class="grid-2">
+        <div class="field"><label>E-mail<span class="req">*</span></label><input id="pf-email" type="email" placeholder="email@exemplo.com" required></div>
+        <div class="field"><label>Celular<span class="req">*</span></label><input id="pf-celular" data-mask="phone" placeholder="(11) 99999-9999" required></div>
+      </div>
+      <div class="grid-3" style="margin-top:14px">
+        <div class="field"><label>Celular 2</label><input id="pf-celular2" data-mask="phone" placeholder="(11) 99999-9999"></div>
+        <div class="field"><label>Telefone Residencial</label><input id="pf-tel_residencial" data-mask="phone" placeholder="(11) 3333-4444"></div>
+        <div class="field"><label>Telefone Comercial</label><input id="pf-tel_comercial" data-mask="phone" placeholder="(11) 3333-4444"></div>
+      </div>
+    </div>
 
-  campos.forEach(c => {
-    if (c.cep) {
-      const el = document.getElementById('f-' + c.id);
-      if (el) el.addEventListener('blur', function() { buscarCEP(this.value); });
-    }
-  });
+    <div class="card">
+      <h3>Forma de Pagamento</h3>
+      <div class="grid-2">
+        <div class="field"><label>Consórcio<span class="req">*</span></label><select id="pf-administradora" onchange="onAdminChange('pf')" required>
+          <option value="">—</option>
+          <option value="porto">Consórcio Porto</option>
+          <option value="bradesco">Consórcio Bradesco</option>
+          <option value="itau">Consórcio Itaú</option>
+        </select></div>
+        <div class="field"><label>Forma de Pagamento<span class="req">*</span></label><select id="pf-forma_pagamento_1" onchange="onPagamentoChange('pf')" required disabled>
+          <option value="">Selecione o consórcio primeiro</option>
+        </select></div>
+      </div>
+      <div id="pf-bloc-debito" class="bloc-conjuge" style="margin-top:14px">
+        <div class="bloc-conjuge-title" id="pf-debito-titulo">Dados da Conta para Débito Automático</div>
+        <p style="font-size:12px;color:var(--text2);margin-bottom:12px" id="pf-debito-aviso">Informe os dados da sua conta.</p>
+        <div class="grid-3">
+          <div class="field"><label>Agência (sem dígito)<span class="req">*</span></label><input id="pf-debito_agencia" placeholder="0000"></div>
+          <div class="field"><label>Conta Corrente<span class="req">*</span></label><input id="pf-debito_conta" placeholder="00000"></div>
+          <div class="field"><label>Dígito<span class="req">*</span></label><input id="pf-debito_dac" placeholder="0"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Dados Bancários para Devolução de Valores</h3>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:14px">Conta para receber devoluções (encerramento de grupo, cancelamento, etc.). <strong>A conta deve estar obrigatoriamente no nome e CPF do titular da cota.</strong></p>
+      <div class="grid-3">
+        <div class="field"><label>Código do Banco<span class="req">*</span></label><input id="pf-banco_codigo" placeholder="Ex: 341" data-no-upper required></div>
+        <div class="field"><label>Nome do Banco<span class="req">*</span></label><input id="pf-banco_nome" placeholder="Itaú, Bradesco..." required></div>
+        <div class="field"><label>Agência (sem dígito)<span class="req">*</span></label><input id="pf-agencia" placeholder="0000" data-no-upper required></div>
+      </div>
+      <div class="grid-3" style="margin-top:14px">
+        <div class="field"><label>Conta Corrente<span class="req">*</span></label><input id="pf-conta_corrente" placeholder="00000" data-no-upper required></div>
+        <div class="field"><label>Dígito<span class="req">*</span></label><input id="pf-dac" placeholder="0" data-no-upper required></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Seguro do Consórcio</h3>
+      <div class="grid-2">
+        <div class="field"><label>Aceita contratar o seguro do consórcio?<span class="req">*</span></label><select id="pf-aceita_seguro" required>
+          <option value="">—</option><option value="true">Sim</option><option value="false">Não</option>
+        </select></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="lgpd">
+        <label>
+          <input type="checkbox" id="pf-lgpd">
+          <span>Autorizo o compartilhamento e tratamento dos meus dados pessoais pela Master Prime Corretora e pela administradora selecionada, para fins de análise, andamento e conclusão do processo de consórcio, conforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018).</span>
+        </label>
+      </div>
+    </div>
+
+    <div id="pf-msg"></div>
+    <div class="actions">
+      <button class="btn btn-outline" onclick="voltarTipo()">← Voltar</button>
+      <div class="spacer"></div>
+      <button class="btn btn-yellow btn-lg" id="pf-submit" onclick="submitPF()">Enviar Proposta</button>
+    </div>
+  `;
+}
+function buildFormPJ() {
+  $('form-pj').innerHTML = `
+    <div class="card">
+      <h3>Dados da Empresa</h3>
+      <div class="grid-2">
+        <div class="field"><label>CNPJ<span class="req">*</span></label><input id="pj-cnpj" data-mask="cnpj" placeholder="00.000.000/0001-00" required></div>
+        <div class="field"><label>Data de Constituição<span class="req">*</span></label><input id="pj-data_constituicao" type="text" data-mask="date" placeholder="dd/mm/aaaa" maxlength="10" required></div>
+      </div>
+      <div class="grid-2" style="margin-top:14px">
+        <div class="field"><label>Razão Social<span class="req">*</span></label><input id="pj-razao_social" required></div>
+        <div class="field"><label>Nome Fantasia</label><input id="pj-nome_fantasia"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Atividade & Faturamento</h3>
+      <div class="grid-2">
+        <div class="field"><label>Ramo de Atividade<span class="req">*</span></label><select id="pj-ramo_atividade" required>
+          <option value="">—</option>
+          <option>Administração Pública</option>
+          <option>Agricultura e Pecuária</option>
+          <option>Alojamento e Alimentação</option>
+          <option>Atividades Imobiliárias</option>
+          <option>Comércio</option>
+          <option>Comunicações</option>
+          <option>Construção Civil</option>
+          <option>Defesa e Seguridade Social</option>
+          <option>Educação</option>
+          <option>Eletricidade, Gás e Água</option>
+          <option>Indústrias de Transformação</option>
+          <option>Indústrias Extrativas</option>
+          <option>Intermediação Financeira</option>
+          <option>Outros Serviços</option>
+          <option>Pesca</option>
+          <option>Reparação de Objetos</option>
+          <option>Reparação de Veículos</option>
+          <option>Saúde e Serviços Sociais</option>
+          <option>Serviços Domésticos</option>
+          <option>Serviços Prestados às Empresas</option>
+          <option>Silvicultura e Exploração Florestal</option>
+          <option>Transporte e Armazenagem</option>
+          <option>Outras</option>
+        </select></div>
+        <div class="field"><label>Atividade Principal (CNAE)<span class="req">*</span></label>
+          <input id="pj-cnae_principal" list="cnae-list" placeholder="Digite ou selecione" data-no-upper required>
+          <datalist id="cnae-list">
+            <option value="4711-3/02">Comércio varejista de mercadorias - minimercados</option>
+            <option value="4712-1/00">Comércio varejista - mercearias</option>
+            <option value="4721-1/02">Padarias e confeitarias</option>
+            <option value="4744-0/05">Materiais de construção</option>
+            <option value="4751-2/01">Computadores</option>
+            <option value="4781-4/00">Vestuário</option>
+            <option value="4782-2/01">Calçados</option>
+            <option value="5611-2/01">Restaurantes e similares</option>
+            <option value="6201-5/01">Desenvolvimento de software</option>
+            <option value="6203-1/00">Licenciamento de software</option>
+            <option value="6209-1/00">Suporte técnico em TI</option>
+            <option value="6810-2/01">Compra e venda de imóveis</option>
+            <option value="6911-7/01">Serviços advocatícios</option>
+            <option value="7020-4/00">Consultoria em gestão empresarial</option>
+            <option value="7410-2/02">Design</option>
+            <option value="8211-3/00">Escritório e apoio administrativo</option>
+            <option value="8512-1/00">Educação infantil</option>
+            <option value="8610-1/01">Atendimento hospitalar</option>
+            <option value="8650-0/01">Profissionais da saúde</option>
+            <option value="9602-5/01">Cabeleireiros, manicure</option>
+          </datalist>
+        </div>
+      </div>
+      <div class="grid-2" style="margin-top:14px">
+        <div class="field"><label>Natureza Jurídica<span class="req">*</span></label><select id="pj-natureza_juridica" required>
+          <option value="">—</option>
+          <option>Sociedade Empresária Limitada</option>
+          <option>Sociedade Limitada Unipessoal (SLU)</option>
+          <option>EIRELI</option>
+          <option>Empresário (Individual)</option>
+          <option>MEI - Microempreendedor Individual</option>
+          <option>Sociedade Anônima Aberta</option>
+          <option>Sociedade Anônima Fechada</option>
+          <option>Sociedade Simples Pura</option>
+          <option>Sociedade Empresária em Nome Coletivo</option>
+          <option>Sociedade Empresária em Comandita Simples</option>
+          <option>Sociedade Empresária em Comandita por Ações</option>
+          <option>Sociedade em Conta de Participação</option>
+          <option>Cooperativa</option>
+          <option>Consórcio de Sociedades</option>
+          <option>Grupo de Sociedades</option>
+          <option>Empresa Pública</option>
+          <option>Sociedade de Economia Mista</option>
+          <option>Associação</option>
+          <option>Fundação</option>
+          <option>Empresa Domiciliada no Exterior</option>
+          <option>Estabelecimento, no Brasil, de Sociedade Estrangeira</option>
+          <option>Outras</option>
+        </select></div>
+        <div class="field"><label>Descreva a Atividade (o que faz)</label><input id="pj-descricao_atividade" placeholder="Em poucas palavras"></div>
+      </div>
+      <div class="grid-3" style="margin-top:14px">
+        <div class="field"><label>Faturamento<span class="req">*</span></label><input id="pj-faturamento" data-mask="money" placeholder="R$ 0,00" required></div>
+        <div class="field"><label>Período do Faturamento<span class="req">*</span></label><select id="pj-faturamento_periodo" required><option value="">—</option><option value="mensal">Mensal</option><option value="12_meses">Últimos 12 meses</option></select></div>
+        <div class="field"><label>Valor do Capital Social</label><input id="pj-valor_capital" data-mask="money" placeholder="R$ 0,00"></div>
+      </div>
+      <div class="grid-2" style="margin-top:14px">
+        <div class="field"><label>Inscrição Estadual</label><input id="pj-inscricao_estadual" data-no-upper></div>
+        <div class="field"><label>Inscrição Municipal</label><input id="pj-inscricao_municipal" data-no-upper></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Endereço da Empresa</h3>
+      <div class="grid-3">
+        <div class="field"><label>CEP<span class="req">*</span></label><input id="pj-cep" data-mask="cep" data-cep-prefix="pj-" placeholder="00000-000" required></div>
+        <div class="field"><label>Endereço Fiscal no Exterior?<span class="req">*</span></label><select id="pj-endereco_exterior" required><option value="false">Não</option><option value="true">Sim</option></select></div>
+        <div class="field"><label>Divulgar Endereço?<span class="req">*</span></label><select id="pj-divulgar_endereco" required><option value="false">Não</option><option value="true">Sim</option></select></div>
+      </div>
+      <div class="grid-4" style="margin-top:14px">
+        <div class="field"><label>Tipo Logradouro<span class="req">*</span></label><input id="pj-tipo_logradouro" placeholder="Rua, Av, Trav..." required></div>
+        <div class="field" style="grid-column: span 2"><label>Logradouro<span class="req">*</span></label><input id="pj-logradouro" required></div>
+        <div class="field"><label>Número<span class="req">*</span></label><input id="pj-numero" required></div>
+      </div>
+      <div class="grid-4" style="margin-top:14px">
+        <div class="field"><label>Complemento</label><input id="pj-complemento"></div>
+        <div class="field"><label>Bairro<span class="req">*</span></label><input id="pj-bairro" required></div>
+        <div class="field"><label>Cidade<span class="req">*</span></label><input id="pj-cidade" required></div>
+        <div class="field"><label>UF<span class="req">*</span></label><select id="pj-estado" required><option value="">—</option><option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option><option>SE</option><option>TO</option></select></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Contato</h3>
+      <div class="grid-2">
+        <div class="field"><label>E-mail<span class="req">*</span></label><input id="pj-email" type="email" placeholder="email@empresa.com" required></div>
+        <div class="field"><label>Celular<span class="req">*</span></label><input id="pj-celular" data-mask="phone" placeholder="(11) 99999-9999" required></div>
+      </div>
+      <div class="grid-3" style="margin-top:14px">
+        <div class="field"><label>Telefone Comercial</label><input id="pj-tel_comercial" data-mask="phone" placeholder="(11) 3333-4444"></div>
+        <div class="field"><label>Celular 2</label><input id="pj-celular2" data-mask="phone"></div>
+        <div class="field"><label>FAX</label><input id="pj-fax" data-mask="phone"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Sócios</h3>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:14px">Cadastre os sócios da empresa. Pelo menos 1 é obrigatório (o sócio administrador).</p>
+      <div id="socios-container"></div>
+      <button class="btn btn-outline" id="btn-add-socio" onclick="addSocio()">+ Adicionar Sócio</button>
+    </div>
+
+    <div class="card">
+      <h3>Forma de Pagamento</h3>
+      <div class="grid-2">
+        <div class="field"><label>Consórcio<span class="req">*</span></label><select id="pj-administradora" onchange="onAdminChange('pj')" required>
+          <option value="">—</option>
+          <option value="porto">Consórcio Porto</option>
+          <option value="bradesco">Consórcio Bradesco</option>
+          <option value="itau">Consórcio Itaú</option>
+        </select></div>
+        <div class="field"><label>Forma de Pagamento<span class="req">*</span></label><select id="pj-forma_pagamento_1" onchange="onPagamentoChange('pj')" required disabled>
+          <option value="">Selecione o consórcio primeiro</option>
+        </select></div>
+      </div>
+      <div id="pj-bloc-debito" class="bloc-conjuge" style="margin-top:14px">
+        <div class="bloc-conjuge-title" id="pj-debito-titulo">Dados da Conta para Débito Automático</div>
+        <p style="font-size:12px;color:var(--text2);margin-bottom:12px" id="pj-debito-aviso">Informe os dados da conta.</p>
+        <div class="grid-3">
+          <div class="field"><label>Agência (sem dígito)<span class="req">*</span></label><input id="pj-debito_agencia" placeholder="0000" data-no-upper></div>
+          <div class="field"><label>Conta Corrente<span class="req">*</span></label><input id="pj-debito_conta" placeholder="00000" data-no-upper></div>
+          <div class="field"><label>Dígito<span class="req">*</span></label><input id="pj-debito_dac" placeholder="0" data-no-upper></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Dados Bancários para Devolução de Valores</h3>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:14px">Conta para receber devoluções (encerramento de grupo, cancelamento, etc.). <strong>A conta deve estar obrigatoriamente no CNPJ da empresa titular.</strong></p>
+      <div class="grid-3">
+        <div class="field"><label>Código do Banco<span class="req">*</span></label><input id="pj-banco_codigo" placeholder="Ex: 341" data-no-upper required></div>
+        <div class="field"><label>Nome do Banco<span class="req">*</span></label><input id="pj-banco_nome" required></div>
+        <div class="field"><label>Agência (sem dígito)<span class="req">*</span></label><input id="pj-agencia" data-no-upper required></div>
+      </div>
+      <div class="grid-3" style="margin-top:14px">
+        <div class="field"><label>Conta Corrente<span class="req">*</span></label><input id="pj-conta_corrente" data-no-upper required></div>
+        <div class="field"><label>Dígito<span class="req">*</span></label><input id="pj-dac" data-no-upper required></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Seguro do Consórcio</h3>
+      <div class="grid-2">
+        <div class="field"><label>Aceita contratar o seguro?<span class="req">*</span></label><select id="pj-aceita_seguro" required>
+          <option value="">—</option><option value="true">Sim</option><option value="false">Não</option>
+        </select></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="lgpd">
+        <label>
+          <input type="checkbox" id="pj-lgpd">
+          <span>Autorizo o compartilhamento e tratamento dos dados pessoais e empresariais pela Master Prime Corretora e pela administradora selecionada, para fins de análise, andamento e conclusão do processo de consórcio, conforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018).</span>
+        </label>
+      </div>
+    </div>
+
+    <div id="pj-msg"></div>
+    <div class="actions">
+      <button class="btn btn-outline" onclick="voltarTipo()">← Voltar</button>
+      <div class="spacer"></div>
+      <button class="btn btn-yellow btn-lg" id="pj-submit" onclick="submitPJ()">Enviar Proposta</button>
+    </div>
+  `;
+  // Adiciona o primeiro sócio
+  addSocio();
 }
 
-function validateStep2() {
-  if (!STATE.adm) { showMsg('msg-step2','Selecione uma administradora.','error'); return false; }
-  const key = `${STATE.adm}_${STATE.tipo}`;
-  const campos = CAMPOS[key] || [];
-  const missing = [];
-  campos.forEach(c => {
-    if (c.section || c.conjugeBlock || c.conjugeBlockEnd || !c.required) return;
-    const el = document.getElementById('f-'+c.id);
-    if (!el || !el.value.trim()) missing.push(c.label);
-  });
-  if (missing.length) {
-    showMsg('msg-step2',`Preencha os campos obrigatórios: <strong>${missing.slice(0,4).join(', ')}${missing.length>4?'...':''}</strong>`,'error');
-    return false;
-  }
-  const emailEl = document.getElementById('f-email');
-  const confEmailEl = document.getElementById('f-confirme_email');
-  if (emailEl && confEmailEl && emailEl.value.trim() !== confEmailEl.value.trim()) {
-    showMsg('msg-step2','Os e-mails não conferem.','error');
-    return false;
-  }
-  if (!document.getElementById('lgpd-check').checked) {
-    showMsg('msg-step2','Você precisa autorizar o tratamento dos dados (LGPD) para continuar.','error');
-    return false;
-  }
-  showMsg('msg-step2','','');
-  return true;
+// ════════ SÓCIOS ════════
+let socioCount = 0;
+function addSocio() {
+  if (socioCount >= 3) { alert('Máximo de 3 sócios.'); return; }
+  socioCount++;
+  const idx = socioCount;
+  const container = $('socios-container');
+  const block = document.createElement('div');
+  block.className = 'socio-block';
+  block.dataset.index = idx;
+  const r = idx === 1 ? '<span class="req">*</span>' : '';
+  block.innerHTML = `
+    <div class="socio-header">
+      <div class="socio-titulo">${idx}º Sócio${idx === 1 ? ' (obrigatório)' : ' (opcional)'}</div>
+      ${idx > 1 ? `<button class="btn btn-danger" onclick="removeSocio(this)">Remover</button>` : ''}
+    </div>
+    <div class="grid-2">
+      <div class="field"><label>Nome Completo${r}</label><input data-socio="nome"></div>
+      <div class="field"><label>CPF${r}</label><input data-socio="cpf" data-mask="cpf" placeholder="000.000.000-00"></div>
+    </div>
+    <div class="grid-3" style="margin-top:12px">
+      <div class="field"><label>RG${r}</label><input data-socio="rg"></div>
+      <div class="field"><label>Data de Emissão RG${r}</label><input data-socio="data_emissao_rg" type="text" data-mask="date" placeholder="dd/mm/aaaa" maxlength="10"></div>
+      <div class="field"><label>Órgão Expedidor${r}</label><input data-socio="orgao_expedidor" placeholder="SSP/SP"></div>
+    </div>
+    <div class="grid-3" style="margin-top:12px">
+      <div class="field"><label>Data de Nascimento${r}</label><input data-socio="data_nascimento" type="text" data-mask="date" placeholder="dd/mm/aaaa" maxlength="10"></div>
+      <div class="field"><label>Nome do Pai${r}</label><input data-socio="nome_pai"></div>
+      <div class="field"><label>Nome da Mãe${r}</label><input data-socio="nome_mae"></div>
+    </div>
+    <div class="grid-3" style="margin-top:12px">
+      <div class="field"><label>Data de Entrada${r}</label><input data-socio="data_entrada" type="text" data-mask="date" placeholder="dd/mm/aaaa" maxlength="10"></div>
+      <div class="field"><label>Participação (%)${r}</label><input data-socio="participacao" placeholder="Ex: 50" data-no-upper></div>
+      <div class="field"><label>É Administrador?${r}</label><select data-socio="administrador"><option value="">—</option><option value="Sim">Sim</option><option value="Não">Não</option></select></div>
+    </div>
+    <div class="grid-3" style="margin-top:12px">
+      <div class="field"><label>Estado Civil</label><select data-socio="estado_civil"><option value="">—</option><option>Solteiro(a)</option><option>Casado(a)</option><option>Divorciado(a)</option><option>Viúvo(a)</option><option>União Estável</option><option>Outros</option></select></div>
+      <div class="field"><label>Nome do Cônjuge</label><input data-socio="nome_conjuge" placeholder="Se aplicável"></div>
+      <div class="field"><label>CPF do Cônjuge</label><input data-socio="cpf_conjuge" data-mask="cpf"></div>
+    </div>
+    <div class="grid-2" style="margin-top:12px">
+      <div class="field"><label>E-mail do Sócio${r}</label><input data-socio="email" type="email" placeholder="email@exemplo.com" onblur="checkSocioEmail(this)"><span class="help" data-socio-msg="email" style="color:var(--red);display:none">E-mail deve ser diferente do e-mail da empresa</span></div>
+      <div class="field"><label>Telefone do Sócio</label><input data-socio="telefone" data-mask="phone" placeholder="(11) 99999-9999"></div>
+    </div>
+  `;
+  container.appendChild(block);
+  bindMasks(block);
+  // Atualiza visibilidade do botão se chegou no limite
+  if (socioCount >= 3) $('btn-add-socio').style.display = 'none';
 }
 
-async function submitForm() {
-  const btn = document.getElementById('btn-submit');
-  if (!validateStep2()) return;
-  btn.disabled = true; btn.textContent = 'Enviando...';
-  showMsg('msg-step2','Enviando sua adesão...','info');
-  try {
-    const key = `${STATE.adm}_${STATE.tipo}`;
-    const campos = CAMPOS[key] || [];
-    const dados = {};
-    campos.forEach(c => {
-      if (c.section || c.conjugeBlock || c.conjugeBlockEnd) return;
-      const el = document.getElementById('f-'+c.id);
-      let valor = el ? el.value.trim() : '';
-      dados[c.id] = valor;
-    });
-    if (dados.banco_codigo) dados.banco = dados.banco_codigo;
-    const protocolo = genProtocol();
-    const payload = {
-      protocolo,
-      administradora: STATE.adm,
-      tipo_pessoa: STATE.tipo,
-      dados,
-      status: 'recebido',
-      criado_em: new Date().toISOString(),
-      nome_cliente: dados.nome_completo || dados.razao_social || '',
-      cpf_cnpj: dados.cpf || dados.cnpj || '',
+function checkSocioEmail(input) {
+  const empresaEmail = ($('pj-email')?.value || '').toLowerCase().trim();
+  const socioEmail   = (input.value || '').toLowerCase().trim();
+  const msg = input.closest('.field').querySelector('[data-socio-msg="email"]');
+  if (empresaEmail && socioEmail && empresaEmail === socioEmail) {
+    if (msg) msg.style.display = 'block';
+    input.closest('.field').classList.add('invalid');
+  } else {
+    if (msg) msg.style.display = 'none';
+    input.closest('.field').classList.remove('invalid');
+  }
+}
+
+function removeSocio(btn) {
+  btn.closest('.socio-block').remove();
+  socioCount--;
+  $('btn-add-socio').style.display = '';
+  // Renumera
+  $$('.socio-block').forEach((b, i) => {
+    b.dataset.index = i+1;
+    const t = b.querySelector('.socio-titulo');
+    if (t) t.textContent = (i+1) + 'º Sócio' + (i === 0 ? ' (obrigatório)' : ' (opcional)');
+  });
+}
+// ════════ COLETA ════════
+function coletarPF() {
+  const get = id => $('pf-'+id)?.value || '';
+  const debitoConta = (get('forma_pagamento_1') === 'Débito Automático')
+    ? { agencia: get('debito_agencia'), conta: get('debito_conta'), dac: get('debito_dac') } : null;
+  // Observações geradas automaticamente pra incluir conta de débito
+  const obs = debitoConta
+    ? `Débito Automático ${ADMINS_LABEL[get('administradora')] || ''} — Ag: ${debitoConta.agencia} CC: ${debitoConta.conta}-${debitoConta.dac}`
+    : '';
+  return {
+    tipo: 'pf',
+    administradora: get('administradora'),
+    cpf: unmaskNum(get('cpf')),
+    nome: get('nome').trim(),
+    data_nascimento: brDateToISO(get('data_nascimento')),
+    sexo: get('sexo'),
+    nacionalidade: get('nacionalidade'),
+    cidade_nascimento: get('cidade_nascimento'),
+    tipo_documento: get('tipo_documento'),
+    numero_documento: get('numero_documento'),
+    data_emissao: brDateToISO(get('data_emissao')),
+    orgao_expedidor: get('orgao_expedidor'),
+    nome_pai: get('nome_pai'),
+    nome_mae: get('nome_mae'),
+    estado_civil: get('estado_civil'),
+    nome_conjuge: get('nome_conjuge'),
+    cpf_conjuge: unmaskNum(get('cpf_conjuge')),
+    rg_conjuge: get('rg_conjuge'),
+    data_nascimento_conjuge: brDateToISO(get('data_nascimento_conjuge')),
+    profissao: get('profissao'),
+    nome_empresa: get('nome_empresa'),
+    data_admissao: brDateToISO(get('data_admissao')),
+    renda_mensal: parseMoney(get('renda_mensal')),
+    email: get('email').trim(),
+    celular: get('celular'),
+    celular2: get('celular2'),
+    tel_residencial: get('tel_residencial'),
+    tel_comercial: get('tel_comercial'),
+    cep: unmaskNum(get('cep')),
+    logradouro: get('logradouro'),
+    numero: get('numero'),
+    complemento: get('complemento'),
+    bairro: get('bairro'),
+    cidade: get('cidade'),
+    estado: get('estado').toUpperCase(),
+    tipo_residencia: get('tipo_residencia'),
+    tempo_residencia: get('tempo_residencia'),
+    forma_pagamento_1: get('forma_pagamento_1'),
+    forma_pagamento_demais: get('forma_pagamento_1'), // mesma forma p/ todas as parcelas
+    banco_codigo: get('banco_codigo'),
+    banco_nome: get('banco_nome'),
+    agencia: get('agencia'),
+    conta_corrente: get('conta_corrente'),
+    dac: get('dac'),
+    nome_correntista: get('nome').trim(),
+    cpf_correntista: unmaskNum(get('cpf')),
+    aceita_seguro: get('aceita_seguro'),
+    observacoes: obs,
+    lgpd_aceito: $('pf-lgpd').checked ? 'true' : 'false'
+  };
+}
+
+function coletarPJ() {
+  const get = id => $('pj-'+id)?.value || '';
+  const socios = $$('.socio-block').map(block => {
+    const s = nome => block.querySelector(`[data-socio="${nome}"]`)?.value || '';
+    return {
+      nome: s('nome'),
+      cpf: unmaskNum(s('cpf')),
+      rg: s('rg'),
+      data_emissao_rg: brDateToISO(s('data_emissao_rg')),
+      orgao_expedidor: s('orgao_expedidor'),
+      data_nascimento: brDateToISO(s('data_nascimento')),
+      nome_pai: s('nome_pai'),
+      nome_mae: s('nome_mae'),
+      data_entrada: brDateToISO(s('data_entrada')),
+      participacao: s('participacao'),
+      administrador: s('administrador'),
+      estado_civil: s('estado_civil'),
+      nome_conjuge: s('nome_conjuge'),
+      cpf_conjuge: unmaskNum(s('cpf_conjuge')),
+      email: s('email').toLowerCase().trim(),
+      telefone: s('telefone')
     };
-    const { error } = await sb.from('portal_adesoes').insert(payload);
+  }).filter(s => s.nome);
+  const obs = (get('forma_pagamento_1') === 'Débito Automático')
+    ? `Débito Automático ${ADMINS_LABEL[get('administradora')]||''} — Ag: ${get('debito_agencia')} CC: ${get('debito_conta')}-${get('debito_dac')}`
+    : '';
+  return {
+    tipo: 'pj',
+    administradora: get('administradora'),
+    cnpj: unmaskNum(get('cnpj')),
+    nome: get('razao_social').trim(),
+    nome_fantasia: get('nome_fantasia'),
+    data_nascimento: brDateToISO(get('data_constituicao')),
+    ramo_atividade: get('ramo_atividade'),
+    cnae_principal: get('cnae_principal'),
+    natureza_juridica: get('natureza_juridica'),
+    inscricao_estadual: get('inscricao_estadual'),
+    inscricao_municipal: get('inscricao_municipal'),
+    valor_capital: parseMoney(get('valor_capital')),
+    faturamento: parseMoney(get('faturamento')),
+    faturamento_periodo: get('faturamento_periodo'),
+    endereco_exterior: get('endereco_exterior'),
+    divulgar_endereco: get('divulgar_endereco'),
+    socios,
+    email: get('email').toLowerCase().trim(),
+    celular: get('celular'),
+    celular2: get('celular2'),
+    tel_comercial: get('tel_comercial'),
+    fax: get('fax'),
+    cep: unmaskNum(get('cep')),
+    tipo_logradouro: get('tipo_logradouro'),
+    logradouro: get('logradouro'),
+    numero: get('numero'),
+    complemento: get('complemento'),
+    bairro: get('bairro'),
+    cidade: get('cidade'),
+    estado: get('estado').toUpperCase(),
+    forma_pagamento_1: get('forma_pagamento_1'),
+    forma_pagamento_demais: get('forma_pagamento_1'),
+    banco_codigo: get('banco_codigo'),
+    banco_nome: get('banco_nome'),
+    agencia: get('agencia'),
+    conta_corrente: get('conta_corrente'),
+    dac: get('dac'),
+    nome_correntista: get('razao_social').trim(),
+    cnpj_correntista: unmaskNum(get('cnpj')),
+    aceita_seguro: get('aceita_seguro'),
+    observacoes: obs,
+    lgpd_aceito: $('pj-lgpd').checked ? 'true' : 'false'
+  };
+}
+
+// ════════ VALIDAÇÃO ════════
+function validarPF(d) {
+  if (d.cpf.length !== 11) return 'CPF inválido (precisa ter 11 dígitos)';
+  if (!d.nome || d.nome.length < 3) return 'Nome completo é obrigatório';
+  if (!d.data_nascimento) return 'Data de nascimento é obrigatória (dd/mm/aaaa)';
+  if (!d.sexo) return 'Sexo é obrigatório';
+  if (!d.nacionalidade) return 'Nacionalidade é obrigatória';
+  if (!d.cidade_nascimento) return 'Cidade de nascimento é obrigatória';
+  if (!d.nome_mae) return 'Nome da mãe é obrigatório';
+  if (!d.tipo_documento) return 'Tipo de documento é obrigatório';
+  if (!d.numero_documento) return 'Número do documento é obrigatório';
+  if (!d.data_emissao) return 'Data de emissão do documento é obrigatória';
+  if (!d.orgao_expedidor) return 'Órgão expedidor é obrigatório';
+  if (!d.estado_civil) return 'Estado civil é obrigatório';
+  if (!d.email || !/.+@.+\..+/.test(d.email)) return 'E-mail inválido';
+  if (unmaskNum(d.celular).length < 10) return 'Celular inválido';
+  if (d.cep.length !== 8) return 'CEP inválido';
+  if (!d.logradouro || !d.numero || !d.bairro || !d.cidade || !d.estado) return 'Preencha o endereço completo';
+  if (!d.tipo_residencia) return 'Tipo de residência é obrigatório';
+  if (!d.renda_mensal) return 'Renda mensal é obrigatória';
+  if (!d.administradora) return 'Selecione o consórcio (Porto, Bradesco ou Itaú)';
+  if (!d.forma_pagamento_1) return 'Selecione a forma de pagamento';
+  // Se Débito Automático, exige conta do banco da admin
+  if (d.forma_pagamento_1 === 'Débito Automático') {
+    const ag = $('pf-debito_agencia')?.value || '';
+    const cc = $('pf-debito_conta')?.value || '';
+    if (!ag || !cc) return `Para Débito Automático ${ADMINS_LABEL[d.administradora]||''}, preencha a conta corrente`;
+  }
+  // Bancário pra devolução = sempre obrigatório (TITULAR DA COTA)
+  if (!d.banco_codigo || !d.banco_nome || !d.agencia || !d.conta_corrente || !d.dac) return 'Preencha os dados bancários para devolução (obrigatório, deve ser do titular)';
+  if (!d.aceita_seguro) return 'Informe se aceita o seguro';
+  if (d.lgpd_aceito !== 'true') return 'É necessário aceitar a autorização LGPD para prosseguir';
+  return null;
+}
+
+function validarPJ(d) {
+  if (d.cnpj.length !== 14) return 'CNPJ inválido (precisa ter 14 dígitos)';
+  if (!d.nome) return 'Razão social é obrigatória';
+  if (!d.data_nascimento) return 'Data de constituição é obrigatória (dd/mm/aaaa)';
+  if (!d.ramo_atividade) return 'Selecione o ramo de atividade';
+  if (!d.cnae_principal) return 'Informe o CNAE (Atividade Principal)';
+  if (!d.natureza_juridica) return 'Selecione a natureza jurídica';
+  if (!d.faturamento || !d.faturamento_periodo) return 'Informe o faturamento e o período';
+  if (!d.email || !/.+@.+\..+/.test(d.email)) return 'E-mail da empresa inválido';
+  if (unmaskNum(d.celular).length < 10) return 'Celular inválido';
+  if (d.cep.length !== 8) return 'CEP inválido';
+  if (!d.tipo_logradouro || !d.logradouro || !d.numero || !d.bairro || !d.cidade || !d.estado) return 'Preencha o endereço completo da empresa';
+  if (!d.socios || d.socios.length === 0) return 'Cadastre pelo menos 1 sócio';
+  const s1 = d.socios[0];
+  if (!s1.nome || s1.cpf.length !== 11) return 'O 1º sócio precisa ter Nome e CPF válido';
+  if (!s1.rg || !s1.data_emissao_rg || !s1.orgao_expedidor) return 'Preencha RG, Data de Emissão RG e Órgão Expedidor do 1º sócio';
+  if (!s1.data_nascimento || !s1.nome_pai || !s1.nome_mae) return 'Preencha Data de Nascimento, Nome do Pai e Nome da Mãe do 1º sócio';
+  if (!s1.data_entrada || !s1.participacao || !s1.administrador) return 'Preencha Data de Entrada, Participação % e se é Administrador do 1º sócio';
+  // Email do sócio deve ser DIFERENTE do email da empresa
+  for (let i = 0; i < d.socios.length; i++) {
+    const s = d.socios[i];
+    if (s.email && d.email && s.email === d.email) {
+      return `E-mail do ${i+1}º sócio (${s.nome}) precisa ser diferente do e-mail da empresa`;
+    }
+  }
+  if (!d.administradora) return 'Selecione o consórcio (Porto, Bradesco ou Itaú)';
+  if (!d.forma_pagamento_1) return 'Selecione a forma de pagamento';
+  if (d.forma_pagamento_1 === 'Débito Automático') {
+    const ag = $('pj-debito_agencia')?.value || '';
+    const cc = $('pj-debito_conta')?.value || '';
+    if (!ag || !cc) return `Para Débito Automático ${ADMINS_LABEL[d.administradora]||''}, preencha a conta corrente`;
+  }
+  if (!d.banco_codigo || !d.banco_nome || !d.agencia || !d.conta_corrente || !d.dac) return 'Preencha os dados bancários para devolução (obrigatório, deve ser do CNPJ da empresa)';
+  if (!d.aceita_seguro) return 'Informe se aceita o seguro';
+  if (d.lgpd_aceito !== 'true') return 'É necessário aceitar a autorização LGPD para prosseguir';
+  return null;
+}
+
+// ════════ SUBMIT ════════
+function showMsg(prefix, text, type='warn') {
+  $(prefix+'-msg').innerHTML = text ? `<div class="alert ${type==='warn'?'warn':''}">${text}</div>` : '';
+}
+
+async function submitPF() {
+  const dados = coletarPF();
+  const erro = validarPF(dados);
+  if (erro) { showMsg('pf', erro); window.scrollTo({top: $('pf-msg').offsetTop - 100, behavior: 'smooth'}); return; }
+  showMsg('pf', '');
+  await enviarProposta('pf', dados);
+}
+
+async function submitPJ() {
+  const dados = coletarPJ();
+  const erro = validarPJ(dados);
+  if (erro) { showMsg('pj', erro); window.scrollTo({top: $('pj-msg').offsetTop - 100, behavior: 'smooth'}); return; }
+  showMsg('pj', '');
+  await enviarProposta('pj', dados);
+}
+
+async function enviarProposta(prefix, dados) {
+  const btn = $(prefix+'-submit');
+  btn.disabled = true;
+  const lblOriginal = btn.textContent;
+  btn.textContent = 'Enviando...';
+  try {
+    const { data, error } = await sb.rpc('inserir_proposta', {
+      codigo: getCodigoConsultor(),
+      dados
+    });
     if (error) throw error;
-    document.getElementById('step-2').classList.remove('active');
-    document.getElementById('step-success').classList.add('active');
-    updateProgressUI(3);
-    window.scrollTo({top:0, behavior:'smooth'});
+    const protocolo = data?.[0]?.protocolo || 'sem protocolo';
+    $('protocolo-display').textContent = protocolo;
+    $('form-pf').classList.add('hidden');
+    $('form-pj').classList.add('hidden');
+    $('tela-sucesso').classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   } catch(e) {
-    showMsg('msg-step2','Erro ao enviar: '+(e.message||'tente novamente')+'.<br>Se o problema persistir, entre em contato com nossa equipe.','error');
-    btn.disabled = false; btn.textContent = 'Enviar Adesão';
+    showMsg(prefix, 'Erro ao enviar: ' + (e.message || e.code || 'erro desconhecido'));
+    btn.disabled = false;
+    btn.textContent = lblOriginal;
   }
 }
 
-function resetForm() {
-  STATE = { step:1, adm:null, tipo:'pf' };
-  document.querySelectorAll('.form-step').forEach(s=>s.classList.remove('active'));
-  document.getElementById('step-1').classList.add('active');
-  document.querySelectorAll('.adm-card').forEach(c=>c.classList.remove('selected'));
-  document.getElementById('form-fields-container').innerHTML = '';
-  document.getElementById('lgpd-check').checked = false;
-  showMsg('msg-step1','',''); showMsg('msg-step2','','');
-  updateProgressUI(1);
-  window.scrollTo({top:0, behavior:'smooth'});
-}
 </script>
 </body>
 </html>
