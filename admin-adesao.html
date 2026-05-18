@@ -116,14 +116,15 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 .link-mini.po .link-mini-badge { background: #fff; }
 .link-mini.it .link-mini-badge { background: #fff; }
 .link-mini.br .link-mini-badge { background: #fff; }
-.link-mini-info { flex: 1; min-width: 0; }
+.link-mini-info { flex: 1; min-width: 0; overflow: hidden; }
 .link-mini-label {
-  font-size: 10px; font-weight: 700; color: var(--text2);
-  text-transform: uppercase; letter-spacing: .4px;
+  font-size: 13px; font-weight: 700; color: var(--mp-navy);
+  letter-spacing: -.1px;
   margin-bottom: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.link-mini-url {
-  font-size: 11px; font-family: 'DM Mono', monospace;
+.link-mini-sub {
+  font-size: 11px;
   color: var(--text2);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
@@ -274,24 +275,16 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 
 <!-- Estado: conteúdo principal -->
 <div id="main-state" style="display:none;">
-  <header class="page-header">
-    <div class="logo">
-      <img src="logo.png" alt="Master Prime">
-      <div>
-        <h1>Adesões</h1>
-        <div class="sub">Visualize e copie os dados das fichas de adesão</div>
-      </div>
-    </div>
-    <button class="btn btn-outline" onclick="loadAdesoes()" style="color:#fff;border-color:rgba(255,255,255,.3);background:rgba(255,255,255,.1);">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-      Atualizar
-    </button>
-  </header>
-
   <div class="container">
     <!-- LINKS DE ADESÃO — 4 cards (Master Prime / Porto / Itaú / Bradesco) -->
     <div class="links-section">
-      <div class="links-title">Links de Adesão · clique em "Copiar" e envie ao cliente</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:12px;flex-wrap:wrap">
+        <div class="links-title" style="margin-bottom:0">Links de Adesão · clique em "Copiar" e envie ao cliente</div>
+        <button class="btn btn-outline" onclick="loadAdesoes()" style="font-size:11px;padding:6px 12px;display:inline-flex;align-items:center;gap:5px;border:1px solid var(--border2);background:#fff;border-radius:7px;cursor:pointer;color:var(--mp-navy);font-weight:600">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          Atualizar
+        </button>
+      </div>
       <div class="links-grid" id="links-grid">
         <!-- gerado dinamicamente em renderLinks() com o código do consultor logado -->
       </div>
@@ -348,17 +341,17 @@ function renderLinks() {
   const c = currentUserCodigo ? '?c=' + currentUserCodigo : '';
   const sep = c ? '&' : '?';
   const links = [
-    { key: 'mp', label: 'Master Prime · Geral',       url: base + c,                            logo: 'logo.png' },
-    { key: 'po', label: 'Consórcio Porto Seguro',     url: base + c + sep + 'admin=porto',     logo: 'logo-porto.png' },
-    { key: 'it', label: 'Consórcio Itaú',             url: base + c + sep + 'admin=itau',      logo: 'logo-itau.png' },
-    { key: 'br', label: 'Consórcio Bradesco',         url: base + c + sep + 'admin=bradesco',  logo: 'logo-bradesco.png' }
+    { key: 'mp', label: 'Master Prime',          sub: 'Geral · todos os consórcios',  url: base + c,                            logo: 'logo.png' },
+    { key: 'po', label: 'Consórcio Porto Seguro', sub: 'Apenas Porto',                 url: base + c + sep + 'admin=porto',     logo: 'logo-porto.png' },
+    { key: 'it', label: 'Consórcio Itaú',         sub: 'Apenas Itaú',                  url: base + c + sep + 'admin=itau',      logo: 'logo-itau.png' },
+    { key: 'br', label: 'Consórcio Bradesco',     sub: 'Apenas Bradesco',              url: base + c + sep + 'admin=bradesco',  logo: 'logo-bradesco.png' }
   ];
   document.getElementById('links-grid').innerHTML = links.map(l => `
     <div class="link-mini ${l.key}">
       <div class="link-mini-badge"><img src="${l.logo}" alt="${l.label}"></div>
       <div class="link-mini-info">
-        <div class="link-mini-label">${l.label}</div>
-        <div class="link-mini-url" title="${l.url}">${l.url}</div>
+        <div class="link-mini-label" title="${l.url}">${l.label}</div>
+        <div class="link-mini-sub">${l.sub}</div>
       </div>
       <button class="link-mini-copy" onclick="copyLinkMini(this, '${l.url}', '${l.label.replace(/'/g, "\\'")}')">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>

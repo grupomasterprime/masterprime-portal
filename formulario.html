@@ -67,6 +67,27 @@ body {
 }
 .header-consultor strong { color: #fff; }
 
+/* Badge com logo da administradora dedicada (Porto/Itaú/Bradesco) */
+.header-admin-badge {
+  display: none;
+  background: #fff;
+  border-radius: 10px;
+  padding: 8px 14px;
+  align-items: center; gap: 8px;
+  margin-left: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.1);
+}
+.header-admin-badge.show { display: inline-flex; }
+.header-admin-badge img {
+  height: 30px; width: auto;
+  display: block;
+}
+.header-admin-badge .label {
+  font-size: 9.5px; font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase; letter-spacing: .5px;
+}
+
 /* CONTAINER */
 .container { max-width: 900px; margin: 24px auto; padding: 0 16px 40px; }
 
@@ -309,6 +330,10 @@ body {
       <h1>Solicitação de Adesão</h1>
       <p>Master Prime · Corretora de Consórcios e Seguros</p>
     </div>
+    <div class="header-admin-badge" id="header-admin-badge">
+      <span class="label">Em parceria com</span>
+      <img id="header-admin-logo" src="" alt="">
+    </div>
     <div class="header-consultor hidden" id="header-consultor">
       Indicado por <strong id="consultor-nome">—</strong>
     </div>
@@ -370,6 +395,25 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
 
 // Estado civil que ativa cônjuge
 const ESTADOS_CONJUGE = ['Casado(a)','União Estável'];
+
+// Labels dos admins (definido cedo pra ficar disponível no init)
+const ADMINS_LABEL = { porto: 'Porto', bradesco: 'Bradesco', itau: 'Itaú' };
+
+// Campos que NÃO entram em cada admin específico (escondidos quando ?admin=X está travado)
+const SKIP_FIELDS = {
+  porto: {
+    pf: ['pf-sexo','pf-nome_pai','pf-tipo_residencia','pf-tempo_residencia','pf-nome_empresa','pf-data_admissao'],
+    pj: []
+  },
+  itau: {
+    pf: ['pf-cidade_nascimento','pf-nome_pai','pf-nome_empresa','pf-data_admissao','pf-tempo_residencia','pf-tipo_logradouro','pf-celular2','pf-tel_residencial','pf-tel_comercial'],
+    pj: []
+  },
+  bradesco: {
+    pf: ['pf-sexo','pf-cidade_nascimento','pf-tipo_documento','pf-numero_documento','pf-data_emissao','pf-orgao_expedidor','pf-tipo_residencia','pf-tipo_logradouro','pf-celular2','pf-tel_residencial','pf-tel_comercial','pf-profissao'],
+    pj: []
+  }
+};
 
 // ════════ HELPERS ════════
 function $(id) { return document.getElementById(id); }
@@ -460,10 +504,17 @@ async function lookupCEP(input) {
 async function init() {
   const codigo = getCodigoConsultor();
   const admin = getAdminLocked();
-  // Se admin travado, atualiza título no header
+  // Se admin travado, atualiza título no header + mostra logo da admin
   if (admin) {
     const h1 = document.querySelector('.header-text h1');
     if (h1) h1.textContent = 'Solicitação de Adesão · Consórcio ' + ADMINS_LABEL[admin];
+    const badge = $('header-admin-badge');
+    const img = $('header-admin-logo');
+    if (badge && img) {
+      img.src = 'logo-' + admin + '.png';
+      img.alt = 'Consórcio ' + ADMINS_LABEL[admin];
+      badge.classList.add('show');
+    }
   }
   if (codigo) {
     try {
@@ -484,17 +535,25 @@ init();
 function aplicarAdminLock(prefix) {
   const admin = getAdminLocked();
   if (!admin) return;
+  // Esconde campos não-pedidos por aquele admin
+  const skipList = (SKIP_FIELDS[admin] && SKIP_FIELDS[admin][prefix]) || [];
+  skipList.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const field = el.closest('.field');
+    if (field) field.style.display = 'none';
+    el.removeAttribute('required');
+    el.value = '';
+  });
+  // Lock no select de Consórcio
   const sel = $(prefix+'-administradora');
   if (!sel) return;
   sel.value = admin;
   sel.disabled = true;
-  // Esconde label de "selecione consórcio" e força preenchimento das opções de pagamento
   onAdminChange(prefix);
-  // Estiliza o select pra mostrar que está bloqueado
   sel.style.background = '#F1F5F9';
   sel.style.color = 'var(--text2)';
   sel.style.cursor = 'not-allowed';
-  // Adiciona aviso visual abaixo
   const helpEl = sel.closest('.field').querySelector('.help-lock');
   if (!helpEl) {
     const help = document.createElement('span');
