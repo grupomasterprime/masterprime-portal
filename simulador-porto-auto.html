@@ -592,8 +592,10 @@ function recalc() {
   setOut('pa-parcelaPJ', formatMoney(r.parcelaPJ));
   setOut('pa-parcelaReduzPF', formatMoney(r.parcelaReduzidaPF));
   setOut('pa-parcelaReduzPJ', formatMoney(r.parcelaReduzidaPJ));
-  setOut('pa-parcelaInicialPFDestaque', formatMoney(r.parcelaPF));
-  setOut('pa-parcelaInicialPJDestaque', formatMoney(r.parcelaPJ));
+  // Quando há redutor ativo, mostra a parcela reduzida no destaque.
+  var redAtivoPa = (parseFloat(i.redutor) > 0) || (i.redutor === 'campanha');
+  setOut('pa-parcelaInicialPFDestaque', formatMoney(redAtivoPa ? r.parcelaReduzidaPF : r.parcelaPF));
+  setOut('pa-parcelaInicialPJDestaque', formatMoney(redAtivoPa ? r.parcelaReduzidaPJ : r.parcelaPJ));
 
   setOut('pa-representatividade', Number.isFinite(r.representatividade) ? formatPct(r.representatividade * 100, 2) : '—');
 

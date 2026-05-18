@@ -605,8 +605,10 @@ function recalc() {
   setOut('pi-parcelaReduzPJ', formatMoney(r.parcelaReduzidaPJ));
   setOut('pi-parcelaInicial', formatMoney(r.parcelaInicial));
   setOut('pi-parcelaDemais', formatMoney(r.parcelaDemais));
-  setOut('pi-parcelaInicialPFDestaque', formatMoney(r.parcelaPF));
-  setOut('pi-parcelaInicialPJDestaque', formatMoney(r.parcelaPJ));
+  // Quando há redutor ativo, mostra a parcela reduzida no destaque (que é o que o cliente paga até a contemplação).
+  var redAtivoPi = (parseFloat(i.redutor) > 0) || (i.redutor === 'campanha');
+  setOut('pi-parcelaInicialPFDestaque', formatMoney(redAtivoPi ? r.parcelaReduzidaPF : r.parcelaPF));
+  setOut('pi-parcelaInicialPJDestaque', formatMoney(redAtivoPi ? r.parcelaReduzidaPJ : r.parcelaPJ));
   atualizaLabelsParcelaInicial(i);
 
   // Lance

@@ -81,6 +81,34 @@
   .result-red strong { font-size: 11.5px; color: var(--bradesco-red-dark); letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
   .result-red .value { font-size: 19px; font-weight: 700; color: var(--mp-navy); font-family: 'DM Mono', ui-monospace, monospace; }
 
+  /* Botão olho — memória de cálculo do lance */
+  .btn-eye-lance { background: transparent; border: none; padding: 4px; cursor: pointer; color: var(--bradesco-red-dark); display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; transition: all .15s; }
+  .btn-eye-lance:hover { background: rgba(204,9,47,0.12); color: var(--bradesco-red); }
+
+  /* Modal do analítico do lance */
+  .modal-lance-bg { display: none; position: fixed; inset: 0; background: rgba(15,23,42,.55); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+  .modal-lance-bg.aberto { display: flex; }
+  .modal-lance-box { background: #fff; border-radius: 14px; max-width: 680px; width: 100%; max-height: 88vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(15,23,42,0.3); }
+  .modal-lance-head { display: flex; align-items: flex-start; justify-content: space-between; padding: 22px 26px; border-bottom: 1px solid var(--border); }
+  .modal-lance-title { font-size: 17px; font-weight: 700; color: var(--mp-navy); letter-spacing: .2px; }
+  .modal-lance-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .modal-lance-body { padding: 22px 26px; }
+  .modal-lance-foot { padding: 14px 26px 20px; display: flex; justify-content: flex-end; gap: 8px; }
+  .modal-lance-close { background: transparent; border: none; cursor: pointer; padding: 4px; color: var(--text-muted); display: flex; align-items: center; border-radius: 50%; transition: background .15s; }
+  .modal-lance-close:hover { background: var(--bg); color: var(--text); }
+  .modal-lance-btn { background: var(--mp-navy); color: #fff; border: none; padding: 10px 22px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; font-family: inherit; }
+  .modal-lance-btn:hover { background: var(--mp-navy-dark); }
+
+  .passo-row { display: grid; grid-template-columns: 26px 1fr auto; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px dashed var(--border); }
+  .passo-row:last-of-type { border-bottom: none; }
+  .passo-num { width: 26px; height: 26px; border-radius: 50%; background: var(--bradesco-red); color: #fff; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+  .passo-text { color: var(--text); font-size: 13.5px; line-height: 1.45; }
+  .passo-sub { display: block; font-size: 11.5px; color: var(--text-muted); margin-top: 2px; font-weight: 400; }
+  .passo-val { font-family: 'DM Mono', ui-monospace, monospace; font-weight: 700; color: var(--mp-navy); font-size: 14px; white-space: nowrap; }
+  .passo-row.final .passo-text { font-weight: 600; color: var(--mp-navy); }
+  .passo-row.final .passo-val { font-size: 16px; color: var(--bradesco-red-dark); }
+  .formula-box { margin-top: 16px; padding: 12px 16px; background: var(--soft-red); border: 1px solid #F5BCC4; border-radius: 8px; font-family: 'DM Mono', ui-monospace, monospace; font-size: 12.5px; color: var(--bradesco-red-dark); text-align: center; line-height: 1.5; }
+
   /* Resumo de parcelas */
   .resumo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
   @media (max-width: 768px) { .resumo-grid { grid-template-columns: 1fr; } }
@@ -254,7 +282,12 @@
     <div style="margin-top: 14px;">
       <div class="result-red">
         <strong>Valor lance total</strong>
-        <span class="value" id="br-lanceTotal">—</span>
+        <span style="display:inline-flex; align-items:center; gap:10px;">
+          <span class="value" id="br-lanceTotal">—</span>
+          <button type="button" class="btn-eye-lance" onclick="abrirAnaliticoLance()" title="Ver memória de cálculo do lance">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </span>
       </div>
     </div>
   </section>
@@ -753,7 +786,61 @@ document.getElementById('baixarPdfBradesco').addEventListener('click', async () 
 });
 
 // ═══════════════════════════════════════════════════════
-// SIMULAÇÕES SALVAS (48h) — SimulacaoStore
+// OLHINHO — MEMÓRIA DE CÁLCULO DO LANCE
+// ═══════════════════════════════════════════════════════
+function abrirAnaliticoLance() {
+  const i = readInputs();
+  if (!(i.credito > 0) || !(i.prazo > 0)) {
+    alert('Preencha crédito e prazo para ver a memória de cálculo.');
+    return;
+  }
+  const r = calc(i);
+  const categoria = r.saldoDevedor;
+  const fator = 1 + (i.taxaAntecipacao || 0);
+  const pctLanceNum = i.pctLance || 0;
+  const passo3 = categoria * pctLanceNum;
+  const lance = r.lanceTotal;
+
+  const pctStr = (n, d=2) => isFinite(n) ? (n*100).toFixed(d).replace('.', ',') + ' %' : '—';
+  const fatorStr = isFinite(fator) ? fator.toFixed(4).replace('.', ',') : '—';
+
+  const body = document.getElementById('lanceMemoriaBody');
+  body.innerHTML = `
+    <div class="passo-row">
+      <span class="passo-num">1</span>
+      <span class="passo-text">Categoria (Crédito + Taxas)<span class="passo-sub">${formatMoney(i.credito)} × (1 + ${pctStr(i.taxaAdm)} + ${pctStr(i.fundo)})</span></span>
+      <span class="passo-val">${formatMoney(categoria)}</span>
+    </div>
+    <div class="passo-row">
+      <span class="passo-num">2</span>
+      <span class="passo-text">% Lance escolhido</span>
+      <span class="passo-val">${pctStr(pctLanceNum)}</span>
+    </div>
+    <div class="passo-row">
+      <span class="passo-num">3</span>
+      <span class="passo-text">Categoria × % Lance<span class="passo-sub">${formatMoney(categoria)} × ${pctStr(pctLanceNum)}</span></span>
+      <span class="passo-val">${formatMoney(passo3)}</span>
+    </div>
+    <div class="passo-row">
+      <span class="passo-num">4</span>
+      <span class="passo-text">Fator (1 + Taxa Antecipação)<span class="passo-sub">Imóvel = 1,0425 (4,25%) · Auto = 1,0525 (5,25%)</span></span>
+      <span class="passo-val">${fatorStr}</span>
+    </div>
+    <div class="passo-row final">
+      <span class="passo-num">5</span>
+      <span class="passo-text">Valor do Lance Total = passo 3 ÷ passo 4</span>
+      <span class="passo-val">${formatMoney(lance)}</span>
+    </div>
+    <div class="formula-box">Lance (R$) = (Categoria × % Lance) ÷ Fator</div>
+  `;
+  document.getElementById('modalLance').classList.add('aberto');
+}
+function fecharAnaliticoLance() {
+  document.getElementById('modalLance').classList.remove('aberto');
+}
+
+// ═══════════════════════════════════════════════════════
+// SIMULAÇÕES SALVAS (7 dias) — SimulacaoStore
 // ═══════════════════════════════════════════════════════
 (function initSimStore() {
   if (!window.SimulacaoStore) return;
@@ -767,6 +854,25 @@ document.getElementById('baixarPdfBradesco').addEventListener('click', async () 
   });
 })();
 </script>
+
+<!-- Modal: Memória de cálculo do lance -->
+<div id="modalLance" class="modal-lance-bg" onclick="if(event.target===this)fecharAnaliticoLance()">
+  <div class="modal-lance-box">
+    <div class="modal-lance-head">
+      <div>
+        <div class="modal-lance-title">Como chegamos no valor do lance</div>
+        <div class="modal-lance-sub">Memória de cálculo passo a passo</div>
+      </div>
+      <button type="button" class="modal-lance-close" onclick="fecharAnaliticoLance()" title="Fechar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-lance-body" id="lanceMemoriaBody"></div>
+    <div class="modal-lance-foot">
+      <button type="button" class="modal-lance-btn" onclick="fecharAnaliticoLance()">Fechar</button>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>
