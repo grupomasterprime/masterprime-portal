@@ -323,23 +323,15 @@
     </div>
   </section>
 
-  <!-- ════════ RESUMO DE PARCELAS ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-red"></span>
-      <h3>Resumo de parcelas</h3>
-    </div>
-
-    <div class="resumo-grid" style="margin-bottom: 12px;">
-      <div class="resumo-row"><span class="lbl">Saldo devedor</span><span class="val" id="br-saldoDevedor">—</span></div>
-      <div class="resumo-row"><span class="lbl">Seguro mensal (incluso)</span><span class="val" id="br-seguroMensal">—</span></div>
-    </div>
-
-    <div class="resumo-grid">
-      <div class="resumo-row highlight"><span class="lbl" id="br-lblParcelaInicial">1ª a 8ª (com antecipação)</span><span class="val" id="br-parcelaInicial">—</span></div>
-      <div class="resumo-row highlight"><span class="lbl" id="br-lblParcelaDemais">Demais parcelas</span><span class="val" id="br-parcelaPosAnt">—</span></div>
-    </div>
-  </section>
+  <!-- Resumo de parcelas / Saldo devedor / Seguro: continuam calculados internamente (ids ocultos) mas a seção visual foi removida a pedido. -->
+  <div style="display:none">
+    <span id="br-saldoDevedor"></span>
+    <span id="br-seguroMensal"></span>
+    <span id="br-parcelaInicial"></span>
+    <span id="br-parcelaPosAnt"></span>
+    <span id="br-lblParcelaInicial"></span>
+    <span id="br-lblParcelaDemais"></span>
+  </div>
 
   <!-- ════════ AVISO ════════ -->
   <div class="aviso">
@@ -761,10 +753,11 @@ function _montarPdfComercialBradesco() {
       total: { pct: _v('br-pctLance').replace(' %','') || '0,00', rs: (_t('br-lanceTotal') || 'R$ 0,00').replace('R$ ','') }
     },
     outputs: [
-      { label: 'Crédito Líquido',                                                      value: creditoLiquido },
-      { label: 'Parcela Inicial',                                                       value: _t('br-parcelaInicial') || '—' },
-      { label: 'Valor parcela (pós-contemplado)', subAcima: '(Diluir nas Parcelas)', value: _t('br-parcDiluir') || '—' },
-      { label: 'Prazo Restante',                                                        value: _t('br-prazoDiluir') || '—' },
+      { label: 'Crédito Líquido',                                                                          value: creditoLiquido },
+      { label: 'Parcela Inicial',                                                                          value: _t('br-parcelaInicial') || '—' },
+      { label: '1ª parcela pós-contemplação',     subAcima: '(Mantém o valor da parcela inicial)',         value: _t('br-parcelaInicial') || '—' },
+      { label: 'Demais parcelas pós-contemplação', subAcima: '(A partir da 2ª · Diluir nas Parcelas)',     value: _t('br-parcDiluir') || '—' },
+      { label: 'Prazo Restante',                                                                           value: _t('br-prazoDiluir') || '—' },
     ]
   };
 }
@@ -788,6 +781,53 @@ document.getElementById('baixarPdfBradesco').addEventListener('click', async () 
 // ═══════════════════════════════════════════════════════
 // OLHINHO — MEMÓRIA DE CÁLCULO DO LANCE
 // ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// SYNC % LANCE ↔ VALOR DO LANCE (R$)
+// Usa a mesma fórmula: Lance = (Categoria × %Lance) ÷ Fator
+// ═══════════════════════════════════════════════════════
+let _syncingLance = false;
+function _baseCatEFator() {
+  const credito = unmaskMoney(get('br-credito').value || '');
+  const adm = unmaskPct(get('br-taxaAdm').value || '') / 100;
+  const fundo = unmaskPct(get('br-fundo').value || '') / 100;
+  const txAnt = unmaskPct(get('br-taxaAntecipacao').value || '') / 100;
+  const categoria = credito * (1 + adm + fundo);
+  const fator = 1 + txAnt;
+  return { credito, categoria, fator };
+}
+function syncPctParaValor() {
+  if (_syncingLance) return;
+  const pct = unmaskPct(get('br-pctLance').value || '') / 100;
+  const { categoria, fator } = _baseCatEFator();
+  _syncingLance = true;
+  if (categoria > 0 && fator > 0 && pct > 0) {
+    const lance = (categoria * pct) / fator;
+    get('br-lanceManual').value = maskMoney(String(Math.round(lance * 100)));
+  } else if (pct === 0) {
+    get('br-lanceManual').value = '';
+  }
+  _syncingLance = false;
+}
+function syncValorParaPct() {
+  if (_syncingLance) return;
+  const valor = unmaskMoney(get('br-lanceManual').value || '');
+  const { categoria, fator } = _baseCatEFator();
+  _syncingLance = true;
+  if (categoria > 0 && fator > 0 && valor > 0) {
+    const pct = (valor * fator) / categoria * 100;
+    get('br-pctLance').value = pct.toFixed(2).replace('.', ',') + ' %';
+  } else if (valor === 0) {
+    get('br-pctLance').value = '';
+  }
+  _syncingLance = false;
+}
+get('br-pctLance').addEventListener('input', syncPctParaValor);
+get('br-lanceManual').addEventListener('input', syncValorParaPct);
+['br-credito','br-taxaAdm','br-fundo','br-taxaAntecipacao'].forEach(id => {
+  const el = get(id);
+  if (el) el.addEventListener('input', () => { if (!_syncingLance) setTimeout(syncPctParaValor, 0); });
+});
+
 function abrirAnaliticoLance() {
   const i = readInputs();
   if (!(i.credito > 0) || !(i.prazo > 0)) {
