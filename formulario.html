@@ -346,7 +346,7 @@ body {
 <div id="tela-tipo">
   <div class="card">
     <h3>Vamos começar — você é Pessoa Física ou Jurídica?</h3>
-    <p style="color:var(--text2);margin-bottom:18px;font-size:13px">Selecione o tipo de cadastro para iniciar o preenchimento. O processo leva cerca de 5 a 10 minutos.</p>
+    <p style="color:var(--text2);margin-bottom:18px;font-size:13px">Selecione o tipo de cadastro para iniciar o preenchimento.</p>
     <div class="tipo-grid">
       <button class="tipo-btn" onclick="iniciarForm('pf')">
         <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
@@ -601,7 +601,7 @@ const PAGAMENTO_OPCOES = {
   bradesco: ['Boleto', 'Débito Automático'],
   itau:     ['Boleto', 'Débito Automático']
 };
-const ADMINS_LABEL = { porto: 'Porto', bradesco: 'Bradesco', itau: 'Itaú' };
+// ADMINS_LABEL já definida no topo do script (linha ~400). Não redeclarar.
 
 // Quando muda administradora, atualiza opções de pagamento
 function onAdminChange(prefix) {
