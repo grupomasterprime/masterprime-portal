@@ -340,18 +340,18 @@ function renderList(filter = '') {
       return dir * (a.fbs.length - b.fbs.length);
     }
     if (_fbSort === 'last') {
-      // Quem nunca teve feedback vai pro extremo: desc = primeiro, asc = último
-      if (a.dias === null && b.dias !== null) return -dir;
-      if (b.dias === null && a.dias !== null) return dir;
+      // desc = mais atrasados primeiro (com nunca no topo); asc = mais recentes primeiro
+      if (a.dias === null && b.dias !== null) return dir;
+      if (b.dias === null && a.dias !== null) return -dir;
       return dir * ((b.dias || 0) - (a.dias || 0));
     }
     if (_fbSort === 'status') {
       return dir * (statusRank(b.status.cls) - statusRank(a.status.cls));
     }
-    // Default: urgência (nunca primeiro, depois atrasados)
-    if (a.dias === null && b.dias !== null) return -dir;
-    if (b.dias === null && a.dias !== null) return dir;
-    return dir * ((b.dias || 0) - (a.dias || 0));
+    // Default: urgência (nunca primeiro, depois atrasados) — independente de dir
+    if (a.dias === null && b.dias !== null) return -1;
+    if (b.dias === null && a.dias !== null) return 1;
+    return (b.dias || 0) - (a.dias || 0);
   });
 
   const arrow = (col) => _fbSort === col ? (_fbSortDir === 'asc' ? ' <span style="color:var(--mp-yellow)">▲</span>' : ' <span style="color:var(--mp-yellow)">▼</span>') : '';
