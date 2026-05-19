@@ -241,12 +241,19 @@ async function init() {
 
 async function loadData() {
   // Lista de consultores (consultor + sócio + parceiro — pessoas que recebem feedback)
-  const { data: users } = await sb.from('portal_users')
-    .select('auth_id, nome, tipo')
-    .in('tipo', ['consultor', 'socio', 'parceiro'])
-    .not('auth_id', 'is', null)
-    .order('nome');
-  allUsers = users || [];
+  // Usa RPC pra contornar RLS que limitaria sócios a só verem o próprio registro
+  const { data: users, error: errUsers } = await sb.rpc('listar_feedbackaveis');
+  if (errUsers) {
+    // fallback: tenta direto (admin/master conseguem)
+    const { data: u2 } = await sb.from('portal_users')
+      .select('auth_id, nome, tipo')
+      .in('tipo', ['consultor', 'socio', 'parceiro'])
+      .not('auth_id', 'is', null)
+      .order('nome');
+    allUsers = u2 || [];
+  } else {
+    allUsers = users || [];
+  }
 
   // Todos os feedbacks
   const { data: fbs } = await sb.from('portal_feedbacks')
@@ -346,7 +353,8 @@ function renderList(filter = '') {
       return dir * ((b.dias || 0) - (a.dias || 0));
     }
     if (_fbSort === 'status') {
-      return dir * (statusRank(b.status.cls) - statusRank(a.status.cls));
+      // desc = mais urgente primeiro (NUNCA → atrasado → atenção → recente)
+      return dir * (statusRank(a.status.cls) - statusRank(b.status.cls));
     }
     // Default: urgência (nunca primeiro, depois atrasados) — independente de dir
     if (a.dias === null && b.dias !== null) return -1;
