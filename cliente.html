@@ -340,6 +340,13 @@
     .section-divider{display:flex;align-items:center;gap:12px;margin:18px 0 14px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;}
     .section-divider::before,.section-divider::after{content:"";flex:1;height:1px;background:var(--border)}
 
+    /* Destaque para aviso Bradesco */
+    .bradesco-doc-alert{
+      background:#FFF5F5; border:1px solid #FECACA; border-radius:10px;
+      padding:14px 16px; margin-bottom:14px; font-size:12px; color:#991B1B;
+      display:flex; gap:10px; align-items:flex-start; line-height:1.5;
+    }
+
     @media (max-width:680px){
       .container{padding:24px 14px 60px}
       .cliente-hero{grid-template-columns:1fr;padding:24px}
@@ -427,7 +434,10 @@ const BANCOS = [
         descricao: 'Envio de faturamento de cota(s) para administração.',
         documentos: [
           { key: 'documento_foto',  label: 'Documento com foto', sub: 'RG ou CNH (frente e verso)', obrigatorio: true, iconKey: 'id' },
+          { key: 'comprovante_residencia', label: 'Comprovante de residência', sub: 'Conta de luz, água ou similar (últimos 90 dias)', obrigatorio: true, iconKey: 'home' },
+          { key: 'comprovante_renda', label: 'Comprovante de renda', sub: 'Holerite, extrato bancário ou declaração de IR', obrigatorio: true, iconKey: 'docs' },
           { key: 'Doc.CRLV', label: 'CRLV do bem', sub: 'Documento do Veículo', obrigatorio: false, iconKey: 'car' },
+          { key: 'documento_foto_vendedor',  label: 'Documento com foto do vendedor', sub: 'RG ou CNH (frente e verso)', obrigatorio: true, iconKey: 'id' },
           { key: 'outros',          label: 'Outros documentos', sub: 'Declarações, comprovantes adicionais (opcional)', obrigatorio: false, iconKey: 'docs' }
         ]
       }
@@ -493,6 +503,7 @@ const SVG = {
   bank:   '<svg viewBox="0 0 24 24"><rect x="2" y="11" width="20" height="9" rx="2"/><path d="M12 2L2 7h20L12 2z"/><line x1="6" y1="11" x2="6" y2="20"/><line x1="10" y1="11" x2="10" y2="20"/><line x1="14" y1="11" x2="14" y2="20"/><line x1="18" y1="11" x2="18" y2="20"/></svg>',
   pf:     '<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
   pj:     '<svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>',
+  money:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
 };
 const ico = (key, cls='ico') => `<span class="${cls}">${SVG[key]||''}</span>`;
 
@@ -695,7 +706,7 @@ function renderBlocoTipoPessoa() {
         <button type="button" class="tipo-pessoa-btn ${tipoPessoa==='pj'?'ativo':''}" onclick="selecionarTipoPessoa('pj')" id="btn-tp-pj">
           <span class="tipo-icon">🏢</span>
           <span class="tipo-label">Pessoa Jurídica</span>
-          <span class="tipo-sub">CNPJ</span>
+          <span class="tipo-sub">CNPJ · Contrato Social obrigatório</span>
         </button>
       </div>
     </div>`;
@@ -703,7 +714,6 @@ function renderBlocoTipoPessoa() {
 
 function selecionarTipoPessoa(tipo) {
   tipoPessoa = tipo;
-  // Atualiza botões visuais
   document.querySelectorAll('.tipo-pessoa-btn').forEach(b => b.classList.remove('ativo'));
   const btn = document.getElementById('btn-tp-' + tipo);
   if (btn) btn.classList.add('ativo');
@@ -714,40 +724,110 @@ function selecionarTipoPessoa(tipo) {
   if (campoCpf)  campoCpf.style.display  = tipo==='pf'  ? '' : 'none';
   if (campoCnpj) campoCnpj.style.display = tipo==='pj'  ? '' : 'none';
   if (campoNome) campoNome.textContent = tipo==='pj' ? 'Razão Social' : 'Nome Completo';
+  // Atualiza documento extra de PJ (Contrato Social) se existir
+  atualizarDocContratoSocial();
 }
 
-// ════════════════ BLOCO DADOS BANCÁRIOS DO VENDEDOR ════════════════
-function renderBlocoDadosBancariosVendedor(prefixo='vendedor') {
+function atualizarDocContratoSocial() {
+  if (!operacaoSelecionada) return;
+  // Adiciona/remove slot de contrato social conforme tipo
+  const jaTem = operacaoSelecionada.documentos.find(d => d.key === 'contrato_social');
+  if (tipoPessoa === 'pj' && !jaTem) {
+    operacaoSelecionada.documentos.push({
+      key: 'contrato_social',
+      label: 'Contrato Social',
+      sub: 'Documento da empresa (obrigatório para PJ)',
+      obrigatorio: true,
+      iconKey: 'docs'
+    });
+  } else if (tipoPessoa === 'pf' && jaTem) {
+    operacaoSelecionada.documentos = operacaoSelecionada.documentos.filter(d => d.key !== 'contrato_social');
+    delete arquivosPendentes['contrato_social'];
+  }
+  renderSlotsAnexo(operacaoSelecionada.documentos);
+}
+
+// ════════════════ BLOCO ESTADO CIVIL / CÔNJUGE ════════════════
+function renderBlocoEstadoCivil() {
   return `
     <div class="card">
-      <div class="card-head"><div class="card-title">${ico('bank')} Dados Bancários do Vendedor (para pagamento)</div></div>
+      <div class="card-head"><div class="card-title">${ico('user')} Estado Civil</div></div>
       <div class="card-body">
-        <div class="grid-2">
-          <div class="campo"><label>Nome do Vendedor <span class="req">*</span></label><input type="text" id="f-${prefixo}-nome" placeholder="Nome completo do vendedor"></div>
-          <div class="campo"><label>CPF / CNPJ <span class="req">*</span></label><input type="text" id="f-${prefixo}-cpf" placeholder="000.000.000-00 ou CNPJ" maxlength="18" oninput="mascaraCpfCnpjGenerico(this)"></div>
+        <div class="campo">
+          <label>Estado Civil <span class="req">*</span></label>
+          <select id="f-estado_civil" onchange="toggleBlocoConjuge()">
+            <option value="">Selecione...</option>
+            <option value="solteiro">Solteiro(a)</option>
+            <option value="casado">Casado(a)</option>
+            <option value="divorciado">Divorciado(a)</option>
+            <option value="viuvo">Viúvo(a)</option>
+            <option value="uniao_estavel">União Estável</option>
+          </select>
         </div>
-        <div class="campo"><label>Endereço</label><input type="text" id="f-${prefixo}-endereco" placeholder="Rua, número, bairro, cidade - UF"></div>
-        <div class="grid-3">
-          <div class="campo"><label>Banco <span class="req">*</span></label><input type="text" id="f-${prefixo}-banco" placeholder="Ex: 341 - Itaú"></div>
-          <div class="campo"><label>Agência <span class="req">*</span></label><input type="text" id="f-${prefixo}-agencia" placeholder="Ex: 1234"></div>
-          <div class="campo"><label>Conta <span class="req">*</span></label><input type="text" id="f-${prefixo}-conta" placeholder="Ex: 12345-6"></div>
-        </div>
-        <div class="grid-2">
-          <div class="campo"><label>Tipo de Conta <span class="req">*</span></label>
-            <select id="f-${prefixo}-tipo_conta">
-              <option value="">Selecione...</option>
-              <option value="corrente">Conta Corrente</option>
-              <option value="poupanca">Conta Poupança</option>
-            </select>
+        <div id="bloco-conjuge" style="display:none;">
+          <div class="alert" style="background:var(--amber-bg);color:var(--amber);border-color:#FCD34D;display:flex;margin-bottom:14px;">
+            ${ico('alert')} Para processos de transferência da Porto, é obrigatório anexar documento do cônjuge.
           </div>
-          <div class="campo"><label>Chave PIX (opcional)</label><input type="text" id="f-${prefixo}-pix" placeholder="CPF, CNPJ, e-mail ou celular"></div>
-        </div>
-        <div class="grid-2">
-          <div class="campo"><label>E-mail</label><input type="email" id="f-${prefixo}-email" placeholder="email@exemplo.com"></div>
-          <div class="campo"><label>Telefone para contato</label><input type="text" id="f-${prefixo}-telefone" placeholder="(00) 00000-0000" maxlength="15" oninput="mascaraTel(this)"></div>
+          <div class="grid-2">
+            <div class="campo"><label>Nome do cônjuge <span class="req">*</span></label><input type="text" id="f-conjuge-nome" placeholder="Nome completo"></div>
+            <div class="campo"><label>CPF do cônjuge <span class="req">*</span></label><input type="text" id="f-conjuge-cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)"></div>
+          </div>
         </div>
       </div>
     </div>`;
+}
+
+function toggleBlocoConjuge() {
+  const sel = document.getElementById('f-estado_civil');
+  const bloco = document.getElementById('bloco-conjuge');
+  if (!sel || !bloco) return;
+  const estado = sel.value;
+  const exibir = estado === 'casado' || estado === 'uniao_estavel';
+  bloco.style.display = exibir ? 'block' : 'none';
+  // Torna campos obrigatórios se exibir
+  const nomeEl = document.getElementById('f-conjuge-nome');
+  const cpfEl  = document.getElementById('f-conjuge-cpf');
+  if (nomeEl) nomeEl.required = exibir;
+  if (cpfEl)  cpfEl.required  = exibir;
+}
+
+// ════════════════ BLOCO REPRESENTANTE LEGAL (Itaú PJ) ════════════════
+function renderBlocoRepresentanteLegal() {
+  return `
+    <div class="card" id="card-rep-legal" style="display:none;">
+      <div class="card-head"><div class="card-title">${ico('user')} Representante Legal (Itaú PJ)</div></div>
+      <div class="card-body">
+        <div class="alert" style="background:var(--amber-bg);color:var(--amber);border-color:#FCD34D;display:flex;margin-bottom:14px;">
+          ${ico('alert')} Para Itaú com CNPJ, são necessários os dados do representante legal para assinatura dos contratos.
+        </div>
+        <div class="grid-2">
+          <div class="campo"><label>Nome <span class="req">*</span></label><input type="text" id="f-rep-nome" placeholder="Nome completo"></div>
+          <div class="campo"><label>CPF <span class="req">*</span></label><input type="text" id="f-rep-cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)"></div>
+        </div>
+        <div class="campo"><label>E-mail <span class="req">*</span></label><input type="email" id="f-rep-email" placeholder="representante@email.com"></div>
+      </div>
+    </div>`;
+}
+
+function atualizarVisibilidadeRepresentante() {
+  if (!bancoSelecionado) return;
+  const card = document.getElementById('card-rep-legal');
+  if (!card) return;
+  // Exibe somente se for Itaú e PJ
+  card.style.display = (bancoSelecionado.id === 'itau' && tipoPessoa === 'pj') ? 'block' : 'none';
+}
+
+// ════════════════ BLOCO GRUPOS/COTAS MULTIPLOS ════════════════
+function adicionarGrupoCota(){
+  const container = document.getElementById('grupo-cota-container');
+  if (!container) return;
+  const linha = document.createElement('div');
+  linha.className = 'grid-2 grupo-cota-linha';
+  linha.style.marginBottom = '10px';
+  linha.innerHTML = `
+    <div class="campo"><label>Grupo</label><input type="text" class="f-grupo" placeholder="Ex: 12"></div>
+    <div class="campo"><label>Cota</label><input type="text" class="f-cota" placeholder="Ex: 0042"></div>`;
+  container.appendChild(linha);
 }
 
 // ════════════════ CADASTRO ════════════════
@@ -755,6 +835,8 @@ function renderTelaCadastro(banco, operacao){
   if (!banco || !operacao) { renderTelaSelecaoBanco(); return; }
   arquivosPendentes = {};
   tipoPessoa = 'pf';
+  // Garante que contrato social não está nos docs iniciais (será adicionado se PJ)
+  operacao.documentos = operacao.documentos.filter(d => d.key !== 'contrato_social');
   const cor = banco.corPrimaria;
   const corDark = banco.corPrimariaDark;
 
@@ -810,22 +892,18 @@ function renderTelaCadastro(banco, operacao){
               <div class="campo"><label>Telefone</label><input type="text" id="f-cessionario-telefone" placeholder="(00) 00000-0000" maxlength="15" oninput="mascaraTel(this)"></div>
             </div>
             <div class="campo"><label>Endereço</label><input type="text" id="f-cessionario-endereco" placeholder="Rua, número, bairro, cidade - UF"></div>
-            <div class="campo"><label>Estado Civil</label>
-              <select id="f-cessionario-estado_civil">
-                <option value="">Selecione...</option>
-                <option value="solteiro">Solteiro(a)</option>
-                <option value="casado">Casado(a)</option>
-                <option value="divorciado">Divorciado(a)</option>
-                <option value="viuvo">Viúvo(a)</option>
-                <option value="uniao_estavel">União Estável</option>
-              </select>
-            </div>
+            ${renderBlocoEstadoCivil()}
           </div>
         </div>`;
   } else if (banco.id === 'bradesco') {
     html += `
         <!-- Tipo Pessoa -->
         ${renderBlocoTipoPessoa()}
+
+        <!-- ALERTA BRADESCO: documentos obrigatórios -->
+        
+        </div>
+
         <div class="card">
           <div class="card-head"><div class="card-title">${ico('user')} Dados do Consorciado</div></div>
           <div class="card-body">
@@ -836,9 +914,18 @@ function renderTelaCadastro(banco, operacao){
             </div>
             <div class="campo"><label id="label-nome-doc">Nome Completo <span class="req">*</span></label><input type="text" id="f-nome" placeholder="Nome completo ou Razão Social"></div>
             <div class="grid-3">
-              <div class="campo"><label>Estado Civil</label><select id="f-estado_civil"><option value="">Selecione...</option><option value="solteiro">Solteiro(a)</option><option value="casado">Casado(a)</option><option value="divorciado">Divorciado(a)</option><option value="viuvo">Viúvo(a)</option><option value="uniao_estavel">União Estável</option></select></div>
+              <div class="campo"><label>Estado Civil</label><select id="f-estado_civil" onchange="toggleBlocoConjuge()"><option value="">Selecione...</option><option value="solteiro">Solteiro(a)</option><option value="casado">Casado(a)</option><option value="divorciado">Divorciado(a)</option><option value="viuvo">Viúvo(a)</option><option value="uniao_estavel">União Estável</option></select></div>
               <div class="campo"><label>Nº Documento Identificação</label><input type="text" id="f-doc_id" placeholder="Nº do documento"></div>
               <div class="campo"><label>Tipo de Documento</label><select id="f-tipo_doc"><option value="">Selecione...</option><option value="rg">RG</option><option value="cnh">CNH</option><option value="outro">Outro</option></select></div>
+            </div>
+            <div id="bloco-conjuge" style="display:none;">
+              <div class="alert" style="background:var(--amber-bg);color:var(--amber);border-color:#FCD34D;display:flex;margin-bottom:14px;">
+                ${ico('alert')} Para processos de transferência, anexar documento do cônjuge.
+              </div>
+              <div class="grid-2">
+                <div class="campo"><label>Nome do cônjuge <span class="req">*</span></label><input type="text" id="f-conjuge-nome" placeholder="Nome completo"></div>
+                <div class="campo"><label>CPF do cônjuge <span class="req">*</span></label><input type="text" id="f-conjuge-cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)"></div>
+              </div>
             </div>
             <div class="grid-3">
               <div class="campo"><label>Data de Expedição</label><input type="date" id="f-data_expedicao"></div>
@@ -866,7 +953,10 @@ function renderTelaCadastro(banco, operacao){
               <div class="campo"><label>Agência</label><input type="text" id="f-agencia"></div>
               <div class="campo"><label>Conta</label><input type="text" id="f-conta"></div>
             </div>
-            <div class="campo"><label>Tipo de Conta</label><select id="f-tipo_conta"><option value="">Selecione...</option><option value="corrente">Corrente</option><option value="poupanca">Poupança</option></select></div>
+            <div class="grid-2">
+              <div class="campo"><label>Dígito</label><input type="text" id="f-conta_digito" placeholder="Bradesco não usa dígito" maxlength="2"></div>
+              <div class="campo"><label>Tipo de Conta</label><select id="f-tipo_conta"><option value="">Selecione...</option><option value="corrente">Corrente</option><option value="poupanca">Poupança</option></select></div>
+            </div>
           </div>
         </div>
         <div class="card">
@@ -897,7 +987,7 @@ function renderTelaCadastro(banco, operacao){
             </div>
             <div class="grid-2">
               <div class="campo"><label>Ano Modelo</label><input type="text" id="f-ano_modelo"></div>
-              <div class="campo"><label>Valor de Venda R$</label><input type="text" id="f-valor_venda" placeholder="R$ 0,00" oninput="mascaraValor(this)"></div>
+              <div class="campo"><label>Valor de Venda R$ <span class="req">*</span></label><input type="text" id="f-valor_venda" placeholder="R$ 0,00" oninput="mascaraValor(this)"></div>
             </div>
           </div>
         </div>
@@ -926,16 +1016,6 @@ function renderTelaCadastro(banco, operacao){
           </div>
         </div>`;
   } else if ((banco.id === 'porto' || banco.id === 'itau') && operacao.id === 'faturamento') {
-    // Porto Seguro e Itaú com campos de dados bancários do vendedor
-    const camposItau = banco.id === 'itau' ? `
-      <div class="campo">
-        <label>Deseja realizar o pagamento da taxa de faturamento (710) com o crédito?</label>
-        <select id="f-pagar-taxa-credito">
-          <option value="nao">Não</option>
-          <option value="sim">Sim</option>
-        </select>
-      </div>` : '';
-
     html += `
         <!-- Tipo Pessoa -->
         ${renderBlocoTipoPessoa()}
@@ -947,6 +1027,7 @@ function renderTelaCadastro(banco, operacao){
               <div id="bloco-cpf"><div class="campo"><label>CPF <span class="req">*</span></label><input type="text" id="f-cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)" style="font-family:var(--fonte-mono)"></div></div>
               <div id="bloco-cnpj" style="display:none"><div class="campo"><label>CNPJ <span class="req">*</span></label><input type="text" id="f-cnpj" placeholder="00.000.000/0001-00" maxlength="18" oninput="mascaraCNPJ(this)" style="font-family:var(--fonte-mono)"></div></div>
             </div>
+            ${renderBlocoEstadoCivil()}
             <div class="grid-2">
               <div class="campo"><label>GRUPO <span class="req">*</span></label><input type="text" id="f-grupo" placeholder="Ex: Grupo A, Grupo 12..."></div>
               <div class="campo"><label>COTA <span class="req">*</span></label><input type="text" id="f-cota" placeholder="Ex: 0042"></div>
@@ -974,13 +1055,44 @@ function renderTelaCadastro(banco, operacao){
               </div>
             </div>
             <div class="campo"><label>Valor de Venda R$ <span class="req">*</span></label><input type="text" id="f-valor_venda" placeholder="R$ 0,00" oninput="mascaraValor(this)"></div>
-            ${camposItau}
             <div class="campo"><label>CORRETOR (OPCIONAL)</label><input type="text" id="f-corretor" placeholder="Nome do corretor, se houver"></div>
             <div class="campo"><label>OBSERVAÇÕES</label><textarea id="f-descricao" placeholder="Descreva detalhes do seu caso (opcional)..."></textarea></div>
           </div>
         </div>
         <!-- Dados bancários do vendedor -->
-        ${renderBlocoDadosBancariosVendedor('vendedor')}`;
+        <div class="card">
+          <div class="card-head"><div class="card-title">${ico('bank')} Dados Bancários do Vendedor (para pagamento)</div></div>
+          <div class="card-body">
+            <div class="grid-2">
+              <div class="campo"><label>Nome do Vendedor <span class="req">*</span></label><input type="text" id="f-vendedor-nome" placeholder="Nome completo do vendedor"></div>
+              <div class="campo"><label>CPF / CNPJ <span class="req">*</span></label><input type="text" id="f-vendedor-cpf" placeholder="000.000.000-00 ou CNPJ" maxlength="18" oninput="mascaraCpfCnpjGenerico(this)"></div>
+            </div>
+            <div class="campo"><label>Endereço</label><input type="text" id="f-vendedor-endereco" placeholder="Rua, número, bairro, cidade - UF"></div>
+            <div class="grid-3">
+              <div class="campo"><label>Banco <span class="req">*</span></label><input type="text" id="f-vendedor-banco" placeholder="Ex: 341 - Itaú"></div>
+              <div class="campo"><label>Agência <span class="req">*</span></label><input type="text" id="f-vendedor-agencia" placeholder="Ex: 1234"></div>
+              <div class="campo"><label>Conta <span class="req">*</span></label><input type="text" id="f-vendedor-conta" placeholder="Ex: 12345-6"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>Dígito</label><input type="text" id="f-vendedor-digito" placeholder="Bradesco não usa dígito" maxlength="2"></div>
+              <div class="campo"><label>Tipo de Conta <span class="req">*</span></label>
+                <select id="f-vendedor-tipo_conta">
+                  <option value="">Selecione...</option>
+                  <option value="corrente">Conta Corrente</option>
+                  <option value="poupanca">Conta Poupança</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>Chave PIX (opcional)</label><input type="text" id="f-vendedor-pix" placeholder="CPF, CNPJ, e-mail ou celular"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>E-mail</label><input type="email" id="f-vendedor-email" placeholder="email@exemplo.com"></div>
+              <div class="campo"><label>Telefone para contato</label><input type="text" id="f-vendedor-telefone" placeholder="(00) 00000-0000" maxlength="15" oninput="mascaraTel(this)"></div>
+            </div>
+          </div>
+        </div>
+        ${banco.id === 'itau' ? renderBlocoRepresentanteLegal() : ''}`;
   } else {
     // Formulário genérico
     html += `
@@ -994,6 +1106,7 @@ function renderTelaCadastro(banco, operacao){
               <div id="bloco-cpf"><div class="campo"><label>CPF <span class="req">*</span></label><input type="text" id="f-cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)" style="font-family:var(--fonte-mono)"></div></div>
               <div id="bloco-cnpj" style="display:none"><div class="campo"><label>CNPJ <span class="req">*</span></label><input type="text" id="f-cnpj" placeholder="00.000.000/0001-00" maxlength="18" oninput="mascaraCNPJ(this)" style="font-family:var(--fonte-mono)"></div></div>
             </div>
+            ${renderBlocoEstadoCivil()}
             <div class="grid-2">
               <div class="campo"><label>GRUPO <span class="req">*</span></label><input type="text" id="f-grupo" placeholder="Ex: Grupo A, Grupo 12..."></div>
               <div class="campo"><label>COTA <span class="req">*</span></label><input type="text" id="f-cota" placeholder="Ex: 0042"></div>
@@ -1022,18 +1135,8 @@ function renderTelaCadastro(banco, operacao){
 
   root.innerHTML = html;
   renderSlotsAnexo(operacao.documentos);
-}
-
-function adicionarGrupoCota(){
-  const container = document.getElementById('grupo-cota-container');
-  if (!container) return;
-  const linha = document.createElement('div');
-  linha.className = 'grid-2 grupo-cota-linha';
-  linha.style.marginBottom = '10px';
-  linha.innerHTML = `
-    <div class="campo"><label>Grupo</label><input type="text" class="f-grupo" placeholder="Ex: 12"></div>
-    <div class="campo"><label>Cota</label><input type="text" class="f-cota" placeholder="Ex: 0042"></div>`;
-  container.appendChild(linha);
+  // Atualiza visibilidade de representante legal
+  if (banco.id === 'itau') atualizarVisibilidadeRepresentante();
 }
 
 function mascaraValor(el) {
@@ -1050,23 +1153,6 @@ function toggleCamposBem() {
   if (!select || !divNovo) return;
   divNovo.style.display = (select.value === 'novo') ? 'block' : 'none';
   atualizarSlotCRLV();
-}
-
-function obterValorReal(id) {
-  const el = document.getElementById(id);
-  if (!el) return 0;
-  const raw = el.value.replace(/\D/g, '');
-  return parseFloat(raw) / 100;
-}
-
-// Retorna o documento fiscal (CPF ou CNPJ) limpo conforme tipo de pessoa
-function obterDocumentoFiscal(idCpf, idCnpj) {
-  if (tipoPessoa === 'pj') {
-    const cnpjEl = document.getElementById(idCnpj);
-    return cnpjEl ? (cnpjEl.value||'').replace(/\D/g,'') : '';
-  }
-  const cpfEl = document.getElementById(idCpf);
-  return cpfEl ? (cpfEl.value||'').replace(/\D/g,'') : '';
 }
 
 function voltarEtapaAnterior(){
@@ -1095,8 +1181,7 @@ function renderSlotsAnexo(documentos){
 
   slots.innerHTML = documentos.map(cat => {
     const arq = arquivosPendentes[cat.key];
-    const isCRLV = (bancoSelecionado?.id === 'porto' && cat.key === 'Doc.CRLV') ||
-                   (bancoSelecionado?.id === 'itau' && cat.key === 'crlv');
+    const isCRLV = cat.key === 'crlv' || cat.key === 'Doc.CRLV';
     const obrigatorioAgora = cat.obrigatorio || (isCRLV && crlvObrigatorio);
 
     return `
@@ -1157,37 +1242,57 @@ async function enviarCadastro(){
 
   let nome, cpf, grupo, cota, email, tel, corretor=null, descricao=null, cedente=null, cessionario=null;
   let dadosExtras = null;
+  const estadoCivil = document.getElementById('f-estado_civil')?.value || '';
+  const conjugeNome = document.getElementById('f-conjuge-nome')?.value?.trim() || null;
+  const conjugeCpf = document.getElementById('f-conjuge-cpf')?.value?.replace(/\D/g, '') || null;
+  const repNome = document.getElementById('f-rep-nome')?.value?.trim() || null;
+  const repCpf = document.getElementById('f-rep-cpf')?.value?.replace(/\D/g, '') || null;
+  const repEmail = document.getElementById('f-rep-email')?.value?.trim() || null;
+
+  // Validações de cônjuge
+  if ((estadoCivil === 'casado' || estadoCivil === 'uniao_estavel')) {
+    if (!conjugeNome || !conjugeCpf || conjugeCpf.length !== 11) {
+      return alerta('alerta-cadastro','Preencha nome e CPF do cônjuge corretamente.','erro');
+    }
+  }
+
+  // Validações de representante legal (Itaú PJ)
+  if (bancoSelecionado.id === 'itau' && tipoPessoa === 'pj') {
+    if (!repNome || !repCpf || repCpf.length !== 11 || !repEmail) {
+      return alerta('alerta-cadastro','Preencha todos os dados do representante legal (Itaú PJ).','erro');
+    }
+  }
 
   if (operacaoSelecionada.id === 'transferencia') {
-    const cedNome = v('f-cedente-nome')?.trim();
+    const cedNome = document.getElementById('f-cedente-nome')?.value?.trim();
     const cedDocRaw = tipoPessoa === 'pj'
-      ? (v('f-cedente-cnpj')||'').replace(/\D/g,'')
-      : (v('f-cedente-cpf')||'').replace(/\D/g,'');
-    const cedGrupo = v('f-cedente-grupo')?.trim();
-    const cedCota  = v('f-cedente-cota')?.trim();
+      ? (document.getElementById('f-cedente-cnpj')?.value||'').replace(/\D/g,'')
+      : (document.getElementById('f-cedente-cpf')?.value||'').replace(/\D/g,'');
+    const cedGrupo = document.getElementById('f-cedente-grupo')?.value?.trim();
+    const cedCota  = document.getElementById('f-cedente-cota')?.value?.trim();
     if (!cedNome || cedDocRaw.length < 11 || !cedGrupo || !cedCota) return alerta('alerta-cadastro','Preencha todos os campos obrigatórios do Cedente.','erro');
-    cedente = { nome: cedNome, cpf: cedDocRaw, tipo_pessoa: tipoPessoa, grupo: cedGrupo, cota: cedCota, email: v('f-cedente-email')?.trim()||null, telefone: v('f-cedente-telefone')?.trim()||null };
+    cedente = { nome: cedNome, cpf: cedDocRaw, tipo_pessoa: tipoPessoa, grupo: cedGrupo, cota: cedCota, email: document.getElementById('f-cedente-email')?.value?.trim()||null, telefone: document.getElementById('f-cedente-telefone')?.value?.trim()||null };
 
-    const cesNome = v('f-cessionario-nome')?.trim();
-    const cesCpf  = (v('f-cessionario-cpf')||'').replace(/\D/g,'');
-    const cesGrupo = v('f-cessionario-grupo')?.trim();
-    const cesCota  = v('f-cessionario-cota')?.trim();
+    const cesNome = document.getElementById('f-cessionario-nome')?.value?.trim();
+    const cesCpf  = (document.getElementById('f-cessionario-cpf')?.value||'').replace(/\D/g,'');
+    const cesGrupo = document.getElementById('f-cessionario-grupo')?.value?.trim();
+    const cesCota  = document.getElementById('f-cessionario-cota')?.value?.trim();
     if (!cesNome || cesCpf.length<11 || !cesGrupo || !cesCota) return alerta('alerta-cadastro','Preencha todos os campos obrigatórios do Cessionário.','erro');
-    cessionario = { nome: cesNome, cpf: cesCpf, grupo: cesGrupo, cota: cesCota, email: v('f-cessionario-email')?.trim()||null, telefone: v('f-cessionario-telefone')?.trim()||null, endereco: v('f-cessionario-endereco')?.trim()||null, estado_civil: v('f-cessionario-estado_civil')||null };
+    cessionario = { nome: cesNome, cpf: cesCpf, grupo: cesGrupo, cota: cesCota, email: document.getElementById('f-cessionario-email')?.value?.trim()||null, telefone: document.getElementById('f-cessionario-telefone')?.value?.trim()||null, endereco: document.getElementById('f-cessionario-endereco')?.value?.trim()||null, estado_civil: estadoCivil, conjuge: { nome: conjugeNome, cpf: conjugeCpf } };
 
     nome = cessionario.nome; cpf = cessionario.cpf; grupo = cessionario.grupo; cota = cessionario.cota;
     email = cessionario.email; tel = cessionario.telefone;
     dadosExtras = { banco: bancoSelecionado.id, tipo_operacao: operacaoSelecionada.id, tipo_pessoa: tipoPessoa, cedente, cessionario };
   }
   else if (bancoSelecionado.id === 'bradesco') {
-    nome = v('f-nome')?.trim();
+    nome = document.getElementById('f-nome')?.value?.trim();
     cpf  = tipoPessoa === 'pj'
-      ? (v('f-cnpj')||'').replace(/\D/g,'')
-      : (v('f-cpf')||'').replace(/\D/g,'');
+      ? (document.getElementById('f-cnpj')?.value||'').replace(/\D/g,'')
+      : (document.getElementById('f-cpf')?.value||'').replace(/\D/g,'');
     if (!nome) return alerta('alerta-cadastro','Nome é obrigatório.','erro');
     if (cpf.length<11) return alerta('alerta-cadastro','CPF/CNPJ inválido.','erro');
-    email = v('f-email')?.trim()||null;
-    tel   = v('f-telefone')?.trim()||null;
+    email = document.getElementById('f-email')?.value?.trim()||null;
+    tel   = document.getElementById('f-telefone')?.value?.trim()||null;
 
     const primeiraLinha = document.querySelector('.grupo-cota-linha');
     grupo = primeiraLinha?.querySelector('.f-grupo')?.value?.trim() || '';
@@ -1202,47 +1307,58 @@ async function enviarCadastro(){
       if (g && c) gruposCotas.push({ grupo: g, cota: c });
     });
 
+    // Validação específica Bradesco: comprovante de residência e renda OBRIGATÓRIOS
+    if (!arquivosPendentes['comprovante_residencia']) {
+      return alerta('alerta-cadastro','⚠️ Bradesco: anexe o Comprovante de residência (conta de luz, água etc.).','erro');
+    }
+    if (!arquivosPendentes['comprovante_renda']) {
+      return alerta('alerta-cadastro','⚠️ Bradesco: anexe o Comprovante de renda (holerite, extrato ou IR).','erro');
+    }
+
     dadosExtras = {
       banco: bancoSelecionado.id, tipo_operacao: operacaoSelecionada.id, tipo_pessoa: tipoPessoa,
+      estado_civil: estadoCivil, conjuge: { nome: conjugeNome, cpf: conjugeCpf },
+      representante_legal: { nome: repNome, cpf: repCpf, email: repEmail },
       consorciado: {
-        nome, cpf, tipo_pessoa: tipoPessoa, data_nasc: v('f-data_nasc'), estado_civil: v('f-estado_civil'),
-        doc_id: v('f-doc_id'), tipo_doc: v('f-tipo_doc'), data_expedicao: v('f-data_expedicao'),
-        orgao_emissor: v('f-orgao_emissor'), renda: obterValorReal('f-renda'), cargo: v('f-cargo'),
-        nacionalidade: v('f-nacionalidade'), estado_naturalidade: v('f-estado_naturalidade'),
-        celular: tel, email, endereco: v('f-endereco')
+        nome, cpf, tipo_pessoa: tipoPessoa, data_nasc: document.getElementById('f-data_nasc')?.value, estado_civil: estadoCivil,
+        doc_id: document.getElementById('f-doc_id')?.value, tipo_doc: document.getElementById('f-tipo_doc')?.value, data_expedicao: document.getElementById('f-data_expedicao')?.value,
+        orgao_emissor: document.getElementById('f-orgao_emissor')?.value, renda: obterValorReal('f-renda'), cargo: document.getElementById('f-cargo')?.value,
+        nacionalidade: document.getElementById('f-nacionalidade')?.value, estado_naturalidade: document.getElementById('f-estado_naturalidade')?.value,
+        celular: tel, email, endereco: document.getElementById('f-endereco')?.value
       },
       dados_bancarios: {
-        nome: v('f-banco-nome') || nome,
-        banco: v('f-banco'), agencia: v('f-agencia'), conta: v('f-conta'), tipo_conta: v('f-tipo_conta')
+        nome: document.getElementById('f-banco-nome')?.value || nome,
+        banco: document.getElementById('f-banco')?.value, agencia: document.getElementById('f-agencia')?.value, conta: document.getElementById('f-conta')?.value,
+        digito: document.getElementById('f-conta_digito')?.value || null, tipo_conta: document.getElementById('f-tipo_conta')?.value
       },
       grupos_cotas: gruposCotas,
       veiculo: {
-        chassi: v('f-chassi'), placa: v('f-placa'), renavam: v('f-renavam'),
-        uf_lic: v('f-uf_lic'), marca: v('f-marca'), modelo: v('f-modelo'),
-        cor: v('f-cor_veiculo'), ano_fab: v('f-ano_fab'), ano_modelo: v('f-ano_modelo'),
+        chassi: document.getElementById('f-chassi')?.value, placa: document.getElementById('f-placa')?.value, renavam: document.getElementById('f-renavam')?.value,
+        uf_lic: document.getElementById('f-uf_lic')?.value, marca: document.getElementById('f-marca')?.value, modelo: document.getElementById('f-modelo')?.value,
+        cor: document.getElementById('f-cor_veiculo')?.value, ano_fab: document.getElementById('f-ano_fab')?.value, ano_modelo: document.getElementById('f-ano_modelo')?.value,
         valor_venda: obterValorReal('f-valor_venda')
       },
       vendedor: {
-        nome: v('f-vend-nome'), cpf: (v('f-vend-cpf')||'').replace(/\D/g,''),
-        endereco: v('f-vend-endereco'), banco: v('f-vend-banco'),
-        agencia: v('f-vend-agencia'), conta: v('f-vend-conta'),
-        tipo_conta: v('f-vend-tipo_conta'), pix: v('f-vend-pix'),
-        email: v('f-vend-email'), telefone: v('f-vend-telefone')
+        nome: document.getElementById('f-vend-nome')?.value, cpf: (document.getElementById('f-vend-cpf')?.value||'').replace(/\D/g,''),
+        endereco: document.getElementById('f-vend-endereco')?.value, banco: document.getElementById('f-vend-banco')?.value,
+        agencia: document.getElementById('f-vend-agencia')?.value, conta: document.getElementById('f-vend-conta')?.value,
+        tipo_conta: document.getElementById('f-vend-tipo_conta')?.value, pix: document.getElementById('f-vend-pix')?.value,
+        email: document.getElementById('f-vend-email')?.value, telefone: document.getElementById('f-vend-telefone')?.value
       }
     };
   }
   else {
     // Porto, Itaú e genérico
-    nome   = v('f-nome')?.trim();
+    nome   = document.getElementById('f-nome')?.value?.trim();
     cpf    = tipoPessoa === 'pj'
-      ? (v('f-cnpj')||'').replace(/\D/g,'')
-      : (v('f-cpf')||'').replace(/\D/g,'');
-    grupo  = v('f-grupo')?.trim();
-    cota   = v('f-cota')?.trim();
-    email  = v('f-email')?.trim()||null;
-    tel    = v('f-telefone')?.trim()||null;
-    corretor = v('f-corretor')?.trim()||null;
-    descricao = v('f-descricao')?.trim()||null;
+      ? (document.getElementById('f-cnpj')?.value||'').replace(/\D/g,'')
+      : (document.getElementById('f-cpf')?.value||'').replace(/\D/g,'');
+    grupo  = document.getElementById('f-grupo')?.value?.trim();
+    cota   = document.getElementById('f-cota')?.value?.trim();
+    email  = document.getElementById('f-email')?.value?.trim()||null;
+    tel    = document.getElementById('f-telefone')?.value?.trim()||null;
+    corretor = document.getElementById('f-corretor')?.value?.trim()||null;
+    descricao = document.getElementById('f-descricao')?.value?.trim()||null;
 
     if (!nome) return alerta('alerta-cadastro','Nome é obrigatório.','erro');
     if (cpf.length<11) return alerta('alerta-cadastro','CPF/CNPJ inválido.','erro');
@@ -1264,37 +1380,38 @@ async function enviarCadastro(){
         if (!modelo || !versao || !corVei || !anoModFab) return alerta('alerta-cadastro', 'Preencha todos os campos do veículo novo.', 'erro');
       }
 
-      // Valor de venda obrigatório
       const valorVenda = obterValorReal('f-valor_venda');
       if (!valorVenda || valorVenda <= 0) return alerta('alerta-cadastro', 'Informe o valor de venda do bem.', 'erro');
 
-      // Dados do vendedor (banco e conta são obrigatórios)
-      const vendBanco = v('f-vendedor-banco')?.trim();
-      const vendConta = v('f-vendedor-conta')?.trim();
+      const vendBanco = document.getElementById('f-vendedor-banco')?.value?.trim();
+      const vendConta = document.getElementById('f-vendedor-conta')?.value?.trim();
       if (!vendBanco || !vendConta) return alerta('alerta-cadastro', 'Preencha pelo menos banco e conta do vendedor.', 'erro');
 
       dadosExtras = {
         banco: bancoSelecionado.id, tipo_operacao: operacaoSelecionada.id, tipo_pessoa: tipoPessoa,
+        estado_civil: estadoCivil, conjuge: { nome: conjugeNome, cpf: conjugeCpf },
+        representante_legal: { nome: repNome, cpf: repCpf, email: repEmail },
         condicao_bem: document.getElementById('f-condicao-bem')?.value,
-        modelo: v('f-modelo'), versao: v('f-versao'),
-        cor_veiculo: v('f-cor-veiculo'), ano_modfab: v('f-ano-modfab'),
+        modelo: document.getElementById('f-modelo')?.value, versao: document.getElementById('f-versao')?.value,
+        cor_veiculo: document.getElementById('f-cor-veiculo')?.value, ano_modfab: document.getElementById('f-ano-modfab')?.value,
         valor_venda: valorVenda,
-        pagar_taxa_credito: v('f-pagar-taxa-credito') || null,
         corretor, descricao,
         vendedor: {
-          nome: v('f-vendedor-nome'), cpf: (v('f-vendedor-cpf')||'').replace(/\D/g,''),
-          endereco: v('f-vendedor-endereco'),
-          banco: vendBanco, agencia: v('f-vendedor-agencia'), conta: vendConta,
-          tipo_conta: v('f-vendedor-tipo_conta'), pix: v('f-vendedor-pix'),
-          email: v('f-vendedor-email'), telefone: v('f-vendedor-telefone')
+          nome: document.getElementById('f-vendedor-nome')?.value, cpf: (document.getElementById('f-vendedor-cpf')?.value||'').replace(/\D/g,''),
+          endereco: document.getElementById('f-vendedor-endereco')?.value,
+          banco: vendBanco, agencia: document.getElementById('f-vendedor-agencia')?.value, conta: vendConta,
+          digito: document.getElementById('f-vendedor-digito')?.value || null,
+          tipo_conta: document.getElementById('f-vendedor-tipo_conta')?.value,
+          pix: document.getElementById('f-vendedor-pix')?.value,
+          email: document.getElementById('f-vendedor-email')?.value, telefone: document.getElementById('f-vendedor-telefone')?.value
         }
       };
     } else {
-      dadosExtras = { banco: bancoSelecionado.id, tipo_operacao: operacaoSelecionada.id, tipo_pessoa: tipoPessoa };
+      dadosExtras = { banco: bancoSelecionado.id, tipo_operacao: operacaoSelecionada.id, tipo_pessoa: tipoPessoa, estado_civil: estadoCivil, conjuge: { nome: conjugeNome, cpf: conjugeCpf } };
     }
   }
 
-  // Documentos obrigatórios fixos
+  // Documentos obrigatórios (validação final para todas as administradoras)
   const docsObrigatorios = operacaoSelecionada.documentos.filter(d => d.obrigatorio);
   for (const cat of docsObrigatorios){
     if (!arquivosPendentes[cat.key]) return alerta('alerta-cadastro', `Anexo obrigatório: ${cat.label}.`, 'erro');
@@ -1340,6 +1457,13 @@ async function enviarCadastro(){
     alerta('alerta-cadastro', 'Erro ao enviar: '+e.message, 'erro');
     btn.disabled=false; btn.innerHTML='Enviar processo '+ico('arrow');
   }
+}
+
+function obterValorReal(id) {
+  const el = document.getElementById(id);
+  if (!el) return 0;
+  const raw = el.value.replace(/\D/g, '');
+  return parseFloat(raw) / 100;
 }
 
 // ════════════════ TELA DE SUCESSO ════════════════
@@ -1476,8 +1600,8 @@ function renderPortalProcesso(){
       </div>` : ''}
 
       <div class="tabs">
-        <button class="tab-btn" onclick="abrirTab('painel-msg')" id="tab-msg">${ico('msg')} Conversa</button>
         <button class="tab-btn ativa" onclick="abrirTab('painel-docs')" id="tab-docs">${ico('doc')} Documentos <span class="tab-count" id="count-docs">0</span></button>
+        <button class="tab-btn" onclick="abrirTab('painel-msg')" id="tab-msg">${ico('msg')} Conversa</button>
         <button class="tab-btn" onclick="abrirTab('painel-hist')" id="tab-hist">${ico('clock')} Histórico</button>
       </div>
 
