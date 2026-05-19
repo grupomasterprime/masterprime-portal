@@ -121,7 +121,6 @@
     .btn-xs{padding:6px 11px;font-size:11px;border-radius:6px}
     .w-100{width:100%}
 
-    /* Botão CTA principal (novo processo) */
     .btn-cta{
       background:linear-gradient(135deg, var(--mp-teal) 0%, var(--mp-teal-2) 100%);
       color:#fff; font-size:14px; font-weight:700; padding:16px 24px;
@@ -132,7 +131,6 @@
     .btn-cta:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(77,188,200,.45)}
     .btn-cta:active{transform:translateY(0)}
 
-    /* Botão secundário (consultar) */
     .btn-secondary-link{
       display:inline-flex; align-items:center; justify-content:center; gap:8px;
       padding:11px 18px; border-radius:10px;
@@ -158,7 +156,6 @@
     .campo textarea{resize:vertical;min-height:64px;font-family:inherit}
     .campo .hint{font-size:11px;color:var(--text3);margin-top:4px}
 
-    /* Seletor de tipo pessoa */
     .tipo-pessoa-selector{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
     .tipo-pessoa-btn{
       padding:14px 18px; border-radius:12px; border:2px solid var(--border2);
@@ -203,7 +200,6 @@
     .tag-red{background:var(--red-bg);color:#991B1B}
     .tag-gray{background:#F1F5F9;color:var(--text2)}
 
-    /* Tela inicial redesenhada */
     .start-wrap{max-width:520px;margin:30px auto 0;}
     .start-card{background:var(--card); border-radius:18px;box-shadow:var(--shadow-lg); border:1px solid var(--border);overflow:hidden;}
     .start-head{padding:34px 30px 26px; text-align:center;background:linear-gradient(180deg, #FAFCFE 0%, #FFFFFF 100%);border-bottom:1px solid var(--border);}
@@ -322,7 +318,6 @@
     .banco-card .banco-desc{font-size:12px;color:var(--text2)}
     .banco-card .banco-seta{margin-top:14px;font-weight:600;font-size:13px;color:var(--text3)}
 
-    /* Seção de tipo pessoa no formulário */
     .secao-tipo-pessoa{
       background:linear-gradient(135deg, #F0F9FF 0%, #F8FCFE 100%);
       border:1px solid #BAE6FD; border-radius:12px;
@@ -330,17 +325,14 @@
     }
     .secao-tipo-titulo{font-size:12px;font-weight:700;color:var(--mp-navy);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:6px;}
 
-    /* Tela de sucesso */
     .sucesso-box{background:var(--green-bg);border:1.5px solid #86EFAC;border-radius:14px;padding:20px 22px;margin-bottom:16px;}
     .sucesso-steps{counter-reset:step;display:flex;flex-direction:column;gap:10px;margin-top:12px;}
     .sucesso-step{display:flex;align-items:flex-start;gap:10px;font-size:12.5px;color:var(--text)}
     .sucesso-step-num{width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
 
-    /* Separador de seção no formulário */
     .section-divider{display:flex;align-items:center;gap:12px;margin:18px 0 14px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;}
     .section-divider::before,.section-divider::after{content:"";flex:1;height:1px;background:var(--border)}
 
-    /* Destaque para aviso Bradesco */
     .bradesco-doc-alert{
       background:#FFF5F5; border:1px solid #FECACA; border-radius:10px;
       padding:14px 16px; margin-bottom:14px; font-size:12px; color:#991B1B;
@@ -436,8 +428,8 @@ const BANCOS = [
           { key: 'documento_foto',  label: 'Documento com foto', sub: 'RG ou CNH (frente e verso)', obrigatorio: true, iconKey: 'id' },
           { key: 'comprovante_residencia', label: 'Comprovante de residência', sub: 'Conta de luz, água ou similar (últimos 90 dias)', obrigatorio: true, iconKey: 'home' },
           { key: 'comprovante_renda', label: 'Comprovante de renda', sub: 'Holerite, extrato bancário ou declaração de IR', obrigatorio: true, iconKey: 'docs' },
-          { key: 'Doc.CRLV', label: 'CRLV do bem', sub: 'Documento do Veículo', obrigatorio: false, iconKey: 'car' },
           { key: 'documento_foto_vendedor',  label: 'Documento com foto do vendedor', sub: 'RG ou CNH (frente e verso)', obrigatorio: true, iconKey: 'id' },
+          { key: 'Doc.CRLV', label: 'CRLV do bem', sub: 'Documento do Veículo', obrigatorio: false, iconKey: 'car' },
           { key: 'outros',          label: 'Outros documentos', sub: 'Declarações, comprovantes adicionais (opcional)', obrigatorio: false, iconKey: 'docs' }
         ]
       }
@@ -717,20 +709,17 @@ function selecionarTipoPessoa(tipo) {
   document.querySelectorAll('.tipo-pessoa-btn').forEach(b => b.classList.remove('ativo'));
   const btn = document.getElementById('btn-tp-' + tipo);
   if (btn) btn.classList.add('ativo');
-  // Alterna campos de documento
   const campoCpf  = document.getElementById('bloco-cpf');
   const campoCnpj = document.getElementById('bloco-cnpj');
   const campoNome = document.getElementById('label-nome-doc');
   if (campoCpf)  campoCpf.style.display  = tipo==='pf'  ? '' : 'none';
   if (campoCnpj) campoCnpj.style.display = tipo==='pj'  ? '' : 'none';
   if (campoNome) campoNome.textContent = tipo==='pj' ? 'Razão Social' : 'Nome Completo';
-  // Atualiza documento extra de PJ (Contrato Social) se existir
   atualizarDocContratoSocial();
 }
 
 function atualizarDocContratoSocial() {
   if (!operacaoSelecionada) return;
-  // Adiciona/remove slot de contrato social conforme tipo
   const jaTem = operacaoSelecionada.documentos.find(d => d.key === 'contrato_social');
   if (tipoPessoa === 'pj' && !jaTem) {
     operacaoSelecionada.documentos.push({
@@ -784,7 +773,6 @@ function toggleBlocoConjuge() {
   const estado = sel.value;
   const exibir = estado === 'casado' || estado === 'uniao_estavel';
   bloco.style.display = exibir ? 'block' : 'none';
-  // Torna campos obrigatórios se exibir
   const nomeEl = document.getElementById('f-conjuge-nome');
   const cpfEl  = document.getElementById('f-conjuge-cpf');
   if (nomeEl) nomeEl.required = exibir;
@@ -813,7 +801,6 @@ function atualizarVisibilidadeRepresentante() {
   if (!bancoSelecionado) return;
   const card = document.getElementById('card-rep-legal');
   if (!card) return;
-  // Exibe somente se for Itaú e PJ
   card.style.display = (bancoSelecionado.id === 'itau' && tipoPessoa === 'pj') ? 'block' : 'none';
 }
 
@@ -835,7 +822,6 @@ function renderTelaCadastro(banco, operacao){
   if (!banco || !operacao) { renderTelaSelecaoBanco(); return; }
   arquivosPendentes = {};
   tipoPessoa = 'pf';
-  // Garante que contrato social não está nos docs iniciais (será adicionado se PJ)
   operacao.documentos = operacao.documentos.filter(d => d.key !== 'contrato_social');
   const cor = banco.corPrimaria;
   const corDark = banco.corPrimariaDark;
@@ -856,7 +842,6 @@ function renderTelaCadastro(banco, operacao){
 
   if (operacao.id === 'transferencia') {
     html += `
-        <!-- Tipo Pessoa Cedente -->
         ${renderBlocoTipoPessoa()}
         <div class="card">
           <div class="card-head"><div class="card-title">${ico('user')} Cedente (titular atual)</div></div>
@@ -897,11 +882,21 @@ function renderTelaCadastro(banco, operacao){
         </div>`;
   } else if (banco.id === 'bradesco') {
     html += `
-        <!-- Tipo Pessoa -->
         ${renderBlocoTipoPessoa()}
 
         <!-- ALERTA BRADESCO: documentos obrigatórios -->
-        
+        <div class="bradesco-doc-alert">
+          ${ico('alert')}
+          <div>
+            <strong>Documentos obrigatórios para Bradesco:</strong>
+            <ul style="margin:6px 0 0 16px;padding:0;">
+              <li>Documento com foto (RG ou CNH do consorciado)</li>
+              <li>Comprovante de residência (conta de luz, água etc. – últimos 90 dias)</li>
+              <li>Comprovante de renda (holerite, extrato ou declaração de IR)</li>
+              <li>Documento com foto do vendedor (RG ou CNH)</li>
+            </ul>
+            <p style="margin-top:6px;font-size:11px;color:#991B1B;">⚠️ O processo <strong>não será enviado</strong> sem esses documentos.</p>
+          </div>
         </div>
 
         <div class="card">
@@ -1017,7 +1012,6 @@ function renderTelaCadastro(banco, operacao){
         </div>`;
   } else if ((banco.id === 'porto' || banco.id === 'itau') && operacao.id === 'faturamento') {
     html += `
-        <!-- Tipo Pessoa -->
         ${renderBlocoTipoPessoa()}
         <div class="card">
           <div class="card-head"><div class="card-title">${ico('user')} Dados pessoais</div></div>
@@ -1094,9 +1088,7 @@ function renderTelaCadastro(banco, operacao){
         </div>
         ${banco.id === 'itau' ? renderBlocoRepresentanteLegal() : ''}`;
   } else {
-    // Formulário genérico
     html += `
-        <!-- Tipo Pessoa -->
         ${renderBlocoTipoPessoa()}
         <div class="card">
           <div class="card-head"><div class="card-title">${ico('user')} Dados pessoais</div></div>
@@ -1135,7 +1127,6 @@ function renderTelaCadastro(banco, operacao){
 
   root.innerHTML = html;
   renderSlotsAnexo(operacao.documentos);
-  // Atualiza visibilidade de representante legal
   if (banco.id === 'itau') atualizarVisibilidadeRepresentante();
 }
 
@@ -1249,14 +1240,12 @@ async function enviarCadastro(){
   const repCpf = document.getElementById('f-rep-cpf')?.value?.replace(/\D/g, '') || null;
   const repEmail = document.getElementById('f-rep-email')?.value?.trim() || null;
 
-  // Validações de cônjuge
   if ((estadoCivil === 'casado' || estadoCivil === 'uniao_estavel')) {
     if (!conjugeNome || !conjugeCpf || conjugeCpf.length !== 11) {
       return alerta('alerta-cadastro','Preencha nome e CPF do cônjuge corretamente.','erro');
     }
   }
 
-  // Validações de representante legal (Itaú PJ)
   if (bancoSelecionado.id === 'itau' && tipoPessoa === 'pj') {
     if (!repNome || !repCpf || repCpf.length !== 11 || !repEmail) {
       return alerta('alerta-cadastro','Preencha todos os dados do representante legal (Itaú PJ).','erro');
@@ -1307,12 +1296,18 @@ async function enviarCadastro(){
       if (g && c) gruposCotas.push({ grupo: g, cota: c });
     });
 
-    // Validação específica Bradesco: comprovante de residência e renda OBRIGATÓRIOS
+    // Validações Bradesco – bloqueia se faltar algum dos 4 obrigatórios
     if (!arquivosPendentes['comprovante_residencia']) {
-      return alerta('alerta-cadastro','⚠️ Bradesco: anexe o Comprovante de residência (conta de luz, água etc.).','erro');
+      return alerta('alerta-cadastro','⚠️ Anexe o Comprovante de residência (conta de luz, água etc.).','erro');
     }
     if (!arquivosPendentes['comprovante_renda']) {
-      return alerta('alerta-cadastro','⚠️ Bradesco: anexe o Comprovante de renda (holerite, extrato ou IR).','erro');
+      return alerta('alerta-cadastro','⚠️ Anexe o Comprovante de renda (holerite, extrato ou IR).','erro');
+    }
+    if (!arquivosPendentes['documento_foto']) {
+      return alerta('alerta-cadastro','⚠️ Anexe o Documento com foto do consorciado (RG ou CNH).','erro');
+    }
+    if (!arquivosPendentes['documento_foto_vendedor']) {
+      return alerta('alerta-cadastro','⚠️ Anexe o Documento com foto do vendedor (RG ou CNH).','erro');
     }
 
     dadosExtras = {
@@ -1348,7 +1343,6 @@ async function enviarCadastro(){
     };
   }
   else {
-    // Porto, Itaú e genérico
     nome   = document.getElementById('f-nome')?.value?.trim();
     cpf    = tipoPessoa === 'pj'
       ? (document.getElementById('f-cnpj')?.value||'').replace(/\D/g,'')
@@ -1365,7 +1359,6 @@ async function enviarCadastro(){
     if (!grupo) return alerta('alerta-cadastro','Grupo é obrigatório.','erro');
     if (!cota)  return alerta('alerta-cadastro','Cota é obrigatória.','erro');
 
-    // Validações Porto/Itaú
     if ((bancoSelecionado.id === 'porto' || bancoSelecionado.id === 'itau') && operacaoSelecionada.id === 'faturamento') {
       const condicaoBem = document.getElementById('f-condicao-bem')?.value;
       if (!condicaoBem) return alerta('alerta-cadastro', 'Informe se o bem é novo ou usado.', 'erro');
@@ -1872,7 +1865,6 @@ function tagClass(s){
   return map[s] || 'tag-gray';
 }
 
-// Máscara CPF
 function mascaraCPF(el){
   let v = el.value.replace(/\D/g,'');
   v = v.substring(0,11);
@@ -1882,7 +1874,6 @@ function mascaraCPF(el){
   el.value = v;
 }
 
-// Máscara CNPJ
 function mascaraCNPJ(el){
   let v = el.value.replace(/\D/g,'');
   v = v.substring(0,14);
@@ -1893,7 +1884,6 @@ function mascaraCNPJ(el){
   el.value = v;
 }
 
-// Máscara CPF ou CNPJ conforme comprimento (campo genérico)
 function mascaraCpfCnpj(el){
   let raw = el.value.replace(/\D/g,'');
   if (raw.length <= 11) {
@@ -1911,7 +1901,6 @@ function mascaraCpfCnpj(el){
   el.value = raw;
 }
 
-// Alias para campos genéricos de vendedor/cessionário
 function mascaraCpfCnpjGenerico(el){ mascaraCpfCnpj(el); }
 
 function mascaraTel(el){
