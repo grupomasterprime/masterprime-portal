@@ -845,11 +845,11 @@ async function enterPortal() {
   const _histItem = document.getElementById('ni-historico');
   if (_demoItem) _demoItem.style.display = _isDemoBlocked ? 'none' : '';
   if (_histItem) _histItem.style.display = _isDemoBlocked ? 'none' : '';
-  // NOVA ABA: Adesão Admin — visível apenas para admins, master e consultores
+  // NOVA ABA: Formulário de Adesão — visível para TODOS os usuários
+  // (qualquer consultor/sócio/parceiro precisa do form pra mandar pros clientes)
   const _adesaoAdminItem = document.getElementById('ni-admin-adesao');
   if (_adesaoAdminItem) {
-    const _podeVerAdesao = (currentUser.tipo === 'admin' || currentUser.tipo === 'master' || currentUser.tipo === 'consultor');
-    _adesaoAdminItem.style.display = _podeVerAdesao ? '' : 'none';
+    _adesaoAdminItem.style.display = '';
   }
   // Aplica permissões granulares por módulo (per-user). Admin sempre vê tudo.
   aplicarPermissoesUI();
@@ -887,10 +887,8 @@ function nav(id) {
   if ((id === 'dashboard' || id === 'historico') && currentUser && ['CLAUDIA BARRETO'].includes((currentUser.nome||'').trim().toUpperCase())) {
     id = 'assembleia';
   }
-  // NOVA ABA: Adesão Admin — bloqueia acesso de sócios/parceiros
-  if (id === 'admin-adesao' && currentUser && !(currentUser.tipo === 'admin' || currentUser.tipo === 'master' || currentUser.tipo === 'consultor')) {
-    id = 'perfil';
-  }
+  // NOVA ABA: Formulário de Adesão — liberado pra todos os tipos
+  // (qualquer consultor/sócio/parceiro precisa preencher pros clientes)
   // Bloqueio de acesso direto a módulo sem permissão (cai pra perfil)
   if (currentUser && currentUser.tipo !== 'master' && !podeAcessarScreen(id)) {
     id = 'perfil';
@@ -1530,8 +1528,9 @@ function aplicarPermissoesUI() {
       // Menu: default visível, oculto só se permissoes[key] === false
       visible = semConfig || perms[m.key] !== false;
     }
-    // Exceção: Adesão Admin é visível para consultores mesmo sem permissão explícita
-    if (m.key === 'admin_adesao' && (currentUser.tipo === 'admin' || currentUser.tipo === 'consultor')) {
+    // Exceção: Formulário de Adesão é visível pra TODOS os tipos
+    // (qualquer consultor/sócio/parceiro precisa do link pros clientes)
+    if (m.key === 'admin_adesao') {
       visible = true;
     }
     if (visible) el.classList.remove('hidden');
@@ -1555,8 +1554,8 @@ function aplicarPermissoesUI() {
 function podeAcessarScreen(screenId) {
   if (!currentUser) return true;
   if (currentUser.tipo === 'master') return true;
-  // Adesão Admin é permitida para admins e consultores
-  if (screenId === 'admin-adesao' && (currentUser.tipo === 'admin' || currentUser.tipo === 'consultor')) return true;
+  // Formulário de Adesão é permitido pra TODOS os tipos
+  if (screenId === 'admin-adesao') return true;
   const m = MODULOS_MENU.find(x => x.screen === screenId);
   if (!m) return true; // screens não-gateáveis (perfil etc) liberadas
   const perms = currentUser.permissoes || {};

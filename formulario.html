@@ -1436,13 +1436,22 @@ function coletarPJ() {
 }
 
 // ════════ VALIDAÇÃO ════════
+// Retorna true se o campo está sendo ocultado pelo SKIP_FIELDS da admin atual
+function _isSkipped(prefix, fieldKey) {
+  const admin = getAdminLocked();
+  if (!admin) return false;
+  const list = (SKIP_FIELDS[admin] && SKIP_FIELDS[admin][prefix]) || [];
+  return list.includes(`${prefix}-${fieldKey}`);
+}
+
 function validarPF(d) {
+  const skip = (k) => _isSkipped('pf', k);
   if (d.cpf.length !== 11) return 'CPF inválido (precisa ter 11 dígitos)';
   if (!d.nome || d.nome.length < 3) return 'Nome completo é obrigatório';
   if (!d.data_nascimento) return 'Data de nascimento é obrigatória (dd/mm/aaaa)';
-  if (!d.sexo) return 'Sexo é obrigatório';
-  if (!d.nacionalidade) return 'Nacionalidade é obrigatória';
-  if (!d.cidade_nascimento) return 'Cidade de nascimento é obrigatória';
+  if (!skip('sexo') && !d.sexo) return 'Sexo é obrigatório';
+  if (!skip('nacionalidade') && !d.nacionalidade) return 'Nacionalidade é obrigatória';
+  if (!skip('cidade_nascimento') && !d.cidade_nascimento) return 'Cidade de nascimento é obrigatória';
   if (!d.nome_mae) return 'Nome da mãe é obrigatório';
   if (!d.tipo_documento) return 'Tipo de documento é obrigatório';
   if (!d.numero_documento) return 'Número do documento é obrigatório';
