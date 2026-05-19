@@ -93,14 +93,14 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 /* Modal */
 .modal-bg { position: fixed; inset: 0; background: rgba(15,23,42,.55); display: none; align-items: flex-start; justify-content: center; z-index: 9999; padding: 40px 20px; overflow-y: auto; }
 .modal-bg.show { display: flex; }
-.modal { background: #fff; border-radius: 14px; padding: 26px 28px; width: 100%; max-width: 720px; margin-bottom: 40px; }
+.modal { background: #fff; border-radius: 14px; padding: 28px 32px; width: 100%; max-width: 880px; margin-bottom: 40px; }
 .modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 4px; color: var(--mp-navy); }
 .modal-sub { font-size: 12px; color: var(--text2); margin-bottom: 18px; }
 .fld { margin-bottom: 14px; }
 .fld label { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: .5px; font-weight: 700; color: var(--text2); margin-bottom: 5px; }
 .fld input, .fld select, .fld textarea { width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: inherit; outline: 0; }
 .fld input:focus, .fld select:focus, .fld textarea:focus { border-color: var(--mp-teal); }
-.fld textarea { min-height: 70px; resize: vertical; line-height: 1.5; }
+.fld textarea { min-height: 170px; resize: vertical; line-height: 1.6; font-size: 13.5px; }
 .fld-row { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
 .fld-row.three { grid-template-columns: 2fr 1fr 1fr; }
 .dyn-list { display: flex; flex-direction: column; gap: 8px; }
@@ -293,7 +293,25 @@ function render() {
   else renderHistorico();
 }
 
+// Estado de ordenação (default: urgência — atrasados primeiro)
+let _fbSort = 'urgencia';
+let _fbSortDir = 'desc'; // 'asc' ou 'desc'
+let _fbFilter = '';
+
+function setFbSort(col) {
+  // Se clicou na mesma coluna, inverte direção. Se em outra, vai pro default daquela.
+  if (_fbSort === col) {
+    _fbSortDir = _fbSortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    _fbSort = col;
+    // Defaults sensíveis: urgência=desc (atrasados primeiro), nome=asc, total=desc, last=desc
+    _fbSortDir = (col === 'nome') ? 'asc' : 'desc';
+  }
+  renderList(_fbFilter);
+}
+
 function renderList(filter = '') {
+  _fbFilter = filter;
   // Agrega: cada consultor com qtde + último feedback
   const q = filter.trim().toLowerCase();
   let users = allUsers.slice();
@@ -304,20 +322,39 @@ function renderList(filter = '') {
     if (!byConsultor[f.consultor_auth_id]) byConsultor[f.consultor_auth_id] = [];
     byConsultor[f.consultor_auth_id].push(f);
   });
-  // Enriquecer + ordenar (atrasados primeiro)
+  // Enriquecer
   const enriched = users.map(u => {
     const fbs = byConsultor[u.auth_id] || [];
     const last = fbs[0] || null;
     const dias = last ? diasDesde(last.data_feedback) : null;
     return { ...u, fbs, last, dias, status: statusFeedback(dias) };
   });
+  // Ordenação por coluna
+  const dir = _fbSortDir === 'asc' ? 1 : -1;
+  const statusRank = s => ({never: 4, crit: 3, warn: 2, ok: 1})[s] || 0;
   enriched.sort((a, b) => {
-    // Nunca tiveram feedback → primeiro
-    if (a.dias === null && b.dias !== null) return -1;
-    if (b.dias === null && a.dias !== null) return 1;
-    // Mais antigo (mais dias) primeiro
-    return (b.dias || 0) - (a.dias || 0);
+    if (_fbSort === 'nome') {
+      return dir * (a.nome || '').localeCompare(b.nome || '');
+    }
+    if (_fbSort === 'total') {
+      return dir * (a.fbs.length - b.fbs.length);
+    }
+    if (_fbSort === 'last') {
+      // Quem nunca teve feedback vai pro extremo: desc = primeiro, asc = último
+      if (a.dias === null && b.dias !== null) return -dir;
+      if (b.dias === null && a.dias !== null) return dir;
+      return dir * ((b.dias || 0) - (a.dias || 0));
+    }
+    if (_fbSort === 'status') {
+      return dir * (statusRank(b.status.cls) - statusRank(a.status.cls));
+    }
+    // Default: urgência (nunca primeiro, depois atrasados)
+    if (a.dias === null && b.dias !== null) return -dir;
+    if (b.dias === null && a.dias !== null) return dir;
+    return dir * ((b.dias || 0) - (a.dias || 0));
   });
+
+  const arrow = (col) => _fbSort === col ? (_fbSortDir === 'asc' ? ' <span style="color:var(--mp-yellow)">▲</span>' : ' <span style="color:var(--mp-yellow)">▼</span>') : '';
 
   document.getElementById('main').innerHTML = `
     <div class="fb-header">
@@ -342,10 +379,10 @@ function renderList(filter = '') {
     <div class="fb-list">
       <div class="fb-row header">
         <div></div>
-        <div>Consultor</div>
-        <div>Total</div>
-        <div>Último feedback</div>
-        <div class="col-status">Status</div>
+        <div style="cursor:pointer;user-select:none" onclick="setFbSort('nome')" title="Ordenar por nome">Consultor${arrow('nome')}</div>
+        <div style="cursor:pointer;user-select:none" onclick="setFbSort('total')" title="Ordenar por quantidade">Total${arrow('total')}</div>
+        <div style="cursor:pointer;user-select:none" onclick="setFbSort('last')" title="Ordenar por data do último feedback">Último feedback${arrow('last')}</div>
+        <div class="col-status" style="cursor:pointer;user-select:none" onclick="setFbSort('status')" title="Ordenar por urgência">Status${arrow('status')}</div>
         <div></div>
       </div>
       ${enriched.length === 0 ? `
