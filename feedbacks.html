@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feedbacks de Consultores</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --mp-navy:   #2D3F5E;
+  --mp-yellow: #C8C84A;
+  --mp-teal:   #4DBCC8;
+  --bg:        #F4F6FA;
+  --card:      #FFFFFF;
+  --border:    #E2E8F0;
+  --text:      #1E293B;
+  --text2:     #64748B;
+  --text3:     #94A3B8;
+  --green:     #16A34A; --green-bg: #F0FDF4;
+  --red:       #DC2626; --red-bg:   #FEF2F2;
+  --amber:     #D97706; --amber-bg: #FFFBEB;
+  --blue:      #2563EB; --blue-bg:  #EFF6FF;
+  --r: 10px;
+  --shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; min-height: 100vh; }
+.container { max-width: 1400px; margin: 0 auto; padding: 24px 28px; }
+
+/* Header */
+.fb-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+.fb-title { font-size: 22px; font-weight: 700; color: var(--mp-navy); }
+.fb-subtitle { font-size: 12px; color: var(--text2); margin-top: 2px; }
+.btn-novo { background: var(--mp-navy); color: #fff; border: 0; padding: 10px 18px; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+.btn-novo:hover { background: #1e2c44; }
+.btn-back { background: transparent; border: 1px solid var(--border); padding: 6px 12px; border-radius: 8px; font-size: 12px; color: var(--text2); cursor: pointer; font-weight: 600; display: inline-flex; align-items: center; gap: 4px; }
+.btn-back:hover { background: #fff; color: var(--text); }
+
+/* Filtros */
+.fb-toolbar { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.fb-search { flex: 1; min-width: 240px; position: relative; }
+.fb-search input { width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px 8px 36px; font-size: 13px; font-family: inherit; outline: 0; }
+.fb-search input:focus { border-color: var(--mp-teal); }
+.fb-search svg { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text3); }
+.fb-filter-chip { background: #fff; border: 1px solid var(--border); padding: 6px 10px; border-radius: 8px; font-size: 12px; cursor: pointer; color: var(--text2); }
+.fb-filter-chip.active { background: var(--mp-navy); color: #fff; border-color: var(--mp-navy); }
+
+/* Lista */
+.fb-list { background: #fff; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.fb-row { display: grid; grid-template-columns: 50px 2fr 1fr 1.4fr 1fr 130px; gap: 14px; padding: 14px 18px; border-bottom: 1px solid var(--border); align-items: center; transition: background .12s; }
+.fb-row:last-child { border-bottom: 0; }
+.fb-row:hover { background: var(--bg); }
+.fb-row.header { background: var(--bg); font-size: 10px; text-transform: uppercase; letter-spacing: .5px; font-weight: 700; color: var(--text3); padding: 12px 18px; }
+.fb-avatar { width: 38px; height: 38px; border-radius: 50%; background: var(--mp-teal); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+.fb-avatar.master { background: var(--mp-yellow); color: var(--mp-navy); }
+.fb-avatar.socio  { background: var(--mp-teal); }
+.fb-avatar.admin  { background: var(--mp-navy); }
+.fb-name { font-weight: 700; font-size: 13.5px; color: var(--text); }
+.fb-name-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.fb-count { font-weight: 700; font-size: 16px; color: var(--mp-navy); }
+.fb-count-sub { font-size: 11px; color: var(--text3); }
+.fb-last { font-size: 12.5px; color: var(--text); }
+.fb-last-sub { font-size: 11px; color: var(--text2); margin-top: 1px; }
+.fb-status { display: inline-block; padding: 4px 10px; border-radius: 14px; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .3px; }
+.fb-status.ok      { background: var(--green-bg); color: var(--green); }
+.fb-status.warn    { background: var(--amber-bg); color: var(--amber); }
+.fb-status.crit    { background: var(--red-bg);   color: var(--red); }
+.fb-status.never   { background: #F1F5F9; color: var(--text2); }
+.fb-actions { display: flex; gap: 6px; justify-content: flex-end; }
+.btn-action { background: transparent; border: 1px solid var(--border); padding: 5px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; color: var(--text2); font-weight: 600; }
+.btn-action:hover { background: var(--mp-navy); color: #fff; border-color: var(--mp-navy); }
+.btn-action.primary { background: var(--mp-teal); color: #fff; border-color: var(--mp-teal); }
+
+/* Timeline (drill-down) */
+.timeline { position: relative; padding-left: 32px; }
+.timeline::before { content: ''; position: absolute; left: 12px; top: 0; bottom: 0; width: 2px; background: var(--border); }
+.tl-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 18px 22px; margin-bottom: 16px; position: relative; }
+.tl-card::before { content: ''; position: absolute; left: -28px; top: 22px; width: 12px; height: 12px; border-radius: 50%; background: var(--mp-teal); border: 3px solid #fff; box-shadow: 0 0 0 2px var(--mp-teal); }
+.tl-date { font-size: 12px; color: var(--text2); font-weight: 600; }
+.tl-meta { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+.tl-avaliador { font-size: 11px; color: var(--text2); background: var(--bg); padding: 3px 8px; border-radius: 6px; }
+.tl-section { margin-top: 14px; }
+.tl-section h4 { font-size: 10px; text-transform: uppercase; letter-spacing: .5px; color: var(--text3); font-weight: 700; margin-bottom: 6px; }
+.tl-section p { font-size: 13px; color: var(--text); line-height: 1.55; white-space: pre-wrap; }
+.tl-metrica { display: inline-flex; align-items: center; gap: 8px; background: var(--bg); padding: 6px 12px; border-radius: 8px; margin: 0 6px 6px 0; font-size: 12px; }
+.tl-metrica strong { font-weight: 700; color: var(--mp-navy); }
+.tl-metrica .meta { color: var(--text2); }
+.tl-acoes-grid { display: grid; gap: 6px; }
+.tl-acao-row { background: var(--bg); padding: 8px 12px; border-radius: 8px; display: grid; grid-template-columns: 1fr 110px 130px 80px; gap: 10px; align-items: center; font-size: 12.5px; }
+.tl-card-actions { display: flex; gap: 6px; justify-content: flex-end; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); }
+
+/* Modal */
+.modal-bg { position: fixed; inset: 0; background: rgba(15,23,42,.55); display: none; align-items: flex-start; justify-content: center; z-index: 9999; padding: 40px 20px; overflow-y: auto; }
+.modal-bg.show { display: flex; }
+.modal { background: #fff; border-radius: 14px; padding: 26px 28px; width: 100%; max-width: 720px; margin-bottom: 40px; }
+.modal h2 { font-size: 18px; font-weight: 700; margin-bottom: 4px; color: var(--mp-navy); }
+.modal-sub { font-size: 12px; color: var(--text2); margin-bottom: 18px; }
+.fld { margin-bottom: 14px; }
+.fld label { display: block; font-size: 10.5px; text-transform: uppercase; letter-spacing: .5px; font-weight: 700; color: var(--text2); margin-bottom: 5px; }
+.fld input, .fld select, .fld textarea { width: 100%; border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: inherit; outline: 0; }
+.fld input:focus, .fld select:focus, .fld textarea:focus { border-color: var(--mp-teal); }
+.fld textarea { min-height: 70px; resize: vertical; line-height: 1.5; }
+.fld-row { display: grid; gap: 10px; grid-template-columns: 1fr 1fr; }
+.fld-row.three { grid-template-columns: 2fr 1fr 1fr; }
+.dyn-list { display: flex; flex-direction: column; gap: 8px; }
+.dyn-row { display: grid; gap: 8px; align-items: center; }
+.metricas .dyn-row { grid-template-columns: 1.6fr 1fr 1fr 30px; }
+.acoes .dyn-row    { grid-template-columns: 2.2fr 1fr 1.2fr 100px 30px; }
+.dyn-row input, .dyn-row select { border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; font-size: 12.5px; font-family: inherit; outline: 0; width: 100%; }
+.btn-add { background: transparent; border: 1px dashed var(--border); padding: 6px 10px; border-radius: 6px; font-size: 11px; color: var(--mp-teal); cursor: pointer; font-weight: 600; align-self: flex-start; margin-top: 4px; }
+.btn-add:hover { background: var(--bg); }
+.btn-del { background: transparent; border: 0; color: var(--red); cursor: pointer; font-size: 16px; padding: 0; }
+.modal-foot { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); }
+.btn-cancel { background: #fff; color: var(--text2); border: 1px solid var(--border); padding: 9px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; }
+.btn-save { background: var(--green); color: #fff; border: 0; padding: 9px 20px; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px; }
+.btn-save:hover { background: #15803d; }
+.btn-save:disabled { opacity: .5; cursor: not-allowed; }
+
+/* Empty state */
+.empty { text-align: center; padding: 60px 20px; color: var(--text2); }
+.empty svg { color: var(--text3); margin-bottom: 12px; }
+.empty h3 { font-size: 16px; color: var(--text); margin-bottom: 6px; }
+.empty p { font-size: 13px; }
+
+/* Loading */
+.spinner { display: inline-block; width: 20px; height: 20px; border: 2.5px solid var(--border); border-top-color: var(--mp-teal); border-radius: 50%; animation: spin .8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Toast */
+.toast { position: fixed; bottom: 24px; right: 24px; background: var(--green); color: #fff; padding: 12px 18px; border-radius: 10px; font-weight: 600; font-size: 13px; box-shadow: 0 10px 24px rgba(0,0,0,.14); z-index: 10001; animation: slidein .25s; }
+@keyframes slidein { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+@media (max-width: 800px) {
+  .fb-row { grid-template-columns: 38px 1.4fr 80px 100px; gap: 8px; padding: 12px; }
+  .fb-row .col-status, .fb-row .col-actions-mobile-hidden { display: none; }
+  .container { padding: 14px; }
+}
+</style>
+</head>
+<body>
+
+<div class="container" id="main">
+  <!-- Conteúdo renderizado dinamicamente -->
+  <div class="empty">
+    <div class="spinner"></div>
+    <p style="margin-top: 12px">Carregando feedbacks...</p>
+  </div>
+</div>
+
+<!-- Modal de novo/editar feedback -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <h2 id="modal-title">Novo Feedback</h2>
+    <div class="modal-sub" id="modal-sub">Registre a conversa com o consultor</div>
+
+    <div class="fld">
+      <label>Consultor *</label>
+      <select id="fb-consultor" required></select>
+    </div>
+
+    <div class="fld-row">
+      <div class="fld">
+        <label>Data do feedback *</label>
+        <input type="date" id="fb-data" required>
+      </div>
+      <div class="fld">
+        <label>Próximo feedback (opcional)</label>
+        <input type="date" id="fb-proximo">
+      </div>
+    </div>
+
+    <div class="fld">
+      <label>Contexto / Pauta da reunião</label>
+      <textarea id="fb-contexto" placeholder="O que motivou a reunião? Situação atual..."></textarea>
+    </div>
+
+    <div class="fld">
+      <label>Métricas registradas</label>
+      <div class="dyn-list metricas" id="fb-metricas"></div>
+      <button type="button" class="btn-add" onclick="addMetrica()">+ Adicionar métrica</button>
+    </div>
+
+    <div class="fld">
+      <label>Pontos positivos</label>
+      <textarea id="fb-positivos" placeholder="O que está indo bem..."></textarea>
+    </div>
+
+    <div class="fld">
+      <label>Pontos a melhorar</label>
+      <textarea id="fb-melhoria" placeholder="O que precisa melhorar..."></textarea>
+    </div>
+
+    <div class="fld">
+      <label>Ideias que surgiram</label>
+      <textarea id="fb-ideias" placeholder="Sugestões do consultor, novas iniciativas..."></textarea>
+    </div>
+
+    <div class="fld">
+      <label>Próximas ações / compromissos</label>
+      <div class="dyn-list acoes" id="fb-acoes"></div>
+      <button type="button" class="btn-add" onclick="addAcao()">+ Adicionar ação</button>
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="fecharModal()">Cancelar</button>
+      <button class="btn-save" id="fb-salvar" onclick="salvarFeedback()">Salvar feedback</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://jhwciwvgagnuxakukyob.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let allUsers = [];        // portal_users (consultor/socio/parceiro)
+let allFeedbacks = [];    // tudo
+let currentView = 'list'; // 'list' | 'historico'
+let currentConsultorId = null;
+let editingFeedbackId = null;
+
+// ═══ INIT ═══
+async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) {
+    document.getElementById('main').innerHTML = '<div class="empty"><h3>Sessão expirada</h3><p>Faça login novamente.</p></div>';
+    return;
+  }
+  // Busca perfil
+  const { data: profile } = await sb.from('portal_users').select('auth_id, nome, tipo').eq('auth_id', session.user.id).single();
+  if (!profile || !['master','socio'].includes(profile.tipo)) {
+    document.getElementById('main').innerHTML = '<div class="empty"><h3>Acesso negado</h3><p>Apenas master e sócios podem ver feedbacks.</p></div>';
+    return;
+  }
+  currentUser = profile;
+  await loadData();
+  render();
+}
+
+async function loadData() {
+  // Lista de consultores (consultor + sócio + parceiro — pessoas que recebem feedback)
+  const { data: users } = await sb.from('portal_users')
+    .select('auth_id, nome, tipo')
+    .in('tipo', ['consultor', 'socio', 'parceiro'])
+    .not('auth_id', 'is', null)
+    .order('nome');
+  allUsers = users || [];
+
+  // Todos os feedbacks
+  const { data: fbs } = await sb.from('portal_feedbacks')
+    .select('*')
+    .order('data_feedback', { ascending: false });
+  allFeedbacks = fbs || [];
+}
+
+// ═══ HELPERS ═══
+function initials(nome) {
+  return (nome || '?').split(' ').filter(Boolean).slice(0,2).map(p => p[0]).join('').toUpperCase();
+}
+function fmtData(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso + 'T00:00:00');
+  return d.toLocaleDateString('pt-BR');
+}
+function diasDesde(iso) {
+  if (!iso) return null;
+  const ms = Date.now() - new Date(iso + 'T00:00:00').getTime();
+  return Math.floor(ms / 86400000);
+}
+function diasTexto(dias) {
+  if (dias === null) return 'nunca';
+  if (dias === 0) return 'hoje';
+  if (dias === 1) return 'ontem';
+  if (dias < 30) return dias + ' dias atrás';
+  if (dias < 365) return Math.floor(dias / 30) + ' mês atrás';
+  return Math.floor(dias / 365) + 'a atrás';
+}
+function statusFeedback(dias) {
+  if (dias === null) return { cls: 'never', txt: 'Nunca' };
+  if (dias <= 30) return { cls: 'ok',   txt: 'Recente' };
+  if (dias <= 60) return { cls: 'warn', txt: 'Atenção' };
+  return                  { cls: 'crit', txt: 'Atrasado' };
+}
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+// ═══ RENDER ═══
+function render() {
+  if (currentView === 'list') renderList();
+  else renderHistorico();
+}
+
+function renderList(filter = '') {
+  // Agrega: cada consultor com qtde + último feedback
+  const q = filter.trim().toLowerCase();
+  let users = allUsers.slice();
+  if (q) users = users.filter(u => u.nome.toLowerCase().includes(q));
+  // Mapa consultor → feedbacks
+  const byConsultor = {};
+  allFeedbacks.forEach(f => {
+    if (!byConsultor[f.consultor_auth_id]) byConsultor[f.consultor_auth_id] = [];
+    byConsultor[f.consultor_auth_id].push(f);
+  });
+  // Enriquecer + ordenar (atrasados primeiro)
+  const enriched = users.map(u => {
+    const fbs = byConsultor[u.auth_id] || [];
+    const last = fbs[0] || null;
+    const dias = last ? diasDesde(last.data_feedback) : null;
+    return { ...u, fbs, last, dias, status: statusFeedback(dias) };
+  });
+  enriched.sort((a, b) => {
+    // Nunca tiveram feedback → primeiro
+    if (a.dias === null && b.dias !== null) return -1;
+    if (b.dias === null && a.dias !== null) return 1;
+    // Mais antigo (mais dias) primeiro
+    return (b.dias || 0) - (a.dias || 0);
+  });
+
+  document.getElementById('main').innerHTML = `
+    <div class="fb-header">
+      <div>
+        <div class="fb-title">Feedbacks de Consultores</div>
+        <div class="fb-subtitle">Reuniões 1:1 — visível apenas pra master e sócios</div>
+      </div>
+      <button class="btn-novo" onclick="abrirNovo()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Novo Feedback
+      </button>
+    </div>
+
+    <div class="fb-toolbar">
+      <div class="fb-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="search" placeholder="Buscar consultor..." oninput="renderList(this.value)" value="${escapeHtml(filter)}">
+      </div>
+      <span style="font-size:12px;color:var(--text2)">${enriched.length} consultor${enriched.length !== 1 ? 'es' : ''}</span>
+    </div>
+
+    <div class="fb-list">
+      <div class="fb-row header">
+        <div></div>
+        <div>Consultor</div>
+        <div>Total</div>
+        <div>Último feedback</div>
+        <div class="col-status">Status</div>
+        <div></div>
+      </div>
+      ${enriched.length === 0 ? `
+        <div class="empty">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <h3>Nenhum consultor encontrado</h3>
+        </div>
+      ` : enriched.map(u => `
+        <div class="fb-row">
+          <div class="fb-avatar ${u.tipo}">${initials(u.nome)}</div>
+          <div>
+            <div class="fb-name">${escapeHtml(u.nome)}</div>
+            <div class="fb-name-sub">${u.tipo === 'socio' ? 'Sócio' : u.tipo === 'parceiro' ? 'Parceiro' : 'Consultor'}</div>
+          </div>
+          <div>
+            <div class="fb-count">${u.fbs.length}</div>
+            <div class="fb-count-sub">${u.fbs.length === 1 ? 'feedback' : 'feedbacks'}</div>
+          </div>
+          <div>
+            <div class="fb-last">${u.last ? fmtData(u.last.data_feedback) : '<span style="color:var(--text3);font-style:italic">Nunca</span>'}</div>
+            <div class="fb-last-sub">${u.last ? `${diasTexto(u.dias)} · por ${escapeHtml(u.last.avaliador_nome)}` : ''}</div>
+          </div>
+          <div class="col-status"><span class="fb-status ${u.status.cls}">${u.status.txt}</span></div>
+          <div class="fb-actions">
+            <button class="btn-action" onclick="abrirHistorico('${u.auth_id}')">Histórico</button>
+            <button class="btn-action primary" onclick="abrirNovo('${u.auth_id}')">+ Novo</button>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function renderHistorico() {
+  const consultor = allUsers.find(u => u.auth_id === currentConsultorId);
+  if (!consultor) { currentView = 'list'; render(); return; }
+  const fbs = allFeedbacks.filter(f => f.consultor_auth_id === currentConsultorId);
+
+  document.getElementById('main').innerHTML = `
+    <button class="btn-back" onclick="voltarLista()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      Voltar
+    </button>
+
+    <div class="fb-header" style="margin-top:14px">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div class="fb-avatar ${consultor.tipo}" style="width:54px;height:54px;font-size:18px">${initials(consultor.nome)}</div>
+        <div>
+          <div class="fb-title">${escapeHtml(consultor.nome)}</div>
+          <div class="fb-subtitle">${consultor.tipo === 'socio' ? 'Sócio' : consultor.tipo === 'parceiro' ? 'Parceiro' : 'Consultor'} · ${fbs.length} feedback${fbs.length !== 1 ? 's' : ''}</div>
+        </div>
+      </div>
+      <button class="btn-novo" onclick="abrirNovo('${consultor.auth_id}')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Novo Feedback
+      </button>
+    </div>
+
+    ${fbs.length === 0 ? `
+      <div class="empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        <h3>Nenhum feedback ainda</h3>
+        <p>Clique em "Novo Feedback" pra registrar a primeira conversa.</p>
+      </div>
+    ` : `
+      <div class="timeline">
+        ${fbs.map(f => renderFeedbackCard(f)).join('')}
+      </div>
+    `}
+  `;
+}
+
+function renderFeedbackCard(f) {
+  const dias = diasDesde(f.data_feedback);
+  const metricas = Array.isArray(f.metricas) ? f.metricas : [];
+  const acoes = Array.isArray(f.acoes) ? f.acoes : [];
+  return `
+    <div class="tl-card">
+      <div class="tl-meta">
+        <span class="tl-date">${fmtData(f.data_feedback)} · ${diasTexto(dias)}</span>
+        <span class="tl-avaliador">por ${escapeHtml(f.avaliador_nome)}</span>
+        ${f.proximo_feedback ? `<span class="tl-avaliador">próximo: ${fmtData(f.proximo_feedback)}</span>` : ''}
+      </div>
+      ${f.contexto ? `<div class="tl-section"><h4>Contexto</h4><p>${escapeHtml(f.contexto)}</p></div>` : ''}
+      ${metricas.length ? `
+        <div class="tl-section">
+          <h4>Métricas</h4>
+          <div>
+            ${metricas.map(m => `<span class="tl-metrica"><strong>${escapeHtml(m.nome || '')}:</strong> ${escapeHtml(m.valor_atual || '—')} ${m.meta ? `<span class="meta">/ meta ${escapeHtml(m.meta)}</span>` : ''}</span>`).join('')}
+          </div>
+        </div>
+      ` : ''}
+      ${f.pontos_positivos ? `<div class="tl-section"><h4 style="color:var(--green)">Pontos positivos</h4><p>${escapeHtml(f.pontos_positivos)}</p></div>` : ''}
+      ${f.pontos_melhoria ? `<div class="tl-section"><h4 style="color:var(--amber)">Pontos a melhorar</h4><p>${escapeHtml(f.pontos_melhoria)}</p></div>` : ''}
+      ${f.ideias ? `<div class="tl-section"><h4 style="color:var(--blue)">Ideias</h4><p>${escapeHtml(f.ideias)}</p></div>` : ''}
+      ${acoes.length ? `
+        <div class="tl-section">
+          <h4>Ações</h4>
+          <div class="tl-acoes-grid">
+            ${acoes.map(a => `
+              <div class="tl-acao-row">
+                <div>${escapeHtml(a.descricao || '')}</div>
+                <div style="font-size:11px;color:var(--text2)">${a.prazo ? '📅 ' + fmtData(a.prazo) : ''}</div>
+                <div style="font-size:11px;color:var(--text2)">${a.responsavel ? '👤 ' + escapeHtml(a.responsavel) : ''}</div>
+                <div><span class="fb-status ${a.status === 'concluido' ? 'ok' : a.status === 'andamento' ? 'warn' : 'never'}" style="font-size:9px;padding:2px 7px">${a.status || 'pendente'}</span></div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      ` : ''}
+      <div class="tl-card-actions">
+        <button class="btn-action" onclick="editarFeedback('${f.id}')">Editar</button>
+        <button class="btn-action" style="color:var(--red);border-color:var(--red)" onclick="deletarFeedback('${f.id}')">Remover</button>
+      </div>
+    </div>
+  `;
+}
+
+function abrirHistorico(consultorId) {
+  currentConsultorId = consultorId;
+  currentView = 'historico';
+  render();
+}
+function voltarLista() {
+  currentConsultorId = null;
+  currentView = 'list';
+  render();
+}
+
+// ═══ MODAL ═══
+function abrirNovo(consultorId = null) {
+  editingFeedbackId = null;
+  document.getElementById('modal-title').textContent = 'Novo Feedback';
+  document.getElementById('modal-sub').textContent = 'Registre a conversa com o consultor';
+  // Popular dropdown
+  const sel = document.getElementById('fb-consultor');
+  sel.innerHTML = '<option value="">—</option>' + allUsers.map(u => `<option value="${u.auth_id}">${escapeHtml(u.nome)} ${u.tipo === 'socio' ? '(Sócio)' : u.tipo === 'parceiro' ? '(Parceiro)' : ''}</option>`).join('');
+  sel.value = consultorId || '';
+  // Limpa
+  document.getElementById('fb-data').value = new Date().toISOString().slice(0, 10);
+  document.getElementById('fb-proximo').value = '';
+  document.getElementById('fb-contexto').value = '';
+  document.getElementById('fb-positivos').value = '';
+  document.getElementById('fb-melhoria').value = '';
+  document.getElementById('fb-ideias').value = '';
+  document.getElementById('fb-metricas').innerHTML = '';
+  document.getElementById('fb-acoes').innerHTML = '';
+  addMetrica(); // 1 linha vazia inicial
+  addAcao();    // 1 linha vazia inicial
+  document.getElementById('modal-bg').classList.add('show');
+}
+
+function editarFeedback(id) {
+  const f = allFeedbacks.find(x => x.id === id);
+  if (!f) return;
+  editingFeedbackId = id;
+  document.getElementById('modal-title').textContent = 'Editar Feedback';
+  document.getElementById('modal-sub').textContent = `Editando feedback de ${fmtData(f.data_feedback)}`;
+  const sel = document.getElementById('fb-consultor');
+  sel.innerHTML = '<option value="">—</option>' + allUsers.map(u => `<option value="${u.auth_id}">${escapeHtml(u.nome)}</option>`).join('');
+  sel.value = f.consultor_auth_id;
+  document.getElementById('fb-data').value = f.data_feedback;
+  document.getElementById('fb-proximo').value = f.proximo_feedback || '';
+  document.getElementById('fb-contexto').value = f.contexto || '';
+  document.getElementById('fb-positivos').value = f.pontos_positivos || '';
+  document.getElementById('fb-melhoria').value = f.pontos_melhoria || '';
+  document.getElementById('fb-ideias').value = f.ideias || '';
+  document.getElementById('fb-metricas').innerHTML = '';
+  document.getElementById('fb-acoes').innerHTML = '';
+  (f.metricas || []).forEach(m => addMetrica(m));
+  (f.acoes || []).forEach(a => addAcao(a));
+  if (!(f.metricas || []).length) addMetrica();
+  if (!(f.acoes || []).length) addAcao();
+  document.getElementById('modal-bg').classList.add('show');
+}
+
+function fecharModal() {
+  document.getElementById('modal-bg').classList.remove('show');
+  editingFeedbackId = null;
+}
+
+function addMetrica(m = {}) {
+  const div = document.createElement('div');
+  div.className = 'dyn-row';
+  div.innerHTML = `
+    <input type="text" placeholder="Nome (ex: Vendas)" value="${escapeHtml(m.nome || '')}">
+    <input type="text" placeholder="Valor atual" value="${escapeHtml(m.valor_atual || '')}">
+    <input type="text" placeholder="Meta" value="${escapeHtml(m.meta || '')}">
+    <button type="button" class="btn-del" onclick="this.parentNode.remove()" title="Remover">×</button>
+  `;
+  document.getElementById('fb-metricas').appendChild(div);
+}
+
+function addAcao(a = {}) {
+  const div = document.createElement('div');
+  div.className = 'dyn-row';
+  div.innerHTML = `
+    <input type="text" placeholder="Descrição da ação" value="${escapeHtml(a.descricao || '')}">
+    <input type="date" value="${a.prazo || ''}">
+    <input type="text" placeholder="Responsável" value="${escapeHtml(a.responsavel || '')}">
+    <select>
+      <option value="pendente" ${a.status === 'pendente' || !a.status ? 'selected' : ''}>Pendente</option>
+      <option value="andamento" ${a.status === 'andamento' ? 'selected' : ''}>Em andamento</option>
+      <option value="concluido" ${a.status === 'concluido' ? 'selected' : ''}>Concluído</option>
+    </select>
+    <button type="button" class="btn-del" onclick="this.parentNode.remove()" title="Remover">×</button>
+  `;
+  document.getElementById('fb-acoes').appendChild(div);
+}
+
+// ═══ SALVAR ═══
+async function salvarFeedback() {
+  const consultorId = document.getElementById('fb-consultor').value;
+  if (!consultorId) { alert('Selecione o consultor.'); return; }
+  const data = document.getElementById('fb-data').value;
+  if (!data) { alert('Informe a data do feedback.'); return; }
+  const consultor = allUsers.find(u => u.auth_id === consultorId);
+  if (!consultor) { alert('Consultor não encontrado.'); return; }
+
+  // Coleta métricas
+  const metricas = [];
+  document.querySelectorAll('#fb-metricas .dyn-row').forEach(row => {
+    const ins = row.querySelectorAll('input');
+    const nome = ins[0].value.trim();
+    if (nome) {
+      metricas.push({ nome, valor_atual: ins[1].value.trim(), meta: ins[2].value.trim() });
+    }
+  });
+
+  // Coleta ações
+  const acoes = [];
+  document.querySelectorAll('#fb-acoes .dyn-row').forEach(row => {
+    const ins = row.querySelectorAll('input, select');
+    const descricao = ins[0].value.trim();
+    if (descricao) {
+      acoes.push({
+        descricao,
+        prazo: ins[1].value || null,
+        responsavel: ins[2].value.trim(),
+        status: ins[3].value || 'pendente'
+      });
+    }
+  });
+
+  const payload = {
+    consultor_auth_id: consultorId,
+    consultor_nome: consultor.nome,
+    avaliador_auth_id: currentUser.auth_id,
+    avaliador_nome: currentUser.nome,
+    data_feedback: data,
+    proximo_feedback: document.getElementById('fb-proximo').value || null,
+    contexto: document.getElementById('fb-contexto').value.trim() || null,
+    pontos_positivos: document.getElementById('fb-positivos').value.trim() || null,
+    pontos_melhoria: document.getElementById('fb-melhoria').value.trim() || null,
+    ideias: document.getElementById('fb-ideias').value.trim() || null,
+    metricas, acoes
+  };
+
+  const btn = document.getElementById('fb-salvar');
+  btn.disabled = true; btn.textContent = 'Salvando...';
+  try {
+    let result;
+    if (editingFeedbackId) {
+      result = await sb.from('portal_feedbacks').update(payload).eq('id', editingFeedbackId);
+    } else {
+      result = await sb.from('portal_feedbacks').insert(payload);
+    }
+    if (result.error) throw result.error;
+    showToast(editingFeedbackId ? 'Feedback atualizado!' : 'Feedback registrado!');
+    fecharModal();
+    await loadData();
+    render();
+  } catch(e) {
+    alert('Erro ao salvar: ' + (e.message || e));
+  } finally {
+    btn.disabled = false; btn.textContent = 'Salvar feedback';
+  }
+}
+
+async function deletarFeedback(id) {
+  if (!confirm('Remover este feedback permanentemente? Essa ação não pode ser desfeita.')) return;
+  try {
+    const { error } = await sb.from('portal_feedbacks').delete().eq('id', id);
+    if (error) throw error;
+    showToast('Feedback removido.');
+    await loadData();
+    render();
+  } catch(e) {
+    alert('Erro: ' + (e.message || e));
+  }
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2400);
+}
+
+// Fechar modal clicando no backdrop
+document.getElementById('modal-bg').addEventListener('click', e => {
+  if (e.target.id === 'modal-bg') fecharModal();
+});
+
+init();
+</script>
+</body>
+</html>
