@@ -590,9 +590,11 @@ function renderList() {
         </div>`;
     });
     if (currentSection) detailHtml += '</div>';
-    // Sócios PJ — array JSONB
+    // Sócios PJ — array JSONB (editável se for proposta nova)
     if (a._source === 'nova' && a.tipo_pessoa === 'pj' && dados.socios?.length) {
-      detailHtml += renderSocios(dados.socios);
+      detailHtml += renderSocios(dados.socios, a.id, true);
+    } else if (a.tipo_pessoa === 'pj' && dados.socios?.length) {
+      detailHtml += renderSocios(dados.socios, a.id, false);
     }
 
     const jsonStr = JSON.stringify(dados, null, 2);
@@ -750,7 +752,20 @@ async function salvarAlteracoes(propId) {
   const btn = document.querySelector(`#salvar-bar-${propId} .salvar-btn`);
   if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
   try {
-    const { error } = await sb.from('portal_propostas').update(changes).eq('id', propId);
+    // Separa: campos top-level vs sócios
+    const { _socios_dirty, ...topLevelChanges } = changes;
+    const payload = { ...topLevelChanges };
+    // Se houve mudança em sócios, reconstruir o array
+    if (_socios_dirty && Object.keys(_socios_dirty).length) {
+      const adesao = allAdesoes.find(a => a.id === propId);
+      const originalSocios = adesao?.dados?.socios || [];
+      const newSocios = originalSocios.map((s, i) => {
+        const patch = _socios_dirty[i] || {};
+        return { ...s, ...patch };
+      });
+      payload.socios = newSocios;
+    }
+    const { error } = await sb.from('portal_propostas').update(payload).eq('id', propId);
     if (error) throw error;
     delete window._pendingChanges[propId];
     showToast('Alterações salvas!');
@@ -872,29 +887,93 @@ function getCamposNova(tipo) {
 }
 
 // Sócios PJ — render separado pq é JSONB array
-function renderSocios(socios) {
+// Schema dos campos editáveis de sócios (com label + mask quando aplicável)
+const SOCIO_FIELDS = [
+  { id:'nome', label:'Nome' }, { id:'cpf', label:'CPF', mask:'cpf' }, { id:'rg', label:'RG' },
+  { id:'data_emissao_rg', label:'Data Emissão RG', mask:'date' }, { id:'orgao_expedidor', label:'Órgão Expedidor' },
+  { id:'data_nascimento', label:'Data Nascimento', mask:'date' },
+  { id:'nome_pai', label:'Nome do Pai' }, { id:'nome_mae', label:'Nome da Mãe' },
+  { id:'data_entrada', label:'Data Entrada', mask:'date' },
+  { id:'participacao', label:'Participação %' },
+  { id:'administrador', label:'Administrador', mask:'simnao' },
+  { id:'estado_civil', label:'Estado Civil' }, { id:'nome_conjuge', label:'Cônjuge' },
+  { id:'cpf_conjuge', label:'CPF Cônjuge', mask:'cpf' },
+  { id:'email', label:'E-mail' }, { id:'telefone', label:'Telefone' }
+];
+
+function renderSocios(socios, propId, isEditable) {
   if (!socios || !socios.length) return '';
-  return socios.map((s, i) => `
-    <div class="section-label" style="margin-top:12px">${i+1}º Sócio</div>
-    <div class="detail-grid">
-      ${[
-        ['Nome', s.nome], ['CPF', s.cpf], ['RG', s.rg],
-        ['Data Emissão RG', s.data_emissao_rg], ['Órgão Expedidor', s.orgao_expedidor],
-        ['Data Nascimento', s.data_nascimento], ['Nome do Pai', s.nome_pai], ['Nome da Mãe', s.nome_mae],
-        ['Data Entrada', s.data_entrada], ['Participação %', s.participacao], ['Administrador', s.administrador],
-        ['Estado Civil', s.estado_civil], ['Cônjuge', s.nome_conjuge], ['CPF Cônjuge', s.cpf_conjuge],
-        ['E-mail', s.email], ['Telefone', s.telefone]
-      ].filter(([_, v]) => v).map(([l, v]) => `
-        <div class="detail-item">
-          <button class="copy-btn" title="Copiar ${l}" onclick="copyText('${String(v).replace(/'/g, "\\'")}')">
+  return socios.map((s, i) => {
+    const camposHtml = SOCIO_FIELDS.map(campo => {
+      const rawVal = s[campo.id];
+      const displayVal = fmtFichaVal(rawVal, campo);
+      const isAdminSelect = campo.mask === 'simnao';
+      let inputHtml;
+      if (!isEditable) {
+        inputHtml = `<div class="detail-item-value">${displayVal}</div>`;
+      } else if (isAdminSelect) {
+        const v = (rawVal || '').toString().toLowerCase();
+        inputHtml = `<select class="detail-item-input" onchange="markSocioDirty('${propId}',${i},'${campo.id}',this.value,'')">
+          <option value="" ${!v ? 'selected' : ''}>—</option>
+          <option value="Sim" ${v === 'sim' ? 'selected' : ''}>Sim</option>
+          <option value="Não" ${(v === 'não' || v === 'nao') ? 'selected' : ''}>Não</option>
+        </select>`;
+      } else {
+        const escaped = displayVal === '—' ? '' : displayVal.replace(/"/g,'&quot;');
+        inputHtml = `<input type="text" class="detail-item-input" value="${escaped}" onchange="markSocioDirty('${propId}',${i},'${campo.id}',this.value,'${campo.mask||''}')">`;
+      }
+      return `
+        <div class="detail-item" data-prop="${propId}" data-socio-idx="${i}" data-field="${campo.id}">
+          <button class="copy-btn" title="Copiar ${campo.label}" onclick="copyText('${displayVal.replace(/'/g, "\\'")}')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           </button>
-          <div class="detail-item-label">${l}</div>
-          <div class="detail-item-value">${v}</div>
-        </div>
-      `).join('')}
-    </div>
-  `).join('');
+          <div class="detail-item-label">${campo.label}</div>
+          ${inputHtml}
+        </div>`;
+    }).join('');
+    return `
+      <div class="section-label" style="margin-top:12px">${i+1}º Sócio</div>
+      <div class="detail-grid">${camposHtml}</div>
+    `;
+  }).join('');
+}
+
+// ═══ MARCAR CAMPO DE SÓCIO COMO ALTERADO ═══
+function markSocioDirty(propId, socioIdx, fieldId, newValue, mask) {
+  if (!window._pendingChanges[propId]) window._pendingChanges[propId] = {};
+  if (!window._pendingChanges[propId]._socios_dirty) window._pendingChanges[propId]._socios_dirty = {};
+  const sociosDirty = window._pendingChanges[propId]._socios_dirty;
+  if (!sociosDirty[socioIdx]) sociosDirty[socioIdx] = {};
+  const adesao = allAdesoes.find(a => a.id === propId);
+  const originalSocio = adesao?.dados?.socios?.[socioIdx] || {};
+  const original = originalSocio[fieldId];
+  // Normaliza valor pra salvar
+  let saveVal;
+  if (newValue === '') saveVal = null;
+  else if (mask) saveVal = unmaskFichaVal(newValue, mask);
+  else saveVal = newValue;
+  const equalOriginal = (saveVal === original) ||
+    (saveVal === null && (original === '' || original === null || original === undefined));
+  const cell = document.querySelector(`.detail-item[data-prop="${propId}"][data-socio-idx="${socioIdx}"][data-field="${fieldId}"]`);
+  if (equalOriginal) {
+    delete sociosDirty[socioIdx][fieldId];
+    if (Object.keys(sociosDirty[socioIdx]).length === 0) delete sociosDirty[socioIdx];
+    cell?.classList.remove('dirty');
+  } else {
+    sociosDirty[socioIdx][fieldId] = saveVal;
+    cell?.classList.add('dirty');
+  }
+  // Limpa _socios_dirty se vazio
+  if (Object.keys(sociosDirty).length === 0) delete window._pendingChanges[propId]._socios_dirty;
+  // Atualiza barra
+  const changes = window._pendingChanges[propId];
+  const sociosCount = Object.keys(changes._socios_dirty || {}).reduce((acc, idx) => acc + Object.keys(changes._socios_dirty[idx]).length, 0);
+  const topCount = Object.keys(changes).filter(k => k !== '_socios_dirty').length;
+  const total = topCount + sociosCount;
+  const bar = document.getElementById('salvar-bar-' + propId);
+  const counter = document.getElementById('alteracoes-count-' + propId);
+  if (bar) bar.classList.toggle('hidden', total === 0);
+  if (counter) counter.textContent = total === 1 ? '1 alteração' : `${total} alterações`;
 }
 
 function getCamposPorAdmTipo(adm, tipo) {
