@@ -798,6 +798,68 @@ async function doLogout() {
   document.getElementById('portal-screen').style.display='none';
   document.getElementById('login-cpf').value='';
   document.getElementById('login-senha').value='';
+  _pararAutoLogout();
+}
+
+// ═══ AUTO-LOGOUT POR INATIVIDADE ═══
+// Política de segurança: 30 min sem interação → logout automático
+// (proteção pra demonstrativos sensíveis se notebook fica aberto)
+const AUTO_LOGOUT_MS = 30 * 60 * 1000;   // 30 minutos
+const AVISO_ANTES_MS = 60 * 1000;        // 1 minuto antes do logout, mostra modal
+let _timerInatividade = null;
+let _timerAviso = null;
+let _avisoEl = null;
+
+function _resetTimerInatividade() {
+  if (_timerInatividade) clearTimeout(_timerInatividade);
+  if (_timerAviso) clearTimeout(_timerAviso);
+  if (_avisoEl) { _avisoEl.remove(); _avisoEl = null; }
+  // Avisa 1 min antes
+  _timerAviso = setTimeout(_mostrarAvisoLogout, AUTO_LOGOUT_MS - AVISO_ANTES_MS);
+  // Logout efetivo
+  _timerInatividade = setTimeout(() => {
+    console.log('Auto-logout por inatividade (30 min)');
+    doLogout();
+    alert('Sessão expirada por inatividade (30 min sem uso). Faça login novamente.');
+  }, AUTO_LOGOUT_MS);
+}
+
+function _mostrarAvisoLogout() {
+  if (_avisoEl) return;
+  _avisoEl = document.createElement('div');
+  _avisoEl.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#FEF3C7;border:2px solid #F59E0B;border-radius:12px;padding:16px 20px;box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:99999;max-width:340px;font-size:13px;color:#92400E';
+  _avisoEl.innerHTML = `
+    <div style="font-weight:700;margin-bottom:6px">⏱ Você vai ser deslogado em 1 min</div>
+    <div style="margin-bottom:10px;font-size:12px">Por segurança, deslogamos quem fica 30 min sem mexer no portal.</div>
+    <button onclick="_resetTimerInatividade()" style="background:#F59E0B;color:#fff;border:0;padding:6px 14px;border-radius:6px;font-weight:600;cursor:pointer;font-size:12px">Continuar logado</button>
+  `;
+  document.body.appendChild(_avisoEl);
+}
+
+function _pararAutoLogout() {
+  if (_timerInatividade) clearTimeout(_timerInatividade);
+  if (_timerAviso) clearTimeout(_timerAviso);
+  if (_avisoEl) { _avisoEl.remove(); _avisoEl = null; }
+  _timerInatividade = null; _timerAviso = null;
+  ['click','keydown','mousemove','scroll','touchstart'].forEach(ev =>
+    document.removeEventListener(ev, _resetTimerInatividade, true)
+  );
+}
+
+function _iniciarAutoLogout() {
+  _pararAutoLogout();
+  // Throttle: só reseta se passou pelo menos 5s desde último reset
+  let _ultimoReset = 0;
+  const handler = () => {
+    const now = Date.now();
+    if (now - _ultimoReset < 5000) return;
+    _ultimoReset = now;
+    _resetTimerInatividade();
+  };
+  ['click','keydown','mousemove','scroll','touchstart'].forEach(ev =>
+    document.addEventListener(ev, handler, true)
+  );
+  _resetTimerInatividade();
 }
 
 async function checkSession() {
@@ -824,6 +886,7 @@ async function enterPortal() {
   document.getElementById('loading-screen').style.display='none';
   document.getElementById('login-screen').style.display='none';
   document.getElementById('portal-screen').style.display='block';
+  _iniciarAutoLogout();
   document.getElementById('sb-avatar').textContent=getInitials(currentUser.nome);
   document.getElementById('sb-user-name').textContent=currentUser.nome;
   const role = currentUser.tipo==='master'?'Master':currentUser.tipo==='admin'?'Administrador':currentUser.tipo==='socio'?'Socio':currentUser.tipo==='parceiro'?'Parceiro':'Consultor';
@@ -1343,17 +1406,60 @@ async function addUser() {
     msg.innerHTML='<div class="alert alert-err">Erro: '+(e.message||e)+'</div>';
   }
 }
+// Modo de ordenação da tabela de usuários
+let _usersSort = 'role'; // 'role' (default) | 'login_recent' | 'login_oldest' | 'name'
+
 async function renderUsers() {
   const users = await DB.getAllUsers();
   const el = document.getElementById('users-list');
   document.getElementById('user-count').textContent = users.length + ' usuarios';
-  // Ordena: master/admin primeiro, depois por nome
+  // Busca último login via RPC (admin/master apenas)
+  let loginsMap = {};
+  try {
+    if (USE_SUPABASE && (currentUser.tipo === 'master' || currentUser.tipo === 'admin')) {
+      const { data: logins } = await sb.rpc('listar_logins_usuarios');
+      if (logins) logins.forEach(l => { loginsMap[l.auth_id] = l.last_sign_in_at; });
+    }
+  } catch(e) { console.warn('Não foi possível buscar últimos logins:', e); }
+  // Anexa last_login em cada user
+  users.forEach(u => { u._last_login = u.auth_id ? loginsMap[u.auth_id] : null; });
+  // Ordena de acordo com _usersSort
   const _rank = t => (t==='master'?0:t==='admin'?1:t==='socio'?2:3);
-  users.sort((a,b) => {
-    const ra = _rank(a.tipo), rb = _rank(b.tipo);
-    if (ra !== rb) return ra - rb;
-    return (a.nome||'').localeCompare(b.nome||'');
-  });
+  if (_usersSort === 'login_recent') {
+    users.sort((a,b) => (new Date(b._last_login||0)) - (new Date(a._last_login||0)));
+  } else if (_usersSort === 'login_oldest') {
+    users.sort((a,b) => {
+      // Nunca logaram aparecem por último
+      const da = a._last_login ? new Date(a._last_login).getTime() : Infinity;
+      const db = b._last_login ? new Date(b._last_login).getTime() : Infinity;
+      return da - db;
+    });
+  } else if (_usersSort === 'name') {
+    users.sort((a,b) => (a.nome||'').localeCompare(b.nome||''));
+  } else {
+    users.sort((a,b) => {
+      const ra = _rank(a.tipo), rb = _rank(b.tipo);
+      if (ra !== rb) return ra - rb;
+      return (a.nome||'').localeCompare(b.nome||'');
+    });
+  }
+  // Helper pra formatar data de login (relativo: "hoje", "2 dias", "nunca", etc.)
+  const fmtUltimoLogin = (iso) => {
+    if (!iso) return '<span style="color:var(--text3);font-style:italic;font-size:11px">nunca</span>';
+    const d = new Date(iso);
+    const diffMs = Date.now() - d.getTime();
+    const diffH = diffMs / (1000*60*60);
+    const diffD = diffH / 24;
+    let texto, cor;
+    if (diffH < 1) { texto = 'agora'; cor = '#10B981'; }
+    else if (diffH < 24) { texto = Math.floor(diffH) + 'h atrás'; cor = '#10B981'; }
+    else if (diffD < 7) { texto = Math.floor(diffD) + 'd atrás'; cor = 'var(--text)'; }
+    else if (diffD < 30) { texto = Math.floor(diffD/7) + 'sem atrás'; cor = 'var(--text2)'; }
+    else if (diffD < 365) { texto = Math.floor(diffD/30) + 'mês atrás'; cor = '#F59E0B'; }
+    else { texto = Math.floor(diffD/365) + 'a atrás'; cor = '#DC2626'; }
+    const dataLocal = d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+    return `<span style="font-size:11px;color:${cor}" title="${dataLocal}">${texto}</span>`;
+  };
   const rows = users.map(u => {
     const tc = u.tipo==='master'?'tag-amber':u.tipo==='admin'?'tag-navy':u.tipo==='socio'?'tag-teal':'tag-blue';
     const tl = u.tipo==='master'?'Master':u.tipo==='admin'?'Admin':u.tipo==='socio'?'S&oacute;cio':u.tipo==='parceiro'?'Parceiro':'Consultor';
@@ -1368,6 +1474,7 @@ async function renderUsers() {
       <td style="font-weight:600;font-size:12px">${u.nome}</td>
       <td class="mono" style="font-size:12px">${userLogin}</td>
       <td>${senhaDisplay}</td>
+      <td>${fmtUltimoLogin(u._last_login)}</td>
       <td style="text-align:right;white-space:nowrap">
         ${(currentUser.tipo === 'master' && u.tipo !== 'master') ? `<button class="btn btn-outline btn-sm" onclick="abrirPermissoes('${u.cpf}')">Permissões</button>` : ''}
         <button class="btn btn-outline btn-sm" onclick="resetPw('${u.cpf}')">Reset senha</button>
@@ -1375,7 +1482,15 @@ async function renderUsers() {
       </td>
     </tr>`;
   }).join('');
+  const sortArrow = (key) => _usersSort === key ? ' ↑' : '';
   el.innerHTML = `
+    <div style="display:flex;gap:8px;flex-wrap:wrap;padding:8px 0;font-size:11px;color:var(--text2)">
+      <span style="font-weight:600">Ordenar:</span>
+      <button onclick="setUsersSort('role')" style="background:none;border:1px solid var(--border);padding:3px 8px;border-radius:6px;cursor:pointer;font-size:11px;${_usersSort==='role'?'background:var(--mp-navy);color:#fff;border-color:var(--mp-navy)':''}">Tipo${sortArrow('role')}</button>
+      <button onclick="setUsersSort('name')" style="background:none;border:1px solid var(--border);padding:3px 8px;border-radius:6px;cursor:pointer;font-size:11px;${_usersSort==='name'?'background:var(--mp-navy);color:#fff;border-color:var(--mp-navy)':''}">Nome${sortArrow('name')}</button>
+      <button onclick="setUsersSort('login_recent')" style="background:none;border:1px solid var(--border);padding:3px 8px;border-radius:6px;cursor:pointer;font-size:11px;${_usersSort==='login_recent'?'background:var(--mp-navy);color:#fff;border-color:var(--mp-navy)':''}">Login mais recente${sortArrow('login_recent')}</button>
+      <button onclick="setUsersSort('login_oldest')" style="background:none;border:1px solid var(--border);padding:3px 8px;border-radius:6px;cursor:pointer;font-size:11px;${_usersSort==='login_oldest'?'background:var(--mp-navy);color:#fff;border-color:var(--mp-navy)':''}">Login mais antigo${sortArrow('login_oldest')}</button>
+    </div>
     <div class="tbl-wrap" style="padding:0">
       <table class="tbl">
         <thead>
@@ -1384,12 +1499,18 @@ async function renderUsers() {
             <th>Nome</th>
             <th>Usu&aacute;rio</th>
             <th>Senha</th>
+            <th>&Uacute;ltimo login</th>
             <th></th>
           </tr>
         </thead>
         <tbody>${rows}</tbody>
       </table>
     </div>`;
+}
+
+function setUsersSort(key) {
+  _usersSort = key;
+  renderUsers();
 }
 // Toggle de revelar senha na tabela de usuários (admin only)
 function toggleSenhaCell(btn) {
