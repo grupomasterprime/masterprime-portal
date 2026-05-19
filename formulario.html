@@ -56,6 +56,18 @@ body {
 }
 .header-text h1 { font-size: 16px; font-weight: 700; letter-spacing: -.2px; margin-bottom: 1px; }
 .header-text p { font-size: 11px; color: rgba(255,255,255,.6); }
+@media (max-width: 540px) {
+  .header { padding: 12px 14px; }
+  .header-logo { height: 28px; }
+  .header-text h1 { font-size: 14px; }
+  .header-text p { font-size: 10px; }
+  .header-admin-badge { padding: 4px 8px; margin-left: 0; }
+  .header-admin-badge img { height: 18px; }
+  .header-admin-badge .label { font-size: 8px; }
+  .container { padding: 0 12px 30px; margin-top: 14px; }
+  .card { padding: 16px 16px; }
+  .card h3 { font-size: 12px; }
+}
 .header-consultor {
   margin-left: auto;
   background: rgba(255,255,255,.1);
@@ -112,11 +124,15 @@ body {
   background: var(--mp-teal); border-radius: 2px;
 }
 
-/* GRID */
-.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
-.grid-4 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 14px; }
-@media (max-width: 640px) {
+/* GRID — auto-fill responsivo: campos se reorganizam pra preencher o espaço */
+.grid-2, .grid-3, .grid-4 {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+/* Campos largos (nome, logradouro) ocupam linha inteira */
+.field-full { grid-column: 1 / -1; }
+@media (max-width: 480px) {
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
 }
 
@@ -464,6 +480,11 @@ function upperNoAccent(s) {
 }
 
 function bindMasks(root = document) {
+  // Define teclado numérico em mobile para campos com máscara numérica
+  $$('[data-mask="cpf"], [data-mask="cnpj"], [data-mask="cep"], [data-mask="phone"], [data-mask="money"], [data-mask="date"]', root).forEach(el => {
+    el.setAttribute('inputmode', 'numeric');
+    el.setAttribute('autocomplete', 'off');
+  });
   $$('[data-mask="cpf"]', root).forEach(el => el.addEventListener('input', e => e.target.value = maskCPF(e.target.value)));
   $$('[data-mask="cnpj"]', root).forEach(el => el.addEventListener('input', e => e.target.value = maskCNPJ(e.target.value)));
   $$('[data-mask="cep"]', root).forEach(el => {
@@ -734,7 +755,7 @@ function buildFormPF() {
         <div class="field"><label>Sexo<span class="req">*</span></label><select id="pf-sexo" required><option value="">—</option><option>Masculino</option><option>Feminino</option><option>Outro</option></select></div>
       </div>
       <div class="grid-2" style="margin-top:14px">
-        <div class="field" style="grid-column: span 2"><label>Nome Completo<span class="req">*</span></label><input id="pf-nome" placeholder="Como está no documento" required></div>
+        <div class="field field-full"><label>Nome Completo<span class="req">*</span></label><input id="pf-nome" placeholder="Como está no documento" required></div>
       </div>
       <div class="grid-3" style="margin-top:14px">
         <div class="field"><label>Nacionalidade<span class="req">*</span></label><select id="pf-nacionalidade" required><option value="">—</option><option>Brasileira</option><option>Estrangeira</option><option>Naturalizada</option></select></div>
@@ -785,7 +806,7 @@ function buildFormPF() {
         <div class="field"><label>CEP<span class="req">*</span></label><input id="pf-cep" data-mask="cep" data-cep-prefix="pf-" placeholder="00000-000" required></div>
       </div>
       <div class="grid-4" style="margin-top:14px">
-        <div class="field" style="grid-column: span 2"><label>Logradouro<span class="req">*</span></label><input id="pf-logradouro" placeholder="Rua, Avenida..." required></div>
+        <div class="field field-full"><label>Logradouro<span class="req">*</span></label><input id="pf-logradouro" placeholder="Rua, Avenida..." required></div>
         <div class="field"><label>Número<span class="req">*</span></label><input id="pf-numero" placeholder="123" required></div>
         <div class="field"><label>Complemento</label><input id="pf-complemento" placeholder="Apto, Bloco..."></div>
       </div>
@@ -999,7 +1020,7 @@ function buildFormPJ() {
       </div>
       <div class="grid-4" style="margin-top:14px">
         <div class="field"><label>Tipo Logradouro<span class="req">*</span></label><input id="pj-tipo_logradouro" placeholder="Rua, Av, Trav..." required></div>
-        <div class="field" style="grid-column: span 2"><label>Logradouro<span class="req">*</span></label><input id="pj-logradouro" required></div>
+        <div class="field field-full"><label>Logradouro<span class="req">*</span></label><input id="pj-logradouro" required></div>
         <div class="field"><label>Número<span class="req">*</span></label><input id="pj-numero" required></div>
       </div>
       <div class="grid-4" style="margin-top:14px">
