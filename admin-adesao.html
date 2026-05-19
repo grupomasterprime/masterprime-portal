@@ -195,6 +195,34 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 .detail-item:hover { box-shadow: 0 0 0 2px var(--mp-teal); }
 .detail-item-label { font-size: 9.5px; color: var(--text3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; font-weight: 600; }
 .detail-item-value { font-size: 13px; font-weight: 500; color: var(--text); word-break: break-word; }
+.detail-item-input {
+  font-size: 13px; font-weight: 500; color: var(--text);
+  width: 100%; border: 0; padding: 0; background: transparent;
+  font-family: inherit; outline: 0;
+}
+.detail-item-input:focus { background: #FFF; outline: 1.5px solid var(--mp-teal); border-radius: 4px; padding: 2px 4px; margin: -2px -4px; }
+.detail-item.dirty { box-shadow: 0 0 0 2px var(--mp-yellow, #C8C84A); }
+.salvar-bar {
+  position: sticky; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(0deg, #fff 70%, transparent);
+  padding: 16px 0 8px; margin-top: 16px;
+  display: flex; gap: 10px; align-items: center; justify-content: flex-end;
+  border-top: 1px dashed var(--border, #e5e7eb);
+}
+.salvar-bar.hidden { display: none; }
+.salvar-bar .alteracoes-count {
+  font-size: 12px; color: var(--text2); font-weight: 600; margin-right: auto;
+}
+.salvar-btn {
+  background: #10B981; color: #fff; border: 0; padding: 8px 18px;
+  border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.salvar-btn:hover { background: #059669; }
+.salvar-btn:disabled { opacity: .5; cursor: not-allowed; }
+.cancelar-btn {
+  background: #fff; color: var(--text2); border: 1px solid var(--border, #e5e7eb);
+  padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;
+}
 .copy-btn {
   position: absolute; top: 6px; right: 8px; background: none; border: none; cursor: pointer;
   color: var(--text3); padding: 4px; border-radius: 4px; display: flex; align-items: center; transition: all .15s;
@@ -518,6 +546,9 @@ function renderList() {
     return;
   }
 
+  // Map de alterações pendentes por proposta_id (limpo a cada render)
+  if (!window._pendingChanges) window._pendingChanges = {};
+
   listEl.innerHTML = filteredAdesoes.map(a => {
     const dados = a.dados || {};
     const admTag = `tag-${a.administradora}`;
@@ -543,14 +574,19 @@ function renderList() {
       }
       // pra nova: dados é a linha completa (vem direto da tabela)
       // pra legacy: dados é a.dados (JSONB)
-      const val = (dados[c.id] != null && dados[c.id] !== '') ? String(dados[c.id]) : '—';
+      const rawVal = dados[c.id];
+      const displayVal = fmtFichaVal(rawVal, c);
+      const isEditable = a._source === 'nova'; // só edita propostas novas (portal_propostas)
+      const inputHtml = isEditable
+        ? renderEditableInput(a.id, c, rawVal)
+        : `<div class="detail-item-value">${displayVal}</div>`;
       detailHtml += `
-        <div class="detail-item">
-          <button class="copy-btn" title="Copiar ${c.label}" onclick="copyText('${val.replace(/'/g, "\\'")}')">
+        <div class="detail-item" data-prop="${a.id}" data-field="${c.id}">
+          <button class="copy-btn" title="Copiar ${c.label}" onclick="copyText('${displayVal.replace(/'/g, "\\'")}')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           </button>
           <div class="detail-item-label">${c.label}</div>
-          <div class="detail-item-value">${val}</div>
+          ${inputHtml}
         </div>`;
     });
     if (currentSection) detailHtml += '</div>';
@@ -591,9 +627,143 @@ function renderList() {
             Copiar como texto (WhatsApp)
           </button>
         </div>
+        ${a._source === 'nova' ? `
+        <div class="salvar-bar hidden" id="salvar-bar-${a.id}">
+          <span class="alteracoes-count" id="alteracoes-count-${a.id}">0 alteração</span>
+          <button class="cancelar-btn" onclick="cancelarAlteracoes('${a.id}')">Cancelar</button>
+          <button class="salvar-btn" onclick="salvarAlteracoes('${a.id}')">Salvar alterações</button>
+        </div>` : ''}
       </div>
     </div>`;
   }).join('');
+}
+
+// ═══ FORMATAÇÃO DE VALORES DA FICHA ═══
+function fmtFichaVal(value, campo) {
+  if (value === null || value === undefined || value === '') return '—';
+  // Boolean: Sim / Não
+  if (typeof value === 'boolean') return value ? 'Sim' : 'Não';
+  if (value === 'true') return 'Sim';
+  if (value === 'false') return 'Não';
+  const str = String(value);
+  const mask = campo?.mask;
+  switch (mask) {
+    case 'cpf': {
+      const d = str.replace(/\D/g, '');
+      return d.length === 11 ? d.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4') : str;
+    }
+    case 'cnpj': {
+      const d = str.replace(/\D/g, '');
+      return d.length === 14 ? d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5') : str;
+    }
+    case 'date': {
+      const m = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      return m ? `${m[3]}/${m[2]}/${m[1]}` : str;
+    }
+    case 'money': {
+      const n = Number(str);
+      return isNaN(n) ? str : n.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+    }
+    default: return str;
+  }
+}
+
+// ═══ RENDER DE INPUT EDITÁVEL ═══
+function renderEditableInput(propId, campo, rawVal) {
+  const displayVal = (rawVal === null || rawVal === undefined || rawVal === '') ? '' : fmtFichaVal(rawVal, campo);
+  // Boolean → select Sim/Não
+  if (typeof rawVal === 'boolean' || rawVal === 'true' || rawVal === 'false' || campo.id === 'aceita_seguro') {
+    const isYes = (rawVal === true || rawVal === 'true');
+    const isNo  = (rawVal === false || rawVal === 'false');
+    return `<select class="detail-item-input" onchange="markFichaDirty('${propId}','${campo.id}',this.value,'${campo.mask||''}')">
+      <option value="" ${!isYes && !isNo ? 'selected' : ''}>—</option>
+      <option value="true" ${isYes ? 'selected' : ''}>Sim</option>
+      <option value="false" ${isNo ? 'selected' : ''}>Não</option>
+    </select>`;
+  }
+  // Estado civil, sexo etc. → input texto livre (fica simples; depois dá pra virar select se quiser)
+  const escaped = displayVal.replace(/"/g,'&quot;');
+  return `<input type="text" class="detail-item-input" value="${escaped}" data-mask="${campo.mask||''}" onchange="markFichaDirty('${propId}','${campo.id}',this.value,'${campo.mask||''}')">`;
+}
+
+// ═══ DESFORMATA VALOR PRA SALVAR NO BANCO ═══
+function unmaskFichaVal(value, mask) {
+  if (value === '' || value === null || value === undefined) return null;
+  const str = String(value);
+  switch (mask) {
+    case 'cpf':
+    case 'cnpj': return str.replace(/\D/g, '');
+    case 'date': {
+      // dd/mm/aaaa → yyyy-mm-dd
+      const m = str.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      return m ? `${m[3]}-${m[2]}-${m[1]}` : (str.match(/^\d{4}-\d{2}-\d{2}$/) ? str : null);
+    }
+    case 'money': {
+      const n = Number(str.replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.'));
+      return isNaN(n) ? null : n;
+    }
+    default: return str;
+  }
+}
+
+// ═══ MARCAR CAMPO COMO ALTERADO ═══
+function markFichaDirty(propId, fieldId, newValue, mask) {
+  if (!window._pendingChanges[propId]) window._pendingChanges[propId] = {};
+  const adesao = allAdesoes.find(a => a.id === propId);
+  const original = adesao?.dados?.[fieldId];
+  // Compara valor normalizado
+  let saveVal;
+  if (newValue === 'true') saveVal = true;
+  else if (newValue === 'false') saveVal = false;
+  else if (newValue === '') saveVal = null;
+  else saveVal = unmaskFichaVal(newValue, mask);
+  // Se voltou ao original, remove do dirty
+  const equalOriginal = (saveVal === original) ||
+    (saveVal === null && (original === '' || original === null || original === undefined));
+  const cell = document.querySelector(`.detail-item[data-prop="${propId}"][data-field="${fieldId}"]`);
+  if (equalOriginal) {
+    delete window._pendingChanges[propId][fieldId];
+    cell?.classList.remove('dirty');
+  } else {
+    window._pendingChanges[propId][fieldId] = saveVal;
+    cell?.classList.add('dirty');
+  }
+  // Atualiza barra de salvar
+  const changes = window._pendingChanges[propId];
+  const count = Object.keys(changes).length;
+  const bar = document.getElementById('salvar-bar-' + propId);
+  const counter = document.getElementById('alteracoes-count-' + propId);
+  if (bar) bar.classList.toggle('hidden', count === 0);
+  if (counter) counter.textContent = count === 1 ? '1 alteração' : `${count} alterações`;
+}
+
+// ═══ CANCELAR ALTERAÇÕES ═══
+function cancelarAlteracoes(propId) {
+  delete window._pendingChanges[propId];
+  loadAdesoes(); // re-renderiza tudo
+}
+
+// ═══ SALVAR ALTERAÇÕES ═══
+async function salvarAlteracoes(propId) {
+  const changes = window._pendingChanges[propId];
+  if (!changes || !Object.keys(changes).length) return;
+  const btn = document.querySelector(`#salvar-bar-${propId} .salvar-btn`);
+  if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
+  try {
+    const { error } = await sb.from('portal_propostas').update(changes).eq('id', propId);
+    if (error) throw error;
+    delete window._pendingChanges[propId];
+    showToast('Alterações salvas!');
+    await loadAdesoes();
+    // reabre o card que foi editado
+    setTimeout(() => {
+      const card = document.getElementById('card-' + propId);
+      if (card) card.classList.add('open');
+    }, 100);
+  } catch(e) {
+    alert('Erro ao salvar: ' + (e.message || e));
+    if (btn) { btn.disabled = false; btn.textContent = 'Salvar alterações'; }
+  }
 }
 
 // ═══ TOGGLE CARD ═══
