@@ -172,11 +172,18 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
     <!-- Recorrência (só na criação) -->
     <div class="fld" id="fld-recorrencia">
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;color:var(--text);text-transform:none;letter-spacing:0;font-size:13px">
-        <input type="checkbox" id="sl-recorrente" style="width:auto;margin:0" onchange="document.getElementById('sl-semanas').disabled=!this.checked">
+        <input type="checkbox" id="sl-recorrente" style="width:auto;margin:0" onchange="toggleRecorrencia(this.checked)">
         Repetir toda semana
       </label>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:8px;font-size:12.5px;color:var(--text2)">
-        por <input type="number" id="sl-semanas" value="12" min="1" max="52" disabled style="width:60px;padding:4px 8px"> semanas
+      <div id="opcoes-recorrencia" style="display:none;margin-top:10px;padding-left:24px">
+        <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer;margin-bottom:6px">
+          <input type="radio" name="sl-tipo-rec" value="semanas" checked onchange="document.getElementById('sl-semanas').disabled = false">
+          Por <input type="number" id="sl-semanas" value="12" min="1" max="52" style="width:60px;padding:3px 8px;margin:0 4px"> semanas
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12.5px;cursor:pointer">
+          <input type="radio" name="sl-tipo-rec" value="semfim" onchange="document.getElementById('sl-semanas').disabled = true">
+          <strong>Sem fim</strong> — repete até alguém cancelar (auto-renovado)
+        </label>
       </div>
     </div>
 
@@ -262,6 +269,8 @@ async function init() {
   currentUser = profile;
   await loadData();
   render();
+  // Auto-renova séries "sem fim" em background
+  autoRenovarSeries().then(() => loadData().then(render));
   // Atualiza a cada 30s pra status "agora" não ficar velho
   setInterval(() => { loadData().then(render); }, 30000);
 }
@@ -488,7 +497,9 @@ function abrirNovo(inicioDefault = null, fimDefault = null) {
   document.getElementById('fld-recorrencia').style.display = '';
   document.getElementById('fld-serie').style.display = 'none';
   document.getElementById('sl-recorrente').checked = false;
+  document.getElementById('opcoes-recorrencia').style.display = 'none';
   document.getElementById('sl-semanas').disabled = true;
+  document.querySelector('input[name="sl-tipo-rec"][value="semanas"]').checked = true;
   document.getElementById('sl-inicio').disabled = false;
   document.getElementById('sl-fim').disabled = false;
   document.getElementById('sl-cliente').disabled = false;
@@ -602,6 +613,63 @@ function fecharModal() {
   editingId = null;
 }
 
+function toggleRecorrencia(ativada) {
+  document.getElementById('opcoes-recorrencia').style.display = ativada ? 'block' : 'none';
+  const tipo = document.querySelector('input[name="sl-tipo-rec"]:checked')?.value;
+  document.getElementById('sl-semanas').disabled = !ativada || tipo !== 'semanas';
+}
+
+// ═══ AUTO-RENOVAÇÃO DE SÉRIES "SEM FIM" ═══
+// Quando a última ocorrência de uma série está em menos de 60 dias,
+// cria mais 26 semanas pra manter "sem fim"
+async function autoRenovarSeries() {
+  try {
+    const cutoff = new Date(); cutoff.setDate(cutoff.getDate() + 60);
+    // Pega séries com ÚLTIMA ocorrência em < 60 dias e que tenham >= 50 ocorrências (heurística pra "sem fim")
+    const { data: series } = await sb.from('portal_sala_reservas')
+      .select('recorrente_id')
+      .not('recorrente_id', 'is', null)
+      .eq('cancelada', false);
+    if (!series || !series.length) return;
+    const seriesIds = [...new Set(series.map(s => s.recorrente_id))];
+    for (const sid of seriesIds) {
+      const { data: ocs } = await sb.from('portal_sala_reservas')
+        .select('*').eq('recorrente_id', sid).eq('cancelada', false)
+        .order('inicio', { ascending: false }).limit(1);
+      if (!ocs || !ocs.length) continue;
+      const ultimaInicio = new Date(ocs[0].inicio);
+      // Só auto-renova séries com >= 50 ocorrências (=sem fim) E última < 60 dias futuro
+      const { count } = await sb.from('portal_sala_reservas')
+        .select('id', { count: 'exact', head: true })
+        .eq('recorrente_id', sid).eq('cancelada', false);
+      if ((count || 0) < 50) continue;
+      if (ultimaInicio > cutoff) continue;
+      // Cria mais 26 semanas a partir da última
+      const baseIni = new Date(ocs[0].inicio);
+      const baseFim = new Date(ocs[0].fim);
+      const novas = [];
+      for (let i = 1; i <= 26; i++) {
+        const i2 = new Date(baseIni); i2.setDate(i2.getDate() + 7*i);
+        const f2 = new Date(baseFim); f2.setDate(f2.getDate() + 7*i);
+        novas.push({
+          consultor_auth_id: ocs[0].consultor_auth_id,
+          consultor_nome: ocs[0].consultor_nome,
+          criado_por_auth_id: ocs[0].criado_por_auth_id,
+          criado_por_nome: ocs[0].criado_por_nome,
+          sala_id: ocs[0].sala_id,
+          cliente_nome: ocs[0].cliente_nome,
+          motivo: ocs[0].motivo,
+          recorrente_id: sid,
+          inicio: i2.toISOString(),
+          fim: f2.toISOString()
+        });
+      }
+      await sb.from('portal_sala_reservas').insert(novas);
+      console.log(`Auto-renovou série ${sid}: +${novas.length} semanas`);
+    }
+  } catch(e) { console.warn('auto-renovação:', e); }
+}
+
 async function salvarReserva() {
   const ini = document.getElementById('sl-inicio').value;
   const fim = document.getElementById('sl-fim').value;
@@ -643,7 +711,9 @@ async function salvarReserva() {
       // Recorrência?
       const recorrente = document.getElementById('sl-recorrente').checked;
       if (recorrente) {
-        const semanas = parseInt(document.getElementById('sl-semanas').value || '12', 10);
+        const tipoRec = document.querySelector('input[name="sl-tipo-rec"]:checked')?.value || 'semanas';
+        // Sem fim: cria 104 ocorrências (2 anos) — auto-renovação extende quando aproxima do fim
+        const semanas = tipoRec === 'semfim' ? 104 : parseInt(document.getElementById('sl-semanas').value || '12', 10);
         const recorrenteId = crypto.randomUUID();
         const linhas = [];
         const baseIni = new Date(ini);
@@ -654,7 +724,10 @@ async function salvarReserva() {
           linhas.push({ ...basePayload, inicio: i2.toISOString(), fim: f2.toISOString(), recorrente_id: recorrenteId });
         }
         res = await sb.from('portal_sala_reservas').insert(linhas);
-        if (!res.error) showToast(`${semanas} reservas criadas!`);
+        if (!res.error) {
+          if (tipoRec === 'semfim') showToast('Reserva sem fim criada (2 anos, auto-renova)!');
+          else showToast(`${semanas} reservas criadas!`);
+        }
       } else {
         res = await sb.from('portal_sala_reservas').insert({
           ...basePayload,

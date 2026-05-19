@@ -306,6 +306,7 @@ body.embedded-mode .portal-menu-fab { display:flex; }
       <div id="sala-banner-title" style="font-weight:700"></div>
       <div id="sala-banner-sub" style="font-size:11.5px;opacity:.85;margin-top:1px"></div>
     </div>
+    <button id="btn-estou-aguardando" onclick="event.stopPropagation();mandarAvisoAguardando()" style="display:none;background:rgba(0,0,0,.18);border:0;color:inherit;padding:6px 12px;border-radius:6px;font-size:11.5px;cursor:pointer;font-weight:700">🔔 Estou aguardando</button>
     <button onclick="event.stopPropagation();fecharSalaBanner()" style="background:rgba(0,0,0,.12);border:0;color:inherit;padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600">Fechar ×</button>
   </div>
 
@@ -325,6 +326,8 @@ body.embedded-mode .portal-menu-fab { display:flex; }
       <!-- Formulário de Adesão (visível para todos os tipos) -->
       <div class="sb-item" onclick="nav('admin-adesao')" id="ni-admin-adesao"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg></span> Formulário de Adesão</div>
       <div class="sb-item" onclick="nav('admin-faturamento')" id="ni-admin-faturamento"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span> <span id="ni-admin-faturamento-label">Faturamento</span></div>
+      <!-- Sala de Reunião (liberada pra todos os tipos) -->
+      <div class="sb-item" onclick="nav('sala')" id="ni-sala"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> Sala de Reunião</div>
       <!-- Formulários (Adesão Bradesco): em stand-by até refinamento. Tela e backend continuam funcionais via /adesao.html — basta remover a classe `hidden` para reativar. -->
       <div class="sb-item hidden" onclick="nav('adesao')" id="ni-adesao"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></span> Formulários</div>
       <div class="sb-item" onclick="nav('dashboard')" id="ni-dashboard"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></span> Demonstrativo</div>
@@ -332,8 +335,6 @@ body.embedded-mode .portal-menu-fab { display:flex; }
       <div class="sb-item" onclick="nav('perfil')" id="ni-perfil"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span> Meu Perfil</div>
       <div id="admin-nav" class="hidden">
         <div class="sb-section">Administracao</div>
-        <!-- Sala de Reunião (em fase de teste — visível pra master/admin/sócio só) -->
-        <div class="sb-item hidden" onclick="nav('sala')" id="ni-sala"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> Sala de Reunião</div>
         <!-- Feedbacks (master e sócio) — dentro da Administração -->
         <div class="sb-item hidden" onclick="nav('feedbacks')" id="ni-feedbacks"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span> Feedbacks</div>
         <div class="sb-item" onclick="nav('admin-overview')" id="ni-admin-overview"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg></span> Visao Geral</div>
@@ -892,8 +893,8 @@ let _salaBannerDismissed = null;  // timestamp + tipo da última situação fech
 
 function _iniciarSalaBanner() {
   if (_salaBannerTimer) clearInterval(_salaBannerTimer);
-  // Só roda pra quem pode ter reserva — todos exceto parceiro/consultor por enquanto (fase teste)
-  if (!currentUser || !['master','admin','socio'].includes(currentUser.tipo)) return;
+  if (!currentUser) return;
+  // Banner roda pra todos os tipos (todos podem ter reserva)
   _checarSalaBanner();
   _salaBannerTimer = setInterval(_checarSalaBanner, 60000); // a cada 1 min
 }
@@ -902,17 +903,30 @@ async function _checarSalaBanner() {
   try {
     if (!sb || !currentUser) return;
     const now = new Date();
+    const meuAuthId = currentUser.auth_id || (await sb.auth.getUser()).data?.user?.id;
     const desde = new Date(now.getTime() - 60*60000); // 1h atrás
     const ate   = new Date(now.getTime() + 60*60000); // 1h pra frente
+
+    // MINHAS reservas no entorno
     const { data } = await sb.from('portal_sala_reservas')
-      .select('id, consultor_auth_id, consultor_nome, inicio, fim, cliente_nome')
-      .eq('consultor_auth_id', currentUser.auth_id || (await sb.auth.getUser()).data?.user?.id)
+      .select('id, consultor_auth_id, consultor_nome, inicio, fim, cliente_nome, aviso_aguardando_por_nome, aviso_aguardando_em')
+      .eq('consultor_auth_id', meuAuthId)
       .gte('inicio', desde.toISOString())
       .lte('inicio', ate.toISOString())
       .eq('cancelada', false)
       .order('inicio');
     const reservas = data || [];
-    // Busca também a próxima reserva geral (de outros consultores) pra mostrar "Vagner às 15h"
+
+    // Reserva ATIVA agora (de qualquer um) — pra ver se preciso avisar
+    const { data: ativasGerais } = await sb.from('portal_sala_reservas')
+      .select('id, consultor_auth_id, consultor_nome, inicio, fim, cliente_nome, aviso_aguardando_por_nome, aviso_aguardando_em')
+      .lte('inicio', now.toISOString())
+      .gt('fim', now.toISOString())
+      .eq('cancelada', false)
+      .limit(1);
+    const ativaQualquer = (ativasGerais && ativasGerais[0]) || null;
+
+    // Próxima reserva geral (qualquer um)
     const { data: prox } = await sb.from('portal_sala_reservas')
       .select('consultor_nome, inicio')
       .gt('inicio', now.toISOString())
@@ -920,15 +934,30 @@ async function _checarSalaBanner() {
       .order('inicio').limit(1);
     const proxOutra = (prox && prox[0]) || null;
 
-    // Estado a mostrar
-    const ativa = reservas.find(r => new Date(r.inicio) <= now && new Date(r.fim) > now);
-    const futura = reservas.find(r => new Date(r.inicio) > now);
-    const passada = reservas.find(r => new Date(r.fim) < now && (now - new Date(r.fim)) < 10*60000);
+    // Estados
+    const minhaAtiva = reservas.find(r => new Date(r.inicio) <= now && new Date(r.fim) > now);
+    const minhaFutura = reservas.find(r => new Date(r.inicio) > now);
+    const minhaPassada = reservas.find(r => new Date(r.fim) < now && (now - new Date(r.fim)) < 10*60000);
+    // Outra ativa = sala em uso por OUTRO consultor
+    const outraAtiva = ativaQualquer && ativaQualquer.consultor_auth_id !== meuAuthId ? ativaQualquer : null;
 
     let bannerInfo = null;
-    if (passada && proxOutra && new Date(proxOutra.inicio) <= new Date(passada.fim).getTime() + 30*60000) {
-      // Você passou da hora e tem alguém na fila
-      const minPassados = Math.floor((now - new Date(passada.fim)) / 60000);
+    let mostrarBotaoAguardando = false;
+
+    // Caso 0 (PRIORIDADE): minha reserva ATIVA tem alguém esperando
+    if (minhaAtiva && minhaAtiva.aviso_aguardando_por_nome) {
+      const minDesdeAviso = Math.floor((now - new Date(minhaAtiva.aviso_aguardando_em)) / 60000);
+      bannerInfo = {
+        tipo: 'alguem-esperando',
+        bg: '#FEE2E2', fg: '#991B1B',
+        icon: '🚨',
+        title: `${minhaAtiva.aviso_aguardando_por_nome.toUpperCase()} está aguardando você`,
+        sub: `Avisou há ${minDesdeAviso < 1 ? 'menos de 1' : minDesdeAviso} min · sua reserva termina às ${new Date(minhaAtiva.fim).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`
+      };
+    }
+    // Caso 1: passei do tempo e tem alguém na fila
+    else if (minhaPassada && proxOutra && new Date(proxOutra.inicio) <= new Date(minhaPassada.fim).getTime() + 30*60000) {
+      const minPassados = Math.floor((now - new Date(minhaPassada.fim)) / 60000);
       bannerInfo = {
         tipo: 'atrasado',
         bg: '#FEE2E2', fg: '#991B1B',
@@ -936,10 +965,12 @@ async function _checarSalaBanner() {
         title: `Você passou ${minPassados} min do horário`,
         sub: `Próxima reserva: ${proxOutra.consultor_nome} às ${new Date(proxOutra.inicio).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`
       };
-    } else if (ativa) {
-      const minRest = Math.floor((new Date(ativa.fim) - now) / 60000);
-      const fimStr = new Date(ativa.fim).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
-      if (minRest <= 10 && proxOutra && new Date(proxOutra.inicio) <= new Date(ativa.fim).getTime() + 30*60000) {
+    }
+    // Caso 2: minha reserva está ativa
+    else if (minhaAtiva) {
+      const minRest = Math.floor((new Date(minhaAtiva.fim) - now) / 60000);
+      const fimStr = new Date(minhaAtiva.fim).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      if (minRest <= 10 && proxOutra && new Date(proxOutra.inicio) <= new Date(minhaAtiva.fim).getTime() + 30*60000) {
         bannerInfo = {
           tipo: 'acaba-logo',
           bg: '#FEF3C7', fg: '#92400E',
@@ -953,29 +984,35 @@ async function _checarSalaBanner() {
           bg: '#DBEAFE', fg: '#1E40AF',
           icon: '🔵',
           title: `Sua reserva acaba às ${fimStr} (em ${minRest} min)`,
-          sub: ativa.cliente_nome ? `Cliente: ${ativa.cliente_nome}` : 'Reserva ativa'
+          sub: minhaAtiva.cliente_nome ? `Cliente: ${minhaAtiva.cliente_nome}` : 'Reserva ativa'
         };
       }
-    } else if (futura) {
-      const minAteInicio = Math.floor((new Date(futura.inicio) - now) / 60000);
+    }
+    // Caso 3: tenho reserva começando em ≤30min
+    else if (minhaFutura) {
+      const minAteInicio = Math.floor((new Date(minhaFutura.inicio) - now) / 60000);
       if (minAteInicio <= 30) {
         bannerInfo = {
           tipo: 'comeca-em-breve',
           bg: '#DCFCE7', fg: '#166534',
           icon: '🟢',
           title: `Sua reserva começa em ${minAteInicio} min`,
-          sub: `${new Date(futura.inicio).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})} – ${new Date(futura.fim).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}${futura.cliente_nome ? ' · ' + futura.cliente_nome : ''}`
+          sub: `${new Date(minhaFutura.inicio).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})} – ${new Date(minhaFutura.fim).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}${minhaFutura.cliente_nome ? ' · ' + minhaFutura.cliente_nome : ''}`
         };
+        // Se a sala está em uso por OUTRO E sobrepõe com minha futura, mostro botão "Estou aguardando"
+        // (mas só se ele ainda não foi avisado por mim)
+        if (outraAtiva && new Date(outraAtiva.fim) >= new Date(minhaFutura.inicio).getTime() - 5*60000) {
+          mostrarBotaoAguardando = !(outraAtiva.aviso_aguardando_por_nome && outraAtiva.aviso_aguardando_por_nome === currentUser.nome);
+          // Guarda id da reserva ativa pra clique do botão
+          window._reservaAtivaParaAvisar = outraAtiva.id;
+        }
       }
     }
 
     const banner = document.getElementById('sala-banner');
     if (!banner) return;
-    if (!bannerInfo) {
-      banner.style.display = 'none';
-      return;
-    }
-    // Se foi fechado pelo user na MESMA situação há menos de 5 min, mantém escondido
+    if (!bannerInfo) { banner.style.display = 'none'; return; }
+    // Dismiss respeitado por 5 min se for a MESMA situação
     if (_salaBannerDismissed && _salaBannerDismissed.tipo === bannerInfo.tipo && (Date.now() - _salaBannerDismissed.ts) < 5*60000) {
       banner.style.display = 'none';
       return;
@@ -986,8 +1023,34 @@ async function _checarSalaBanner() {
     document.getElementById('sala-banner-icon').textContent = bannerInfo.icon;
     document.getElementById('sala-banner-title').textContent = bannerInfo.title;
     document.getElementById('sala-banner-sub').textContent = bannerInfo.sub;
+    document.getElementById('btn-estou-aguardando').style.display = mostrarBotaoAguardando ? '' : 'none';
     banner.dataset.tipo = bannerInfo.tipo;
   } catch(e) { /* silent */ }
+}
+
+// Manda aviso "estou aguardando" pra reserva ativa
+async function mandarAvisoAguardando() {
+  const reservaId = window._reservaAtivaParaAvisar;
+  if (!reservaId) return;
+  try {
+    const { error } = await sb.from('portal_sala_reservas')
+      .update({
+        aviso_aguardando_por_nome: currentUser.nome,
+        aviso_aguardando_por_auth_id: currentUser.auth_id || (await sb.auth.getUser()).data?.user?.id,
+        aviso_aguardando_em: new Date().toISOString()
+      })
+      .eq('id', reservaId);
+    if (error) throw error;
+    const btn = document.getElementById('btn-estou-aguardando');
+    if (btn) {
+      btn.textContent = '✓ Avisado';
+      btn.disabled = true;
+      btn.style.opacity = '.6';
+      setTimeout(() => { btn.style.display = 'none'; }, 2500);
+    }
+  } catch(e) {
+    alert('Erro ao avisar: ' + (e.message || e));
+  }
 }
 
 function fecharSalaBanner() {
@@ -1061,12 +1124,9 @@ async function enterPortal() {
     const podeVerFeedbacks = (currentUser.tipo === 'master' || currentUser.tipo === 'socio');
     _feedbacksItem.classList.toggle('hidden', !podeVerFeedbacks);
   }
-  // NOVA ABA: Sala de Reunião — em FASE DE TESTE, só master/admin/sócio
+  // Sala de Reunião — liberada pra todos os tipos
   const _salaItem = document.getElementById('ni-sala');
-  if (_salaItem) {
-    const podeVerSala = ['master','admin','socio'].includes(currentUser.tipo);
-    _salaItem.classList.toggle('hidden', !podeVerSala);
-  }
+  if (_salaItem) _salaItem.classList.remove('hidden');
   // Aplica permissões granulares por módulo (per-user). Admin sempre vê tudo.
   aplicarPermissoesUI();
   document.getElementById('perfil-nome').textContent=currentUser.nome;
@@ -1109,10 +1169,7 @@ function nav(id) {
   if (id === 'feedbacks' && currentUser && !(currentUser.tipo === 'master' || currentUser.tipo === 'socio')) {
     id = 'perfil';
   }
-  // SALA DE REUNIÃO — fase de teste, só master/admin/sócio
-  if (id === 'sala' && currentUser && !['master','admin','socio'].includes(currentUser.tipo)) {
-    id = 'perfil';
-  }
+  // Sala de Reunião — liberada pra todos os tipos
   // Bloqueio de acesso direto a módulo sem permissão (cai pra perfil)
   if (currentUser && currentUser.tipo !== 'master' && !podeAcessarScreen(id)) {
     id = 'perfil';
@@ -1847,8 +1904,8 @@ function podeAcessarScreen(screenId) {
   if (screenId === 'admin-adesao') return true;
   // Feedbacks: só master e sócio
   if (screenId === 'feedbacks') return (currentUser.tipo === 'master' || currentUser.tipo === 'socio');
-  // Sala de Reunião: fase de teste — só master/admin/sócio
-  if (screenId === 'sala') return ['master','admin','socio'].includes(currentUser.tipo);
+  // Sala de Reunião: liberada pra todos os tipos
+  if (screenId === 'sala') return true;
   const m = MODULOS_MENU.find(x => x.screen === screenId);
   if (!m) return true; // screens não-gateáveis (perfil etc) liberadas
   const perms = currentUser.permissoes || {};
