@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reserva de Sala — Painel</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#2D3F5E; --yellow:#C8C84A; --teal:#4DBCC8;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+html{font-size:clamp(13px,0.95vw,30px);}
+body{
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  background:radial-gradient(ellipse at 22% -10%,#3a5078 0%,#26375a 42%,#161f33 100%);
+  color:#fff; overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+#app{height:100vh;display:flex;flex-direction:column;padding:1.5rem 1.9rem 1.1rem;gap:1.05rem;}
+
+/* ── Topbar ── */
+.topbar{display:flex;align-items:center;justify-content:space-between;flex:0 0 auto;}
+.tb-left{display:flex;align-items:center;gap:1.15rem;}
+.logo{height:2.7rem;width:auto;display:block;}
+.tb-title{
+  border-left:1px solid rgba(255,255,255,.18);padding-left:1.15rem;
+  font-size:1.12rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:#c3cee3;
+}
+.clock{text-align:right;line-height:1;}
+.clock .time{font-size:3.5rem;font-weight:800;letter-spacing:.01em;font-variant-numeric:tabular-nums;}
+.clock .sep{animation:blink 1.5s steps(1,end) infinite;}
+@keyframes blink{50%{opacity:.2;}}
+.clock .date{font-size:1.05rem;font-weight:500;color:#aebbd4;margin-top:.32rem;text-transform:capitalize;}
+
+.divider{flex:0 0 auto;height:3px;border-radius:3px;
+  background:linear-gradient(90deg,var(--teal),var(--yellow) 70%,transparent);}
+
+/* ── Rooms ── */
+#rooms{flex:1;display:flex;flex-direction:column;gap:1.05rem;min-height:0;}
+.room{
+  flex:1;display:flex;min-height:0;
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.09);
+  border-radius:1.35rem;overflow:hidden;
+  box-shadow:0 1.4rem 3rem rgba(0,0,0,.28);
+}
+
+/* status side */
+.rs{flex:0 0 37%;display:flex;flex-direction:column;justify-content:center;
+  padding:2rem 2.5rem;position:relative;overflow:hidden;}
+.rs.livre{background:linear-gradient(150deg,#1f8049 0%,#13a256 100%);}
+.rs.ocupada{background:linear-gradient(150deg,#a02334 0%,#c8313f 100%);}
+.rs::after{content:"";position:absolute;right:-4rem;bottom:-5rem;
+  width:14rem;height:14rem;border-radius:50%;background:rgba(255,255,255,.07);}
+.rs-room{font-size:1rem;font-weight:800;letter-spacing:.17em;text-transform:uppercase;
+  opacity:.82;position:relative;}
+.rs-state{display:flex;align-items:center;gap:1rem;margin-top:.55rem;position:relative;}
+.rs-state b{font-size:4.7rem;font-weight:900;line-height:.95;letter-spacing:-.02em;}
+.live-dot{width:1.05rem;height:1.05rem;border-radius:50%;background:#fff;flex:0 0 auto;
+  box-shadow:0 0 0 0 rgba(255,255,255,.7);animation:pulse 2s infinite;}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 rgba(255,255,255,.55);}
+  70%{box-shadow:0 0 0 1.1rem rgba(255,255,255,0);}
+  100%{box-shadow:0 0 0 0 rgba(255,255,255,0);}
+}
+.rs-detail{margin-top:1.15rem;font-size:1.4rem;font-weight:600;line-height:1.4;position:relative;}
+.rs-detail .who{font-weight:900;}
+.rs-sub{margin-top:.5rem;font-size:1.07rem;opacity:.9;font-weight:500;position:relative;}
+.rs-count{margin-top:1.4rem;align-self:flex-start;background:rgba(0,0,0,.24);
+  padding:.52rem 1.05rem;border-radius:.62rem;font-size:1.02rem;font-weight:700;
+  position:relative;}
+
+/* agenda side */
+.ag{flex:1;padding:1.65rem 2rem;display:flex;flex-direction:column;min-width:0;}
+.ag-head{display:flex;align-items:baseline;justify-content:space-between;
+  margin-bottom:1.05rem;flex:0 0 auto;}
+.ag-title{font-size:1.16rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:#d2dcef;}
+.ag-cnt{font-size:.96rem;color:#8e9cb9;font-weight:600;}
+.ag-list{flex:1;display:flex;flex-direction:column;gap:.6rem;overflow:hidden;min-height:0;}
+.ag-item{display:flex;align-items:center;gap:1.05rem;
+  background:rgba(255,255,255,.045);
+  border-left:.34rem solid var(--c,#4DBCC8);
+  border-radius:.58rem;padding:.78rem 1.05rem;flex:0 0 auto;}
+.ag-item.past{opacity:.42;}
+.ag-item.now{background:rgba(200,200,74,.17);border-left-color:var(--yellow);
+  box-shadow:0 0 0 1px rgba(200,200,74,.4) inset;}
+.ag-time{font-size:1.26rem;font-weight:800;font-variant-numeric:tabular-nums;
+  white-space:nowrap;min-width:9rem;}
+.ag-info{min-width:0;flex:1;}
+.ag-name{font-size:1.22rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ag-meta{font-size:.97rem;color:#a3b3cf;margin-top:.16rem;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;}
+.ag-badge{margin-left:auto;background:var(--yellow);color:#1b2840;font-size:.82rem;
+  font-weight:900;padding:.32rem .66rem;border-radius:.42rem;letter-spacing:.09em;flex:0 0 auto;}
+.ag-more{font-size:.98rem;color:#8e9cb9;font-weight:600;padding:.3rem .2rem;}
+.ag-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:#8593b3;gap:.7rem;text-align:center;}
+.ag-empty svg{opacity:.5;}
+.ag-empty .big{font-size:1.45rem;font-weight:800;color:#aebbd4;}
+
+/* footer */
+.statusbar{flex:0 0 auto;display:flex;align-items:center;gap:.5rem;
+  font-size:.85rem;color:#7e8db0;}
+.dot{width:.56rem;height:.56rem;border-radius:50%;background:#f59e0b;flex:0 0 auto;}
+.dot.ok{background:#22c55e;} .dot.err{background:#ef4444;}
+
+/* loading / vazio geral */
+.center-msg{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:1rem;color:#9aa8c6;}
+.spinner{width:2.6rem;height:2.6rem;border:.32rem solid rgba(255,255,255,.15);
+  border-top-color:var(--teal);border-radius:50%;animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="topbar">
+    <div class="tb-left">
+      <img class="logo" src="logo-branco.png" alt="Master Prime" onerror="this.onerror=null;this.src='logo.png';this.style.filter='brightness(0) invert(1)'">
+      <div class="tb-title">Reserva de Sala</div>
+    </div>
+    <div class="clock">
+      <div class="time" id="clock-time">--<span class="sep">:</span>--</div>
+      <div class="date" id="clock-date">—</div>
+    </div>
+  </header>
+  <div class="divider"></div>
+  <main id="rooms">
+    <div class="center-msg"><div class="spinner"></div><div>Carregando agenda…</div></div>
+  </main>
+  <footer class="statusbar">
+    <span class="dot" id="conn-dot"></span>
+    <span id="conn-text">Conectando…</span>
+  </footer>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://jhwciwvgagnuxakukyob.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
+
+let salas = [];
+let reservas = [];
+let lastOk = null;
+
+const PALETTE = [
+  '#4DBCC8','#60A5FA','#34D399','#FBBF24','#A78BFA',
+  '#22D3EE','#F472B6','#A3E635','#2DD4BF','#818CF8',
+  '#38BDF8','#FACC15','#4ADE80','#C084FC','#FB923C'
+];
+function hashStr(s){ let h=0; s=String(s||''); for(let i=0;i<s.length;i++) h=(h*31+s.charCodeAt(i))>>>0; return h; }
+function corDoConsultor(id,nome){ return PALETTE[hashStr(id||nome||'x')%PALETTE.length]; }
+
+function fmtHora(d){ return d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+function escapeHtml(s){
+  return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function capitalize(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+function fmtDur(m){
+  if(m<1) return 'menos de 1 min';
+  if(m<60) return m+' min';
+  const h=Math.floor(m/60), mm=m%60;
+  return h+'h'+(mm? ' '+mm+'min':'');
+}
+
+/* ── Relógio ── */
+function tickClock(){
+  const now = new Date();
+  const hh = String(now.getHours()).padStart(2,'0');
+  const mm = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('clock-time').innerHTML = hh+'<span class="sep">:</span>'+mm;
+  document.getElementById('clock-date').textContent =
+    capitalize(now.toLocaleDateString('pt-BR',{weekday:'long',day:'numeric',month:'long'}));
+}
+
+/* ── Dados ── */
+async function carregar(){
+  try{
+    const { data, error } = await sb.rpc('painel_sala_tv');
+    if(error) throw error;
+    salas = (data && data.salas) || [];
+    reservas = (((data && data.reservas) || [])).map(r=>({
+      ...r, _ini:new Date(r.inicio), _fim:new Date(r.fim)
+    })).sort((a,b)=> a._ini-b._ini);
+    if(!salas.length) salas = [{ id:'__all__', nome:'Sala de Reunião' }];
+    lastOk = new Date();
+    setConn(true);
+  }catch(e){
+    console.warn('painel_sala_tv:', e);
+    setConn(false);
+  }
+  render();
+}
+
+function setConn(ok){
+  const dot = document.getElementById('conn-dot');
+  const txt = document.getElementById('conn-text');
+  if(ok){
+    dot.className = 'dot ok';
+    txt.textContent = 'Atualizado às '+fmtHora(lastOk)+' · atualiza sozinho';
+  }else{
+    dot.className = 'dot err';
+    txt.textContent = lastOk
+      ? 'Sem conexão — exibindo dados de '+fmtHora(lastOk)
+      : 'Sem conexão com o servidor';
+  }
+}
+
+/* ── Render ── */
+function render(){
+  const wrap = document.getElementById('rooms');
+  if(!salas.length){
+    wrap.innerHTML = '<div class="center-msg"><div class="spinner"></div><div>Carregando…</div></div>';
+    return;
+  }
+  const now = new Date();
+  wrap.innerHTML = salas.map((s,i)=>renderRoom(s,i,now)).join('');
+}
+
+function reservasDaSala(sala, idx){
+  // 1 sala (caso real): toda reserva é dela, mesmo sem sala_id
+  if(salas.length<=1) return reservas;
+  // várias salas: casa por sala_id; reservas sem sala vão pra primeira
+  return reservas.filter(r=> r.sala_id===sala.id || (r.sala_id==null && idx===0));
+}
+
+function renderRoom(sala, idx, now){
+  const lista = reservasDaSala(sala, idx);
+  const ativa  = lista.find(r=> r._ini<=now && r._fim>now);
+  const proxima = lista.find(r=> r._ini>now);
+
+  // ── lado status ──
+  let cls, estado, dot='', detalhe='', sub='';
+  if(ativa){
+    cls='ocupada'; estado='EM REUNIÃO'; dot='<span class="live-dot"></span>';
+    const rem = Math.round((ativa._fim-now)/60000);
+    detalhe = '<span class="who">'+escapeHtml(ativa.consultor_nome||'Reservada')+'</span><br>'
+            + 'até '+fmtHora(ativa._fim);
+    sub = rem>0 ? 'Termina em '+fmtDur(rem) : 'Encerrando agora';
+    if(ativa.cliente_nome) sub += ' · Cliente: '+escapeHtml(ativa.cliente_nome);
+  }else{
+    cls='livre'; estado='LIVRE';
+    if(proxima){
+      const ate = Math.round((proxima._ini-now)/60000);
+      detalhe = 'Próxima reserva às <span class="who">'+fmtHora(proxima._ini)+'</span>';
+      sub = escapeHtml(proxima.consultor_nome||'Reservada')+' · em '+fmtDur(ate);
+    }else{
+      detalhe = 'Sem mais reservas hoje';
+      sub = 'A sala está livre o resto do dia';
+    }
+  }
+  const total = lista.length;
+  const countTxt = total===0 ? 'Nenhuma reserva hoje'
+                 : total+' reserva'+(total>1?'s':'')+' hoje';
+
+  // ── lado agenda ──
+  const cap = salas.length>1 ? 4 : 8;
+  let agendaHtml;
+  if(total===0){
+    agendaHtml = '<div class="ag-empty">'
+      + '<svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'
+      + '<div class="big">Nenhuma reserva hoje</div>'
+      + '<div>A sala está disponível o dia todo.</div></div>';
+  }else{
+    const vis = lista.slice(0,cap);
+    const itens = vis.map(r=>{
+      const isNow  = r._ini<=now && r._fim>now;
+      const isPast = r._fim<=now;
+      const cor = corDoConsultor(r.consultor_auth_id, r.consultor_nome);
+      const meta = [r.cliente_nome, r.motivo].filter(Boolean).map(escapeHtml).join(' · ');
+      return '<div class="ag-item '+(isNow?'now':isPast?'past':'')+'" style="--c:'+cor+'">'
+        + '<div class="ag-time">'+fmtHora(r._ini)+' – '+fmtHora(r._fim)+'</div>'
+        + '<div class="ag-info">'
+        +   '<div class="ag-name">'+escapeHtml(r.consultor_nome||'Reserva')+'</div>'
+        +   (meta? '<div class="ag-meta">'+meta+'</div>':'')
+        + '</div>'
+        + (isNow? '<div class="ag-badge">AGORA</div>':'')
+        + '</div>';
+    }).join('');
+    const resto = total-vis.length;
+    agendaHtml = '<div class="ag-list">'+itens
+      + (resto>0? '<div class="ag-more">+ '+resto+' reserva'+(resto>1?'s':'')+' mais tarde</div>':'')
+      + '</div>';
+  }
+
+  return '<div class="room">'
+    + '<div class="rs '+cls+'">'
+    +   '<div class="rs-room">'+escapeHtml(sala.nome||'Sala de Reunião')+'</div>'
+    +   '<div class="rs-state">'+dot+'<b>'+estado+'</b></div>'
+    +   '<div class="rs-detail">'+detalhe+'</div>'
+    +   '<div class="rs-sub">'+sub+'</div>'
+    +   '<div class="rs-count">'+countTxt+'</div>'
+    + '</div>'
+    + '<div class="ag">'
+    +   '<div class="ag-head"><div class="ag-title">Agenda de hoje</div>'
+    +     '<div class="ag-cnt">'+countTxt+'</div></div>'
+    +   agendaHtml
+    + '</div>'
+    + '</div>';
+}
+
+/* ── Ciclos ── */
+tickClock();
+carregar();
+setInterval(tickClock, 1000);                    // relógio
+setInterval(render, 20000);                      // recalcula livre/ocupada/contagem
+setInterval(carregar, 60000);                    // busca dados novos
+setInterval(()=>location.reload(), 6*3600*1000); // recarrega a página a cada 6h
+</script>
+</body>
+</html>
