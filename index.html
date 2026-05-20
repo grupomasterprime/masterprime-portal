@@ -474,12 +474,12 @@ body.embedded-mode .portal-menu-fab { display:flex; }
         <div class="page-sub">Cadastre e gerencie o acesso dos consultores</div>
         <div class="card"><div class="card-head"><div class="card-title">Novo consultor</div><button class="btn btn-primary btn-sm" onclick="document.getElementById('add-form').classList.toggle('hidden')">+ Adicionar</button></div>
           <div class="card-body hidden" id="add-form">
-            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:10px">
               <div><label class="login-label">Nome completo</label><input type="text" class="login-input" id="nu-nome" placeholder="NOME SOBRENOME" style="font-size:12px;padding:9px 12px;text-transform:uppercase"></div>
-              <div><label class="login-label">CPF</label><input type="text" class="login-input" id="nu-cpf" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)" style="font-size:12px;padding:9px 12px"></div>
               <div><label class="login-label">Tipo</label><select class="login-input" id="nu-tipo" style="font-size:12px;padding:9px 12px"><option value="consultor">Consultor</option><option value="parceiro">Parceiro</option><option value="socio">Socio</option><option value="admin">Administrador</option></select></div>
-              <div><label class="login-label">Senha inicial (opcional)</label><input type="text" class="login-input" id="nu-senha" placeholder="Deixe vazio = CPF. Pode usar CNPJ." style="font-size:12px;padding:9px 12px"></div>
+              <div><label class="login-label">Senha inicial (opcional)</label><input type="text" class="login-input" id="nu-senha" placeholder="Vazio = usa o próprio login" style="font-size:12px;padding:9px 12px"></div>
             </div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:14px">O login é gerado automaticamente a partir do nome (ex.: <strong>jose.batista</strong>). Não é necessário CPF.</div>
             <div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" onclick="addUser()">Salvar</button><button class="btn btn-outline btn-sm" onclick="document.getElementById('add-form').classList.add('hidden')">Cancelar</button></div>
             <div id="add-msg" style="margin-top:12px"></div>
           </div>
@@ -1603,21 +1603,40 @@ function toggleOverviewDemo(nome) {
 }
 
 // ═══ ADMIN: USERS ═══
+// Gera um login (username) a partir do nome: "JOSE BATISTA" -> "jose.batista".
+// Usa primeiro + último nome e trata duplicados (jose.batista, jose.batista2, ...).
+function gerarUsername(nome, users) {
+  const partes = (nome || '').normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .toLowerCase().replace(/[^a-z\s]/g,' ').trim().split(/\s+/).filter(Boolean);
+  let base = partes[0] || 'usuario';
+  if (partes.length > 1) base += '.' + partes[partes.length - 1];
+  let username = base, n = 2;
+  while (users.some(u => (u.username || '').toLowerCase() === username)) {
+    username = base + n; n++;
+  }
+  return username;
+}
+
 async function addUser() {
-  const nome=document.getElementById('nu-nome').value.trim().toUpperCase(), cpf=cleanCPF(document.getElementById('nu-cpf').value), tipo=document.getElementById('nu-tipo').value, msg=document.getElementById('add-msg');
-  // Campo opcional "senha inicial" - se não preencher usa CPF
+  const nome = document.getElementById('nu-nome').value.trim().toUpperCase();
+  const tipo = document.getElementById('nu-tipo').value;
+  const msg = document.getElementById('add-msg');
   const senhaInput = document.getElementById('nu-senha');
   const senhaCustom = senhaInput ? senhaInput.value.trim() : '';
-  const senha = senhaCustom || cpf;
-  if(!nome||nome.length<3){msg.innerHTML='<div class="alert alert-warn">Nome invalido.</div>';return;}
-  if(cpf.length!==11){msg.innerHTML='<div class="alert alert-warn">CPF invalido.</div>';return;}
-  if(senha.length<6){msg.innerHTML='<div class="alert alert-warn">Senha deve ter no minimo 6 caracteres.</div>';return;}
-  const users=await DB.getAllUsers();
-  if(users.find(u=>u.cpf===cpf)){msg.innerHTML='<div class="alert alert-err">CPF ja cadastrado.</div>';return;}
+  if(!nome || nome.length < 3){ msg.innerHTML='<div class="alert alert-warn">Nome invalido.</div>'; return; }
+  const users = await DB.getAllUsers();
+  if(users.find(u => u.nome === nome)){ msg.innerHTML='<div class="alert alert-err">Ja existe um usuario com esse nome.</div>'; return; }
+  // Login gerado automaticamente — não precisa de CPF
+  const username = gerarUsername(nome, users);
+  // Senha: a que o admin digitou, ou o próprio login como senha inicial
+  const senha = senhaCustom || username;
+  if(senha.length < 6){ msg.innerHTML='<div class="alert alert-warn">A senha inicial deve ter no minimo 6 caracteres.</div>'; return; }
+  // CPF interno aleatório (não é exibido nem pedido — o login é por username)
+  const cpf = String(Math.floor(10000000000 + Math.random() * 89999999999));
   try {
-    await criarUsuarioCompleto({ nome, cpf, senha, tipo });
-    msg.innerHTML=`<div class="alert alert-ok">${nome} cadastrado! Senha inicial: ${senhaCustom?senha:fmtCPF(cpf)}</div>`;
-    document.getElementById('nu-nome').value='';document.getElementById('nu-cpf').value='';
+    await criarUsuarioCompleto({ nome, cpf, username, senha, tipo });
+    msg.innerHTML=`<div class="alert alert-ok">${nome} cadastrado!<br>Login: <strong>${username}</strong> &nbsp;·&nbsp; Senha: <strong>${senha}</strong></div>`;
+    document.getElementById('nu-nome').value='';
     if (senhaInput) senhaInput.value='';
     await renderUsers();
   } catch(e) {
