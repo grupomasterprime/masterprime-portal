@@ -246,7 +246,7 @@ async function loadData() {
   if (errUsers) {
     // fallback: tenta direto (admin/master conseguem)
     const { data: u2 } = await sb.from('portal_users')
-      .select('auth_id, nome, tipo')
+      .select('auth_id, nome, tipo, foto_url')
       .in('tipo', ['consultor', 'socio', 'parceiro'])
       .not('auth_id', 'is', null)
       .order('nome');
@@ -265,6 +265,13 @@ async function loadData() {
 // ═══ HELPERS ═══
 function initials(nome) {
   return (nome || '?').split(' ').filter(Boolean).slice(0,2).map(p => p[0]).join('').toUpperCase();
+}
+// Conteúdo do avatar: foto de perfil (recortada em círculo) ou as iniciais.
+function avatarConteudo(u) {
+  if (u && u.foto_url) {
+    return `<img src="${u.foto_url}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block">`;
+  }
+  return initials(u ? u.nome : '');
 }
 function fmtData(iso) {
   if (!iso) return '—';
@@ -400,7 +407,7 @@ function renderList(filter = '') {
         </div>
       ` : enriched.map(u => `
         <div class="fb-row">
-          <div class="fb-avatar ${u.tipo}">${initials(u.nome)}</div>
+          <div class="fb-avatar ${u.tipo}">${avatarConteudo(u)}</div>
           <div>
             <div class="fb-name">${escapeHtml(u.nome)}</div>
             <div class="fb-name-sub">${u.tipo === 'socio' ? 'Sócio' : u.tipo === 'parceiro' ? 'Parceiro' : 'Consultor'}</div>
@@ -437,7 +444,7 @@ function renderHistorico() {
 
     <div class="fb-header" style="margin-top:14px">
       <div style="display:flex;align-items:center;gap:14px">
-        <div class="fb-avatar ${consultor.tipo}" style="width:54px;height:54px;font-size:18px">${initials(consultor.nome)}</div>
+        <div class="fb-avatar ${consultor.tipo}" style="width:54px;height:54px;font-size:18px">${avatarConteudo(consultor)}</div>
         <div>
           <div class="fb-title">${escapeHtml(consultor.nome)}</div>
           <div class="fb-subtitle">${consultor.tipo === 'socio' ? 'Sócio' : consultor.tipo === 'parceiro' ? 'Parceiro' : 'Consultor'} · ${fbs.length} feedback${fbs.length !== 1 ? 's' : ''}</div>
