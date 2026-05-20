@@ -429,6 +429,13 @@ function renderLinks() {
   `).join('');
 }
 
+// Copia o link de visualização da ficha (abre o formulário preenchido e travado)
+function copiarLinkFicha(id) {
+  const url = 'https://grupomasterprime.github.io/masterprime-portal/formulario.html?view=' + id;
+  navigator.clipboard.writeText(url)
+    .then(() => showToast('Link de visualização copiado!'))
+    .catch(() => alert('Erro ao copiar. Link: ' + url));
+}
 function copyLinkMini(btn, url, label) {
   navigator.clipboard.writeText(url).then(() => {
     const txt = btn.innerHTML;
@@ -665,6 +672,11 @@ function renderList() {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             Copiar como texto (WhatsApp)
           </button>
+          ${a._source === 'nova' ? `
+          <button class="copy-all-btn" style="background:var(--mp-navy);" onclick="copiarLinkFicha('${a.id}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            Copiar link de visualização
+          </button>` : ''}
         </div>
         ${a._source === 'nova' ? `
         <div class="salvar-bar hidden" id="salvar-bar-${a.id}">

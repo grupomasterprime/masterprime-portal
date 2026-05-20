@@ -666,6 +666,79 @@ async function init() {
 }
 init();
 
+// ════════ MODO VISUALIZAÇÃO (?view=<id>) ════════
+// Abre o MESMO formulário, preenchido e TRAVADO: quem recebe o link vê tudo,
+// pode selecionar/copiar os campos, mas não consegue editar nem enviar.
+(function(){
+  const vid = new URLSearchParams(location.search).get('view');
+  if (vid) modoVisualizacao(vid);
+})();
+
+async function modoVisualizacao(id) {
+  let dados;
+  try {
+    const { data, error } = await sb.rpc('obter_ficha_publica', { p_id: id });
+    if (error || !data) throw error || new Error('nao encontrada');
+    dados = data;
+  } catch(e) {
+    document.body.innerHTML = '<div style="max-width:480px;margin:80px auto;text-align:center;'
+      + 'font-family:Inter,sans-serif;color:#64748B;padding:24px">'
+      + '<div style="font-size:18px;font-weight:700;color:#2D3F5E;margin-bottom:8px">Ficha não encontrada</div>'
+      + 'O link pode estar incorreto ou a ficha foi removida.</div>';
+    return;
+  }
+  const tipo = (dados.tipo || 'pf').toLowerCase();
+  iniciarForm(tipo);                  // monta e exibe o form do tipo certo
+  preencherForm(tipo, dados);         // preenche os campos principais
+  if (tipo === 'pj' && Array.isArray(dados.socios)) preencherSocios(dados.socios);
+  travarFormulario(tipo);             // trava tudo (readonly — copiável, não editável)
+  // Banner discreto de modo visualização
+  const banner = document.createElement('div');
+  banner.style.cssText = 'background:#2D3F5E;color:#fff;text-align:center;padding:9px 14px;'
+    + 'font:600 12px Inter,sans-serif;letter-spacing:.3px';
+  banner.textContent = 'Modo visualização · ficha somente leitura';
+  document.body.insertBefore(banner, document.body.firstChild);
+  window.scrollTo({ top: 0 });
+}
+
+function preencherSocios(socios) {
+  while (document.querySelectorAll('.socio-block').length < socios.length
+         && typeof socioCount !== 'undefined' && socioCount < 3) {
+    addSocio();
+  }
+  const blocks = document.querySelectorAll('.socio-block');
+  socios.forEach((s, i) => {
+    const b = blocks[i];
+    if (!b || !s) return;
+    Object.keys(s).forEach(k => {
+      const el = b.querySelector('[data-socio="'+k+'"]');
+      let v = s[k];
+      if (!el || v == null || v === '') return;
+      v = String(v);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(v)) { const p = v.split('-'); v = p[2]+'/'+p[1]+'/'+p[0]; }
+      else if ((k === 'cpf' || k === 'cpf_conjuge') && /^\d{11}$/.test(v)) {
+        v = v.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+      }
+      el.value = v;
+      el.dispatchEvent(new Event('input', { bubbles:true }));
+    });
+  });
+}
+
+function travarFormulario(tipo) {
+  const form = document.getElementById('form-' + tipo);
+  if (!form) return;
+  form.querySelectorAll('input').forEach(el => {
+    if (el.type === 'checkbox' || el.type === 'radio') el.disabled = true;
+    else el.readOnly = true;            // readonly: dá pra selecionar/copiar, não editar
+  });
+  form.querySelectorAll('textarea').forEach(el => { el.readOnly = true; });
+  form.querySelectorAll('select').forEach(el => {
+    el.style.pointerEvents = 'none'; el.tabIndex = -1; el.setAttribute('aria-disabled','true');
+  });
+  form.querySelectorAll('button').forEach(el => { el.style.display = 'none'; });
+}
+
 // Aplica lock do admin no select de Consórcio depois que o form é renderizado
 function aplicarAdminLock(prefix) {
   const admin = getAdminLocked();
