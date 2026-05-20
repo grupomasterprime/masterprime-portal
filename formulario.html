@@ -617,12 +617,17 @@ function bindMasks(root = document) {
 async function lookupCEP(input) {
   const cep = unmaskNum(input.value);
   if (cep.length !== 8) return;
+  // Se o CEP não mudou desde a última busca, não refaz nada (preserva edições manuais
+  // de endereço). Mas se o cliente DIGITAR um CEP diferente, atualiza o endereço.
+  if (input.dataset.lastCep === cep) return;
   try {
     const r = await fetch('https://viacep.com.br/ws/'+cep+'/json/');
     const d = await r.json();
     if (d.erro) return;
+    input.dataset.lastCep = cep;
     const pf = input.dataset.cepPrefix || '';
-    const set = (sufix, val) => { const el = $(pf+sufix); if (el && !el.value && val) el.value = val; };
+    // Sobrescreve o endereço com o resultado do novo CEP (mesmo se já estava preenchido).
+    const set = (sufix, val) => { const el = $(pf+sufix); if (el && val) el.value = upperNoAccent(String(val)); };
     set('logradouro', d.logradouro);
     set('bairro', d.bairro);
     set('cidade', d.localidade);
@@ -778,6 +783,10 @@ function preencherForm(tipo, dados) {
     if (k === 'id' || k === 'criado_em' || k === 'atualizado_em' || k === 'protocolo' || k.startsWith('consultor')) return;
     set(k, dados[k]);
   });
+  // Marca o CEP auto-preenchido como "já buscado" pra não sobrescrever o endereço
+  // à toa — mas se o cliente DIGITAR um CEP diferente, a busca atualiza normalmente.
+  const cepEl = $(prefix + 'cep');
+  if (cepEl && cepEl.value) cepEl.dataset.lastCep = unmaskNum(cepEl.value);
   // Trata bloco cônjuge se houver
   if (dados.estado_civil && tipo === 'pf') toggleConjuge(prefix);
 }
