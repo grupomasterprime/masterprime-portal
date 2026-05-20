@@ -322,7 +322,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
     <!-- BUSCA -->
     <div class="search-box">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-      <input class="search-input" id="search-input" placeholder="Buscar por nome, CPF/CNPJ, protocolo, e-mail, telefone..." oninput="applyFilter()">
+      <input class="search-input" id="search-input" placeholder="Buscar por nome, CPF/CNPJ, protocolo, e-mail, telefone..." oninput="scheduleFilter()">
       <span class="search-info" id="search-info"></span>
     </div>
 
@@ -460,8 +460,23 @@ async function loadAdesoes() {
     const { data: legacy, error: e1 } = await sb.from('portal_adesoes').select('*').order('criado_em', { ascending: false });
     if (e1) throw e1;
     // 2) Tabela NOVA (portal_propostas — formulário Master Prime v2)
-    const { data: novas, error: e2 } = await sb.from('portal_propostas').select('*').order('criado_em', { ascending: false });
-    if (e2 && e2.code !== 'PGRST116') throw e2; // ignora se tabela não existe
+    //    Busca PAGINADA: o Supabase devolve no máx. 1000 linhas por request.
+    //    Percorremos em páginas de 1000 pra trazer TODAS as propostas (2.000+).
+    let novas = [];
+    try {
+      const PAGE = 1000;
+      for (let from = 0; ; from += PAGE) {
+        const { data, error } = await sb.from('portal_propostas')
+          .select('*')
+          .order('criado_em', { ascending: false })
+          .range(from, from + PAGE - 1);
+        if (error) { if (error.code === 'PGRST116') break; throw error; }
+        novas = novas.concat(data || []);
+        if (!data || data.length < PAGE) break;
+      }
+    } catch (e2) {
+      if (e2.code !== 'PGRST116') throw e2; // ignora se tabela não existe
+    }
     // Normaliza ambas pra estrutura comum
     const legacyNorm = (legacy || []).map(a => ({
       id: a.id,
@@ -498,6 +513,14 @@ async function loadAdesoes() {
     if (currentUserTipo !== 'admin' && currentUserTipo !== 'master') {
       merged = merged.filter(a => a.consultor_auth_id === currentUserAuthId);
     }
+    // Pré-computa a string de busca de cada registro UMA vez. Antes isso era
+    // refeito (JSON.stringify) a cada tecla — principal causa da lentidão
+    // depois que a base passou de 2.000 registros.
+    merged.forEach(a => {
+      const topo = [a.nome_cliente, a.cpf_cnpj, a.protocolo, a.administradora, a.tipo_pessoa, a.status, a.consultor_nome].filter(Boolean).join(' ');
+      a._haystack = (topo + ' ' + JSON.stringify(a.dados || {})).toLowerCase();
+      a._haystackDigits = a._haystack.replace(/\D/g, '');
+    });
     allAdesoes = merged;
     applyFilter();
   } catch(e) {
@@ -506,6 +529,15 @@ async function loadAdesoes() {
 }
 
 // ═══ FILTRO — busca em TODOS os campos (nome, CPF, e-mail, telefone, cidade, etc.) ═══
+// Debounce: espera o usuário parar de digitar antes de filtrar (evita travar
+// a tela a cada tecla quando há milhares de registros).
+let _filterTimer = null;
+let _pagAtual = 1;     // página atual da lista
+const PAG_TAM = 30;    // registros exibidos por página
+function scheduleFilter() {
+  clearTimeout(_filterTimer);
+  _filterTimer = setTimeout(applyFilter, 220);
+}
 function applyFilter() {
   const queryRaw = (document.getElementById('search-input').value || '').trim();
   const query = queryRaw.toLowerCase();
@@ -513,20 +545,14 @@ function applyFilter() {
   if (!query) {
     filteredAdesoes = [...allAdesoes];
   } else {
+    // Usa as strings de busca pré-computadas (a._haystack) — muito mais rápido.
     filteredAdesoes = allAdesoes.filter(a => {
-      // Junta TUDO em uma string só (campos topo + dados JSON)
-      const topo = [a.nome_cliente, a.cpf_cnpj, a.protocolo, a.administradora, a.tipo_pessoa, a.status, a.consultor_nome].filter(Boolean).join(' ').toLowerCase();
-      const dadosStr = JSON.stringify(a.dados || {}).toLowerCase();
-      const haystack = topo + ' ' + dadosStr;
-      // Se busca for só dígitos (CPF, CNPJ, celular), compara só números
-      if (qOnlyDigits && qOnlyDigits.length >= 4) {
-        const hayDigits = haystack.replace(/\D/g, '');
-        if (hayDigits.includes(qOnlyDigits)) return true;
-      }
-      return haystack.includes(query);
+      if (qOnlyDigits && qOnlyDigits.length >= 4 && (a._haystackDigits || '').includes(qOnlyDigits)) return true;
+      return (a._haystack || '').includes(query);
     });
   }
   document.getElementById('search-info').textContent = `${filteredAdesoes.length} de ${allAdesoes.length} adesões`;
+  _pagAtual = 1; // toda busca nova volta pra primeira página
   renderList();
 }
 
@@ -551,7 +577,15 @@ function renderList() {
   // Map de alterações pendentes por proposta_id (limpo a cada render)
   if (!window._pendingChanges) window._pendingChanges = {};
 
-  listEl.innerHTML = filteredAdesoes.map(a => {
+  // Paginação: exibe PAG_TAM registros por página. Evita o scroll gigante e
+  // o travamento de montar milhares de cards de uma vez.
+  const totalPag = Math.max(1, Math.ceil(filteredAdesoes.length / PAG_TAM));
+  if (_pagAtual > totalPag) _pagAtual = totalPag;
+  if (_pagAtual < 1) _pagAtual = 1;
+  const _ini = (_pagAtual - 1) * PAG_TAM;
+  const _toRender = filteredAdesoes.slice(_ini, _ini + PAG_TAM);
+
+  listEl.innerHTML = _toRender.map(a => {
     const dados = a.dados || {};
     const admTag = `tag-${a.administradora}`;
     const tipoTag = a.tipo_pessoa === 'pf' ? 'tag-pf' : 'tag-pj';
@@ -640,7 +674,29 @@ function renderList() {
         </div>` : ''}
       </div>
     </div>`;
-  }).join('');
+  }).join('') + renderPaginacao(totalPag);
+}
+
+// ═══ CONTROLES DE PAGINAÇÃO ═══
+function renderPaginacao(totalPag) {
+  if (filteredAdesoes.length <= PAG_TAM) return '';
+  const ini = (_pagAtual - 1) * PAG_TAM;
+  const fim = Math.min(ini + PAG_TAM, filteredAdesoes.length);
+  const base = 'padding:7px 15px;border:1px solid var(--border2);background:#fff;border-radius:8px;font-size:12px;font-weight:600;color:var(--mp-navy)';
+  const on = base + ';cursor:pointer';
+  const off = base + ';opacity:.38;cursor:not-allowed';
+  return `
+  <div style="display:flex;align-items:center;justify-content:center;gap:14px;padding:20px 12px;flex-wrap:wrap">
+    <button style="${_pagAtual<=1?off:on}" ${_pagAtual<=1?'disabled':''} onclick="irParaPagina(${_pagAtual-1})">◀ Anterior</button>
+    <span style="font-size:12px;color:var(--text2);font-weight:600">${ini+1}–${fim} de ${filteredAdesoes.length} · Página ${_pagAtual}/${totalPag}</span>
+    <button style="${_pagAtual>=totalPag?off:on}" ${_pagAtual>=totalPag?'disabled':''} onclick="irParaPagina(${_pagAtual+1})">Próxima ▶</button>
+  </div>`;
+}
+function irParaPagina(n) {
+  _pagAtual = n;
+  renderList();
+  const el = document.getElementById('adesoes-list');
+  if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' });
 }
 
 // ═══ FORMATAÇÃO DE VALORES DA FICHA ═══

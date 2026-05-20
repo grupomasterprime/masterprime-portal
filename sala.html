@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sala de Reunião</title>
+<title>Reserva de Sala</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -138,7 +138,7 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
 <body>
 
 <div class="container" id="main">
-  <div class="sl-head"><div><div class="sl-title">Sala de Reunião</div><div class="sl-subtitle">Carregando...</div></div></div>
+  <div class="sl-head"><div><div class="sl-title">Reserva de Sala</div><div class="sl-subtitle">Carregando...</div></div></div>
   <div style="text-align:center;padding:60px"><div class="spinner"></div></div>
 </div>
 
@@ -383,7 +383,7 @@ function render() {
   document.getElementById('main').innerHTML = `
     <div class="sl-head">
       <div>
-        <div class="sl-title">Sala de Reunião</div>
+        <div class="sl-title">Reserva de Sala</div>
         <div class="sl-subtitle">${allUsers.length} pessoas com acesso · reservas visíveis a todos</div>
       </div>
       <button class="btn-novo" onclick="abrirNovo()">
