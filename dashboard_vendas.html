@@ -19,6 +19,13 @@ body{background:#F4F6FA;color:#1E293B;font-family:'Inter','Segoe UI',system-ui,A
 .hdr p{font-size:10px;color:#C8C84A;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
 .hdr-right{display:flex;align-items:center;gap:14px}
 .hdr-status{font-size:11px;color:#CBD5E1}
+/* Mobile: cabeçalho empilha em vez de espremer tudo numa linha de 64px */
+@media (max-width:640px){
+  .hdr{height:auto;flex-direction:column;align-items:flex-start;gap:10px;padding:12px 16px}
+  .hdr-right{flex-wrap:wrap;gap:8px;width:100%}
+  .hdr-status{font-size:10px}
+  .hdr h1{font-size:15px}
+}
 .btn{padding:8px 16px;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:.15s}
 .btn-refresh{background:#C8C84A;color:#2D3F5E}
 .btn-refresh:hover{background:#d8d85a}

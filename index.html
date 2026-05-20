@@ -237,10 +237,14 @@ body.embedded-mode .portal-menu-fab { display:flex; }
 /* ═══ RESPONSIVE ═══ */
 @media (max-width:768px) {
   .app { grid-template-columns:1fr; }
-  .sidebar { position:fixed; left:-260px; z-index:100; width:260px; transition:left .3s; }
+  .sidebar { position:fixed; left:-280px; z-index:110; width:260px; transition:left .3s; }
   .sidebar.open { left:0; }
-  .mobile-toggle { display:block; position:fixed; top:12px; left:12px; z-index:101; background:var(--mp-navy); color:#fff; border:none; border-radius:8px; padding:8px 12px; font-size:18px; cursor:pointer; }
-  .screen { padding:16px; padding-top:56px; }
+  /* Barra de topo fixa no mobile — contém o menu hambúrguer. Evita que o
+     botão flutuante fique por cima do título de cada página. */
+  .mobile-toggle { display:flex; align-items:center; gap:10px; position:fixed; top:0; left:0; right:0; width:100%; height:52px; z-index:101; background:var(--mp-navy); color:#fff; border:none; border-radius:0; padding:0 16px; font-size:14px; font-weight:700; letter-spacing:.3px; cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,.18); }
+  .screen { padding:16px; padding-top:64px; }
+  /* Telas em iframe (padding:0 inline) — abre espaço pra barra de topo */
+  .screen[style*="100vh"] { padding-top:52px !important; box-sizing:border-box; }
   .stats { grid-template-columns:1fr 1fr; }
   .hist-grid { grid-template-columns:1fr; }
   .login-card { padding:32px 24px; }
@@ -310,7 +314,7 @@ body.embedded-mode .portal-menu-fab { display:flex; }
     <button onclick="event.stopPropagation();fecharSalaBanner()" style="background:rgba(0,0,0,.12);border:0;color:inherit;padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600">Fechar ×</button>
   </div>
 
-  <button class="mobile-toggle" onclick="toggleSidebar()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <button class="mobile-toggle" onclick="toggleSidebar()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg><span>Master Prime</span></button>
   <div class="sidebar-backdrop" onclick="toggleSidebar()"></div>
   <button class="portal-menu-fab" id="portal-menu-fab" onclick="exitEmbedded()" title="Voltar ao menu do portal"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <div class="app" id="portal-app">
@@ -343,9 +347,10 @@ body.embedded-mode .portal-menu-fab { display:flex; }
         <div class="sb-item" onclick="nav('painel')" id="ni-painel"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> Painel Split</div>
       </div>
       <div class="sb-user-card">
-        <div class="sb-user-info">
+        <div class="sb-user-info" onclick="nav('perfil')" title="Abrir Meu Perfil" style="cursor:pointer;border-radius:8px;padding:6px;margin:-6px -6px 6px;transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background='transparent'">
           <div class="sb-avatar" id="sb-avatar">--</div>
-          <div><div class="sb-user-name" id="sb-user-name">--</div><div class="sb-user-role" id="sb-user-role">Consultor</div></div>
+          <div style="min-width:0"><div class="sb-user-name" id="sb-user-name">--</div><div class="sb-user-role" id="sb-user-role">Consultor</div></div>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="color:rgba(255,255,255,.45);margin-left:auto;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
         <button class="sb-logout" onclick="doLogout()">Sair</button>
       </div>
