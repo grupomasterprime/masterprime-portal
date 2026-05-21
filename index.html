@@ -261,8 +261,8 @@ body.embedded-mode .portal-menu-fab { display:flex; }
 ::-webkit-scrollbar { width:5px; height:5px; }
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:var(--border2); border-radius:10px; }
-.sidebar-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:99; }
-@media (max-width:768px) { .sidebar.open ~ .sidebar-backdrop { display:block; } }
+.sidebar-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:100; }
+@media (max-width:768px) { .sidebar-backdrop.open { display:block; } }
 </style>
 </head>
 <body>
@@ -1172,11 +1172,25 @@ async function checkSession() {
   document.getElementById('login-screen').style.display='flex';
   if (!USE_SUPABASE) document.getElementById('config-warn').classList.remove('hidden');
 }
+// Carimba o último acesso REAL ao portal (não depende de digitar senha).
+// Roda ao entrar e a cada 5 min enquanto a aba está visível.
+let _acessoHeartbeat = null;
+function registrarAcesso() {
+  if (!USE_SUPABASE) return;
+  try { sb.rpc('registrar_acesso'); } catch(e) {}
+  if (_acessoHeartbeat) clearInterval(_acessoHeartbeat);
+  _acessoHeartbeat = setInterval(() => {
+    if (document.visibilityState === 'visible') {
+      try { sb.rpc('registrar_acesso'); } catch(e) {}
+    }
+  }, 5 * 60 * 1000);
+}
 async function enterPortal() {
   document.getElementById('loading-screen').style.display='none';
   document.getElementById('login-screen').style.display='none';
   document.getElementById('portal-screen').style.display='block';
   _iniciarAutoLogout();
+  registrarAcesso();
   _iniciarSalaBanner();
   atualizarAvatares();
   document.getElementById('sb-user-name').textContent=currentUser.nome;
@@ -1268,6 +1282,7 @@ function nav(id) {
   const s=document.getElementById('s-'+id), n=document.getElementById('ni-'+id);
   if(s)s.classList.add('active'); if(n)n.classList.add('active');
   document.getElementById('sidebar').classList.remove('open');
+  document.querySelector('.sidebar-backdrop')?.classList.remove('open');
   // Lazy-load dos iframes: só carrega na primeira visita (evita 2.5 MB no login)
   // Iframes com lazy-load (assembleia/lances/painel) — carrega só na primeira visita
   const iframeScreens = ['assembleia','lances','painel','simuladores','dashboard-vendas','adesao','admin-faturamento','admin-adesao','feedbacks','sala'];
@@ -1305,7 +1320,11 @@ function exitEmbedded(){
   document.body.classList.remove('embedded-mode');
   nav('dashboard');
 }
-function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); }
+function toggleSidebar() {
+  const aberta = document.getElementById('sidebar').classList.toggle('open');
+  const bd = document.querySelector('.sidebar-backdrop');
+  if (bd) bd.classList.toggle('open', aberta);
+}
 
 // ═══ DASHBOARD ═══
 async function renderDashboard() {
@@ -1776,7 +1795,8 @@ async function renderUsers() {
   const users = await DB.getAllUsers();
   const el = document.getElementById('users-list');
   document.getElementById('user-count').textContent = users.length + ' usuarios';
-  // Busca último login via RPC (admin/master apenas)
+  // Busca último login (assinatura de senha) via RPC — fallback p/ quem ainda
+  // não tem ultimo_acesso registrado (pré-deploy desta feature).
   let loginsMap = {};
   try {
     if (USE_SUPABASE && (currentUser.tipo === 'master' || currentUser.tipo === 'admin')) {
@@ -1784,8 +1804,8 @@ async function renderUsers() {
       if (logins) logins.forEach(l => { loginsMap[l.auth_id] = l.last_sign_in_at; });
     }
   } catch(e) { console.warn('Não foi possível buscar últimos logins:', e); }
-  // Anexa last_login em cada user
-  users.forEach(u => { u._last_login = u.auth_id ? loginsMap[u.auth_id] : null; });
+  // Último acesso REAL ao portal (ultimo_acesso); cai pro último login se vazio
+  users.forEach(u => { u._last_login = u.ultimo_acesso || (u.auth_id ? loginsMap[u.auth_id] : null); });
   // Ordena de acordo com _usersSort
   const _rank = t => (t==='master'?0:t==='admin'?1:t==='socio'?2:3);
   if (_usersSort === 'login_recent') {
@@ -1863,7 +1883,7 @@ async function renderUsers() {
             <th onclick="setUsersSort('name')" style="cursor:pointer;user-select:none" title="Ordenar por nome">Nome${sortArrow(['name'])}</th>
             <th>Usu&aacute;rio</th>
             <th>Senha</th>
-            <th onclick="toggleUsersSortLogin()" style="cursor:pointer;user-select:none" title="Clique pra alternar mais recente / mais antigo">&Uacute;ltimo login${sortArrow(['login_recent','login_oldest'])}</th>
+            <th onclick="toggleUsersSortLogin()" style="cursor:pointer;user-select:none" title="Clique pra alternar mais recente / mais antigo">&Uacute;ltimo acesso${sortArrow(['login_recent','login_oldest'])}</th>
             <th></th>
           </tr>
         </thead>
