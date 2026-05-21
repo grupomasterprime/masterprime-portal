@@ -1678,11 +1678,36 @@ function imprimirDemo(nomeSafe) {
   const container = document.getElementById('demo-body-' + nomeSafe);
   if (!container) { window.print(); return; }
   // Abre janela nova com só o demo (estilo print)
-  const w = window.open('', '_blank', 'width=900,height=1000');
+  const w = window.open('', '_blank', 'width=1100,height=900');
   const stylesTags = Array.from(document.querySelectorAll('style,link[rel="stylesheet"]')).map(s => s.outerHTML).join('\n');
-  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Demonstrativo</title>${stylesTags}<style>body{padding:20px;background:#fff}@media print{body{padding:0}}</style></head><body>${container.innerHTML}</body></html>`);
+  // CSS de impressão: a tabela tem 13 colunas (até "Obs parceiro"), então
+  // imprime em PAISAGEM pra caber tudo sem cortar. Deixa o card FLUIR entre
+  // páginas em vez de pular inteiro pra próxima (causa do "header sozinho").
+  const printCss = `
+    @page { size: A4 landscape; margin: 9mm; }
+    html, body { background:#fff !important; }
+    body { padding:16px; }
+    .tbl-wrap { overflow:visible !important; }
+    table.tbl { width:100% !important; font-size:9px !important; }
+    .tbl th, .tbl td { padding:4px 6px !important; }
+    .tbl th { white-space:normal !important; }
+    .tbl td { word-break:break-word; }
+    @media print {
+      body { padding:0 !important; }
+      /* card flui entre páginas — não pula inteiro deixando o topo vazio */
+      .card { break-inside:auto !important; page-break-inside:auto !important;
+              box-shadow:none !important; border:1px solid #e5e7eb !important; }
+      .card-head, .det-header { break-inside:avoid; }
+      .card-head { break-after:avoid; }
+      /* repete o cabeçalho/total da tabela em cada página */
+      .tbl thead { display:table-header-group; }
+      .tbl tfoot { display:table-footer-group; }
+      .tbl tr { break-inside:avoid; }
+    }
+  `;
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Demonstrativo</title>${stylesTags}<style>${printCss}</style></head><body>${container.innerHTML}</body></html>`);
   w.document.close();
-  setTimeout(() => { w.focus(); w.print(); }, 500);
+  setTimeout(() => { w.focus(); w.print(); }, 700);
 }
 
 function toggleOverviewDemo(nome) {
