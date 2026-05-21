@@ -128,6 +128,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
   color: var(--text2);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
+.link-mini-actions { display: flex; gap: 6px; flex-shrink: 0; }
 .link-mini-copy {
   background: var(--mp-navy); color: #fff;
   border: 0; padding: 8px 14px; border-radius: 7px;
@@ -281,6 +282,11 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 @media (max-width: 600px) {
   .detail-grid { grid-template-columns: 1fr; }
   .ad-card-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  /* No celular: badge+nome em cima, botões Copiar/Abrir em linha cheia embaixo */
+  .link-mini { flex-wrap: wrap; row-gap: 12px; }
+  .link-mini-info { min-width: calc(100% - 70px); }
+  .link-mini-actions { width: 100%; }
+  .link-mini-actions .link-mini-copy { flex: 1; justify-content: center; }
 }
 </style>
 </head>
@@ -415,7 +421,7 @@ function renderLinks() {
         <div class="link-mini-label" title="${l.url}">${l.label}</div>
         <div class="link-mini-sub">${l.sub}</div>
       </div>
-      <div style="display:flex;gap:6px;flex-shrink:0">
+      <div class="link-mini-actions">
         <button class="link-mini-copy" onclick="copyLinkMini(this, '${l.url}', '${l.label.replace(/'/g, "\\'")}')">
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
           Copiar
