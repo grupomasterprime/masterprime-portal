@@ -856,6 +856,13 @@ function preencherForm(tipo, dados) {
     if (k === 'id' || k === 'criado_em' || k === 'atualizado_em' || k === 'protocolo' || k.startsWith('consultor')) return;
     set(k, dados[k]);
   });
+  // O banco é salvo partido em banco_codigo + banco_nome. O campo "Banco" é
+  // único ("código - nome"), então recombina aqui senão aparece vazio.
+  if (dados.banco_codigo || dados.banco_nome) {
+    const cod = String(dados.banco_codigo || '').trim();
+    const nom = String(dados.banco_nome || '').trim();
+    set('banco', (cod && nom) ? `${cod} - ${nom}` : (nom || cod));
+  }
   // Marca o CEP auto-preenchido como "já buscado" pra não sobrescrever o endereço
   // à toa — mas se o cliente DIGITAR um CEP diferente, a busca atualiza normalmente.
   const cepEl = $(prefix + 'cep');
