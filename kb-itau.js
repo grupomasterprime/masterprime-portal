@@ -606,10 +606,37 @@ window.KB_ADMIN["itau"] = {
       "categoria_key": "seguro",
       "categoria_label": "Seguro consórcio",
       "categoria_ordem": 10,
+      "titulo": "Quais são as coberturas do Seguro Consórcio?",
+      "conteudo": "O Seguro Consórcio PF cobre duas situações: morte por qualquer causa e invalidez permanente total por acidente. Em um sinistro coberto, o valor é direcionado para a quitação total ou parcial da cota — a dívida não fica para a família.\n\nA vigência do seguro acompanha o prazo do consórcio, e a contratação é feita exclusivamente no momento da negociação da cota.",
+      "tags": "seguro, cobertura, morte, invalidez, vigência",
+      "ordem": 3
+    },
+    {
+      "categoria_key": "seguro",
+      "categoria_label": "Seguro consórcio",
+      "categoria_ordem": 10,
+      "titulo": "O Seguro Consórcio tem carência?",
+      "conteudo": "A carência se aplica à morte decorrente de doença. As carências em vigor a partir de 10/12/2025 são, contadas do início da vigência do seguro:\n\n• Contratos com prazo de até 6 meses: 30 dias.\n• Contratos entre 6 e 12 meses: 60 dias.\n• Contratos com prazo acima de 12 meses: 90 dias.\n\nEm caso de suicídio ou tentativa, a carência é dos 2 primeiros anos do contrato.",
+      "tags": "seguro, carência, morte, doença, suicídio",
+      "ordem": 4
+    },
+    {
+      "categoria_key": "seguro",
+      "categoria_label": "Seguro consórcio",
+      "categoria_ordem": 10,
+      "titulo": "Quais assistências 24h o Seguro Consórcio oferece?",
+      "conteudo": "O seguro inclui assistências 24h, com 3 acionamentos por ano e renovação anual durante a vigência da cota. Estão disponíveis para contratos fechados a partir de outubro de 2022.\n\nPara carro, moto e pesados — até 5 serviços: guincho, chaveiro, borracheiro, envio de profissional em caso de pane mecânica ou elétrica, e pane seca (falta de combustível).\n\nPara imóvel — até 3 serviços: encanador, eletricista e chaveiro, com um profissional indo até o cliente a qualquer hora. A assistência de imóvel tem carência de 30 dias.",
+      "tags": "seguro, assistência 24h, guincho, chaveiro, encanador, eletricista",
+      "ordem": 5
+    },
+    {
+      "categoria_key": "seguro",
+      "categoria_label": "Seguro consórcio",
+      "categoria_ordem": 10,
       "titulo": "Como o cliente sabe se contratou o seguro?",
       "conteudo": "Basta conferir o quadro de pagamento da proposta (item IX, \"g\" ou \"h\"): se a coluna \"Seguro Consórcio\" tiver um valor, o seguro foi contratado; se estiver zerada ou em branco, a adesão foi sem seguro.",
       "tags": "seguro, proposta, conferir",
-      "ordem": 3
+      "ordem": 6
     },
     {
       "categoria_key": "seguro",
@@ -618,7 +645,7 @@ window.KB_ADMIN["itau"] = {
       "titulo": "Onde consultar as condições do seguro?",
       "conteudo": "As condições completas do Seguro Consórcio, assim como o Regulamento do consórcio, ficam disponíveis no Portal do Consorciado (itau.com.br/consorcios/portal-do-consorciado) e na Central de Atendimento Consórcio Itaú.",
       "tags": "seguro, condições, portal",
-      "ordem": 4
+      "ordem": 7
     },
     {
       "categoria_key": "canais",
