@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master Prime — Base de Conhecimento</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --mp-navy:   #2D3F5E;
+  --mp-navy-d: #1E2D45;
+  --mp-yellow: #C8C84A;
+  --mp-teal:   #4DBCC8;
+  --mp-blue:   #7A9BC8;
+  --bg:        #F4F6FA;
+  --card:      #FFFFFF;
+  --border:    #E2E8F0;
+  --border2:   #CBD5E1;
+  --text:      #1E293B;
+  --text2:     #64748B;
+  --text3:     #94A3B8;
+  --bradesco:  #CC092F;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, system-ui, sans-serif; font-size: 13px; min-height: 100vh; }
+
+.wrap { padding: 32px 40px 56px; max-width: 1080px; margin: 0 auto; }
+
+/* ── Header ── */
+.kb-header { margin-bottom: 22px; }
+.kb-title { font-size: 24px; font-weight: 700; color: var(--mp-navy); letter-spacing: -0.4px; display: flex; align-items: center; gap: 10px; }
+.kb-title svg { width: 24px; height: 24px; color: var(--mp-teal); }
+.kb-sub { font-size: 13px; color: var(--text2); margin-top: 6px; }
+
+/* ── Administradora pills ── */
+.adm-row { display: flex; gap: 10px; margin: 18px 0 16px; flex-wrap: wrap; }
+.adm-pill {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 16px; border-radius: 10px;
+  border: 1px solid var(--border); background: var(--card);
+  font-size: 13px; font-weight: 600; color: var(--text2);
+  cursor: pointer; font-family: inherit; transition: all .15s ease;
+}
+.adm-pill .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.adm-pill.active { border-color: var(--bradesco); color: var(--bradesco); background: #FFF5F6; box-shadow: 0 1px 3px rgba(204,9,47,.10); }
+.adm-pill.soon { opacity: .6; cursor: not-allowed; }
+.adm-pill .soon-tag { font-size: 9px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; background: #FEF3C7; color: #A16207; padding: 2px 6px; border-radius: 5px; }
+
+/* ── Search ── */
+.search-box { position: relative; margin-bottom: 14px; }
+.search-box svg.ico { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--text3); pointer-events: none; }
+#search {
+  width: 100%; padding: 14px 44px 14px 44px;
+  border: 1px solid var(--border2); border-radius: 12px;
+  font-size: 14px; font-family: inherit; color: var(--text);
+  background: var(--card); outline: none; transition: border-color .15s, box-shadow .15s;
+}
+#search:focus { border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,.14); }
+#search::placeholder { color: var(--text3); }
+.search-clear {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  width: 26px; height: 26px; border: 0; border-radius: 7px; background: transparent;
+  color: var(--text3); cursor: pointer; display: none; align-items: center; justify-content: center;
+}
+.search-clear:hover { background: var(--bg); color: var(--text2); }
+.search-clear.show { display: flex; }
+
+/* ── Category chips ── */
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+.chip {
+  padding: 7px 13px; border-radius: 20px; border: 1px solid var(--border);
+  background: var(--card); color: var(--text2); font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: all .14s ease; white-space: nowrap;
+}
+.chip:hover { border-color: var(--mp-teal); color: var(--mp-navy); }
+.chip.active { background: var(--mp-navy); border-color: var(--mp-navy); color: #fff; }
+.chip .c-count { opacity: .65; font-weight: 600; margin-left: 3px; }
+
+/* ── Result info ── */
+.result-info { font-size: 12px; color: var(--text2); margin-bottom: 14px; font-weight: 500; }
+.result-info b { color: var(--mp-navy); }
+
+/* ── Category section ── */
+.cat-section { margin-bottom: 28px; }
+.cat-head {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+  padding-bottom: 8px; border-bottom: 2px solid var(--border);
+}
+.cat-head .cat-name { font-size: 15px; font-weight: 700; color: var(--mp-navy); letter-spacing: -0.2px; }
+.cat-head .cat-count {
+  font-size: 11px; font-weight: 700; color: var(--text2);
+  background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 2px 9px;
+}
+
+/* ── Q&A item ── */
+.kb-item {
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  margin-bottom: 8px; overflow: hidden; transition: border-color .14s, box-shadow .14s;
+}
+.kb-item:hover { border-color: var(--border2); }
+.kb-item.open { border-color: var(--mp-teal); box-shadow: 0 3px 12px rgba(45,63,94,.07); }
+.kb-q {
+  width: 100%; text-align: left; background: transparent; border: 0; cursor: pointer;
+  padding: 15px 16px; display: flex; align-items: center; gap: 12px;
+  font-family: inherit; font-size: 13.5px; font-weight: 600; color: var(--mp-navy);
+}
+.kb-q .badge {
+  font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
+  color: var(--mp-teal); background: #ECFDFB; border: 1px solid #CFF3F0;
+  padding: 3px 7px; border-radius: 5px; flex-shrink: 0;
+}
+.kb-q .q-text { flex-grow: 1; }
+.kb-q .chev { width: 17px; height: 17px; color: var(--text3); flex-shrink: 0; transition: transform .18s ease; }
+.kb-item.open .kb-q .chev { transform: rotate(180deg); color: var(--mp-teal); }
+.kb-a { display: none; padding: 0 16px 16px 16px; }
+.kb-item.open .kb-a { display: block; }
+.kb-a-inner { border-top: 1px solid var(--border); padding-top: 13px; }
+.kb-a p { font-size: 13px; line-height: 1.62; color: var(--text); margin-bottom: 9px; }
+.kb-a p:last-child { margin-bottom: 0; }
+.kb-a ul, .kb-a ol { margin: 4px 0 11px; padding-left: 22px; }
+.kb-a li { font-size: 13px; line-height: 1.6; color: var(--text); margin-bottom: 5px; }
+.kb-a li:last-child { margin-bottom: 0; }
+.kb-a mark { background: #FEF3C7; color: inherit; padding: 0 2px; border-radius: 2px; }
+
+/* ── Empty ── */
+.empty {
+  text-align: center; padding: 56px 20px; color: var(--text2);
+}
+.empty svg { width: 46px; height: 46px; color: var(--border2); margin-bottom: 12px; }
+.empty .e-title { font-size: 15px; font-weight: 600; color: var(--mp-navy); margin-bottom: 4px; }
+.empty .e-desc { font-size: 12.5px; }
+
+/* ── Footnote ── */
+.kb-foot {
+  margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border);
+  font-size: 11.5px; color: var(--text3); line-height: 1.6;
+}
+
+@media (max-width: 760px) {
+  .wrap { padding: 20px 15px 40px; }
+  .kb-title { font-size: 20px; }
+  .kb-q { padding: 13px 13px; font-size: 13px; }
+  .kb-q .badge { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="kb-header">
+    <div class="kb-title">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      Base de Conhecimento
+    </div>
+    <div class="kb-sub">As regras de cada administradora, explicadas em linguagem simples. O manual de consulta do consultor.</div>
+  </div>
+
+  <div class="adm-row">
+    <button class="adm-pill active" id="adm-bradesco">
+      <span class="dot" style="background:var(--bradesco)"></span> Bradesco
+    </button>
+    <button class="adm-pill soon" disabled>
+      <span class="dot" style="background:#B91C1C"></span> Porto
+      <span class="soon-tag">Em breve</span>
+    </button>
+    <button class="adm-pill soon" disabled>
+      <span class="dot" style="background:#EC7000"></span> Itaú
+      <span class="soon-tag">Em breve</span>
+    </button>
+  </div>
+
+  <div class="search-box">
+    <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input type="text" id="search" placeholder="Buscar… ex.: lance, contemplação, FGTS, prazo de pagamento" autocomplete="off">
+    <button class="search-clear" id="search-clear" title="Limpar" aria-label="Limpar busca">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
+  <div class="chips" id="chips"></div>
+
+  <div class="result-info" id="result-info" style="display:none"></div>
+
+  <div id="content"></div>
+
+  <div class="kb-foot" id="kb-foot"></div>
+
+</div>
+
+<script src="kb-bradesco.js"></script>
+<script>
+(function () {
+  var DATA = (window.KB_DATA && window.KB_DATA.entradas) ? window.KB_DATA.entradas.slice() : [];
+
+  // ── helpers ──
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function norm(s) {
+    return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  }
+  // renderiza o conteudo (paragrafos, listas com • e listas numeradas)
+  function renderConteudo(txt) {
+    var lines = String(txt).split('\n');
+    var html = '', listTag = null, listBuf = [], para = [];
+    function flushList() {
+      if (listBuf.length) {
+        html += '<' + listTag + '>' + listBuf.map(function (li) { return '<li>' + li + '</li>'; }).join('') + '</' + listTag + '>';
+        listBuf = []; listTag = null;
+      }
+    }
+    function flushPara() {
+      if (para.length) { html += '<p>' + para.join(' ') + '</p>'; para = []; }
+    }
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i].trim();
+      if (line === '') { flushList(); flushPara(); continue; }
+      if (line.charAt(0) === '•') {
+        flushPara();
+        if (listTag && listTag !== 'ul') flushList();
+        listTag = 'ul'; listBuf.push(esc(line.replace(/^•\s*/, '')));
+        continue;
+      }
+      var m = line.match(/^(\d+)\.\s+(.*)$/);
+      if (m) {
+        flushPara();
+        if (listTag && listTag !== 'ol') flushList();
+        listTag = 'ol'; listBuf.push(esc(m[2]));
+        continue;
+      }
+      flushList(); para.push(esc(line));
+    }
+    flushList(); flushPara();
+    return html;
+  }
+
+  // ── agrupa por categoria ──
+  DATA.sort(function (a, b) {
+    return (a.categoria_ordem - b.categoria_ordem) || (a.ordem - b.ordem);
+  });
+  var CATS = [];
+  var catMap = {};
+  DATA.forEach(function (e) {
+    if (!catMap[e.categoria_key]) {
+      catMap[e.categoria_key] = { key: e.categoria_key, label: e.categoria_label, ordem: e.categoria_ordem, itens: [] };
+      CATS.push(catMap[e.categoria_key]);
+    }
+    catMap[e.categoria_key].itens.push(e);
+  });
+
+  var activeChip = 'todas';
+  var query = '';
+
+  // ── chips ──
+  function buildChips() {
+    var box = document.getElementById('chips');
+    var html = '<button class="chip active" data-cat="todas">Todas <span class="c-count">' + DATA.length + '</span></button>';
+    CATS.forEach(function (c) {
+      html += '<button class="chip" data-cat="' + c.key + '">' + esc(c.label) + ' <span class="c-count">' + c.itens.length + '</span></button>';
+    });
+    box.innerHTML = html;
+    box.querySelectorAll('.chip').forEach(function (ch) {
+      ch.addEventListener('click', function () {
+        activeChip = ch.getAttribute('data-cat');
+        box.querySelectorAll('.chip').forEach(function (x) { x.classList.remove('active'); });
+        ch.classList.add('active');
+        render();
+      });
+    });
+  }
+
+  // ── busca ──
+  function matches(e, terms) {
+    var hay = norm(e.titulo + ' ' + e.conteudo + ' ' + e.tags + ' ' + e.categoria_label);
+    for (var i = 0; i < terms.length; i++) {
+      if (hay.indexOf(terms[i]) === -1) return false;
+    }
+    return true;
+  }
+
+  // ── item HTML ──
+  function itemHTML(e, showBadge) {
+    var badge = showBadge ? '<span class="badge">' + esc(e.categoria_label) + '</span>' : '';
+    return '<div class="kb-item">' +
+      '<button class="kb-q">' + badge +
+        '<span class="q-text">' + esc(e.titulo) + '</span>' +
+        '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>' +
+      '</button>' +
+      '<div class="kb-a"><div class="kb-a-inner">' + renderConteudo(e.conteudo) + '</div></div>' +
+    '</div>';
+  }
+
+  // ── render ──
+  function render() {
+    var content = document.getElementById('content');
+    var info = document.getElementById('result-info');
+    var terms = norm(query).split(/\s+/).filter(Boolean);
+    var html = '';
+
+    if (terms.length) {
+      // modo busca: lista plana entre todas as categorias
+      var hits = DATA.filter(function (e) { return matches(e, terms); });
+      if (hits.length) {
+        info.style.display = 'block';
+        info.innerHTML = '<b>' + hits.length + '</b> resultado' + (hits.length > 1 ? 's' : '') + ' para "' + esc(query.trim()) + '"';
+        html += '<div class="cat-section">';
+        hits.forEach(function (e) { html += itemHTML(e, true); });
+        html += '</div>';
+      } else {
+        info.style.display = 'none';
+        html = emptyHTML('Nenhum resultado', 'Nenhum item encontrado para "' + esc(query.trim()) + '". Tente outra palavra.');
+      }
+    } else {
+      info.style.display = 'none';
+      var cats = CATS;
+      if (activeChip !== 'todas') {
+        cats = CATS.filter(function (c) { return c.key === activeChip; });
+      }
+      cats.forEach(function (c) {
+        html += '<div class="cat-section">' +
+          '<div class="cat-head"><span class="cat-name">' + esc(c.label) + '</span>' +
+          '<span class="cat-count">' + c.itens.length + '</span></div>';
+        c.itens.forEach(function (e) { html += itemHTML(e, false); });
+        html += '</div>';
+      });
+    }
+
+    content.innerHTML = html;
+    // liga accordions
+    content.querySelectorAll('.kb-q').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        btn.parentElement.classList.toggle('open');
+      });
+    });
+  }
+
+  function emptyHTML(title, desc) {
+    return '<div class="empty">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>' +
+      '<div class="e-title">' + title + '</div><div class="e-desc">' + desc + '</div></div>';
+  }
+
+  // ── busca: eventos ──
+  var input = document.getElementById('search');
+  var clearBtn = document.getElementById('search-clear');
+  var chipsBox = document.getElementById('chips');
+  input.addEventListener('input', function () {
+    query = input.value;
+    clearBtn.classList.toggle('show', query.trim().length > 0);
+    if (query.trim().length > 0) {
+      activeChip = 'todas';
+      chipsBox.querySelectorAll('.chip').forEach(function (x) {
+        x.classList.toggle('active', x.getAttribute('data-cat') === 'todas');
+      });
+    }
+    render();
+  });
+  clearBtn.addEventListener('click', function () {
+    query = ''; input.value = ''; clearBtn.classList.remove('show');
+    input.focus(); render();
+  });
+
+  // ── footnote ──
+  var foot = document.getElementById('kb-foot');
+  var when = (window.KB_DATA && window.KB_DATA.atualizado) ? window.KB_DATA.atualizado : '';
+  foot.innerHTML = 'Conteúdo baseado nos regulamentos e guias oficiais da Bradesco Consórcios, resumido em linguagem simples para consulta rápida. ' +
+    'Em caso de dúvida sobre um caso específico, vale sempre confirmar no regulamento oficial da administradora.' +
+    (when ? '<br>Atualizado em ' + esc(when) + '.' : '');
+
+  // ── init ──
+  if (!DATA.length) {
+    document.getElementById('content').innerHTML =
+      emptyHTML('Conteúdo não carregado', 'O arquivo de conteúdo (kb-bradesco.js) não foi encontrado.');
+    document.getElementById('chips').style.display = 'none';
+  } else {
+    buildChips();
+    render();
+  }
+})();
+</script>
+</body>
+</html>
