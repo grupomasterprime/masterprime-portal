@@ -436,7 +436,7 @@ window.KB_ADMIN["porto"] = {
       "categoria_label": "Crédito e compra — Imóvel",
       "categoria_ordem": 7,
       "titulo": "Quais documentos o cliente envia no consórcio de imóvel?",
-      "conteudo": "A lista tem 3 blocos: documentos do consorciado, do imóvel e do proprietário (vendedor).\n\n• Consorciado PF: documento pessoal, comprovante de estado civil, pacto antenupcial (quando aplicável) e comprovante de endereço.\n• Imóvel urbano: IPTU, certidão de valor venal, certidão negativa de IPTU, matrícula com certidão negativa de ônus.\n• Construção/reforma: cronograma físico-financeiro, memorial descritivo, alvará e CREA/CAU do responsável.\n\nO envio é feito pela esteira: porto.vc/botimovel. A validade da análise é de 60 dias.",
+      "conteudo": "A lista tem 3 blocos: documentos do consorciado, do imóvel e do proprietário (vendedor).\n\n• Consorciado PF: documento pessoal, comprovante de estado civil, pacto antenupcial (quando aplicável) e comprovante de endereço.\n• Imóvel urbano: IPTU, certidão de valor venal, certidão negativa de IPTU, matrícula com certidão negativa de ônus.\n• Construção/reforma: cronograma físico-financeiro, memorial descritivo, alvará e CREA/CAU do responsável.\n\nO envio é feito pela esteira digital da Porto. A validade da análise é de 60 dias.",
       "tags": "documentos, imóvel, esteira, lista",
       "ordem": 3
     },
@@ -688,7 +688,7 @@ window.KB_ADMIN["porto"] = {
       "categoria_label": "Sistema e canais digitais",
       "categoria_ordem": 11,
       "titulo": "O que é a esteira digital?",
-      "conteudo": "A esteira digital é por onde o cliente envia os documentos do processo (pós-contemplação, transferência, etc.).\n\n• Para imóvel, o envio é feito em porto.vc/botimovel.\n• Para auto e demais bens móveis, o cliente preenche a esteira digital indicada após a contemplação.",
+      "conteudo": "A esteira digital é por onde o cliente envia os documentos do processo (pós-contemplação, transferência, etc.).\n\n• Para imóvel, o envio é feito pela esteira digital de imóvel da Porto.\n• Para auto e demais bens móveis, o cliente preenche a esteira digital indicada após a contemplação.",
       "tags": "esteira digital, documentos, envio",
       "ordem": 3
     },
@@ -750,19 +750,28 @@ window.KB_ADMIN["porto"] = {
       "categoria_key": "canais",
       "categoria_label": "Canais e contatos",
       "categoria_ordem": 12,
-      "titulo": "SAC, Ouvidoria e Sinistro",
-      "conteudo": "• SAC Porto: 0800 727 2743.\n• Ouvidoria: 0800 727 1184.\n• Sinistro de Seguro de Vida: (11) 3366-3377 (São Paulo) e 0800 727 9393 (demais localidades), de segunda a sexta, das 8h15 às 18h30.",
-      "tags": "sac, ouvidoria, sinistro, telefone",
+      "titulo": "Chat do Consórcio Porto (atendimento online)",
+      "conteudo": "A Porto disponibiliza um chat online para tirar dúvidas e acompanhar processos do consórcio:\n\n• https://prime.altubots.com/chats/portoconsorcio/7c96b76f7322ab5d65b7d15182b53d9a/index.html\n\nÉ um canal rápido para resolver dúvidas do dia a dia sem precisar ligar.",
+      "tags": "chat, consórcio, online, atendimento, elite, contato",
       "ordem": 4
     },
     {
       "categoria_key": "canais",
       "categoria_label": "Canais e contatos",
       "categoria_ordem": 12,
-      "titulo": "Esteira do cliente e site",
-      "conteudo": "• Site oficial do consórcio: portoconsorcio.com.br.\n• Esteira do cliente (envio de documentos): para imóvel, porto.vc/botimovel.\n\nA esteira é onde o cliente envia os documentos dos processos de pós-contemplação, transferência e afins.",
-      "tags": "esteira, site, portoconsorcio, documentos",
+      "titulo": "SAC, Ouvidoria e Sinistro",
+      "conteudo": "• SAC Porto: 0800 727 2743.\n• Ouvidoria: 0800 727 1184.\n• Sinistro de Seguro de Vida: (11) 3366-3377 (São Paulo) e 0800 727 9393 (demais localidades), de segunda a sexta, das 8h15 às 18h30.",
+      "tags": "sac, ouvidoria, sinistro, telefone",
       "ordem": 5
+    },
+    {
+      "categoria_key": "canais",
+      "categoria_label": "Canais e contatos",
+      "categoria_ordem": 12,
+      "titulo": "Esteira do cliente e site",
+      "conteudo": "O site oficial do consórcio é portoconsorcio.com.br.\n\nA esteira digital é o canal online por onde o cliente envia os documentos dos processos (pós-contemplação, transferência e afins). O link da esteira é informado ao cliente no momento de cada processo.",
+      "tags": "esteira, site, portoconsorcio, documentos",
+      "ordem": 6
     },
     {
       "categoria_key": "plataforma_corretor",

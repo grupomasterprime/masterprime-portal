@@ -338,7 +338,7 @@ body.embedded-mode .portal-menu-fab { display:flex; }
       <div class="sb-item" onclick="nav('historico')" id="ni-historico"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg></span> Historico</div>
       <div id="admin-nav" class="hidden">
         <div class="sb-section">Administracao</div>
-        <div class="sb-item" onclick="nav('base-conhecimento')" id="ni-base-conhecimento"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span> Base de Conhecimento</div>
+        <div class="sb-item" onclick="nav('base-conhecimento')" id="ni-base-conhecimento"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span> Manual do Consultor</div>
         <!-- Feedbacks (master e sócio) — dentro da Administração -->
         <div class="sb-item hidden" onclick="nav('feedbacks')" id="ni-feedbacks"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span> Feedbacks</div>
         <div class="sb-item" onclick="nav('admin-overview')" id="ni-admin-overview"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg></span> Visao Geral</div>
@@ -393,7 +393,7 @@ body.embedded-mode .portal-menu-fab { display:flex; }
 
       <!-- BASE DE CONHECIMENTO (iframe carregado sob demanda) -->
       <div class="screen" id="s-base-conhecimento" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
-        <iframe id="iframe-base-conhecimento" src="about:blank" data-target="base-conhecimento.html" style="width:100%;height:100%;border:0;display:block" title="Base de Conhecimento"></iframe>
+        <iframe id="iframe-base-conhecimento" src="about:blank" data-target="base-conhecimento.html" style="width:100%;height:100%;border:0;display:block" title="Manual do Consultor"></iframe>
       </div>
 
       <!-- ADESÃO BRADESCO (iframe carregado sob demanda) -->
@@ -1967,7 +1967,7 @@ const MODULOS_MENU = [
   { key: 'historico',        label: 'Histórico',            navId: 'ni-historico',            screen: 'historico',         secao: 'menu' },
   { key: 'faturamento',      label: 'Faturamento',          navId: 'ni-admin-faturamento',    screen: 'admin-faturamento', secao: 'menu' },
   { key: 'admin_adesao',     label: 'Formulário de Adesão', navId: 'ni-admin-adesao',         screen: 'admin-adesao',      secao: 'menu' },
-  { key: 'base_conhecimento',label: 'Base de Conhecimento', navId: 'ni-base-conhecimento',     screen: 'base-conhecimento', secao: 'admin' },
+  { key: 'base_conhecimento',label: 'Manual do Consultor', navId: 'ni-base-conhecimento',     screen: 'base-conhecimento', secao: 'admin' },
   { key: 'admin_overview',   label: 'Visão Geral',          navId: 'ni-admin-overview',       screen: 'admin-overview',    secao: 'admin' },
   { key: 'admin_upload',     label: 'Upload Demonstrativos',navId: 'ni-admin-upload',         screen: 'admin-upload',      secao: 'admin' },
   { key: 'painel_split',     label: 'Painel Split',         navId: 'ni-painel',               screen: 'painel',            secao: 'admin' }

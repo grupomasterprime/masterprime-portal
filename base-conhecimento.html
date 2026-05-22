@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Master Prime — Base de Conhecimento</title>
+<title>Master Prime — Manual do Consultor</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -174,9 +174,9 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
   <div class="kb-header">
     <div class="kb-title">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-      Base de Conhecimento
+      Manual do Consultor
     </div>
-    <div class="kb-sub">As regras de cada administradora, explicadas em linguagem simples. O manual de consulta do consultor.</div>
+    <div class="kb-sub">As regras de cada administradora, explicadas em linguagem simples — sua referência rápida no dia a dia.</div>
   </div>
 
   <div class="adm-row">
@@ -186,9 +186,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
     <button class="adm-pill" id="adm-porto" data-adm="porto">
       <span class="dot" style="background:#0a52a8"></span> Porto
     </button>
-    <button class="adm-pill soon" disabled>
+    <button class="adm-pill" id="adm-itau" data-adm="itau">
       <span class="dot" style="background:#EC7000"></span> Itaú
-      <span class="soon-tag">Em breve</span>
     </button>
   </div>
 
@@ -221,6 +220,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
 
 <script src="kb-bradesco.js"></script>
 <script src="kb-porto.js"></script>
+<script src="kb-itau.js"></script>
 <script>
 (function () {
   var ADM = window.KB_ADMIN || {};
@@ -236,7 +236,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
   }
   // transforma URLs/sites (já escapados) em links clicáveis
   function linkify(s) {
-    return s.replace(/((?:https?:\/\/)?(?:[a-z0-9-]+\.)+(?:com\.br|gov\.br|vc)\b(?:\/[^\s<),;"']*)?)/gi, function (m) {
+    return s.replace(/(https?:\/\/[^\s<),;"']+|(?:[a-z0-9-]+\.)+(?:com\.br|gov\.br|vc)\b(?:\/[^\s<),;"']*)?)/gi, function (m) {
       var url = /^https?:\/\//i.test(m) ? m : 'https://' + m;
       return '<a href="' + url + '" target="_blank" rel="noopener">' + m + '</a>';
     });
