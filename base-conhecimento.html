@@ -136,6 +136,30 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
   font-size: 11.5px; color: var(--text3); line-height: 1.6;
 }
 
+/* ── Downloads ── */
+.dl-section { margin-top: 34px; }
+.dl-head { font-size: 16px; font-weight: 700; color: var(--mp-navy); letter-spacing: -0.2px; display: flex; align-items: center; gap: 8px; }
+.dl-head svg { width: 19px; height: 19px; color: var(--mp-teal); }
+.dl-sub { font-size: 12px; color: var(--text2); margin: 5px 0 14px; }
+.dl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(258px, 1fr)); gap: 12px; }
+.dl-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  padding: 16px; display: flex; flex-direction: column; gap: 9px;
+  transition: border-color .14s, box-shadow .14s;
+}
+.dl-card:hover { border-color: var(--mp-teal); box-shadow: 0 3px 12px rgba(45,63,94,.07); }
+.dl-ico { width: 34px; height: 34px; border-radius: 8px; background: #FFF5F6; color: var(--bradesco); display: flex; align-items: center; justify-content: center; }
+.dl-ico svg { width: 19px; height: 19px; }
+.dl-titulo { font-size: 13.5px; font-weight: 700; color: var(--mp-navy); }
+.dl-desc { font-size: 12px; color: var(--text2); line-height: 1.5; flex-grow: 1; }
+.dl-btn {
+  display: inline-flex; align-items: center; gap: 6px; align-self: flex-start;
+  padding: 8px 14px; border-radius: 8px; background: var(--mp-navy); color: #fff;
+  font-size: 12px; font-weight: 600; text-decoration: none; transition: background .14s;
+}
+.dl-btn:hover { background: var(--mp-teal); }
+.dl-btn svg { width: 14px; height: 14px; }
+
 @media (max-width: 760px) {
   .wrap { padding: 20px 15px 40px; }
   .kb-title { font-size: 20px; }
@@ -183,6 +207,15 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
 
   <div id="content"></div>
 
+  <div class="dl-section" id="downloads-section" style="display:none">
+    <div class="dl-head">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Materiais para baixar
+    </div>
+    <div class="dl-sub">Documentos oficiais da Bradesco para consultar e enviar ao cliente.</div>
+    <div class="dl-grid" id="downloads"></div>
+  </div>
+
   <div class="kb-foot" id="kb-foot"></div>
 
 </div>
@@ -191,6 +224,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
 <script>
 (function () {
   var DATA = (window.KB_DATA && window.KB_DATA.entradas) ? window.KB_DATA.entradas.slice() : [];
+  var DOWNLOADS = (window.KB_DATA && window.KB_DATA.downloads) ? window.KB_DATA.downloads : [];
 
   // ── helpers ──
   function esc(s) {
@@ -332,6 +366,25 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
         btn.parentElement.classList.toggle('open');
       });
     });
+    // downloads: visível fora da busca
+    var dlSec = document.getElementById('downloads-section');
+    if (dlSec) dlSec.style.display = (terms.length || !DOWNLOADS.length) ? 'none' : 'block';
+  }
+
+  // ── downloads ──
+  function renderDownloads() {
+    var box = document.getElementById('downloads');
+    if (!box || !DOWNLOADS.length) return;
+    box.innerHTML = DOWNLOADS.map(function (d) {
+      return '<div class="dl-card">' +
+        '<div class="dl-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>' +
+        '<div class="dl-titulo">' + esc(d.titulo) + '</div>' +
+        '<div class="dl-desc">' + esc(d.descricao) + '</div>' +
+        '<a class="dl-btn" href="' + esc(d.arquivo) + '" download target="_blank" rel="noopener">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
+          'Baixar PDF</a>' +
+      '</div>';
+    }).join('');
   }
 
   function emptyHTML(title, desc) {
@@ -363,9 +416,9 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
   // ── footnote ──
   var foot = document.getElementById('kb-foot');
   var when = (window.KB_DATA && window.KB_DATA.atualizado) ? window.KB_DATA.atualizado : '';
-  foot.innerHTML = 'Conteúdo baseado nos regulamentos e guias oficiais da Bradesco Consórcios, resumido em linguagem simples para consulta rápida. ' +
-    'Em caso de dúvida sobre um caso específico, vale sempre confirmar no regulamento oficial da administradora.' +
-    (when ? '<br>Atualizado em ' + esc(when) + '.' : '');
+  foot.innerHTML = 'Conteúdo baseado no Manual do Parceiro Bradesco Consórcios (versão 10/2024) e nos guias oficiais, ' +
+    'resumido em linguagem simples para consulta rápida. Em caso de dúvida sobre um caso específico, vale sempre confirmar com a Bradesco.' +
+    (when ? '<br>Base revisada em ' + esc(when) + '.' : '');
 
   // ── init ──
   if (!DATA.length) {
@@ -374,6 +427,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
     document.getElementById('chips').style.display = 'none';
   } else {
     buildChips();
+    renderDownloads();
     render();
   }
 })();
