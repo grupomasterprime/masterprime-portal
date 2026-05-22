@@ -894,7 +894,16 @@ function toggleConjuge(prefix) {
   const sel = $(prefix+'estado_civil');
   const bloco = $(prefix+'bloc-conjuge');
   if (!sel || !bloco) return;
-  bloco.classList.toggle('show', ESTADOS_CONJUGE.includes(sel.value));
+  const ativo = ESTADOS_CONJUGE.includes(sel.value);
+  bloco.classList.toggle('show', ativo);
+  // Casado(a)/União Estável → dados do cônjuge obrigatórios.
+  // Solteiro etc. → bloco escondido, sem required (não atrapalha o envio).
+  ['nome_conjuge','cpf_conjuge','rg_conjuge','data_nascimento_conjuge'].forEach(id => {
+    const el = $(prefix+id);
+    if (!el) return;
+    if (ativo) el.setAttribute('required','required');
+    else el.removeAttribute('required');
+  });
 }
 
 // Opções de pagamento por administradora
@@ -987,12 +996,12 @@ function buildFormPF() {
       <div id="pf-bloc-conjuge" class="bloc-conjuge">
         <div class="bloc-conjuge-title">Dados do Cônjuge</div>
         <div class="grid-2">
-          <div class="field"><label>Nome do Cônjuge</label><input id="pf-nome_conjuge" placeholder="Nome completo"></div>
-          <div class="field"><label>CPF do Cônjuge</label><input id="pf-cpf_conjuge" data-mask="cpf" placeholder="000.000.000-00"></div>
+          <div class="field"><label>Nome do Cônjuge<span class="req">*</span></label><input id="pf-nome_conjuge" placeholder="Nome completo"></div>
+          <div class="field"><label>CPF do Cônjuge<span class="req">*</span></label><input id="pf-cpf_conjuge" data-mask="cpf" placeholder="000.000.000-00"></div>
         </div>
         <div class="grid-2" style="margin-top:12px">
-          <div class="field"><label>RG do Cônjuge</label><input id="pf-rg_conjuge" placeholder="Número do RG"></div>
-          <div class="field"><label>Data de Nascimento do Cônjuge</label><input id="pf-data_nascimento_conjuge" type="text" data-mask="date" placeholder="dd/mm/aaaa" maxlength="10"></div>
+          <div class="field"><label>RG do Cônjuge<span class="req">*</span></label><input id="pf-rg_conjuge" placeholder="Número do RG"></div>
+          <div class="field"><label>Data de Nascimento do Cônjuge<span class="req">*</span></label><input id="pf-data_nascimento_conjuge" type="text" data-mask="date" placeholder="dd/mm/aaaa" maxlength="10"></div>
         </div>
       </div>
     </div>
@@ -1411,6 +1420,7 @@ function coletarPF() {
     sexo: get('sexo'),
     nacionalidade: get('nacionalidade'),
     cidade_nascimento: get('cidade_nascimento'),
+    uf_naturalidade: get('uf_naturalidade'),
     tipo_documento: get('tipo_documento'),
     numero_documento: get('numero_documento'),
     data_emissao: brDateToISO(get('data_emissao')),
@@ -1551,6 +1561,13 @@ function validarPF(d) {
   if (!d.data_emissao) return 'Data de emissão do documento é obrigatória';
   if (!d.orgao_expedidor) return 'Órgão expedidor é obrigatório';
   if (!d.estado_civil) return 'Estado civil é obrigatório';
+  // Casado(a) / União Estável → todos os dados do cônjuge são obrigatórios
+  if (ESTADOS_CONJUGE.includes(d.estado_civil)) {
+    if (!d.nome_conjuge || d.nome_conjuge.length < 3) return 'Nome do cônjuge é obrigatório';
+    if ((d.cpf_conjuge || '').length !== 11) return 'CPF do cônjuge é obrigatório (11 dígitos)';
+    if (!d.rg_conjuge) return 'RG do cônjuge é obrigatório';
+    if (!d.data_nascimento_conjuge) return 'Data de nascimento do cônjuge é obrigatória';
+  }
   if (!d.email || !/.+@.+\..+/.test(d.email)) return 'E-mail inválido';
   if (unmaskNum(d.celular).length < 10) return 'Celular inválido';
   if (d.cep.length !== 8) return 'CEP inválido';
@@ -1641,6 +1658,12 @@ async function enviarProposta(prefix, dados) {
       dados
     });
     if (error) throw error;
+    // UF de naturalidade não entra no inserir_proposta — completa logo após o insert.
+    const novaId = data?.[0]?.id;
+    if (novaId && dados.uf_naturalidade) {
+      try { await sb.rpc('completar_uf_naturalidade', { p_id: novaId, p_uf: dados.uf_naturalidade }); }
+      catch(e) { console.warn('uf_naturalidade não salva:', e); }
+    }
     const protocolo = data?.[0]?.protocolo || 'sem protocolo';
     $('protocolo-display').textContent = protocolo;
     $('form-pf').classList.add('hidden');
