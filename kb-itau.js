@@ -642,9 +642,9 @@ window.KB_ADMIN["itau"] = {
       "categoria_key": "seguro",
       "categoria_label": "Seguro consórcio",
       "categoria_ordem": 10,
-      "titulo": "Onde consultar as condições do seguro?",
-      "conteudo": "As condições completas do Seguro Consórcio, assim como o Regulamento do consórcio, ficam disponíveis no Portal do Consorciado (itau.com.br/consorcios/portal-do-consorciado) e na Central de Atendimento Consórcio Itaú.",
-      "tags": "seguro, condições, portal",
+      "titulo": "Onde consultar as condições do seguro e qual o telefone?",
+      "conteudo": "As condições completas do Seguro Consórcio, assim como o Regulamento do consórcio, ficam disponíveis no Portal do Consorciado (itau.com.br/consorcios/portal-do-consorciado).\n\nPara dúvidas sobre o seguro, o cliente conta com a Central de Atendimento Itaú:\n\n• 4004 4828 — capitais e regiões metropolitanas;\n• 0800 970 4828 — demais localidades.",
+      "tags": "seguro, condições, portal, telefone, central, contato",
       "ordem": 7
     },
     {
