@@ -1,9 +1,12 @@
 // Base de Conhecimento Master Prime - conteudo Bradesco.
 // Fonte: Manual do Parceiro Bradesco Consorcios 10/2024 e guias oficiais.
 // Para editar ou adicionar: alterar este arquivo e commitar.
-window.KB_DATA = {
+window.KB_ADMIN = window.KB_ADMIN || {};
+window.KB_ADMIN["bradesco"] = {
   "administradora": "bradesco",
+  "nome": "Bradesco",
   "atualizado": "2026-05",
+  "nota": "Conteúdo baseado no Manual do Parceiro Bradesco Consórcios (versão 10/2024) e nos guias oficiais, resumido em linguagem simples para consulta rápida. Em caso de dúvida sobre um caso específico, vale sempre confirmar com a Bradesco.",
   "entradas": [
     {
       "categoria_key": "visao_geral",

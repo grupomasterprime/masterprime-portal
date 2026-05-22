@@ -42,7 +42,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
   cursor: pointer; font-family: inherit; transition: all .15s ease;
 }
 .adm-pill .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-.adm-pill.active { border-color: var(--bradesco); color: var(--bradesco); background: #FFF5F6; box-shadow: 0 1px 3px rgba(204,9,47,.10); }
+.adm-pill.active { border-color: var(--mp-navy); color: var(--mp-navy); background: #fff; box-shadow: 0 2px 7px rgba(45,63,94,.14); }
 .adm-pill.soon { opacity: .6; cursor: not-allowed; }
 .adm-pill .soon-tag { font-size: 9px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; background: #FEF3C7; color: #A16207; padding: 2px 6px; border-radius: 5px; }
 
@@ -180,12 +180,11 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
   </div>
 
   <div class="adm-row">
-    <button class="adm-pill active" id="adm-bradesco">
+    <button class="adm-pill" id="adm-bradesco" data-adm="bradesco">
       <span class="dot" style="background:var(--bradesco)"></span> Bradesco
     </button>
-    <button class="adm-pill soon" disabled>
-      <span class="dot" style="background:#B91C1C"></span> Porto
-      <span class="soon-tag">Em breve</span>
+    <button class="adm-pill" id="adm-porto" data-adm="porto">
+      <span class="dot" style="background:#0a52a8"></span> Porto
     </button>
     <button class="adm-pill soon" disabled>
       <span class="dot" style="background:#EC7000"></span> Itaú
@@ -212,7 +211,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Materiais para baixar
     </div>
-    <div class="dl-sub">Documentos oficiais da Bradesco para consultar e enviar ao cliente.</div>
+    <div class="dl-sub">Documentos oficiais para consultar e enviar ao cliente.</div>
     <div class="dl-grid" id="downloads"></div>
   </div>
 
@@ -221,10 +220,12 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
 </div>
 
 <script src="kb-bradesco.js"></script>
+<script src="kb-porto.js"></script>
 <script>
 (function () {
-  var DATA = (window.KB_DATA && window.KB_DATA.entradas) ? window.KB_DATA.entradas.slice() : [];
-  var DOWNLOADS = (window.KB_DATA && window.KB_DATA.downloads) ? window.KB_DATA.downloads : [];
+  var ADM = window.KB_ADMIN || {};
+  var DATA = [], DOWNLOADS = [], CATS = [];
+  var activeAdm = null, activeChip = 'todas', query = '';
 
   // ── helpers ──
   function esc(s) {
@@ -232,6 +233,13 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
   }
   function norm(s) {
     return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  }
+  // transforma URLs/sites (já escapados) em links clicáveis
+  function linkify(s) {
+    return s.replace(/((?:https?:\/\/)?(?:[a-z0-9-]+\.)+(?:com\.br|gov\.br|vc)\b(?:\/[^\s<),;"']*)?)/gi, function (m) {
+      var url = /^https?:\/\//i.test(m) ? m : 'https://' + m;
+      return '<a href="' + url + '" target="_blank" rel="noopener">' + m + '</a>';
+    });
   }
   // renderiza o conteudo (paragrafos, listas com • e listas numeradas)
   function renderConteudo(txt) {
@@ -252,38 +260,54 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
       if (line.charAt(0) === '•') {
         flushPara();
         if (listTag && listTag !== 'ul') flushList();
-        listTag = 'ul'; listBuf.push(esc(line.replace(/^•\s*/, '')));
+        listTag = 'ul'; listBuf.push(linkify(esc(line.replace(/^•\s*/, ''))));
         continue;
       }
       var m = line.match(/^(\d+)\.\s+(.*)$/);
       if (m) {
         flushPara();
         if (listTag && listTag !== 'ol') flushList();
-        listTag = 'ol'; listBuf.push(esc(m[2]));
+        listTag = 'ol'; listBuf.push(linkify(esc(m[2])));
         continue;
       }
-      flushList(); para.push(esc(line));
+      flushList(); para.push(linkify(esc(line)));
     }
     flushList(); flushPara();
     return html;
   }
 
-  // ── agrupa por categoria ──
-  DATA.sort(function (a, b) {
-    return (a.categoria_ordem - b.categoria_ordem) || (a.ordem - b.ordem);
-  });
-  var CATS = [];
-  var catMap = {};
-  DATA.forEach(function (e) {
-    if (!catMap[e.categoria_key]) {
-      catMap[e.categoria_key] = { key: e.categoria_key, label: e.categoria_label, ordem: e.categoria_ordem, itens: [] };
-      CATS.push(catMap[e.categoria_key]);
-    }
-    catMap[e.categoria_key].itens.push(e);
-  });
-
-  var activeChip = 'todas';
-  var query = '';
+  // ── carrega uma administradora (Bradesco / Porto) ──
+  function loadAdmin(key) {
+    var d = ADM[key];
+    if (!d) return;
+    activeAdm = key;
+    DATA = (d.entradas || []).slice().sort(function (a, b) {
+      return (a.categoria_ordem - b.categoria_ordem) || (a.ordem - b.ordem);
+    });
+    DOWNLOADS = d.downloads || [];
+    CATS = [];
+    var catMap = {};
+    DATA.forEach(function (e) {
+      if (!catMap[e.categoria_key]) {
+        catMap[e.categoria_key] = { key: e.categoria_key, label: e.categoria_label, ordem: e.categoria_ordem, itens: [] };
+        CATS.push(catMap[e.categoria_key]);
+      }
+      catMap[e.categoria_key].itens.push(e);
+    });
+    activeChip = 'todas';
+    query = '';
+    if (input) { input.value = ''; }
+    if (clearBtn) { clearBtn.classList.remove('show'); }
+    document.querySelectorAll('.adm-pill[data-adm]').forEach(function (p) {
+      p.classList.toggle('active', p.getAttribute('data-adm') === key);
+    });
+    var dlSub = document.querySelector('.dl-sub');
+    if (dlSub) { dlSub.textContent = 'Documentos oficiais da ' + (d.nome || '') + ' para consultar e enviar ao cliente.'; }
+    if (foot) { foot.innerHTML = esc(d.nota || '') + (d.atualizado ? '<br>Base revisada em ' + esc(d.atualizado) + '.' : ''); }
+    buildChips();
+    renderDownloads();
+    render();
+  }
 
   // ── chips ──
   function buildChips() {
@@ -380,9 +404,9 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
         '<div class="dl-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>' +
         '<div class="dl-titulo">' + esc(d.titulo) + '</div>' +
         '<div class="dl-desc">' + esc(d.descricao) + '</div>' +
-        '<a class="dl-btn" href="' + esc(d.arquivo) + '" download target="_blank" rel="noopener">' +
-          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>' +
-          'Baixar PDF</a>' +
+        '<a class="dl-btn" href="' + esc(d.arquivo) + '" target="_blank" rel="noopener">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>' +
+          'Abrir PDF</a>' +
       '</div>';
     }).join('');
   }
@@ -413,22 +437,30 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
     input.focus(); render();
   });
 
-  // ── footnote ──
+  // ── footnote (preenchida por loadAdmin) ──
   var foot = document.getElementById('kb-foot');
-  var when = (window.KB_DATA && window.KB_DATA.atualizado) ? window.KB_DATA.atualizado : '';
-  foot.innerHTML = 'Conteúdo baseado no Manual do Parceiro Bradesco Consórcios (versão 10/2024) e nos guias oficiais, ' +
-    'resumido em linguagem simples para consulta rápida. Em caso de dúvida sobre um caso específico, vale sempre confirmar com a Bradesco.' +
-    (when ? '<br>Base revisada em ' + esc(when) + '.' : '');
+
+  // ── alternância de administradora ──
+  document.querySelectorAll('.adm-pill[data-adm]').forEach(function (p) {
+    p.addEventListener('click', function () {
+      var k = p.getAttribute('data-adm');
+      if (k === activeAdm || !ADM[k]) return;
+      loadAdmin(k);
+      try { window.scrollTo(0, 0); } catch (e) {}
+    });
+  });
 
   // ── init ──
-  if (!DATA.length) {
+  document.querySelectorAll('.adm-pill[data-adm]').forEach(function (p) {
+    if (!ADM[p.getAttribute('data-adm')]) { p.disabled = true; p.classList.add('soon'); }
+  });
+  var first = ADM['bradesco'] ? 'bradesco' : (ADM['porto'] ? 'porto' : null);
+  if (!first) {
     document.getElementById('content').innerHTML =
-      emptyHTML('Conteúdo não carregado', 'O arquivo de conteúdo (kb-bradesco.js) não foi encontrado.');
+      emptyHTML('Conteúdo não carregado', 'Os arquivos de conteúdo (kb-bradesco.js / kb-porto.js) não foram encontrados.');
     document.getElementById('chips').style.display = 'none';
   } else {
-    buildChips();
-    renderDownloads();
-    render();
+    loadAdmin(first);
   }
 })();
 </script>
