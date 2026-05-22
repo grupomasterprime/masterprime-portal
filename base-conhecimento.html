@@ -459,9 +459,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
   if (jumpBtn) {
     jumpBtn.addEventListener('click', function () {
       var sec = document.getElementById('downloads-section');
-      if (!sec) return;
-      try { sec.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
-      catch (e) { sec.scrollIntoView(); }
+      if (sec) sec.scrollIntoView({ block: 'start' });
     });
   }
 
