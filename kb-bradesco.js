@@ -1110,6 +1110,11 @@ window.KB_DATA = {
       "titulo": "Formulário — Reforma Simples",
       "descricao": "Formulário do modelo simplificado de consórcio de reforma da Bradesco (sem vistoria de obra).",
       "arquivo": "kb-formulario-reforma-simples.pdf"
+    },
+    {
+      "titulo": "Autorização SCR — Bradesco",
+      "descricao": "Formulário de autorização de consulta e registro no SCR (Sistema de Informações de Crédito do Banco Central), para o cliente assinar.",
+      "arquivo": "kb-autorizacao-scr.pdf"
     }
   ]
 };
