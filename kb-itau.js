@@ -477,6 +477,24 @@ window.KB_ADMIN["itau"] = {
       "ordem": 11
     },
     {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Imóvel para empresa (PJ): o que pode e não pode comprar",
+      "conteudo": "No Consórcio Itaú Empresas, a pessoa jurídica usa a carta de crédito de imóvel para o negócio. Documentos mínimos para iniciar a compra: Formulário do Comprador e Formulário do Vendedor preenchidos, matrícula atualizada e na validade (30 dias), IPTU do ano vigente e certidão de estado civil do comprador e do vendedor.\n\nA empresa pode comprar: casa, apartamento, kitnet, edifício e terreno urbano; flat / hotel residencial; imóvel comercial, residencial, multifamiliar, com edícula, de alvenaria e de praia; sítios e chácaras urbanos e rurais, com a documentação regularizada (no imóvel rural, registro no CAR e um imóvel urbano dado em garantia).\n\nA empresa não pode comprar mais de um imóvel com a mesma cota nem usar mais de uma cota para comprar um imóvel. Valem as mesmas restrições da pessoa física: imóvel de madeira ou pré-moldado, tombado ou em região de tombamento, patrimônio histórico, vaga de garagem isolada, área de alagamento ou solo contaminado, imóvel sem averbação da construção, em leilão, na planta (sem habite-se), bens de natureza social e imóveis em áreas indígenas ou de risco.\n\nO imóvel dado em garantia passa por avaliação (laudo de vistoria), e o valor avaliado deve ser igual ou maior que o saldo devedor da(s) cota(s).",
+      "tags": "imóvel, pj, empresa, consórcio itaú empresas, pode, não pode, comprar",
+      "ordem": 12
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Imóvel PJ: construção, reforma e sobra da carta",
+      "conteudo": "A empresa pode usar a carta de crédito para construir ou reformar um imóvel urbano de propriedade da empresa e livre de ônus.\n\nRequisitos: ter o contrato registrado do imóvel; o imóvel não pode estar financiado nem empenhado; a garantia não pode estar alugada durante o período de alienação; e a reforma deve ser estrutural. Os valores só são creditados depois do contrato registrado. Se a empresa já tiver uma edificação no terreno, o processo conta como reforma, não construção.\n\nNão é permitido: usar a carta só para compra de materiais, só para acabamentos e acessórios ou só para demolição; nem construir ou reformar imóveis que não são aceitos como garantia.\n\nSobra da carta de crédito: quando houver, até 10% do valor da carta pode ser usado para reembolso de ITBI, custas cartorárias e tarifa de avaliação. A sobra não pode ser usada para reembolsar seguro nem custas de correios.",
+      "tags": "imóvel, pj, empresa, construção, reforma, sobra da carta",
+      "ordem": 13
+    },
+    {
       "categoria_key": "pagamentos",
       "categoria_label": "Pagamentos e parcelas",
       "categoria_ordem": 8,
@@ -648,6 +666,15 @@ window.KB_ADMIN["itau"] = {
       "ordem": 5
     },
     {
+      "categoria_key": "canais",
+      "categoria_label": "Canais e contatos",
+      "categoria_ordem": 11,
+      "titulo": "O que a Central de Atendimento resolve para o representante",
+      "conteudo": "A Itaú organiza as solicitações do consórcio em jornadas, mostrando o que dá para resolver direto nos canais digitais e o que precisa passar pela Central de Atendimento.\n\nA Central de Atendimento resolve: substituição de garantia, boleto de lance, gravames, boleto com atraso acima de 30 dias e devolução de valores.\n\nDisponível no autosserviço dos canais digitais (não precisa da Central): faturamento (Iparceiros, Credline e Hive), DPP, gestão da carteira e contratação (Iparceiros).\n\nAtendido pela Central e também disponível no autosserviço: oferta de lance e boleto de parcela (Iparceiros e Credline), resultado de assembleia e antecipação / quitação (Credline).\n\nResolvido pela central de clientes, acionada pelo próprio cliente: pagamento em espécie, alterações cadastrais, reativação ou cancelamento de cota e cancelamento de seguros.\n\nEm caso de dúvida, fale com o consultor comercial.",
+      "tags": "central, atendimento, autosserviço, iparceiros, credline, hive, representante, jornada",
+      "ordem": 6
+    },
+    {
       "categoria_key": "glossario",
       "categoria_label": "Glossário",
       "categoria_ordem": 12,
@@ -791,9 +818,19 @@ window.KB_ADMIN["itau"] = {
       "arquivo": "kb-itau-faturamento-imoveis.pdf"
     },
     {
-      "titulo": "Imóvel — Pode x Não Pode",
-      "descricao": "O que o cliente pode e não pode fazer com a carta de crédito de imóvel: tipos de imóvel, construção, reforma e FGTS.",
+      "titulo": "Imóvel PF — Pode e Não Pode",
+      "descricao": "O que a pessoa física pode e não pode fazer com a carta de crédito de imóvel: tipos de imóvel, construção, reforma, FGTS e sobra da carta.",
       "arquivo": "kb-itau-pode-imovel.pdf"
+    },
+    {
+      "titulo": "Imóvel PJ — Pode e Não Pode (Itaú Empresas)",
+      "descricao": "O que a empresa pode e não pode fazer com a carta de crédito de imóvel no Consórcio Itaú Empresas: compra, construção, reforma e sobra da carta.",
+      "arquivo": "kb-itau-imovel-pj.pdf"
+    },
+    {
+      "titulo": "Central de Atendimento — o que resolve",
+      "descricao": "Guia das jornadas do consórcio: o que a Central de Atendimento resolve e o que é autosserviço nos canais digitais.",
+      "arquivo": "kb-itau-central-atendimento.pdf"
     }
   ]
 };
