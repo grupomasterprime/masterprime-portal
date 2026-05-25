@@ -1481,6 +1481,13 @@ document.addEventListener('click', function(ev) {
   }
 });
 
+// Fecha o painel ao rolar a página (ele é position:fixed e ficaria "solto" na tela).
+// Sem captura: rolar a lista interna de notificações não dispara este fechamento.
+window.addEventListener('scroll', function() {
+  const panel = document.getElementById('fat-notif-panel');
+  if (panel && panel.classList.contains('aberto')) fatFecharNotif();
+});
+
 (async function init() {
   try {
     const { data: sess } = await sb.auth.getSession();
