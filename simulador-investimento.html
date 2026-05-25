@@ -58,6 +58,15 @@
   @media (max-width: 768px) { .grid-3, .grid-4 { grid-template-columns: 1fr; } }
   .group-card .grid-3 { grid-template-columns: 1fr; }
   .group-card.compact { padding: 14px; }
+
+  /* Observações */
+  .obs-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 24px; }
+  .obs-card .obs-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .obs-card .obs-title { font-size: 12px; font-weight: 700; color: var(--navy); letter-spacing: 1px; text-transform: uppercase; }
+  .obs-card .obs-clear { background: none; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-family: inherit; }
+  .obs-card .obs-clear:hover { background: var(--soft-blue); }
+  .obs-area { width: 100%; min-height: 90px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: inherit; resize: vertical; color: var(--text); background: #fff; }
+  .obs-area:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(45,63,94,0.10); }
   .field { position: relative; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
   .field label { font-size: 11px; color: var(--text-muted); letter-spacing: 0.4px; text-transform: uppercase; font-weight: 600; line-height: 1.3; word-wrap: break-word; }
   .field label input[type="checkbox"] { vertical-align: middle; }
@@ -79,7 +88,7 @@
 <style>html.embedded header { display: none; } html.embedded main { padding-top: 16px; }</style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="pdf-master-prime.js"></script>
+<script src="pdf-master-prime.js?v=20260525"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="simulacao-store.js"></script>
 </head>
@@ -174,6 +183,15 @@
         </tr>
       </tfoot>
     </table>
+  </div>
+
+  <!-- ════ OBSERVAÇÕES ════ -->
+  <div class="obs-card">
+    <div class="obs-head">
+      <span class="obs-title">Observações (opcional)</span>
+      <button type="button" class="obs-clear" id="btnLimparObs">Limpar</button>
+    </div>
+    <textarea id="inv-observacoes" class="obs-area" placeholder="Adicione anotações que devem aparecer no PDF…"></textarea>
   </div>
 
   <div class="actions">
@@ -643,7 +661,8 @@ document.getElementById('opsBody').addEventListener('click',e=>{
   if(btn.dataset.action==='edit') openModal(op);
   else if(btn.dataset.action==='del'){if(confirm('Excluir?')){operacoes=operacoes.filter(o=>o.id!==id); renderOps();}}
 });
-document.getElementById('btnLimpar').addEventListener('click',()=>{if(operacoes.length && !confirm('Limpar tudo?'))return; operacoes=[]; renderOps();});
+document.getElementById('btnLimpar').addEventListener('click',()=>{if(operacoes.length && !confirm('Limpar tudo?'))return; operacoes=[]; const obsEl=document.getElementById('inv-observacoes'); if(obsEl)obsEl.value=''; renderOps();});
+document.getElementById('btnLimparObs').addEventListener('click',()=>{const obsEl=document.getElementById('inv-observacoes'); if(obsEl)obsEl.value='';});
 // ─── COLETA DE BLOCOS PARA O PDF ───
 function _coletarBlocosInvestimento() {
   const _txt = id => (document.getElementById(id)?.textContent || '').trim();
@@ -692,7 +711,8 @@ document.getElementById('btnPdf').addEventListener('click', async () => {
       tituloEstrategia: 'Consórcio como Investimento',
       filename: 'master-prime-consorcio-como-investimento',
       orientation: 'landscape',
-      blocos: _coletarBlocosInvestimento()
+      blocos: _coletarBlocosInvestimento(),
+      observacoes: (document.getElementById('inv-observacoes')?.value || '').trim()
     });
   } catch (err) {
     console.error(err);

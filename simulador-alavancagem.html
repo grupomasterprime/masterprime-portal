@@ -57,12 +57,14 @@
   button.primary:hover { background: var(--navy-dark); }
   button.secondary { background: transparent; color: var(--text-muted); border-color: var(--border); }
   button.secondary:hover { background: var(--bg); }
+  .obs-area { width: 100%; min-height: 90px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: inherit; resize: vertical; color: var(--text); background: #fff; }
+  .obs-area:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(45,63,94,0.10); }
 </style>
 <script>if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('embedded');</script>
 <style>html.embedded header { display: none; } html.embedded main { padding-top: 16px; }</style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="pdf-master-prime.js"></script>
+<script src="pdf-master-prime.js?v=20260525"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="simulacao-store.js"></script>
 <script src="analitico-cet.js"></script>
@@ -225,6 +227,14 @@
       <div class="result-row" id="rowInvestimento" style="display:none;"><strong>Investimento + Rentabilidade</strong><span class="value" id="resInvest">R$ 0,00</span></div>
     </div>
     <div style="margin-top:14px;"><div class="result-primary"><strong>Patrimônio total</strong><span class="value" id="resPatrimonio">R$ 0,00</span></div></div>
+  </section>
+
+  <!-- ════ OBSERVAÇÕES ════ -->
+  <section class="card">
+    <div class="card-section-title">Observações (opcional)
+      <button type="button" class="reset-btn" id="btnLimparObs">Limpar</button>
+    </div>
+    <textarea id="alav-observacoes" class="obs-area" placeholder="Adicione anotações que devem aparecer no PDF…"></textarea>
   </section>
 
   <div class="actions">
@@ -610,6 +620,10 @@ document.getElementById('resetImovel').addEventListener('click',()=>{
 document.getElementById('btnLimpar').addEventListener('click',()=>{
   document.getElementById('resetConsorcio').click();
   document.getElementById('resetImovel').click();
+  const obsEl = document.getElementById('alav-observacoes'); if (obsEl) obsEl.value = '';
+});
+document.getElementById('btnLimparObs').addEventListener('click',()=>{
+  const obsEl = document.getElementById('alav-observacoes'); if (obsEl) obsEl.value = '';
 });
 // ─── COLETA DE BLOCOS PARA O PDF ───
 function _coletarBlocosAlavancagem() {
@@ -684,7 +698,8 @@ document.getElementById('btnPdf').addEventListener('click', async () => {
     await PdfMasterPrime.gerar({
       tituloEstrategia: 'Alavancagem Patrimonial',
       filename: 'master-prime-alavancagem-patrimonial',
-      blocos: _coletarBlocosAlavancagem()
+      blocos: _coletarBlocosAlavancagem(),
+      observacoes: (document.getElementById('alav-observacoes')?.value || '').trim()
     });
   } catch (err) {
     console.error(err);

@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="pdf-master-prime.js"></script>
+<script src="pdf-master-prime.js?v=20260525"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="simulacao-store.js"></script>
 <style>
@@ -142,6 +142,10 @@
   /* Embed mode (iframe) */
   html.embedded header { display: none; }
   html.embedded main { padding-top: 18px; }
+
+  /* Observações textarea */
+  .obs-area { width: 100%; min-height: 90px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: inherit; resize: vertical; color: var(--text); background: #fff; }
+  .obs-area:focus { outline: none; border-color: var(--bradesco-red); box-shadow: 0 0 0 3px rgba(204,9,47,0.10); }
 </style>
 <script>if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('embedded');</script>
 </head>
@@ -329,6 +333,16 @@
     <span id="br-lblParcelaInicial"></span>
     <span id="br-lblParcelaDemais"></span>
   </div>
+
+  <!-- ════════ OBSERVAÇÕES ════════ -->
+  <section class="card">
+    <div class="card-header">
+      <span class="badge-red"></span>
+      <h3>Observações (opcional)</h3>
+      <button type="button" class="reset-btn" id="btnLimparObs">Limpar</button>
+    </div>
+    <textarea id="br-observacoes" class="obs-area" placeholder="Adicione anotações que devem aparecer no PDF…"></textarea>
+  </section>
 
   <!-- ════════ AVISO ════════ -->
   <div class="aviso">
@@ -588,8 +602,13 @@ function atualizaLabelsParcela(i) {
 function limparTudo() {
   ['br-credito','br-prazo','br-contempla','br-qtdAntecipacao','br-taxaAntecipacao','br-taxaAdm','br-fundo','br-seguro','br-pctLance','br-lanceManual'].forEach(id => get(id).value = '');
   get('br-redutor').value = '';
+  const obsEl = get('br-observacoes'); if (obsEl) obsEl.value = '';
   recalc();
 }
+
+document.getElementById('btnLimparObs').addEventListener('click', () => {
+  const obsEl = get('br-observacoes'); if (obsEl) obsEl.value = '';
+});
 
 document.getElementById('btnLimparProposta').addEventListener('click', () => {
   ['br-credito','br-prazo','br-contempla','br-qtdAntecipacao'].forEach(id => get(id).value = '');
@@ -755,7 +774,8 @@ function _montarPdfComercialBradesco() {
       { label: '1ª parcela pós-contemplação',     subAcima: '(Mantém o valor da parcela inicial)',         value: _t('br-parcelaInicial') || '—' },
       { label: 'Demais parcelas pós-contemplação', subAcima: '(A partir da 2ª pós contemplação, Diluir nas Parcelas)', value: _t('br-parcDiluir') || '—' },
       { label: 'Prazo Restante',                                                                           value: _t('br-prazoDiluir') || '—' },
-    ]
+    ],
+    observacoes: _v('br-observacoes')
   };
 }
 

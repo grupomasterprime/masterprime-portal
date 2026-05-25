@@ -65,19 +65,20 @@
   // O logo Master Prime já contém "Master Prime" + "Corretora de Consórcios e Seguros".
   // Quando há logo de administradora (Porto/Itaú/Bradesco), mostra à direita.
   function renderHeader(tituloEstrategia, logoAdmin) {
-    // logoAdmin pode ser: 'porto' | 'itau' | 'bradesco' (chave) ou um data URL direto
-    const resolvedLogo = (logoAdmin && LOGO_ADMIN_DATA[logoAdmin]) ? LOGO_ADMIN_DATA[logoAdmin] : logoAdmin;
-    const logoAdminHtml = resolvedLogo
-      ? `<img src="${resolvedLogo}" style="height:54px; width:54px; object-fit:contain; background:#fff; padding:6px; border-radius:8px; margin-right:14px;">`
-      : '';
+    // Cabeçalho moderno (mesma linguagem visual dos simuladores dedicados):
+    // logo Master Prime grande, pill da marca e título grande da simulação.
     return `
-      <div style="background:${NAVY}; color:#fff; padding:24px 50px; display:flex; justify-content:space-between; align-items:center;">
-        <div style="display:flex; align-items:center;">
-          ${LOGO_HTML}
+      <div style="padding:44px 52px 0;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:26px; border-bottom:1px solid #EEF2F6;">
+          <img src="${LOGO_DATA_URL}" alt="Master Prime" style="height:84px; width:auto; display:block;">
+          <div style="display:inline-flex; align-items:center; gap:9px; background:#F8FAFC; border:1px solid #E2E8F0; color:${NAVY}; padding:8px 16px; border-radius:999px; font-size:12.5px; font-weight:600; letter-spacing:0.2px;">
+            <span style="width:8px; height:8px; border-radius:50%; background:#4DBCC8;"></span>
+            Simulador Master Prime
+          </div>
         </div>
-        <div style="display:flex; align-items:center; gap:0;">
-          ${logoAdminHtml}
-          <div style="font-size:18px; font-weight:600;">Estratégia Simulada: ${tituloEstrategia || ''}</div>
+        <div style="margin-top:32px;">
+          <div style="display:inline-block; font-size:11px; font-weight:700; color:${NAVY}; letter-spacing:2px; text-transform:uppercase; margin-bottom:14px; padding:6px 13px; background:#EEF2F6; border-radius:999px;">Simulação de Consórcio</div>
+          <div style="font-size:44px; font-weight:700; color:#0F172A; line-height:1.1; letter-spacing:-1.1px;">${tituloEstrategia || 'Simulação'}</div>
         </div>
       </div>`;
   }
@@ -89,9 +90,9 @@
     const mm = String(hoje.getMonth() + 1).padStart(2, '0');
     const yyyy = hoje.getFullYear();
     return `
-      <div style="background:${NAVY}; color:#fff; padding:22px 50px; display:flex; justify-content:space-between; align-items:center; font-size:15px;">
-        <div style="font-weight:600;">Master Prime · Simulador de Consórcio</div>
-        <div style="text-align:right; line-height:1.5;">Documento gerado em ${dd}/${mm}/${yyyy}<br>Página 1/1</div>
+      <div style="margin:34px 52px 0; padding:18px 0 40px; border-top:1px solid #EEF2F6; display:flex; justify-content:space-between; align-items:center; color:#94A3B8; font-size:12px;">
+        <div>Documento gerado em ${dd}/${mm}/${yyyy}</div>
+        <div style="font-weight:700; color:#475569; letter-spacing:0.2px;">grupomasterprime.com.br</div>
       </div>`;
   }
 
@@ -508,12 +509,21 @@
       return '';
     }).join('');
 
+    const obsHtml = (opts.observacoes && String(opts.observacoes).trim()) ? `
+          <div style="margin-top:18px; background:#fff; border:1px solid #E5E7EB; border-radius:14px; padding:20px 24px;">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+              <span style="width:6px; height:22px; background:${NAVY}; border-radius:3px;"></span>
+              <div style="font-size:13px; color:${NAVY}; letter-spacing:1.5px; text-transform:uppercase; font-weight:700;">Observações</div>
+            </div>
+            <div style="font-size:14px; color:#334155; line-height:1.6; white-space:pre-wrap; word-wrap:break-word;">${String(opts.observacoes).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+          </div>` : '';
+
     return `
       <div style="width:1300px; background:#fff; font-family:'Inter',-apple-system,system-ui,sans-serif; color:#1F2937; font-size:18px; line-height:1.5;">
         ${renderHeader(opts.tituloEstrategia, opts.logoAdmin)}
-        <div style="padding:42px 50px;">
+        <div style="padding:14px 52px 0;">
           ${blocosHtml}
-          ${renderDisclaimer(opts.disclaimer)}
+          ${obsHtml}
         </div>
         ${renderFooter()}
       </div>`;

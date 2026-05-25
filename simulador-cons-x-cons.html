@@ -56,12 +56,14 @@
   button.primary:hover { background: var(--navy-dark); }
   button.secondary { background: transparent; color: var(--text-muted); border-color: var(--border); }
   button.secondary:hover { background: var(--bg); }
+  .obs-area { width: 100%; min-height: 90px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: inherit; resize: vertical; color: var(--text); background: #fff; }
+  .obs-area:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(45,63,94,0.10); }
 </style>
 <script>if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('embedded');</script>
 <style>html.embedded header { display: none; } html.embedded main { padding-top: 16px; }</style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="pdf-master-prime.js"></script>
+<script src="pdf-master-prime.js?v=20260525"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="simulacao-store.js"></script>
 <script src="analitico-cet.js"></script>
@@ -293,6 +295,14 @@
     <div id="vencedor" style="margin-top:18px; padding:18px; background:#ECFDF5; border:1px solid #10B981; border-radius:10px; text-align:center; font-size:14px; color:#065F46; font-weight:600; display:none;"></div>
   </section>
 
+  <!-- ════ OBSERVAÇÕES ════ -->
+  <section class="card">
+    <div class="card-section-title">Observações (opcional)
+      <button type="button" class="reset-btn" id="btnLimparObs">Limpar</button>
+    </div>
+    <textarea id="cxc-observacoes" class="obs-area" placeholder="Adicione anotações que devem aparecer no PDF…"></textarea>
+  </section>
+
   <div class="actions">
     <button class="secondary" id="btnLimpar">Limpar tudo</button>
     <button class="primary" id="btnPdf">Baixar PDF</button>
@@ -412,7 +422,8 @@ function resetProposta(s) {
 }
 $('resetP1').addEventListener('click',()=>resetProposta('p1'));
 $('resetP2').addEventListener('click',()=>resetProposta('p2'));
-$('btnLimpar').addEventListener('click',()=>{ resetProposta('p1'); resetProposta('p2'); });
+$('btnLimpar').addEventListener('click',()=>{ resetProposta('p1'); resetProposta('p2'); const obsEl=$('cxc-observacoes'); if(obsEl)obsEl.value=''; });
+$('btnLimparObs').addEventListener('click',()=>{ const obsEl=$('cxc-observacoes'); if(obsEl)obsEl.value=''; });
 
 // ─── BAIXAR PDF (PdfMasterPrime, retrato) ───
 function _coletarBlocosConsXCons() {
@@ -464,7 +475,8 @@ $('btnPdf').addEventListener('click', async () => {
     await PdfMasterPrime.gerar({
       tituloEstrategia: 'Consórcio X Consórcio',
       filename: 'master-prime-consorcio-x-consorcio',
-      blocos: _coletarBlocosConsXCons()
+      blocos: _coletarBlocosConsXCons(),
+      observacoes: ($('cxc-observacoes')?.value || '').trim()
     });
   } catch (err) {
     console.error(err);

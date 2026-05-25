@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="pdf-master-prime.js"></script>
+<script src="pdf-master-prime.js?v=20260525"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="simulacao-store.js"></script>
 <style>
@@ -126,6 +126,10 @@
   /* Embed mode (iframe) */
   html.embedded header { display: none; }
   html.embedded main { padding-top: 18px; }
+
+  /* Observações textarea */
+  .obs-area { width: 100%; min-height: 90px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: inherit; resize: vertical; color: var(--text); background: #fff; }
+  .obs-area:focus { outline: none; border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,0.12); }
 
   /* Modal de % de Lance Livre */
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,.55); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
@@ -345,6 +349,16 @@
       <div class="resumo-row highlight"><span class="lbl" id="pi-lblParcelaInicial">1ª a 12ª (com adesão)</span><span class="val" id="pi-parcelaInicial">—</span></div>
       <div class="resumo-row highlight"><span class="lbl" id="pi-lblParcelaDemais">Demais parcelas</span><span class="val" id="pi-parcelaDemais">—</span></div>
     </div>
+  </section>
+
+  <!-- ════════ OBSERVAÇÕES ════════ -->
+  <section class="card">
+    <div class="card-header">
+      <span class="badge-teal"></span>
+      <h3>Observações (opcional)</h3>
+      <button type="button" class="reset-btn" id="btnLimparObs">Limpar</button>
+    </div>
+    <textarea id="pi-observacoes" class="obs-area" placeholder="Adicione anotações que devem aparecer no PDF…"></textarea>
   </section>
 
   <!-- ════════ AVISO ════════ -->
@@ -731,8 +745,13 @@ function limparTudo() {
   ['pi-credito','pi-prazo','pi-qtdAdesao','pi-contempla','pi-recProp','pi-fgts','pi-embutido','pi-adesao','pi-taxaAdm','pi-fundo','pi-seguro'].forEach(id => get(id).value = '');
   get('pi-tipo').value = '';
   get('pi-redutor').value = '';
+  const obsEl = get('pi-observacoes'); if (obsEl) obsEl.value = '';
   recalc();
 }
+
+document.getElementById('btnLimparObs').addEventListener('click', () => {
+  const obsEl = get('pi-observacoes'); if (obsEl) obsEl.value = '';
+});
 
 document.getElementById('btnLimparProposta').addEventListener('click', () => {
   ['pi-credito','pi-prazo','pi-qtdAdesao','pi-contempla'].forEach(id => get(id).value = '');
@@ -955,7 +974,8 @@ function _montarPdfComercialPortoImovel() {
       { label: 'Demais Parcelas',                       subAcima: '(antes da contemplação)',   value: parcelaAntes || _t('pi-parcelaDemais') || '—' },
       { label: 'Valor parcela (pós-contemplado)',                                                value: _t('pi-novaParcela') || '—' },
       { label: 'Prazo Restante',                                                                 value: _t('pi-novoPrazo') || '—' },
-    ]
+    ],
+    observacoes: _v('pi-observacoes')
   };
 }
 

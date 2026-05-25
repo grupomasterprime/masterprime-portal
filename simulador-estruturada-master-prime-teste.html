@@ -54,6 +54,10 @@
   /* Resumo */
   .resumo-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px; }
   .resumo-header { font-size: 13px; font-weight: 600; color: var(--navy); letter-spacing: 1.5px; text-transform: uppercase; padding-bottom: 14px; border-bottom: 1px solid var(--border); margin-bottom: 18px; }
+  .resumo-header .reset-btn { float: right; background: none; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-family: inherit; text-transform: none; letter-spacing: 0; font-weight: 400; }
+  .resumo-header .reset-btn:hover { background: var(--bg); }
+  .obs-area { width: 100%; min-height: 90px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: inherit; resize: vertical; color: var(--text); background: #fff; }
+  .obs-area:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(45,63,94,0.10); }
   .resumo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
   @media (max-width: 768px) { .resumo-grid { grid-template-columns: 1fr; } }
   .resumo-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: var(--soft-blue); border-radius: 8px; }
@@ -137,7 +141,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="simulacao-store.js"></script>
-<script src="pdf-master-prime.js"></script>
+<script src="pdf-master-prime.js?v=20260525"></script>
 <script src="analitico-cet.js"></script>
 
 <header>
@@ -219,6 +223,14 @@
       <div class="resumo-row sub" style="display:flex;align-items:center;justify-content:space-between;"><strong>Custo Efetivo Anual</strong><span style="display:inline-flex;align-items:center;gap:8px;"><span class="value" id="rs_cetAnual">0,00 %</span><button type="button" class="ace-eye" onclick="AnaliticoCet.abrir('agregado')" title="Ver memória de cálculo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></div>
       <div class="resumo-row sub"><strong>FGTS <span style="color:#9CA3AF; font-weight:400;" id="rs_fgtsPct">0,00%</span></strong><span class="value" id="rs_fgts">R$ 0,00</span></div>
     </div>
+  </div>
+
+  <!-- ════ OBSERVAÇÕES ════ -->
+  <div class="resumo-card">
+    <div class="resumo-header">Observações (opcional)
+      <button type="button" class="reset-btn" id="btnLimparObs">Limpar</button>
+    </div>
+    <textarea id="estr-observacoes" class="obs-area" placeholder="Adicione anotações que devem aparecer no PDF…"></textarea>
   </div>
 
   <div class="actions">
@@ -1030,7 +1042,11 @@ document.getElementById('opsBody').addEventListener('click', e => {
 document.getElementById('btnLimpar').addEventListener('click', () => {
   if (operacoes.length && !confirm('Limpar todas as operações?')) return;
   operacoes = [];
+  const obsEl = document.getElementById('estr-observacoes'); if (obsEl) obsEl.value = '';
   renderOps();
+});
+document.getElementById('btnLimparObs').addEventListener('click', () => {
+  const obsEl = document.getElementById('estr-observacoes'); if (obsEl) obsEl.value = '';
 });
 
 // ─── COLETA DE BLOCOS PARA O PDF ───
@@ -1093,7 +1109,8 @@ document.getElementById('btnPdf').addEventListener('click', async () => {
       tituloEstrategia: 'Operação Estruturada',
       filename: 'master-prime-operacao-estruturada',
       orientation: 'landscape',
-      blocos: _coletarBlocosEstruturada()
+      blocos: _coletarBlocosEstruturada(),
+      observacoes: (document.getElementById('estr-observacoes')?.value || '').trim()
     });
   } catch (err) {
     console.error('Erro ao gerar PDF:', err);
