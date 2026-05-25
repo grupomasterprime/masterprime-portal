@@ -755,6 +755,10 @@ async function salvarReserva() {
     }
     if (res.error) throw res.error;
     if (editingId) showToast('Reserva atualizada!');
+    if (!editingId) {
+      const _det = new Date(ini).toLocaleString('pt-BR') + (basePayload.consultor_nome ? ' · ' + basePayload.consultor_nome : '');
+      sb.rpc('registrar_log', { p_acao:'reserva_criada', p_detalhe:_det }).then(()=>{},()=>{});
+    }
     fecharModal();
     await loadData();
     render();
@@ -775,6 +779,8 @@ async function deletarReserva(serieToda = false) {
     try {
       const { error } = await sb.from('portal_sala_reservas').delete().eq('recorrente_id', r.recorrente_id);
       if (error) throw error;
+      const _det = 'Série · ' + new Date(r.inicio).toLocaleString('pt-BR') + (r.consultor_nome ? ' · ' + r.consultor_nome : '');
+      sb.rpc('registrar_log', { p_acao:'reserva_cancelada', p_detalhe:_det }).then(()=>{},()=>{});
       showToast('Série cancelada');
     } catch(e) { showToast('Erro: ' + (e.message || e), true); return; }
   } else {
@@ -782,6 +788,8 @@ async function deletarReserva(serieToda = false) {
     try {
       const { error } = await sb.from('portal_sala_reservas').delete().eq('id', editingId);
       if (error) throw error;
+      const _det = new Date(r.inicio).toLocaleString('pt-BR') + (r.consultor_nome ? ' · ' + r.consultor_nome : '');
+      sb.rpc('registrar_log', { p_acao:'reserva_cancelada', p_detalhe:_det }).then(()=>{},()=>{});
       showToast('Reserva cancelada');
     } catch(e) { showToast('Erro: ' + (e.message || e), true); return; }
   }

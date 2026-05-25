@@ -318,6 +318,12 @@
         await salvar(titulo, dados);
         toast('Simulação salva (7 dias)');
       }
+      // Log de atividade: simulação salva (cobre salvar novo e sobrescrever).
+      try {
+        if (global.PortalLog) {
+          global.PortalLog.registrar('simulacao_salva', (cfg.simulador || '') + (titulo ? ' — ' + titulo : ''));
+        }
+      } catch(e) {}
       await refreshSelect();
     } catch (err) {
       console.error(err);
@@ -364,6 +370,17 @@
     }
 
     sb = global.supabase.createClient(cfg.supabaseUrl, cfg.supabaseKey);
+
+    // Logger global de atividade — reutiliza o cliente Supabase já inicializado.
+    // sb.rpc(...) é "lazy": só dispara com .then(). Por isso o .then() obrigatório.
+    global.PortalLog = {
+      registrar(acao, detalhe) {
+        try {
+          sb.rpc('registrar_log', { p_acao: acao, p_detalhe: detalhe || null }).then(()=>{}, ()=>{});
+        } catch(e) {}
+      }
+    };
+
     await loadUser();
 
     const mount = cfg.mountPoint || document.body;

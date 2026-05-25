@@ -589,6 +589,7 @@
       const yyyy = hoje.getFullYear();
       const filename = (opts.filename || 'master-prime-simulacao') + `-${dd}${mm}${yyyy}.pdf`;
       pdf.save(filename);
+      try { if (window.PortalLog) window.PortalLog.registrar('pdf_gerado', opts.tituloEstrategia || opts.subtitulo || opts.filename || ''); } catch(e){}
     } finally {
       wrap.remove();
     }
@@ -865,6 +866,7 @@
       const yyyy = hoje.getFullYear();
       const filename = (opts.filename || 'master-prime-simulacao') + `-${dd}${mm}${yyyy}.pdf`;
       pdf.save(filename);
+      try { if (window.PortalLog) window.PortalLog.registrar('pdf_gerado', opts.tituloEstrategia || opts.subtitulo || opts.filename || ''); } catch(e){}
     } finally {
       wrap.remove();
     }

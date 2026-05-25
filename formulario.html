@@ -1666,6 +1666,17 @@ async function enviarProposta(prefix, dados) {
     }
     const protocolo = data?.[0]?.protocolo || 'sem protocolo';
     $('protocolo-display').textContent = protocolo;
+    // Log de atividade: ficha criada. Contexto pode ser anônimo (form público) —
+    // por isso passamos p_usuario com o nome do consultor quando conhecido.
+    // sb.rpc(...) é "lazy": precisa do .then() pra disparar a requisição.
+    try {
+      const _consultorNome = ($('consultor-nome') && $('consultor-nome').textContent || '').trim();
+      sb.rpc('registrar_log', {
+        p_acao: 'ficha_criada',
+        p_detalhe: (dados && dados.nome) ? dados.nome : null,
+        p_usuario: (_consultorNome && _consultorNome !== '—') ? _consultorNome : null
+      }).then(()=>{}, ()=>{});
+    } catch(e) {}
     $('form-pf').classList.add('hidden');
     $('form-pj').classList.add('hidden');
     $('tela-sucesso').classList.remove('hidden');

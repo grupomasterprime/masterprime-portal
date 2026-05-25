@@ -346,6 +346,8 @@ body.embedded-mode .portal-menu-fab { display:flex; }
         <div class="sb-item" onclick="nav('admin-upload')" id="ni-admin-upload"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> Upload Demonstrativos</div>
         <div class="sb-item" onclick="nav('admin-users')" id="ni-admin-users"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Gerenciar Usuarios</div>
         <div class="sb-item" onclick="nav('painel')" id="ni-painel"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> Painel Split</div>
+        <!-- Logs de Atividade (master / admin / sócio) — dentro da Administração -->
+        <div class="sb-item hidden" onclick="nav('logs')" id="ni-logs"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span> Logs de Atividade</div>
       </div>
       <div class="sb-user-card">
         <div class="sb-user-info" onclick="nav('perfil')" title="Abrir Meu Perfil" style="cursor:pointer;border-radius:8px;padding:6px;margin:-6px -6px 6px;transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background='transparent'">
@@ -409,6 +411,10 @@ body.embedded-mode .portal-menu-fab { display:flex; }
       <!-- FEEDBACKS (iframe carregado sob demanda) -->
       <div class="screen" id="s-feedbacks" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
         <iframe id="iframe-feedbacks" src="about:blank" data-target="feedbacks.html" style="width:100%;height:100%;border:0;display:block" title="Feedbacks"></iframe>
+      </div>
+      <!-- LOGS DE ATIVIDADE (iframe carregado sob demanda) -->
+      <div class="screen" id="s-logs" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
+        <iframe id="iframe-logs" src="about:blank" data-target="logs.html" style="width:100%;height:100%;border:0;display:block" title="Logs de Atividade"></iframe>
       </div>
       <!-- SALA DE REUNIÃO (iframe carregado sob demanda) -->
       <div class="screen" id="s-sala" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
@@ -881,6 +887,7 @@ async function doLogin() {
       if (rpcErr) throw rpcErr;
       if (!ok) {
         err.style.display='block'; err.textContent='Usuario ou senha incorretos.';
+        sb.rpc('registrar_log', { p_acao:'login_negado', p_detalhe:identificador, p_usuario:identificador }).then(()=>{},()=>{});
         btn.disabled=false; btn.textContent='Entrar'; return;
       }
       // 3) Cria conta no Supabase Auth
@@ -907,11 +914,17 @@ async function doLogin() {
     await enterPortal();
   } catch(e) {
     err.style.display='block'; err.textContent = 'Erro: ' + (e.message||e);
+    try {
+      const ident = (document.getElementById('login-cpf').value||'').trim().toLowerCase();
+      if (ident && sb) sb.rpc('registrar_log', { p_acao:'login_negado', p_detalhe:ident, p_usuario:ident }).then(()=>{},()=>{});
+    } catch(_e) {}
   }
   btn.disabled = false; btn.textContent = 'Entrar';
 }
 
 async function doLogout() {
+  // Registra o logout ANTES de destruir a sessão (depois o RPC perde o auth.uid()).
+  registrarLog('logout', currentUser && currentUser.nome ? currentUser.nome : null);
   try { if (USE_SUPABASE) await sb.auth.signOut(); } catch(e) {}
   currentUser=null; sessionStorage.removeItem('mp_session');
   document.getElementById('login-screen').style.display='flex';
@@ -1184,20 +1197,32 @@ async function checkSession() {
 let _acessoHeartbeat = null;
 function registrarAcesso() {
   if (!USE_SUPABASE) return;
-  try { sb.rpc('registrar_acesso'); } catch(e) {}
+  // IMPORTANTE: sb.rpc(...) é "lazy" no supabase-js — a requisição só é
+  // enviada quando .then()/await é chamado. Sem isso o carimbo de acesso
+  // nunca era gravado e o "Último acesso" ficava preso no login antigo.
+  const _carimbar = () => { try { sb.rpc('registrar_acesso').then(()=>{}, ()=>{}); } catch(e) {} };
+  _carimbar();
   if (_acessoHeartbeat) clearInterval(_acessoHeartbeat);
   _acessoHeartbeat = setInterval(() => {
-    if (document.visibilityState === 'visible') {
-      try { sb.rpc('registrar_acesso'); } catch(e) {}
-    }
+    if (document.visibilityState === 'visible') _carimbar();
   }, 5 * 60 * 1000);
 }
+// Registra uma ação no log de atividade do portal (portal_logs).
+// IMPORTANTE: sb.rpc(...) é "lazy" no supabase-js — precisa do .then() pra disparar.
+function registrarLog(acao, detalhe) {
+  if (!USE_SUPABASE || !sb) return;
+  try {
+    sb.rpc('registrar_log', { p_acao: acao, p_detalhe: detalhe || null }).then(()=>{}, ()=>{});
+  } catch(e) {}
+}
+
 async function enterPortal() {
   document.getElementById('loading-screen').style.display='none';
   document.getElementById('login-screen').style.display='none';
   document.getElementById('portal-screen').style.display='block';
   _iniciarAutoLogout();
   registrarAcesso();
+  registrarLog('login', currentUser && currentUser.nome ? currentUser.nome : null);
   _iniciarSalaBanner();
   atualizarAvatares();
   document.getElementById('sb-user-name').textContent=currentUser.nome;
@@ -1234,6 +1259,12 @@ async function enterPortal() {
     const podeVerFeedbacks = (currentUser.tipo === 'master' || currentUser.tipo === 'socio');
     _feedbacksItem.classList.toggle('hidden', !podeVerFeedbacks);
   }
+  // NOVA ABA: Logs de Atividade — visível APENAS para o Master
+  const _logsItem = document.getElementById('ni-logs');
+  if (_logsItem) {
+    const podeVerLogs = (currentUser.tipo === 'master');
+    _logsItem.classList.toggle('hidden', !podeVerLogs);
+  }
   // Sala de Reunião — liberada pra todos os tipos
   const _salaItem = document.getElementById('ni-sala');
   if (_salaItem) _salaItem.classList.remove('hidden');
@@ -1260,6 +1291,7 @@ async function enterPortal() {
 }
 
 // ═══ NAV ═══
+let _ultimaTelaLogada = null;
 function nav(id) {
   // Visão Geral: só para os donos. Outros admins/usuários redirecionados.
   if (id === 'admin-overview' && currentUser && !['ALLAN ALMEIDA', 'ADMINISTRADOR'].includes((currentUser.nome||'').trim().toUpperCase())) {
@@ -1279,6 +1311,10 @@ function nav(id) {
   if (id === 'feedbacks' && currentUser && !(currentUser.tipo === 'master' || currentUser.tipo === 'socio')) {
     id = 'perfil';
   }
+  // LOGS DE ATIVIDADE — somente Master
+  if (id === 'logs' && currentUser && currentUser.tipo !== 'master') {
+    id = 'perfil';
+  }
   // Sala de Reunião — liberada pra todos os tipos
   // Bloqueio de acesso direto a módulo sem permissão (cai pra perfil)
   if (currentUser && currentUser.tipo !== 'master' && !podeAcessarScreen(id)) {
@@ -1292,7 +1328,7 @@ function nav(id) {
   document.querySelector('.sidebar-backdrop')?.classList.remove('open');
   // Lazy-load dos iframes: só carrega na primeira visita (evita 2.5 MB no login)
   // Iframes com lazy-load (assembleia/lances/painel) — carrega só na primeira visita
-  const iframeScreens = ['assembleia','lances','painel','simuladores','base-conhecimento','dashboard-vendas','adesao','admin-faturamento','admin-adesao','feedbacks','sala'];
+  const iframeScreens = ['assembleia','lances','painel','simuladores','base-conhecimento','dashboard-vendas','adesao','admin-faturamento','admin-adesao','feedbacks','logs','sala'];
   if (iframeScreens.includes(id)) {
     const ifr = document.getElementById('iframe-' + id);
     if (ifr && ifr.dataset.target && ifr.getAttribute('src') === 'about:blank') {
@@ -1318,6 +1354,12 @@ function nav(id) {
     if (app) app.classList.remove('embedded');
     if (fab) fab.style.display = 'none';
     document.body.classList.remove('embedded-mode');
+  }
+  // Log de atividade: registra a abertura de cada tela do portal
+  // (evita repetir quando navega pra mesma tela em sequência).
+  if (n && currentUser && id !== _ultimaTelaLogada) {
+    _ultimaTelaLogada = id;
+    registrarLog('tela', (n.textContent || id).trim());
   }
 }
 function exitEmbedded(){
@@ -1787,6 +1829,7 @@ async function addUser() {
   const cpf = String(Math.floor(10000000000 + Math.random() * 89999999999));
   try {
     await criarUsuarioCompleto({ nome, cpf, username, senha, tipo });
+    registrarLog('usuario_acao', `Criou usuário ${nome} (${tipo})`);
     msg.innerHTML=`<div class="alert alert-ok">${nome} cadastrado!<br>Login: <strong>${username}</strong> &nbsp;·&nbsp; Senha: <strong>${senha}</strong></div>`;
     document.getElementById('nu-nome').value='';
     if (senhaInput) senhaInput.value='';
@@ -1971,7 +2014,8 @@ const MODULOS_MENU = [
   { key: 'base_conhecimento',label: 'Material de Apoio', navId: 'ni-base-conhecimento',     screen: 'base-conhecimento', secao: 'menu' },
   { key: 'admin_overview',   label: 'Visão Geral',          navId: 'ni-admin-overview',       screen: 'admin-overview',    secao: 'admin' },
   { key: 'admin_upload',     label: 'Upload Demonstrativos',navId: 'ni-admin-upload',         screen: 'admin-upload',      secao: 'admin' },
-  { key: 'painel_split',     label: 'Painel Split',         navId: 'ni-painel',               screen: 'painel',            secao: 'admin' }
+  { key: 'painel_split',     label: 'Painel Split',         navId: 'ni-painel',               screen: 'painel',            secao: 'admin' },
+  { key: 'logs',             label: 'Logs de Atividade',    navId: 'ni-logs',                 screen: 'logs',              secao: 'admin' }
 ];
 
 // CPF do usuário cuja modal de permissões está aberta no momento
@@ -2022,7 +2066,10 @@ async function salvarPermissoes() {
     perms[cb.getAttribute('data-perm-key')] = cb.checked;
   });
   try {
+    let _alvoNome = _permCpfAtual;
+    try { const _u = await DB.getUser(_permCpfAtual); if (_u && _u.nome) _alvoNome = _u.nome; } catch(e) {}
     await DB.updateUser(_permCpfAtual, { permissoes: perms });
+    registrarLog('usuario_acao', `Alterou permissões de ${_alvoNome}`);
     fecharPermissoes();
     await renderUsers();
   } catch(e) { alert('Erro ao salvar: ' + (e.message||e)); }
@@ -2052,6 +2099,10 @@ function aplicarPermissoesUI() {
     if (m.key === 'admin_adesao') {
       visible = true;
     }
+    // Exceção: Logs de Atividade — visível APENAS para o Master (gate por tipo)
+    if (m.key === 'logs') {
+      visible = (currentUser.tipo === 'master');
+    }
     if (visible) el.classList.remove('hidden');
     else el.classList.add('hidden');
   });
@@ -2077,6 +2128,8 @@ function podeAcessarScreen(screenId) {
   if (screenId === 'admin-adesao') return true;
   // Feedbacks: só master e sócio
   if (screenId === 'feedbacks') return (currentUser.tipo === 'master' || currentUser.tipo === 'socio');
+  // Logs de Atividade: somente Master
+  if (screenId === 'logs') return (currentUser.tipo === 'master');
   // Sala de Reunião: liberada pra todos os tipos
   if (screenId === 'sala') return true;
   const m = MODULOS_MENU.find(x => x.screen === screenId);

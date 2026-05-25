@@ -678,6 +678,7 @@ async function salvarFeedback() {
       result = await sb.from('portal_feedbacks').insert(payload);
     }
     if (result.error) throw result.error;
+    sb.rpc('registrar_log', { p_acao:'feedback_enviado', p_detalhe:consultor.nome }).then(()=>{},()=>{});
     showToast(editingFeedbackId ? 'Feedback atualizado!' : 'Feedback registrado!');
     fecharModal();
     await loadData();

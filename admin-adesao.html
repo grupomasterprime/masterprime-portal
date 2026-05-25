@@ -435,12 +435,10 @@ function renderLinks() {
   `).join('');
 }
 
-// Copia o link de visualização da ficha (abre o formulário preenchido e travado)
-function copiarLinkFicha(id) {
+// Abre o link de visualização da ficha numa nova aba (formulário preenchido e travado)
+function abrirLinkFicha(id) {
   const url = 'https://grupomasterprime.github.io/masterprime-portal/formulario.html?view=' + id;
-  navigator.clipboard.writeText(url)
-    .then(() => showToast('Link de visualização copiado!'))
-    .catch(() => alert('Erro ao copiar. Link: ' + url));
+  window.open(url, '_blank', 'noopener');
 }
 function copyLinkMini(btn, url, label) {
   navigator.clipboard.writeText(url).then(() => {
@@ -679,9 +677,9 @@ function renderList() {
             Copiar como texto (WhatsApp)
           </button>
           ${a._source === 'nova' ? `
-          <button class="copy-all-btn" style="background:var(--mp-navy);" onclick="copiarLinkFicha('${a.id}')">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
-            Copiar link de visualização
+          <button class="copy-all-btn" style="background:var(--mp-navy);" onclick="abrirLinkFicha('${a.id}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Abrir link de visualização
           </button>` : ''}
         </div>
         ${a._source === 'nova' ? `
@@ -844,6 +842,14 @@ async function salvarAlteracoes(propId) {
     }
     const { error } = await sb.from('portal_propostas').update(payload).eq('id', propId);
     if (error) throw error;
+    // Log de atividade: ficha editada. sb.rpc(...) é "lazy" — precisa do .then().
+    try {
+      const _ficha = allAdesoes.find(a => a.id === propId);
+      sb.rpc('registrar_log', {
+        p_acao: 'ficha_editada',
+        p_detalhe: (_ficha && _ficha.nome_cliente) ? _ficha.nome_cliente : null
+      }).then(()=>{}, ()=>{});
+    } catch(e) {}
     delete window._pendingChanges[propId];
     showToast('Alterações salvas!');
     await loadAdesoes();
