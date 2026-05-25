@@ -309,7 +309,10 @@ function calcularOperacao(op){
   const pctAluguel=unmaskPct(op.pctAluguel)/100;
 
   const totalDevido=credito*(1+taxaAdm+fundo);
-  const parcelaBase=prazo>0?totalDevido/prazo:0;
+  // Redutor de parcela: quando ativo, reduz a parcela pelo % informado.
+  // Confirmado no Conkey: redutor de 50% → parcela cai exatamente à metade.
+  const redutor = op.redutorOn ? unmaskPct(op.redutor)/100 : 0;
+  const parcelaBase=prazo>0?(totalDevido/prazo)*(1-redutor):0;
   let creditoAtualizado=credito;
   if(reajuste>0){const num=Math.floor(expectativa/12); creditoAtualizado=credito*Math.pow(1+reajuste,num);}
   const lanceP=creditoAtualizado*pP, lanceE=creditoAtualizado*pE;
@@ -594,8 +597,8 @@ function _coletarBlocosInvestimento() {
   const opsLinhas = Array.from(document.querySelectorAll('#opsBody tr')).filter(tr => !tr.classList.contains('empty-row') && !tr.classList.contains('add-row')).map(tr => ({
     celulas: Array.from(tr.querySelectorAll('td')).slice(0, 11).map(td => (td.textContent || '').trim())
   }));
-  // Linha total (footer)
-  opsLinhas.push({ celulas: ['Total','-','-','-','-', _txt('ft_credito'), _txt('ft_parcela'), _txt('ft_creditoDisp'), _txt('ft_invCont'), _txt('ft_vendaPrev'), _txt('ft_lucro') ], total:true });
+  // Linha total (footer) — alinhada com as 11 colunas reais da tabela
+  opsLinhas.push({ celulas: ['Total', _txt('ft_credito'), _txt('ft_parcela'), '-', '-', _txt('ft_creditoDisp'), _txt('ft_invCont'), _txt('ft_vendaPrev'), _txt('ft_lucro'), _txt('ft_retorno'), '-' ], total:true });
 
   // Lê linhas da tabela de renda fixa (rfBody)
   const rfLinhas = Array.from(document.querySelectorAll('#rfBody tr')).filter(tr => !tr.classList.contains('empty-row')).map(tr => ({
@@ -605,7 +608,7 @@ function _coletarBlocosInvestimento() {
 
   return [
     { tipo: 'tabela-ampla',
-      colunas: ['#','GRUPO','PRAZO','EXPECTATIVA','TIPO','CRÉDITO TOTAL','PARCELA','CRÉDITO DISPONÍVEL','VALOR INVESTIDO','VENDA / PREVIDÊNCIA','LUCRO BRUTO'],
+      colunas: ['#','CRÉDITO CONTRATADO','1ª PARCELA','MÊS EXPECT. CONTEMPL.','CONTEMPLAÇÃO','CRÉDITO DISPONÍVEL','VALOR INVESTIDO ATÉ CONT.','VALOR VENDA/PREVIDÊNCIA','LUCRO BRUTO','% RETORNO','ESTRATÉGIA'],
       compact: true,
       linhas: opsLinhas
     },
