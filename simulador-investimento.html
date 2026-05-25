@@ -317,6 +317,9 @@ function calcularOperacao(op){
   // Confirmado no Conkey: redutor de 50% → parcela cai exatamente à metade.
   const redutor = op.redutorOn ? unmaskPct(op.redutor)/100 : 0;
   const parcelaBase=prazo>0?(totalDevido/prazo)*(1-redutor):0;
+  // parcelaCheia = parcela SEM o redutor. O redutor só ADIA pagamento; o
+  // custo "cheio" entra no lucro da previdência e na conta de aluguel.
+  const parcelaCheia=prazo>0?(totalDevido/prazo):0;
   let creditoAtualizado=credito;
   if(reajuste>0){const num=Math.floor(expectativa/12); creditoAtualizado=credito*Math.pow(1+reajuste,num);}
   const lanceP=creditoAtualizado*pP, lanceE=creditoAtualizado*pE;
@@ -331,7 +334,8 @@ function calcularOperacao(op){
   const adesaoMensal = (op.adesaoOn && prazoAdesao>0) ? (unmaskPct(op.adesao)/100) * credito / prazoAdesao : 0;
   // LANCE EMBUTIDO — conferido no Conkey: o lance embutido amortiza o saldo na
   //   contemplação, reduzindo cada parcela posterior em (% embutido × valor devido ÷ prazo).
-  const embutidoReducaoMensal = prazo>0 ? (pE * totalDevido) / prazo : 0;
+  //   Quando há redutor de parcela, essa redução acompanha o redutor — escalada por (1−redutor).
+  const embutidoReducaoMensal = prazo>0 ? (pE * totalDevido / prazo) * (1-redutor) : 0;
   // Parcela de um mês m: base reajustada + seguro + adesão − redução do embutido (pós-contemplação).
   const parcelaMes = m => parcelaBase*Math.pow(1+reajuste, Math.floor(m/12))
                           + seguroMensal
@@ -343,9 +347,14 @@ function calcularOperacao(op){
   let valorInvestidoAteCont = lanceP;
   for(let m = 1; m <= expectativa; m++) valorInvestidoAteCont += parcelaMes(m);
 
-  // Total Pago no Consórcio (Σ todas as parcelas + lance)
+  // Total Pago no Consórcio (Σ todas as parcelas + lance) — fluxo de caixa real
   let totalPagoConsorcio = lanceP;
   for(let m = 1; m <= prazo; m++) totalPagoConsorcio += parcelaMes(m);
+
+  // Custo VERDADEIRO do consórcio para o lucro da previdência — conferido no Conkey:
+  //   o redutor de parcela apenas ADIA o pagamento; o valor adiado
+  //   (redutor × parte não-embutida do total devido) continua sendo devido.
+  const totalPagoForLucro = totalPagoConsorcio + redutor * (1 - pE) * totalDevido;
 
   // ════════ FÓRMULAS DO CONKEY/SIMULAKEY — decifradas por engenharia reversa ════════
   // CDI mensal = (Selic − 0,10 ponto percentual) capitalizada ao mês.
@@ -370,7 +379,8 @@ function calcularOperacao(op){
   // DIFERENÇA ALUGUEL × PARCELA — conferido exato (0,00000%):
   //   anuidade da sobra (aluguel − parcela) capitalizada ao CDI mensal pelos
   //   meses pós-contemplação, menos IR regressivo sobre os juros ganhos.
-  const sobraMensalDif = aluguelMensal - parcelaBase;
+  //   Usa a parcela CHEIA (o redutor não muda a obrigação real da parcela).
+  const sobraMensalDif = aluguelMensal - parcelaCheia;
   const mesesPosDif = Math.max(0, prazo - expectativa);
   let stDiferenca;
   if (cdiMensal > 0 && mesesPosDif > 0) {
@@ -384,19 +394,23 @@ function calcularOperacao(op){
 
   // ── Lucro bruto de cada estratégia ──
   const lucroVenda       = stVenda - valorInvestidoAteCont;
-  const lucroImoveis     = stImoveis - totalPagoConsorcio;
+  const lucroImoveis     = stImoveis - totalPagoForLucro;
   const lucroImoveisCard = stImoveis;
   const lucroDiferenca   = stDiferenca;
-  const lucroPrevidencia = stPrevidencia - totalPagoConsorcio;
+  const lucroPrevidencia = stPrevidencia - totalPagoForLucro;
 
-  const opcoes = [
-    {key:'venda',       valor: stVenda,       lucro: lucroVenda,       aporteRf: valorInvestidoAteCont, prazoRf: expectativa},
-    {key:'imoveis',     valor: 0,             lucro: lucroImoveis,     aporteRf: totalPagoConsorcio,    prazoRf: prazo},
-    {key:'diferenca',   valor: 0,             lucro: lucroDiferenca,   aporteRf: valorInvestidoAteCont, prazoRf: expectativa},
-    {key:'previdencia', valor: stPrevidencia, lucro: lucroPrevidencia, aporteRf: totalPagoConsorcio,    prazoRf: prazo},
-  ];
-  let melhor = opcoes[0];
-  for(const o of opcoes) if(o.lucro > melhor.lucro) melhor = o;
+  // Seleção da estratégia — conferido no Conkey (7 cenários, erro 0,00):
+  //  • COM lance embutido (pE>0): a estratégia é sempre PREVIDÊNCIA EXPONENCIAL
+  //    (é o jogo do lance embutido — escolhida mesmo se o lucro for negativo).
+  //  • SEM lance embutido (pE=0): escolhe o maior lucro entre Venda e Diferença.
+  let melhor;
+  if (pE > 0) {
+    melhor = {key:'previdencia', valor: stPrevidencia, lucro: lucroPrevidencia, aporteRf: totalPagoConsorcio, prazoRf: prazo};
+  } else {
+    const opVenda     = {key:'venda',     valor: stVenda, lucro: lucroVenda,     aporteRf: valorInvestidoAteCont, prazoRf: expectativa};
+    const opDiferenca = {key:'diferenca', valor: 0,       lucro: lucroDiferenca, aporteRf: valorInvestidoAteCont, prazoRf: expectativa};
+    melhor = (opVenda.lucro >= opDiferenca.lucro) ? opVenda : opDiferenca;
+  }
 
   const estrategia = melhor.key;
   const valorVendaPrev = melhor.valor;
