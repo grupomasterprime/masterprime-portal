@@ -595,22 +595,19 @@ function renderOps(){
   document.getElementById('ft_retorno').textContent=fmtPct(totalAporte>0?(sum('lucroBruto')/totalAporte)*100:0,2);
   tfoot.classList.remove('hidden');
 
-  // Estratégias — card só mostra se LUCRO DE ESCOLHA é positivo (não pelo card_value isolado)
-  // Para Imóveis, lucro_escolha = stImoveis - totalPagoConsorcio (geralmente negativo)
-  // O VALOR mostrado no card de Imóveis = lucroImoveisCard (= stImoveis)
+  // Estratégias — conferido no Conkey: cada card recebe o lucro APENAS das
+  // operações cuja estratégia ESCOLHIDA é a daquele card. As demais ficam zeradas.
+  // O Patrimônio Total é a soma dos lucros das estratégias escolhidas.
   const totalPorEstr = {venda:0, imoveis:0, diferenca:0, previdencia:0};
   calcs.forEach(c => {
-    if(c.lucroVenda > 0)        totalPorEstr.venda += c.lucroVenda;
-    if(c.lucroImoveis > 0)      totalPorEstr.imoveis += c.lucroImoveisCard;  // mostra card_value, mas só se escolha é positiva
-    if(c.lucroDiferenca > 0)    totalPorEstr.diferenca += c.lucroDiferenca;
-    if(c.lucroPrevidencia > 0)  totalPorEstr.previdencia += c.lucroPrevidencia;
+    if (Object.prototype.hasOwnProperty.call(totalPorEstr, c.estrategia))
+      totalPorEstr[c.estrategia] += c.lucroBruto;
   });
-  const showEstr=(id,val)=>{document.getElementById(id).textContent=val>0?fmtMoney(val):'R$ -';};
+  const showEstr=(id,val)=>{document.getElementById(id).textContent=fmtMoney(val);};
   showEstr('stVenda',       totalPorEstr.venda);
   showEstr('stImoveis',     totalPorEstr.imoveis);
   showEstr('stDiferenca',   totalPorEstr.diferenca);
   showEstr('stPrevidencia', totalPorEstr.previdencia);
-  // Patrimônio Total = soma de TODOS os lucros positivos (não só a vencedora)
   const patrimonio = totalPorEstr.venda + totalPorEstr.imoveis + totalPorEstr.diferenca + totalPorEstr.previdencia;
   document.getElementById('stPatrimonio').textContent=fmtMoney(patrimonio);
 
