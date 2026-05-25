@@ -392,24 +392,31 @@ function calcularOperacao(op){
     stDiferenca = sobraMensalDif * mesesPosDif;
   }
 
-  // ── Lucro bruto de cada estratégia ──
-  const lucroVenda       = stVenda - valorInvestidoAteCont;
-  const lucroImoveis     = stImoveis - totalPagoForLucro;
-  const lucroImoveisCard = stImoveis;
-  const lucroDiferenca   = stDiferenca;
-  const lucroPrevidencia = stPrevidencia - totalPagoForLucro;
+  // ── Lucro de cada estratégia ──
+  // Venda e Previdência: lucro bruto = lucro líquido.
+  // Diferença (Aluguel): o "lucro bruto" exibido é o montante do fundo de
+  //   sobras (stDiferenca); o lucro LÍQUIDO desconta o principal aplicado
+  //   (Σ das sobras aluguel−parcela) — é ele que define o % de retorno.
+  //   Conferido no estado interno do Conkey (lucroLiquido / percentualRetorno).
+  const lucroVenda        = stVenda - valorInvestidoAteCont;
+  const lucroImoveis      = stImoveis - totalPagoForLucro;
+  const lucroImoveisCard  = stImoveis;
+  const lucroDiferenca    = stDiferenca;
+  const lucroPrevidencia  = stPrevidencia - totalPagoForLucro;
+  const sobraTotalDif     = sobraMensalDif * mesesPosDif;
+  const lucroLiqDiferenca = stDiferenca - sobraTotalDif;
 
   // Seleção da estratégia — conferido no Conkey (7 cenários, erro 0,00):
   //  • COM lance embutido (pE>0): a estratégia é sempre PREVIDÊNCIA EXPONENCIAL
   //    (é o jogo do lance embutido — escolhida mesmo se o lucro for negativo).
-  //  • SEM lance embutido (pE=0): escolhe o maior lucro entre Venda e Diferença.
+  //  • SEM lance embutido (pE=0): maior lucro líquido entre Venda e Diferença.
   let melhor;
   if (pE > 0) {
-    melhor = {key:'previdencia', valor: stPrevidencia, lucro: lucroPrevidencia, aporteRf: totalPagoConsorcio, prazoRf: prazo};
+    melhor = {key:'previdencia', valor: stPrevidencia, lucro: lucroPrevidencia, lucroLiq: lucroPrevidencia, aporteRf: totalPagoConsorcio, prazoRf: prazo};
   } else {
-    const opVenda     = {key:'venda',     valor: stVenda, lucro: lucroVenda,     aporteRf: valorInvestidoAteCont, prazoRf: expectativa};
-    const opDiferenca = {key:'diferenca', valor: 0,       lucro: lucroDiferenca, aporteRf: valorInvestidoAteCont, prazoRf: expectativa};
-    melhor = (opVenda.lucro >= opDiferenca.lucro) ? opVenda : opDiferenca;
+    const opVenda     = {key:'venda',     valor: stVenda, lucro: lucroVenda,     lucroLiq: lucroVenda,        aporteRf: valorInvestidoAteCont, prazoRf: expectativa};
+    const opDiferenca = {key:'diferenca', valor: 0,       lucro: lucroDiferenca, lucroLiq: lucroLiqDiferenca, aporteRf: valorInvestidoAteCont, prazoRf: expectativa};
+    melhor = (opVenda.lucroLiq >= opDiferenca.lucroLiq) ? opVenda : opDiferenca;
   }
 
   const estrategia = melhor.key;
@@ -418,8 +425,8 @@ function calcularOperacao(op){
   const aporteRf = melhor.aporteRf;
   const prazoRf = melhor.prazoRf;
 
-  // % Retorno = Lucro Bruto / Aporte (base da estratégia)
-  const retorno = aporteRf>0 ? (lucroBruto/aporteRf)*100 : 0;
+  // % Retorno = Lucro Líquido / Aporte (base da estratégia)
+  const retorno = aporteRf>0 ? (melhor.lucroLiq/aporteRf)*100 : 0;
 
   // RENDA FIXA equivalente — conferido exato (0,00000%):
   //   investe o lance próprio + a anuidade das parcelas num CDB que rende
