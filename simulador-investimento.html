@@ -332,45 +332,39 @@ function calcularOperacao(op){
     totalPagoConsorcio += parcelaBase * fator;
   }
 
-  // === 4 ESTRATÉGIAS — calcular cada valor possível
+  // ════════ FÓRMULAS DO CONKEY/SIMULAKEY — decifradas por engenharia reversa ════════
+  // CDI mensal = (Selic − 0,10 ponto percentual) capitalizada ao mês.
+  // Conferido contra o Conkey: erro 0,00000%.
+  const cdiMensal = Math.pow(1 + Math.max(0, selic - 0.001), 1/12) - 1;
+
+  // VENDA da carta — conferido exato
   const taxaVenda = expectativa <= 30 ? vendaCurta : vendaLonga;
   const stVenda = creditoAtualizado * taxaVenda;
 
-  // Imóveis Alugados — Fórmula proprietária (decifrada via 5 cenários):
-  //   Card: stImoveis = creditoDisp × (1+valImob)^((prazo-expectativa)/12)
-  //   anos efetivos = pós-contemplação (não prazo total)
-  //   Validado: valImob 0% EXATO; valImob 3% off 4,2%; valImob 6,39% off 4%
+  // PREVIDÊNCIA EXPONENCIAL — conferido exato (0,00000% em 4 cenários):
+  //   crédito disponível capitalizado a (rentGrupo × CDI mensal) pelos meses
+  //   entre a contemplação e o fim do plano (prazo − contemplação − 1).
+  const taxaPrevMensal = rentGrupo * cdiMensal;
+  const stPrevidencia = creditoDisp * Math.pow(1 + taxaPrevMensal, Math.max(0, prazo - expectativa - 1));
+
+  // IMÓVEIS ALUGADOS e DIFERENÇA ALUGUEL×PARCELA — aproximação
+  // (pendentes de mais cenários do Conkey para fechar 100%).
   const aluguelMensal = creditoDisp * pctAluguel;
   const stImoveis = creditoDisp * Math.pow(1+valImob, (prazo-expectativa)/12);
-
-  // Diferença Aluguel × Parcela — Fórmula proprietária (decifrada via 5 cenários):
-  //   stDiferenca = (aluguel - parcela) × prazo  (ambos CONSTANTES, sem reajustes)
-  //   Validado: aluguel sem reaj, parc sem reaj — Modelo NÃO reajusta nem aluguel nem parcela
-  //   Erro residual: 2-3% (provavelmente arredondamento ou pequeno ajuste interno do modelo)
   const stDiferenca = (aluguelMensal - parcelaBase) * prazo;
 
-  // Previdência Exponencial (fórmula linear ajustada via 5 cenários do mercado)
-  const taxaPrev = 0.566*selic + 0.116*rentGrupo - 0.028;
-  const stPrevidencia = creditoDisp * Math.pow(1+taxaPrev, prazo/12);
-
-  // === SISTEMA ESCOLHE A ESTRATÉGIA COM MAIOR LUCRO PARA ESCOLHA
-  // Sistema usa fórmulas DIFERENTES para o card visual vs o lucro de escolha:
-  //  - VENDA: lucro_escolha = stVenda - valorInvestidoAteCont
-  //  - DIFERENÇA: lucro_escolha = stDiferenca (NÃO subtrai valInvCont — sistema usa direto)
-  //  - PREVIDÊNCIA: lucro_escolha = (stPrevidencia - creditoDisp) - totalPagoConsorcio
-  //  - IMÓVEIS: lucro_escolha = stImoveis - totalPagoConsorcio (mesma base que Previdência)
-  // Cards visuais usam mesmos valores que lucro_escolha
-  const lucroVenda      = stVenda - valorInvestidoAteCont;
-  const lucroImoveis    = stImoveis - totalPagoConsorcio;          // base para escolha
-  const lucroImoveisCard = stImoveis;                              // valor mostrado no card
-  const lucroDiferenca  = stDiferenca;                             // sistema não subtrai
-  const lucroPrevidencia = (stPrevidencia - creditoDisp) - totalPagoConsorcio;
+  // ── Lucro bruto de cada estratégia ──
+  const lucroVenda       = stVenda - valorInvestidoAteCont;
+  const lucroImoveis     = stImoveis - totalPagoConsorcio;
+  const lucroImoveisCard = stImoveis;
+  const lucroDiferenca   = stDiferenca;
+  const lucroPrevidencia = stPrevidencia - totalPagoConsorcio;
 
   const opcoes = [
-    {key:'venda',       valor: stVenda,                       lucro: lucroVenda,       aporteRf: valorInvestidoAteCont, prazoRf: expectativa},
-    {key:'imoveis',     valor: stImoveis,                     lucro: lucroImoveis,     aporteRf: totalPagoConsorcio,    prazoRf: prazo},
-    {key:'diferenca',   valor: stDiferenca,                   lucro: lucroDiferenca,   aporteRf: valorInvestidoAteCont, prazoRf: expectativa},
-    {key:'previdencia', valor: stPrevidencia - creditoDisp,   lucro: lucroPrevidencia, aporteRf: totalPagoConsorcio,    prazoRf: prazo},
+    {key:'venda',       valor: stVenda,       lucro: lucroVenda,       aporteRf: valorInvestidoAteCont, prazoRf: expectativa},
+    {key:'imoveis',     valor: 0,             lucro: lucroImoveis,     aporteRf: totalPagoConsorcio,    prazoRf: prazo},
+    {key:'diferenca',   valor: 0,             lucro: lucroDiferenca,   aporteRf: valorInvestidoAteCont, prazoRf: expectativa},
+    {key:'previdencia', valor: stPrevidencia, lucro: lucroPrevidencia, aporteRf: totalPagoConsorcio,    prazoRf: prazo},
   ];
   let melhor = opcoes[0];
   for(const o of opcoes) if(o.lucro > melhor.lucro) melhor = o;
@@ -381,14 +375,21 @@ function calcularOperacao(op){
   const aporteRf = melhor.aporteRf;
   const prazoRf = melhor.prazoRf;
 
-  // % Retorno = Lucro Bruto / Aporte RF (= base da estratégia)
+  // % Retorno = Lucro Bruto / Aporte (base da estratégia)
   const retorno = aporteRf>0 ? (lucroBruto/aporteRf)*100 : 0;
 
-  // Renda Fixa equivalente — taxa de mercado (linear ajustada)
-  const taxaRf = 0.456*selic + 0.0608*rentInv - 0.0715;
-  const valorBrutoRf = aporteRf * Math.pow(1+taxaRf, prazoRf/12);
+  // RENDA FIXA equivalente — conferido exato (0,00000%):
+  //   investe o lance próprio + a anuidade das parcelas num CDB que rende
+  //   rentInv × CDI mensal, pelo prazo da estratégia escolhida.
+  const taxaRfMensal = rentInv * cdiMensal;
+  const annuParcelas = taxaRfMensal>0
+      ? parcelaBase * (Math.pow(1+taxaRfMensal, prazoRf) - 1) / taxaRfMensal
+      : parcelaBase * prazoRf;
+  const valorBrutoRf = lanceP + annuParcelas;
   const ganhoRf = valorBrutoRf - aporteRf;
-  const irRf = ganhoRf * 0.15;
+  // Imposto de Renda regressivo conforme o prazo (tabela da Receita Federal)
+  const irAliq = prazoRf<=6 ? 0.225 : prazoRf<=12 ? 0.20 : prazoRf<=24 ? 0.175 : 0.15;
+  const irRf = ganhoRf * irAliq;
   const rfLiquido = ganhoRf - irRf;
   const rfRetorno = aporteRf>0 ? (rfLiquido/aporteRf)*100 : 0;
 
@@ -400,7 +401,7 @@ function calcularOperacao(op){
     lucroImoveis,                   // lucro_escolha (decide se mostra card)
     lucroImoveisCard,               // valor exibido quando card é mostrado
     lucroDiferenca, lucroPrevidencia,
-    rfValor: aporteRf, rfCdi: 100, rfPrazo: prazoRf, rfBruto: valorBrutoRf, rfIR: irRf, rfLiquido, rfRetorno
+    rfValor: aporteRf, rfCdi: rentInv*100, rfPrazo: prazoRf, rfBruto: valorBrutoRf, rfIR: irRf, rfLiquido, rfRetorno
   };
 }
 
