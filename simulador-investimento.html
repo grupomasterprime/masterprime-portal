@@ -217,6 +217,10 @@
           <label>% Taxa de adesão <input type="checkbox" id="adesaoOn" style="margin-left:8px;"></label>
           <input type="text" id="adesao" placeholder="0,00 %" data-mask="pct2" disabled>
         </div>
+        <div class="field">
+          <label>Prazo da adesão (meses)</label>
+          <input type="text" id="adesaoMeses" placeholder="0" data-mask="int" disabled>
+        </div>
       </div>
     </div>
 
@@ -318,19 +322,26 @@ function calcularOperacao(op){
   const lanceP=creditoAtualizado*pP, lanceE=creditoAtualizado*pE;
   const creditoDisp=creditoAtualizado-lanceE;
 
-  // Valor Investido até Contemplação (com reajuste no mês de aniversário)
-  let valorInvestidoAteCont = lanceP;
-  for(let m = 1; m <= expectativa; m++) {
-    const fator = Math.pow(1+reajuste, Math.floor(m/12));
-    valorInvestidoAteCont += parcelaBase * fator;
-  }
+  // SEGURO e ADESÃO — conferido no Conkey:
+  //   seguro: a parcela aumenta em (% seguro × valor devido) — todos os meses.
+  //   adesão: a parcela aumenta em (% adesão × crédito ÷ prazo da adesão),
+  //           apenas durante os primeiros "prazo da adesão" meses.
+  const seguroMensal = op.seguroOn ? (unmaskPct(op.seguro)/100) * totalDevido : 0;
+  const prazoAdesao  = op.adesaoOn ? (parseInt(op.adesaoMeses||'0',10) || prazo) : 0;
+  const adesaoMensal = (op.adesaoOn && prazoAdesao>0) ? (unmaskPct(op.adesao)/100) * credito / prazoAdesao : 0;
+  // Parcela de um mês m: base reajustada no aniversário + seguro + parcela de adesão.
+  const parcelaMes = m => parcelaBase*Math.pow(1+reajuste, Math.floor(m/12))
+                          + seguroMensal
+                          + (m <= prazoAdesao ? adesaoMensal : 0);
+  const parcelaInicial = parcelaMes(1);
 
-  // Total Pago no Consórcio (Σ todas as parcelas + lance, com reajustes anuais)
+  // Valor Investido até Contemplação
+  let valorInvestidoAteCont = lanceP;
+  for(let m = 1; m <= expectativa; m++) valorInvestidoAteCont += parcelaMes(m);
+
+  // Total Pago no Consórcio (Σ todas as parcelas + lance)
   let totalPagoConsorcio = lanceP;
-  for(let m = 1; m <= prazo; m++) {
-    const fator = Math.pow(1+reajuste, Math.floor(m/12));
-    totalPagoConsorcio += parcelaBase * fator;
-  }
+  for(let m = 1; m <= prazo; m++) totalPagoConsorcio += parcelaMes(m);
 
   // ════════ FÓRMULAS DO CONKEY/SIMULAKEY — decifradas por engenharia reversa ════════
   // CDI mensal = (Selic − 0,10 ponto percentual) capitalizada ao mês.
@@ -347,11 +358,25 @@ function calcularOperacao(op){
   const taxaPrevMensal = rentGrupo * cdiMensal;
   const stPrevidencia = creditoDisp * Math.pow(1 + taxaPrevMensal, Math.max(0, prazo - expectativa - 1));
 
-  // IMÓVEIS ALUGADOS e DIFERENÇA ALUGUEL×PARCELA — aproximação
-  // (pendentes de mais cenários do Conkey para fechar 100%).
+  // IMÓVEIS ALUGADOS — conferido exato: crédito disponível valorizado pelos
+  //   anos entre a contemplação e o fim do plano.
   const aluguelMensal = creditoDisp * pctAluguel;
   const stImoveis = creditoDisp * Math.pow(1+valImob, (prazo-expectativa)/12);
-  const stDiferenca = (aluguelMensal - parcelaBase) * prazo;
+
+  // DIFERENÇA ALUGUEL × PARCELA — conferido exato (0,00000%):
+  //   anuidade da sobra (aluguel − parcela) capitalizada ao CDI mensal pelos
+  //   meses pós-contemplação, menos IR regressivo sobre os juros ganhos.
+  const sobraMensalDif = aluguelMensal - parcelaBase;
+  const mesesPosDif = Math.max(0, prazo - expectativa);
+  let stDiferenca;
+  if (cdiMensal > 0 && mesesPosDif > 0) {
+    const fvDif = sobraMensalDif * (Math.pow(1+cdiMensal, mesesPosDif) - 1) / cdiMensal;
+    const jurosDif = fvDif - sobraMensalDif * mesesPosDif;
+    const irDif = mesesPosDif<=6 ? 0.225 : mesesPosDif<=12 ? 0.20 : mesesPosDif<=24 ? 0.175 : 0.15;
+    stDiferenca = fvDif - Math.max(0, jurosDif) * irDif;
+  } else {
+    stDiferenca = sobraMensalDif * mesesPosDif;
+  }
 
   // ── Lucro bruto de cada estratégia ──
   const lucroVenda       = stVenda - valorInvestidoAteCont;
@@ -382,9 +407,10 @@ function calcularOperacao(op){
   //   investe o lance próprio + a anuidade das parcelas num CDB que rende
   //   rentInv × CDI mensal, pelo prazo da estratégia escolhida.
   const taxaRfMensal = rentInv * cdiMensal;
-  const annuParcelas = taxaRfMensal>0
-      ? parcelaBase * (Math.pow(1+taxaRfMensal, prazoRf) - 1) / taxaRfMensal
-      : parcelaBase * prazoRf;
+  // SIP equivalente: cada parcela investida no CDB cresce até o fim do prazo.
+  let annuParcelas = 0;
+  for(let m = 1; m <= prazoRf; m++)
+    annuParcelas += parcelaMes(m) * Math.pow(1+taxaRfMensal, prazoRf - m);
   const valorBrutoRf = lanceP + annuParcelas;
   const ganhoRf = valorBrutoRf - aporteRf;
   // Imposto de Renda regressivo conforme o prazo (tabela da Receita Federal)
@@ -394,7 +420,7 @@ function calcularOperacao(op){
   const rfRetorno = aporteRf>0 ? (rfLiquido/aporteRf)*100 : 0;
 
   return {
-    credito, parcelaBase, expectativa, contemplacao: op.tipoCont, creditoDisp, valorInvestidoAteCont, valorVendaPrev,
+    credito, parcelaBase: parcelaInicial, expectativa, contemplacao: op.tipoCont, creditoDisp, valorInvestidoAteCont, valorVendaPrev,
     lucroBruto, retorno, estrategia, totalPagoConsorcio,
     // Lucros individuais para os cards: visível só quando lucro_escolha > 0
     lucroVenda,
@@ -419,6 +445,7 @@ function snapshotForm(){
     redutor: document.getElementById('redutor').value,
     adesaoOn: document.getElementById('adesaoOn').checked,
     adesao: document.getElementById('adesao').value,
+    adesaoMeses: document.getElementById('adesaoMeses').value,
     expectativa: document.getElementById('expectativa').value,
     tipoCont: document.getElementById('tipoCont').value,
     tipoLance: document.getElementById('tipoLance').value,
@@ -445,7 +472,7 @@ function loadIntoForm(op){
 }
 
 function clearForm(){
-  ['credito','prazo','taxaAdm','fundo','reajuste','lanceP','lanceE','seguro','redutor','adesao'].forEach(id=>document.getElementById(id).value='');
+  ['credito','prazo','taxaAdm','fundo','reajuste','lanceP','lanceE','seguro','redutor','adesao','adesaoMeses'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('expectativa').value='1';
   document.getElementById('tipoCont').value='sorteio';
   document.getElementById('tipoReajuste').value='';
@@ -456,12 +483,14 @@ function clearForm(){
 }
 
 function wireToggles(root){
-  const map = {'seguroOn':'seguro','redutorOn':'redutor','adesaoOn':'adesao'};
-  for(const [chk, inp] of Object.entries(map)) {
-    const c = document.getElementById(chk), i = document.getElementById(inp);
-    if(!c || !i || c.dataset.wt) continue;
+  const map = {'seguroOn':['seguro'],'redutorOn':['redutor'],'adesaoOn':['adesao','adesaoMeses']};
+  for(const [chk, inps] of Object.entries(map)) {
+    const c = document.getElementById(chk);
+    if(!c || c.dataset.wt) continue;
+    const els = inps.map(id=>document.getElementById(id)).filter(Boolean);
+    if(!els.length) continue;
     c.dataset.wt='1';
-    const sync = () => { i.disabled = !c.checked; if(!c.checked) i.value=''; };
+    const sync = () => els.forEach(i=>{ i.disabled = !c.checked; if(!c.checked) i.value=''; });
     c.addEventListener('change', sync); sync();
   }
   const lP = document.getElementById('lanceP'), lE = document.getElementById('lanceE'), lT = document.getElementById('lanceTotalCalc');
