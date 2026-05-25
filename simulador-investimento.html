@@ -329,10 +329,14 @@ function calcularOperacao(op){
   const seguroMensal = op.seguroOn ? (unmaskPct(op.seguro)/100) * totalDevido : 0;
   const prazoAdesao  = op.adesaoOn ? (parseInt(op.adesaoMeses||'0',10) || prazo) : 0;
   const adesaoMensal = (op.adesaoOn && prazoAdesao>0) ? (unmaskPct(op.adesao)/100) * credito / prazoAdesao : 0;
-  // Parcela de um mês m: base reajustada no aniversário + seguro + parcela de adesão.
+  // LANCE EMBUTIDO — conferido no Conkey: o lance embutido amortiza o saldo na
+  //   contemplação, reduzindo cada parcela posterior em (% embutido × valor devido ÷ prazo).
+  const embutidoReducaoMensal = prazo>0 ? (pE * totalDevido) / prazo : 0;
+  // Parcela de um mês m: base reajustada + seguro + adesão − redução do embutido (pós-contemplação).
   const parcelaMes = m => parcelaBase*Math.pow(1+reajuste, Math.floor(m/12))
                           + seguroMensal
-                          + (m <= prazoAdesao ? adesaoMensal : 0);
+                          + (m <= prazoAdesao ? adesaoMensal : 0)
+                          - (m > expectativa ? embutidoReducaoMensal : 0);
   const parcelaInicial = parcelaMes(1);
 
   // Valor Investido até Contemplação
