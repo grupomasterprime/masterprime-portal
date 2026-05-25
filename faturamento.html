@@ -98,6 +98,29 @@ select.login-input { cursor: pointer; }
 .fat-hero-side { position:relative; z-index:1; display:flex; flex-direction:column; gap:8px; align-items:flex-end; }
 .fat-hero-tag { display:inline-flex; align-items:center; gap:5px; padding:4px 10px; border-radius:999px; background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.18); font-size:10.5px; font-weight:500; color:#fff; }
 
+/* ─── Sininho de notificações ─── */
+.fat-notif { position:relative; }
+.fat-notif-btn { position:relative; display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; padding:0; border-radius:9px; border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.10); color:#fff; cursor:pointer; transition:background .15s; }
+.fat-notif-btn:hover { background:rgba(255,255,255,.22); }
+.fat-notif-btn svg { width:17px; height:17px; stroke:currentColor; fill:none; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.fat-notif-badge { position:absolute; top:-5px; right:-5px; min-width:17px; height:17px; padding:0 4px; border-radius:9px; background:#DC2626; color:#fff; font-size:9.5px; font-weight:700; display:flex; align-items:center; justify-content:center; line-height:1; box-shadow:0 0 0 2px var(--mp-navy); }
+.fat-notif-panel { position:fixed; z-index:4000; width:340px; max-width:calc(100vw - 24px); max-height:420px; background:#fff; border-radius:12px; box-shadow:0 16px 44px rgba(15,23,42,.30); overflow:hidden; display:none; flex-direction:column; }
+.fat-notif-panel.aberto { display:flex; }
+.fat-notif-head { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:12px 14px; border-bottom:1px solid var(--border); flex-shrink:0; }
+.fat-notif-head-titulo { font-size:13px; font-weight:600; color:var(--text); }
+.fat-notif-marcar { font-size:10.5px; font-weight:600; color:var(--mp-teal); background:none; border:none; cursor:pointer; padding:2px 4px; font-family:'Inter',sans-serif; }
+.fat-notif-marcar:hover { text-decoration:underline; }
+.fat-notif-lista { overflow-y:auto; }
+.fat-notif-item { display:block; width:100%; text-align:left; padding:11px 14px; border:none; border-bottom:1px solid #F1F5F9; background:#fff; cursor:pointer; transition:background .12s; font-family:'Inter',sans-serif; }
+.fat-notif-item:hover { background:#F8FAFC; }
+.fat-notif-item.nao-lida { background:#F4F8FF; }
+.fat-notif-item.nao-lida:hover { background:#EAF1FF; }
+.fat-notif-item-titulo { font-size:12px; font-weight:600; color:var(--text); display:flex; align-items:center; gap:6px; }
+.fat-notif-item.nao-lida .fat-notif-item-titulo::before { content:''; width:6px; height:6px; border-radius:50%; background:var(--blue); flex-shrink:0; }
+.fat-notif-item-texto { font-size:11px; color:var(--text2); margin-top:2px; }
+.fat-notif-item-hora { font-size:10px; color:var(--text3); margin-top:3px; }
+.fat-notif-vazio { padding:24px 14px; text-align:center; font-size:11.5px; color:var(--text3); }
+
 .fat-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 18px; }
 .fat-stat { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; display:flex; gap:10px; align-items:center; transition:all .15s; }
 .fat-stat:hover { border-color:var(--border2); }
@@ -259,14 +282,31 @@ select.login-input { cursor: pointer; }
       <p id="fat-subtitulo" style="font-size:13px;color:rgba(255,255,255,.78);line-height:1.55;max-width:560px;margin:0;">Acompanhe os processos enviados pelos clientes e atualize protocolo, status e documentos.</p>
     </div>
     <div class="fat-hero-side">
-      <span class="fat-hero-tag">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        Faturamento
-      </span>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div class="fat-notif">
+          <button class="fat-notif-btn" id="fat-notif-btn" onclick="fatToggleNotif(event)" title="Notificações" aria-label="Notificações">
+            <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            <span class="fat-notif-badge" id="fat-notif-badge" style="display:none">0</span>
+          </button>
+        </div>
+        <span class="fat-hero-tag">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Faturamento
+        </span>
+      </div>
       <button class="btn btn-sm" style="background:#fff;color:var(--mp-navy);border:none;font-weight:700;" onclick="fatCopiarLinkFixo()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px;"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
         Copiar link do cliente
       </button>
+      <div class="fat-notif-panel" id="fat-notif-panel">
+        <div class="fat-notif-head">
+          <span class="fat-notif-head-titulo">Notificações</span>
+          <button class="fat-notif-marcar" onclick="fatMarcarTodasLidas(event)">Marcar todas como lidas</button>
+        </div>
+        <div class="fat-notif-lista" id="fat-notif-lista">
+          <div class="fat-notif-vazio">Carregando...</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1018,6 +1058,7 @@ async function fatSalvarProtocolo(processoId) {
     observacao: `Protocolo ${novoProtocolo}`,
     autor: currentUser?.nome || 'admin'
   });
+  fatNotificar(processoId, 'Protocolo atribuído', `${fatNomeCliente(processoId)} · ${novoProtocolo}`);
   await fatVerProcesso(processoId);
   await renderAdminFaturamento();
 }
@@ -1058,6 +1099,7 @@ async function fatSalvarDadosProcesso(processoId) {
 
   const { error } = await sb.from('portal_processos').update(updates).eq('id', processoId);
   if (error) { alert('Erro ao salvar dados: ' + error.message); return; }
+  fatNotificar(processoId, 'Dados do processo atualizados', nome);
   await fatVerProcesso(processoId);
   await renderAdminFaturamento();
 }
@@ -1078,6 +1120,7 @@ async function fatAtualizarStatus(processoId) {
     autor: currentUser?.nome || 'admin'
   });
 
+  fatNotificar(processoId, 'Status atualizado', `${fatNomeCliente(processoId)} · ${novoStatus}`);
   await fatVerProcesso(processoId);
   await renderAdminFaturamento();
 }
@@ -1144,6 +1187,7 @@ async function fatNotificarCliente(processoId) {
       if (feedbackEl) feedbackEl.innerHTML = '<span style="color:var(--green);">Status atualizado e cliente notificado por e-mail.</span>';
     }
 
+    fatNotificar(processoId, 'Status atualizado', `${fatNomeCliente(processoId)} · ${novoStatus}`);
     await fatVerProcesso(processoId);
     await renderAdminFaturamento();
   } catch (e) {
@@ -1172,6 +1216,7 @@ async function fatAtribuirConsultor(processoId) {
     autor: currentUser?.nome || 'admin'
   });
 
+  fatNotificar(processoId, 'Processo atribuído', consultorNome ? `${fatNomeCliente(processoId)} → ${consultorNome}` : fatNomeCliente(processoId));
   await fatVerProcesso(processoId);
   await renderAdminFaturamento();
 }
@@ -1187,11 +1232,13 @@ async function fatEnviarMsg(processoId) {
   });
   if (error) { alert('Erro: ' + error.message); return; }
   campo.value = '';
+  fatNotificar(processoId, 'Nova mensagem', fatNomeCliente(processoId));
   await fatVerProcesso(processoId);
 }
 
 async function fatUploadArquivos(processoId, token, input) {
   const categoria = document.getElementById(`fat-categoria-upload-${processoId}`)?.value || null;
+  let fatEnviados = 0;
   for (const arquivo of Array.from(input.files)) {
     if (arquivo.size > 16*1024*1024) { alert(`${arquivo.name} muito grande`); continue; }
     const path = `${token}/${Date.now()}_${arquivo.name}`;
@@ -1203,8 +1250,10 @@ async function fatUploadArquivos(processoId, token, input) {
       storage_path: path,
       categoria: categoria
     });
+    fatEnviados++;
   }
   input.value = '';
+  if (fatEnviados) fatNotificar(processoId, 'Novo documento', fatNomeCliente(processoId));
   await fatVerProcesso(processoId);
 }
 
@@ -1295,6 +1344,143 @@ async function fatGerarProtocolo() {
   return `${prefixo}${proximo}`;
 }
 
+// ══════════════════════════════════════════════════════════════════════════
+//  SININHO DE NOTIFICAÇÕES — Faturamento / Meus Processos
+//  Lê portal_notificacoes (RLS restringe ao usuário atual). Atualiza ao abrir
+//  a tela, a cada 60s e ao abrir o sininho. Clicar abre o processo.
+// ══════════════════════════════════════════════════════════════════════════
+let _fatNotificacoes = [];
+let _fatNotifInterval = null;
+
+function fatTempoRelativo(iso) {
+  if (!iso) return '';
+  const diff = Date.now() - new Date(iso).getTime();
+  const min = Math.floor(diff / 60000);
+  if (min < 1) return 'agora';
+  if (min < 60) return 'há ' + min + ' min';
+  const h = Math.floor(min / 60);
+  if (h < 24) return 'há ' + h + 'h';
+  const d = Math.floor(h / 24);
+  if (d < 30) return 'há ' + d + (d === 1 ? ' dia' : ' dias');
+  return new Date(iso).toLocaleDateString('pt-BR');
+}
+
+function fatNomeCliente(processoId) {
+  const p = fatProcessos.find(x => String(x.id) === String(processoId));
+  return (p && p.nome) || 'Processo';
+}
+
+// Dispara a RPC notificar_processo. Nunca quebra o fluxo principal.
+function fatNotificar(processoId, titulo, texto) {
+  if (!processoId) return;
+  try {
+    sb.rpc('notificar_processo', {
+      p_processo_id: processoId,
+      p_titulo: titulo,
+      p_texto: texto || null
+    }).then(function(){}, function(){});
+  } catch (e) { /* silencioso */ }
+}
+
+async function fatCarregarNotificacoes() {
+  if (!sb) return;
+  try {
+    const { data, error } = await sb
+      .from('portal_notificacoes')
+      .select('*')
+      .order('criado', { ascending: false })
+      .limit(30);
+    if (error) return;
+    _fatNotificacoes = data || [];
+    fatRenderNotificacoes();
+  } catch (e) { /* silencioso — sininho nunca quebra a tela */ }
+}
+
+function fatRenderNotificacoes() {
+  const badge = document.getElementById('fat-notif-badge');
+  const lista = document.getElementById('fat-notif-lista');
+  const naoLidas = _fatNotificacoes.filter(n => !n.lido).length;
+  if (badge) {
+    badge.textContent = naoLidas > 99 ? '99+' : String(naoLidas);
+    badge.style.display = naoLidas > 0 ? 'flex' : 'none';
+  }
+  if (!lista) return;
+  if (!_fatNotificacoes.length) {
+    lista.innerHTML = '<div class="fat-notif-vazio">Nenhuma notificação ainda.</div>';
+    return;
+  }
+  lista.innerHTML = _fatNotificacoes.map(n => `
+    <button class="fat-notif-item ${n.lido ? '' : 'nao-lida'}" onclick="fatAbrirNotificacao('${esc(String(n.id))}')">
+      <div class="fat-notif-item-titulo">${esc(n.titulo || '')}</div>
+      ${n.texto ? `<div class="fat-notif-item-texto">${esc(n.texto)}</div>` : ''}
+      <div class="fat-notif-item-hora">${esc(fatTempoRelativo(n.criado))}</div>
+    </button>
+  `).join('');
+}
+
+function fatToggleNotif(ev) {
+  if (ev) ev.stopPropagation();
+  const panel = document.getElementById('fat-notif-panel');
+  const btn = document.getElementById('fat-notif-btn');
+  if (!panel || !btn) return;
+  const abrindo = !panel.classList.contains('aberto');
+  if (abrindo) {
+    const r = btn.getBoundingClientRect();
+    panel.style.top = (r.bottom + 8) + 'px';
+    let right = window.innerWidth - r.right;
+    if (right < 12) right = 12;
+    panel.style.right = right + 'px';
+    fatCarregarNotificacoes();
+  }
+  panel.classList.toggle('aberto', abrindo);
+}
+
+function fatFecharNotif() {
+  const panel = document.getElementById('fat-notif-panel');
+  if (panel) panel.classList.remove('aberto');
+}
+
+async function fatAbrirNotificacao(id) {
+  const notif = _fatNotificacoes.find(n => String(n.id) === String(id));
+  if (!notif) return;
+  if (!notif.lido) {
+    notif.lido = true;
+    fatRenderNotificacoes();
+    try { await sb.from('portal_notificacoes').update({ lido: true }).eq('id', id); }
+    catch (e) { /* segue mesmo se falhar */ }
+  }
+  fatFecharNotif();
+  if (notif.processo_id) {
+    try { await fatVerProcesso(notif.processo_id); } catch (e) {}
+  }
+}
+
+async function fatMarcarTodasLidas(ev) {
+  if (ev) ev.stopPropagation();
+  const ids = _fatNotificacoes.filter(n => !n.lido).map(n => n.id);
+  if (!ids.length) return;
+  _fatNotificacoes.forEach(n => { n.lido = true; });
+  fatRenderNotificacoes();
+  try { await sb.from('portal_notificacoes').update({ lido: true }).in('id', ids); }
+  catch (e) { /* segue mesmo se falhar */ }
+}
+
+function fatIniciarNotificacoes() {
+  fatCarregarNotificacoes();
+  if (_fatNotifInterval) clearInterval(_fatNotifInterval);
+  _fatNotifInterval = setInterval(fatCarregarNotificacoes, 60000);
+}
+
+// Fecha o painel ao clicar fora dele.
+document.addEventListener('click', function(ev) {
+  const panel = document.getElementById('fat-notif-panel');
+  const wrap = document.querySelector('.fat-notif');
+  if (panel && panel.classList.contains('aberto')
+      && wrap && !wrap.contains(ev.target) && !panel.contains(ev.target)) {
+    fatFecharNotif();
+  }
+});
+
 (async function init() {
   try {
     const { data: sess } = await sb.auth.getSession();
@@ -1312,6 +1498,7 @@ async function fatGerarProtocolo() {
     document.getElementById('fat-loading').style.display = 'none';
     document.getElementById('fat-app').style.display = 'block';
     await renderAdminFaturamento();
+    fatIniciarNotificacoes();
   } catch (e) {
     document.getElementById('fat-loading').innerHTML = `<div style="color:var(--red);font-size:13px;">Erro ao carregar: ${(e.message||e)}</div>`;
   }

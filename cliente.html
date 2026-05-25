@@ -518,6 +518,20 @@ function gerarTokenSeguro() {
   return Array.from(array).map(b => b.toString(16).padStart(2,'0')).join('');
 }
 
+// ─── Notificações (sininho) — avisa a equipe interna do Faturamento ───
+// Contexto anônimo: a RPC notificar_processo_token avisa todos os admins/master
+// + o consultor atribuído ao processo. Nunca quebra o fluxo do cliente.
+function clienteNotificar(token, titulo, texto) {
+  if (!token) return;
+  try {
+    sb.rpc('notificar_processo_token', {
+      p_token: token,
+      p_titulo: titulo,
+      p_texto: texto || null
+    }).then(function(){}, function(){});
+  } catch (e) { /* silencioso */ }
+}
+
 // ════════════════ NOTIFICAÇÃO ════════════════
 function mostrarNotif(msg, tipo='ok') {
   const n = document.createElement('div');
@@ -1445,6 +1459,7 @@ async function enviarCadastro(){
     }
 
     arquivosPendentes = {};
+    clienteNotificar(novoT, 'Novo processo recebido', nome);
     renderTelaSucesso(novoT, cpf);
   } catch(e){
     alerta('alerta-cadastro', 'Erro ao enviar: '+e.message, 'erro');
@@ -1816,6 +1831,7 @@ async function enviarMensagem(){
 
   textarea.value = '';
   textarea.focus();
+  clienteNotificar(processoAtual && processoAtual.token, 'Nova mensagem do cliente', (processoAtual && processoAtual.nome) || '');
   await carregarMensagens();
 }
 
