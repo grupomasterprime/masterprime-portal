@@ -1351,6 +1351,7 @@ async function fatGerarProtocolo() {
 // ══════════════════════════════════════════════════════════════════════════
 let _fatNotificacoes = [];
 let _fatNotifInterval = null;
+let _fatNotifCanal = null;
 
 function fatTempoRelativo(iso) {
   if (!iso) return '';
@@ -1465,8 +1466,28 @@ async function fatMarcarTodasLidas(ev) {
   catch (e) { /* segue mesmo se falhar */ }
 }
 
+// Assinatura em tempo real: recarrega o sininho na hora quando chega
+// uma notificação nova para o usuário atual (sem esperar o polling).
+function fatAssinarNotificacoesRealtime() {
+  if (!sb || !currentUser || !currentUser.auth_id) return;
+  try {
+    if (_fatNotifCanal) sb.removeChannel(_fatNotifCanal);
+    _fatNotifCanal = sb
+      .channel('notif-' + currentUser.auth_id)
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'portal_notificacoes',
+        filter: 'destinatario=eq.' + currentUser.auth_id
+      }, function() { fatCarregarNotificacoes(); })
+      .subscribe();
+  } catch (e) { /* tempo real nunca quebra a tela; o polling de 60s cobre */ }
+}
+
 function fatIniciarNotificacoes() {
   fatCarregarNotificacoes();
+  fatAssinarNotificacoesRealtime();
+  // Rede de segurança: se a conexão de tempo real cair, o polling garante a atualização.
   if (_fatNotifInterval) clearInterval(_fatNotifInterval);
   _fatNotifInterval = setInterval(fatCarregarNotificacoes, 60000);
 }
