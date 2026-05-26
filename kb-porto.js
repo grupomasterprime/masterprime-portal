@@ -84,10 +84,19 @@ window.KB_ADMIN["porto"] = {
       "categoria_key": "fundamentos",
       "categoria_label": "Entendendo o consórcio",
       "categoria_ordem": 2,
+      "titulo": "Quantas pessoas formam um grupo na Porto?",
+      "conteudo": "O tamanho do grupo varia conforme o tipo de bem:\n\n• Grupos de imóvel: até 900 participantes.\n• Grupos de automóvel e pesados: até 600 participantes.\n\nQuanto maior o grupo, mais cotas concorrem — e o recurso arrecadado define quantas contemplações acontecem em cada assembleia.",
+      "tags": "grupo, participantes, quantas pessoas, tamanho",
+      "ordem": 4
+    },
+    {
+      "categoria_key": "fundamentos",
+      "categoria_label": "Entendendo o consórcio",
+      "categoria_ordem": 2,
       "titulo": "O que é o Fundo Comum?",
       "conteudo": "O Fundo Comum é o dinheiro reunido pelas parcelas dos consorciados, destinado às contemplações — é dele que sai o crédito de quem é contemplado e a devolução de quem sai do grupo.",
       "tags": "fundo comum, caixa",
-      "ordem": 4
+      "ordem": 5
     },
     {
       "categoria_key": "fundamentos",
@@ -96,7 +105,7 @@ window.KB_ADMIN["porto"] = {
       "titulo": "O que é o Fundo de Reserva?",
       "conteudo": "O Fundo de Reserva é uma parte da parcela mensal usada para capitalizar o grupo e cobrir eventualidades — como insuficiência de recursos para uma contemplação ou inadimplência de contemplados.",
       "tags": "fundo de reserva, segurança",
-      "ordem": 5
+      "ordem": 6
     },
     {
       "categoria_key": "fundamentos",
@@ -105,7 +114,7 @@ window.KB_ADMIN["porto"] = {
       "titulo": "O que é a Taxa de Administração?",
       "conteudo": "É a remuneração da Porto pela formação, organização e gestão do grupo. É fixada na proposta e não pode ser alterada durante o grupo (pode ser diferente entre participantes).\n\nParte da taxa pode ser cobrada antecipadamente na adesão — à vista ou diluída nas parcelas. É a taxa de administração que substitui os juros do financiamento.",
       "tags": "taxa de administração, remuneração",
-      "ordem": 6
+      "ordem": 7
     },
     {
       "categoria_key": "fundamentos",
@@ -114,16 +123,16 @@ window.KB_ADMIN["porto"] = {
       "titulo": "Do que é composta a parcela mensal?",
       "conteudo": "A parcela mensal é a soma de fundo comum, fundo de reserva, taxa de administração e seguro prestamista (se contratado), além de eventuais encargos.\n\nAlguns grupos têm redutor de parcela: um percentual que reduz a parcela até a contemplação. Depois da contemplação, a parcela é recalculada com base no saldo devedor total.",
       "tags": "parcela, composição, redutor",
-      "ordem": 7
+      "ordem": 8
     },
     {
       "categoria_key": "fundamentos",
       "categoria_label": "Entendendo o consórcio",
       "categoria_ordem": 2,
       "titulo": "Como as parcelas são reajustadas?",
-      "conteudo": "O reajuste mantém o poder de compra do crédito:\n\n• Automóveis e pesados: pelo IPCA acumulado de 12 meses. O 1º reajuste ocorre no 13º mês a contar da assembleia inaugural; depois, a cada 12 meses.\n• Imóveis: anualmente pelo INCC (Índice Nacional do Custo da Construção).\n• Planos DATA CERTA: índice fixo de 3% ao ano.",
+      "conteudo": "O reajuste mantém o poder de compra do crédito:\n\n• Automóveis e pesados: pelo IPCA acumulado de 12 meses. O 1º reajuste ocorre no 13º mês a contar da assembleia inaugural; depois, a cada 12 meses.\n• Imóveis: anualmente, pela média entre o IPCA e o INCC (Índice Nacional do Custo da Construção).\n• Planos DATA CERTA: índice fixo de 3% ao ano.",
       "tags": "reajuste, ipca, incc, correção",
-      "ordem": 8
+      "ordem": 9
     },
     {
       "categoria_key": "fundamentos",
@@ -132,7 +141,7 @@ window.KB_ADMIN["porto"] = {
       "titulo": "O que é a assembleia (AGO)?",
       "conteudo": "A Assembleia Geral Ordinária (AGO) é a reunião mensal do grupo, onde acontecem as contemplações por sorteio e por lance. No sistema novo, a assembleia é transmitida às 15h.\n\nO resultado fica disponível no site portoconsorcio.com.br, no aplicativo e na URA (telefone).",
       "tags": "assembleia, ago, mensal",
-      "ordem": 9
+      "ordem": 10
     },
     {
       "categoria_key": "argumentos",
@@ -189,6 +198,42 @@ window.KB_ADMIN["porto"] = {
       "ordem": 6
     },
     {
+      "categoria_key": "argumentos",
+      "categoria_label": "Por que vender consórcio",
+      "categoria_ordem": 3,
+      "titulo": "Objeção: o cliente tem receio de não conseguir pagar as parcelas",
+      "conteudo": "Ajude o cliente a enxergar que conquistar algo importante envolve escolhas e prioridades — e que o consórcio é flexível diante de imprevistos.\n\nEnquanto não foi contemplado, o cliente pode ajustar o valor da carta de crédito para uma parcela que caiba no orçamento (sujeito à análise de viabilidade da Porto). Atenção: depois da contemplação não é possível alterar o valor da carta. Se ele já estiver contemplado e não conseguir arcar com a parcela, ainda há a opção de transferir a cota para outro titular, sujeita à aprovação da administradora.",
+      "tags": "objeção, parcela, receio, pagar",
+      "ordem": 7
+    },
+    {
+      "categoria_key": "argumentos",
+      "categoria_label": "Por que vender consórcio",
+      "categoria_ordem": 3,
+      "titulo": "Objeção: o cliente acha o consórcio um produto complexo",
+      "conteudo": "O consórcio tem uma lei própria e é regulado pelo Banco Central — e a melhor resposta para essa objeção é o domínio do produto. Um consultor que conhece bem o consórcio transmite segurança e vira a principal fonte de esclarecimento do cliente.\n\nExplique o funcionamento em linguagem simples, use o simulador para mostrar números concretos e divida a informação em partes. Quanto mais claro o consultor for, menos \"complexo\" o produto parece.",
+      "tags": "objeção, complexo, dúvidas, produto",
+      "ordem": 8
+    },
+    {
+      "categoria_key": "argumentos",
+      "categoria_label": "Por que vender consórcio",
+      "categoria_ordem": 3,
+      "titulo": "Objeção: o cliente acha a taxa de administração alta",
+      "conteudo": "A taxa de administração é a remuneração da Porto por formar, organizar e administrar o grupo durante todo o contrato. O ponto-chave é mostrar que ela é diluída ao longo do prazo do grupo — ou seja, é paga aos poucos.\n\nApresente o percentual total da taxa, mas mostre também quanto isso representa diluído por mês. Visto mês a mês, o custo se revela bem menor — e ainda compara muito bem com os juros de um financiamento, que o consórcio não tem.",
+      "tags": "objeção, taxa de administração, custo",
+      "ordem": 9
+    },
+    {
+      "categoria_key": "argumentos",
+      "categoria_label": "Por que vender consórcio",
+      "categoria_ordem": 3,
+      "titulo": "Objeção: o cliente prefere uma opção em que o dinheiro está disponível na hora",
+      "conteudo": "Mostre que o consórcio também pode ser um caminho econômico, especialmente quando o bem gera renda — por exemplo, comprar um imóvel para alugar ou renovar a frota de uma empresa para ganhar eficiência.\n\nE lembre que o crédito do consórcio pode até ser retirado em espécie, desde que o cliente cumpra três critérios do Banco Central: estar contemplado, ter quitado todo o saldo devedor e aguardar 180 dias da data da contemplação.",
+      "tags": "objeção, dinheiro na hora, renda, espécie",
+      "ordem": 10
+    },
+    {
       "categoria_key": "contemplacao",
       "categoria_label": "Contemplação",
       "categoria_ordem": 4,
@@ -243,6 +288,15 @@ window.KB_ADMIN["porto"] = {
       "ordem": 6
     },
     {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Contemplação",
+      "categoria_ordem": 4,
+      "titulo": "Como funciona a análise de crédito e a biometria após a contemplação?",
+      "conteudo": "Logo após a contemplação (e, no caso de lance, após o pagamento do lance), acontece uma nova análise de crédito — uma verificação rápida, pensada na segurança e no bom funcionamento do grupo. O resultado sai em até 3 dias úteis.\n\nSe a análise não for aprovada de imediato, a Porto dá a opção de incluir um fiador, que passa a ser corresponsável financeiramente pelas cotas. Esse fiador também precisa passar pela análise de crédito e ser aprovado.\n\nDepois vem a etapa de biometria: a Porto envia por SMS o caminho para o cliente cadastrar a digital em um celular com sensor biométrico. Só após esse cadastro a jornada de pós-contemplação continua.",
+      "tags": "análise de crédito, fiador, biometria, pós-contemplação",
+      "ordem": 7
+    },
+    {
       "categoria_key": "lance",
       "categoria_label": "Lance",
       "categoria_ordem": 5,
@@ -265,7 +319,7 @@ window.KB_ADMIN["porto"] = {
       "categoria_label": "Lance",
       "categoria_ordem": 5,
       "titulo": "Como funciona o lance fixo?",
-      "conteudo": "No lance fixo, o grupo tem um percentual pré-definido (informado na proposta). Todas as ofertas naquele percentual são consideradas lance fixo.\n\nHavendo recursos, primeiro é contemplada uma cota por lance fixo e as demais por lance livre. Se houver mais de uma oferta de lance fixo, o desempate é feito pela Loteria Federal. O cliente que oferta lance fixo não pode ofertar lance livre (e vice-versa) — vale a última oferta cadastrada.",
+      "conteudo": "No lance fixo, o grupo tem um percentual pré-definido — na Porto, esse percentual é de 40% do crédito. Todas as ofertas naquele percentual são consideradas lance fixo.\n\nHavendo recursos, primeiro é contemplada uma cota por lance fixo e as demais por lance livre. Se houver mais de uma oferta de lance fixo, o desempate é feito pela Loteria Federal. O cliente que oferta lance fixo não pode ofertar lance livre (e vice-versa) — vale a última oferta cadastrada.",
       "tags": "lance fixo, como funciona",
       "ordem": 3
     },
@@ -414,6 +468,15 @@ window.KB_ADMIN["porto"] = {
       "ordem": 11
     },
     {
+      "categoria_key": "credito_movel",
+      "categoria_label": "Crédito e compra — Bens móveis",
+      "categoria_ordem": 6,
+      "titulo": "O que não é permitido na compra de bens móveis?",
+      "conteudo": "Na pós-contemplação de bens móveis, alguns casos não são aceitos:\n\n• Veículos 0 km comprados em lojas que não sejam concessionárias autorizadas.\n• Veículo com vendedor de CNPJ suspenso ou inapto na Receita Federal.\n• Veículos em leilão, fora do ano permitido, ou acima de 3,5 toneladas em cota destinada a veículos leves.\n• Bens não alienáveis: motos esportivas, motos elétricas, carrocerias, quadriciclos, triciclos, motorhomes e trailers.\n• Aquisição entre cônjuges, ou entre sócio e a sua empresa (PJ), e vice-versa.\n• Juntar cotas depois que a aquisição já foi feita, ou juntar cotas de categorias de veículos diferentes.\n\nA exceção é quando a cota já está quitada — aí algumas dessas restrições deixam de valer.",
+      "tags": "não permitido, restrição, bens móveis, leilão",
+      "ordem": 12
+    },
+    {
       "categoria_key": "credito_imovel",
       "categoria_label": "Crédito e compra — Imóvel",
       "categoria_ordem": 7,
@@ -453,10 +516,46 @@ window.KB_ADMIN["porto"] = {
       "categoria_key": "credito_imovel",
       "categoria_label": "Crédito e compra — Imóvel",
       "categoria_ordem": 7,
+      "titulo": "Como o crédito é liberado na construção ou reforma?",
+      "conteudo": "Na construção ou reforma, o crédito não sai de uma vez — é liberado por etapas, conforme o cronograma físico-financeiro e o andamento da obra. O cliente pode usar 100% do crédito para comprar o terreno, 100% para construir ou reformar, ou até 50% para o terreno e o restante na obra.\n\nA liberação começa após a assinatura da escritura ou o registro do contrato de alienação. A cada etapa, um engenheiro credenciado faz a vistoria para confirmar que o percentual de obra previsto foi cumprido, antes de liberar a parcela seguinte. Na última liberação, 5% do crédito fica retido e só é reembolsado após a vistoria final e a averbação da construção na matrícula.\n\nAs vistorias de obra têm custo (cerca de R$ 540,00 nas capitais e arredores), descontado do crédito da cota.",
+      "tags": "construção, reforma, liberação, etapas, vistoria",
+      "ordem": 5
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "O que dá para construir ou reformar com o consórcio?",
+      "conteudo": "O crédito de construção e reforma é flexível. Dá para construir em alvenaria, madeira, pré-fabricado, container ou steel frame — nesses casos, o que define a aceitação é a obtenção do alvará da prefeitura aprovando o projeto. Itens como piscina, churrasqueira e área de lazer também entram, junto da obra ou isoladamente, desde que com as licenças necessárias.\n\nA obra pode ser feita em imóvel de terceiros (pais, cônjuge): o dono do imóvel entra como garantidor, assinando a escritura, sem participar da cota. Também é possível construir um prédio ou condomínio com junção de cotas.\n\nEm qualquer caso, a Porto exige a documentação da obra: cronograma físico-financeiro, memorial descritivo, CREA do engenheiro, projeto e planta aprovados, alvará e, ao fim, o Habite-se. Não é possível usar o crédito para comprar um terreno que já tenha uma construção em andamento.",
+      "tags": "construção, reforma, container, steel frame, terceiros",
+      "ordem": 6
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "O cliente pode usar o FGTS no consórcio de imóvel?",
+      "conteudo": "Sim. O cliente pode usar o saldo do FGTS no consórcio de imóvel, atendendo aos critérios da Caixa. Da parte do cliente: ter pelo menos 3 anos de trabalho sob carteira assinada (somando períodos), não ter outro imóvel onde mora ou trabalha, e não ter financiamento ativo no Sistema Financeiro Habitacional (SFH).\n\nDa parte do imóvel: precisa ser para moradia, estar pronto para morar, ficar na cidade ou região onde o cliente mora ou trabalha, custar até R$ 1.500.000,00 e não ter sido comprado com FGTS nos últimos 3 anos.\n\nO FGTS não pode ser usado para sacar dinheiro, para comprar imóvel na região onde o cliente já é proprietário, nem para um imóvel adquirido com FGTS nos últimos 3 anos.",
+      "tags": "fgts, imóvel, caixa, critérios",
+      "ordem": 7
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Como funciona a vistoria do imóvel na pós-contemplação?",
+      "conteudo": "Depois do envio dos documentos, a Porto faz a inspeção do imóvel que está sendo adquirido:\n\n• Apartamentos: a vistoria é remota, sem agendamento, e leva até 2 dias úteis.\n• Casas, terrenos e demais imóveis: a Porto agenda uma vistoria presencial com o vendedor ou o cliente — prazo estimado de até 6 dias úteis após a abertura do protocolo.\n\nNa sequência é emitido o Certificado Digital e-Notariado (que dá segurança e autenticidade aos atos feitos online em cartório), o que exige a participação do cliente em uma videoconferência. Há ainda uma etapa de confirmação dos valores da operação, feita por ligação de uma assessoria contratada pela Porto.",
+      "tags": "vistoria, inspeção, imóvel, e-notariado, certificado",
+      "ordem": 8
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
       "titulo": "Como funciona a quitação de financiamento imobiliário?",
       "conteudo": "O cliente pode usar a carta de crédito para quitar um financiamento imobiliário já existente. É preciso informar o e-mail da instituição credora (onde o imóvel está financiado) para que a Porto faça a quitação do saldo devedor.\n\nNa prática, o cliente troca uma dívida com juros por um consórcio sem juros.",
       "tags": "quitar financiamento, imóvel, interveniente quitante",
-      "ordem": 5
+      "ordem": 9
     },
     {
       "categoria_key": "credito_imovel",
@@ -465,7 +564,7 @@ window.KB_ADMIN["porto"] = {
       "titulo": "O cliente pode usar o crédito para móveis planejados?",
       "conteudo": "Sim — é uma novidade para os grupos de imóvel. Quando há sobra de crédito após a aquisição do bem, o cliente pode usar 10% do valor da avaliação do imóvel para projetos, móveis planejados e mão de obra.\n\nAtenção: os 10% da avaliação não podem ultrapassar 10% do valor original do crédito. O benefício vale por até 180 dias após a aquisição, e o fornecedor dos móveis precisa ser Pessoa Jurídica especializada.",
       "tags": "móveis planejados, sobra de crédito, 10%",
-      "ordem": 6
+      "ordem": 10
     },
     {
       "categoria_key": "credito_imovel",
@@ -474,7 +573,7 @@ window.KB_ADMIN["porto"] = {
       "titulo": "Dá para comprar imóvel no exterior com o consórcio?",
       "conteudo": "Sim — uma novidade para cotas de imóvel contempladas a partir de 01/04/2025. O imóvel pode ser comprado em qualquer cidade ou estado dos EUA.\n\nA garantia é um imóvel no Brasil de valor equivalente ao saldo devedor, alienado antes da compra lá fora. A operação usa um cartório local (Title Company) e conta de Escrow. A Porto cuida da remessa dos valores.",
       "tags": "imóvel no exterior, eua, novidade",
-      "ordem": 7
+      "ordem": 11
     },
     {
       "categoria_key": "credito_imovel",
@@ -483,7 +582,7 @@ window.KB_ADMIN["porto"] = {
       "titulo": "Qual a garantia no consórcio de imóvel?",
       "conteudo": "A garantia é a alienação fiduciária do imóvel. O imóvel passa por vistoria e avaliação (jurídica e patrimonial) antes da liberação do crédito.\n\nO imóvel precisa estar regularizado, sem dívidas de IPTU ou condomínio, e a matrícula precisa estar atualizada (estado civil dos proprietários, metragem, ampliações).",
       "tags": "garantia, alienação fiduciária, imóvel",
-      "ordem": 8
+      "ordem": 12
     },
     {
       "categoria_key": "credito_imovel",
@@ -492,7 +591,7 @@ window.KB_ADMIN["porto"] = {
       "titulo": "O cliente pode usar parte do crédito para despesas do imóvel?",
       "conteudo": "Sim. Havendo sobra de crédito, o cliente pode usar até 10% para despesas vinculadas ao imóvel — ITBI, taxa de registro do contrato, cartório.",
       "tags": "10%, despesas, itbi, cartório",
-      "ordem": 9
+      "ordem": 13
     },
     {
       "categoria_key": "credito_imovel",
@@ -501,7 +600,7 @@ window.KB_ADMIN["porto"] = {
       "titulo": "Quanto tempo leva o processo de imóvel?",
       "conteudo": "O processo de imóvel é mais longo que o de bens móveis, porque envolve análise jurídica, vistoria, ITBI e registro em cartório.\n\nA análise jurídica leva cerca de 7 dias úteis; o registro depende do cartório (prazo legal de até 30 dias úteis). Não há um prazo curto garantido — o que acelera é a documentação completa e correta.",
       "tags": "prazo, imóvel, registro, cartório",
-      "ordem": 10
+      "ordem": 14
     },
     {
       "categoria_key": "credito_imovel",
@@ -510,7 +609,7 @@ window.KB_ADMIN["porto"] = {
       "titulo": "Quais imóveis não podem ser comprados?",
       "conteudo": "Não são aceitos imóveis com dívidas de condomínio, de tributos ou com acordos em andamento. A matrícula precisa estar regular (estado civil, metragem, ampliações averbadas).\n\nCasos com usufruto exigem o cancelamento prévio da cláusula na matrícula. Vendas entre parentes (ascendente para descendente) exigem documentação adicional.",
       "tags": "restrição, imóvel, não aceito",
-      "ordem": 11
+      "ordem": 15
     },
     {
       "categoria_key": "pagamentos",
@@ -961,6 +1060,15 @@ window.KB_ADMIN["porto"] = {
       "conteudo": "O total que o consorciado ainda deve — parcelas a vencer, atrasadas e encargos.",
       "tags": "glossário, saldo devedor, termo",
       "ordem": 16
+    },
+    {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Contemplação",
+      "categoria_ordem": 4,
+      "titulo": "E quando a análise de crédito pede um fiador?",
+      "conteudo": "Vale para qualquer tipo de bem (auto, moto, pesados, bens móveis e imóvel). Se a renda do cliente não basta na análise pós-contemplação, a Porto pode pedir um fiador (ou acrescentar um titular adicional na cota) para liberar o crédito.\n\nRequisitos do fiador:\n\n• Não pode ter pendências ou restrições em nome dele.\n• A renda do fiador precisa ser pelo menos 3× maior que a parcela do crédito solicitado.\n• Só pessoa física — CNPJ não é aceito como fiador.\n• Atenção: cônjuge não é aceito como fiador somente nas cotas de imóvel (nas outras cotas, pode).\n\nProcesso:\n\n1. Baixar o 'Formulário do Fiador' na seção 'Materiais para baixar' aqui no Material de Apoio.\n2. Preencher todos os campos do fiador e indicar o(s) grupo(s) e cota(s).\n3. Enviar o PDF preenchido como anexo para tratativa.analisedecredito@portoseguro.com.br.",
+      "tags": "fiador, garantia, análise de crédito, restrição, pós-contemplação, segundo titular, score, formulário, renda, veículo, automóvel, moto, bens móveis, imóvel",
+      "ordem": 8
     }
   ],
   "downloads": [
@@ -983,6 +1091,26 @@ window.KB_ADMIN["porto"] = {
       "titulo": "Material — Móveis Planejados",
       "descricao": "Como funciona o uso da sobra de crédito do consórcio de imóvel para móveis planejados.",
       "arquivo": "kb-porto-moveis-planejados.pdf"
+    },
+    {
+      "titulo": "Guia da Pós-Contemplação — Bens Móveis (2025)",
+      "descricao": "Passo a passo da jornada de pós-contemplação de veículos: análise de crédito, protocolo, documentação, biometria, alienação e casos especiais.",
+      "arquivo": "kb-porto-pos-contemplacao-moveis.pdf"
+    },
+    {
+      "titulo": "Guia da Pós-Contemplação — Imóvel (2025)",
+      "descricao": "Passo a passo da jornada de pós-contemplação de imóvel: análise de crédito, protocolo, inspeção, certificados, contrato, ITBI e uso do FGTS.",
+      "arquivo": "kb-porto-pos-contemplacao-imovel.pdf"
+    },
+    {
+      "titulo": "Consórcio — Construção e Reforma",
+      "descricao": "Procedimentos de construção e reforma: liberação por etapas, tipos de obra aceitos, imóvel de terceiros, placas solares e prédios.",
+      "arquivo": "kb-porto-construcao-reforma.pdf"
+    },
+    {
+      "titulo": "Formulário do Fiador",
+      "descricao": "Documento oficial da Porto pra quando a análise de crédito pede fiador (ou titular adicional na cota). Inclui regras (renda 3× a parcela, sem restrições, só PF) e o e-mail da Porto pra enviar depois de preenchido.",
+      "arquivo": "kb-porto-formulario-fiador.pdf"
     }
   ]
 };

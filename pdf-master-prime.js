@@ -598,7 +598,13 @@
       // foi bloqueado pelo navegador, faz fallback pra download direto.
       try { pdf.setProperties({ title: filename.replace(/\.pdf$/, '') }); } catch(e){}
       const _blob = pdf.output('blob');
-      const _url  = URL.createObjectURL(_blob);
+      // Embrulha como File com o nome certo — assim, quando o usuário clicar
+      // em "Download" dentro do leitor PDF do navegador, o nome sugerido é o
+      // filename (não o UUID do blob).
+      let _named;
+      try { _named = new File([_blob], filename, { type: 'application/pdf' }); }
+      catch (e) { _named = _blob; }
+      const _url = URL.createObjectURL(_named);
       if (_winPdf && !_winPdf.closed) {
         _winPdf.location.href = _url;
       } else {
@@ -892,7 +898,13 @@
       // foi bloqueado pelo navegador, faz fallback pra download direto.
       try { pdf.setProperties({ title: filename.replace(/\.pdf$/, '') }); } catch(e){}
       const _blob = pdf.output('blob');
-      const _url  = URL.createObjectURL(_blob);
+      // Embrulha como File com o nome certo — assim, quando o usuário clicar
+      // em "Download" dentro do leitor PDF do navegador, o nome sugerido é o
+      // filename (não o UUID do blob).
+      let _named;
+      try { _named = new File([_blob], filename, { type: 'application/pdf' }); }
+      catch (e) { _named = _blob; }
+      const _url = URL.createObjectURL(_named);
       if (_winPdf && !_winPdf.closed) {
         _winPdf.location.href = _url;
       } else {

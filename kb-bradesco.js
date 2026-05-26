@@ -1096,6 +1096,15 @@ window.KB_ADMIN["bradesco"] = {
       "conteudo": "O valor mensal pago pelo consorciado — soma de Fundo Comum, Taxa de Administração, Fundo de Reserva e seguro (se houver).",
       "tags": "glossário, parcela, termo",
       "ordem": 17
+    },
+    {
+      "categoria_key": "adesao",
+      "categoria_label": "Adesão e atendimento",
+      "categoria_ordem": 5,
+      "titulo": "Quais documentos o cliente envia na atualização cadastral (monitoramento)?",
+      "conteudo": "O monitoramento do Bradesco pede atualização cadastral periódica. A lista varia por perfil:\n\nPessoa Física:\n\n• Documento de identificação pessoal (CNH ou RG).\n• Comprovante de endereço em nome do cliente, emissão de até 180 dias. Aceita contas de consumo (água, luz, gás, internet, telefone), IPTU, IPVA, extratos do FGTS, multas de trânsito, licenciamento de veículo, boletos de financiamento imobiliário, mensalidade escolar, fatura de plano de saúde, correspondências bancárias e oficiais. Se o cliente for morador recente, aceita contrato de aluguel, compra e venda ou financiamento de imóvel, desde que registrado em cartório.\n• Comprovante de renda: 3 últimos holerites ou Declaração de Imposto de Renda.\n• Autorização de consulta ao SIBA: formulário 4335-032E.\n\nPessoa Jurídica:\n\n• Identificação pessoal dos responsáveis legais (CNH ou RG).\n• Comprovante de endereço (mesmas regras da PF).\n• Comprovante de faturamento dos últimos 12 meses, preenchido e assinado, com número do CRC do contador.\n• Documento de constituição: contrato social + última alteração.\n• Autorização de consulta ao SIBA: formulário 4335-032E.\n\nProdutor Rural:\n\n• Identificação pessoal (CNH ou RG).\n• Comprovante de endereço (mesmas regras da PF).\n• Comprovante de renda: Declaração de Imposto de Renda.\n• Autorização de consulta ao SIBA: formulário 4335-032E.\n• Cadastro Agro: se o cliente não for correntista, informar para apoio da análise — ficha sanitária, experiência na atividade, tipo de agricultura (soja, milho, algodão, pecuária, etc.) e, no caso de pecuária, etapas trabalhadas (cria, recria, engorda, confinamento).\n\nA lista completa em PDF está disponível na seção 'Materiais para baixar' aqui no Material de Apoio.",
+      "tags": "monitoramento, atualização cadastral, documentos, checklist, SIBA, comprovante de renda, comprovante de endereço, PF, PJ, produtor rural, agro",
+      "ordem": 7
     }
   ],
   "downloads": [
@@ -1118,6 +1127,11 @@ window.KB_ADMIN["bradesco"] = {
       "titulo": "Autorização SCR — Bradesco",
       "descricao": "Formulário de autorização de consulta e registro no SCR (Sistema de Informações de Crédito do Banco Central), para o cliente assinar.",
       "arquivo": "kb-autorizacao-scr.pdf"
+    },
+    {
+      "titulo": "Checklist — Atualização Cadastral (Monitoramento)",
+      "descricao": "Documentos necessários na atualização cadastral periódica do Bradesco, separados por perfil: Pessoa Física, Pessoa Jurídica e Produtor Rural.",
+      "arquivo": "kb-bradesco-atualizacao-cadastral.pdf"
     }
   ]
 };

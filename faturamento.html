@@ -492,7 +492,7 @@ function fatRenderStats() {
   };
 
   document.getElementById('fat-stats').innerHTML = `
-    <div class="fat-stat borda-teal">
+    <div class="fat-stat borda-teal" onclick="fatLimparFiltros()" title="Ver todos os processos" style="cursor:pointer;">
       <div class="fat-stat-ico">${I.total}</div>
       <div class="fat-stat-body">
         <div class="fat-stat-label">Total</div>
@@ -500,7 +500,7 @@ function fatRenderStats() {
         <div class="fat-stat-sub">processos</div>
       </div>
     </div>
-    <div class="fat-stat borda-amber">
+    <div class="fat-stat borda-amber" onclick="fatFiltrarPorStatus('Recebido')" title="Filtrar: Recebido" style="cursor:pointer;">
       <div class="fat-stat-ico">${I.receb}</div>
       <div class="fat-stat-body">
         <div class="fat-stat-label">Recebidos</div>
@@ -508,7 +508,7 @@ function fatRenderStats() {
         <div class="fat-stat-sub">aguardando análise</div>
       </div>
     </div>
-    <div class="fat-stat borda-purple">
+    <div class="fat-stat borda-purple" onclick="fatFiltrarPorStatus('Em análise')" title="Filtrar: Em análise" style="cursor:pointer;">
       <div class="fat-stat-ico">${I.anali}</div>
       <div class="fat-stat-body">
         <div class="fat-stat-label">Em análise</div>
@@ -516,7 +516,7 @@ function fatRenderStats() {
         <div class="fat-stat-sub">em andamento</div>
       </div>
     </div>
-    <div class="fat-stat borda-amber">
+    <div class="fat-stat borda-amber" onclick="fatFiltrarPorStatus('Em retorno da administradora')" title="Filtrar: Em retorno da administradora" style="cursor:pointer;">
       <div class="fat-stat-ico">${I.retor}</div>
       <div class="fat-stat-body">
         <div class="fat-stat-label">Retorno adm.</div>
@@ -524,7 +524,7 @@ function fatRenderStats() {
         <div class="fat-stat-sub">em retorno</div>
       </div>
     </div>
-    <div class="fat-stat borda-green">
+    <div class="fat-stat borda-green" onclick="fatFiltrarPorStatus('Finalizado')" title="Filtrar: Finalizado" style="cursor:pointer;">
       <div class="fat-stat-ico">${I.final}</div>
       <div class="fat-stat-body">
         <div class="fat-stat-label">Finalizados</div>
@@ -532,7 +532,7 @@ function fatRenderStats() {
         <div class="fat-stat-sub">concluídos</div>
       </div>
     </div>
-    <div class="fat-stat borda-red" onclick="fatFiltrarSemProtocolo()" title="Filtrar processos sem protocolo">
+    <div class="fat-stat borda-red" onclick="fatFiltrarSemProtocolo()" title="Filtrar: Sem protocolo" style="cursor:pointer;">
       <div class="fat-stat-ico">${I.semp}</div>
       <div class="fat-stat-body">
         <div class="fat-stat-label" style="color:var(--red);">Sem protocolo</div>
@@ -548,6 +548,13 @@ function fatFiltrarSemProtocolo() {
   document.getElementById('fat-busca').value = '';
   document.getElementById('fat-status-filtro').value = '';
   fatRenderTabela(fatFiltrados);
+}
+
+// Clique nos cards de status — usa o filtro de status existente.
+function fatFiltrarPorStatus(status) {
+  document.getElementById('fat-busca').value = '';
+  document.getElementById('fat-status-filtro').value = status;
+  fatFiltrar();
 }
 
 function fatRenderTabela(lista) {
