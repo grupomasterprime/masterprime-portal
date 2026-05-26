@@ -872,6 +872,20 @@ function preencherForm(tipo, dados) {
     const nom = String(dados.banco_nome || '').trim();
     set('banco', (cod && nom) ? `${cod} - ${nom}` : (nom || cod));
   }
+  // Débito Automático: o banco hoje só guarda UMA conta (em agencia/conta_corrente/dac).
+  // No formulário existem 2 seções — "Débito Automático" e "Devolução de Valores".
+  // Quando a forma é Débito Automático, espelha a mesma conta nos dois lados pra
+  // visualização não ficar vazia (na prática é a mesma conta na maioria dos casos).
+  if (dados.forma_pagamento_1 === 'Débito Automático') {
+    set('debito_agencia', dados.agencia);
+    set('debito_conta', dados.conta_corrente);
+    set('debito_dac', dados.dac);
+  }
+  // LGPD: o checkbox é pf-lgpd / pj-lgpd, mas no banco é lgpd_aceito
+  const lgpdEl = $(prefix + 'lgpd');
+  if (lgpdEl && (dados.lgpd_aceito === true || dados.lgpd_aceito === 'true')) {
+    lgpdEl.checked = true;
+  }
   // Marca o CEP auto-preenchido como "já buscado" pra não sobrescrever o endereço
   // à toa — mas se o cliente DIGITAR um CEP diferente, a busca atualiza normalmente.
   const cepEl = $(prefix + 'cep');
@@ -1581,6 +1595,10 @@ function validarPF(d) {
   if (unmaskNum(d.celular).length < 10) return 'Celular inválido';
   if (d.cep.length !== 8) return 'CEP inválido';
   if (!d.logradouro || !d.numero || !d.bairro || !d.cidade || !d.estado) return 'Preencha o endereço completo';
+  // Empresa + Data Admissão: obrigatórios em Bradesco e link Master Prime geral.
+  // Porto e Itaú estão no SKIP_FIELDS, então skip() devolve true e pula a regra.
+  if (!skip('nome_empresa') && (!d.nome_empresa || d.nome_empresa.trim().length < 2)) return 'Empresa onde trabalha é obrigatória';
+  if (!skip('data_admissao') && !d.data_admissao) return 'Data de admissão é obrigatória';
   if (!d.renda_mensal) return 'Renda mensal é obrigatória';
   if (!d.administradora) return 'Selecione o consórcio (Porto, Bradesco ou Itaú)';
   if (!d.forma_pagamento_1) return 'Selecione a forma de pagamento';
