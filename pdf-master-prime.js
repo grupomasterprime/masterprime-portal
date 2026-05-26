@@ -588,7 +588,17 @@
       const mm = String(hoje.getMonth() + 1).padStart(2, '0');
       const yyyy = hoje.getFullYear();
       const filename = (opts.filename || 'master-prime-simulacao') + `-${dd}${mm}${yyyy}.pdf`;
-      pdf.save(filename);
+      // Abre o PDF numa NOVA ABA do navegador (em vez de baixar). O usuário
+      // pode visualizar ali mesmo e, se quiser, usar o botão de download do
+      // próprio leitor PDF do navegador.
+      try { pdf.setProperties({ title: filename.replace(/\.pdf$/, '') }); } catch(e){}
+      const _blob = pdf.output('blob');
+      const _url  = URL.createObjectURL(_blob);
+      const _a    = document.createElement('a');
+      _a.href = _url; _a.target = '_blank'; _a.rel = 'noopener';
+      document.body.appendChild(_a); _a.click(); _a.remove();
+      // Libera o blob depois — o browser segura enquanto a aba estiver aberta.
+      setTimeout(function(){ try { URL.revokeObjectURL(_url); } catch(e){} }, 60000);
       try { if (window.PortalLog) window.PortalLog.registrar('pdf_gerado', opts.tituloEstrategia || opts.subtitulo || opts.filename || ''); } catch(e){}
     } finally {
       wrap.remove();
@@ -865,7 +875,17 @@
       const mm = String(hoje.getMonth() + 1).padStart(2, '0');
       const yyyy = hoje.getFullYear();
       const filename = (opts.filename || 'master-prime-simulacao') + `-${dd}${mm}${yyyy}.pdf`;
-      pdf.save(filename);
+      // Abre o PDF numa NOVA ABA do navegador (em vez de baixar). O usuário
+      // pode visualizar ali mesmo e, se quiser, usar o botão de download do
+      // próprio leitor PDF do navegador.
+      try { pdf.setProperties({ title: filename.replace(/\.pdf$/, '') }); } catch(e){}
+      const _blob = pdf.output('blob');
+      const _url  = URL.createObjectURL(_blob);
+      const _a    = document.createElement('a');
+      _a.href = _url; _a.target = '_blank'; _a.rel = 'noopener';
+      document.body.appendChild(_a); _a.click(); _a.remove();
+      // Libera o blob depois — o browser segura enquanto a aba estiver aberta.
+      setTimeout(function(){ try { URL.revokeObjectURL(_url); } catch(e){} }, 60000);
       try { if (window.PortalLog) window.PortalLog.registrar('pdf_gerado', opts.tituloEstrategia || opts.subtitulo || opts.filename || ''); } catch(e){}
     } finally {
       wrap.remove();
