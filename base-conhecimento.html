@@ -588,6 +588,18 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
           'Abrir PDF</a>' +
       '</div>';
     }).join('');
+    // Reforço defensivo: garante que o click abre em nova aba mesmo se algum
+    // pop-up blocker exótico engolir o target="_blank" do anchor.
+    box.querySelectorAll('.dl-btn').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        // Se for click do meio ou com cmd/ctrl, deixa o browser fazer o default
+        if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) return;
+        e.preventDefault();
+        var w = window.open(a.href, '_blank', 'noopener,noreferrer');
+        // Fallback final: se window.open foi bloqueado, navega no mesmo tab
+        if (!w) window.location.href = a.href;
+      });
+    });
   }
 
   // ── modo Comparativo: UM card por assunto, abre os 3 bancos juntos ──
