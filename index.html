@@ -1856,6 +1856,15 @@ async function renderUsers() {
   } catch(e) { console.warn('Não foi possível buscar últimos logins:', e); }
   // Último acesso REAL ao portal (ultimo_acesso); cai pro último login se vazio
   users.forEach(u => { u._last_login = u.ultimo_acesso || (u.auth_id ? loginsMap[u.auth_id] : null); });
+  // Ranking pra medalhas: pelos campos novos total_sessoes e dias_ativos_mes
+  // (só conta consultor, sócio, parceiro — admin/master não disputam)
+  const _rankUsers = users.filter(u => !['master','admin'].includes(u.tipo));
+  const _topSessoes = [..._rankUsers].sort((a,b)=>(b.total_sessoes||0)-(a.total_sessoes||0)).slice(0,3).map(u=>u.cpf);
+  const _topDias = [..._rankUsers].sort((a,b)=>(b.dias_ativos_mes||0)-(a.dias_ativos_mes||0)).slice(0,3).map(u=>u.cpf);
+  const _medal = (cpf, top) => {
+    const i = top.indexOf(cpf);
+    return i === 0 ? '🥇 ' : i === 1 ? '🥈 ' : i === 2 ? '🥉 ' : '';
+  };
   // Ordena de acordo com _usersSort
   const _rank = t => (t==='master'?0:t==='admin'?1:t==='socio'?2:3);
   if (_usersSort === 'login_recent') {
@@ -1869,6 +1878,10 @@ async function renderUsers() {
     });
   } else if (_usersSort === 'name') {
     users.sort((a,b) => (a.nome||'').localeCompare(b.nome||''));
+  } else if (_usersSort === 'sessoes') {
+    users.sort((a,b) => (b.total_sessoes||0) - (a.total_sessoes||0));
+  } else if (_usersSort === 'dias_mes') {
+    users.sort((a,b) => (b.dias_ativos_mes||0) - (a.dias_ativos_mes||0));
   } else {
     users.sort((a,b) => {
       const ra = _rank(a.tipo), rb = _rank(b.tipo);
@@ -1902,12 +1915,19 @@ async function renderUsers() {
       ? `<span class="senha-cell" data-senha="${(u.senha+'').replace(/"/g,'&quot;')}" style="display:inline-flex;align-items:center;gap:6px"><span class="senha-val mono" style="font-size:11px">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span><button type="button" onclick="toggleSenhaCell(this)" title="Mostrar/ocultar senha" style="background:none;border:0;padding:2px;cursor:pointer;color:var(--text3)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span>`
       : '<span style="color:var(--text3)">&mdash;</span>';
     const canDel = u.cpf !== currentUser.cpf;
+    // Contadores de uso: medalha se top 3 (entre consultor/sócio/parceiro)
+    const sessoesNum = u.total_sessoes || 0;
+    const diasNum = u.dias_ativos_mes || 0;
+    const sessoesCell = `<span style="font-size:11.5px;font-weight:600;color:var(--text)" title="Total de sessões (gaps de 30min+)">${_medal(u.cpf, _topSessoes)}${sessoesNum}</span>`;
+    const diasCell = `<span style="font-size:11.5px;font-weight:600;color:var(--text)" title="Dias ativos no mês corrente">${_medal(u.cpf, _topDias)}${diasNum}</span>`;
     return `<tr>
       <td><span class="tag ${tc}" style="font-size:9px">${tl}</span></td>
       <td style="font-weight:600;font-size:12px">${u.nome}</td>
       <td class="mono" style="font-size:12px">${userLogin}</td>
       <td>${senhaDisplay}</td>
       <td>${fmtUltimoLogin(u._last_login)}</td>
+      <td style="text-align:center">${sessoesCell}</td>
+      <td style="text-align:center">${diasCell}</td>
       <td style="text-align:right;white-space:nowrap">
         ${(currentUser.tipo === 'master' && u.tipo !== 'master') ? `<button class="btn btn-outline btn-sm" onclick="abrirPermissoes('${u.cpf}')">Permissões</button>` : ''}
         <button class="btn btn-outline btn-sm" onclick="resetPw('${u.cpf}')">Reset senha</button>
@@ -1934,6 +1954,8 @@ async function renderUsers() {
             <th>Usu&aacute;rio</th>
             <th>Senha</th>
             <th onclick="toggleUsersSortLogin()" style="cursor:pointer;user-select:none" title="Clique pra alternar mais recente / mais antigo">&Uacute;ltimo acesso${sortArrow(['login_recent','login_oldest'])}</th>
+            <th onclick="setUsersSort('sessoes')" style="cursor:pointer;user-select:none;text-align:center" title="Total de sess&otilde;es (gaps de 30min+) &mdash; clique pra ordenar">Sess&otilde;es${sortArrow(['sessoes'])}</th>
+            <th onclick="setUsersSort('dias_mes')" style="cursor:pointer;user-select:none;text-align:center" title="Dias ativos no m&ecirc;s &mdash; clique pra ordenar">Dias/m&ecirc;s${sortArrow(['dias_mes'])}</th>
             <th></th>
           </tr>
         </thead>
