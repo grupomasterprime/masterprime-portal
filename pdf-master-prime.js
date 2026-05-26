@@ -534,6 +534,12 @@
     if (typeof html2canvas !== 'function') throw new Error('html2canvas não está carregado');
     if (!window.jspdf || !window.jspdf.jsPDF) throw new Error('jsPDF não está carregado');
 
+    // Abre uma aba em branco AGORA (gesto do usuário ainda válido). Depois,
+    // quando o PDF estiver pronto, navega essa aba pra exibir o arquivo.
+    // Sem isso, o popup blocker do navegador bloqueia a abertura feita após o await.
+    var _winPdf = null;
+    try { _winPdf = window.open('about:blank', '_blank'); } catch (e) { _winPdf = null; }
+
     // Cria container off-screen mas dentro da viewport (z-index baixíssimo)
     const wrap = document.createElement('div');
     wrap.style.cssText = `position:fixed; top:0; left:0; width:${PDF_WIDTH}px; background:#fff; z-index:-99999; pointer-events:none; overflow:hidden;`;
@@ -588,16 +594,17 @@
       const mm = String(hoje.getMonth() + 1).padStart(2, '0');
       const yyyy = hoje.getFullYear();
       const filename = (opts.filename || 'master-prime-simulacao') + `-${dd}${mm}${yyyy}.pdf`;
-      // Abre o PDF numa NOVA ABA do navegador (em vez de baixar). O usuário
-      // pode visualizar ali mesmo e, se quiser, usar o botão de download do
-      // próprio leitor PDF do navegador.
+      // Mostra o PDF na aba que pré-abrimos no gesto do clique. Se o popup
+      // foi bloqueado pelo navegador, faz fallback pra download direto.
       try { pdf.setProperties({ title: filename.replace(/\.pdf$/, '') }); } catch(e){}
       const _blob = pdf.output('blob');
       const _url  = URL.createObjectURL(_blob);
-      const _a    = document.createElement('a');
-      _a.href = _url; _a.target = '_blank'; _a.rel = 'noopener';
-      document.body.appendChild(_a); _a.click(); _a.remove();
-      // Libera o blob depois — o browser segura enquanto a aba estiver aberta.
+      if (_winPdf && !_winPdf.closed) {
+        _winPdf.location.href = _url;
+      } else {
+        // Popup bloqueado — baixa o PDF como fallback.
+        pdf.save(filename);
+      }
       setTimeout(function(){ try { URL.revokeObjectURL(_url); } catch(e){} }, 60000);
       try { if (window.PortalLog) window.PortalLog.registrar('pdf_gerado', opts.tituloEstrategia || opts.subtitulo || opts.filename || ''); } catch(e){}
     } finally {
@@ -823,6 +830,12 @@
     if (typeof html2canvas !== 'function') throw new Error('html2canvas não está carregado');
     if (!window.jspdf || !window.jspdf.jsPDF) throw new Error('jsPDF não está carregado');
 
+    // Abre uma aba em branco AGORA (gesto do usuário ainda válido). Depois,
+    // quando o PDF estiver pronto, navega essa aba pra exibir o arquivo.
+    // Sem isso, o popup blocker do navegador bloqueia a abertura feita após o await.
+    var _winPdf = null;
+    try { _winPdf = window.open('about:blank', '_blank'); } catch (e) { _winPdf = null; }
+
     const wrap = document.createElement('div');
     wrap.style.cssText = `position:fixed; top:0; left:0; width:${PDF_WIDTH}px; background:#fff; z-index:-99999; pointer-events:none; overflow:hidden;`;
     wrap.innerHTML = buildTemplateComercial(opts);
@@ -875,16 +888,17 @@
       const mm = String(hoje.getMonth() + 1).padStart(2, '0');
       const yyyy = hoje.getFullYear();
       const filename = (opts.filename || 'master-prime-simulacao') + `-${dd}${mm}${yyyy}.pdf`;
-      // Abre o PDF numa NOVA ABA do navegador (em vez de baixar). O usuário
-      // pode visualizar ali mesmo e, se quiser, usar o botão de download do
-      // próprio leitor PDF do navegador.
+      // Mostra o PDF na aba que pré-abrimos no gesto do clique. Se o popup
+      // foi bloqueado pelo navegador, faz fallback pra download direto.
       try { pdf.setProperties({ title: filename.replace(/\.pdf$/, '') }); } catch(e){}
       const _blob = pdf.output('blob');
       const _url  = URL.createObjectURL(_blob);
-      const _a    = document.createElement('a');
-      _a.href = _url; _a.target = '_blank'; _a.rel = 'noopener';
-      document.body.appendChild(_a); _a.click(); _a.remove();
-      // Libera o blob depois — o browser segura enquanto a aba estiver aberta.
+      if (_winPdf && !_winPdf.closed) {
+        _winPdf.location.href = _url;
+      } else {
+        // Popup bloqueado — baixa o PDF como fallback.
+        pdf.save(filename);
+      }
       setTimeout(function(){ try { URL.revokeObjectURL(_url); } catch(e){} }, 60000);
       try { if (window.PortalLog) window.PortalLog.registrar('pdf_gerado', opts.tituloEstrategia || opts.subtitulo || opts.filename || ''); } catch(e){}
     } finally {
