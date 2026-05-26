@@ -453,9 +453,11 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
     var d = ADM[key];
     if (!d) return;
     activeAdm = key;
-    // Restaura UI específica de banco único (pode ter vindo do modo Comparativo)
+    // Restaura UI (caso estivesse no estado inicial sem banco selecionado).
     var _sb = document.querySelector('.search-box');
     if (_sb) _sb.style.display = '';
+    var _chips = document.getElementById('chips');
+    if (_chips) _chips.style.display = '';
     DATA = (d.entradas || []).slice().sort(function (a, b) {
       return (a.categoria_ordem - b.categoria_ordem) || (a.ordem - b.ordem);
     });
@@ -847,13 +849,20 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
     // "comparar" não corresponde a um banco em ADM — sempre habilitado.
     if (k !== 'comparar' && !ADM[k]) { p.disabled = true; p.classList.add('soon'); }
   });
-  var first = ADM['bradesco'] ? 'bradesco' : (ADM['porto'] ? 'porto' : null);
-  if (!first) {
+  // Estado inicial: nenhuma administradora selecionada — o usuário escolhe na barra.
+  var _sbInit = document.querySelector('.search-box');
+  if (_sbInit) _sbInit.style.display = 'none';
+  var _chipsInit = document.getElementById('chips');
+  if (_chipsInit) _chipsInit.style.display = 'none';
+  var _dlJumpInit = document.getElementById('dl-jump');
+  if (_dlJumpInit) _dlJumpInit.style.display = 'none';
+  var temAlgum = ADM['bradesco'] || ADM['porto'] || ADM['itau'];
+  if (!temAlgum) {
     document.getElementById('content').innerHTML =
-      emptyHTML('Conteúdo não carregado', 'Os arquivos de conteúdo (kb-bradesco.js / kb-porto.js) não foram encontrados.');
-    document.getElementById('chips').style.display = 'none';
+      emptyHTML('Conteúdo não carregado', 'Os arquivos de conteúdo (kb-bradesco.js / kb-porto.js / kb-itau.js) não foram encontrados.');
   } else {
-    loadAdmin(first);
+    document.getElementById('content').innerHTML =
+      emptyHTML('Escolha uma administradora', 'Selecione Porto, Itaú ou Bradesco acima para ver o material de apoio.');
   }
 })();
 </script>
