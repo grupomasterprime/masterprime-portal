@@ -598,20 +598,41 @@
       // foi bloqueado pelo navegador, faz fallback pra download direto.
       try { pdf.setProperties({ title: filename.replace(/\.pdf$/, '') }); } catch(e){}
       const _blob = pdf.output('blob');
-      // Embrulha como File com o nome certo — assim, quando o usuário clicar
-      // em "Download" dentro do leitor PDF do navegador, o nome sugerido é o
-      // filename (não o UUID do blob).
       let _named;
       try { _named = new File([_blob], filename, { type: 'application/pdf' }); }
       catch (e) { _named = _blob; }
       const _url = URL.createObjectURL(_named);
       if (_winPdf && !_winPdf.closed) {
-        _winPdf.location.href = _url;
+        // Embrulha o PDF num wrapper HTML: barra superior com o filename +
+        // botão "Baixar PDF" que usa anchor download (assim o nome sugerido
+        // no download é o filename certo, não o UUID do blob).
+        try {
+          const _safeFn = String(filename).replace(/[<>"&']/g, '');
+          const _html = '<!DOCTYPE html><html lang="pt-BR"><head>' +
+            '<meta charset="UTF-8"><title>' + _safeFn + '</title>' +
+            '<style>html,body{margin:0;padding:0;height:100%;background:#525659;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}' +
+            '.mp-bar{background:#2D3F5E;color:#fff;padding:10px 16px;display:flex;align-items:center;gap:14px;height:42px;box-sizing:border-box;}' +
+            '.mp-title{flex:1;font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}' +
+            '.mp-dl{background:#fff;color:#2D3F5E;padding:8px 16px;border-radius:6px;text-decoration:none;font-weight:700;font-size:12.5px;letter-spacing:.2px;}' +
+            '.mp-dl:hover{background:#F1F5F9;}' +
+            'iframe{border:0;width:100%;height:calc(100vh - 42px);display:block;}' +
+            '</style></head><body>' +
+            '<div class="mp-bar"><span class="mp-title">' + _safeFn + '</span>' +
+            '<a class="mp-dl" href="' + _url + '" download="' + _safeFn + '">⬇ Baixar PDF</a></div>' +
+            '<iframe src="' + _url + '"></iframe>' +
+            '</body></html>';
+          _winPdf.document.open();
+          _winPdf.document.write(_html);
+          _winPdf.document.close();
+        } catch (e) {
+          // Se algo falhar no wrapper, navega direto pro blob.
+          _winPdf.location.href = _url;
+        }
       } else {
         // Popup bloqueado — baixa o PDF como fallback.
         pdf.save(filename);
       }
-      setTimeout(function(){ try { URL.revokeObjectURL(_url); } catch(e){} }, 60000);
+      setTimeout(function(){ try { URL.revokeObjectURL(_url); } catch(e){} }, 120000);
       try { if (window.PortalLog) window.PortalLog.registrar('pdf_gerado', opts.tituloEstrategia || opts.subtitulo || opts.filename || ''); } catch(e){}
     } finally {
       wrap.remove();
@@ -898,20 +919,41 @@
       // foi bloqueado pelo navegador, faz fallback pra download direto.
       try { pdf.setProperties({ title: filename.replace(/\.pdf$/, '') }); } catch(e){}
       const _blob = pdf.output('blob');
-      // Embrulha como File com o nome certo — assim, quando o usuário clicar
-      // em "Download" dentro do leitor PDF do navegador, o nome sugerido é o
-      // filename (não o UUID do blob).
       let _named;
       try { _named = new File([_blob], filename, { type: 'application/pdf' }); }
       catch (e) { _named = _blob; }
       const _url = URL.createObjectURL(_named);
       if (_winPdf && !_winPdf.closed) {
-        _winPdf.location.href = _url;
+        // Embrulha o PDF num wrapper HTML: barra superior com o filename +
+        // botão "Baixar PDF" que usa anchor download (assim o nome sugerido
+        // no download é o filename certo, não o UUID do blob).
+        try {
+          const _safeFn = String(filename).replace(/[<>"&']/g, '');
+          const _html = '<!DOCTYPE html><html lang="pt-BR"><head>' +
+            '<meta charset="UTF-8"><title>' + _safeFn + '</title>' +
+            '<style>html,body{margin:0;padding:0;height:100%;background:#525659;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}' +
+            '.mp-bar{background:#2D3F5E;color:#fff;padding:10px 16px;display:flex;align-items:center;gap:14px;height:42px;box-sizing:border-box;}' +
+            '.mp-title{flex:1;font-weight:600;font-size:13.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}' +
+            '.mp-dl{background:#fff;color:#2D3F5E;padding:8px 16px;border-radius:6px;text-decoration:none;font-weight:700;font-size:12.5px;letter-spacing:.2px;}' +
+            '.mp-dl:hover{background:#F1F5F9;}' +
+            'iframe{border:0;width:100%;height:calc(100vh - 42px);display:block;}' +
+            '</style></head><body>' +
+            '<div class="mp-bar"><span class="mp-title">' + _safeFn + '</span>' +
+            '<a class="mp-dl" href="' + _url + '" download="' + _safeFn + '">⬇ Baixar PDF</a></div>' +
+            '<iframe src="' + _url + '"></iframe>' +
+            '</body></html>';
+          _winPdf.document.open();
+          _winPdf.document.write(_html);
+          _winPdf.document.close();
+        } catch (e) {
+          // Se algo falhar no wrapper, navega direto pro blob.
+          _winPdf.location.href = _url;
+        }
       } else {
         // Popup bloqueado — baixa o PDF como fallback.
         pdf.save(filename);
       }
-      setTimeout(function(){ try { URL.revokeObjectURL(_url); } catch(e){} }, 60000);
+      setTimeout(function(){ try { URL.revokeObjectURL(_url); } catch(e){} }, 120000);
       try { if (window.PortalLog) window.PortalLog.registrar('pdf_gerado', opts.tituloEstrategia || opts.subtitulo || opts.filename || ''); } catch(e){}
     } finally {
       wrap.remove();
