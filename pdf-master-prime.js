@@ -958,5 +958,5 @@
   }
 
   // ─── EXPORT PUBLIC API ───
-  window.PdfMasterPrime = { gerar, gerarComercial, preview, buildTemplate, buildTemplateComercial, _internals: { DISCLAIMER_PADRAO, NAVY, CARD_BG } };
+  window.PdfMasterPrime = { gerar, gerarComercial, preview, buildTemplate, buildTemplateComercial, LOGO_ADMIN_DATA, ADMIN_THEME, _internals: { DISCLAIMER_PADRAO, NAVY, CARD_BG } };
 })();

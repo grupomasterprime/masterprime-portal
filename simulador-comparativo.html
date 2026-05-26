@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Master Prime - Consórcio x Consórcio</title>
+<title>Master Prime - Comparativo de Administradoras</title>
 <style>
-  :root { --navy:#2D3F5E; --navy-dark:#1E2D45; --bg:#F4F5F7; --card:#FFFFFF; --border:#E5E7EB; --text:#1F2937; --text-muted:#6B7280; --soft-blue:#F1F5F9; --green:#10B981; --p1:#2D3F5E; --p2:#7C3AED; }
+  :root { --navy:#2D3F5E; --navy-dark:#1E2D45; --bg:#F4F5F7; --card:#FFFFFF; --border:#E5E7EB; --text:#1F2937; --text-muted:#6B7280; --soft-blue:#F1F5F9; --green:#10B981; --p1:#2D3F5E; --p2:#7C3AED; --p3:#DC2626; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Inter', -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
   header { background: var(--navy); color: #fff; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
@@ -58,6 +58,34 @@
   button.secondary:hover { background: var(--bg); }
   .obs-area { width: 100%; min-height: 90px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: inherit; resize: vertical; color: var(--text); background: #fff; }
   .obs-area:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(45,63,94,0.10); }
+  /* Modo 3 administradoras: a row3 vira row4 (label + p1 + p2 + p3) */
+  body.mode-3 .row3 { grid-template-columns: 220px 1fr 1fr 1fr; }
+  body.mode-3 .header-row { grid-template-columns: 220px 1fr 1fr 1fr; }
+  body.mode-3 .pos-grid { grid-template-columns: 1fr 1fr 1fr; }
+  @media (max-width: 1024px) {
+    body.mode-3 .row3 { grid-template-columns: 1fr; }
+    body.mode-3 .header-row { grid-template-columns: 1fr; }
+  }
+  /* Esconde tudo de p3 quando modo 2 (default) */
+  body:not(.mode-3) .p3-only { display: none !important; }
+  .pill-p3 { background: var(--p3); }
+  .pos-card.p3 { border-left: 4px solid var(--p3); }
+  .pos-card.p3 .tag { background: var(--p3); }
+  .mode-toggle { display: inline-flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 6px; margin: 0 auto 18px; }
+  .mode-toggle button { background: transparent; border: none; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--text-muted); cursor: pointer; }
+  .mode-toggle button.active { background: var(--navy); color: #fff; }
+  .toggle-wrap { display: flex; justify-content: center; margin-bottom: 8px; }
+  /* Picker de administradora no cabeçalho de cada coluna */
+  .admin-pick { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .admin-pick .admin-select { width: 100%; padding: 8px 30px 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 12px; font-weight: 600; background: #fff; color: var(--navy); cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; }
+  .admin-badge { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 8px; background: var(--soft-blue); border: 1px solid var(--border); min-height: 36px; }
+  .admin-badge img { width: 24px; height: 24px; object-fit: contain; }
+  .admin-badge .admin-label { font-size: 12px; font-weight: 700; color: var(--navy); letter-spacing: 0.4px; text-transform: uppercase; }
+  .admin-badge .modalidade { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+  .admin-badge.bg-porto { background: #E8EFFA; border-color: #B6CAF0; }
+  .admin-badge.bg-itau { background: #FFF1E0; border-color: #FFD9AC; }
+  .admin-badge.bg-bradesco { background: #FFE6EB; border-color: #FFB6C2; }
+
 </style>
 <script>if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('embedded');</script>
 <style>html.embedded header { display: none; } html.embedded main { padding-top: 16px; }</style>
@@ -69,21 +97,67 @@
 <script src="analitico-cet.js"></script>
 </head>
 <body>
-<header><div class="brand"><div class="brand-mark">M</div><div class="brand-text"><h1>Master Prime</h1><p>Simulador de Consórcio</p></div></div></header>
+<header><div class="brand"><div class="brand-mark">M</div><div class="brand-text"><h1>Master Prime</h1><p>Comparativo de Administradoras</p></div></div></header>
 <main>
   <div id="simStoreMount" style="max-width:1400px; margin:16px auto 0; padding:0 32px;"></div>
-  <h2 class="section-title">Consórcio x Consórcio</h2>
+  <h2 class="section-title">Comparativo de Administradoras</h2>
+  <div class="toggle-wrap">
+    <div class="mode-toggle">
+      <button type="button" id="modeBtn2" class="active" onclick="setMode(2)">Comparar 2</button>
+      <button type="button" id="modeBtn3" onclick="setMode(3)">Comparar 3</button>
+    </div>
+  </div>
+
 
   <section class="card">
     <div class="card-section-title">Comparação de Propostas
       <button type="button" class="reset-btn" id="resetP1">Limpar P1</button>
       <button type="button" class="reset-btn" id="resetP2">Limpar P2</button>
+      <button type="button" class="reset-btn p3-only" id="resetP3">Limpar P3</button>
     </div>
 
     <div class="header-row">
       <div></div>
-      <div class="prop-pill pill-p1">Proposta 1</div>
-      <div class="prop-pill pill-p2">Proposta 2</div>
+      <div class="admin-pick">
+        <select id="adminPick_p1" class="admin-select">
+          <option value="">— Selecione administradora —</option>
+          <optgroup label="Porto">
+            <option value="porto-imovel">Porto Imóvel</option>
+            <option value="porto-auto">Porto Auto</option>
+            <option value="porto-pesados">Porto Pesados</option>
+          </optgroup>
+          <optgroup label="Itaú">
+            <option value="itau-integral">Itaú Integral (sem redutor)</option>
+            <option value="itau-reduzida">Itaú Reduzida (com redutor)</option>
+          </optgroup>
+          <optgroup label="Bradesco">
+            <option value="bradesco-imovel">Bradesco Imóvel</option>
+            <option value="bradesco-auto">Bradesco Auto</option>
+          </optgroup>
+          <option value="custom">Personalizada</option>
+        </select>
+        <div class="admin-badge" id="adminBadge_p1"><span class="prop-pill pill-p1">Proposta 1</span></div>
+      </div>
+      <div class="admin-pick">
+        <select id="adminPick_p2" class="admin-select">
+          <option value="">— Selecione administradora —</option>
+          <optgroup label="Porto"><option value="porto-imovel">Porto Imóvel</option><option value="porto-auto">Porto Auto</option><option value="porto-pesados">Porto Pesados</option></optgroup>
+          <optgroup label="Itaú"><option value="itau-integral">Itaú Integral (sem redutor)</option><option value="itau-reduzida">Itaú Reduzida (com redutor)</option></optgroup>
+          <optgroup label="Bradesco"><option value="bradesco-imovel">Bradesco Imóvel</option><option value="bradesco-auto">Bradesco Auto</option></optgroup>
+          <option value="custom">Personalizada</option>
+        </select>
+        <div class="admin-badge" id="adminBadge_p2"><span class="prop-pill pill-p2">Proposta 2</span></div>
+      </div>
+      <div class="admin-pick p3-only">
+        <select id="adminPick_p3" class="admin-select">
+          <option value="">— Selecione administradora —</option>
+          <optgroup label="Porto"><option value="porto-imovel">Porto Imóvel</option><option value="porto-auto">Porto Auto</option><option value="porto-pesados">Porto Pesados</option></optgroup>
+          <optgroup label="Itaú"><option value="itau-integral">Itaú Integral (sem redutor)</option><option value="itau-reduzida">Itaú Reduzida (com redutor)</option></optgroup>
+          <optgroup label="Bradesco"><option value="bradesco-imovel">Bradesco Imóvel</option><option value="bradesco-auto">Bradesco Auto</option></optgroup>
+          <option value="custom">Personalizada</option>
+        </select>
+        <div class="admin-badge" id="adminBadge_p3"><span class="prop-pill pill-p3">Proposta 3</span></div>
+      </div>
     </div>
 
     <div class="group-header">Proposta</div>
@@ -92,21 +166,25 @@
       <div class="lbl">Crédito</div>
       <div class="field-input"><input type="text" id="credito_p1" placeholder="R$ 0,00" data-mask="money"></div>
       <div class="field-input"><input type="text" id="credito_p2" placeholder="R$ 0,00" data-mask="money"></div>
+      <div class="field-input p3-only"><input type="text" id="credito_p3" placeholder="R$ 0,00" data-mask="money"></div>
     </div>
     <div class="row3">
       <div class="lbl">Prazo (meses)</div>
       <div class="field-input"><input type="text" id="prazo_p1" placeholder="0" data-mask="int"></div>
       <div class="field-input"><input type="text" id="prazo_p2" placeholder="0" data-mask="int"></div>
+      <div class="field-input p3-only"><input type="text" id="prazo_p3" placeholder="0" data-mask="int"></div>
     </div>
     <div class="row3">
       <div class="lbl">% Taxa de administração</div>
       <div class="field-input"><input type="text" id="taxaAdm_p1" placeholder="0,00 %" data-mask="pct2"></div>
       <div class="field-input"><input type="text" id="taxaAdm_p2" placeholder="0,00 %" data-mask="pct2"></div>
+      <div class="field-input p3-only"><input type="text" id="taxaAdm_p3" placeholder="0,00 %" data-mask="pct2"></div>
     </div>
     <div class="row3">
       <div class="lbl">% Fundo de reserva</div>
       <div class="field-input"><input type="text" id="fundo_p1" placeholder="0,00 %" data-mask="pct2"></div>
       <div class="field-input"><input type="text" id="fundo_p2" placeholder="0,00 %" data-mask="pct2"></div>
+      <div class="field-input p3-only"><input type="text" id="fundo_p3" placeholder="0,00 %" data-mask="pct2"></div>
     </div>
     <div class="row3">
       <div class="lbl">Tipo de reajuste</div>
@@ -123,6 +201,18 @@
         </optgroup>
       </select></div>
       <div class="field-input"><select id="tipoReajuste_p2">
+      <div class="field-input p3-only"><select id="tipoReajuste_p3">
+        <option value="">Selecione</option>
+        <optgroup label="Aniversário da cota">
+          <option value="cota-anual">Cota - Anual</option>
+          <option value="cota-semestral">Cota - Semestral</option>
+          <option value="cota-mensal">Cota - Mensal</option>
+        </optgroup>
+        <optgroup label="Aniversário do grupo">
+          <option value="grupo-anual">Grupo - Anual</option>
+          <option value="grupo-semestral">Grupo - Semestral</option>
+        </optgroup>
+      </select></div>
         <option value="">Selecione</option>
         <optgroup label="Aniversário da cota">
           <option value="cota-anual">Cota - Anual</option>
@@ -139,6 +229,7 @@
       <div class="lbl">% Reajuste</div>
       <div class="field-input"><input type="text" id="reajuste_p1" placeholder="0,00 %" data-mask="pct2"></div>
       <div class="field-input"><input type="text" id="reajuste_p2" placeholder="0,00 %" data-mask="pct2"></div>
+      <div class="field-input p3-only"><input type="text" id="reajuste_p3" placeholder="0,00 %" data-mask="pct2"></div>
     </div>
     <div class="row3">
       <label class="toggle-lbl"><span class="toggle-input"><input type="checkbox" id="seguroOn_p1"><span class="toggle-slider"></span></span>% Seguro (P1) / P2:
@@ -146,6 +237,7 @@
       </label>
       <div class="field-input"><input type="text" id="seguro_p1" placeholder="0,0000 %" data-mask="pct4" disabled></div>
       <div class="field-input"><input type="text" id="seguro_p2" placeholder="0,0000 %" data-mask="pct4" disabled></div>
+      <div class="field-input p3-only"><input type="text" id="seguro_p3" placeholder="0,0000 %" data-mask="pct4" disabled></div>
     </div>
     <div class="row3">
       <label class="toggle-lbl"><span class="toggle-input"><input type="checkbox" id="redutorOn_p1"><span class="toggle-slider"></span></span>Redutor de parcela (P1) / P2:
@@ -153,6 +245,7 @@
       </label>
       <div class="field-input"><input type="text" id="redutor_p1" placeholder="0,00 %" data-mask="pct2" disabled></div>
       <div class="field-input"><input type="text" id="redutor_p2" placeholder="0,00 %" data-mask="pct2" disabled></div>
+      <div class="field-input p3-only"><input type="text" id="redutor_p3" placeholder="0,00 %" data-mask="pct2" disabled></div>
     </div>
     <div class="row3">
       <label class="toggle-lbl"><span class="toggle-input"><input type="checkbox" id="adesaoOn_p1"><span class="toggle-slider"></span></span>% Taxa de adesão (P1) / P2:
@@ -160,11 +253,13 @@
       </label>
       <div class="field-input"><input type="text" id="adesao_p1" placeholder="0,00 %" data-mask="pct2" disabled></div>
       <div class="field-input"><input type="text" id="adesao_p2" placeholder="0,00 %" data-mask="pct2" disabled></div>
+      <div class="field-input p3-only"><input type="text" id="adesao_p3" placeholder="0,00 %" data-mask="pct2" disabled></div>
     </div>
     <div class="row3">
       <div class="lbl" style="font-weight:700; color:var(--navy);">Parcela inicial</div>
       <div class="field-input"><input type="text" id="parcelaInicial_p1" disabled style="font-weight:600;"></div>
       <div class="field-input"><input type="text" id="parcelaInicial_p2" disabled style="font-weight:600;"></div>
+      <div class="field-input p3-only"><input type="text" id="parcelaInicial_p3" disabled style="font-weight:600;"></div>
     </div>
 
     <div class="group-header">Contemplação</div>
@@ -173,6 +268,23 @@
       <div class="lbl">Tipo de contemplação</div>
       <div class="field-input"><select id="tipoCont_p1"><option value="sorteio">Sorteio</option><option value="lance">Lance</option></select></div>
       <div class="field-input"><select id="tipoCont_p2"><option value="sorteio">Sorteio</option><option value="lance">Lance</option></select></div>
+      <div class="field-input p3-only"><select id="tipoCont_p3"><option value="sorteio">Sorteio</option><option value="lance">Lance</option></select></div>
+    </div>
+    <div class="row3">
+      <div class="lbl">Expectativa (meses)</div>
+      <div class="field-input"><input type="text" id="expectativa_p1" value="1" data-mask="int"></div>
+      <div class="field-input"><input type="text" id="expectativa_p2" value="1" data-mask="int"></div>
+    </div>
+    <div class="row3">
+      <div class="lbl">Tipo de lance</div>
+      <div class="field-input"><select id="tipoLance_p1" disabled>
+        <option value="carta">Carta de crédito</option>
+        <option value="categoria">Categoria</option>
+        <option value="saldo">Saldo devedor</option>
+        <option value="cat-carta">Categoria (Total) e Carta (Emb.)</option>
+        <option value="bradesco-imovel">Bradesco Imóvel</option>
+        <option value="bradesco-auto">Bradesco Auto</option>
+      </select></div>
     </div>
     <div class="row3">
       <div class="lbl">Expectativa (meses)</div>
@@ -190,6 +302,14 @@
         <option value="bradesco-auto">Bradesco Auto</option>
       </select></div>
       <div class="field-input"><select id="tipoLance_p2" disabled>
+      <div class="field-input p3-only"><select id="tipoLance_p3" disabled>
+        <option value="carta">Carta de crédito</option>
+        <option value="categoria">Categoria</option>
+        <option value="saldo">Saldo devedor</option>
+        <option value="cat-carta">Categoria (Total) e Carta (Emb.)</option>
+        <option value="bradesco-imovel">Bradesco Imóvel</option>
+        <option value="bradesco-auto">Bradesco Auto</option>
+      </select></div>
         <option value="carta">Carta de crédito</option>
         <option value="categoria">Categoria</option>
         <option value="saldo">Saldo devedor</option>
@@ -202,21 +322,25 @@
       <div class="lbl">Crédito atualizado</div>
       <div class="field-input"><input type="text" id="creditoAtualizado_p1" disabled></div>
       <div class="field-input"><input type="text" id="creditoAtualizado_p2" disabled></div>
+      <div class="field-input p3-only"><input type="text" id="creditoAtualizado_p3" disabled></div>
     </div>
     <div class="row3">
       <div class="lbl">Valor de referência</div>
       <div class="field-input"><input type="text" id="valorRef_p1" disabled></div>
       <div class="field-input"><input type="text" id="valorRef_p2" disabled></div>
+      <div class="field-input p3-only"><input type="text" id="valorRef_p3" disabled></div>
     </div>
     <div class="row3">
       <div class="lbl">% Lance recursos próprios</div>
       <div class="field-input"><input type="text" id="lanceP_p1" placeholder="0,0000 %" data-mask="pct4" disabled></div>
       <div class="field-input"><input type="text" id="lanceP_p2" placeholder="0,0000 %" data-mask="pct4" disabled></div>
+      <div class="field-input p3-only"><input type="text" id="lanceP_p3" placeholder="0,0000 %" data-mask="pct4" disabled></div>
     </div>
     <div class="row3">
       <div class="lbl">% Lance embutido</div>
       <div class="field-input"><input type="text" id="lanceE_p1" placeholder="0,0000 %" data-mask="pct4" disabled></div>
       <div class="field-input"><input type="text" id="lanceE_p2" placeholder="0,0000 %" data-mask="pct4" disabled></div>
+      <div class="field-input p3-only"><input type="text" id="lanceE_p3" placeholder="0,0000 %" data-mask="pct4" disabled></div>
     </div>
     <div class="row3">
       <label class="toggle-lbl"><span class="toggle-input"><input type="checkbox" id="fgtsOn_p1" disabled><span class="toggle-slider"></span></span>% Lance FGTS (P1) / P2:
@@ -224,36 +348,43 @@
       </label>
       <div class="field-input"><input type="text" id="lanceFGTS_p1" placeholder="0,0000 %" data-mask="pct4" disabled></div>
       <div class="field-input"><input type="text" id="lanceFGTS_p2" placeholder="0,0000 %" data-mask="pct4" disabled></div>
+      <div class="field-input p3-only"><input type="text" id="lanceFGTS_p3" placeholder="0,0000 %" data-mask="pct4" disabled></div>
     </div>
     <div class="row3">
       <div class="lbl">% Lance total</div>
       <div class="field-input"><input type="text" id="lanceTotalCalc_p1" placeholder="0,0000 %" disabled></div>
       <div class="field-input"><input type="text" id="lanceTotalCalc_p2" placeholder="0,0000 %" disabled></div>
+      <div class="field-input p3-only"><input type="text" id="lanceTotalCalc_p3" placeholder="0,0000 %" disabled></div>
     </div>
     <div class="row3">
       <div class="lbl">Lance recursos próprios</div>
       <div class="field-input"><input type="text" id="lanceP_v_p1" placeholder="R$ 0,00" data-mask="money" disabled></div>
       <div class="field-input"><input type="text" id="lanceP_v_p2" placeholder="R$ 0,00" data-mask="money" disabled></div>
+      <div class="field-input p3-only"><input type="text" id="lanceP_v_p3" placeholder="R$ 0,00" data-mask="money" disabled></div>
     </div>
     <div class="row3">
       <div class="lbl">Lance embutido</div>
       <div class="field-input"><input type="text" id="lanceE_v_p1" placeholder="R$ 0,00" data-mask="money" disabled></div>
       <div class="field-input"><input type="text" id="lanceE_v_p2" placeholder="R$ 0,00" data-mask="money" disabled></div>
+      <div class="field-input p3-only"><input type="text" id="lanceE_v_p3" placeholder="R$ 0,00" data-mask="money" disabled></div>
     </div>
     <div class="row3">
       <div class="lbl">Lance FGTS</div>
       <div class="field-input"><input type="text" id="lanceFGTS_v_p1" placeholder="R$ 0,00" data-mask="money" disabled></div>
       <div class="field-input"><input type="text" id="lanceFGTS_v_p2" placeholder="R$ 0,00" data-mask="money" disabled></div>
+      <div class="field-input p3-only"><input type="text" id="lanceFGTS_v_p3" placeholder="R$ 0,00" data-mask="money" disabled></div>
     </div>
     <div class="row3">
       <div class="lbl">Valor total do lance</div>
       <div class="field-input"><input type="text" id="valorTotalLance_p1" disabled></div>
       <div class="field-input"><input type="text" id="valorTotalLance_p2" disabled></div>
+      <div class="field-input p3-only"><input type="text" id="valorTotalLance_p3" disabled></div>
     </div>
     <div class="row3">
       <div class="lbl" style="font-weight:700; color:var(--navy);">Crédito disponível</div>
       <div class="field-input"><input type="text" id="creditoDisponivel_p1" disabled style="font-weight:600;"></div>
       <div class="field-input"><input type="text" id="creditoDisponivel_p2" disabled style="font-weight:600;"></div>
+      <div class="field-input p3-only"><input type="text" id="creditoDisponivel_p3" disabled style="font-weight:600;"></div>
     </div>
 
     <div class="group-header">Pós-Contemplação - Redução de Parcela</div>
@@ -273,6 +404,14 @@
         <div class="pos-row"><span>Custo da operação</span><span id="rp_custo_p2">R$ 0,00</span></div>
         <div class="pos-row"><span>CET mensal</span><span id="rp_cm_p2">0,00 %</span></div>
         <div class="pos-row"><span>CET anual</span><span style="display:inline-flex;align-items:center;gap:8px;"><span id="rp_ca_p2">0,00 %</span><button type="button" class="ace-eye" onclick="AnaliticoCet.abrir('p2_parcela')" title="Ver memória de cálculo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></div>
+      </div>
+      <div class="pos-card p3 p3-only">
+        <h4>Proposta 3<span class="tag">P3</span></h4>
+        <div class="pos-row"><span>Parcela</span><span id="rp_parc_p3">R$ 0,00</span></div>
+        <div class="pos-row"><span>Prazo restante</span><span id="rp_prazo_p3">0</span></div>
+        <div class="pos-row"><span>Custo da operação</span><span id="rp_custo_p3">R$ 0,00</span></div>
+        <div class="pos-row"><span>CET mensal</span><span id="rp_cm_p3">0,00 %</span></div>
+        <div class="pos-row"><span>CET anual</span><span style="display:inline-flex;align-items:center;gap:8px;"><span id="rp_ca_p3">0,00 %</span></span></div>
       </div>
     </div>
 
@@ -294,6 +433,14 @@
         <div class="pos-row"><span>CET mensal</span><span id="rd_cm_p2">0,00 %</span></div>
         <div class="pos-row"><span>CET anual</span><span style="display:inline-flex;align-items:center;gap:8px;"><span id="rd_ca_p2">0,00 %</span><button type="button" class="ace-eye" onclick="AnaliticoCet.abrir('p2_prazo')" title="Ver memória de cálculo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></div>
       </div>
+      <div class="pos-card p3 p3-only">
+        <h4>Proposta 3<span class="tag">P3</span></h4>
+        <div class="pos-row"><span>Parcela</span><span id="rd_parc_p3">R$ 0,00</span></div>
+        <div class="pos-row"><span>Prazo restante</span><span id="rd_prazo_p3">0</span></div>
+        <div class="pos-row"><span>Custo da operação</span><span id="rd_custo_p3">R$ 0,00</span></div>
+        <div class="pos-row"><span>CET mensal</span><span id="rd_cm_p3">0,00 %</span></div>
+        <div class="pos-row"><span>CET anual</span><span style="display:inline-flex;align-items:center;gap:8px;"><span id="rd_ca_p3">0,00 %</span></span></div>
+      </div>
     </div>
 
     <div id="vencedor" style="margin-top:18px; padding:18px; background:#ECFDF5; border:1px solid #10B981; border-radius:10px; text-align:center; font-size:14px; color:#065F46; font-weight:600; display:none;"></div>
@@ -314,6 +461,83 @@
 </main>
 
 <script>
+
+// Toggle de 2 ou 3 administradoras
+let _compareMode = 2;
+function setMode(n) {
+  _compareMode = n;
+  document.body.classList.toggle('mode-3', n === 3);
+  document.getElementById('modeBtn2').classList.toggle('active', n === 2);
+  document.getElementById('modeBtn3').classList.toggle('active', n === 3);
+  // Recalcula pra atualizar p3 caso esteja sendo mostrado
+  if (typeof recalc === 'function') recalc();
+}
+
+// Picker de administradora: ao escolher, auto-configura tipoLance + redutor + label/logo
+// Os logos vêm do pdf-master-prime.js (LOGO_ADMIN_DATA já tem em base64).
+const ADMIN_PRESETS = {
+  'porto-imovel':    { admKey: 'porto',    label: 'Porto',    modal: 'Imóvel',           tipoLance: 'carta',           redutor: false, bg: 'bg-porto' },
+  'porto-auto':      { admKey: 'porto',    label: 'Porto',    modal: 'Auto',             tipoLance: 'carta',           redutor: false, bg: 'bg-porto' },
+  'porto-pesados':   { admKey: 'porto',    label: 'Porto',    modal: 'Pesados',          tipoLance: 'carta',           redutor: false, bg: 'bg-porto' },
+  'itau-integral':   { admKey: 'itau',     label: 'Itaú',     modal: 'Integral',         tipoLance: 'carta',           redutor: false, bg: 'bg-itau' },
+  'itau-reduzida':   { admKey: 'itau',     label: 'Itaú',     modal: 'Reduzida (50%)',   tipoLance: 'carta',           redutor: true,  redutorValor: '50', bg: 'bg-itau' },
+  'bradesco-imovel': { admKey: 'bradesco', label: 'Bradesco', modal: 'Imóvel',           tipoLance: 'bradesco-imovel', redutor: false, bg: 'bg-bradesco' },
+  'bradesco-auto':   { admKey: 'bradesco', label: 'Bradesco', modal: 'Auto',             tipoLance: 'bradesco-auto',   redutor: false, bg: 'bg-bradesco' },
+  'custom':          { admKey: '',         label: 'Personalizada', modal: '',            tipoLance: '',                redutor: null,  bg: '' }
+};
+
+function aplicarAdmin(side, value) {
+  const preset = ADMIN_PRESETS[value];
+  const badge = document.getElementById('adminBadge_' + side);
+  if (!preset || !value) {
+    // Volta pro estado neutro "Proposta X"
+    const num = side === 'p1' ? 1 : side === 'p2' ? 2 : 3;
+    badge.innerHTML = `<span class="prop-pill pill-${side}">Proposta ${num}</span>`;
+    badge.className = 'admin-badge';
+    return;
+  }
+  // Atualiza badge com logo + nome
+  const logoData = (window.PdfMasterPrime && window.PdfMasterPrime.LOGO_ADMIN_DATA && preset.admKey)
+    ? window.PdfMasterPrime.LOGO_ADMIN_DATA[preset.admKey]
+    : '';
+  badge.className = 'admin-badge ' + (preset.bg || '');
+  badge.innerHTML = (logoData ? `<img src="${logoData}" alt="${preset.label}">` : '') +
+                    `<div><div class="admin-label">${preset.label}</div>` +
+                    (preset.modal ? `<div class="modalidade">${preset.modal}</div>` : '') + '</div>';
+
+  // Custom: não altera nada
+  if (value === 'custom') return;
+
+  // Auto-configura tipoLance (precisa o tipoCont estar em 'lance' pra fazer efeito)
+  // Mas seta de qualquer jeito — quando user escolher lance vai pegar o valor.
+  const sel = document.getElementById('tipoLance_' + side);
+  if (sel && preset.tipoLance) {
+    sel.value = preset.tipoLance;
+    sel.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  // Itaú Reduzida → liga redutor + valor 50%; Outras → desliga
+  const chkRed = document.getElementById('redutorOn_' + side);
+  const inpRed = document.getElementById('redutor_' + side);
+  if (preset.redutor === true) {
+    chkRed.checked = true;
+    inpRed.disabled = false;
+    if (!inpRed.value) inpRed.value = (preset.redutorValor || '0') + ',00 %';
+  } else if (preset.redutor === false) {
+    chkRed.checked = false;
+    inpRed.disabled = true;
+    inpRed.value = '';
+  }
+
+  if (typeof recalc === 'function') recalc();
+}
+
+// Wire dropdowns
+['p1','p2','p3'].forEach(s => {
+  const sel = document.getElementById('adminPick_' + s);
+  if (sel) sel.addEventListener('change', e => aplicarAdmin(s, e.target.value));
+});
+
 function maskMoney(v){const d=String(v).replace(/\D/g,'');if(!d)return'';const c=parseInt(d,10);return'R$ '+Math.floor(c/100).toLocaleString('pt-BR')+','+String(c%100).padStart(2,'0');}
 function unmaskMoney(v){const d=String(v).replace(/\D/g,'');return parseInt(d||'0',10)/100;}
 function maskPct(v,dec=2){const c=String(v).replace(',','.').replace(/[^\d.]/g,'');if(!c)return'';const n=parseFloat(c);return isNaN(n)?'':n.toFixed(dec).replace('.',',')+' %';}
@@ -337,14 +561,14 @@ function syncToggle(chkId, inputId) {
   const c = $(chkId), i = $(inputId);
   c.addEventListener('change', () => { i.disabled = !c.checked; if(!c.checked) i.value=''; recalc(); });
 }
-['p1','p2'].forEach(s=>{
+['p1','p2','p3'].forEach(s=>{
   syncToggle(`seguroOn_${s}`,`seguro_${s}`);
   syncToggle(`redutorOn_${s}`,`redutor_${s}`);
   syncToggle(`adesaoOn_${s}`,`adesao_${s}`);
 });
 
 // Tipo Contemplação habilita/desabilita Lance, em cada lado
-['p1','p2'].forEach(s=>{
+['p1','p2','p3'].forEach(s=>{
   $(`tipoCont_${s}`).addEventListener('change',e=>{
     const isLance=e.target.value==='lance';
     [`tipoLance_${s}`,`lanceP_${s}`,`lanceE_${s}`,`fgtsOn_${s}`,`lanceP_v_${s}`,`lanceE_v_${s}`].forEach(id=>{
@@ -429,7 +653,7 @@ function setupLanceReverse(s, rsId, pctId) {
     recalc();
   });
 }
-['p1','p2'].forEach(s=>{
+['p1','p2','p3'].forEach(s=>{
   setupLanceReverse(s, `lanceP_v_${s}`, `lanceP_${s}`);
   setupLanceReverse(s, `lanceE_v_${s}`, `lanceE_${s}`);
 });
@@ -447,6 +671,7 @@ function resetProposta(s) {
 }
 $('resetP1').addEventListener('click',()=>resetProposta('p1'));
 $('resetP2').addEventListener('click',()=>resetProposta('p2'));
+$('resetP3').addEventListener('click',()=>resetProposta('p3'));
 $('btnLimpar').addEventListener('click',()=>{ resetProposta('p1'); resetProposta('p2'); const obsEl=$('cxc-observacoes'); if(obsEl)obsEl.value=''; });
 $('btnLimparObs').addEventListener('click',()=>{ const obsEl=$('cxc-observacoes'); if(obsEl)obsEl.value=''; });
 
@@ -684,35 +909,37 @@ function calcProposta(s) {
 function recalc() {
   const r1 = calcProposta('p1');
   const r2 = calcProposta('p2');
+  const r3 = _compareMode === 3 ? calcProposta('p3') : null;
 
   // Vencedor = menor CET (Redução de Parcela como referência principal)
+  // Compara entre as propostas ativas (2 ou 3) que tenham CET > 0
   const v = $('vencedor');
-  const ce1 = r1.cetA.a;
-  const ce2 = r2.cetA.a;
-  if(ce1 > 0 && ce2 > 0) {
-    if(ce1 < ce2) {
-      const econ = r2.custoOpA - r1.custoOpA;
-      v.style.display = 'block';
-      v.style.background = '#ECFDF5';
-      v.style.borderColor = '#10B981';
-      v.style.color = '#065F46';
-      v.innerHTML = `<strong>PROPOSTA 1</strong> tem menor CET anual (${fmtPct(ce1,2)} vs ${fmtPct(ce2,2)}). Economia: ${fmtMoney(econ)} no Custo da Operação.`;
-    } else if(ce2 < ce1) {
-      const econ = r1.custoOpA - r2.custoOpA;
-      v.style.display = 'block';
-      v.style.background = '#F5F3FF';
-      v.style.borderColor = '#7C3AED';
-      v.style.color = '#5B21B6';
-      v.innerHTML = `<strong>PROPOSTA 2</strong> tem menor CET anual (${fmtPct(ce2,2)} vs ${fmtPct(ce1,2)}). Economia: ${fmtMoney(econ)} no Custo da Operação.`;
-    } else {
-      v.style.display = 'block';
-      v.style.background = '#F1F5F9';
-      v.style.borderColor = '#6B7280';
-      v.style.color = '#1F2937';
-      v.innerHTML = `<strong>EMPATE</strong> — ambas as propostas têm CET anual igual (${fmtPct(ce1,2)}).`;
-    }
+  const propostas = [
+    { nome: 'PROPOSTA 1', idx: 1, cet: r1.cetA.a, custo: r1.custoOpA, color: '#10B981', bg: '#ECFDF5', txt: '#065F46' },
+    { nome: 'PROPOSTA 2', idx: 2, cet: r2.cetA.a, custo: r2.custoOpA, color: '#7C3AED', bg: '#F5F3FF', txt: '#5B21B6' }
+  ];
+  if (r3) propostas.push({ nome: 'PROPOSTA 3', idx: 3, cet: r3.cetA.a, custo: r3.custoOpA, color: '#DC2626', bg: '#FEF2F2', txt: '#7F1D1D' });
+
+  const ativas = propostas.filter(p => p.cet > 0);
+  if (ativas.length < 2) { v.style.display = 'none'; return; }
+
+  ativas.sort((a,b) => a.cet - b.cet);
+  const menor = ativas[0];
+  const segundo = ativas[1];
+  if (menor.cet === segundo.cet) {
+    v.style.display = 'block';
+    v.style.background = '#F1F5F9';
+    v.style.borderColor = '#6B7280';
+    v.style.color = '#1F2937';
+    v.innerHTML = `<strong>EMPATE</strong> — propostas com CET anual igual (${fmtPct(menor.cet,2)}).`;
   } else {
-    v.style.display = 'none';
+    const econ = segundo.custo - menor.custo;
+    const outras = ativas.slice(1).map(p => `Proposta ${p.idx}: ${fmtPct(p.cet,2)}`).join(' · ');
+    v.style.display = 'block';
+    v.style.background = menor.bg;
+    v.style.borderColor = menor.color;
+    v.style.color = menor.txt;
+    v.innerHTML = `<strong>${menor.nome}</strong> tem menor CET anual (${fmtPct(menor.cet,2)}) · ${outras}. Economia vs 2º colocado: ${fmtMoney(econ)} no Custo da Operação.`;
   }
 }
 
