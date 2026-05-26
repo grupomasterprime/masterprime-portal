@@ -271,12 +271,10 @@ function renderRoom(sala, idx, now){
       const isNow  = r._ini<=now && r._fim>now;
       const isPast = r._fim<=now;
       const cor = corDoConsultor(r.consultor_auth_id, r.consultor_nome);
-      const meta = [r.cliente_nome, r.motivo].filter(Boolean).map(escapeHtml).join(' · ');
       return '<div class="ag-item '+(isNow?'now':isPast?'past':'')+'" style="--c:'+cor+'">'
         + '<div class="ag-time">'+fmtHora(r._ini)+' – '+fmtHora(r._fim)+'</div>'
         + '<div class="ag-info">'
         +   '<div class="ag-name">'+escapeHtml(r.consultor_nome||'Reserva')+'</div>'
-        +   (meta? '<div class="ag-meta">'+meta+'</div>':'')
         + '</div>'
         + (isNow? '<div class="ag-badge">AGORA</div>':'')
         + '</div>';
