@@ -175,6 +175,17 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--tex
       <textarea id="sl-motivo" placeholder="Apresentação Bradesco Imóvel, fechamento, dúvidas..."></textarea>
     </div>
 
+    <!-- Privacidade: opt-out de exibir cliente+motivo na TV da sala -->
+    <div class="fld">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;color:var(--text);text-transform:none;letter-spacing:0;font-size:13px">
+        <input type="checkbox" id="sl-ocultar" style="width:auto;margin:0">
+        Ocultar nome do cliente e motivo na TV da sala
+      </label>
+      <div style="margin-top:6px;padding-left:24px;font-size:11.5px;color:var(--text2);line-height:1.4">
+        Use em reuniões delicadas (fechamento, negociação) — a TV vai mostrar só o seu nome e o horário.
+      </div>
+    </div>
+
     <!-- Recorrência (só na criação) -->
     <div class="fld" id="fld-recorrencia">
       <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:600;color:var(--text);text-transform:none;letter-spacing:0;font-size:13px">
@@ -545,6 +556,8 @@ function abrirNovo(inicioDefault = null, fimDefault = null) {
   document.getElementById('sl-fim').value    = toLocalDatetimeInput(fim);
   document.getElementById('sl-cliente').value = '';
   document.getElementById('sl-motivo').value = '';
+  document.getElementById('sl-ocultar').checked = false;
+  document.getElementById('sl-ocultar').disabled = false;
   document.getElementById('modal-bg').classList.add('show');
   checarConflito();
 }
@@ -584,10 +597,12 @@ function abrirEditar(id) {
   document.getElementById('sl-fim').value    = toLocalDatetimeInput(new Date(r.fim));
   document.getElementById('sl-cliente').value = r.cliente_nome || '';
   document.getElementById('sl-motivo').value  = r.motivo || '';
+  document.getElementById('sl-ocultar').checked = !!r.ocultar_detalhes;
   document.getElementById('sl-inicio').disabled = !podeEditar;
   document.getElementById('sl-fim').disabled    = !podeEditar;
   document.getElementById('sl-cliente').disabled = !podeEditar;
   document.getElementById('sl-motivo').disabled  = !podeEditar;
+  document.getElementById('sl-ocultar').disabled = !podeEditar;
   document.getElementById('modal-bg').classList.add('show');
   checarConflito();
 }
@@ -675,6 +690,7 @@ async function autoRenovarSeries() {
           sala_id: ocs[0].sala_id,
           cliente_nome: ocs[0].cliente_nome,
           motivo: ocs[0].motivo,
+          ocultar_detalhes: ocs[0].ocultar_detalhes,
           recorrente_id: sid,
           inicio: i2.toISOString(),
           fim: f2.toISOString()
@@ -710,7 +726,8 @@ async function salvarReserva() {
     criado_por_auth_id: currentUser.auth_id,
     criado_por_nome: currentUser.nome,
     cliente_nome: document.getElementById('sl-cliente').value.trim() || null,
-    motivo:       document.getElementById('sl-motivo').value.trim() || null
+    motivo:       document.getElementById('sl-motivo').value.trim() || null,
+    ocultar_detalhes: document.getElementById('sl-ocultar').checked
   };
 
   const btn = document.getElementById('btn-save');

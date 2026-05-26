@@ -240,7 +240,15 @@ function renderRoom(sala, idx, now){
     const rem = Math.round((ativa._fim-now)/60000);
     detalhe = '<span class="who">'+escapeHtml(ativa.consultor_nome||'Reservada')+'</span><br>'
             + 'até '+fmtHora(ativa._fim);
-    sub = rem>0 ? 'Termina em '+fmtDur(rem) : 'Encerrando agora';
+    // Se a reserva pediu pra ocultar detalhes na TV, mostra só "Termina em..."
+    // Caso contrário, mostra cliente · motivo (se preenchidos)
+    if (ativa.ocultar_detalhes) {
+      sub = rem>0 ? 'Termina em '+fmtDur(rem) : 'Encerrando agora';
+    } else {
+      const det = [ativa.cliente_nome, ativa.motivo].filter(Boolean).map(escapeHtml).join(' · ');
+      const tempo = rem>0 ? 'Termina em '+fmtDur(rem) : 'Encerrando agora';
+      sub = det ? det + '<br><span style="opacity:.7;font-size:.9em">'+tempo+'</span>' : tempo;
+    }
   }else{
     cls='livre'; estado='LIVRE';
     if(proxima){
@@ -270,10 +278,15 @@ function renderRoom(sala, idx, now){
       const isNow  = r._ini<=now && r._fim>now;
       const isPast = r._fim<=now;
       const cor = corDoConsultor(r.consultor_auth_id, r.consultor_nome);
+      // Detalhes (cliente · motivo) só aparecem se a reserva NÃO marcou ocultar_detalhes
+      const meta = r.ocultar_detalhes
+        ? ''
+        : [r.cliente_nome, r.motivo].filter(Boolean).map(escapeHtml).join(' · ');
       return '<div class="ag-item '+(isNow?'now':isPast?'past':'')+'" style="--c:'+cor+'">'
         + '<div class="ag-time">'+fmtHora(r._ini)+' – '+fmtHora(r._fim)+'</div>'
         + '<div class="ag-info">'
         +   '<div class="ag-name">'+escapeHtml(r.consultor_nome||'Reserva')+'</div>'
+        +   (meta ? '<div class="ag-meta">'+meta+'</div>' : '')
         + '</div>'
         + (isNow? '<div class="ag-badge">AGORA</div>':'')
         + '</div>';
