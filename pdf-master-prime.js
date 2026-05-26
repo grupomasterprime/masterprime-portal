@@ -781,17 +781,8 @@
     return `
       <div style="width:1300px; background:#fff; font-family:'Inter','Helvetica Neue',-apple-system,system-ui,sans-serif; color:#0F172A; padding:44px 52px 32px; box-sizing:border-box;">
 
-        <!-- BARRA TOPO: logo Master Prime real à esquerda + pill admin à direita -->
-        <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:30px; border-bottom:1px solid #EEF2F6;">
-          <img src="${LOGO_DATA_URL}" alt="Master Prime" style="height:96px; width:auto; display:block;">
-          <div style="display:inline-flex; align-items:center; gap:9px; background:#F8FAFC; border:1px solid #E2E8F0; color:#0F172A; padding:8px 18px 8px 14px; border-radius:999px; font-size:13px; font-weight:600; letter-spacing:0.2px;">
-            <span style="width:8px; height:8px; border-radius:50%; background:${theme.corAcento};"></span>
-            ${opts.representanteTexto || theme.repTexto}
-          </div>
-        </div>
-
-        <!-- HEADER PRINCIPAL: tag + título sans + admin logo -->
-        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:34px; margin-bottom:32px;">
+        <!-- HEADER PRINCIPAL: tag + título sans + caixa dupla (MP + admin logo) -->
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:32px;">
           <div style="max-width:74%;">
             <div style="display:inline-block; font-size:11.5px; font-weight:700; color:${theme.corAcento}; letter-spacing:2px; text-transform:uppercase; margin-bottom:18px; padding:6px 14px; background:${theme.corAcento}14; border-radius:999px;">Simulação de Crédito</div>
             <div style="font-family:'Inter',-apple-system,system-ui,sans-serif; font-size:54px; font-weight:700; color:#0F172A; line-height:1.05; letter-spacing:-1.4px;">${opts.subtitulo || 'Consórcio'}</div>
