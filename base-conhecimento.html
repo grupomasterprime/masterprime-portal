@@ -239,9 +239,6 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
   </div>
 
   <div class="adm-row">
-    <button class="adm-pill" id="adm-comparar" data-adm="comparar" title="Comparar Porto, Itaú e Bradesco no mesmo card">
-      <span class="dot"></span> Comparar
-    </button>
     <button class="adm-pill" id="adm-porto" data-adm="porto">
       <span class="dot" style="background:#0a52a8"></span> Porto
     </button>
@@ -327,11 +324,12 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
   var TOPICO_ALIASES = [
     // Visão geral — apresentações da administradora
     ['o que e o', 'o que e a'],
-    ['quais sao os diferenciais da no', 'quais sao os diferenciais da'],
+    ['quais sao os diferenciais da no', 'quais sao os diferenciais da', 'por que a e uma boa escolha para o cliente'],
     ['o que a vende no portfolio', 'quais bens da para comprar com o', 'que produtos a oferece portfolio'],
     // Fundamentos
     ['o que e o grupo e a cota', 'o que e o grupo de e a cota'],
     ['do que e composta a parcela mensal', 'do que e composta a parcela'],
+    ['como as parcelas sao reajustadas', 'como a carta de credito e atualizada reajuste'],
     // Argumentos / objeções
     ['por que o cliente deve fazer um', 'quais sao as vantagens do'],
     ['o serve para formar patrimonio', 'serve como investimento e formacao de patrimonio'],
@@ -364,12 +362,13 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
     ['quais imoveis nao podem ser comprados', 'que imoveis o cliente nao pode comprar', 'o que nao e permitido na compra do imovel'],
     ['quais as etapas do processo de imovel', 'quais as etapas do faturamento do imovel'],
     ['da para comprar imovel no exterior com o', 'a carta pode ser usada para imovel no exterior ou para quitar emprestimo'],
+    ['que tipos de imovel o cliente pode comprar', 'quais sao as modalidades de aquisicao de imovel'],
     // Pagamentos
     ['quando vence a parcela do', 'quando vence a parcela'],
     ['o que acontece se o cliente atrasar a parcela', 'o que acontece se o cliente nao pagar'],
     ['o cliente pode antecipar parcelas ou quitar o', 'o cliente pode antecipar parcelas'],
     // Seguro
-    ['o que o seguro prestamista cobre', 'qual e a cobertura do seguro prestamista'],
+    ['o que o seguro prestamista cobre', 'qual e a cobertura do seguro prestamista', 'para que serve o seguro do', 'quais sao as coberturas do seguro'],
     // Canais e contatos
     ['central de relacionamento ao cliente', 'central de atendimento', 'central de atendimento ao consorciado'],
     ['atendimento ao corretor', 'o que a central de atendimento resolve para o representante', 'central do parceiro'],
@@ -378,6 +377,9 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
     // Transferência / saída / cancelamento
     ['o cliente excluido recebe o dinheiro de volta', 'o cliente que cancela recebe o dinheiro de volta'],
     ['quando o cliente e excluido do grupo', 'como funciona o cancelamento da cota'],
+    ['existe direito de arrependimento depois de assinar', 'existe direito de arrependimento depois de aderir'],
+    // Plataforma do corretor
+    ['o que e o gestao de carteira', 'como funciona a venda pela plataforma'],
     // Glossário
     ['credito', 'carta de credito'],
     ['ago', 'assembleia ago']
@@ -594,9 +596,9 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
     if (input) input.value = '';
     if (clearBtn) clearBtn.classList.remove('show');
 
-    // Esconde UI específica de banco único
+    // Mantém a busca visível (agora ela varre os 3 bancos do card).
     var _sb = document.querySelector('.search-box');
-    if (_sb) _sb.style.display = 'none';
+    if (_sb) _sb.style.display = '';
     var dlSec = document.getElementById('downloads-section');
     if (dlSec) dlSec.style.display = 'none';
     if (jumpBtn) jumpBtn.style.display = 'none';
@@ -728,13 +730,46 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
   function renderComparativo() {
     var content = document.getElementById('content');
     var info = document.getElementById('result-info');
-    if (info) info.style.display = 'none';
+    var terms = norm(query).split(/\s+/).filter(Boolean);
     var cats = COMPARE_CATS;
     if (activeChip !== 'todas') cats = COMPARE_CATS.filter(function (c) { return c.key === activeChip; });
+
+    // Busca: filtra os tópicos que casam em QUALQUER um dos 3 bancos.
+    if (terms.length) {
+      cats = cats.map(function (c) {
+        var filtrados = c.topicos.filter(function (t) {
+          var hay = norm(t.titulo);
+          ['porto', 'itau', 'bradesco'].forEach(function (bk) {
+            var e = t[bk];
+            if (e) hay += ' ' + norm((e.titulo || '') + ' ' + (e.conteudo || '') + ' ' + (e.tags || ''));
+          });
+          for (var i = 0; i < terms.length; i++) {
+            if (hay.indexOf(terms[i]) === -1) return false;
+          }
+          return true;
+        });
+        return { key: c.key, label: c.label, bancos: c.bancos, numBancos: c.numBancos, ordem: c.ordem, topicos: filtrados };
+      }).filter(function (c) { return c.topicos.length > 0; });
+    }
+
+    if (info) {
+      if (terms.length) {
+        var total = cats.reduce(function (s, c) { return s + c.topicos.length; }, 0);
+        info.style.display = 'block';
+        info.innerHTML = '<b>' + total + '</b> resultado' + (total !== 1 ? 's' : '') + ' para "' + esc(query.trim()) + '"';
+      } else {
+        info.style.display = 'none';
+      }
+    }
+
     if (!cats.length) {
-      content.innerHTML = emptyHTML('Nenhum assunto', 'Selecione um assunto na lista acima.');
+      content.innerHTML = emptyHTML(
+        terms.length ? 'Nenhum resultado' : 'Nenhum assunto',
+        terms.length ? 'Nenhum item encontrado para "' + esc(query.trim()) + '". Tente outra palavra.' : 'Selecione um assunto na lista acima.'
+      );
       return;
     }
+
     var html = '';
     cats.forEach(function (c) {
       html += '<div class="cat-section">' +
@@ -768,11 +803,14 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
         x.classList.toggle('active', x.getAttribute('data-cat') === 'todas');
       });
     }
-    render();
+    if (activeAdm === 'comparar') renderComparativo();
+    else render();
   });
   clearBtn.addEventListener('click', function () {
     query = ''; input.value = ''; clearBtn.classList.remove('show');
-    input.focus(); render();
+    input.focus();
+    if (activeAdm === 'comparar') renderComparativo();
+    else render();
   });
 
   // ── atalho: rolar até os materiais para baixar ──
