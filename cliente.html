@@ -519,8 +519,6 @@ function gerarTokenSeguro() {
 }
 
 // ─── Notificações (sininho) — avisa a equipe interna do Faturamento ───
-// Contexto anônimo: a RPC notificar_processo_token avisa todos os admins/master
-// + o consultor atribuído ao processo. Nunca quebra o fluxo do cliente.
 function clienteNotificar(token, titulo, texto) {
   if (!token) return;
   try {
@@ -1620,6 +1618,25 @@ function renderPortalProcesso(){
             <div class="empty"><div class="empty-icon">${ico('doc')}</div><div class="empty-msg">Carregando...</div></div>
           </div>
         </div>
+
+        <!-- ========== INÍCIO DA ALTERAÇÃO: CAMPO PERMANENTE PARA ENVIO DE DOCUMENTOS ========== -->
+        <div class="card" style="margin-top: 20px;">
+          <div class="card-head"><div class="card-title">${ico('upload')} Enviar novos documentos</div><div class="card-sub">Envie arquivos adicionais relacionados ao seu processo (PDF, JPG, PNG até 16MB cada)</div></div>
+          <div class="card-body">
+            <div id="alerta-upload-doc" class="alerta"></div>
+            <div class="campo">
+              <label>Descrição (opcional)</label>
+              <input type="text" id="nova-doc-desc" placeholder="Ex: Comprovante de residência atualizado">
+            </div>
+            <div class="campo">
+              <label>Arquivos <span class="req">*</span></label>
+              <input type="file" id="novos-docs-input" multiple accept=".pdf,.jpg,.jpeg,.png">
+              <div class="hint">Você pode selecionar vários arquivos de uma vez.</div>
+            </div>
+            <button class="btn btn-primary" id="btn-upload-docs" onclick="enviarNovosDocumentos()">${ico('upload')} Enviar arquivo(s)</button>
+          </div>
+        </div>
+        <!-- ========== FIM DA ALTERAÇÃO ========== -->
       </div>
 
       <div class="painel" id="painel-msg">
@@ -1678,6 +1695,71 @@ function renderPortalProcesso(){
   iniciarPolling();
 }
 
+// NOVA FUNÇÃO: Enviar documentos complementares no processo já existente
+async function enviarNovosDocumentos() {
+  const input = document.getElementById('novos-docs-input');
+  const files = input.files;
+  if (!files || files.length === 0) {
+    alerta('alerta-upload-doc', 'Selecione pelo menos um arquivo.', 'erro');
+    return;
+  }
+  const descricao = document.getElementById('nova-doc-desc')?.value.trim() || 'Documento complementar';
+  const btn = document.getElementById('btn-upload-docs');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Enviando...';
+
+  try {
+    // Obter processo_id a partir do token atual
+    const { data: proc, error: procErr } = await sb
+      .from('portal_processos')
+      .select('id')
+      .eq('token', processoAtual.token)
+      .single();
+    if (procErr || !proc) throw new Error('Processo não encontrado');
+
+    const processoId = proc.id;
+    let successCount = 0;
+
+    for (const file of files) {
+      if (file.size > 16 * 1024 * 1024) {
+        mostrarNotif(`Arquivo ${file.name} excede 16MB, ignorado.`, 'erro');
+        continue;
+      }
+      const timestamp = Date.now();
+      const safeName = file.name.replace(/[^a-zA-Z0-9.\-]/g, '_');
+      const path = `${processoAtual.token}/complementar_${timestamp}_${safeName}`;
+      const { error: uploadErr } = await sb.storage.from('arquivos').upload(path, file);
+      if (uploadErr) throw uploadErr;
+
+      const { error: insertErr } = await sb.from('portal_arquivos').insert({
+        processo_id: processoId,
+        nome_original: file.name,
+        storage_path: path,
+        categoria: 'complementar',
+        descricao: descricao
+      });
+      if (insertErr) throw insertErr;
+      successCount++;
+    }
+
+    if (successCount > 0) {
+      alerta('alerta-upload-doc', `${successCount} arquivo(s) enviado(s) com sucesso!`, 'sucesso');
+      input.value = '';
+      document.getElementById('nova-doc-desc').value = '';
+      await carregarDocumentos(); // recarregar a lista de documentos
+      clienteNotificar(processoAtual.token, 'Novo documento enviado pelo cliente', processoAtual.nome);
+    } else {
+      alerta('alerta-upload-doc', 'Nenhum arquivo enviado.', 'erro');
+    }
+  } catch (e) {
+    console.error(e);
+    alerta('alerta-upload-doc', 'Erro ao enviar: ' + e.message, 'erro');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `${ico('upload')} Enviar arquivo(s)`;
+  }
+}
+
 async function carregarDocumentos(){
   const container = document.getElementById('lista-arquivos');
   if (!container) return;
@@ -1707,12 +1789,16 @@ async function carregarDocumentos(){
   }
   container.innerHTML = data.map(arq => {
     const url = sb.storage.from('arquivos').getPublicUrl(arq.storage_path).data.publicUrl;
+    let categoriaExibicao = arq.categoria || '';
+    if (categoriaExibicao === 'complementar') {
+      categoriaExibicao = arq.descricao || 'Complementar';
+    }
     return `
     <div class="arquivo-item" onclick="window.open('${url}','_blank')" style="cursor:pointer">
       <div class="file-ico">${ico('doc')}</div>
       <div class="file-info">
         <div class="file-name">${esc(arq.nome_original)}</div>
-        <div class="file-meta">${esc(arq.categoria||'')} · ${fmtData(arq.criado_em)}</div>
+        <div class="file-meta">${esc(categoriaExibicao)} · ${fmtData(arq.criado_em)}</div>
       </div>
       <span style="font-size:10px;color:var(--mp-teal);font-weight:600">Abrir →</span>
     </div>`;
@@ -1931,7 +2017,9 @@ function alerta(id, msg, tipo){
   const el = document.getElementById(id);
   if (!el) return;
   el.className = `alerta alerta-${tipo} visivel`;
-  el.innerHTML = `${SVG[tipo==='erro'?'alert':'check']||''} ${msg}`;
+  // Fallback para ícone caso SVG não tenha a chave exata
+  const iconHtml = SVG[tipo==='erro'?'alert':(tipo==='sucesso'?'check':'alert')] || SVG.alert;
+  el.innerHTML = `${iconHtml} ${msg}`;
   setTimeout(() => el.classList.remove('visivel'), 6000);
 }
 </script>
