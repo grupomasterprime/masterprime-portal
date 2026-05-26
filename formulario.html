@@ -845,6 +845,15 @@ function preencherForm(tipo, dados) {
     if (typeof val === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(val)) {
       const [a,m,d] = val.split('-'); val = `${d}/${m}/${a}`;
     }
+    // Campos money: o banco guarda em reais, mas a máscara trata os dígitos
+    // digitados como CENTAVOS. Formata como "R$ X.XXX,YY" antes de setar —
+    // aí a máscara, ao re-rodar no evento 'input', mantém estável.
+    if (el.dataset && el.dataset.mask === 'money') {
+      const n = parseFloat(typeof val === 'string' ? val.replace(',', '.') : val);
+      if (Number.isFinite(n)) {
+        val = 'R$ ' + n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+    }
     // Mantém valor atual se já preenchido (cliente pode estar atualizando)
     if (el.value && el.value !== '—') return;
     el.value = val;
