@@ -1858,9 +1858,10 @@ async function renderUsers() {
   users.forEach(u => { u._last_login = u.ultimo_acesso || (u.auth_id ? loginsMap[u.auth_id] : null); });
   // Ranking pra medalhas: pelos campos novos total_sessoes e dias_ativos_mes
   // (só conta consultor, sócio, parceiro — admin/master não disputam)
+  // E só dá medalha pra quem tem valor > 0 (senão "ninguém usou ainda" virava campeão)
   const _rankUsers = users.filter(u => !['master','admin'].includes(u.tipo));
-  const _topSessoes = [..._rankUsers].sort((a,b)=>(b.total_sessoes||0)-(a.total_sessoes||0)).slice(0,3).map(u=>u.cpf);
-  const _topDias = [..._rankUsers].sort((a,b)=>(b.dias_ativos_mes||0)-(a.dias_ativos_mes||0)).slice(0,3).map(u=>u.cpf);
+  const _topSessoes = [..._rankUsers].filter(u => (u.total_sessoes||0) > 0).sort((a,b)=>(b.total_sessoes||0)-(a.total_sessoes||0)).slice(0,3).map(u=>u.cpf);
+  const _topDias = [..._rankUsers].filter(u => (u.dias_ativos_mes||0) > 0).sort((a,b)=>(b.dias_ativos_mes||0)-(a.dias_ativos_mes||0)).slice(0,3).map(u=>u.cpf);
   const _medal = (cpf, top) => {
     const i = top.indexOf(cpf);
     return i === 0 ? '🥇 ' : i === 1 ? '🥈 ' : i === 2 ? '🥉 ' : '';
