@@ -790,8 +790,8 @@
           </div>
           <div style="display:flex; flex-direction:column; align-items:flex-end;">
             <div style="display:flex; align-items:center; gap:14px;">
-              <div style="height:96px; padding:0 6px; border-radius:18px; background:#fff; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; box-shadow:0 1px 2px rgba(15,23,42,0.04);">
-                <img src="${LOGO_DATA_URL}" alt="Master Prime" style="height:90px; width:auto; display:block;">
+              <div style="height:96px; padding:0 4px; border-radius:18px; background:#fff; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; box-shadow:0 1px 2px rgba(15,23,42,0.04);">
+                <img src="${LOGO_DATA_URL}" alt="Master Prime" style="height:92px; width:auto; display:block;">
               </div>
               <div style="width:1px; height:56px; background:#E2E8F0;"></div>
               <div style="width:96px; height:96px; border-radius:18px; background:#fff; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; padding:10px; box-shadow:0 1px 2px rgba(15,23,42,0.04);">
