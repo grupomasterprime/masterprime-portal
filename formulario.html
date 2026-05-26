@@ -886,6 +886,14 @@ function preencherForm(tipo, dados) {
   if (lgpdEl && (dados.lgpd_aceito === true || dados.lgpd_aceito === 'true')) {
     lgpdEl.checked = true;
   }
+  // PJ tem nomes de coluna que NÃO batem com o id do campo no form:
+  //   DB nome              → form pj-razao_social
+  //   DB data_nascimento   → form pj-data_constituicao (data de constituição da empresa)
+  // Pra PF os dois batem direto e o loop acima já preenche.
+  if (tipo === 'pj') {
+    if (dados.nome) set('razao_social', dados.nome);
+    if (dados.data_nascimento) set('data_constituicao', dados.data_nascimento);
+  }
   // Marca o CEP auto-preenchido como "já buscado" pra não sobrescrever o endereço
   // à toa — mas se o cliente DIGITAR um CEP diferente, a busca atualiza normalmente.
   const cepEl = $(prefix + 'cep');
