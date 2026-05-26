@@ -186,12 +186,16 @@
         <option value="categoria">Categoria</option>
         <option value="saldo">Saldo devedor</option>
         <option value="cat-carta">Categoria (Total) e Carta (Emb.)</option>
+        <option value="bradesco-imovel">Bradesco Imóvel</option>
+        <option value="bradesco-auto">Bradesco Auto</option>
       </select></div>
       <div class="field-input"><select id="tipoLance_p2" disabled>
         <option value="carta">Carta de crédito</option>
         <option value="categoria">Categoria</option>
         <option value="saldo">Saldo devedor</option>
         <option value="cat-carta">Categoria (Total) e Carta (Emb.)</option>
+        <option value="bradesco-imovel">Bradesco Imóvel</option>
+        <option value="bradesco-auto">Bradesco Auto</option>
       </select></div>
     </div>
     <div class="row3">
@@ -354,6 +358,27 @@ function syncToggle(chkId, inputId) {
     recalc();
   });
 
+  // Tipo Lance: quando "Bradesco Imóvel/Auto", desabilita embutido + FGTS (não se aplicam)
+  $(`tipoLance_${s}`).addEventListener('change',e=>{
+    const isBrad = (e.target.value === 'bradesco-imovel' || e.target.value === 'bradesco-auto');
+    const isLance = $(`tipoCont_${s}`).value === 'lance';
+    if (isBrad) {
+      // Zera e desabilita embutido + FGTS
+      $(`lanceE_${s}`).value=''; $(`lanceE_v_${s}`).value='';
+      $(`lanceE_${s}`).disabled=true; $(`lanceE_v_${s}`).disabled=true;
+      $(`fgtsOn_${s}`).checked=false; $(`fgtsOn_${s}`).disabled=true;
+      $(`lanceFGTS_${s}`).value=''; $(`lanceFGTS_v_${s}`).value='';
+      $(`lanceFGTS_${s}`).disabled=true; $(`lanceFGTS_v_${s}`).disabled=true;
+    } else {
+      // Reabilita conforme estado normal (só se contemplação for lance)
+      $(`lanceE_${s}`).disabled=!isLance; $(`lanceE_v_${s}`).disabled=!isLance;
+      $(`fgtsOn_${s}`).disabled=!isLance;
+      $(`lanceFGTS_${s}`).disabled=!isLance || !$(`fgtsOn_${s}`).checked;
+      $(`lanceFGTS_v_${s}`).disabled=!isLance || !$(`fgtsOn_${s}`).checked;
+    }
+    recalc();
+  });
+
   // FGTS toggle (habilita % E R$ juntos)
   $(`fgtsOn_${s}`).addEventListener('change',e=>{
     $(`lanceFGTS_${s}`).disabled = !e.target.checked;
@@ -499,8 +524,10 @@ function calcProposta(s) {
   const tipoCont = $(`tipoCont_${s}`).value;
   const tipoLance = $(`tipoLance_${s}`).value;
   const pP = tipoCont==='lance' ? unmaskPct($(`lanceP_${s}`).value)/100 : 0;
-  const pE = tipoCont==='lance' ? unmaskPct($(`lanceE_${s}`).value)/100 : 0;
-  const pFGTS = (tipoCont==='lance' && $(`fgtsOn_${s}`).checked) ? unmaskPct($(`lanceFGTS_${s}`).value)/100 : 0;
+  // Bradesco (Imóvel/Auto): só usa % sobre Categoria, não tem lance embutido nem FGTS
+  const _isBrad = (tipoLance === 'bradesco-imovel' || tipoLance === 'bradesco-auto');
+  const pE = (tipoCont==='lance' && !_isBrad) ? unmaskPct($(`lanceE_${s}`).value)/100 : 0;
+  const pFGTS = (tipoCont==='lance' && !_isBrad && $(`fgtsOn_${s}`).checked) ? unmaskPct($(`lanceFGTS_${s}`).value)/100 : 0;
 
   const totalDevido = credito*(1+taxaAdm+fundo);
   const parcelaBase = prazo>0 ? totalDevido/prazo : 0;
@@ -533,12 +560,22 @@ function calcProposta(s) {
   saldoNoMomentoCont = Math.max(0, saldoNoMomentoCont);
 
   let valorRef = creditoAtualizado;
-  if(tipoLance === 'categoria' || tipoLance === 'cat-carta') valorRef = creditoAtualizado * (1 + taxaAdm + fundo);
+  // Bradesco: % lance multiplica a Categoria (Crédito × (1 + taxa adm + fundo)) e DIVIDE pelo Fator
+  // (1 + taxa de antecipação). Fator difere entre Imóvel (1,0425) e Auto (1,0525) — mesma fórmula
+  // do simulador dedicado do Bradesco.
+  const isBrad = tipoLance === 'bradesco-imovel' || tipoLance === 'bradesco-auto';
+  const fatorBrad = (tipoLance === 'bradesco-imovel') ? 1.0425
+                  : (tipoLance === 'bradesco-auto')   ? 1.0525
+                  : 1;
+  if(tipoLance === 'categoria' || tipoLance === 'cat-carta' || isBrad) valorRef = creditoAtualizado * (1 + taxaAdm + fundo);
   else if(tipoLance === 'saldo') valorRef = saldoNoMomentoCont;
   $(`valorRef_${s}`).value = fmtMoney(valorRef);
 
   const categoriaTotal = creditoAtualizado * (1 + 2 * (taxaAdm + fundo));
-  const lanceProprios_v = (tipoLance === 'cat-carta') ? categoriaTotal * pP : valorRef * pP;
+  // Bradesco aplica o fator de divisão no valor R$ final: (Categoria × % Lance) / Fator
+  const lanceProprios_v = (tipoLance === 'cat-carta')
+    ? categoriaTotal * pP
+    : (valorRef * pP) / fatorBrad;
   const lanceEmbutido_v = (tipoLance === 'cat-carta') ? creditoAtualizado * pE : valorRef * pE;
   const lanceFGTS_v = valorRef * pFGTS;
   const valorTotalLance = lanceProprios_v + lanceEmbutido_v + lanceFGTS_v;
