@@ -137,6 +137,8 @@
             <option value="categoria">Categoria</option>
             <option value="saldo">Saldo devedor</option>
             <option value="cat-carta">Categoria (Total) e Carta (Emb.)</option>
+            <option value="bradesco-imovel">Bradesco Imóvel</option>
+            <option value="bradesco-auto">Bradesco Auto</option>
           </select>
         </div>
         <div class="field"><label>Valor de referência</label><input type="text" id="valorRef" disabled></div>
@@ -406,9 +408,12 @@ function recalc(){
   const expectativa = parseInt(document.getElementById('expectativa').value||'1',10);
   const tipoCont = document.getElementById('tipoCont').value;
   const tipoLance = document.getElementById('tipoLance').value;
+  const _isBrad = (tipoLance === 'bradesco-imovel' || tipoLance === 'bradesco-auto');
+  const _fatorBrad = (tipoLance === 'bradesco-imovel') ? 1.0425 : (tipoLance === 'bradesco-auto') ? 1.0525 : 1;
   const pP = tipoCont==='lance' ? unmaskPct(document.getElementById('lanceP').value)/100 : 0;
-  const pE = tipoCont==='lance' ? unmaskPct(document.getElementById('lanceE').value)/100 : 0;
-  const pFGTS = (tipoCont==='lance' && document.getElementById('fgtsOn').checked) ? unmaskPct(document.getElementById('lanceFGTS').value)/100 : 0;
+  // Bradesco (Imóvel/Auto): só % sobre Categoria, não tem embutido nem FGTS
+  const pE = (tipoCont==='lance' && !_isBrad) ? unmaskPct(document.getElementById('lanceE').value)/100 : 0;
+  const pFGTS = (tipoCont==='lance' && !_isBrad && document.getElementById('fgtsOn').checked) ? unmaskPct(document.getElementById('lanceFGTS').value)/100 : 0;
   // Redutor de parcela: reduz a parcela paga pelo cliente em X% (sobre a parcela total).
   // Igual referencial Conkey: parcelaInicial = parcela_bruta × (1 − redutor).
   const redutorOn = document.getElementById('redutorOn').checked;
@@ -482,13 +487,15 @@ function recalc(){
 
   // Valor de referência (depende do tipo de lance)
   let valorRef = creditoAtualizado;
-  if(tipoLance === 'categoria' || tipoLance === 'cat-carta') valorRef = creditoAtualizado * (1 + taxaAdm + fundo);
+  if(tipoLance === 'categoria' || tipoLance === 'cat-carta' || _isBrad) valorRef = creditoAtualizado * (1 + taxaAdm + fundo);
   else if(tipoLance === 'saldo') valorRef = saldoNoMomentoCont;
   document.getElementById('valorRef').value = fmtMoney(valorRef);
 
-  // Lances
+  // Lances — Bradesco divide o lance R$ pelo Fator (1,0425 imóvel · 1,0525 auto)
   const categoriaTotal = creditoAtualizado * (1 + 2 * (taxaAdm + fundo));
-  const lanceProprios_v = (tipoLance === 'cat-carta') ? categoriaTotal * pP : valorRef * pP;
+  const lanceProprios_v = (tipoLance === 'cat-carta')
+    ? categoriaTotal * pP
+    : (valorRef * pP) / _fatorBrad;
   const lanceEmbutido_v = (tipoLance === 'cat-carta') ? creditoAtualizado * pE : valorRef * pE;
   const lanceFGTS_v = valorRef * pFGTS;
   const valorTotalLance = lanceProprios_v + lanceEmbutido_v + lanceFGTS_v;

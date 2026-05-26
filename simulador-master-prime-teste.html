@@ -264,6 +264,8 @@
           <option value="categoria">Categoria</option>
           <option value="saldo">Saldo devedor</option>
           <option value="cat-carta">Categoria (total) e carta (emb.)</option>
+          <option value="bradesco-imovel">Bradesco Imóvel</option>
+          <option value="bradesco-auto">Bradesco Auto</option>
         </select>
       </div>
       <div class="field"><label>Valor de referência</label><input type="text" id="valorRef" placeholder="R$ 0,00" disabled class="disabled"></div>
@@ -548,10 +550,13 @@ function recalc() {
   const tipoCont = document.getElementById('tipoContemplacao').value;
   const expectativa = parseInt(document.getElementById('expectativa').value || '1', 10);
   const tipoLance = document.getElementById('tipoLance').value;
+  const _isBrad = (tipoLance === 'bradesco-imovel' || tipoLance === 'bradesco-auto');
+  const _fatorBrad = (tipoLance === 'bradesco-imovel') ? 1.0425 : (tipoLance === 'bradesco-auto') ? 1.0525 : 1;
   const pProprios = unmaskPct(document.getElementById('lanceProprios').value) / 100;
-  const pEmbutido = unmaskPct(document.getElementById('lanceEmbutido').value) / 100;
+  // Bradesco (Imóvel/Auto): só % sobre Categoria, não tem embutido nem FGTS
+  const pEmbutido = _isBrad ? 0 : unmaskPct(document.getElementById('lanceEmbutido').value) / 100;
   const fgtsOn = document.getElementById('fgtsOn').checked;
-  const pFGTS = fgtsOn ? unmaskPct(document.getElementById('lanceFGTS').value) / 100 : 0;
+  const pFGTS = (fgtsOn && !_isBrad) ? unmaskPct(document.getElementById('lanceFGTS').value) / 100 : 0;
 
   const evolucaoOn = document.getElementById('evolucaoOn').checked;
   const selic = unmaskPct(document.getElementById('selic').value) / 100;
@@ -617,7 +622,7 @@ function recalc() {
   // === VALOR DE REFERÊNCIA ===
   let valorRef = creditoAtualizado;
   if (tipoCont !== '') {
-    if (tipoLance === 'categoria' || tipoLance === 'cat-carta') {
+    if (tipoLance === 'categoria' || tipoLance === 'cat-carta' || _isBrad) {
       valorRef = creditoAtualizado * (1 + taxaAdm + fundo);
     } else if (tipoLance === 'saldo') {
       valorRef = saldoNoMomentoCont;
@@ -630,8 +635,11 @@ function recalc() {
   //   - Lance Próprios = % × Categoria Total (= Crédito Atualizado × (1 + 2 × (adm + FR)))
   //   - Lance Embutido = % × Carta (= Crédito Atualizado)
   //   - Lance FGTS = % × Valor de Referência (sempre)
+  // Bradesco: Lance R$ = (Categoria × % Lance) / Fator (1,0425 imóvel · 1,0525 auto)
   const categoriaTotal = creditoAtualizado * (1 + 2 * (taxaAdm + fundo));
-  const lanceProprios_v = (tipoLance === 'cat-carta') ? categoriaTotal * pProprios : valorRef * pProprios;
+  const lanceProprios_v = (tipoLance === 'cat-carta')
+    ? categoriaTotal * pProprios
+    : (valorRef * pProprios) / _fatorBrad;
   const lanceEmbutido_v = (tipoLance === 'cat-carta') ? creditoAtualizado * pEmbutido : valorRef * pEmbutido;
   const lanceFGTS_v = valorRef * pFGTS;  // FGTS sempre sobre VR
   const valorTotalLance = lanceProprios_v + lanceEmbutido_v + lanceFGTS_v;

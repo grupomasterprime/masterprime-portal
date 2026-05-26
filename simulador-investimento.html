@@ -255,6 +255,8 @@
             <option value="categoria">Categoria</option>
             <option value="saldo">Saldo devedor</option>
             <option value="cat-carta">Categoria (Total) e Carta (Emb.)</option>
+            <option value="bradesco-imovel">Bradesco Imóvel</option>
+            <option value="bradesco-auto">Bradesco Auto</option>
           </select>
         </div>
         <div class="field"><label>% Lance recursos próprios</label><input type="text" id="lanceP" placeholder="0,00 %" data-mask="pct2"></div>
@@ -320,8 +322,13 @@ function calcularOperacao(op){
   const fundo=unmaskPct(op.fundo)/100;
   const reajuste=unmaskPct(op.reajuste)/100;
   const expectativa=parseInt(op.expectativa||'1',10);
+  // Bradesco (Imóvel/Auto): lance R$ = (Categoria × % Lance) / Fator (1,0425 imóvel · 1,0525 auto)
+  const _tipoLance = op.tipoLance || 'carta';
+  const _isBrad = (_tipoLance === 'bradesco-imovel' || _tipoLance === 'bradesco-auto');
+  const _fatorBrad = (_tipoLance === 'bradesco-imovel') ? 1.0425 : (_tipoLance === 'bradesco-auto') ? 1.0525 : 1;
   const pP=unmaskPct(op.lanceP)/100;
-  const pE=unmaskPct(op.lanceE)/100;
+  // Bradesco não usa lance embutido
+  const pE=_isBrad ? 0 : unmaskPct(op.lanceE)/100;
   const selic=unmaskPct(op.selic)/100;
   const rentGrupo=unmaskPct(op.rentGrupo)/100;
   const rentInv=unmaskPct(op.rentInv)/100;
@@ -340,7 +347,11 @@ function calcularOperacao(op){
   const parcelaCheia=prazo>0?(totalDevido/prazo):0;
   let creditoAtualizado=credito;
   if(reajuste>0){const num=Math.floor(expectativa/12); creditoAtualizado=credito*Math.pow(1+reajuste,num);}
-  const lanceP=creditoAtualizado*pP, lanceE=creditoAtualizado*pE;
+  // Bradesco multiplica pela Categoria (Crédito × (1+adm+fundo)) e divide pelo Fator
+  const lanceP = _isBrad
+    ? (creditoAtualizado * (1 + taxaAdm + fundo) * pP) / _fatorBrad
+    : creditoAtualizado * pP;
+  const lanceE = creditoAtualizado * pE;
   const creditoDisp=creditoAtualizado-lanceE;
 
   // SEGURO e ADESÃO — conferido no Conkey:
