@@ -175,6 +175,50 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
   .kb-q { padding: 13px 13px; font-size: 13px; }
   .kb-q .badge { display: none; }
 }
+
+/* ─── Modo Comparativo (Porto · Itaú · Bradesco lado a lado) ─── */
+.adm-pill[data-adm="comparar"] .dot {
+  background: linear-gradient(135deg, #0a52a8 0%, #EC7000 50%, var(--bradesco) 100%);
+}
+.chip .cd { display:inline-block; width:6px; height:6px; border-radius:50%; margin-right:2px; vertical-align:middle; }
+.chip .cd-porto    { background: #0a52a8; }
+.chip .cd-itau     { background: #EC7000; }
+.chip .cd-bradesco { background: var(--bradesco); }
+/* Modo Comparativo — card único que abre os 3 bancos juntos */
+.kb-bg-row { display: inline-flex; gap: 3px; margin-right: 8px; flex-shrink: 0; align-items: center; }
+.kb-bg { display: inline-block; width: 7px; height: 7px; border-radius: 50%; }
+.kb-bg-porto    { background: #0a52a8; }
+.kb-bg-itau     { background: #EC7000; }
+.kb-bg-bradesco { background: var(--bradesco); }
+.kb-merged .kb-a-inner {
+  padding-top: 0; border-top: none;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.kb-bank-block {
+  border-left: 3px solid; border-radius: 6px;
+  padding: 11px 14px 12px; background: #FBFCFE;
+}
+.kb-bank-porto    { border-color: #0a52a8; }
+.kb-bank-itau     { border-color: #EC7000; }
+.kb-bank-bradesco { border-color: var(--bradesco); }
+.kb-bank-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+.kb-bank-name {
+  font-size: 10.5px; font-weight: 800; letter-spacing: .9px;
+  text-transform: uppercase;
+}
+.kb-bank-porto .kb-bank-name    { color: #0a52a8; }
+.kb-bank-itau .kb-bank-name     { color: #EC7000; }
+.kb-bank-bradesco .kb-bank-name { color: var(--bradesco); }
+.kb-bank-subtitulo { font-size: 11.5px; color: var(--text3); font-style: italic; }
+.kb-bank-body p { font-size: 13px; line-height: 1.6; color: var(--text); margin-bottom: 8px; }
+.kb-bank-body p:last-child { margin-bottom: 0; }
+.kb-bank-body ul, .kb-bank-body ol { margin: 4px 0 10px; padding-left: 20px; }
+.kb-bank-body li { font-size: 13px; line-height: 1.55; color: var(--text); margin-bottom: 4px; }
+.kb-bank-empty { font-size: 12px; color: var(--text3); font-style: italic; padding: 4px 0 2px; }
+@media (max-width: 760px) {
+  .kb-bank-block { padding: 10px 12px 11px; }
+  .kb-bank-body p, .kb-bank-body li { font-size: 12.5px; }
+}
 </style>
 </head>
 <body>
@@ -195,14 +239,17 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
   </div>
 
   <div class="adm-row">
-    <button class="adm-pill" id="adm-bradesco" data-adm="bradesco">
-      <span class="dot" style="background:var(--bradesco)"></span> Bradesco
+    <button class="adm-pill" id="adm-comparar" data-adm="comparar" title="Comparar Porto, Itaú e Bradesco no mesmo card">
+      <span class="dot"></span> Comparar
     </button>
     <button class="adm-pill" id="adm-porto" data-adm="porto">
       <span class="dot" style="background:#0a52a8"></span> Porto
     </button>
     <button class="adm-pill" id="adm-itau" data-adm="itau">
       <span class="dot" style="background:#EC7000"></span> Itaú
+    </button>
+    <button class="adm-pill" id="adm-bradesco" data-adm="bradesco">
+      <span class="dot" style="background:var(--bradesco)"></span> Bradesco
     </button>
   </div>
 
@@ -240,7 +287,115 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
 (function () {
   var ADM = window.KB_ADMIN || {};
   var DATA = [], DOWNLOADS = [], CATS = [];
+  var COMPARE_CATS = [];
   var activeAdm = null, activeChip = 'todas', query = '';
+
+  // Categorias que cada banco nomeia diferente, mas tratam do mesmo tema.
+  var CAT_ALIASES = {
+    // Bradesco "credito_auto", Itaú "credito_veiculo", Porto "credito_movel" → mesma coisa
+    credito_auto:    'credito_movel_veiculo',
+    credito_veiculo: 'credito_movel_veiculo',
+    credito_movel:   'credito_movel_veiculo',
+    // Porto chama "transferencia", Itaú e Bradesco chamam "saida" → mesmo assunto
+    transferencia:   'saida_transferencia',
+    saida:           'saida_transferencia',
+    // Bradesco separa "objecoes" do resto; Porto e Itaú juntam tudo em "argumentos"
+    objecoes:        'argumentos'
+  };
+
+  // Rótulos genéricos das categorias no modo Comparativo.
+  var CAT_LABEL_GENERIC = {
+    visao_geral: 'Visão geral',
+    fundamentos: 'Entendendo o consórcio',
+    argumentos: 'Por que vender / objeções',
+    adesao: 'Adesão e atendimento',
+    contemplacao: 'Contemplação',
+    lance: 'Lance',
+    credito_imovel: 'Crédito — Imóvel',
+    credito_movel_veiculo: 'Crédito — Veículos e bens móveis',
+    pagamentos: 'Pagamentos e parcelas',
+    saida_transferencia: 'Transferência, cancelamento e saída',
+    seguro: 'Seguro',
+    sistema: 'Sistema e canais digitais',
+    canais: 'Canais e contatos',
+    plataforma_corretor: 'Plataforma do corretor',
+    glossario: 'Glossário'
+  };
+
+  // Equivalências de tópicos (perguntas iguais com títulos diferentes).
+  // Quando o título normalizado bate em qualquer item de um grupo, ele assume o 1º como canônico.
+  var TOPICO_ALIASES = [
+    // Visão geral — apresentações da administradora
+    ['o que e o', 'o que e a'],
+    ['quais sao os diferenciais da no', 'quais sao os diferenciais da'],
+    ['o que a vende no portfolio', 'quais bens da para comprar com o', 'que produtos a oferece portfolio'],
+    // Fundamentos
+    ['o que e o grupo e a cota', 'o que e o grupo de e a cota'],
+    ['do que e composta a parcela mensal', 'do que e composta a parcela'],
+    // Argumentos / objeções
+    ['por que o cliente deve fazer um', 'quais sao as vantagens do'],
+    ['o serve para formar patrimonio', 'serve como investimento e formacao de patrimonio'],
+    ['para que tipo de cliente o e indicado', 'para que tipo de cliente o e a melhor opcao'],
+    ['objecao o cliente acha a taxa de administracao alta', 'as taxas sao muito altas'],
+    ['o cliente diz e se eu demorar a ser contemplado', 'vou demorar muito para pegar o bem'],
+    // Contemplação
+    ['como funciona a contemplacao por sorteio', 'como funciona o sorteio'],
+    // Lance
+    ['como funciona o lance fixo', 'o que e o lance fixo'],
+    ['como e ate quando o cliente oferta o lance', 'quais sao as formas de ofertar o lance'],
+    ['diluir ou antecipar o que fazer com o lance vencedor', 'diluir ou abater o que fazer com o lance vencedor'],
+    ['qual o prazo para pagar o lance vencedor', 'qual o prazo para pagar o lance em dinheiro'],
+    ['o cliente pode usar o fgts no lance', 'como funciona o lance com fgts'],
+    ['o que e o lance quitacao', 'o que e o lance de quitacao'],
+    // Crédito — veículos e bens móveis
+    ['quais as etapas da compra depois de contemplado bens moveis', 'quais as etapas do faturamento do veiculo', 'quais as etapas para comprar o veiculo depois de contemplado'],
+    ['o que da para comprar com a carta de bens moveis', 'o que da para comprar enquadramento dos veiculos', 'o que o cliente pode fazer com a carta de credito de veiculos'],
+    ['quais documentos o cliente envia bens moveis', 'quais documentos sao necessarios para faturar o veiculo', 'quais documentos o cliente precisa apresentar'],
+    ['quanto tempo leva o processo de pos-contemplacao', 'quanto tempo leva o pagamento do veiculo', 'quanto tempo leva para o veiculo ser pago'],
+    ['e se a carta for maior ou menor que o veiculo', 'e se o veiculo custar menos que a carta de credito', 'e se a carta de credito for maior que o veiculo'],
+    ['como e avaliado o valor do veiculo', 'como e calculado o valor pago no veiculo'],
+    ['o que nao e permitido na compra de bens moveis', 'o que nao e permitido na compra do veiculo'],
+    // Crédito — imóvel
+    ['para que serve o credito do de imovel', 'o que o cliente pode fazer com a carta de credito de imovel', 'para que o cliente pode usar o credito do de imovel'],
+    ['quais documentos o cliente envia no de imovel', 'quais documentos minimos para iniciar a compra do imovel'],
+    ['como funciona o para construcao e reforma', 'como funciona usar a carta para construir ou reformar', 'como funciona a construcao e a reforma'],
+    ['qual a garantia no de imovel', 'qual e a garantia no de imovel'],
+    ['o cliente pode usar parte do credito para despesas do imovel', 'o cliente pode usar a sobra de credito para despesas do imovel'],
+    ['quais imoveis nao podem ser comprados', 'que imoveis o cliente nao pode comprar', 'o que nao e permitido na compra do imovel'],
+    ['quais as etapas do processo de imovel', 'quais as etapas do faturamento do imovel'],
+    ['da para comprar imovel no exterior com o', 'a carta pode ser usada para imovel no exterior ou para quitar emprestimo'],
+    // Pagamentos
+    ['quando vence a parcela do', 'quando vence a parcela'],
+    ['o que acontece se o cliente atrasar a parcela', 'o que acontece se o cliente nao pagar'],
+    ['o cliente pode antecipar parcelas ou quitar o', 'o cliente pode antecipar parcelas'],
+    // Seguro
+    ['o que o seguro prestamista cobre', 'qual e a cobertura do seguro prestamista'],
+    // Canais e contatos
+    ['central de relacionamento ao cliente', 'central de atendimento', 'central de atendimento ao consorciado'],
+    ['atendimento ao corretor', 'o que a central de atendimento resolve para o representante', 'central do parceiro'],
+    ['sac ouvidoria e sinistro', 'sac e ouvidoria'],
+    ['esteira do cliente e site', 'canais digitais e site', 'quais servicos o cliente faz nos canais digitais'],
+    // Transferência / saída / cancelamento
+    ['o cliente excluido recebe o dinheiro de volta', 'o cliente que cancela recebe o dinheiro de volta'],
+    ['quando o cliente e excluido do grupo', 'como funciona o cancelamento da cota'],
+    // Glossário
+    ['credito', 'carta de credito'],
+    ['ago', 'assembleia ago']
+  ];
+
+  // Normaliza um título para gerar uma "chave de tópico" comparável entre bancos.
+  function topicoChave(titulo) {
+    var s = String(titulo || '')
+      .toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[?!,.;:()"'—–]/g, ' ')
+      .replace(/\b(porto|itau|bradesco|consorcio|consorcios)\b/g, '')
+      .replace(/\s+/g, ' ').trim();
+    for (var i = 0; i < TOPICO_ALIASES.length; i++) {
+      if (TOPICO_ALIASES[i].indexOf(s) !== -1) return TOPICO_ALIASES[i][0];
+    }
+    return s;
+  }
 
   // ── helpers ──
   function esc(s) {
@@ -296,6 +451,9 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
     var d = ADM[key];
     if (!d) return;
     activeAdm = key;
+    // Restaura UI específica de banco único (pode ter vindo do modo Comparativo)
+    var _sb = document.querySelector('.search-box');
+    if (_sb) _sb.style.display = '';
     DATA = (d.entradas || []).slice().sort(function (a, b) {
       return (a.categoria_ordem - b.categoria_ordem) || (a.ordem - b.ordem);
     });
@@ -428,6 +586,169 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
     }).join('');
   }
 
+  // ── modo Comparativo: UM card por assunto, abre os 3 bancos juntos ──
+  function loadComparativo() {
+    activeAdm = 'comparar';
+    query = '';
+    activeChip = 'todas';
+    if (input) input.value = '';
+    if (clearBtn) clearBtn.classList.remove('show');
+
+    // Esconde UI específica de banco único
+    var _sb = document.querySelector('.search-box');
+    if (_sb) _sb.style.display = 'none';
+    var dlSec = document.getElementById('downloads-section');
+    if (dlSec) dlSec.style.display = 'none';
+    if (jumpBtn) jumpBtn.style.display = 'none';
+    if (foot) foot.innerHTML = 'Comparativo das três administradoras no mesmo card — abra um assunto e veja Porto, Itaú e Bradesco juntos.';
+
+    document.querySelectorAll('.adm-pill[data-adm]').forEach(function (p) {
+      p.classList.toggle('active', p.getAttribute('data-adm') === 'comparar');
+    });
+
+    // Constrói: categoria -> tópico -> { porto, itau, bradesco }
+    COMPARE_CATS = [];
+    var catMap = {};
+    ['porto', 'itau', 'bradesco'].forEach(function (bk) {
+      var d = ADM[bk]; if (!d) return;
+      (d.entradas || []).forEach(function (e) {
+        var catKey = CAT_ALIASES[e.categoria_key] || e.categoria_key;
+        if (!catMap[catKey]) {
+          catMap[catKey] = {
+            key: catKey,
+            label: CAT_LABEL_GENERIC[catKey] || e.categoria_label,
+            ordem: e.categoria_ordem || 999,
+            topicMap: {},
+            bancos: { porto: 0, itau: 0, bradesco: 0 }
+          };
+        }
+        var c = catMap[catKey];
+        var topicKey = topicoChave(e.titulo);
+        if (!c.topicMap[topicKey]) {
+          c.topicMap[topicKey] = {
+            titulo: e.titulo,                  // 1º encontrado (Porto > Itaú > Bradesco, nessa ordem)
+            porto: null, itau: null, bradesco: null,
+            ordemMin: e.ordem || 999
+          };
+        }
+        if (!c.topicMap[topicKey][bk]) c.topicMap[topicKey][bk] = e;
+        if (e.ordem && e.ordem < c.topicMap[topicKey].ordemMin) c.topicMap[topicKey].ordemMin = e.ordem;
+        c.bancos[bk]++;
+        if (e.categoria_ordem && e.categoria_ordem < c.ordem) c.ordem = e.categoria_ordem;
+      });
+    });
+
+    Object.keys(catMap).forEach(function (k) {
+      var c = catMap[k];
+      c.numBancos = (c.bancos.porto > 0 ? 1 : 0) + (c.bancos.itau > 0 ? 1 : 0) + (c.bancos.bradesco > 0 ? 1 : 0);
+      c.topicos = Object.values(c.topicMap).map(function (t) {
+        t.numBancos = (t.porto ? 1 : 0) + (t.itau ? 1 : 0) + (t.bradesco ? 1 : 0);
+        return t;
+      }).sort(function (a, b) {
+        return (b.numBancos - a.numBancos) || (a.ordemMin - b.ordemMin);
+      });
+      delete c.topicMap;
+      COMPARE_CATS.push(c);
+    });
+
+    // Ordenação: glossário SEMPRE por último; o resto por nº de bancos (desc) e ordem original.
+    COMPARE_CATS.sort(function (a, b) {
+      var ag = a.key === 'glossario' ? 1 : 0;
+      var bg = b.key === 'glossario' ? 1 : 0;
+      if (ag !== bg) return ag - bg;
+      return (b.numBancos - a.numBancos) || (a.ordem - b.ordem) || a.label.localeCompare(b.label);
+    });
+
+    buildChipsComparativo();
+    renderComparativo();
+  }
+
+  function buildChipsComparativo() {
+    var box = document.getElementById('chips');
+    var totalTopicos = COMPARE_CATS.reduce(function (s, c) { return s + c.topicos.length; }, 0);
+    var html = '<button class="chip active" data-cat="todas">Todos os assuntos <span class="c-count">' + totalTopicos + '</span></button>';
+    COMPARE_CATS.forEach(function (c) {
+      var dots = '';
+      if (c.bancos.porto)    dots += '<span class="cd cd-porto" title="Porto"></span>';
+      if (c.bancos.itau)     dots += '<span class="cd cd-itau" title="Itaú"></span>';
+      if (c.bancos.bradesco) dots += '<span class="cd cd-bradesco" title="Bradesco"></span>';
+      html += '<button class="chip" data-cat="' + c.key + '">' + dots + ' ' + esc(c.label) +
+              ' <span class="c-count">' + c.topicos.length + '</span></button>';
+    });
+    box.innerHTML = html;
+    box.querySelectorAll('.chip').forEach(function (ch) {
+      ch.addEventListener('click', function () {
+        activeChip = ch.getAttribute('data-cat');
+        box.querySelectorAll('.chip').forEach(function (x) { x.classList.remove('active'); });
+        ch.classList.add('active');
+        renderComparativo();
+        try { window.scrollTo(0, 0); } catch (e) {}
+      });
+    });
+  }
+
+  // Renderiza um bloco por banco dentro do card mesclado.
+  function bankBlockHTML(bankKey, bankNome, entry) {
+    if (!entry) {
+      return '<div class="kb-bank-block kb-bank-' + bankKey + '">' +
+        '<div class="kb-bank-head"><span class="kb-bank-name">' + bankNome + '</span></div>' +
+        '<div class="kb-bank-empty">Informação ainda não disponível por essa administradora.</div>' +
+      '</div>';
+    }
+    return '<div class="kb-bank-block kb-bank-' + bankKey + '">' +
+      '<div class="kb-bank-head">' +
+        '<span class="kb-bank-name">' + bankNome + '</span>' +
+        '<span class="kb-bank-subtitulo">' + esc(entry.titulo) + '</span>' +
+      '</div>' +
+      '<div class="kb-bank-body">' + renderConteudo(entry.conteudo) + '</div>' +
+    '</div>';
+  }
+
+  // Um card por assunto: clica → abre Porto/Itaú/Bradesco empilhados.
+  function mergedItemHTML(t) {
+    var badges = '';
+    if (t.porto)    badges += '<span class="kb-bg kb-bg-porto" title="Porto"></span>';
+    if (t.itau)     badges += '<span class="kb-bg kb-bg-itau" title="Itaú"></span>';
+    if (t.bradesco) badges += '<span class="kb-bg kb-bg-bradesco" title="Bradesco"></span>';
+
+    return '<div class="kb-item kb-merged">' +
+      '<button class="kb-q">' +
+        '<span class="kb-bg-row">' + badges + '</span>' +
+        '<span class="q-text">' + esc(t.titulo) + '</span>' +
+        '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>' +
+      '</button>' +
+      '<div class="kb-a"><div class="kb-a-inner">' +
+        bankBlockHTML('porto', 'PORTO', t.porto) +
+        bankBlockHTML('itau', 'ITAÚ', t.itau) +
+        bankBlockHTML('bradesco', 'BRADESCO', t.bradesco) +
+      '</div></div>' +
+    '</div>';
+  }
+
+  function renderComparativo() {
+    var content = document.getElementById('content');
+    var info = document.getElementById('result-info');
+    if (info) info.style.display = 'none';
+    var cats = COMPARE_CATS;
+    if (activeChip !== 'todas') cats = COMPARE_CATS.filter(function (c) { return c.key === activeChip; });
+    if (!cats.length) {
+      content.innerHTML = emptyHTML('Nenhum assunto', 'Selecione um assunto na lista acima.');
+      return;
+    }
+    var html = '';
+    cats.forEach(function (c) {
+      html += '<div class="cat-section">' +
+        '<div class="cat-head"><span class="cat-name">' + esc(c.label) + '</span>' +
+        '<span class="cat-count">' + c.topicos.length + '</span></div>';
+      c.topicos.forEach(function (t) { html += mergedItemHTML(t); });
+      html += '</div>';
+    });
+    content.innerHTML = html;
+    content.querySelectorAll('.kb-q').forEach(function (btn) {
+      btn.addEventListener('click', function () { btn.parentElement.classList.toggle('open'); });
+    });
+  }
+
   function emptyHTML(title, desc) {
     return '<div class="empty">' +
       '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>' +
@@ -470,15 +791,23 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
   document.querySelectorAll('.adm-pill[data-adm]').forEach(function (p) {
     p.addEventListener('click', function () {
       var k = p.getAttribute('data-adm');
-      if (k === activeAdm || !ADM[k]) return;
-      loadAdmin(k);
+      if (k === activeAdm) return;
+      if (k === 'comparar') {
+        loadComparativo();
+      } else if (ADM[k]) {
+        loadAdmin(k);
+      } else {
+        return;
+      }
       try { window.scrollTo(0, 0); } catch (e) {}
     });
   });
 
   // ── init ──
   document.querySelectorAll('.adm-pill[data-adm]').forEach(function (p) {
-    if (!ADM[p.getAttribute('data-adm')]) { p.disabled = true; p.classList.add('soon'); }
+    var k = p.getAttribute('data-adm');
+    // "comparar" não corresponde a um banco em ADM — sempre habilitado.
+    if (k !== 'comparar' && !ADM[k]) { p.disabled = true; p.classList.add('soon'); }
   });
   var first = ADM['bradesco'] ? 'bradesco' : (ADM['porto'] ? 'porto' : null);
   if (!first) {

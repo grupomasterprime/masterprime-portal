@@ -241,7 +241,6 @@ function renderRoom(sala, idx, now){
     detalhe = '<span class="who">'+escapeHtml(ativa.consultor_nome||'Reservada')+'</span><br>'
             + 'até '+fmtHora(ativa._fim);
     sub = rem>0 ? 'Termina em '+fmtDur(rem) : 'Encerrando agora';
-    if(ativa.cliente_nome) sub += ' · Cliente: '+escapeHtml(ativa.cliente_nome);
   }else{
     cls='livre'; estado='LIVRE';
     if(proxima){
