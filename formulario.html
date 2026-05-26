@@ -1329,15 +1329,6 @@ function buildFormPJ() {
     </div>
 
     <div class="card">
-      <h3>Seguro do Consórcio</h3>
-      <div class="grid-2">
-        <div class="field"><label>Aceita contratar o seguro?<span class="req">*</span></label><select id="pj-aceita_seguro" required>
-          <option value="">—</option><option value="true">Sim</option><option value="false">Não</option>
-        </select></div>
-      </div>
-    </div>
-
-    <div class="card">
       <div class="lgpd">
         <label>
           <input type="checkbox" id="pj-lgpd">
@@ -1563,7 +1554,8 @@ function coletarPJ() {
     dac: get('dac'),
     nome_correntista: get('razao_social').trim(),
     cnpj_correntista: unmaskNum(get('cnpj')),
-    aceita_seguro: get('aceita_seguro'),
+    // PJ não tem seguro de vida — empresa não tem vida. Mandado como 'Não' fixo.
+    aceita_seguro: 'Não',
     observacoes: obs,
     lgpd_aceito: $('pj-lgpd').checked ? 'true' : 'false'
   };
@@ -1656,7 +1648,7 @@ function validarPJ(d) {
     if (!ag || !cc) return `Para Débito Automático ${ADMINS_LABEL[d.administradora]||''}, preencha a conta corrente`;
   }
   if (!d.banco_codigo || !d.agencia || !d.conta_corrente || !d.dac) return 'Preencha os dados bancários da empresa (selecione o banco da lista, agência, conta e dígito)';
-  if (!d.aceita_seguro) return 'Informe se aceita o seguro';
+  // PJ não tem seguro de vida — empresa não tem vida. Validação removida.
   if (d.lgpd_aceito !== 'true') return 'É necessário aceitar a autorização LGPD para prosseguir';
   return null;
 }
