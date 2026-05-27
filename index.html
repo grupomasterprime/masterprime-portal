@@ -1857,9 +1857,9 @@ async function renderUsers() {
   // Último acesso REAL ao portal (ultimo_acesso); cai pro último login se vazio
   users.forEach(u => { u._last_login = u.ultimo_acesso || (u.auth_id ? loginsMap[u.auth_id] : null); });
   // Ranking pra medalhas: pelos campos novos total_sessoes e dias_ativos_mes
-  // (só conta consultor, sócio, parceiro — admin/master não disputam)
+  // Todos os tipos disputam (master, admin, sócio, parceiro, consultor) — quem mais usa, ganha
   // E só dá medalha pra quem tem valor > 0 (senão "ninguém usou ainda" virava campeão)
-  const _rankUsers = users.filter(u => !['master','admin'].includes(u.tipo));
+  const _rankUsers = users;
   const _topSessoes = [..._rankUsers].filter(u => (u.total_sessoes||0) > 0).sort((a,b)=>(b.total_sessoes||0)-(a.total_sessoes||0)).slice(0,3).map(u=>u.cpf);
   const _topDias = [..._rankUsers].filter(u => (u.dias_ativos_mes||0) > 0).sort((a,b)=>(b.dias_ativos_mes||0)-(a.dias_ativos_mes||0)).slice(0,3).map(u=>u.cpf);
   const _medal = (cpf, top) => {
@@ -1916,7 +1916,7 @@ async function renderUsers() {
       ? `<span class="senha-cell" data-senha="${(u.senha+'').replace(/"/g,'&quot;')}" style="display:inline-flex;align-items:center;gap:6px"><span class="senha-val mono" style="font-size:11px">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span><button type="button" onclick="toggleSenhaCell(this)" title="Mostrar/ocultar senha" style="background:none;border:0;padding:2px;cursor:pointer;color:var(--text3)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span>`
       : '<span style="color:var(--text3)">&mdash;</span>';
     const canDel = u.cpf !== currentUser.cpf;
-    // Contadores de uso: medalha se top 3 (entre consultor/sócio/parceiro)
+    // Contadores de uso: medalha se top 3 (todos os tipos disputam, inclusive master/admin)
     const sessoesNum = u.total_sessoes || 0;
     const diasNum = u.dias_ativos_mes || 0;
     const sessoesCell = `<span style="font-size:11.5px;font-weight:600;color:var(--text)" title="Total de sessões (gaps de 30min+)">${_medal(u.cpf, _topSessoes)}${sessoesNum}</span>`;
