@@ -6,6 +6,7 @@
   <title>Master Prime — Portal do Cliente</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
+    /* ===== ESTILOS (mantidos do original) ===== */
     :root{
       --mp-navy:#2D3F5E; --mp-navy-2:#1E2D45; --mp-teal:#4DBCC8; --mp-teal-2:#3AA7B3;
       --mp-yellow:#F4C24A; --mp-amber:#E89D3A;
@@ -46,32 +47,6 @@
     .header-tag{font-size:10px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:1.6px;}
 
     .container{max-width:960px;margin:0 auto;padding:36px 22px 80px}
-
-    .cliente-hero{
-      display:grid; grid-template-columns:1.1fr .9fr; gap:24px;
-      align-items:center; margin-bottom:22px;
-      padding:30px 32px; border-radius:18px;
-      background:linear-gradient(135deg, var(--mp-navy) 0%, #344A6E 100%);
-      color:#fff;
-      box-shadow:0 18px 44px rgba(45,63,94,.24);
-      position:relative; overflow:hidden;
-    }
-    .cliente-hero::before{
-      content:""; position:absolute; right:-60px; top:-60px;
-      width:240px; height:240px; border-radius:50%;
-      background:radial-gradient(circle, rgba(77,188,200,.20), transparent 60%);
-    }
-    .cliente-hero h1{font-size:24px;font-weight:800;margin-bottom:8px;letter-spacing:-.3px;line-height:1.2}
-    .cliente-hero p{font-size:13px;color:rgba(255,255,255,.78);line-height:1.55;max-width:520px}
-    .cliente-hero-panel{
-      border:1px solid rgba(255,255,255,.16);
-      background:rgba(255,255,255,.08);
-      backdrop-filter:blur(8px);
-      border-radius:12px; padding:18px;
-      font-size:12px; color:rgba(255,255,255,.86);
-      position:relative; z-index:1;
-    }
-    .cliente-hero-panel strong{display:block;color:#fff;margin-bottom:6px;font-size:13px}
 
     .card{
       background:var(--card); border-radius:var(--r);
@@ -156,6 +131,15 @@
     .campo textarea{resize:vertical;min-height:64px;font-family:inherit}
     .campo .hint{font-size:11px;color:var(--text3);margin-top:4px}
 
+    .checkbox-lgpd{
+      display:flex; gap:12px; align-items:flex-start;
+      background:#F9FAFB; padding:14px 16px; border-radius:10px;
+      margin:12px 0; border:1px solid #E2E8F0;
+    }
+    .checkbox-lgpd input{margin-top:2px; width:18px; height:18px; cursor:pointer}
+    .checkbox-lgpd label{font-size:12px; line-height:1.5; color:var(--text2); cursor:pointer}
+    .checkbox-lgpd strong{color:var(--mp-navy)}
+
     .tipo-pessoa-selector{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
     .tipo-pessoa-btn{
       padding:14px 18px; border-radius:12px; border:2px solid var(--border2);
@@ -219,12 +203,6 @@
     .proc-meta{font-size:11px;color:var(--text2);display:flex;flex-wrap:wrap;gap:6px}
     .proc-meta .mono{font-family:var(--fonte-mono);font-weight:700;color:var(--text)}
     .proc-arrow{color:var(--text3);font-weight:700;font-size:14px}
-
-    .protocolo-bar{background:#fff; border:1px solid var(--border);border-radius:14px; padding:18px 22px;display:grid; grid-template-columns:1.1fr 1fr 1fr; gap:22px; align-items:center;margin-bottom:18px; box-shadow:var(--shadow);}
-    .protocolo-num{font-family:var(--fonte-mono); font-size:18px; font-weight:700;color:var(--mp-navy); letter-spacing:.6px; line-height:1.1;}
-    .protocolo-pendente{font-size:12px;color:var(--amber);font-weight:600;display:flex;align-items:center;gap:6px}
-    .protocolo-label{font-size:9.5px; font-weight:700; text-transform:uppercase; letter-spacing:.7px;color:var(--text3); margin-bottom:4px;}
-    .protocolo-actions{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
 
     .stepper{background:#fff; border:1px solid var(--border); border-radius:14px;padding:24px 26px; margin-bottom:18px;display:flex; gap:0; box-shadow:var(--shadow);overflow-x:auto;}
     .step{display:flex; flex-direction:column; align-items:center;flex:1; min-width:90px; position:relative;}
@@ -544,7 +522,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   else renderTelaConsulta();
 });
 
-// ════════════════ TELA CONSULTA (REDESENHADA) ════════════════
+// ════════════════ TELA CONSULTA ════════════════
 function renderTelaConsulta(){
   root.innerHTML = `
     <div class="container">
@@ -558,19 +536,13 @@ function renderTelaConsulta(){
             <p>Inicie um novo processo ou acompanhe o andamento de um processo existente.</p>
           </div>
           <div class="start-body">
-
-            <!-- BOTÃO PRINCIPAL: Iniciar novo processo em destaque -->
             <button class="btn-cta" onclick="renderTelaSelecaoBanco()">
               ${ico('plus','ico ico-lg')} Iniciar novo processo
             </button>
-
             <div style="margin-top:10px;font-size:11px;color:var(--text3);text-align:center;">
               Preencha os dados e envie seus documentos online
             </div>
-
             <div class="start-divider">já tenho um processo</div>
-
-            <!-- BOTÃO SECUNDÁRIO: Consultar processo -->
             <div id="alerta-consulta" class="alerta" style="margin-bottom:12px"></div>
             <div class="campo">
               <label>CPF ou CNPJ</label>
@@ -895,8 +867,6 @@ function renderTelaCadastro(banco, operacao){
   } else if (banco.id === 'bradesco') {
     html += `
         ${renderBlocoTipoPessoa()}
-
-        <!-- ALERTA BRADESCO: documentos obrigatórios -->
         <div class="bradesco-doc-alert">
           ${ico('alert')}
           <div>
@@ -910,7 +880,6 @@ function renderTelaCadastro(banco, operacao){
             <p style="margin-top:6px;font-size:11px;color:#991B1B;">⚠️ O processo <strong>não será enviado</strong> sem esses documentos.</p>
           </div>
         </div>
-
         <div class="card">
           <div class="card-head"><div class="card-title">${ico('user')} Dados do Consorciado</div></div>
           <div class="card-body">
@@ -998,7 +967,6 @@ function renderTelaCadastro(banco, operacao){
             </div>
           </div>
         </div>
-        <!-- Dados bancários do vendedor (Bradesco) -->
         <div class="card">
           <div class="card-head"><div class="card-title">${ico('user')} Dados do Vendedor do Veículo</div></div>
           <div class="card-body">
@@ -1065,7 +1033,6 @@ function renderTelaCadastro(banco, operacao){
             <div class="campo"><label>OBSERVAÇÕES</label><textarea id="f-descricao" placeholder="Descreva detalhes do seu caso (opcional)..."></textarea></div>
           </div>
         </div>
-        <!-- Dados bancários do vendedor -->
         <div class="card">
           <div class="card-head"><div class="card-title">${ico('bank')} Dados Bancários do Vendedor (para pagamento)</div></div>
           <div class="card-body">
@@ -1125,6 +1092,16 @@ function renderTelaCadastro(banco, operacao){
           </div>
         </div>`;
   }
+
+  html += `
+      <div class="checkbox-lgpd">
+        <input type="checkbox" id="autorizacao-lgpd" required>
+        <label for="autorizacao-lgpd">
+          <strong>Autorização de uso de dados (LGPD)</strong><br>
+          Autorizo a <strong>Master Prime</strong> a utilizar meus dados pessoais fornecidos neste formulário para fins de análise de crédito, processamento do consórcio, comunicação sobre o andamento do processo e demais finalidades relacionadas, conforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018). Declaro que li e concordo com os termos.
+        </label>
+      </div>
+  `;
 
   html += `
       <div class="card">
@@ -1243,6 +1220,12 @@ async function enviarCadastro(){
     alerta('alerta-cadastro','Selecione banco e tipo de operação.','erro'); return;
   }
 
+  const autorizacao = document.getElementById('autorizacao-lgpd')?.checked;
+  if (!autorizacao) {
+    alerta('alerta-cadastro','Você precisa autorizar o uso dos seus dados conforme a LGPD para prosseguir.','erro');
+    return;
+  }
+
   let nome, cpf, grupo, cota, email, tel, corretor=null, descricao=null, cedente=null, cessionario=null;
   let dadosExtras = null;
   const estadoCivil = document.getElementById('f-estado_civil')?.value || '';
@@ -1308,19 +1291,10 @@ async function enviarCadastro(){
       if (g && c) gruposCotas.push({ grupo: g, cota: c });
     });
 
-    // Validações Bradesco – bloqueia se faltar algum dos 4 obrigatórios
-    if (!arquivosPendentes['comprovante_residencia']) {
-      return alerta('alerta-cadastro','⚠️ Anexe o Comprovante de residência (conta de luz, água etc.).','erro');
-    }
-    if (!arquivosPendentes['comprovante_renda']) {
-      return alerta('alerta-cadastro','⚠️ Anexe o Comprovante de renda (holerite, extrato ou IR).','erro');
-    }
-    if (!arquivosPendentes['documento_foto']) {
-      return alerta('alerta-cadastro','⚠️ Anexe o Documento com foto do consorciado (RG ou CNH).','erro');
-    }
-    if (!arquivosPendentes['documento_foto_vendedor']) {
-      return alerta('alerta-cadastro','⚠️ Anexe o Documento com foto do vendedor (RG ou CNH).','erro');
-    }
+    if (!arquivosPendentes['comprovante_residencia']) return alerta('alerta-cadastro','⚠️ Anexe o Comprovante de residência.','erro');
+    if (!arquivosPendentes['comprovante_renda']) return alerta('alerta-cadastro','⚠️ Anexe o Comprovante de renda.','erro');
+    if (!arquivosPendentes['documento_foto']) return alerta('alerta-cadastro','⚠️ Anexe o Documento com foto do consorciado.','erro');
+    if (!arquivosPendentes['documento_foto_vendedor']) return alerta('alerta-cadastro','⚠️ Anexe o Documento com foto do vendedor.','erro');
 
     dadosExtras = {
       banco: bancoSelecionado.id, tipo_operacao: operacaoSelecionada.id, tipo_pessoa: tipoPessoa,
@@ -1328,22 +1302,26 @@ async function enviarCadastro(){
       representante_legal: { nome: repNome, cpf: repCpf, email: repEmail },
       consorciado: {
         nome, cpf, tipo_pessoa: tipoPessoa, data_nasc: document.getElementById('f-data_nasc')?.value, estado_civil: estadoCivil,
-        doc_id: document.getElementById('f-doc_id')?.value, tipo_doc: document.getElementById('f-tipo_doc')?.value, data_expedicao: document.getElementById('f-data_expedicao')?.value,
-        orgao_emissor: document.getElementById('f-orgao_emissor')?.value, renda: obterValorReal('f-renda'), cargo: document.getElementById('f-cargo')?.value,
-        nacionalidade: document.getElementById('f-nacionalidade')?.value, estado_naturalidade: document.getElementById('f-estado_naturalidade')?.value,
+        doc_id: document.getElementById('f-doc_id')?.value, tipo_doc: document.getElementById('f-tipo_doc')?.value,
+        data_expedicao: document.getElementById('f-data_expedicao')?.value,
+        orgao_emissor: document.getElementById('f-orgao_emissor')?.value, renda: obterValorReal('f-renda'),
+        cargo: document.getElementById('f-cargo')?.value, nacionalidade: document.getElementById('f-nacionalidade')?.value,
+        estado_naturalidade: document.getElementById('f-estado_naturalidade')?.value,
         celular: tel, email, endereco: document.getElementById('f-endereco')?.value
       },
       dados_bancarios: {
         nome: document.getElementById('f-banco-nome')?.value || nome,
-        banco: document.getElementById('f-banco')?.value, agencia: document.getElementById('f-agencia')?.value, conta: document.getElementById('f-conta')?.value,
-        digito: document.getElementById('f-conta_digito')?.value || null, tipo_conta: document.getElementById('f-tipo_conta')?.value
+        banco: document.getElementById('f-banco')?.value, agencia: document.getElementById('f-agencia')?.value,
+        conta: document.getElementById('f-conta')?.value, digito: document.getElementById('f-conta_digito')?.value || null,
+        tipo_conta: document.getElementById('f-tipo_conta')?.value
       },
       grupos_cotas: gruposCotas,
       veiculo: {
-        chassi: document.getElementById('f-chassi')?.value, placa: document.getElementById('f-placa')?.value, renavam: document.getElementById('f-renavam')?.value,
-        uf_lic: document.getElementById('f-uf_lic')?.value, marca: document.getElementById('f-marca')?.value, modelo: document.getElementById('f-modelo')?.value,
-        cor: document.getElementById('f-cor_veiculo')?.value, ano_fab: document.getElementById('f-ano_fab')?.value, ano_modelo: document.getElementById('f-ano_modelo')?.value,
-        valor_venda: obterValorReal('f-valor_venda')
+        chassi: document.getElementById('f-chassi')?.value, placa: document.getElementById('f-placa')?.value,
+        renavam: document.getElementById('f-renavam')?.value, uf_lic: document.getElementById('f-uf_lic')?.value,
+        marca: document.getElementById('f-marca')?.value, modelo: document.getElementById('f-modelo')?.value,
+        cor: document.getElementById('f-cor_veiculo')?.value, ano_fab: document.getElementById('f-ano_fab')?.value,
+        ano_modelo: document.getElementById('f-ano_modelo')?.value, valor_venda: obterValorReal('f-valor_venda')
       },
       vendedor: {
         nome: document.getElementById('f-vend-nome')?.value, cpf: (document.getElementById('f-vend-cpf')?.value||'').replace(/\D/g,''),
@@ -1402,13 +1380,15 @@ async function enviarCadastro(){
         valor_venda: valorVenda,
         corretor, descricao,
         vendedor: {
-          nome: document.getElementById('f-vendedor-nome')?.value, cpf: (document.getElementById('f-vendedor-cpf')?.value||'').replace(/\D/g,''),
+          nome: document.getElementById('f-vendedor-nome')?.value,
+          cpf: (document.getElementById('f-vendedor-cpf')?.value||'').replace(/\D/g,''),
           endereco: document.getElementById('f-vendedor-endereco')?.value,
           banco: vendBanco, agencia: document.getElementById('f-vendedor-agencia')?.value, conta: vendConta,
           digito: document.getElementById('f-vendedor-digito')?.value || null,
           tipo_conta: document.getElementById('f-vendedor-tipo_conta')?.value,
           pix: document.getElementById('f-vendedor-pix')?.value,
-          email: document.getElementById('f-vendedor-email')?.value, telefone: document.getElementById('f-vendedor-telefone')?.value
+          email: document.getElementById('f-vendedor-email')?.value,
+          telefone: document.getElementById('f-vendedor-telefone')?.value
         }
       };
     } else {
@@ -1416,7 +1396,6 @@ async function enviarCadastro(){
     }
   }
 
-  // Documentos obrigatórios (validação final para todas as administradoras)
   const docsObrigatorios = operacaoSelecionada.documentos.filter(d => d.obrigatorio);
   for (const cat of docsObrigatorios){
     if (!arquivosPendentes[cat.key]) return alerta('alerta-cadastro', `Anexo obrigatório: ${cat.label}.`, 'erro');
@@ -1493,7 +1472,6 @@ function renderTelaSucesso(token, cpf) {
             <p>Seus dados e documentos foram recebidos com sucesso.<br>Nossa equipe entrará em contato em breve.</p>
           </div>
           <div class="start-body">
-
             <div style="background:var(--green-bg);border:1.5px solid #86EFAC;border-radius:12px;padding:18px 20px;margin-bottom:18px;">
               <div style="font-size:13px;font-weight:700;color:#166534;margin-bottom:12px;display:flex;align-items:center;gap:8px">
                 ${ico('check')} Como acompanhar seu processo
@@ -1513,7 +1491,6 @@ function renderTelaSucesso(token, cpf) {
                 </div>
               </div>
             </div>
-
             <div style="background:var(--bg);border:1.5px solid var(--border2);border-radius:10px;padding:14px 16px;margin-bottom:16px;">
               <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-bottom:8px">Link para consulta</div>
               <div style="display:flex;gap:8px;align-items:center">
@@ -1524,12 +1501,10 @@ function renderTelaSucesso(token, cpf) {
                 </button>
               </div>
             </div>
-
             <div style="background:var(--amber-bg);border:1px solid #FCD34D;border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:12px;color:#92400E;line-height:1.6;display:flex;gap:8px;align-items:flex-start;">
               ${ico('alert')}
               <span><strong>Importante:</strong> O protocolo será gerado pela nossa equipe após contato com a Administradora. Fique atento às mensagens no portal.</span>
             </div>
-
             <button class="btn-cta" onclick="renderTelaConsulta()" style="margin-bottom:10px">
               ${ico('search')} Consultar meu processo agora
             </button>
@@ -1565,29 +1540,120 @@ async function carregarProcesso(token){
   renderPortalProcesso();
 }
 
+// ─── Card simples com os contatos da administradora ───
+function getContatoBanco(bancoId, bancoNome) {
+  const id = (bancoId || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const nome = (bancoNome || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  if (id === 'porto' || nome.includes('porto')) {
+    return `
+    <div class="card" style="border-top:4px solid #003C8A; margin-top:20px;">
+      <div class="card-head">
+        <div class="card-title">🏢 Porto Seguro — Canais de atendimento</div>
+      </div>
+      <div class="card-body">
+        <p><strong>(11) 3366-3006</strong> — São Paulo e Grande São Paulo</p>
+        <p><strong>0800 721 3006</strong> — demais regiões</p>
+        <p><strong>WhatsApp: (11) 3003-9303</strong></p>
+        <p><strong>0800 727 8736</strong> — Exclusivo para pessoas com deficiência auditiva</p>
+      </div>
+    </div>`;
+  } else if (id === 'itau' || id === 'itaú' || nome.includes('itau')) {
+    return `
+    <div class="card" style="border-top:4px solid #EC7000; margin-top:20px;">
+      <div class="card-head">
+        <div class="card-title">🏦 Itaú Consórcio — Canais de atendimento</div>
+      </div>
+      <div class="card-body">
+        <p><strong>SAC Itaú Consórcio: 0800 728 0728</strong> — diariamente, 24h</p>
+        <p><strong>Ouvidoria Corporativa Itaú: 0800 570 0011</strong> — dias úteis, das 9h às 18h</p>
+        <p><strong>0800 722 1722</strong> — Pessoas com deficiência auditiva e de fala, todos os dias, 24h</p>
+      </div>
+    </div>`;
+  } else if (id === 'bradesco' || nome.includes('bradesco')) {
+    return `
+    <div class="card" style="border-top:4px solid #CC092F; margin-top:20px;">
+      <div class="card-head">
+        <div class="card-title">🏛️ Bradesco — Central de Relacionamento</div>
+      </div>
+      <div class="card-body">
+        <p><strong>4004 4436</strong> — capitais e regiões metropolitanas</p>
+        <p><strong>0800 722 4436</strong> — demais localidades</p>
+        <p>Atendimento de segunda a sexta, das 8h às 20h (exceto feriados). O atendimento eletrônico funciona 24 horas, 7 dias por semana. A central não recebe ligações de celulares e telefones públicos.</p>
+      </div>
+    </div>`;
+  }
+  return '';
+}
+
+function formatarCpfCnpj(valor) {
+  if (!valor) return '-';
+  const num = valor.replace(/\D/g, '');
+  if (num.length === 11) return num.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+  if (num.length === 14) return num.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+  return valor;
+}
+
 function renderPortalProcesso(){
   const p = processoAtual;
   if (!p) return;
   const idxEtapa = ETAPAS.findIndex(e => e.status === p.status);
   const protocolo = p.protocolo || null;
-  const bancoObj = BANCOS.find(b => b.id === p.banco) || { nome: 'Banco', corPrimaria: '#2D3F5E', corPrimariaDark: '#1E2D45' };
+
+  // 🔍 IDENTIFICAÇÃO ROBUSTA DO BANCO (usa dados_extras.banco)
+  let bancoId = '';
+  if (p.dados_extras && p.dados_extras.banco) {
+    bancoId = p.dados_extras.banco;
+  } else if (p.banco) {
+    bancoId = p.banco;
+  }
+  bancoId = (bancoId || '').toString().toLowerCase().trim();
+
+  const bancoObj = BANCOS.find(b => b.id === bancoId) || { nome: 'Banco', corPrimaria: '#2D3F5E', corPrimariaDark: '#1E2D45' };
+  const bancoNome = p.banco_to_nome || bancoObj.nome;
+  const tipoOp = p.dados_extras?.tipo_operacao
+    ? p.dados_extras.tipo_operacao.charAt(0).toUpperCase() + p.dados_extras.tipo_operacao.slice(1)
+    : 'Faturamento';
+
+  const dadosClienteHtml = `
+    <div class="card" style="margin-bottom:18px;overflow:hidden">
+      <div style="padding:24px 26px;background:linear-gradient(135deg,${bancoObj.corPrimaria} 0%,${bancoObj.corPrimariaDark} 100%)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+          <div>
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,255,255,.6);margin-bottom:8px">${esc(bancoNome)} · ${esc(tipoOp)}</div>
+            <div style="font-size:19px;font-weight:800;color:#fff;margin-bottom:4px">${esc(p.nome)}</div>
+            <div style="font-size:12px;color:rgba(255,255,255,.75)">${formatarCpfCnpj(p.cpf)}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:10px;color:rgba(255,255,255,.6);margin-bottom:5px">Status</div>
+            <span class="tag ${tagClass(p.status)}" style="font-size:12px">${esc(p.status)}</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px">
+          <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:10px;padding:10px 14px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text3);margin-bottom:3px">Protocolo</div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);font-family:var(--fonte-mono)">${protocolo ? esc(protocolo) : '<span style="font-family:var(--fonte);font-weight:400;color:var(--text3);font-size:12px">Aguardando</span>'}</div>
+          </div>
+          <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:10px;padding:10px 14px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text3);margin-bottom:3px">Grupo · Cota</div>
+            <div style="font-size:13px;font-weight:700;color:var(--text)">${esc(p.grupo)||'-'} · ${esc(p.cota)||'-'}</div>
+          </div>
+          ${p.email ? `<div style="background:#F8FAFC;border:1px solid var(--border);border-radius:10px;padding:10px 14px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text3);margin-bottom:3px">E-mail</div><div style="font-size:12px;font-weight:600;color:var(--text);word-break:break-all">${esc(p.email)}</div></div>` : ''}
+          ${p.telefone ? `<div style="background:#F8FAFC;border:1px solid var(--border);border-radius:10px;padding:10px 14px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text3);margin-bottom:3px">WhatsApp</div><div style="font-size:13px;font-weight:700;color:var(--text)">${esc(p.telefone)}</div></div>` : ''}
+          <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:10px;padding:10px 14px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text3);margin-bottom:3px">Abertura</div>
+            <div style="font-size:12px;font-weight:600;color:var(--text)">${fmtData(p.criado_em)}</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  const contatoAdmHtml = getContatoBanco(bancoId, bancoNome);
 
   root.innerHTML = `
     <div class="container">
-      <div class="cliente-hero" style="background:linear-gradient(135deg, ${bancoObj.corPrimaria} 0%, ${bancoObj.corPrimariaDark||'#1E2D45'} 100%)">
-        <div>
-          <h1>${esc(p.nome)}</h1>
-          <p>${esc(p.banco_to_nome || bancoObj.nome)}</p>
-        </div>
-        <div class="cliente-hero-panel">
-          <strong>Protocolo</strong>
-          ${protocolo
-            ? `<span style="font-family:var(--fonte-mono);font-size:16px">${esc(protocolo)}</span>`
-            : `<span style="color:rgba(255,255,255,.6);font-size:13px;font-style:italic">Aguardando atribuição</span>`
-          }
-        </div>
-      </div>
-
       <div class="stepper">
         ${ETAPAS.map((etapa, i) => `
           <div class="step ${i<idxEtapa?'concluido':''} ${i===idxEtapa?'atual':''}">
@@ -1596,6 +1662,8 @@ function renderPortalProcesso(){
           </div>
         `).join('')}
       </div>
+
+      ${dadosClienteHtml}
 
       ${!protocolo ? `
       <div class="alerta alerta-aviso visivel" style="margin-bottom:18px">
@@ -1618,10 +1686,13 @@ function renderPortalProcesso(){
             <div class="empty"><div class="empty-icon">${ico('doc')}</div><div class="empty-msg">Carregando...</div></div>
           </div>
         </div>
-
-        <!-- ========== INÍCIO DA ALTERAÇÃO: CAMPO PERMANENTE PARA ENVIO DE DOCUMENTOS ========== -->
-        <div class="card" style="margin-top: 20px;">
-          <div class="card-head"><div class="card-title">${ico('upload')} Enviar novos documentos</div><div class="card-sub">Envie arquivos adicionais relacionados ao seu processo (PDF, JPG, PNG até 16MB cada)</div></div>
+        <div class="card" style="margin-top:20px;">
+          <div class="card-head">
+            <div>
+              <div class="card-title">${ico('upload')} Enviar novos documentos</div>
+              <div class="card-sub">Envie arquivos adicionais relacionados ao seu processo (PDF, JPG, PNG até 16MB cada)</div>
+            </div>
+          </div>
           <div class="card-body">
             <div id="alerta-upload-doc" class="alerta"></div>
             <div class="campo">
@@ -1636,7 +1707,6 @@ function renderPortalProcesso(){
             <button class="btn btn-primary" id="btn-upload-docs" onclick="enviarNovosDocumentos()">${ico('upload')} Enviar arquivo(s)</button>
           </div>
         </div>
-        <!-- ========== FIM DA ALTERAÇÃO ========== -->
       </div>
 
       <div class="painel" id="painel-msg">
@@ -1661,6 +1731,8 @@ function renderPortalProcesso(){
           </div>
         </div>
       </div>
+
+      ${contatoAdmHtml}
 
       <div class="footer-info">
         <h3>Termos e Responsabilidades</h3>
@@ -1695,7 +1767,7 @@ function renderPortalProcesso(){
   iniciarPolling();
 }
 
-// NOVA FUNÇÃO: Enviar documentos complementares no processo já existente
+// Enviar documentos complementares
 async function enviarNovosDocumentos() {
   const input = document.getElementById('novos-docs-input');
   const files = input.files;
@@ -1709,16 +1781,16 @@ async function enviarNovosDocumentos() {
   btn.innerHTML = '<span class="spinner"></span> Enviando...';
 
   try {
-    // Obter processo_id a partir do token atual
     const { data: proc, error: procErr } = await sb
       .from('portal_processos')
       .select('id')
       .eq('token', processoAtual.token)
       .single();
-    if (procErr || !proc) throw new Error('Processo não encontrado');
+    if (procErr || !proc) throw new Error('Processo não encontrado: ' + procErr?.message);
 
     const processoId = proc.id;
     let successCount = 0;
+    const errors = [];
 
     for (const file of files) {
       if (file.size > 16 * 1024 * 1024) {
@@ -1728,28 +1800,41 @@ async function enviarNovosDocumentos() {
       const timestamp = Date.now();
       const safeName = file.name.replace(/[^a-zA-Z0-9.\-]/g, '_');
       const path = `${processoAtual.token}/complementar_${timestamp}_${safeName}`;
+      
       const { error: uploadErr } = await sb.storage.from('arquivos').upload(path, file);
-      if (uploadErr) throw uploadErr;
-
+      if (uploadErr) {
+        errors.push(`${file.name}: ${uploadErr.message}`);
+        continue;
+      }
+      
       const { error: insertErr } = await sb.from('portal_arquivos').insert({
         processo_id: processoId,
         nome_original: file.name,
         storage_path: path,
         categoria: 'complementar',
-        descricao: descricao
+        descricao: descricao || null
       });
-      if (insertErr) throw insertErr;
+      if (insertErr) {
+        errors.push(`${file.name}: erro no banco - ${insertErr.message}`);
+        await sb.storage.from('arquivos').remove([path]);
+        continue;
+      }
       successCount++;
     }
 
-    if (successCount > 0) {
-      alerta('alerta-upload-doc', `${successCount} arquivo(s) enviado(s) com sucesso!`, 'sucesso');
-      input.value = '';
-      document.getElementById('nova-doc-desc').value = '';
-      await carregarDocumentos(); // recarregar a lista de documentos
-      clienteNotificar(processoAtual.token, 'Novo documento enviado pelo cliente', processoAtual.nome);
-    } else {
-      alerta('alerta-upload-doc', 'Nenhum arquivo enviado.', 'erro');
+if (successCount > 0) {
+  // Pop-up simples e discreto (substitui o alerta grande)
+  mostrarNotif(`${successCount} arquivo(s) enviado(s) com sucesso!`, 'ok');
+  
+  input.value = '';
+  const descInput = document.getElementById('nova-doc-desc');
+  if (descInput) descInput.value = '';
+  
+  await carregarDocumentos();
+  clienteNotificar(processoAtual.token, 'Novo documento enviado pelo cliente', processoAtual.nome);
+} else {
+      const msg = errors.length ? `Erros: ${errors.join('; ')}` : 'Nenhum arquivo enviado.';
+      alerta('alerta-upload-doc', msg, 'erro');
     }
   } catch (e) {
     console.error(e);
@@ -1765,21 +1850,22 @@ async function carregarDocumentos(){
   if (!container) return;
 
   let data, error;
-  const rpcRes = await sb.rpc('cliente_listar_arquivos', { p_token: processoAtual.token });
-  data = rpcRes.data; error = rpcRes.error;
-
-  if (error) {
-    const { data: proc } = await sb
-      .from('portal_processos').select('id').eq('token', processoAtual.token).single();
-    if (proc) {
-      const fb = await sb.from('portal_arquivos')
-        .select('*').eq('processo_id', proc.id).order('criado_em');
-      data = fb.data; error = fb.error;
+  try {
+    const rpcRes = await sb.rpc('cliente_listar_arquivos', { p_token: processoAtual.token });
+    data = rpcRes.data; error = rpcRes.error;
+    if (error) {
+      const { data: proc } = await sb.from('portal_processos').select('id').eq('token', processoAtual.token).single();
+      if (proc) {
+        const fb = await sb.from('portal_arquivos').select('*').eq('processo_id', proc.id).order('criado_em');
+        data = fb.data; error = fb.error;
+      }
     }
+  } catch(e) {
+    error = e;
   }
 
   if (error) {
-    container.innerHTML = '<div class="empty"><div class="empty-msg" style="color:var(--red)">Erro ao carregar documentos.</div></div>';
+    container.innerHTML = `<div class="empty"><div class="empty-msg" style="color:var(--red)">Erro ao carregar documentos: ${error.message}</div></div>`;
     return;
   }
   if (!data?.length){
@@ -1811,17 +1897,18 @@ async function carregarMensagens(){
   if (!timeline) return;
 
   let data, error;
-  const rpcRes = await sb.rpc('cliente_listar_mensagens', { p_token: processoAtual.token });
-  data = rpcRes.data; error = rpcRes.error;
-
-  if (error) {
-    const { data: proc } = await sb
-      .from('portal_processos').select('id').eq('token', processoAtual.token).single();
-    if (proc) {
-      const fb = await sb.from('portal_mensagens')
-        .select('*').eq('processo_id', proc.id).order('criado_em');
-      data = fb.data; error = fb.error;
+  try {
+    const rpcRes = await sb.rpc('cliente_listar_mensagens', { p_token: processoAtual.token });
+    data = rpcRes.data; error = rpcRes.error;
+    if (error) {
+      const { data: proc } = await sb.from('portal_processos').select('id').eq('token', processoAtual.token).single();
+      if (proc) {
+        const fb = await sb.from('portal_mensagens').select('*').eq('processo_id', proc.id).order('criado_em');
+        data = fb.data; error = fb.error;
+      }
     }
+  } catch(e) {
+    error = e;
   }
 
   if (error) {
@@ -1851,17 +1938,18 @@ async function carregarHistorico(){
   if (!hist) return;
 
   let data, error;
-  const rpcRes = await sb.rpc('cliente_listar_historico_status', { p_token: processoAtual.token });
-  data = rpcRes.data; error = rpcRes.error;
-
-  if (error) {
-    const { data: proc } = await sb
-      .from('portal_processos').select('id').eq('token', processoAtual.token).single();
-    if (proc) {
-      const fb = await sb.from('portal_historico')
-        .select('*').eq('processo_id', proc.id).order('criado_em', { ascending: false });
-      data = fb.data; error = fb.error;
+  try {
+    const rpcRes = await sb.rpc('cliente_listar_historico_status', { p_token: processoAtual.token });
+    data = rpcRes.data; error = rpcRes.error;
+    if (error) {
+      const { data: proc } = await sb.from('portal_processos').select('id').eq('token', processoAtual.token).single();
+      if (proc) {
+        const fb = await sb.from('portal_historico').select('*').eq('processo_id', proc.id).order('criado_em', { ascending: false });
+        data = fb.data; error = fb.error;
+      }
     }
+  } catch(e) {
+    error = e;
   }
 
   if (error) {
@@ -1894,20 +1982,22 @@ async function enviarMensagem(){
   textarea.disabled = true;
 
   let error = null;
-  const rpcRes = await sb.rpc('cliente_enviar_mensagem', {
-    p_token: processoAtual.token,
-    p_texto: txt,
-    p_autor: 'cliente'
-  });
-  error = rpcRes.error;
-
-  if (error) {
-    const { data: proc, error: ep } = await sb
-      .from('portal_processos').select('id').eq('token', processoAtual.token).single();
-    if (!ep && proc) {
-      const ins = await sb.from('portal_mensagens').insert({ processo_id: proc.id, autor: 'cliente', texto: txt });
-      error = ins.error;
+  try {
+    const rpcRes = await sb.rpc('cliente_enviar_mensagem', {
+      p_token: processoAtual.token,
+      p_texto: txt,
+      p_autor: 'cliente'
+    });
+    error = rpcRes.error;
+    if (error) {
+      const { data: proc, error: ep } = await sb.from('portal_processos').select('id').eq('token', processoAtual.token).single();
+      if (!ep && proc) {
+        const ins = await sb.from('portal_mensagens').insert({ processo_id: proc.id, autor: 'cliente', texto: txt });
+        error = ins.error;
+      }
     }
+  } catch(e) {
+    error = e;
   }
 
   if (btn){ btn.disabled=false; btn.innerHTML=ico('send'); }
@@ -2017,7 +2107,6 @@ function alerta(id, msg, tipo){
   const el = document.getElementById(id);
   if (!el) return;
   el.className = `alerta alerta-${tipo} visivel`;
-  // Fallback para ícone caso SVG não tenha a chave exata
   const iconHtml = SVG[tipo==='erro'?'alert':(tipo==='sucesso'?'check':'alert')] || SVG.alert;
   el.innerHTML = `${iconHtml} ${msg}`;
   setTimeout(() => el.classList.remove('visivel'), 6000);
