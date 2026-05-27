@@ -858,6 +858,11 @@ window.KB_ADMIN["itau"] = {
       "titulo": "Central de Atendimento — o que resolve",
       "descricao": "Guia das jornadas do consórcio: o que a Central de Atendimento resolve e o que é autosserviço nos canais digitais.",
       "arquivo": "kb-itau-central-atendimento.pdf"
+    },
+    {
+      "titulo": "Guia do Consorciado — Itaú",
+      "descricao": "Material oficial do Itaú para o cliente: linha do tempo do consórcio, serviços disponíveis (2ª via, contemplação, cancelamento, atualização cadastral, IR, resgate), canais de atendimento e dicas.",
+      "arquivo": "kb-itau-guia-consorciado.pdf"
     }
   ]
 };
