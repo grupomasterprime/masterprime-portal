@@ -125,18 +125,25 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 .app.sb-collapsed .sb-user-name, .app.sb-collapsed .sb-user-role { display:none; }
 .app.sb-collapsed .sb-logout { font-size:0; padding:6px 4px; }
 .app.sb-collapsed .sb-logout::before { content:"↩"; font-size:14px; }
-/* Botão flutuante de toggle (canto sup-direito da sidebar) */
+/* Botão flutuante de toggle — POSITION FIXED pra não ser cortado pela
+   sidebar (que tem overflow-y:auto). Aparece encavalado na borda direita
+   da sidebar; muda de posição quando recolhe. */
 .sb-collapse-btn {
-  position:absolute; top:14px; right:-12px; z-index:10;
+  position:fixed; top:14px; left:228px; z-index:120;
   width:24px; height:24px; border-radius:50%; background:var(--mp-yellow);
   color:var(--mp-navy); border:2px solid var(--sidebar-bg); cursor:pointer;
   display:flex; align-items:center; justify-content:center; font-weight:700;
-  box-shadow:0 2px 6px rgba(0,0,0,.25); transition:transform .25s ease;
+  box-shadow:0 2px 6px rgba(0,0,0,.25); transition:left .25s ease, transform .15s ease;
   font-family:'Inter',sans-serif; font-size:11px; line-height:1;
 }
 .sb-collapse-btn:hover { transform:scale(1.1); }
-.app.sb-collapsed .sb-collapse-btn { transform:rotate(180deg); }
+.app.sb-collapsed ~ .sb-collapse-btn,
+.app.sb-collapsed .sb-collapse-btn { left:52px; transform:rotate(180deg); }
 .app.sb-collapsed .sb-collapse-btn:hover { transform:rotate(180deg) scale(1.1); }
+/* Quando recolhida, o conteúdo principal expande pra usar o espaço extra
+   (em vez de só deslocar pra esquerda). Cap em 1500px pra não ficar absurdo. */
+.app.sb-collapsed .screen { max-width:1500px; }
+.app.embedded .sb-collapse-btn { display:none; }
 @media (max-width:768px) { .sb-collapse-btn { display:none; } .app.sb-collapsed { grid-template-columns:1fr; } }
 /* Botão flutuante para reabrir o menu do portal quando em tela cheia */
 .portal-menu-fab {
@@ -352,9 +359,10 @@ body.embedded-mode .portal-menu-fab { display:flex; }
   <div class="sidebar-backdrop" onclick="toggleSidebar()"></div>
   <button class="portal-menu-fab" id="portal-menu-fab" onclick="exitEmbedded()" title="Voltar ao menu do portal"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <div class="app" id="portal-app">
+    <!-- Botão recolher/expandir sidebar (modo "mais espaço" — inspirado no Conkey).
+         Fica FORA da sidebar pra não ser cortado pelo overflow nem deslocado pelo transform. -->
+    <button class="sb-collapse-btn" onclick="toggleSidebarCollapse()" title="Recolher menu lateral" aria-label="Recolher menu">‹</button>
     <aside class="sidebar" id="sidebar">
-      <!-- Botão recolher/expandir sidebar (modo "mais espaço" — inspirado no Conkey) -->
-      <button class="sb-collapse-btn" onclick="toggleSidebarCollapse()" title="Recolher menu lateral" aria-label="Recolher menu">‹</button>
       <div class="sb-logo">
         <img src="logo.png" alt="Master Prime" style="width:100%;max-width:200px;height:auto;display:block;margin:0 auto;filter:brightness(0) invert(1)">
       </div>
