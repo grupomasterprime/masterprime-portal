@@ -452,18 +452,25 @@ function calcularOperacao(op){
   const lucroImoveisReal     = stImoveis  - totalPagoForLucro;
   const lucroDiferencaReal   = stImoveis  + stDiferenca - totalPagoForLucro;
   const lucroPrevidenciaReal = stPrevidencia - totalPagoForLucro;
+  // IR 15% sobre o LUCRO da Venda da Cota (alíquota fixa de Ganho de Capital,
+  // conferido contra Conkey). Só aplica se lucro > 0; prejuízo não tem imposto.
+  // Demais estratégias: lucroLiq = lucroReal (IR regressivo já está embutido
+  // dentro de stDiferenca/stPrevidencia para fluxos de RF; valorização do
+  // imóvel fica como ganho contábil sem IR neste cenário de comparação).
+  const IR_VENDA = 0.15;
+  const lucroVendaLiq = lucroVendaReal > 0 ? lucroVendaReal * (1 - IR_VENDA) : lucroVendaReal;
   let melhor;
   if (pE > 0) {
     melhor = {key:'previdencia', valor: stPrevidencia, lucro: lucroPrevidenciaReal, lucroLiq: lucroPrevidenciaReal, aporteRf: totalPagoConsorcio, prazoRf: prazo};
   } else {
     const cands = [
-      {key:'venda',       valor: stVenda,                  lucro: lucroVendaReal,       lucroLiq: lucroVendaReal,       aporteRf: valorInvestidoAteCont, prazoRf: expectativa},
+      {key:'venda',       valor: stVenda,                  lucro: lucroVendaReal,       lucroLiq: lucroVendaLiq,        aporteRf: valorInvestidoAteCont, prazoRf: expectativa},
       {key:'imoveis',     valor: stImoveis,                lucro: lucroImoveisReal,     lucroLiq: lucroImoveisReal,     aporteRf: totalPagoConsorcio,    prazoRf: prazo},
       {key:'diferenca',   valor: stImoveis + stDiferenca,  lucro: lucroDiferencaReal,   lucroLiq: lucroDiferencaReal,   aporteRf: totalPagoConsorcio,    prazoRf: prazo},
       {key:'previdencia', valor: stPrevidencia,            lucro: lucroPrevidenciaReal, lucroLiq: lucroPrevidenciaReal, aporteRf: totalPagoConsorcio,    prazoRf: prazo},
     ];
-    // % retorno = lucro / aporte. Aporte 0 ou negativo desqualifica a estratégia.
-    const retornoOf = c => c.aporteRf > 0 ? c.lucro / c.aporteRf : -Infinity;
+    // % retorno usa lucroLiq (com IR da Venda aplicado). Aporte 0 desqualifica.
+    const retornoOf = c => c.aporteRf > 0 ? c.lucroLiq / c.aporteRf : -Infinity;
     melhor = cands.reduce((best, c) => retornoOf(c) > retornoOf(best) ? c : best, cands[0]);
   }
 
