@@ -436,19 +436,18 @@ function calcularOperacao(op){
   const lucroLiqDiferenca = stDiferenca - sobraTotalDif;
 
   // ── SELEÇÃO DA ESTRATÉGIA CAMPEÃ ─────────────────────────────────────────
-  // Métrica unificada: LUCRO REAL = Patrimônio Final − Aporte Total
-  // (apples-to-apples entre as 4 estratégias). Antes a comparação era injusta:
-  // Diferença usava "stDiferenca − sobraTotalDif" (só juros do CDI, ignorando
-  // o imóvel) e Imóveis/Previdência nem entravam na disputa quando pE=0.
+  // Lucro real = Patrimônio Final − Aporte Total (cada estratégia tem seu aporte)
+  // Métrica de comparação: MAIOR % RETORNO (lucro/aporte) — conferido no Conkey.
+  //   Não é maior valor absoluto: Venda com aporte pequeno + ágio modesto pode
+  //   bater Previdência multimilionária porque o RETORNO sobre o capital é maior.
   //
   // Regra de negócio mantida: COM lance embutido (pE>0) → PREVIDÊNCIA sempre.
-  //   (é o jogo específico do lance embutido — escolhida mesmo se lucro < 0)
   //
-  // Patrimônio final por estratégia:
-  //   • Venda:       stVenda                       (vendeu a cota na contemplação)
-  //   • Imóveis:     stImoveis                     (terminou consórcio, ficou só com imóvel)
-  //   • Diferença:   stImoveis + stDiferenca       (imóvel + fundo das sobras aluguel-parcela)
-  //   • Previdência: stPrevidencia                 (vendeu o crédito, investiu no CDI)
+  // Patrimônio e aporte por estratégia:
+  //   • Venda:       patr=stVenda                  aporte=valorInvestidoAteCont (vende na contemp.)
+  //   • Imóveis:     patr=stImoveis                aporte=totalPagoForLucro     (termina o consórcio)
+  //   • Diferença:   patr=stImoveis+stDiferenca    aporte=totalPagoForLucro     (imóvel + fundo CDI)
+  //   • Previdência: patr=stPrevidencia            aporte=totalPagoForLucro     (vendeu o crédito)
   const lucroVendaReal       = stVenda    - valorInvestidoAteCont;
   const lucroImoveisReal     = stImoveis  - totalPagoForLucro;
   const lucroDiferencaReal   = stImoveis  + stDiferenca - totalPagoForLucro;
@@ -463,7 +462,9 @@ function calcularOperacao(op){
       {key:'diferenca',   valor: stImoveis + stDiferenca,  lucro: lucroDiferencaReal,   lucroLiq: lucroDiferencaReal,   aporteRf: totalPagoConsorcio,    prazoRf: prazo},
       {key:'previdencia', valor: stPrevidencia,            lucro: lucroPrevidenciaReal, lucroLiq: lucroPrevidenciaReal, aporteRf: totalPagoConsorcio,    prazoRf: prazo},
     ];
-    melhor = cands.reduce((best, c) => c.lucro > best.lucro ? c : best, cands[0]);
+    // % retorno = lucro / aporte. Aporte 0 ou negativo desqualifica a estratégia.
+    const retornoOf = c => c.aporteRf > 0 ? c.lucro / c.aporteRf : -Infinity;
+    melhor = cands.reduce((best, c) => retornoOf(c) > retornoOf(best) ? c : best, cands[0]);
   }
 
   const estrategia = melhor.key;
