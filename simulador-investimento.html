@@ -454,21 +454,27 @@ function calcularOperacao(op){
   const lucroPrevidenciaReal = stPrevidencia - totalPagoForLucro;
   // IR 15% sobre o LUCRO da Venda da Cota (alíquota fixa de Ganho de Capital,
   // conferido contra Conkey). Só aplica se lucro > 0; prejuízo não tem imposto.
-  // Demais estratégias: lucroLiq = lucroReal (IR regressivo já está embutido
-  // dentro de stDiferenca/stPrevidencia para fluxos de RF; valorização do
-  // imóvel fica como ganho contábil sem IR neste cenário de comparação).
   const IR_VENDA = 0.15;
   const lucroVendaLiq = lucroVendaReal > 0 ? lucroVendaReal * (1 - IR_VENDA) : lucroVendaReal;
+  // Alinhamento com Conkey: ele só tem 3 estratégias candidatas — Venda,
+  // Aluguel/Diferença (com imóvel embutido) e Previdência. "Imóveis Alugados"
+  // no Conkey é card informativo do valor do ativo, não estratégia separada.
+  // Diferença só candidata se sobra mensal > 0 (aluguel cobre a parcela).
   let melhor;
   if (pE > 0) {
     melhor = {key:'previdencia', valor: stPrevidencia, lucro: lucroPrevidenciaReal, lucroLiq: lucroPrevidenciaReal, aporteRf: totalPagoConsorcio, prazoRf: prazo};
   } else {
     const cands = [
       {key:'venda',       valor: stVenda,                  lucro: lucroVendaReal,       lucroLiq: lucroVendaLiq,        aporteRf: valorInvestidoAteCont, prazoRf: expectativa},
-      {key:'imoveis',     valor: stImoveis,                lucro: lucroImoveisReal,     lucroLiq: lucroImoveisReal,     aporteRf: totalPagoConsorcio,    prazoRf: prazo},
-      {key:'diferenca',   valor: stImoveis + stDiferenca,  lucro: lucroDiferencaReal,   lucroLiq: lucroDiferencaReal,   aporteRf: totalPagoConsorcio,    prazoRf: prazo},
       {key:'previdencia', valor: stPrevidencia,            lucro: lucroPrevidenciaReal, lucroLiq: lucroPrevidenciaReal, aporteRf: totalPagoConsorcio,    prazoRf: prazo},
     ];
+    // Diferença/Aluguel só candidata quando:
+    //   (a) sobra mensal > 0 (aluguel cobre a parcela)
+    //   (b) expectativa > 30 meses (mesmo threshold que separa venda curta/longa)
+    // Para expectativa <= 30, Conkey favorece Venda da Cota com ágio curto.
+    if (sobraMensalDif > 0 && expectativa > 30) {
+      cands.push({key:'diferenca', valor: stImoveis + stDiferenca, lucro: lucroDiferencaReal, lucroLiq: lucroDiferencaReal, aporteRf: valorInvestidoAteCont, prazoRf: expectativa});
+    }
     // % retorno usa lucroLiq (com IR da Venda aplicado). Aporte 0 desqualifica.
     const retornoOf = c => c.aporteRf > 0 ? c.lucroLiq / c.aporteRf : -Infinity;
     melhor = cands.reduce((best, c) => retornoOf(c) > retornoOf(best) ? c : best, cands[0]);
