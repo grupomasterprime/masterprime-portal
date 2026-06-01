@@ -405,11 +405,13 @@ function calcularOperacao(op){
   const aluguelMensal = creditoDisp * pctAluguel;
   const stImoveis = creditoDisp * Math.pow(1+valImob, (prazo-expectativa)/12);
 
-  // DIFERENÇA ALUGUEL × PARCELA — conferido exato (0,00000%):
-  //   anuidade da sobra (aluguel − parcela) capitalizada ao CDI mensal pelos
-  //   meses pós-contemplação, menos IR regressivo sobre os juros ganhos.
-  //   Usa a parcela CHEIA (o redutor não muda a obrigação real da parcela).
-  const sobraMensalDif = aluguelMensal - parcelaCheia;
+  // DIFERENÇA ALUGUEL × PARCELA — conferido exato contra Conkey (centavos):
+  //   anuidade da sobra (aluguel − parcela BASE) capitalizada ao CDI mensal
+  //   pelos meses pós-contemplação, menos IR regressivo sobre os juros.
+  //   Usa a parcela BASE (com redutor aplicado): conferido em 2 ops Conkey:
+  //     Op A (red 45, alu 1.5%, exp 40): Master 4.874.957,648 = Conkey 4.874.957,64 ✓
+  //     Op B (sem red,  alu 1.0%, exp 40): Master 1.674.256,258 = Conkey 1.674.256,26 ✓
+  const sobraMensalDif = aluguelMensal - parcelaBase;
   const mesesPosDif = Math.max(0, prazo - expectativa);
   let stDiferenca;
   if (cdiMensal > 0 && mesesPosDif > 0) {
@@ -443,14 +445,15 @@ function calcularOperacao(op){
   //
   // Regra de negócio mantida: COM lance embutido (pE>0) → PREVIDÊNCIA sempre.
   //
-  // Patrimônio e aporte por estratégia:
-  //   • Venda:       patr=stVenda                  aporte=valorInvestidoAteCont (vende na contemp.)
-  //   • Imóveis:     patr=stImoveis                aporte=totalPagoForLucro     (termina o consórcio)
-  //   • Diferença:   patr=stImoveis+stDiferenca    aporte=totalPagoForLucro     (imóvel + fundo CDI)
-  //   • Previdência: patr=stPrevidencia            aporte=totalPagoForLucro     (vendeu o crédito)
+  // Patrimônio e aporte por estratégia (alinhado Conkey):
+  //   • Venda:       lucro = stVenda − valorInvestidoAteCont        aporte=valorInvestidoAteCont
+  //   • Diferença:   lucro = stDiferenca (PURO, fundo CDI das sobras) aporte=valorInvestidoAteCont
+  //   • Previdência: lucro = stPrevidencia − totalPagoForLucro       aporte=totalPagoConsorcio
+  // Conkey reporta o LUCRO do Aluguel como stDiferenca puro (não soma imóvel,
+  // não subtrai aporte) — conferido na casa dos centavos em 2 cenários.
   const lucroVendaReal       = stVenda    - valorInvestidoAteCont;
   const lucroImoveisReal     = stImoveis  - totalPagoForLucro;
-  const lucroDiferencaReal   = stImoveis  + stDiferenca - totalPagoForLucro;
+  const lucroDiferencaReal   = stDiferenca;
   const lucroPrevidenciaReal = stPrevidencia - totalPagoForLucro;
   // IR 15% sobre o LUCRO da Venda da Cota (alíquota fixa de Ganho de Capital,
   // conferido contra Conkey). Só aplica se lucro > 0; prejuízo não tem imposto.
