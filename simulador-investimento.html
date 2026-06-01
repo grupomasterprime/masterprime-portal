@@ -435,17 +435,35 @@ function calcularOperacao(op){
   const sobraTotalDif     = sobraMensalDif * mesesPosDif;
   const lucroLiqDiferenca = stDiferenca - sobraTotalDif;
 
-  // Seleção da estratégia — conferido no Conkey (7 cenários, erro 0,00):
-  //  • COM lance embutido (pE>0): a estratégia é sempre PREVIDÊNCIA EXPONENCIAL
-  //    (é o jogo do lance embutido — escolhida mesmo se o lucro for negativo).
-  //  • SEM lance embutido (pE=0): maior lucro líquido entre Venda e Diferença.
+  // ── SELEÇÃO DA ESTRATÉGIA CAMPEÃ ─────────────────────────────────────────
+  // Métrica unificada: LUCRO REAL = Patrimônio Final − Aporte Total
+  // (apples-to-apples entre as 4 estratégias). Antes a comparação era injusta:
+  // Diferença usava "stDiferenca − sobraTotalDif" (só juros do CDI, ignorando
+  // o imóvel) e Imóveis/Previdência nem entravam na disputa quando pE=0.
+  //
+  // Regra de negócio mantida: COM lance embutido (pE>0) → PREVIDÊNCIA sempre.
+  //   (é o jogo específico do lance embutido — escolhida mesmo se lucro < 0)
+  //
+  // Patrimônio final por estratégia:
+  //   • Venda:       stVenda                       (vendeu a cota na contemplação)
+  //   • Imóveis:     stImoveis                     (terminou consórcio, ficou só com imóvel)
+  //   • Diferença:   stImoveis + stDiferenca       (imóvel + fundo das sobras aluguel-parcela)
+  //   • Previdência: stPrevidencia                 (vendeu o crédito, investiu no CDI)
+  const lucroVendaReal       = stVenda    - valorInvestidoAteCont;
+  const lucroImoveisReal     = stImoveis  - totalPagoForLucro;
+  const lucroDiferencaReal   = stImoveis  + stDiferenca - totalPagoForLucro;
+  const lucroPrevidenciaReal = stPrevidencia - totalPagoForLucro;
   let melhor;
   if (pE > 0) {
-    melhor = {key:'previdencia', valor: stPrevidencia, lucro: lucroPrevidencia, lucroLiq: lucroPrevidencia, aporteRf: totalPagoConsorcio, prazoRf: prazo};
+    melhor = {key:'previdencia', valor: stPrevidencia, lucro: lucroPrevidenciaReal, lucroLiq: lucroPrevidenciaReal, aporteRf: totalPagoConsorcio, prazoRf: prazo};
   } else {
-    const opVenda     = {key:'venda',     valor: stVenda, lucro: lucroVenda,     lucroLiq: lucroVenda,        aporteRf: valorInvestidoAteCont, prazoRf: expectativa};
-    const opDiferenca = {key:'diferenca', valor: 0,       lucro: lucroDiferenca, lucroLiq: lucroLiqDiferenca, aporteRf: valorInvestidoAteCont, prazoRf: expectativa};
-    melhor = (opVenda.lucroLiq >= opDiferenca.lucroLiq) ? opVenda : opDiferenca;
+    const cands = [
+      {key:'venda',       valor: stVenda,                  lucro: lucroVendaReal,       lucroLiq: lucroVendaReal,       aporteRf: valorInvestidoAteCont, prazoRf: expectativa},
+      {key:'imoveis',     valor: stImoveis,                lucro: lucroImoveisReal,     lucroLiq: lucroImoveisReal,     aporteRf: totalPagoConsorcio,    prazoRf: prazo},
+      {key:'diferenca',   valor: stImoveis + stDiferenca,  lucro: lucroDiferencaReal,   lucroLiq: lucroDiferencaReal,   aporteRf: totalPagoConsorcio,    prazoRf: prazo},
+      {key:'previdencia', valor: stPrevidencia,            lucro: lucroPrevidenciaReal, lucroLiq: lucroPrevidenciaReal, aporteRf: totalPagoConsorcio,    prazoRf: prazo},
+    ];
+    melhor = cands.reduce((best, c) => c.lucro > best.lucro ? c : best, cands[0]);
   }
 
   const estrategia = melhor.key;
