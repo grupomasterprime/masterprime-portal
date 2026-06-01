@@ -102,8 +102,42 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 .sidebar {
   background:var(--sidebar-bg); display:flex; flex-direction:column;
   position:sticky; top:0; height:100vh; overflow-y:auto;
-  transition:transform .25s ease;
+  transition:transform .25s ease, width .25s ease;
 }
+/* ═══ SIDEBAR COLAPSADA (modo "mais espaço" — inspirado no Conkey/Simulakey) ═══
+   Reduz sidebar pra 64px com só ícones. Estado persiste em localStorage. */
+.app.sb-collapsed { grid-template-columns:64px 1fr; }
+.app.sb-collapsed .sidebar { overflow:visible; }
+.app.sb-collapsed .sb-logo { padding:18px 8px 14px; }
+.app.sb-collapsed .sb-logo img { max-width:40px !important; }
+.app.sb-collapsed .sb-ver { display:none; }
+.app.sb-collapsed .sb-section { display:none; }
+.app.sb-collapsed .sb-item { padding:11px 0; justify-content:center; font-size:0; position:relative; border-left:none; border-right:2px solid transparent; }
+.app.sb-collapsed .sb-item .ic { font-size:14px; }
+.app.sb-collapsed .sb-item.active { border-right-color:var(--mp-yellow); }
+.app.sb-collapsed .sb-item:hover::after {
+  content: attr(data-tip); position:absolute; left:calc(100% + 6px); top:50%; transform:translateY(-50%);
+  background:#1a2942; color:#fff; padding:5px 9px; border-radius:6px; font-size:11px; font-weight:500;
+  white-space:nowrap; z-index:200; box-shadow:0 4px 10px rgba(0,0,0,.3); pointer-events:none;
+}
+.app.sb-collapsed .sb-user-card { padding:12px 8px; }
+.app.sb-collapsed .sb-user-info { justify-content:center; margin-bottom:8px; }
+.app.sb-collapsed .sb-user-name, .app.sb-collapsed .sb-user-role { display:none; }
+.app.sb-collapsed .sb-logout { font-size:0; padding:6px 4px; }
+.app.sb-collapsed .sb-logout::before { content:"↩"; font-size:14px; }
+/* Botão flutuante de toggle (canto sup-direito da sidebar) */
+.sb-collapse-btn {
+  position:absolute; top:14px; right:-12px; z-index:10;
+  width:24px; height:24px; border-radius:50%; background:var(--mp-yellow);
+  color:var(--mp-navy); border:2px solid var(--sidebar-bg); cursor:pointer;
+  display:flex; align-items:center; justify-content:center; font-weight:700;
+  box-shadow:0 2px 6px rgba(0,0,0,.25); transition:transform .25s ease;
+  font-family:'Inter',sans-serif; font-size:11px; line-height:1;
+}
+.sb-collapse-btn:hover { transform:scale(1.1); }
+.app.sb-collapsed .sb-collapse-btn { transform:rotate(180deg); }
+.app.sb-collapsed .sb-collapse-btn:hover { transform:rotate(180deg) scale(1.1); }
+@media (max-width:768px) { .sb-collapse-btn { display:none; } .app.sb-collapsed { grid-template-columns:1fr; } }
 /* Botão flutuante para reabrir o menu do portal quando em tela cheia */
 .portal-menu-fab {
   display:none; position:fixed; top:12px; left:12px; z-index:500;
@@ -319,6 +353,8 @@ body.embedded-mode .portal-menu-fab { display:flex; }
   <button class="portal-menu-fab" id="portal-menu-fab" onclick="exitEmbedded()" title="Voltar ao menu do portal"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
   <div class="app" id="portal-app">
     <aside class="sidebar" id="sidebar">
+      <!-- Botão recolher/expandir sidebar (modo "mais espaço" — inspirado no Conkey) -->
+      <button class="sb-collapse-btn" onclick="toggleSidebarCollapse()" title="Recolher menu lateral" aria-label="Recolher menu">‹</button>
       <div class="sb-logo">
         <img src="logo.png" alt="Master Prime" style="width:100%;max-width:200px;height:auto;display:block;margin:0 auto;filter:brightness(0) invert(1)">
       </div>
@@ -1220,6 +1256,7 @@ async function enterPortal() {
   document.getElementById('loading-screen').style.display='none';
   document.getElementById('login-screen').style.display='none';
   document.getElementById('portal-screen').style.display='block';
+  aplicarSidebarCollapseSalva();
   _iniciarAutoLogout();
   registrarAcesso();
   registrarLog('login', currentUser && currentUser.nome ? currentUser.nome : null);
@@ -1373,6 +1410,31 @@ function toggleSidebar() {
   const aberta = document.getElementById('sidebar').classList.toggle('open');
   const bd = document.querySelector('.sidebar-backdrop');
   if (bd) bd.classList.toggle('open', aberta);
+}
+// Modo "sidebar recolhida" (mais espaço pros simuladores) — inspirado Conkey.
+// Persiste em localStorage. Aplicado no boot pelo aplicarSidebarCollapseSalva().
+function toggleSidebarCollapse() {
+  const app = document.getElementById('portal-app');
+  if (!app) return;
+  const colapsado = app.classList.toggle('sb-collapsed');
+  try { localStorage.setItem('mp_sidebar_collapsed', colapsado ? '1' : '0'); } catch(e){}
+  // Atualiza tooltip do botão e símbolo
+  const btn = document.querySelector('.sb-collapse-btn');
+  if (btn) btn.title = colapsado ? 'Expandir menu lateral' : 'Recolher menu lateral';
+}
+function aplicarSidebarCollapseSalva() {
+  try {
+    if (localStorage.getItem('mp_sidebar_collapsed') === '1') {
+      document.getElementById('portal-app')?.classList.add('sb-collapsed');
+    }
+  } catch(e){}
+  // Popula data-tip nos sb-items pra mostrar tooltip ao hover no modo recolhido
+  document.querySelectorAll('.sb-item').forEach(it => {
+    if (!it.hasAttribute('data-tip')) {
+      const txt = it.textContent.trim().replace(/\s+/g,' ');
+      if (txt) it.setAttribute('data-tip', txt);
+    }
+  });
 }
 
 // ═══ DASHBOARD ═══
@@ -1857,11 +1919,10 @@ async function renderUsers() {
   // Último acesso REAL ao portal (ultimo_acesso); cai pro último login se vazio
   users.forEach(u => { u._last_login = u.ultimo_acesso || (u.auth_id ? loginsMap[u.auth_id] : null); });
   // Ranking pra medalhas: pelos campos novos total_sessoes e dias_ativos_mes
-  // Todos os tipos disputam (master, admin, sócio, parceiro, consultor) — quem mais usa, ganha
-  // E só dá medalha pra quem tem valor > 0 (senão "ninguém usou ainda" virava campeão)
-  const _rankUsers = users;
-  const _topSessoes = [..._rankUsers].filter(u => (u.total_sessoes||0) > 0).sort((a,b)=>(b.total_sessoes||0)-(a.total_sessoes||0)).slice(0,3).map(u=>u.cpf);
-  const _topDias = [..._rankUsers].filter(u => (u.dias_ativos_mes||0) > 0).sort((a,b)=>(b.dias_ativos_mes||0)-(a.dias_ativos_mes||0)).slice(0,3).map(u=>u.cpf);
+  // Todos os tipos competem (admin, master, sócio, consultor, parceiro) — campeão é quem usa mais.
+  // Só dá medalha pra quem tem valor > 0 (senão "ninguém usou ainda" virava campeão).
+  const _topSessoes = [...users].filter(u => (u.total_sessoes||0) > 0).sort((a,b)=>(b.total_sessoes||0)-(a.total_sessoes||0)).slice(0,3).map(u=>u.cpf);
+  const _topDias = [...users].filter(u => (u.dias_ativos_mes||0) > 0).sort((a,b)=>(b.dias_ativos_mes||0)-(a.dias_ativos_mes||0)).slice(0,3).map(u=>u.cpf);
   const _medal = (cpf, top) => {
     const i = top.indexOf(cpf);
     return i === 0 ? '🥇 ' : i === 1 ? '🥈 ' : i === 2 ? '🥉 ' : '';
@@ -1916,7 +1977,7 @@ async function renderUsers() {
       ? `<span class="senha-cell" data-senha="${(u.senha+'').replace(/"/g,'&quot;')}" style="display:inline-flex;align-items:center;gap:6px"><span class="senha-val mono" style="font-size:11px">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span><button type="button" onclick="toggleSenhaCell(this)" title="Mostrar/ocultar senha" style="background:none;border:0;padding:2px;cursor:pointer;color:var(--text3)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span>`
       : '<span style="color:var(--text3)">&mdash;</span>';
     const canDel = u.cpf !== currentUser.cpf;
-    // Contadores de uso: medalha se top 3 (todos os tipos disputam, inclusive master/admin)
+    // Contadores de uso: medalha se top 3 (entre consultor/sócio/parceiro)
     const sessoesNum = u.total_sessoes || 0;
     const diasNum = u.dias_ativos_mes || 0;
     const sessoesCell = `<span style="font-size:11.5px;font-weight:600;color:var(--text)" title="Total de sessões (gaps de 30min+)">${_medal(u.cpf, _topSessoes)}${sessoesNum}</span>`;
