@@ -878,10 +878,18 @@ const COM_SOCIOS = ['RENATO BENEDETTI', 'VAGNER SANTOS', 'BRUNO E RENATO'];
 const TODOS_SOCIOS = [...ADM_SOCIOS, ...COM_SOCIOS];
 
 // Parceiros que geram Carta de Parceria (não demonstrativo de pagamento)
-const PARCEIROS_CARTA = ['RICARDO CABEZAOLIAS', 'ANDERSON PASSADOR'];
+// Default cartaResp = RENATO BENEDETTI quando não há "/ NOME REPASSA" explícito
+const PARCEIROS_CARTA = ['RICARDO CABEZAOLIAS', 'ANDERSON PASSADOR', 'DANIEL BEIRAS'];
 
 // Parceiros que a Master paga com demonstrativo próprio
 const PARCEIROS_DEMO = ['ADVANCED', 'STRADA', 'CAMINO', 'SPOLAOR'];
+
+// Parceiros que emitem NF própria — geram demonstrativo separado quando o padrão
+// aparecer como "X% NOME LIQUIDO LIQUIDO" (LIQUIDO duplicado é o gatilho).
+// Master paga o parceiro pelo NF dele; split do bruto_cons entre consultor e parceiro.
+// IMPORTANTE: padrão "1% EDSON" sozinho continua funcionando como split interno normal —
+// só o duplicado "LIQUIDO LIQUIDO" dispara o demo próprio.
+const PARCEIROS_COM_NF = ['LE - EDSON'];
 
 // Nomes ocultos na aba Por Consultor (parceiros externos sem demonstrativo MP)
 const OCULTOS_LISTA = ['FLAVIA', 'JOSE CARLOS', 'MOISES', 'RICARDO CABEZAOLIAS', 'ANDERSON PASSADOR', 'DANIEL BEIRAS'];
@@ -1640,6 +1648,23 @@ function parseInd(ind, consultor, multConsultor=0.625) {
     return { tipo:'ok', partes:[
       { quem, fracBruto: pctObsToFrac(pct), ehParceiro:true, masterPaga:true, oculto:false, ehCarta:false, ehLiquido:true }
     ]};
+  }
+
+  // ── PARCEIROS COM NF PRÓPRIA (Edson etc.) ──
+  // Padrão "X% NOME LIQUIDO LIQUIDO" (LIQUIDO duplicado) sinaliza que o parceiro
+  // emite NF própria → trata exatamente como SÓ DEMONSTRATIVO (split do bruto_cons,
+  // parceiro com demo separado, Master paga). Só dispara se o nome estiver em
+  // PARCEIROS_COM_NF — pra não pegar "X% NOME LIQUIDO" simples por engano.
+  const mNF = s.match(/^(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s\.\-]+?)\s+LIQUIDO\s+LIQUIDO$/);
+  if (mNF) {
+    const pct = parseFloat(mNF[1].replace(',','.'))/100;
+    const nomeBase = normNome(mNF[2].trim());
+    if (PARCEIROS_COM_NF.includes(nomeBase) && pct > 0) {
+      return { tipo:'ok', partes:[
+        { quem: nomeBase, fracBruto:null, pctOrig:pct, ehParceiro:true, masterPaga:true,
+          oculto:false, ehCarta:false, ehLiquido:true, ehSoDemo:true }
+      ]};
+    }
   }
 
   // ── Advanced ── (consultores Advanced têm regra especial — tratado em executarCalculo)
