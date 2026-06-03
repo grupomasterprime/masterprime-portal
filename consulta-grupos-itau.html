@@ -335,9 +335,11 @@ function taxaDoGrupo(g) {
   return v ? parseFloat(v) / 100 : 0;
 }
 // Seguro Itaú é definido por TIPO de bem (validado no simulador + prints reais).
+// IMPORTANTE: tipo vem como "IMÓVEIS" (plural). Usa substring "IMÓVE/IMOVE" pra pegar
+// tanto "IMÓVEIS" quanto "IMÓVEL" caso a planilha mude a forma um dia.
 function seguroDoGrupo(g) {
   const t = (g.tipo || '').toUpperCase();
-  if (t.includes('IMÓVEL') || t.includes('IMOVEL')) return 0.000472;  // 0,0472% a.m.
+  if (t.includes('IMÓVE') || t.includes('IMOVE')) return 0.000472;  // 0,0472% a.m.
   // Veículos leves, motos, pesados — todos usam mesmo fator
   return 0.00056;  // 0,056% a.m.
 }
