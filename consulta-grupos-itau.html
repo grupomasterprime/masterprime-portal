@@ -685,26 +685,33 @@ function renderSecaoValores(g) {
         const redSem = p.sem * ITAU_FATOR_REDUZIDA;
         const redSeguro = p.seguro * ITAU_FATOR_REDUZIDA;
         const redCom = redSem + redSeguro;
-        return `<tr>
-          <td><strong>${fmtMoney(v)}</strong></td>
-          <td class="num">${fmtMoney(p.sem)}</td>
-          <td class="num">${p.seguro > 0 ? `<strong style="color:var(--admin-text)">${fmtMoney(p.com)}</strong>` : cell}</td>
-          ${temRed ? `<td class="num" style="background:#F8FAFC">${fmtMoney(redSem)}</td>
-          <td class="num" style="background:#F8FAFC">${p.seguro > 0 ? `<strong style="color:var(--admin-text)">${fmtMoney(redCom)}</strong>` : cell}</td>` : ''}
-        </tr>`;
+        // Pra grupos com redutor: REDUZIDA primeiro (mais relevante pra venda), CHEIA depois.
+        return temRed
+          ? `<tr>
+              <td><strong>${fmtMoney(v)}</strong></td>
+              <td class="num" style="background:#F8FAFC">${fmtMoney(redSem)}</td>
+              <td class="num" style="background:#F8FAFC">${p.seguro > 0 ? `<strong style="color:var(--admin-text)">${fmtMoney(redCom)}</strong>` : cell}</td>
+              <td class="num">${fmtMoney(p.sem)}</td>
+              <td class="num">${p.seguro > 0 ? `<strong style="color:var(--admin-text)">${fmtMoney(p.com)}</strong>` : cell}</td>
+            </tr>`
+          : `<tr>
+              <td><strong>${fmtMoney(v)}</strong></td>
+              <td class="num">${fmtMoney(p.sem)}</td>
+              <td class="num">${p.seguro > 0 ? `<strong style="color:var(--admin-text)">${fmtMoney(p.com)}</strong>` : cell}</td>
+            </tr>`;
       }).join('');
   const thead = temRed
     ? `<thead>
         <tr>
           <th rowspan="2">Crédito</th>
-          <th class="num" colspan="2" style="text-align:center;border-right:1px solid var(--border)">Parcela CHEIA</th>
-          <th class="num" colspan="2" style="text-align:center;background:#F1F5F9">Parcela REDUZIDA <small style="font-weight:500;text-transform:none;letter-spacing:0;color:var(--text2)">(−30%)</small></th>
+          <th class="num" colspan="2" style="text-align:center;background:#F1F5F9;border-right:1px solid var(--border)">Parcela REDUZIDA <small style="font-weight:500;text-transform:none;letter-spacing:0;color:var(--text2)">(−30%)</small></th>
+          <th class="num" colspan="2" style="text-align:center">Parcela CHEIA</th>
         </tr>
         <tr>
-          <th class="num">s/ Seguro</th>
-          <th class="num" style="border-right:1px solid var(--border)">c/ Seguro</th>
           <th class="num" style="background:#F8FAFC">s/ Seguro</th>
-          <th class="num" style="background:#F8FAFC">c/ Seguro</th>
+          <th class="num" style="background:#F8FAFC;border-right:1px solid var(--border)">c/ Seguro</th>
+          <th class="num">s/ Seguro</th>
+          <th class="num">c/ Seguro</th>
         </tr>
       </thead>`
     : '<thead><tr><th>Crédito</th><th class="num">Parcela s/ Seguro</th><th class="num">Parcela c/ Seguro</th></tr></thead>';
