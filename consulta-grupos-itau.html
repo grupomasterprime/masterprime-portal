@@ -43,7 +43,7 @@ body[data-admin="BRADESCO"] { --admin-accent:#CC092F;            --admin-text:#1
 .hdr-title { font-size:19px; font-weight:700; letter-spacing:-.2px; color:#fff; }
 .hdr-sub { font-size:11px; color:rgba(255,255,255,.65); margin-top:3px; font-weight:500; }
 .hdr-meta { font-size:11px; color:rgba(255,255,255,.7); text-align:right; }
-.hdr-meta strong { color:var(--admin-accent); font-family:'DM Mono',monospace; font-weight:700; font-size:13px; }
+.hdr-meta strong { color:#fff; font-family:'DM Mono',monospace; font-weight:700; font-size:13px; }
 
 /* Layout — sidebar de filtros + lista */
 .app { display:grid; grid-template-columns:260px 1fr; min-height:calc(100vh - 60px); }
@@ -576,7 +576,7 @@ function abrirGrupo(numero, tipo) {
           }
         </tbody>
       </table>
-      ${taxaDoGrupo(g) <= 0 ? '<div style="font-size:11px;color:#92400E;background:#FEF3C7;padding:8px 11px;border-radius:6px;margin-top:8px">⚠ Configure a Taxa Adm acima pra ver as parcelas.</div>' : ''}
+      <div class="m-aviso-taxa" style="font-size:11px;color:#92400E;background:#FEF3C7;padding:8px 11px;border-radius:6px;margin-top:8px;display:${taxaDoGrupo(g) <= 0 ? '' : 'none'}">⚠ Configure a Taxa Adm acima pra ver as parcelas.</div>
     </div>
 
     <div class="m-section">
@@ -648,19 +648,39 @@ document.getElementById('f-prazoMax').addEventListener('input', e => { const n =
 // Seguro é fixo por tipo de bem (validado no simulador interno Itaú).
 // Taxa Admin varia por CPF/grupo — configurada dentro do modal de cada grupo.
 function carregarCalc() { /* sem inputs globais */ }
-// Listener pro input de Taxa Admin do modal (delegação porque é re-criado a cada abertura)
+// Listener pro input de Taxa Admin do modal — atualiza APENAS a tabela de parcelas
+// (não re-renderiza modal inteiro, senão input perde foco/cursor a cada tecla).
 document.addEventListener('input', e => {
   if (e.target.id !== 'm-taxa-input') return;
+  const g = window._grupoAtual;
+  if (!g) return;
   const limpo = String(e.target.value).replace(',', '.').replace(/[^\d.]/g,'');
-  const key = 'mp-itau-taxa-'+adminAtual+'-'+window._grupoAtual.grupo;
+  const key = 'mp-itau-taxa-'+adminAtual+'-'+g.grupo;
   if (limpo && parseFloat(limpo) > 0) localStorage.setItem(key, limpo);
   else localStorage.removeItem(key);
-  // Re-renderiza só o modal (não a lista — fica chato perder scroll)
-  abrirGrupo(window._grupoAtual.grupo, window._grupoAtual.tipo);
-  // Re-focus no input pra continuar digitando
-  setTimeout(() => { const i = document.getElementById('m-taxa-input'); if (i) { i.focus(); i.setSelectionRange(i.value.length, i.value.length); } }, 0);
-  render();  // atualiza cards também
+  // Re-renderiza só a tabela de Valores Disponíveis (mantém input intacto)
+  atualizarTabelaValores(g);
+  render();  // atualiza cards no fundo (debounced naturalmente pelo browser)
 });
+// Atualiza só o <tbody> da tabela de valores e os 2 últimos avisos
+function atualizarTabelaValores(g) {
+  const valoresLista = (g.valoresDisponiveis||'').split(',').map(v=>parseMoney(v)).filter(v=>v!==null);
+  const tbody = document.querySelector('.m-valores-tbl tbody');
+  if (!tbody) return;
+  tbody.innerHTML = valoresLista.length === 0
+    ? '<tr><td colspan="3" style="text-align:center;color:var(--text2);padding:16px">—</td></tr>'
+    : valoresLista.map(v => {
+        const p = calcParcela(g, v);
+        return `<tr>
+          <td><strong>${fmtMoney(v)}</strong></td>
+          <td class="num">${p && p.sem ? fmtMoney(p.sem) : '<span style="color:#CBD5E1">—</span>'}</td>
+          <td class="num">${p && p.seguro > 0 ? `<strong style="color:var(--admin-text)">${fmtMoney(p.com)}</strong>` : '<span style="color:#CBD5E1">—</span>'}</td>
+        </tr>`;
+      }).join('');
+  // Atualiza aviso amarelo (mostra/esconde dependendo da taxa)
+  const aviso = document.querySelector('.m-aviso-taxa');
+  if (aviso) aviso.style.display = taxaDoGrupo(g) <= 0 ? '' : 'none';
+}
 
 // Estende trocarAdmin pra recarregar a calc também
 const _trocarAdminOrig = trocarAdmin;
