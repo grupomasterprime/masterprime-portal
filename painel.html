@@ -891,6 +891,11 @@ const PARCEIROS_DEMO = ['ADVANCED', 'STRADA', 'CAMINO', 'SPOLAOR'];
 // só o duplicado "LIQUIDO LIQUIDO" dispara o demo próprio.
 const PARCEIROS_COM_NF = ['LE - EDSON'];
 
+// Vendedores que NÃO têm desconto de ADM no demonstrativo próprio.
+// Cálculo: bruto_cons − tributos (NF) = líquido_cons (sem deduzir os 10% de admin).
+// PCO_lado continua normal: ADM_PCO calculada igual; excedente é a diferença.
+const VENDEDORES_SEM_ADM = ['FERNANDO SUBLIME', 'JOÃO PORTOMAX'];
+
 // Nomes ocultos na aba Por Consultor (parceiros externos sem demonstrativo MP)
 const OCULTOS_LISTA = ['FLAVIA', 'JOSE CARLOS', 'MOISES', 'RICARDO CABEZAOLIAS', 'ANDERSON PASSADOR', 'DANIEL BEIRAS'];
 
@@ -1100,7 +1105,7 @@ function itauParcTotal(grupo) {
 // Excedente = Líq_PCO − Líq_cons  (sempre ≥ 0)
 // Para sócio: mult=1, Líq_cons = Líq_PCO → excedente = 0 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
 
-function calcLinha(recebido, mult, semAdm=false) {
+function calcLinha(recebido, mult, semAdm=false, consultor='') {
   if (semAdm) {
     // Advanced: não paga ADM
     // liqAdvanced = recebido - ceil(recebido * 15,5%)  [NF sobre recebido total]
@@ -1119,7 +1124,10 @@ function calcLinha(recebido, mult, semAdm=false) {
              nfCons, admCons:0, liqCons, excedente };
   }
 
-  // Normal: com ADM
+  // Normal: com ADM no lado PCO (corretora). No lado CONSULTOR, ADM é
+  // descontada exceto pra VENDEDORES_SEM_ADM (Fernando Sublime, João Portomax) —
+  // pra esses, líquido = bruto − tributos (sem deduzir os 10% de adm).
+  const consultorSemAdm = VENDEDORES_SEM_ADM.includes(consultor);
   const nfPCO   = Math.ceil(recebido * TRIB_PCO * 10000) / 10000;
   const aposPCO = recebido - nfPCO;
   const admPCO  = aposPCO * ADM_PCT;
@@ -1128,7 +1136,7 @@ function calcLinha(recebido, mult, semAdm=false) {
   const brutoCons = recebido * mult;
   const nfCons    = brutoCons * TRIB_VEND;
   const aposCons  = brutoCons - nfCons;
-  const admCons   = aposCons * ADM_PCT;
+  const admCons   = consultorSemAdm ? 0 : aposCons * ADM_PCT;
   const liqCons   = aposCons - admCons;
 
   const excedente = Math.max(0, liqPCO - liqCons);
@@ -2034,7 +2042,7 @@ function processarLinha(linha, match, ciclo, mult, split, isAdvanced=false) {
   const naoParc   = split.partes.filter(p => !p.ehParceiro && !p.ehSelf);
 
   // Calcula ADM (sempre sobre o total recebido)
-  const calc0 = calcLinha(rec, multEfet); // ADM PCO sempre calculado
+  const calc0 = calcLinha(rec, multEfet, false, consultor); // ADM PCO sempre calculado
   addADM(calc0.admPCO, linha.adm);
   addNFPCO(calc0.nfPCO);
 
@@ -2182,7 +2190,7 @@ function processarLinha(linha, match, ciclo, mult, split, isAdvanced=false) {
         .reduce((s,p) => s + (p.fracBruto || 0), 0);
       multCalc = Math.max(0, multEfet - descParceiros);
     }
-    const c = calcLinha(rec, multCalc, isAdvanced);
+    const c = calcLinha(rec, multCalc, isAdvanced, consultor);
     const obsInfo = match.obsInfo;
     const obsComInfo = obsInfo ? [...obsParc, {quem:obsInfo, valor:0, masterPaga:false, ehInfo:true}] : obsParc;
     addResultado(consultor, isSocioC?'socio':'vendedor', {
@@ -2373,7 +2381,7 @@ function _executarCalculo() {
       const consultor = match ? normNome(match.consultor) : 'ESTORNO';
       const ciclo = toCiclo(match?.dataVenda || linha.dataVenda);
       const mult  = match ? getMult(consultor, ciclo) : 1;
-      const c = calcLinha(linha.recebido, mult); // recebido negativo → valores negativos
+      const c = calcLinha(linha.recebido, mult, false, consultor); // recebido negativo → valores negativos
       addADM(c.admPCO, linha.adm);
       addNFPCO(c.nfPCO);
       addExcedente(c.excedente);
