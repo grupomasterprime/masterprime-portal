@@ -23,12 +23,13 @@
 html,body { margin:0; padding:0; font-family:'Inter',system-ui,sans-serif; color:var(--text); background:var(--bg); font-size:13px; }
 button { font-family:inherit; cursor:pointer; }
 
-/* Header — cores se ajustam por administradora via body[data-admin] */
-.hdr { background:var(--admin-bg); color:#fff; padding:18px 28px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; position:relative; border-bottom:4px solid var(--admin-accent); transition:background .25s, border-color .25s; }
-/* Paletas por administradora */
-body[data-admin="ITAU"]     { --admin-bg:var(--itau-blue);  --admin-accent:var(--itau-orange); --admin-text:var(--itau-blue); }
-body[data-admin="PORTO"]    { --admin-bg:#003F87;           --admin-accent:#E10A0A;            --admin-text:#003F87; }
-body[data-admin="BRADESCO"] { --admin-bg:#CC092F;           --admin-accent:#1A1A1A;            --admin-text:#CC092F; }
+/* Header — fundo claro pra não conflitar com a sidebar navy do portal.
+   A identidade da admin vem do texto colorido + tarja accent embaixo. */
+.hdr { background:#fff; color:var(--admin-text); padding:20px 28px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; position:relative; border-bottom:4px solid var(--admin-accent); transition:border-color .25s; box-shadow:0 1px 2px rgba(15,23,42,.04); }
+/* Paletas por administradora — só cores de TEXTO/ACCENT (fundo é sempre branco) */
+body[data-admin="ITAU"]     { --admin-bg:#fff; --admin-accent:var(--itau-orange); --admin-text:var(--itau-blue); }
+body[data-admin="PORTO"]    { --admin-bg:#fff; --admin-accent:#E10A0A;            --admin-text:#003F87; }
+body[data-admin="BRADESCO"] { --admin-bg:#fff; --admin-accent:#CC092F;            --admin-text:#1A1A1A; }
 /* Tabs de administradora */
 .admin-tabs { display:flex; gap:0; background:#fff; border-bottom:1px solid var(--border); padding:0 28px; overflow-x:auto; }
 .admin-tab { padding:14px 22px; background:none; border:0; border-bottom:3px solid transparent; font-size:13px; font-weight:600; color:var(--text2); cursor:pointer; transition:all .15s; display:flex; align-items:center; gap:8px; font-family:inherit; white-space:nowrap; }
@@ -39,10 +40,10 @@ body[data-admin="BRADESCO"] { --admin-bg:#CC092F;           --admin-accent:#1A1A
 .empty-admin { text-align:center; padding:80px 20px; color:var(--text2); font-size:14px; grid-column:1/-1; }
 .empty-admin .ico { font-size:48px; margin-bottom:14px; opacity:.5; }
 .empty-admin .ttl { font-size:18px; font-weight:700; color:var(--text); margin-bottom:8px; }
-.hdr-title { font-size:18px; font-weight:700; letter-spacing:-.2px; }
-.hdr-sub { font-size:11px; color:rgba(255,255,255,.7); margin-top:2px; }
-.hdr-meta { font-size:11px; color:rgba(255,255,255,.75); text-align:right; }
-.hdr-meta strong { color:var(--admin-accent); font-family:'DM Mono',monospace; font-weight:700; }
+.hdr-title { font-size:19px; font-weight:700; letter-spacing:-.2px; color:var(--admin-text); }
+.hdr-sub { font-size:11px; color:var(--text2); margin-top:3px; font-weight:500; }
+.hdr-meta { font-size:11px; color:var(--text2); text-align:right; }
+.hdr-meta strong { color:var(--admin-accent); font-family:'DM Mono',monospace; font-weight:700; font-size:13px; }
 
 /* Layout — sidebar de filtros + lista */
 .app { display:grid; grid-template-columns:260px 1fr; min-height:calc(100vh - 60px); }
@@ -227,7 +228,7 @@ body[data-admin="BRADESCO"] { --admin-bg:#CC092F;           --admin-accent:#1A1A
   <main class="main">
     <!-- Info Itaú: seguro fixo por tipo, taxa varia por CPF -->
     <div class="info-bar">
-      <div><strong>Itaú:</strong> 0,0472% a.m. (imóvel) · 0,056% a.m. (veículo)</div>
+      <div><strong>Seguro Itaú:</strong> 0,0472% a.m. (imóvel) · 0,056% a.m. (veículo)</div>
       <div class="sub">Taxa Admin varia por CPF/grupo — verifique no <strong>iParceiros</strong> a taxa liberada para seu cliente.</div>
     </div>
     <div class="lbar">
