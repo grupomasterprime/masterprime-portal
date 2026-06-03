@@ -160,7 +160,7 @@
 
   /* ═══════════════ MODO GENÉRICO (neutro) ═══════════════ */
   body.generic-mode {
-    --bradesco-red: #4B5563;          /* cinza escuro neutro */
+    --bradesco-red: #4B5563;
     --bradesco-red-dark: #374151;
     --soft-red: #F3F4F6;
     --soft-red-border: #D1D5DB;
@@ -367,7 +367,6 @@
     </div>
   </section>
 
-  <!-- Resumo de parcelas / Saldo devedor / Seguro: continuam calculados internamente (ids ocultos) mas a seção visual foi removida a pedido. -->
   <div style="display:none">
     <span id="br-saldoDevedor"></span>
     <span id="br-seguroMensal"></span>
@@ -409,7 +408,6 @@ function isModoGenerico() {
 function alternarModoGenerico() {
   const ativo = isModoGenerico();
   document.body.classList.toggle('generic-mode', ativo);
-  // Atualiza títulos e labels
   const titulo = document.getElementById('mainTitle');
   const tagAdmin = document.getElementById('tagAdminHeader');
   const pageTitle = document.querySelector('title');
@@ -533,7 +531,6 @@ function calc(i) {
   const txAnt = i.taxaAntecipacao || 0;
   const prazoAnt = i.qtdAntecipacao || 0;
 
-  // Constantes
   r.saldoDevedor = bem * (1 + i.taxaAdm + i.fundo);
   r.seguroMensal = r.saldoDevedor * i.seguro;
   const parcInicialSemSeg = (prazo > 0) ? bem * (1 - red + i.taxaAdm + i.fundo) / prazo : NaN;
@@ -541,7 +538,6 @@ function calc(i) {
   r.parcelaInicial = parcInicialSemSeg + r.seguroMensal;
   r.parcelaPosAnt  = parcPosAntSemSeg  + r.seguroMensal;
 
-  // Lance — fórmula completa replicada do Excel
   if (i.lanceManual > 0) {
     r.lanceTotal = i.lanceManual;
     r.lanceB21 = 0;
@@ -566,7 +562,6 @@ function calc(i) {
     r.lanceTotal = (B21 + C21) * parcInicialSemSeg;
   }
 
-  // PÓS CONTEMPLAÇÃO
   const cont = Math.max(1, i.contempla || 1);
   const parcsAteCont = Math.min(cont + 1, prazo);
   const parcsInicialPagas = Math.min(parcsAteCont, prazoAnt);
@@ -574,17 +569,14 @@ function calc(i) {
   const totalParcsPagas = parcsInicialPagas * r.parcelaInicial + parcsPosAntPagas * r.parcelaPosAnt;
   r.saldoPos = r.saldoDevedor - totalParcsPagas - r.lanceTotal;
 
-  // Diluir nas Parcelas
   const prazoNovaParcela = Math.max(0, prazo - parcsAteCont);
   r.parcDiluir = (prazoNovaParcela > 0) ? (r.saldoPos / prazoNovaParcela) : NaN;
   r.prazoDiluir = Math.max(0, prazo - cont);
 
-  // Antecipar Parcelas
   r.parcAntecipar = r.parcelaInicial;
   const nParcelasAmort = (parcInicialSemSeg > 0) ? r.lanceTotal / parcInicialSemSeg : 0;
   r.prazoAntecipar = Math.max(0, (prazo - cont) - nParcelasAmort);
 
-  // DEMONSTRATIVO TAXAS
   r.taxaMes = (prazo > 0) ? i.taxaAdm / prazo : NaN;
   r.taxaAno = r.taxaMes * 12;
 
@@ -675,104 +667,132 @@ document.getElementById('btnLimparTudo').addEventListener('click', limparTudo);
 recalc();
 
 // ═════════════════════════════════════════════════════════════
-// PDF — usa módulo compartilhado pdf-master-prime.js
+// PDF — FALLBACK GARANTIDO (SEM DEPENDÊNCIA EXTERNA)
 // ═════════════════════════════════════════════════════════════
-function _coletarBlocosBradesco() {
-  const _v = (id) => { const el = document.getElementById(id); return (el?.value || '').trim(); };
-  const _t = (id) => { const el = document.getElementById(id); return (el?.textContent || '').trim(); };
-  const _selTxt = (id) => { const el = document.getElementById(id); return (el?.selectedOptions?.[0]?.textContent || '').trim() || '—'; };
-  const _has = (s) => s && s !== '—' && s !== '?' && s !== '';
+function _gerarPDFFallback(dados) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('p', 'mm', 'a4');
+  const margem = 15;
+  let y = margem;
 
-  const prazoVal = _v('br-prazo');
-  const redutorTxt = _selTxt('br-redutor');
-  const qtdAntec = _v('br-qtdAntecipacao');
-  const contemplaN = parseInt(_v('br-contempla') || '0', 10) || 0;
+  // Cabeçalho neutro
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(18);
+  doc.setTextColor(45, 63, 94); // navy
+  doc.text(dados.titulo, margem, y);
+  y += 8;
+  doc.setFontSize(10);
+  doc.setTextColor(107, 114, 128);
+  doc.text(dados.subtitulo, margem, y);
+  y += 6;
+  doc.setDrawColor(229, 231, 235);
+  doc.line(margem, y, 210 - margem, y);
+  y += 8;
 
-  const propostaLinha1 = [
-    { label: 'Crédito Contratado', value: _v('br-credito') || 'R$ 0,00' },
-    { label: 'Prazo total', value: (prazoVal || '0') + ' meses' },
-    { label: 'Redutor', value: redutorTxt },
-    { label: 'Contemplação na parcela', value: String(contemplaN) }
-  ];
-  const propostaLinha2 = [];
-  if (_has(qtdAntec)) propostaLinha2.push({ label: 'Decomposição antecipação', value: qtdAntec + ' primeiras parcelas' });
-  propostaLinha2.push({ label: 'Saldo devedor', value: _t('br-saldoDevedor') || '—' });
-
-  const propostaLinhas = [
-    { campos: propostaLinha1, destaque: { label: 'Saldo devedor', value: _t('br-saldoDevedor') || '—' } }
-  ];
-  if (propostaLinha2.length > 0) propostaLinhas.push({ campos: propostaLinha2 });
-
-  const taxaMes = _t('br-taxaMes');
-  const taxaAno = _t('br-taxaAno');
-  const taxaCombo = (_has(taxaMes) || _has(taxaAno)) ? `${taxaMes || '—'} a.m. · ${taxaAno || '—'} a.a.` : '—';
-
-  const taxasLinhas = [{
-    campos: [
-      { label: 'Taxa antecipação', value: _v('br-taxaAntecipacao') || '0,00 %' },
-      { label: 'Taxa administrativa', value: _v('br-taxaAdm') || '0,00 %' },
-      { label: 'Fundo de reserva', value: _v('br-fundo') || '0,00 %' },
-      { label: 'Seguro de vida', value: _v('br-seguro') || '0,0000 %' }
-    ],
-    destaque: { label: 'Taxa por mês / ano', value: taxaCombo }
-  }];
-
-  const lanceLinhas = [{
-    campos: [
-      { label: '% Lance', value: _v('br-pctLance') || '0,00 %' },
-      { label: 'Valor manual', value: _v('br-lanceManual') || 'R$ 0,00' }
-    ],
-    destaque: { label: 'Valor lance total', value: _t('br-lanceTotal') || '—' }
-  }];
-
-  const blocos = [
-    { tipo: 'card', titulo: 'PROPOSTA', linhas: propostaLinhas },
-    { tipo: 'card', titulo: 'TAXAS DO GRUPO', linhas: taxasLinhas },
-    { tipo: 'card', titulo: 'OFERTA DE LANCE', linhas: lanceLinhas }
-  ];
-
-  const saldoPos = _t('br-saldoPos');
-  const parcDiluir = _t('br-parcDiluir');
-  const prazoDiluir = _t('br-prazoDiluir');
-  const parcAntecipar = _t('br-parcAntecipar');
-  const prazoAntecipar = _t('br-prazoAntecipar');
-
-  const posLinhas = [
-    { campos: [{ label: 'Saldo após contempla', value: saldoPos || '—' }] }
-  ];
-  posLinhas.push({
-    campos: [
-      { label: 'Nova parcela', value: parcDiluir || '—' },
-      { label: 'Prazo restante', value: prazoDiluir || '—' }
-    ],
-    destaque: { label: 'Diluir nas parcelas', value: parcDiluir || '—' }
+  // Inputs
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  dados.inputs.forEach(inp => {
+    doc.setTextColor(107,114,128);
+    doc.text(inp.label, margem, y);
+    doc.setTextColor(31,41,55);
+    doc.text(inp.value, margem + 50, y);
+    y += 6;
   });
-  posLinhas.push({
-    campos: [
-      { label: 'Novo prazo', value: prazoAntecipar || '—' },
-      { label: 'Parcela mantida', value: parcAntecipar || '—' }
-    ],
-    destaque: { label: 'Antecipar parcelas', value: prazoAntecipar || '—' }
-  });
-  blocos.push({ tipo: 'card', titulo: 'ESTIMATIVA PÓS-CONTEMPLAÇÃO', linhas: posLinhas });
+  y += 4;
 
-  const lblInicial = _t('br-lblParcelaInicial') || 'Parcela inicial';
-  const lblDemais = _t('br-lblParcelaDemais') || 'Parcela após antecipação';
-  const resumoLinhas = [
-    { campos: [
-        { label: lblInicial, value: _t('br-parcelaInicial') || '—' },
-        { label: lblDemais, value: _t('br-parcelaPosAnt') || '—' }
-      ],
-      destaque: { multi: [
-        { label: lblInicial, value: _t('br-parcelaInicial') || '—' },
-        { label: lblDemais, value: _t('br-parcelaPosAnt') || '—' }
-      ]}
+  // Lance
+  if (dados.lance) {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(45,63,94);
+    doc.text('Lance', margem, y);
+    y += 6;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.text(`% Lance: ${dados.lance.total.pct} %`, margem, y);
+    doc.text(`Valor: R$ ${dados.lance.total.rs}`, margem + 60, y);
+    y += 8;
+  }
+
+  // Outputs
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(45,63,94);
+  doc.text('Resultados', margem, y);
+  y += 7;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  dados.outputs.forEach(out => {
+    doc.setTextColor(107,114,128);
+    doc.text(out.label, margem, y);
+    doc.setTextColor(31,41,55);
+    doc.text(out.value, margem + 70, y);
+    if (out.subAcima) {
+      y += 4;
+      doc.setFontSize(7);
+      doc.setTextColor(156,163,175);
+      doc.text(out.subAcima, margem + 70, y);
+      doc.setFontSize(9);
     }
-  ];
-  blocos.push({ tipo: 'card', titulo: 'RESUMO DE PARCELAS', linhas: resumoLinhas });
+    y += 6;
+  });
+  y += 6;
 
-  return blocos;
+  // Observações
+  if (dados.observacoes && dados.observacoes.trim() !== '') {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(45,63,94);
+    doc.text('Observações', margem, y);
+    y += 6;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(31,41,55);
+    const obsLinhas = doc.splitTextToSize(dados.observacoes, 180);
+    obsLinhas.forEach(linha => {
+      if (y > 270) { doc.addPage(); y = margem; }
+      doc.text(linha, margem, y);
+      y += 5;
+    });
+  }
+
+  // Rodapé
+  y += 8;
+  doc.setDrawColor(229,231,235);
+  doc.line(margem, y, 210 - margem, y);
+  y += 5;
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(156,163,175);
+  doc.text('Simulação gerada pelo Master Prime · Caráter ilustrativo', margem, y);
+
+  return doc;
 }
+
+document.getElementById('baixarPdfBradesco').addEventListener('click', async () => {
+  const btn = document.getElementById('baixarPdfBradesco');
+  const txt = btn.textContent;
+  btn.textContent = 'Gerando PDF...';
+  btn.disabled = true;
+  try {
+    // Tenta usar módulo externo se existir e função disponível
+    if (typeof window.PdfMasterPrime !== 'undefined' && typeof window.PdfMasterPrime.gerarComercial === 'function') {
+      await window.PdfMasterPrime.gerarComercial(_montarPdfComercialBradesco());
+    } else {
+      // Fallback com jsPDF próprio
+      const dados = _montarPdfComercialBradesco();
+      const doc = _gerarPDFFallback(dados);
+      doc.save((dados.filename || 'simulacao') + '.pdf');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Erro ao gerar PDF: ' + err.message);
+  } finally {
+    btn.textContent = txt;
+    btn.disabled = false;
+  }
+});
 
 function _montarPdfComercialBradesco() {
   const _v = (id) => { const el = document.getElementById(id); return (el?.value || '').trim(); };
@@ -783,12 +803,11 @@ function _montarPdfComercialBradesco() {
   const qtdAntec = _v('br-qtdAntecipacao') || '6';
   const creditoLiquido = _v('br-credito') || 'R$ 0,00';
 
-  // Verifica modo genérico
   const generico = isModoGenerico();
 
   return {
     filename: generico ? 'simulacao-consorcio' : 'bradesco-auto',
-    logoAdmin: generico ? null : 'bradesco',          // null = sem logo de administradora
+    logoAdmin: generico ? null : 'bradesco',
     titulo: 'Simulador de Crédito',
     subtitulo: generico ? 'Consórcio Auto' : 'Bradesco Auto',
     representanteTexto: generico ? 'Consórcio' : 'Consórcio Bradesco',
@@ -812,22 +831,6 @@ function _montarPdfComercialBradesco() {
     observacoes: _v('br-observacoes')
   };
 }
-
-document.getElementById('baixarPdfBradesco').addEventListener('click', async () => {
-  const btn = document.getElementById('baixarPdfBradesco');
-  const txt = btn.textContent;
-  btn.textContent = 'Gerando PDF...';
-  btn.disabled = true;
-  try {
-    await PdfMasterPrime.gerarComercial(_montarPdfComercialBradesco());
-  } catch (err) {
-    console.error(err);
-    alert('Erro ao gerar PDF: ' + err.message);
-  } finally {
-    btn.textContent = txt;
-    btn.disabled = false;
-  }
-});
 
 // ═══════════════════════════════════════════════════════
 // OLHINHO — MEMÓRIA DE CÁLCULO DO LANCE
