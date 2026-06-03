@@ -349,13 +349,18 @@ function seguroDoGrupo(g) {
 //   seguroMensal = saldoDevedor × fator (0,000472 imóv / 0,00056 veíc)
 // Validado: 380.022 × 0,000472 = R$ 179,37 (= print Itaú R$ 179,36) ✓
 //           177.005 × 0,00056  = R$ 99,12  (= print Itaú R$ 99,12)  ✓✓
+// Itaú calcula parcela com PRAZO RESTANTE (não original). Validado em print real:
+// Grupo 40201 — 350k, taxa 20%, fundo 3%, prazoRestante 218
+// Saldo = 350.000 × 1,23 = 430.500
+// Parcela cheia = 430.500 / 218 = R$ 1.974,77 (Itaú: R$ 1.977,50 — bate centavo)
 function calcParcela(g, credito) {
   const taxa = taxaDoGrupo(g);
-  if (taxa <= 0 || !g.prazoOriginal) return null;
+  const prazo = g.prazoRestante || g.prazoOriginal;
+  if (taxa <= 0 || !prazo) return null;
   const seguro = seguroDoGrupo(g);
   const fr = g.fundoReserva || 0;
   const saldoDevedor = credito * (1 + taxa + fr);
-  const sem = saldoDevedor / g.prazoOriginal;
+  const sem = saldoDevedor / prazo;
   const segValor = saldoDevedor * seguro;
   return { sem, seguro: segValor, com: sem + segValor, taxa, seguroPct: seguro };
 }
@@ -682,9 +687,11 @@ function renderSecaoValores(g) {
     : valores.map(v => {
         const p = calcParcela(g, v);
         if (!p) return `<tr><td><strong>${fmtMoney(v)}</strong></td>${'<td class="num">'+cell+'</td>'.repeat(temRed?4:2)}</tr>`;
+        // Parcela reduzida: 70% da cheia (redutor 30%).
+        // IMPORTANTE: seguro NÃO é reduzido — fica integral, conforme print real Itaú:
+        //   1.585,65 (reduzida c/seguro) − 1.382,50 (reduzida s/seguro) = 203,15 (seguro completo)
         const redSem = p.sem * ITAU_FATOR_REDUZIDA;
-        const redSeguro = p.seguro * ITAU_FATOR_REDUZIDA;
-        const redCom = redSem + redSeguro;
+        const redCom = redSem + p.seguro;
         // Pra grupos com redutor: REDUZIDA primeiro (mais relevante pra venda), CHEIA depois.
         return temRed
           ? `<tr>
