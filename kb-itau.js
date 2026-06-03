@@ -696,10 +696,19 @@ window.KB_ADMIN["itau"] = {
       "categoria_key": "canais",
       "categoria_label": "Canais e contatos",
       "categoria_ordem": 11,
+      "titulo": "Como o cliente acessa o Portal do Consorciado",
+      "conteudo": "Caminhos pro cliente acompanhar a cota:\n\n• Cliente correntista Itaú (PF e PJ): direto pelo app da conta corrente — Consórcio > Meus Consórcios.\n• Cliente não correntista: acesso pelo Portal do Consorciado em https://portalconsorcio.cloud.itau.com.br.\n• Central de Atendimento Consórcio Itaú: 4004-4828 (capitais e regiões metropolitanas) ou 0800 723 4828 (demais localidades).\n\nVale compartilhar com os clientes pra facilitar o acompanhamento das cotas, consultas e serviços.",
+      "tags": "portal do consorciado, acesso, correntista, não correntista, app, login, cliente, 4004 4828, portalconsorcio.cloud.itau",
+      "ordem": 6
+    },
+    {
+      "categoria_key": "canais",
+      "categoria_label": "Canais e contatos",
+      "categoria_ordem": 11,
       "titulo": "O que a Central de Atendimento resolve para o representante",
       "conteudo": "A Itaú organiza as solicitações do consórcio em jornadas, mostrando o que dá para resolver direto nos canais digitais e o que precisa passar pela Central de Atendimento.\n\nA Central de Atendimento resolve: substituição de garantia, boleto de lance, gravames, boleto com atraso acima de 30 dias e devolução de valores.\n\nDisponível no autosserviço dos canais digitais (não precisa da Central): faturamento (Iparceiros, Credline e Hive), DPP, gestão da carteira e contratação (Iparceiros).\n\nAtendido pela Central e também disponível no autosserviço: oferta de lance e boleto de parcela (Iparceiros e Credline), resultado de assembleia e antecipação / quitação (Credline).\n\nResolvido pela central de clientes, acionada pelo próprio cliente: pagamento em espécie, alterações cadastrais, reativação ou cancelamento de cota e cancelamento de seguros.\n\nEm caso de dúvida, fale com o consultor comercial.",
       "tags": "central, atendimento, autosserviço, iparceiros, credline, hive, representante, jornada",
-      "ordem": 6
+      "ordem": 7
     },
     {
       "categoria_key": "glossario",

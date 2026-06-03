@@ -279,13 +279,41 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
 
 <script src="kb-bradesco.js?v=20260527a"></script>
 <script src="kb-porto.js?v=20260527a"></script>
-<script src="kb-itau.js?v=20260527a"></script>
+<script src="kb-itau.js?v=20260603a"></script>
 <script>
 (function () {
   var ADM = window.KB_ADMIN || {};
   var DATA = [], DOWNLOADS = [], CATS = [];
   var COMPARE_CATS = [];
   var activeAdm = null, activeChip = 'todas', query = '';
+
+  // ── FIX iframe: força anchors target="_blank" abrirem nova aba do BROWSER
+  // (não dentro do iframe). Quando o Material de Apoio é embedado no portal,
+  // sem isso o PDF/link navega o iframe e "engole" a tela. Vale pros botões
+  // "Abrir PDF" e pros links automáticos (linkify) nos textos das respostas.
+  document.addEventListener('click', function (e) {
+    var a = e.target && e.target.closest ? e.target.closest('a[target="_blank"]') : null;
+    if (!a) return;
+    if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    // Se NÃO estamos em iframe, deixa o browser fazer seu trabalho normal.
+    if (window === window.top) return;
+    e.preventDefault();
+    var topWin = window.top;
+    var w = null;
+    try { w = topWin.open(a.href, '_blank', 'noopener,noreferrer'); } catch (err) {}
+    if (!w) {
+      // Fallback: cria <a> temporário no top e clica nele
+      try {
+        var tmp = topWin.document.createElement('a');
+        tmp.href = a.href; tmp.target = '_blank'; tmp.rel = 'noopener noreferrer';
+        topWin.document.body.appendChild(tmp);
+        tmp.click();
+        topWin.document.body.removeChild(tmp);
+      } catch (err) {
+        alert('Permita pop-ups deste site nas configurações do navegador para abrir o link.');
+      }
+    }
+  }, true);  // capture phase: pega antes de outros handlers
 
   // Categorias que cada banco nomeia diferente, mas tratam do mesmo tema.
   var CAT_ALIASES = {
@@ -588,18 +616,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
           'Abrir PDF</a>' +
       '</div>';
     }).join('');
-    // Reforço defensivo: garante que o click abre em nova aba mesmo se algum
-    // pop-up blocker exótico engolir o target="_blank" do anchor.
-    box.querySelectorAll('.dl-btn').forEach(function (a) {
-      a.addEventListener('click', function (e) {
-        // Se for click do meio ou com cmd/ctrl, deixa o browser fazer o default
-        if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) return;
-        e.preventDefault();
-        var w = window.open(a.href, '_blank', 'noopener,noreferrer');
-        // Fallback final: se window.open foi bloqueado, navega no mesmo tab
-        if (!w) window.location.href = a.href;
-      });
-    });
+    // Anchors com target="_blank" já são tratados pelo handler global no topo
+    // do arquivo (que escapa do iframe e força nova aba). Sem handler aqui.
   }
 
   // ── modo Comparativo: UM card por assunto, abre os 3 bancos juntos ──
