@@ -359,6 +359,32 @@ function calcParcela(g, credito) {
   const segValor = saldoDevedor * seguro;
   return { sem, seguro: segValor, com: sem + segValor, taxa, seguroPct: seguro };
 }
+// REDUTOR Itaú = 30% (validado no simulador interno: R$1.089,87 / R$1.556,96 = 0,7 exato
+// → parcela reduzida paga 70% da cheia, ou seja, redutor de 30%).
+// Para grupos com parcelaReduzida=true E valores duplicados par a par, a 2ª ocorrência
+// de cada crédito representa a versão COM REDUTOR.
+const ITAU_FATOR_REDUZIDA = 0.7;  // parcela reduzida = parcela cheia × 0,7
+// Detecta se o grupo tem opção com/sem redutor (valores duplicados par a par)
+function temOpcaoReduzida(g) {
+  if (!g.parcelaReduzida) return false;
+  const vals = (g.valoresDisponiveis||'').split(',').map(v=>parseMoney(v)).filter(v=>v!==null);
+  if (vals.length < 2 || vals.length % 2 !== 0) return false;
+  // Confere se cada par é o mesmo valor
+  for (let i = 0; i < vals.length; i += 2) {
+    if (vals[i] !== vals[i+1]) return false;
+  }
+  return true;
+}
+// Retorna lista de créditos únicos (deduplicada) pra grupos com redutor
+function valoresUnicos(g) {
+  const vals = (g.valoresDisponiveis||'').split(',').map(v=>parseMoney(v)).filter(v=>v!==null);
+  if (temOpcaoReduzida(g)) {
+    const unicos = [];
+    for (let i = 0; i < vals.length; i += 2) unicos.push(vals[i]);
+    return unicos;
+  }
+  return vals;
+}
 // Helper pra calcular range (min-max) do grupo
 function calcParcelas(g) {
   const p1 = calcParcela(g, g.valorMin);
@@ -559,25 +585,7 @@ function abrirGrupo(numero, tipo) {
       </div>
     </div>
 
-    <div class="m-section">
-      <div class="m-section-title">Valores de Bem Disponíveis · ${valoresLista.length} ${valoresLista.length===1?'opção':'opções'}</div>
-      <table class="m-valores-tbl">
-        <thead><tr><th>Crédito</th><th class="num">Parcela s/ Seguro</th><th class="num">Parcela c/ Seguro</th></tr></thead>
-        <tbody>
-          ${valoresLista.length === 0 ? '<tr><td colspan="3" style="text-align:center;color:var(--text2);padding:16px">—</td></tr>' :
-            valoresLista.map(v => {
-              const p = calcParcela(g, v);
-              return `<tr>
-                <td><strong>${fmtMoney(v)}</strong></td>
-                <td class="num">${p && p.sem ? fmtMoney(p.sem) : '<span style="color:#CBD5E1">—</span>'}</td>
-                <td class="num">${p && p.seguro > 0 ? `<strong style="color:var(--admin-text)">${fmtMoney(p.com)}</strong>` : '<span style="color:#CBD5E1">—</span>'}</td>
-              </tr>`;
-            }).join('')
-          }
-        </tbody>
-      </table>
-      <div class="m-aviso-taxa" style="font-size:11px;color:#92400E;background:#FEF3C7;padding:8px 11px;border-radius:6px;margin-top:8px;display:${taxaDoGrupo(g) <= 0 ? '' : 'none'}">⚠ Configure a Taxa Adm acima pra ver as parcelas.</div>
-    </div>
+    <div class="m-section">${renderSecaoValores(g)}</div>
 
     <div class="m-section">
       <div class="m-section-title">Modalidades de Lance</div>
@@ -662,24 +670,58 @@ document.addEventListener('input', e => {
   atualizarTabelaValores(g);
   render();  // atualiza cards no fundo (debounced naturalmente pelo browser)
 });
-// Atualiza só o <tbody> da tabela de valores e os 2 últimos avisos
-function atualizarTabelaValores(g) {
-  const valoresLista = (g.valoresDisponiveis||'').split(',').map(v=>parseMoney(v)).filter(v=>v!==null);
-  const tbody = document.querySelector('.m-valores-tbl tbody');
-  if (!tbody) return;
-  tbody.innerHTML = valoresLista.length === 0
-    ? '<tr><td colspan="3" style="text-align:center;color:var(--text2);padding:16px">—</td></tr>'
-    : valoresLista.map(v => {
+// Renderiza a SEÇÃO inteira (título + tabela + aviso). Usada na abertura do modal.
+// Pra grupos com parcela reduzida: 5 colunas (Crédito · Cheia s · Cheia c · Reduzida s · Reduzida c)
+// Pra grupos sem: 3 colunas (Crédito · Parcela s · Parcela c)
+function renderSecaoValores(g) {
+  const valores = valoresUnicos(g);
+  const temRed = temOpcaoReduzida(g);
+  const cell = '<span style="color:#CBD5E1">—</span>';
+  const linhasHtml = valores.length === 0
+    ? `<tr><td colspan="${temRed?5:3}" style="text-align:center;color:var(--text2);padding:16px">—</td></tr>`
+    : valores.map(v => {
         const p = calcParcela(g, v);
+        if (!p) return `<tr><td><strong>${fmtMoney(v)}</strong></td>${'<td class="num">'+cell+'</td>'.repeat(temRed?4:2)}</tr>`;
+        const redSem = p.sem * ITAU_FATOR_REDUZIDA;
+        const redSeguro = p.seguro * ITAU_FATOR_REDUZIDA;
+        const redCom = redSem + redSeguro;
         return `<tr>
           <td><strong>${fmtMoney(v)}</strong></td>
-          <td class="num">${p && p.sem ? fmtMoney(p.sem) : '<span style="color:#CBD5E1">—</span>'}</td>
-          <td class="num">${p && p.seguro > 0 ? `<strong style="color:var(--admin-text)">${fmtMoney(p.com)}</strong>` : '<span style="color:#CBD5E1">—</span>'}</td>
+          <td class="num">${fmtMoney(p.sem)}</td>
+          <td class="num">${p.seguro > 0 ? `<strong style="color:var(--admin-text)">${fmtMoney(p.com)}</strong>` : cell}</td>
+          ${temRed ? `<td class="num" style="background:#F8FAFC">${fmtMoney(redSem)}</td>
+          <td class="num" style="background:#F8FAFC">${p.seguro > 0 ? `<strong style="color:var(--admin-text)">${fmtMoney(redCom)}</strong>` : cell}</td>` : ''}
         </tr>`;
       }).join('');
-  // Atualiza aviso amarelo (mostra/esconde dependendo da taxa)
-  const aviso = document.querySelector('.m-aviso-taxa');
-  if (aviso) aviso.style.display = taxaDoGrupo(g) <= 0 ? '' : 'none';
+  const thead = temRed
+    ? `<thead>
+        <tr>
+          <th rowspan="2">Crédito</th>
+          <th class="num" colspan="2" style="text-align:center;border-right:1px solid var(--border)">Parcela CHEIA</th>
+          <th class="num" colspan="2" style="text-align:center;background:#F1F5F9">Parcela REDUZIDA <small style="font-weight:500;text-transform:none;letter-spacing:0;color:var(--text2)">(−30%)</small></th>
+        </tr>
+        <tr>
+          <th class="num">s/ Seguro</th>
+          <th class="num" style="border-right:1px solid var(--border)">c/ Seguro</th>
+          <th class="num" style="background:#F8FAFC">s/ Seguro</th>
+          <th class="num" style="background:#F8FAFC">c/ Seguro</th>
+        </tr>
+      </thead>`
+    : '<thead><tr><th>Crédito</th><th class="num">Parcela s/ Seguro</th><th class="num">Parcela c/ Seguro</th></tr></thead>';
+  return `
+    <div class="m-section-title">Valores de Bem Disponíveis · ${valores.length} ${valores.length===1?'opção':'opções'}${temRed?' · com opção de Parcela Reduzida':''}</div>
+    <table class="m-valores-tbl">
+      ${thead}
+      <tbody>${linhasHtml}</tbody>
+    </table>
+    <div class="m-aviso-taxa" style="font-size:11px;color:#92400E;background:#FEF3C7;padding:8px 11px;border-radius:6px;margin-top:8px;display:${taxaDoGrupo(g) <= 0 ? '' : 'none'}">⚠ Configure a Taxa Adm acima pra ver as parcelas.</div>
+  `;
+}
+// Atualiza só o <tbody> ao digitar (mantém input intacto).
+function atualizarTabelaValores(g) {
+  const sec = document.querySelector('.m-valores-tbl')?.parentElement;
+  if (!sec) return;
+  sec.innerHTML = renderSecaoValores(g);
 }
 
 // Estende trocarAdmin pra recarregar a calc também
