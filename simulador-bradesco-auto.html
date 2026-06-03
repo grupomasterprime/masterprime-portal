@@ -28,6 +28,7 @@
     --text-light: #9CA3AF;
     --soft-blue: #F1F5F9;
     --soft-red: #FFE9EC;
+    --soft-red-border: #F5BCC4;
     --error: #DC2626;
     --warning-bg: #FFF8E8;
     --warning-border: #F0D9A0;
@@ -77,7 +78,7 @@
   .result-primary strong { color: rgba(255,255,255,0.85); font-size: 11.5px; letter-spacing: 1.2px; text-transform: uppercase; font-weight: 500; }
   .result-primary .value { font-size: 20px; font-weight: 700; color: #fff; font-family: 'DM Mono', ui-monospace, monospace; }
 
-  .result-red { background: var(--soft-red); border: 1px solid #F5BCC4; border-radius: 8px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .result-red { background: var(--soft-red); border: 1px solid var(--soft-red-border); border-radius: 8px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
   .result-red strong { font-size: 11.5px; color: var(--bradesco-red-dark); letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
   .result-red .value { font-size: 19px; font-weight: 700; color: var(--mp-navy); font-family: 'DM Mono', ui-monospace, monospace; }
 
@@ -107,7 +108,7 @@
   .passo-val { font-family: 'DM Mono', ui-monospace, monospace; font-weight: 700; color: var(--mp-navy); font-size: 14px; white-space: nowrap; }
   .passo-row.final .passo-text { font-weight: 600; color: var(--mp-navy); }
   .passo-row.final .passo-val { font-size: 16px; color: var(--bradesco-red-dark); }
-  .formula-box { margin-top: 16px; padding: 12px 16px; background: var(--soft-red); border: 1px solid #F5BCC4; border-radius: 8px; font-family: 'DM Mono', ui-monospace, monospace; font-size: 12.5px; color: var(--bradesco-red-dark); text-align: center; line-height: 1.5; }
+  .formula-box { margin-top: 16px; padding: 12px 16px; background: var(--soft-red); border: 1px solid var(--soft-red-border); border-radius: 8px; font-family: 'DM Mono', ui-monospace, monospace; font-size: 12.5px; color: var(--bradesco-red-dark); text-align: center; line-height: 1.5; }
 
   /* Resumo de parcelas */
   .resumo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
@@ -132,7 +133,7 @@
   .aviso { background: var(--warning-bg); border: 1px solid var(--warning-border); border-radius: 8px; padding: 14px 18px; color: var(--warning-text); font-size: 12.5px; line-height: 1.5; margin-top: 8px; }
   .aviso strong { color: var(--warning-text); }
 
-  .actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; padding-bottom: 32px; }
+  .actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; padding-bottom: 32px; flex-wrap: wrap; }
   button.primary, button.secondary { padding: 11px 22px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.15s; border: 1px solid transparent; font-family: inherit; }
   button.primary { background: var(--bradesco-red); color: #fff; border-color: var(--bradesco-red); }
   button.primary:hover { background: var(--bradesco-red-dark); }
@@ -146,6 +147,39 @@
   /* Observações textarea */
   .obs-area { width: 100%; min-height: 90px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: inherit; resize: vertical; color: var(--text); background: #fff; }
   .obs-area:focus { outline: none; border-color: var(--bradesco-red); box-shadow: 0 0 0 3px rgba(204,9,47,0.10); }
+
+  /* Toggle genérico */
+  .generic-toggle-bar { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-bottom: 20px; }
+  .generic-toggle-label { font-size: 12px; color: var(--text-muted); font-weight: 500; letter-spacing: 0.3px; }
+  .generic-toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
+  .generic-toggle input { opacity: 0; width: 0; height: 0; }
+  .generic-toggle .slider { position: absolute; cursor: pointer; inset: 0; background: var(--border); border-radius: 24px; transition: .3s; }
+  .generic-toggle .slider::before { content: ""; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
+  .generic-toggle input:checked + .slider { background: var(--mp-navy); }
+  .generic-toggle input:checked + .slider::before { transform: translateX(20px); }
+
+  /* ═══════════════ MODO GENÉRICO (neutro) ═══════════════ */
+  body.generic-mode {
+    --bradesco-red: #4B5563;          /* cinza escuro neutro */
+    --bradesco-red-dark: #374151;
+    --soft-red: #F3F4F6;
+    --soft-red-border: #D1D5DB;
+    --focus-ring: rgba(75, 85, 99, 0.15);
+  }
+  body.generic-mode .tag-admin { display: none; }
+  body.generic-mode .field input:focus,
+  body.generic-mode .field select:focus,
+  body.generic-mode .obs-area:focus { border-color: #4B5563; box-shadow: 0 0 0 3px rgba(75, 85, 99, 0.15); }
+  body.generic-mode .btn-eye-lance { color: #4B5563; }
+  body.generic-mode .btn-eye-lance:hover { background: rgba(75,85,99,0.10); color: #374151; }
+  body.generic-mode .result-red strong { color: #374151; }
+  body.generic-mode .pos-row.highlight .val { color: #374151; }
+  body.generic-mode .passo-row.final .passo-val { color: #374151; }
+  body.generic-mode .formula-box { color: #374151; }
+  body.generic-mode .brand-mark { background: #4B5563; }
+  body.generic-mode .card-header .badge-red { background: #4B5563; }
+  body.generic-mode button.primary { background: #4B5563; border-color: #4B5563; }
+  body.generic-mode button.primary:hover { background: #374151; }
 </style>
 <script>if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('embedded');</script>
 </head>
@@ -159,14 +193,23 @@
       <p>Simulador de Consórcio</p>
     </div>
   </div>
-  <span class="tag-admin">Bradesco</span>
+  <span class="tag-admin" id="tagAdminHeader">Bradesco</span>
 </header>
 
 <main>
   <div id="simStoreMount" style="max-width:1400px; margin:16px auto 0; padding:0 32px;"></div>
 
-  <h2 class="section-title">Bradesco · Auto</h2>
-  <p class="subtitle">Cálculo de proposta, contemplação e estratégias de lance</p>
+  <!-- TOGGLE MODO GENÉRICO -->
+  <div class="generic-toggle-bar">
+    <span class="generic-toggle-label">Modo neutro (sem identificação da administradora)</span>
+    <label class="generic-toggle">
+      <input type="checkbox" id="genericModeToggle" onchange="alternarModoGenerico()">
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <h2 class="section-title" id="mainTitle">Bradesco · Auto</h2>
+  <p class="subtitle" id="mainSubtitle">Cálculo de proposta, contemplação e estratégias de lance</p>
 
   <!-- ════════ PROPOSTA ════════ -->
   <section class="card">
@@ -357,6 +400,32 @@
 
 <script>
 // ═══════════════════════════════════════════════════════
+// MODO GENÉRICO (toggle)
+// ═══════════════════════════════════════════════════════
+function isModoGenerico() {
+  return document.getElementById('genericModeToggle').checked;
+}
+
+function alternarModoGenerico() {
+  const ativo = isModoGenerico();
+  document.body.classList.toggle('generic-mode', ativo);
+  // Atualiza títulos e labels
+  const titulo = document.getElementById('mainTitle');
+  const tagAdmin = document.getElementById('tagAdminHeader');
+  const pageTitle = document.querySelector('title');
+
+  if (ativo) {
+    titulo.textContent = 'Simulador de Consórcio · Auto';
+    if (tagAdmin) tagAdmin.textContent = 'Genérico';
+    if (pageTitle) pageTitle.textContent = 'Master Prime - Simulador de Consórcio';
+  } else {
+    titulo.textContent = 'Bradesco · Auto';
+    if (tagAdmin) tagAdmin.textContent = 'Bradesco';
+    if (pageTitle) pageTitle.textContent = 'Master Prime - Bradesco Auto';
+  }
+}
+
+// ═══════════════════════════════════════════════════════
 // MÁSCARAS
 // ═══════════════════════════════════════════════════════
 function maskMoney(value) {
@@ -455,30 +524,6 @@ function readInputs() {
 // ═══════════════════════════════════════════════════════
 // FÓRMULAS — engenharia reversa COMPLETA da planilha Bradesco
 // ═══════════════════════════════════════════════════════
-// Vars: bem, adm, fr, txAnt, prazoAnt, red, prazo, seguro, pctLance, contempla
-//
-// Saldo Devedor    = bem × (1 + adm + fr)
-// Parc Inicial     = bem × (1 − red + adm + fr) / prazo + saldo × seguro
-// Parc Pós-Antec   = bem × (1 − red + adm − txAnt + fr) / prazo + saldo × seguro
-//
-// % por categoria (composição da parcela):
-//   D7 (% COMUM pós-ant)   = (1 − red + txAnt) / prazo
-//   B7 (% COMUM inicial)   = (1 − red)/prazo − txAnt × (prazo − prazoAnt)/(prazo × prazoAnt)
-//
-// Lance Total (E27 do Excel):
-//   Se D7 × (prazo − prazoAnt) <= pctLance:
-//     C21 = prazo − prazoAnt
-//     B21 = (pctLance − D7 × (prazo − prazoAnt)) / B7
-//   Senão:
-//     C21 = pctLance / D7
-//     B21 = 0
-//   Lance Total = (B21 + C21) × ParcInicial(s/seguro)
-//
-// Pós contemplação:
-//   Lance entra ENTRE parcela L7 e L7+1 (parcs cheias até L7+1)
-//   Saldo Pós = SaldoDevedor − parcsPagas − Lance
-//   Diluir nas Parcelas:  novaParc = saldoPos / (prazo − (L7+1))
-//   Antecipar Parcelas:   novoPrazo = (prazo − L7) − Lance/ParcInicial
 function calc(i) {
   const r = {};
   const bem = i.credito;
@@ -522,7 +567,6 @@ function calc(i) {
   }
 
   // PÓS CONTEMPLAÇÃO
-  // Lance entra entre a parcela L7 e L7+1 → 2 parcelas cheias pagas (1 a L7+1) antes da nova parcela
   const cont = Math.max(1, i.contempla || 1);
   const parcsAteCont = Math.min(cont + 1, prazo);
   const parcsInicialPagas = Math.min(parcsAteCont, prazoAnt);
@@ -531,16 +575,11 @@ function calc(i) {
   r.saldoPos = r.saldoDevedor - totalParcsPagas - r.lanceTotal;
 
   // Diluir nas Parcelas
-  // Internamente, parcDiluir é calculada dividindo o saldoPos pelo nº de parcelas com o
-  // valor novo (178 = prazo − 2 parcelas iniciais pagas).
-  // Mas o "Prazo Restante" exibido ao cliente é o total ainda a pagar = prazo − contempla (179),
-  // que é mais intuitivo ("quantos meses faltam até quitar").
   const prazoNovaParcela = Math.max(0, prazo - parcsAteCont);
   r.parcDiluir = (prazoNovaParcela > 0) ? (r.saldoPos / prazoNovaParcela) : NaN;
   r.prazoDiluir = Math.max(0, prazo - cont);
 
-  // Antecipar Parcelas: lance amortiza N parcelas iguais à ParcInicial
-  //   novoPrazo = (prazo − contempla) − Lance/ParcInicial
+  // Antecipar Parcelas
   r.parcAntecipar = r.parcelaInicial;
   const nParcelasAmort = (parcInicialSemSeg > 0) ? r.lanceTotal / parcInicialSemSeg : 0;
   r.prazoAntecipar = Math.max(0, (prazo - cont) - nParcelasAmort);
@@ -649,7 +688,6 @@ function _coletarBlocosBradesco() {
   const qtdAntec = _v('br-qtdAntecipacao');
   const contemplaN = parseInt(_v('br-contempla') || '0', 10) || 0;
 
-  // BLOCO 1: PROPOSTA
   const propostaLinha1 = [
     { label: 'Crédito Contratado', value: _v('br-credito') || 'R$ 0,00' },
     { label: 'Prazo total', value: (prazoVal || '0') + ' meses' },
@@ -665,7 +703,6 @@ function _coletarBlocosBradesco() {
   ];
   if (propostaLinha2.length > 0) propostaLinhas.push({ campos: propostaLinha2 });
 
-  // BLOCO 2: TAXAS DO GRUPO
   const taxaMes = _t('br-taxaMes');
   const taxaAno = _t('br-taxaAno');
   const taxaCombo = (_has(taxaMes) || _has(taxaAno)) ? `${taxaMes || '—'} a.m. · ${taxaAno || '—'} a.a.` : '—';
@@ -680,7 +717,6 @@ function _coletarBlocosBradesco() {
     destaque: { label: 'Taxa por mês / ano', value: taxaCombo }
   }];
 
-  // BLOCO 3: OFERTA DE LANCE
   const lanceLinhas = [{
     campos: [
       { label: '% Lance', value: _v('br-pctLance') || '0,00 %' },
@@ -695,7 +731,6 @@ function _coletarBlocosBradesco() {
     { tipo: 'card', titulo: 'OFERTA DE LANCE', linhas: lanceLinhas }
   ];
 
-  // BLOCO 4: ESTIMATIVA PÓS-CONTEMPLAÇÃO (sempre, contempla default = 1)
   const saldoPos = _t('br-saldoPos');
   const parcDiluir = _t('br-parcDiluir');
   const prazoDiluir = _t('br-prazoDiluir');
@@ -721,7 +756,6 @@ function _coletarBlocosBradesco() {
   });
   blocos.push({ tipo: 'card', titulo: 'ESTIMATIVA PÓS-CONTEMPLAÇÃO', linhas: posLinhas });
 
-  // BLOCO 5: RESUMO DE PARCELAS
   const lblInicial = _t('br-lblParcelaInicial') || 'Parcela inicial';
   const lblDemais = _t('br-lblParcelaDemais') || 'Parcela após antecipação';
   const resumoLinhas = [
@@ -746,18 +780,18 @@ function _montarPdfComercialBradesco() {
   const _selTxt = (id) => { const el = document.getElementById(id); return (el?.selectedOptions?.[0]?.textContent || '').trim(); };
 
   const redutorTxt = _selTxt('br-redutor') || 'Sem redutor';
-  const redutorPct = redutorTxt.replace(/[^\d%]/g, '');
   const qtdAntec = _v('br-qtdAntecipacao') || '6';
-
-  // Crédito Líquido no Bradesco = Crédito Contratado (lance abate no saldo devedor, não reduz o crédito recebido)
   const creditoLiquido = _v('br-credito') || 'R$ 0,00';
 
+  // Verifica modo genérico
+  const generico = isModoGenerico();
+
   return {
-    filename: 'bradesco-auto',
-    logoAdmin: 'bradesco',
+    filename: generico ? 'simulacao-consorcio' : 'bradesco-auto',
+    logoAdmin: generico ? null : 'bradesco',          // null = sem logo de administradora
     titulo: 'Simulador de Crédito',
-    subtitulo: 'Bradesco Auto',
-    representanteTexto: 'Consórcio Bradesco',
+    subtitulo: generico ? 'Consórcio Auto' : 'Bradesco Auto',
+    representanteTexto: generico ? 'Consórcio' : 'Consórcio Bradesco',
     inputs: [
       { label: 'Taxa Administrativa', value: _v('br-taxaAdm') || '0,00 %' },
       { label: 'Fundo de Reserva', value: _v('br-fundo') || '0,00 %' },
@@ -797,10 +831,6 @@ document.getElementById('baixarPdfBradesco').addEventListener('click', async () 
 
 // ═══════════════════════════════════════════════════════
 // OLHINHO — MEMÓRIA DE CÁLCULO DO LANCE
-// ═══════════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════════
-// SYNC % LANCE ↔ VALOR DO LANCE (R$)
-// Usa a mesma fórmula: Lance = (Categoria × %Lance) ÷ Fator
 // ═══════════════════════════════════════════════════════
 let _syncingLance = false;
 function _baseCatEFator() {
