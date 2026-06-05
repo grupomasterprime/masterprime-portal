@@ -1065,7 +1065,9 @@ function fmtData(v) {
 
 // ── CATEGORIA ────────────────────────────────────────────────────────────
 function getMult(consultor, ciclo) {
-  const n = (consultor||'').trim().toUpperCase();
+  // Normaliza via normNome/ALIASES para que variantes ("JOÃO PORTO MAX",
+  // "JOAO PORTOMAX", etc.) batam com a key cadastrada no Master Elite.
+  const n = normNome(consultor);
   if (TODOS_SOCIOS.includes(n)) return 1.0;
   const row = S.elite[n];
   if (!row) return 0.625; // Padrão default
@@ -1477,7 +1479,9 @@ function loadElite(evt) {
       let count = 0;
       for (let i = 1; i < data.length; i++) {
         const r = data[i];
-        const nome = String(r[0]||'').trim().toUpperCase();
+        // Normaliza via normNome/ALIASES — garante que variantes na planilha
+        // ("JOÃO PORTO MAX" vs "JOÃO PORTOMAX") virem a mesma key.
+        const nome = normNome(String(r[0]||''));
         if (!nome) continue;
         S.elite[nome] = {};
         ciclos.forEach((c, j) => {
