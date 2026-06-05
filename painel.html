@@ -888,9 +888,11 @@ const PARCEIROS_DEMO = ['ADVANCED', 'STRADA', 'CAMINO', 'SPOLAOR'];
 // como consultores internos (gera demo próprio com NF+ADM), e o valor SAI da
 // comissão do consultor responsável (não do excedente da Master).
 // Gatilho na OBS: "X% NOME LIQUIDO".
-// Exemplo: Leidi Black (3%) com "1% EDSON LIQUIDO" → Leidi 2% + Edson 1%.
-// Edson tem login no portal e vê seu próprio demonstrativo.
-const PARCEIROS_COM_NF = ['LE - EDSON'];
+// Exemplos:
+//   Leidi Black (3%) + "1% EDSON LIQUIDO"  → Leidi 2%   + Edson 1%
+//   Bete Padrão (2,5%) + "1% ERIK LIQUIDO" → Bete 1,5%  + Erik 1%
+// Edson e Erik têm login no portal e veem seu próprio demonstrativo.
+const PARCEIROS_COM_NF = ['LE - EDSON', 'ERIK GONCALVES'];
 
 // Vendedores que NÃO têm desconto de ADM no demonstrativo próprio.
 // Cálculo: bruto_cons − tributos (NF) = líquido_cons (sem deduzir os 10% de admin).
@@ -938,6 +940,9 @@ const ALIASES = {
   // Edson → demonstrativo conjunto com Leidiane
   'ED':'LE - EDSON',
   'EDSON':'LE - EDSON',
+  // Erik → demonstrativo conjunto com Bete (mesma regra do Edson)
+  'ERIK':'ERIK GONCALVES',
+  'ERIK GONÇALVES':'ERIK GONCALVES',
   // XP = Strada
   'RENAN XP':'STRADA','FABIO XP':'STRADA',
   'XP STRADA':'STRADA','XP':'STRADA',
@@ -2058,9 +2063,13 @@ function processarLinha(linha, match, ciclo, mult, split, isAdvanced=false) {
     TODOS_SOCIOS.includes(p.quem) || p.ehSocio));
   let multEfet = temSocio ? 1 : mult;
   // Grupos Itaú 10 parcelas (50141, 50127, 50136, 50142): comissão paga em 10 × 0,5%
-  // (= 5% total, em vez dos 4% normais). Mult ajustado × 0,8 preserva os tiers
-  // Black 3% / Gold 2,75% / Padrão 2,5% somando as 10 parcelas.
-  if (linha.ehItau10Parc) multEfet = multEfet * 0.8;
+  // (= 5% total, em vez dos 4% normais). Mult ajustado × 0,8 nos tiers Padrão/Gold/Black
+  // preserva os percentuais finais (2,5% / 2,75% / 3% sobre o crédito).
+  // EXCEÇÕES:
+  //  - Sócio (mult 1.0): NÃO leva × 0,8 → leva os 5% inteiros do crédito.
+  //  - Custom (mult < 0,625, ex: Douglas 0,80%): NÃO leva × 0,8 → escala naturalmente
+  //    com a base (Douglas 0,80% × 5/4 = 1%).
+  if (linha.ehItau10Parc && multEfet >= 0.625 && multEfet < 1.0) multEfet = multEfet * 0.8;
 
   const parceiros = split.partes.filter(p => p.ehParceiro);
   const naoParc   = split.partes.filter(p => !p.ehParceiro && !p.ehSelf);
@@ -2406,7 +2415,8 @@ function _executarCalculo() {
       const ciclo = toCiclo(match?.dataVenda || linha.dataVenda);
       let mult = match ? getMult(consultor, ciclo) : 1;
       // Grupos Itaú 10 parcelas — mult ajustado × 0,8 (ver constante GRUPOS_ITAU_10_PARC)
-      if (linha.ehItau10Parc) mult = mult * 0.8;
+      // Sócio (mult 1.0) e Custom (mult < 0,625) preservam mult original.
+      if (linha.ehItau10Parc && mult >= 0.625 && mult < 1.0) mult = mult * 0.8;
       const c = calcLinha(linha.recebido, mult, false, consultor); // recebido negativo → valores negativos
       addADM(c.admPCO, linha.adm);
       addNFPCO(c.nfPCO);
@@ -3487,7 +3497,7 @@ function renderResumo() {
   // Regras de reclassificação para o resumo
   // EDSON foi removido pois agora é tratado como CONSULTOR (vendedor), não parceiro.
   const RESUMO_FORCAR_PARC   = new Set(['STRADA','CAMINO','ADVANCED','SPOLAOR']);
-  const RESUMO_FORCAR_VEND   = new Set(['LE - EDSON']);
+  const RESUMO_FORCAR_VEND   = new Set(['LE - EDSON', 'ERIK GONCALVES']);
   const RESUMO_EXCLUIR_SOCIOS= new Set(['BRUNO E RENATO']);
   const RESUMO_SO_CARTAS = new Set(['DANIEL BEIRAS','FLAVIA','JOSE CARLOS','MOISES',
     'RICARDO CABEZAOLIAS','GUTO','ANDERSON PASSADOR']);
