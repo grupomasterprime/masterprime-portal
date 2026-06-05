@@ -2131,6 +2131,7 @@ async function renderUsers() {
       <td style="text-align:center">${diasCell}</td>
       <td style="text-align:right;white-space:nowrap">
         ${(currentUser.tipo === 'master' && u.tipo !== 'master') ? `<button class="btn btn-outline btn-sm" onclick="abrirPermissoes('${u.cpf}')">Permissões</button>` : ''}
+        <button class="btn btn-outline btn-sm" onclick="editarUsername('${u.cpf}')">Editar usuário</button>
         <button class="btn btn-outline btn-sm" onclick="resetPw('${u.cpf}')">Reset senha</button>
         ${canDel ? `<button class="btn btn-danger btn-sm" onclick="delUser('${u.cpf}')">Remover</button>` : ''}
       </td>
@@ -2366,6 +2367,42 @@ function podeAcessarScreen(screenId) {
   }
   // Menu: default permitido, só nega se permissoes[key] === false
   return semConfig || perms[m.key] !== false;
+}
+
+// Permite o admin editar o username (login) de um usuário já criado.
+// Útil quando o painel gera username esquisito (ex: "le.-" pro Edson) e
+// quer trocar manualmente. Não mexe na senha.
+async function editarUsername(cpf) {
+  const u = await DB.getUser(cpf);
+  if (!u) { alert('Usuário não encontrado.'); return; }
+  const atual = u.username || '(sem username)';
+  const novo = prompt(
+    `Editar username de ${u.nome}\n\nUsername atual: ${atual}\n\nNovo username (apenas letras minúsculas, números e ponto. Ex: edson.parceiro):`,
+    u.username || ''
+  );
+  if (!novo || novo === u.username) return;
+  const trimmed = String(novo).trim().toLowerCase();
+  if (!/^[a-z0-9.]+$/.test(trimmed)) {
+    alert('Username inválido. Use apenas letras minúsculas, números e ponto. Ex: edson.parceiro');
+    return;
+  }
+  try {
+    if (USE_SUPABASE) {
+      const { error } = await sb.from('portal_users').update({ username: trimmed }).eq('cpf', cpf);
+      if (error) throw error;
+    } else {
+      await DB.updateUser(cpf, { username: trimmed });
+    }
+    alert(`Username atualizado para "${trimmed}".\n\nO usuário pode usar esse login a partir de agora.`);
+    await renderUsers();
+  } catch(e) {
+    const msg = String(e.message||e);
+    if (/duplicate|unique/i.test(msg)) {
+      alert('Esse username já está em uso por outro usuário. Escolha outro.');
+    } else {
+      alert('Erro: ' + msg);
+    }
+  }
 }
 
 async function delUser(cpf) {

@@ -4105,7 +4105,13 @@ function exportarExcel() {
 function _removerAcentosUsr(s) { return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,''); }
 const _STOPWORDS_USR = new Set(['E','DA','DE','DO','DOS','DAS','DI']);
 function _palavrasSigUsr(nome) {
-  return _removerAcentosUsr(nome).toUpperCase().split(/\s+/).filter(p => p && !_STOPWORDS_USR.has(p));
+  // Remove prefixos de iniciais usados internamente (ex: "LE - EDSON" → "EDSON",
+  // "BE - ERIK" → "ERIK"). Evita usernames esquisitos tipo "le.-edson".
+  let s = String(nome||'').replace(/^[A-ZÀ-Ö]{2,3}\s*[-–]\s*/i, '');
+  return _removerAcentosUsr(s).toUpperCase()
+    .split(/\s+/)
+    .map(p => p.replace(/[^A-Z0-9]/g, '')) // limpa caracteres não-alfanuméricos
+    .filter(p => p && !_STOPWORDS_USR.has(p));
 }
 function gerarUsername(nome) {
   const p = _palavrasSigUsr(nome);
