@@ -943,6 +943,14 @@ const ALIASES = {
   // Erik → demonstrativo conjunto com Bete (mesma regra do Edson)
   'ERIK':'ERIK GONCALVES',
   'ERIK GONÇALVES':'ERIK GONCALVES',
+  // João Portomax → variantes pra bater em VENDEDORES_SEM_ADM (não desconta ADM)
+  'JOAO PORTOMAX':'JOÃO PORTOMAX',
+  'JOAO PORTO MAX':'JOÃO PORTOMAX',
+  'JOÃO PORTO MAX':'JOÃO PORTOMAX',
+  'JOAO PORTO':'JOÃO PORTOMAX',
+  'JOÃO PORTO':'JOÃO PORTOMAX',
+  'JOÃO MAX':'JOÃO PORTOMAX',
+  'JOAO MAX':'JOÃO PORTOMAX',
   // XP = Strada
   'RENAN XP':'STRADA','FABIO XP':'STRADA',
   'XP STRADA':'STRADA','XP':'STRADA',
@@ -1596,7 +1604,7 @@ function pctObsToFrac(pctObs) {
   return pctObs / 0.04;
 }
 
-function parseInd(ind, consultor, multConsultor=0.625) {
+function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
   if (!ind || !String(ind).trim() || String(ind) === '0')
     return { tipo:'ok', partes:[] };
 
@@ -1849,9 +1857,11 @@ function parseInd(ind, consultor, multConsultor=0.625) {
     const nomeSecond = mRG2 ? normNome(mRG2[2].trim()) : 'RENATO BENEDETTI';
     // cartaResp = a pessoa após a barra (quem paga o Ricardo)
     const cartaResp = nomeSecond;
-    // fracBruto em fração de bruto_cons (base 4%): pParc/0.04
-    const fracParc   = pctObsToFrac(pParc);    // fração do Ricardo (carta)
-    const fracSecond = pctObsToFrac(pSecond);   // fração de Renato/Paulo mencionado
+    // fracBruto em fração de bruto_cons. Pesados Porto = base 3% (não 4%).
+    // Ex Pesados: "1% RICARDO E GUTO / 1% RENATO" → Paulo 1/3 + Renato 1/3 + Ricardo 1/3.
+    const baseObs = linhaCtx?.isPesado ? 0.03 : 0.04;
+    const fracParc   = pParc   / baseObs;    // fração do Ricardo (carta)
+    const fracSecond = pSecond / baseObs;    // fração de Renato/Paulo mencionado
     // Consultor (Paulo ou quem registrou) fica com o restante
     const fracCons = Math.max(0, 1 - fracParc - fracSecond);
     // Regra geral: BRUTO no string da OBS = não desconta tributos do Ricardo.
@@ -2448,7 +2458,7 @@ function _executarCalculo() {
     const dv        = match.dataVenda || linha.dataVenda;
     const ciclo     = toCiclo(dv);
     const mult      = getMult(consultor, ciclo);
-    const split     = parseInd(indicacao, consultor, mult);
+    const split     = parseInd(indicacao, consultor, mult, linha);
 
     if (split.tipo === 'revisar') {
       S.excecoes.push({linha, idx, tipo:'split_complexo', consultor, indicacao, ciclo});
@@ -3623,7 +3633,7 @@ function resolverExc(i) {
   if (!consultor) return;
   const indicacao = prompt('Indicação (deixe vazio se não tiver):', exc.indicacao||'');
   const mult = getMult(normNome(consultor), toCiclo(exc.linha.dataVenda));
-  const split = parseInd(indicacao||'', normNome(consultor), getMult(normNome(consultor), toCiclo(exc.linha.dataVenda)));
+  const split = parseInd(indicacao||'', normNome(consultor), getMult(normNome(consultor), toCiclo(exc.linha.dataVenda)), exc.linha);
   processarLinha(exc.linha, {
     consultor: normNome(consultor),
     indicacao: indicacao||'',
