@@ -1064,17 +1064,18 @@ function getMult(consultor, ciclo) {
   return row[ciclo] ?? 0.625;
 }
 
-function multToBase(m) {
-  return (m * 4).toFixed(2).replace('.',',') + '%';
+function multToBase(m, base = 4) {
+  // base = 4 (normal Itaú/Porto/Bradesco) ou 5 (grupos Itaú 10 parc)
+  return (m * base).toFixed(2).replace('.',',') + '%';
 }
 
-function catLabel(m) {
+function catLabel(m, base = 4) {
   if (!m) return { label:'—', cls:'tag-gray' };
   if (m >= 1.0)    return { label:'Sócio',  cls:'tag-navy' };
   if (m >= 0.75)   return { label:'Black',  cls:'tag-black' };
   if (m >= 0.6875) return { label:'Gold',   cls:'tag-amber' };
   if (m >= 0.625)  return { label:'Padrão', cls:'tag-blue-cat' };
-  return { label: 'Custom ' + multToBase(m), cls:'tag-gray' };  // Douglas e outros custom → mostra %
+  return { label: 'Custom ' + multToBase(m, base), cls:'tag-gray' };  // Douglas e outros custom → mostra %
 }
 
 function tipoFromGrupo(gc, tipoHint) {
@@ -1100,6 +1101,7 @@ function parcTotBradesco(pct) {
 function itauParcTotal(grupo) {
   const g = String(grupo||'').trim();
   const gn = parseInt(g.replace(/\D/g,'')) || 0;
+  if (ehGrupo10Parcelas(grupo)) return 10; // 50141, 50127, 50136, 50142
   if (/^(20|50)/.test(g)) return 4;
   if (/^40/.test(g)) return gn <= 40199 ? 6 : 13;
   return null;
@@ -2666,7 +2668,9 @@ function mostrarDetalhe(nome) {
         <td></td>
       </tr>`;
     }
-    const cat = catLabel(l.mult||0);
+    // Grupos Itaú 10 parc usam base 5% (não 4%) — Custom Douglas 0,20 → "Custom 1,00%"
+    const baseLbl = l.ehItau10Parc ? 5 : 4;
+    const cat = catLabel(l.mult||0, baseLbl);
     // Separar obs informativa (parceria) de obs com valor (parceiro)
     const obsInfo2 = (l.obsParc||[]).filter(p=>p.ehInfo);
     const obsParc2 = (l.obsParc||[]).filter(p=>!p.ehInfo);
