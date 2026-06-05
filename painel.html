@@ -896,6 +896,15 @@ const PARCEIROS_COM_NF = ['LE - EDSON'];
 // PCO_lado continua normal: ADM_PCO calculada igual; excedente é a diferença.
 const VENDEDORES_SEM_ADM = ['FERNANDO SUBLIME', 'JOÃO PORTOMAX'];
 
+// Grupos Itaú especiais: comissão paga em 10 parcelas de 0,5% (= 5% total da operação,
+// não os 4% normais). Pra preservar os tiers padrão (Black 3%, Gold 2,75%, Padrão 2,5%),
+// o mult do consultor é multiplicado por 4/5 = 0,8 nessas linhas.
+// Também NÃO se aplica a regra de 5ª parcela vira excedente (todas as 10 vão pro consultor).
+const GRUPOS_ITAU_10_PARC = ['50141', '50127', '50136', '50142'];
+function ehGrupo10Parcelas(grupo) {
+  return GRUPOS_ITAU_10_PARC.includes(String(grupo||'').replace(/^I/,'').replace(/^0+/,'') || String(grupo||''));
+}
+
 // Nomes ocultos na aba Por Consultor (parceiros externos sem demonstrativo MP)
 const OCULTOS_LISTA = ['FLAVIA', 'JOSE CARLOS', 'MOISES', 'RICARDO CABEZAOLIAS', 'ANDERSON PASSADOR', 'DANIEL BEIRAS'];
 
@@ -1208,6 +1217,9 @@ function parseItau(data) {
     const parcAtual = parseInt(r[4]) || 0;
     const isAuto = /^(20|50)/.test(grupo);
     const isEstorno = recebido < 0;
+    // Grupos especiais (50141, 50127, 50136, 50142) pagam em 10 parcelas — não cair
+    // na regra de 5ª parcela = excedente (todas as 10 vão pro consultor normal).
+    const eh10Parc = ehGrupo10Parcelas(grupo);
     rows.push({
       adm: 'ITAU', grupo, cota,
       grupoCota: (grupo && cota) ? grupo + '/' + cota : (grupo || cota || ''),
@@ -1216,7 +1228,8 @@ function parseItau(data) {
       dataVenda: parseDateFromCell(r[0]),
       recebido,
       isPesado: false,
-      isItau5a: isAuto && parcAtual === 5 && !isEstorno,
+      isItau5a: isAuto && parcAtual === 5 && !isEstorno && !eh10Parc,
+      ehItau10Parc: eh10Parc,
       isEstorno,
     });
   }
@@ -2036,7 +2049,11 @@ function processarLinha(linha, match, ciclo, mult, split, isAdvanced=false) {
   // Detecta se há sócio no split → todos usam mult=1
   const temSocio = isSocioC || (split.partes && split.partes.some(p =>
     TODOS_SOCIOS.includes(p.quem) || p.ehSocio));
-  const multEfet = temSocio ? 1 : mult;
+  let multEfet = temSocio ? 1 : mult;
+  // Grupos Itaú 10 parcelas (50141, 50127, 50136, 50142): comissão paga em 10 × 0,5%
+  // (= 5% total, em vez dos 4% normais). Mult ajustado × 0,8 preserva os tiers
+  // Black 3% / Gold 2,75% / Padrão 2,5% somando as 10 parcelas.
+  if (linha.ehItau10Parc) multEfet = multEfet * 0.8;
 
   const parceiros = split.partes.filter(p => p.ehParceiro);
   const naoParc   = split.partes.filter(p => !p.ehParceiro && !p.ehSelf);
@@ -2380,7 +2397,9 @@ function _executarCalculo() {
       const match = S.base.length ? buscarBase(linha) : null;
       const consultor = match ? normNome(match.consultor) : 'ESTORNO';
       const ciclo = toCiclo(match?.dataVenda || linha.dataVenda);
-      const mult  = match ? getMult(consultor, ciclo) : 1;
+      let mult = match ? getMult(consultor, ciclo) : 1;
+      // Grupos Itaú 10 parcelas — mult ajustado × 0,8 (ver constante GRUPOS_ITAU_10_PARC)
+      if (linha.ehItau10Parc) mult = mult * 0.8;
       const c = calcLinha(linha.recebido, mult, false, consultor); // recebido negativo → valores negativos
       addADM(c.admPCO, linha.adm);
       addNFPCO(c.nfPCO);
