@@ -884,11 +884,12 @@ const PARCEIROS_CARTA = ['RICARDO CABEZAOLIAS', 'ANDERSON PASSADOR', 'DANIEL BEI
 // Parceiros que a Master paga com demonstrativo próprio
 const PARCEIROS_DEMO = ['ADVANCED', 'STRADA', 'CAMINO', 'SPOLAOR'];
 
-// Parceiros que emitem NF própria — geram demonstrativo separado quando o padrão
-// aparecer como "X% NOME LIQUIDO LIQUIDO" (LIQUIDO duplicado é o gatilho).
-// Master paga o parceiro pelo NF dele; split do bruto_cons entre consultor e parceiro.
-// IMPORTANTE: padrão "1% EDSON" sozinho continua funcionando como split interno normal —
-// só o duplicado "LIQUIDO LIQUIDO" dispara o demo próprio.
+// Vendedores subordinados a outro consultor que EMITEM NF própria — são tratados
+// como consultores internos (gera demo próprio com NF+ADM), e o valor SAI da
+// comissão do consultor responsável (não do excedente da Master).
+// Gatilho na OBS: "X% NOME LIQUIDO".
+// Exemplo: Leidi Black (3%) com "1% EDSON LIQUIDO" → Leidi 2% + Edson 1%.
+// Edson tem login no portal e vê seu próprio demonstrativo.
 const PARCEIROS_COM_NF = ['LE - EDSON'];
 
 // Vendedores que NÃO têm desconto de ADM no demonstrativo próprio.
@@ -1671,19 +1672,25 @@ function parseInd(ind, consultor, multConsultor=0.625) {
     ]};
   }
 
-  // ── PARCEIROS COM NF PRÓPRIA (Edson etc.) ──
-  // Padrão "X% NOME LIQUIDO LIQUIDO" (LIQUIDO duplicado) sinaliza que o parceiro
-  // emite NF própria → trata exatamente como SÓ DEMONSTRATIVO (split do bruto_cons,
-  // parceiro com demo separado, Master paga). Só dispara se o nome estiver em
-  // PARCEIROS_COM_NF — pra não pegar "X% NOME LIQUIDO" simples por engano.
-  const mNF = s.match(/^(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s\.\-]+?)\s+LIQUIDO\s+LIQUIDO$/);
+  // ── VENDEDORES COM NF PRÓPRIA (Edson da Leidi etc.) ──
+  // Padrão "X% NOME LIQUIDO" → vendedor é tratado como CONSULTOR INTERNO:
+  // tem login no portal, recebe demonstrativo próprio com NF+ADM, e o valor
+  // SAI da comissão do consultor responsável (NÃO do excedente da Master).
+  // Ex: Leidi Black (3%) com "1% EDSON LIQUIDO" → Leidi vira 2% + Edson 1%.
+  // Só dispara se o nome estiver em PARCEIROS_COM_NF — pra não confundir
+  // com "X% NOME LIQUIDO" comum (parceiro externo).
+  const mNF = s.match(/^(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s\.\-]+?)\s+LIQUIDO$/);
   if (mNF) {
     const pct = parseFloat(mNF[1].replace(',','.'))/100;
     const nomeBase = normNome(mNF[2].trim());
-    if (PARCEIROS_COM_NF.includes(nomeBase) && pct > 0) {
+    if (PARCEIROS_COM_NF.includes(nomeBase) && pct > 0 && pct <= 0.04) {
+      // Converte X% (relativo ao recebido) em fração do brutoConsTotal do consultor.
+      // catDecimal = categoria do consultor responsável (Black=0.03, Gold=0.0275, etc.)
+      const catDecE = TODOS_SOCIOS.includes(consultor) ? 0.04 : ((multConsultor || 0.625) * 4 / 100);
+      const fracE   = catDecE > 0 ? pct / catDecE : pct;
       return { tipo:'ok', partes:[
-        { quem: nomeBase, fracBruto:null, pctOrig:pct, ehParceiro:true, masterPaga:true,
-          oculto:false, ehCarta:false, ehLiquido:true, ehSoDemo:true }
+        { quem: nomeBase, fracBruto: fracE, pctOrig: pct,
+          ehParceiro: false, masterPaga: false, oculto: false, ehCarta: false }
       ]};
     }
   }
@@ -3478,8 +3485,9 @@ function renderResumo() {
   });
 
   // Regras de reclassificação para o resumo
-  const RESUMO_FORCAR_PARC   = new Set(['STRADA','CAMINO','ADVANCED','SPOLAOR','EDSON']);
-  const RESUMO_FORCAR_VEND   = new Set();
+  // EDSON foi removido pois agora é tratado como CONSULTOR (vendedor), não parceiro.
+  const RESUMO_FORCAR_PARC   = new Set(['STRADA','CAMINO','ADVANCED','SPOLAOR']);
+  const RESUMO_FORCAR_VEND   = new Set(['LE - EDSON']);
   const RESUMO_EXCLUIR_SOCIOS= new Set(['BRUNO E RENATO']);
   const RESUMO_SO_CARTAS = new Set(['DANIEL BEIRAS','FLAVIA','JOSE CARLOS','MOISES',
     'RICARDO CABEZAOLIAS','GUTO','ANDERSON PASSADOR']);
@@ -3488,9 +3496,9 @@ function renderResumo() {
     const nu = nome.toUpperCase();
     if ([...RESUMO_SO_CARTAS].some(x => nu.includes(x.toUpperCase()))) return '__oculto';
     if (RESUMO_EXCLUIR_SOCIOS.has(nome)) return 'vendedor';
+    if (RESUMO_FORCAR_VEND.has(nome)) return 'vendedor';
     if (PARCEIROS_DEMO.includes(nome) || nome.startsWith('LE -')) return 'parceiro';
     if ([...RESUMO_FORCAR_PARC].some(x => nu.includes(x.toUpperCase()))) return 'parceiro';
-    if (RESUMO_FORCAR_VEND.has(nome)) return 'vendedor';
     return v.tipo;
   };
 
