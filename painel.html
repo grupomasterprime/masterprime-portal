@@ -1849,6 +1849,42 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
     ]};
   }
 
+  // ── Carta de parceria com split explícito: "X% MOISES [LIQUIDO|BRUTO] / Y% RESP" ──
+  // Ex: "1% MOISES LIQUIDO / 1,5% RENATO BENEDETTI" → Moisés vira carta do Renato.
+  // - Moisés: ehCarta, cartaResp = pessoa após barra
+  // - Responsável (Renato, etc): consultor interno + linha extra "Carta → MOISES" no demo
+  // - Consultor original (Leidi, etc): fica com o restante
+  // ESCOPO LIMITADO A MOISES por enquanto pra não afetar cálculos antigos dos outros
+  // parceiros carta (Ricardo, Anderson, Daniel) — eles continuam pelo código legado.
+  const mCartaSplit = s.match(/^(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s\.]+?)(?:\s+(LIQUIDO|BRUTO))?\s*\/\s*(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s\.]+?)$/);
+  if (mCartaSplit) {
+    const pParc = parseFloat(mCartaSplit[1].replace(',','.'))/100;
+    const nomeParc = normNome(mCartaSplit[2].trim());
+    const modParc = mCartaSplit[3] || '';
+    const pResp = parseFloat(mCartaSplit[4].replace(',','.'))/100;
+    const nomeResp = normNome(mCartaSplit[5].trim());
+    const ehCartaParc = nomeParc === 'MOISES' || nomeParc.includes('MOISES');
+    if (ehCartaParc && pParc > 0 && pResp > 0 && pParc <= 0.04 && pResp <= 0.04) {
+      const baseObs = linhaCtx?.isPesado ? 0.03 : 0.04;
+      const fracParc = pParc / baseObs;
+      const fracResp = pResp / baseObs;
+      const fracCons = Math.max(0, 1 - fracParc - fracResp);
+      const ehLiqCarta = modParc !== 'BRUTO';
+      const partes = [
+        { quem: nomeParc, fracBruto: fracParc, pctOrig: pParc,
+          ehParceiro: true, masterPaga: false, oculto: false, ehCarta: true,
+          cartaResp: nomeResp, ehLiquido: ehLiqCarta },
+        { quem: nomeResp, fracBruto: fracResp, pctOrig: pResp,
+          ehParceiro: false, masterPaga: false, oculto: false, ehCarta: false },
+      ];
+      if (fracCons > 0.001) {
+        partes.push({ quem: consultor, fracBruto: fracCons, ehSelf: true,
+          ehParceiro: false, masterPaga: false, oculto: false, ehCarta: false });
+      }
+      return { tipo:'ok', partes, selfFrac: fracCons > 0.001 ? fracCons : undefined };
+    }
+  }
+
   // ── Ricardo + Guto ──
   // Formatos: "1% RICARDO CABEZAOLIAS E GUTO / 1,5% RENATO" ou "1% RICARDO E GUTO / 1,5% PAULO"
   // Regra: Ricardo → carta de parceria (vc paga), responsável = pessoa mencionada após /
@@ -2687,7 +2723,10 @@ function mostrarDetalhe(nome) {
     const cat = catLabel(l.mult||0, baseLbl);
     // Separar obs informativa (parceria) de obs com valor (parceiro)
     const obsInfo2 = (l.obsParc||[]).filter(p=>p.ehInfo);
-    const obsParc2 = (l.obsParc||[]).filter(p=>!p.ehInfo);
+    // Esconde cartas cujo responsável é OUTRO consultor — a carta já aparece como
+    // linha "Carta → NOME" no demo do responsável (não duplica como "vc paga" aqui).
+    const obsParc2 = (l.obsParc||[]).filter(p => !p.ehInfo &&
+      !(p.ehCarta && p.cartaResp && p.cartaResp !== nome));
     const obsHtml = [
       // Info de parceria (cinza itálico)
       ...obsInfo2.map(p => `<span style="font-size:9px;color:var(--text2);font-style:italic;white-space:nowrap">${p.quem}</span>`),
