@@ -618,7 +618,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
   <div class="page-sub">Demonstrativos individuais do mês</div>
 
   <div class="filters">
-    <input class="search-box" type="text" placeholder="<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Buscar consultor..." oninput="filtrarConsultores(this.value)" id="busca-cons">
+    <input class="search-box" type="text" placeholder="Buscar consultor..." oninput="filtrarConsultores(this.value)" id="busca-cons">
     <button class="filter-btn active" onclick="filtroTipo('todos',this)">Todos</button>
     <button class="filter-btn" onclick="filtroTipo('vendedor',this)">Vendedores</button>
     <button class="filter-btn" onclick="filtroTipo('socio',this)">Sócios</button>
@@ -828,7 +828,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
   <div class="filters" style="gap:8px;align-items:flex-start;flex-wrap:wrap">
     <div style="position:relative;width:280px">
       <input type="text" id="cartas-search"
-        placeholder="<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Buscar vendedor..."
+        placeholder="Buscar vendedor..."
         autocomplete="off"
         style="width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;outline:none;box-sizing:border-box"
         oninput="filtroCartasDigita(this.value)"
@@ -1447,7 +1447,7 @@ function loadBase(evt) {
       document.getElementById('base-log').innerHTML =
         `<div class="alert alert-ok"><span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg></span><span>${S.base.length} contratos carregados da aba "${wsName}"</span></div>`;
       // Update button
-      document.querySelector('[onclick="document.getElementById(\'base-file\').click()"]').textContent = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> ' + S.base.length + ' contratos';
+      document.querySelector('[onclick="document.getElementById(\'base-file\').click()"]').innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> ' + S.base.length + ' contratos';
     } catch(err) {
       document.getElementById('base-log').innerHTML =
         `<div class="alert alert-err"><span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span><span>Erro: ${err.message}</span></div>`;
@@ -1487,7 +1487,7 @@ function loadElite(evt) {
         count++;
       }
       renderEliteTable(ciclos);
-      document.querySelector('[onclick="document.getElementById(\'elite-file\').click()"]').textContent = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> ' + count + ' consultores';
+      document.querySelector('[onclick="document.getElementById(\'elite-file\').click()"]').innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> ' + count + ' consultores';
     } catch(err) {
       wrap.innerHTML = `<div class="alert alert-err"><span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span><span>Erro: ${err.message}</span></div>`;
     }

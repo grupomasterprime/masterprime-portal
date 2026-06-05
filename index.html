@@ -809,6 +809,40 @@ const DB = {
       this._saveLocal(d);
     }
   },
+  // Move todos os demos de um mês para outro. Usado quando admin publica no
+  // mês errado por engano. Bloqueia se o destino já tem demos (admin deve
+  // remover/mesclar manualmente). Retorna número de linhas afetadas.
+  async renameMes(mesAntigo, mesNovo) {
+    if (mesAntigo === mesNovo) return 0;
+    if (USE_SUPABASE) {
+      // Garante que destino está vazio
+      const { data: existentes, error: errExist } = await sb
+        .from('portal_demonstrativos').select('nome').eq('mes', mesNovo).limit(1);
+      if (errExist) throw errExist;
+      if (existentes && existentes.length > 0) {
+        throw new Error('Já existe demonstrativo de ' + mesNovo + '. Remova antes de renomear.');
+      }
+      const { error, count } = await sb.from('portal_demonstrativos')
+        .update({ mes: mesNovo }, { count:'exact' })
+        .eq('mes', mesAntigo);
+      if (error) throw error;
+      return count || 0;
+    } else {
+      const d = this._local();
+      if (d.demonstrativos[mesNovo]) {
+        throw new Error('Já existe demonstrativo de ' + mesNovo + '. Remova antes de renomear.');
+      }
+      const dados = d.demonstrativos[mesAntigo];
+      if (!dados) throw new Error('Mês origem não existe: ' + mesAntigo);
+      d.demonstrativos[mesNovo] = dados;
+      delete d.demonstrativos[mesAntigo];
+      d.meses = d.meses.filter(m => m !== mesAntigo);
+      if (!d.meses.includes(mesNovo)) d.meses.push(mesNovo);
+      d.meses.sort();
+      this._saveLocal(d);
+      return Object.keys(dados).length;
+    }
+  },
 };
 
 // ═══ UTILIDADES ═══
@@ -1606,6 +1640,10 @@ async function criarUsuarioCompleto({ nome, cpf, username, senha, tipo }) {
   return { username: id, senha, nome };
 }
 
+// Fase 1: lê o JSON, valida e mostra confirmação ANTES de publicar.
+// O admin precisa confirmar o mês/ano explicitamente, e pode editar
+// se o JSON veio com mês errado (evita sobrescrever mês fechado por engano).
+let _pendingDemoUpload = null;
 async function adminUpload(evt) {
   const file = evt.target.files[0]; if (!file) return;
   const res = document.getElementById('upload-result');
@@ -1613,7 +1651,71 @@ async function adminUpload(evt) {
     const text = await file.text();
     const data = JSON.parse(text);
     if (!data.mes || !data.consultores) { res.innerHTML = '<div class="alert alert-err">Formato invalido. Precisa ter "mes" e "consultores".</div>'; return; }
-    await DB.publishDemos(data.mes, data.consultores);
+    _pendingDemoUpload = { data, fileName: file.name };
+    const nc = Object.keys(data.consultores).length;
+    // Verifica se já existe demo desse mês (vai sobrescrever?)
+    let avisoSobrescrita = '';
+    try {
+      const mesesPublicados = await DB.getMeses();
+      if (mesesPublicados.includes(data.mes)) {
+        avisoSobrescrita = `<div class="alert alert-warn" style="margin-top:8px;background:#FEF3C7;border:1px solid #F59E0B;color:#92400E"><strong>Atenção:</strong> Já existe publicação de <strong>${fmtMes(data.mes)}</strong> no portal. Confirmar vai SOBRESCREVER os demos atuais desse mês.</div>`;
+      }
+    } catch(e) {}
+    res.innerHTML = `
+      <div class="card" style="border:2px solid var(--mp-navy)">
+        <div class="card-head" style="background:var(--mp-navy);border-radius:6px 6px 0 0">
+          <div>
+            <div style="color:#fff;font-weight:700;font-size:14px">Confirmar publicação</div>
+            <div style="color:rgba(255,255,255,.6);font-size:11px">Arquivo: ${file.name}</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+            <div>
+              <div style="font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;margin-bottom:4px">Mês detectado no JSON</div>
+              <div style="font-size:18px;font-weight:700;color:var(--mp-navy)">${fmtMes(data.mes)}</div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;margin-bottom:4px">Pessoas</div>
+              <div style="font-size:18px;font-weight:700;color:var(--mp-navy)">${nc} consultores</div>
+            </div>
+          </div>
+          <div style="margin-top:8px">
+            <label style="font-size:12px;color:var(--text2);font-weight:600;display:block;margin-bottom:4px">Publicar para o mês:</label>
+            <input type="month" id="upload-mes-confirm" value="${data.mes}" style="padding:8px 12px;font-size:14px;border:1px solid var(--border2);border-radius:6px;font-weight:600;color:var(--mp-navy)">
+            <div style="font-size:11px;color:var(--text2);margin-top:4px">Se o mês estiver errado, troque aqui antes de publicar.</div>
+          </div>
+          ${avisoSobrescrita}
+          <div style="display:flex;gap:8px;margin-top:16px">
+            <button class="btn btn-primary" onclick="confirmarPublicacaoDemos()">Publicar agora</button>
+            <button class="btn btn-outline" onclick="cancelarPublicacaoDemos()">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    `;
+    // Limpa o input file pra permitir re-upload do mesmo arquivo
+    evt.target.value = '';
+  } catch(e) { res.innerHTML = `<div class="alert alert-err">Erro: ${e.message}</div>`; }
+}
+
+function cancelarPublicacaoDemos() {
+  _pendingDemoUpload = null;
+  document.getElementById('upload-result').innerHTML = '<div class="alert alert-info">Upload cancelado. Selecione outro arquivo para tentar novamente.</div>';
+}
+
+// Fase 2: publica de fato, usando o mês confirmado/editado pelo admin.
+async function confirmarPublicacaoDemos() {
+  if (!_pendingDemoUpload) return;
+  const res = document.getElementById('upload-result');
+  const { data } = _pendingDemoUpload;
+  const mesEscolhido = document.getElementById('upload-mes-confirm').value;
+  if (!mesEscolhido || !/^\d{4}-\d{2}$/.test(mesEscolhido)) {
+    alert('Mês inválido. Formato esperado: YYYY-MM');
+    return;
+  }
+  res.innerHTML = '<div class="alert alert-info">Publicando demonstrativos...</div>';
+  try {
+    await DB.publishDemos(mesEscolhido, data.consultores);
     // Cria/atualiza contas usando username+senhaInicial do JSON
     let novos = 0, atualizados = 0;
     const users = await DB.getAllUsers();
@@ -1641,11 +1743,12 @@ async function adminUpload(evt) {
       }
     }
     const nc = Object.keys(data.consultores).length;
-    let msg = `<div class="alert alert-ok">Demonstrativos de <strong>${fmtMes(data.mes)}</strong> publicados! ${nc} pessoas`;
+    let msg = `<div class="alert alert-ok">Demonstrativos de <strong>${fmtMes(mesEscolhido)}</strong> publicados! ${nc} pessoas`;
     if (novos) msg += ` &middot; ${novos} usu&aacute;rios criados`;
     if (atualizados) msg += ` &middot; ${atualizados} atualizados`;
     msg += ` &middot; <a href="#" onclick="nav('admin-users');return false;" style="color:var(--mp-navy);font-weight:600">Ver usu&aacute;rios &rarr;</a></div>`;
     res.innerHTML = msg;
+    _pendingDemoUpload = null;
     await renderAdminMeses(); await renderUsers(); await renderDashboard(); await renderHistorico(); await renderAdminOverview();
   } catch(e) { res.innerHTML = `<div class="alert alert-err">Erro: ${e.message}</div>`; }
 }
@@ -1657,11 +1760,32 @@ async function renderAdminMeses() {
   for(const m of meses){
     const demos=await DB.getDemosMes(m);
     const nc=Object.keys(demos).length;
-    html+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F1F5F9"><div><span style="font-weight:600;font-size:13px;color:var(--mp-navy)">${fmtMes(m)}</span><span style="font-size:11px;color:var(--text2);margin-left:8px">${nc} consultores</span></div><div style="display:flex;gap:8px"><span class="tag tag-green">Publicado</span><button class="btn btn-danger btn-sm" onclick="delMes('${m}')">Remover</button></div></div>`;
+    html+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F1F5F9"><div><span style="font-weight:600;font-size:13px;color:var(--mp-navy)">${fmtMes(m)}</span><span style="font-size:11px;color:var(--text2);margin-left:8px">${nc} consultores</span></div><div style="display:flex;gap:8px"><span class="tag tag-green">Publicado</span><button class="btn btn-outline btn-sm" onclick="renomearMes('${m}')">Renomear</button><button class="btn btn-danger btn-sm" onclick="delMes('${m}')">Remover</button></div></div>`;
   }
   el.innerHTML=html;
 }
 async function delMes(m) { if(!confirm('Remover '+fmtMes(m)+'?'))return; await DB.deleteMes(m); await renderAdminMeses(); await renderDashboard(); await renderHistorico(); await renderAdminOverview(); }
+async function renomearMes(mesAntigo) {
+  const novo = prompt(
+    `Renomear ${fmtMes(mesAntigo)} para qual mês?\n\nFormato: AAAA-MM\nExemplo: 2026-05 (para maio de 2026)`,
+    mesAntigo
+  );
+  if (!novo || novo === mesAntigo) return;
+  if (!/^\d{4}-\d{2}$/.test(novo)) {
+    alert('Formato inválido. Use AAAA-MM (ex: 2026-05).');
+    return;
+  }
+  const mm = parseInt(novo.split('-')[1], 10);
+  if (mm < 1 || mm > 12) { alert('Mês inválido (1-12).'); return; }
+  if (!confirm(`Mover todos os demos de ${fmtMes(mesAntigo)} para ${fmtMes(novo)}?\n\nIsso afeta também os logins dos consultores que estão vendo esse mês.`)) return;
+  try {
+    const n = await DB.renameMes(mesAntigo, novo);
+    alert(`Pronto! ${n} demonstrativo${n!==1?'s':''} movido${n!==1?'s':''} para ${fmtMes(novo)}.`);
+    await renderAdminMeses(); await renderDashboard(); await renderHistorico(); await renderAdminOverview();
+  } catch (e) {
+    alert('Erro: ' + e.message);
+  }
+}
 
 // ═══ ADMIN: VISAO GERAL ═══
 // Agrega todos os demonstrativos do mes selecionado e mostra:
