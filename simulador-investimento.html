@@ -496,20 +496,43 @@ function calcularOperacao(op){
   if (pE > 0) {
     melhor = {key:'previdencia', valor: stPrevidencia, lucro: lucroPrevidenciaReal, lucroLiq: lucroPrevidenciaReal, aporteRf: totalPagoConsorcio, prazoRf: prazo};
   } else {
-    const cands = [
-      {key:'venda',       valor: stVenda,                  lucro: lucroVendaReal,       lucroLiq: lucroVendaLiq,        aporteRf: valorInvestidoAteCont, prazoRf: expectativa},
-      {key:'previdencia', valor: stPrevidencia,            lucro: lucroPrevidenciaReal, lucroLiq: lucroPrevidenciaReal, aporteRf: totalPagoConsorcio,    prazoRf: prazo},
-    ];
-    // Diferença/Aluguel só candidata quando:
-    //   (a) sobra mensal > 0 (aluguel cobre a parcela)
-    //   (b) expectativa > 30 meses (mesmo threshold que separa venda curta/longa)
-    // Para expectativa <= 30, Conkey favorece Venda da Cota com ágio curto.
-    if (sobraMensalDif > 0 && expectativa > 30) {
-      cands.push({key:'diferenca', valor: stImoveis + stDiferenca, lucro: lucroDiferencaReal, lucroLiq: lucroDiferencaReal, aporteRf: aporteAluguelConkey, prazoRf: expectativa});
+    // ════════ CRITÉRIO DE SELEÇÃO — alinhado com Conkey ════════
+    // Validado via Chrome MCP em 6 cenários (exp 40/60/80/100/120/150):
+    //   Conkey escolhe VENDA SE %Retorno_Venda_líq > %Retorno_RF_mesma_duração.
+    //   Senão, default é PREVIDÊNCIA (mesmo quando Previdência também perde da RF longa).
+    //   Aluguel/Diferença é candidata quando aluguel cobre parcela; segue mesma lógica
+    //   da Venda (vence se > RF mesma duração) — não validado mas plausível.
+    //
+    // Pra comparar, precisamos do %Retorno da RF com aporte e prazo da estratégia.
+    const taxaRfMensal_sel = rentInv * cdiMensal;
+    function rfRetornoPct(aporteTotal, prazoMeses) {
+      if (aporteTotal <= 0 || prazoMeses <= 0) return -Infinity;
+      let anu = 0;
+      for (let m = 1; m <= prazoMeses; m++) anu += parcelaMes(m) * Math.pow(1+taxaRfMensal_sel, prazoMeses - m);
+      const ganho = anu - aporteTotal;
+      const irAl = prazoMeses<=6 ? 0.225 : prazoMeses<=12 ? 0.20 : prazoMeses<=24 ? 0.175 : 0.15;
+      const liq = ganho * (1 - irAl);
+      return liq / aporteTotal;
     }
-    // % retorno usa lucroLiq (com IR da Venda aplicado). Aporte 0 desqualifica.
-    const retornoOf = c => c.aporteRf > 0 ? c.lucroLiq / c.aporteRf : -Infinity;
-    melhor = cands.reduce((best, c) => retornoOf(c) > retornoOf(best) ? c : best, cands[0]);
+    const retornoVendaLiq = valorInvestidoAteCont > 0 ? lucroVendaLiq / valorInvestidoAteCont : -Infinity;
+    const retornoRfVenda  = rfRetornoPct(valorInvestidoAteCont, expectativa);
+    const vendaVenceRf    = retornoVendaLiq > retornoRfVenda;
+
+    if (vendaVenceRf) {
+      melhor = {key:'venda', valor: stVenda, lucro: lucroVendaReal, lucroLiq: lucroVendaLiq, aporteRf: valorInvestidoAteCont, prazoRf: expectativa};
+    } else if (sobraMensalDif > 0 && expectativa > 30) {
+      // Aluguel/Diferença: compara com RF do mesmo aporte (aporteAluguelConkey) e prazo (expectativa)
+      const retornoDif = aporteAluguelConkey > 0 ? lucroDiferencaReal / aporteAluguelConkey : -Infinity;
+      const retornoRfDif = rfRetornoPct(aporteAluguelConkey, expectativa);
+      if (retornoDif > retornoRfDif) {
+        melhor = {key:'diferenca', valor: stImoveis + stDiferenca, lucro: lucroDiferencaReal, lucroLiq: lucroDiferencaReal, aporteRf: aporteAluguelConkey, prazoRf: expectativa};
+      } else {
+        melhor = {key:'previdencia', valor: stPrevidencia, lucro: lucroPrevidenciaReal, lucroLiq: lucroPrevidenciaReal, aporteRf: totalPagoConsorcio, prazoRf: prazo};
+      }
+    } else {
+      // Default: PREVIDÊNCIA (mesmo quando perde da RF longa — Conkey faz assim)
+      melhor = {key:'previdencia', valor: stPrevidencia, lucro: lucroPrevidenciaReal, lucroLiq: lucroPrevidenciaReal, aporteRf: totalPagoConsorcio, prazoRf: prazo};
+    }
   }
 
   const estrategia = melhor.key;
@@ -661,7 +684,7 @@ function renderOps(){
     <td>${fmtMoney(c.lucroBruto)}</td>
     <td>${fmtPct(c.retorno,2)}</td>
     <td>${ESTRATEGIA_LABEL[c.estrategia]}</td>
-    <td><div class="row-actions"><button data-action="edit" data-id="${c.id}">Editar</button><button data-action="del" data-id="${c.id}">Excluir</button></div></td>
+    <td><div class="row-actions"><button data-action="edit" data-id="${c.id}">Editar</button><button data-action="dup" data-id="${c.id}">Duplicar</button><button data-action="del" data-id="${c.id}">Excluir</button></div></td>
   </tr>`).join('');
 
   // Totals
@@ -746,6 +769,13 @@ document.getElementById('opsBody').addEventListener('click',e=>{
   const id=parseInt(btn.dataset.id,10);
   const op=operacoes.find(o=>o.id===id);
   if(btn.dataset.action==='edit') openModal(op);
+  else if(btn.dataset.action==='dup'){
+    // Duplica a operação: cria nova com mesmos campos e id novo. Insere logo após a original.
+    const idx = operacoes.findIndex(o=>o.id===id);
+    const novo = {...op, id: nextId++};
+    operacoes.splice(idx+1, 0, novo);
+    renderOps();
+  }
   else if(btn.dataset.action==='del'){if(confirm('Excluir?')){operacoes=operacoes.filter(o=>o.id!==id); renderOps();}}
 });
 document.getElementById('btnLimpar').addEventListener('click',()=>{if(operacoes.length && !confirm('Limpar tudo?'))return; operacoes=[]; const obsEl=document.getElementById('inv-observacoes'); if(obsEl)obsEl.value=''; renderOps();});
