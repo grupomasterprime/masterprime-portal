@@ -388,11 +388,11 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 
   <nav>
     <div class="sb-section">Entrada</div>
-    <div class="sb-item active" onclick="nav('extratos')" id="ni-extratos">
-      <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> Upload extratos
-    </div>
-    <div class="sb-item" onclick="nav('base')" id="ni-base">
+    <div class="sb-item active" onclick="nav('base')" id="ni-base">
       <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg></span> Base de vendas
+    </div>
+    <div class="sb-item" onclick="nav('extratos')" id="ni-extratos">
+      <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> Upload extratos
     </div>
     <div class="sb-item" onclick="nav('elite')" id="ni-elite">
       <span class="ic"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span> Master Elite
@@ -438,7 +438,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 <main class="main">
 
 <!-- ── EXTRATOS ── -->
-<div class="screen active" id="s-extratos">
+<div class="screen" id="s-extratos">
   <div class="page-title">Upload dos Extratos</div>
   <div class="page-sub">Faça o upload dos extratos brutos de cada administradora</div>
 
@@ -504,13 +504,13 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
   </div>
 
   <div class="nav-actions">
-    <div></div>
-    <button class="btn btn-primary" onclick="nav('base')">Próximo → Base de vendas</button>
+    <button class="btn btn-outline" onclick="nav('base')">← Voltar</button>
+    <button class="btn btn-primary" onclick="nav('elite')">Próximo → Master Elite</button>
   </div>
 </div>
 
 <!-- ── BASE DE VENDAS ── -->
-<div class="screen" id="s-base">
+<div class="screen active" id="s-base">
   <div class="page-title">Base de Vendas</div>
   <div class="page-sub">Importar a planilha Master_Prime_Porto_Elite.xlsx — aba "Base de Vendas"</div>
 
@@ -535,8 +535,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
   </div>
 
   <div class="nav-actions">
-    <button class="btn btn-outline" onclick="nav('extratos')">← Voltar</button>
-    <button class="btn btn-primary" onclick="nav('elite')">Próximo → Master Elite</button>
+    <div></div>
+    <button class="btn btn-primary" onclick="nav('extratos')">Próximo → Upload extratos</button>
   </div>
 </div>
 
@@ -566,7 +566,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
   </div>
 
   <div class="nav-actions">
-    <button class="btn btn-outline" onclick="nav('base')">← Voltar</button>
+    <button class="btn btn-outline" onclick="nav('extratos')">← Voltar</button>
     <button class="btn btn-primary" onclick="nav('avulsos')">Próximo → Lançamentos Avulsos</button>
   </div>
 </div> -->
