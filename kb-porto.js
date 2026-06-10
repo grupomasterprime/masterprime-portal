@@ -1069,6 +1069,132 @@ window.KB_ADMIN["porto"] = {
       "conteudo": "Vale para qualquer tipo de bem (auto, moto, pesados, bens móveis e imóvel). Se a renda do cliente não basta na análise pós-contemplação, a Porto pode pedir um fiador (ou acrescentar um titular adicional na cota) para liberar o crédito.\n\nRequisitos do fiador:\n\n• Não pode ter pendências ou restrições em nome dele.\n• A renda do fiador precisa ser pelo menos 3× maior que a parcela do crédito solicitado.\n• Só pessoa física — CNPJ não é aceito como fiador.\n• Atenção: cônjuge não é aceito como fiador somente nas cotas de imóvel (nas outras cotas, pode).\n\nProcesso:\n\n1. Baixar o 'Formulário do Fiador' na seção 'Materiais para baixar' aqui no Material de Apoio.\n2. Preencher todos os campos do fiador e indicar o(s) grupo(s) e cota(s).\n3. Enviar o PDF preenchido como anexo para tratativa.analisedecredito@portoseguro.com.br.",
       "tags": "fiador, garantia, análise de crédito, restrição, pós-contemplação, segundo titular, score, formulário, renda, veículo, automóvel, moto, bens móveis, imóvel",
       "ordem": 8
+    },
+    {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Contemplação",
+      "categoria_ordem": 4,
+      "titulo": "Como funciona a Assembleia Sequencial?",
+      "conteudo": "É a assembleia padrão, mensal, onde são divulgados os contemplados de cada grupo — por sorteio e por lance. Só participam as cotas APTAS, ou seja, em dia com os pagamentos e ainda não contempladas.\n\nDetalhes:\n• Horário: sempre 15h, independente do dia.\n• Convite: 1 dia antes a Porto envia o link por e-mail pros participantes do grupo.\n• Pelo app Porto PF, o link fica disponível na tela inicial da aba Consórcio, do dia do vencimento até o dia da assembleia.\n• Calendário anual: portoconsorcio.com.br → escolha um produto → 'Confira mais informações' → 'Calendário de assembleias'.\n\nNa assembleia o botão 'ContemPlay' é apertado e os resultados saem em tempo real, com sorteio + lance fixo + lance livre.",
+      "tags": "assembleia, sequencial, contemplação, calendário, horário, ContemPlay, ao vivo, app, sorteio, lance",
+      "ordem": 9
+    },
+    {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Contemplação",
+      "categoria_ordem": 4,
+      "titulo": "O que é Assembleia Geral Extraordinária (AGE)?",
+      "conteudo": "A AGE é convocada em casos específicos — quando o grupo precisa votar alguma mudança que afete a regra geral (ex: alteração de prazo, dissolução, mudanças estruturais). Não é mensal e não tem ContemPlay; só rola quando há pauta.\n\nDiferença pra Sequencial: a Sequencial é mensal e foca em contemplação; a AGE é situacional e foca em votação dos consorciados.",
+      "tags": "AGE, assembleia geral extraordinária, votação, mudança grupo",
+      "ordem": 10
+    },
+    {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Contemplação",
+      "categoria_ordem": 4,
+      "titulo": "Como o sorteio define a cota contemplada (Loteria Federal)?",
+      "conteudo": "A Porto usa a extração da Loteria Federal imediatamente anterior ao dia da assembleia como base do sorteio.\n\nRegra prática:\n1. Olha o número sorteado do 1º prêmio. A CENTENA FINAL (últimos 3 dígitos) é o número da cota contemplada.\n   Ex.: prêmio 12345 → centena 345 → cota 345 é a contemplada (se estiver apta).\n2. Se a cota 345 não estiver apta, pula um número pra esquerda: centena vira 234.\n3. Se ainda não tem cota apta, segue para o 2º prêmio, 3º, e assim por diante.\n4. Se nenhum prêmio gerar uma cota válida, decide por APROXIMAÇÃO: volta à centena original (345) e alterna +1/−1 (346 → 344 → 347 → 343 ...) até achar uma cota apta.\n\nA aproximação 'dá a volta' no grupo se necessário (depois da última cota, vai pra primeira).",
+      "tags": "sorteio, loteria federal, centena, aproximação, desempate, cota apta",
+      "ordem": 11
+    },
+    {
+      "categoria_key": "lance",
+      "categoria_label": "Lance",
+      "categoria_ordem": 5,
+      "titulo": "Como funcionam os desempates de Lance Livre e Lance Fixo?",
+      "conteudo": "Quando dois ou mais consorciados dão o MESMO percentual de lance, há desempate por aproximação usando a Loteria Federal.\n\nLance Livre:\n• Cliente investe valor com recursos próprios, igual leilão — quem dá o maior lance ganha.\n• Em caso de empate, usa os 3 últimos dígitos do número sorteado pela loteria pra formar a centena.\n• Ex.: loteria 12010 → centena 010. A cota 010 ganha se deu lance. Senão, busca por aproximação alternando (011 → 009 → 012 → 008 ...).\n\nLance Fixo:\n• Grupo define um % FIXO (ex: 30%). Quem quer ofertar dá exatamente esse %.\n• Os clientes que ofertaram lance fixo entram num sorteio SEPARADO entre si. Menos gente concorrendo = mais chance.\n• Desempate do lance fixo segue a mesma lógica de aproximação da Loteria Federal.",
+      "tags": "lance livre, lance fixo, desempate, aproximação, loteria federal, sorteio",
+      "ordem": 9
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "FGTS: a quem se destina e quais imóveis aceitam?",
+      "conteudo": "O FGTS pode ser usado no consórcio Porto pela pessoa física titular de conta vinculada, desde que adquira IMÓVEL RESIDENCIAL URBANO destinado à moradia.\n\nO crédito pode ter sido usado para:\n• Imóvel residencial urbano novo ou usado;\n• Construção em terreno próprio urbanizado;\n• Aquisição de terreno + construção;\n• Imóvel residencial na planta.\n\nO FGTS NÃO PODE ser concedido se o crédito foi usado para:\n• Quitação de financiamento próprio;\n• Imóvel comercial;\n• Terreno (puro, sem construção);\n• Reforma.\n\nLimite de avaliação do imóvel (data da aquisição):\n• 30/07/2002 a 27/01/2005: R$ 300 mil\n• 28/01/2005 a 26/03/2009: R$ 350 mil\n• 27/03/2009 a 07/10/2013: R$ 500 mil\n• A partir de 25/11/2016: R$ 950 mil (SP, RJ, MG, DF) / R$ 800 mil (demais estados)\n• Imóvel novo entre 20/02/2017 e 31/12/2017: R$ 1,5 milhão (qualquer estado)",
+      "tags": "FGTS, imóvel, residencial, limite, SFH, financiamento, moradia, construção, terreno",
+      "ordem": 14
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "FGTS: requisitos do consorciado e do cônjuge",
+      "conteudo": "Pode usar o FGTS o consorciado, o cônjuge, ou os dois juntos, desde que NA DATA DA AQUISIÇÃO do imóvel:\n\na) Data do casamento ou união estável anterior à alienação (consta na Matrícula);\nb) Tenha pelo menos 3 anos de trabalho sob regime do FGTS (somando empresas);\nc) Quando casal usa as duas contas, a MODALIDADE escolhida tem que ser a mesma;\nd) Não pode ter financiamento habitacional ativo pelo SFH em qualquer parte do Brasil;\ne) Não pode ter imóvel residencial concluído ou em construção no município de residência, no município da ocupação principal ou em municípios limítrofes;\nf) Não pode ter fração superior a 40% de imóvel residencial quitado ou financiado;\ng) Se for proprietário de imóvel mas estiver impedido de morar nele, ainda pode usar;\nh) Se for fração remanescente de imóvel quitado adquirido com FGTS na mesma escritura como coproprietário, pode ultrapassar 40%.\n\nSe casal usa as duas contas, ambos precisam atender separadamente.",
+      "tags": "FGTS, cônjuge, requisitos, casamento, união estável, 3 anos, SFH, fração ideal",
+      "ordem": 15
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "FGTS: quais modalidades de uso estão disponíveis?",
+      "conteudo": "São 3 modalidades (Resolução CCFGTS nº 616):\n\n1. LIQUIDAÇÃO DO SALDO DEVEDOR — quita 100% do saldo da cota. Pode estar inadimplente, mas só rola se o FGTS cobrir TODA a dívida.\n\n2. AMORTIZAÇÃO EXTRAORDINÁRIA — paga um valor menor que o saldo. Consorciado precisa estar em dia. Duas sub-opções:\n   • Redução do VALOR da parcela (todas as parcelas vincendas ficam menores);\n   • Redução do PRAZO (corta parcelas da última pra primeira).\n\n3. PAGAMENTO DE PARTE DAS PARCELAS — até 80% do valor de 12 parcelas consecutivas. Restrições:\n   • Não pode ter mais de 3 parcelas em atraso até a operação concluir;\n   • Parcelas em atraso entram no pacote das 12;\n   • Só pode usar FGTS de novo nessa cota depois das 12 parcelas amortizadas.\n\nLiquidação e Amortização: intervalo mínimo de 2 ANOS entre cada movimentação por trabalhador. Liquidação e Pagamento de Parte de Parcelas podem ser usados SIMULTANEAMENTE (mas uma solicitação por vez).",
+      "tags": "FGTS, liquidação, amortização extraordinária, redução prazo, redução parcela, pagamento parcelas, intervalo 2 anos, Resolução 616, CCFGTS",
+      "ordem": 16
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "FGTS: lista de documentos e como enviar",
+      "conteudo": "Documentos pra abrir o processo de FGTS (originais ou cópias autenticadas conforme indicado):\n\n• RG, CNH ou outro documento oficial (cópia);\n• Extratos analíticos das contas vinculadas dos últimos 3 anos (cópia);\n• Declaração de Imposto de Renda completa + recibo de entrega à Receita Federal (do consorciado e cônjuge, se for o caso) — da época da aquisição do imóvel E do último exercício. Se isento: declaração de isenção;\n• Certidão de Inteiro Teor da Matrícula do imóvel ATUALIZADA (original) — validade de 30 dias a contar da emissão;\n• Instrumento Particular ou Escritura Pública (original ou cópia autenticada);\n• Comprovante de residência DA ÉPOCA da aquisição do imóvel (conta de água, luz, telefone fixo, IPTU ou gás);\n• Certidão de casamento ou Declaração de União Estável (se aplicável);\n• Termo de Escolha de Modalidade (preenchido todo);\n• Autorização de Saque (individual, por titular de conta);\n• Termo Aditivo de inclusão de cônjuge (se for o caso).\n\nCanetas: usar apenas esferográfica AZUL ou PRETA. Não precisa reconhecimento de firma.\n\nEnvio: SEDEX para 'Caixa Consórcios — SHN Quadra 01, Conjunto A, Bloco E, Brasília/DF, CEP 70.701-050'. Identificar o envelope com GRUPO e COTA, e indicar que é processo de FGTS.\n\nAtenção: o envio NÃO garante a operação; é só o início da análise. Mantenha as parcelas em dia até a operação processar.",
+      "tags": "FGTS, documentação, lista documentos, sedex, caixa consórcios, brasília, matrícula, termo escolha, autorização saque, comprovante residência",
+      "ordem": 17
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Imóvel no Exterior: como abrir o ticket?",
+      "conteudo": "A Porto tem fluxo dedicado pra consórcio de imóvel no exterior (atualmente EUA). Pra abrir o ticket:\n\n1. No portal da Tech (cliente contemplado), escolher a opção 'AQUISIÇÃO DE IMÓVEL NO EXTERIOR' (não usar 'Aquisição do Bem Imóvel' nem 'Aquisição de Bem Imóvel + Construção').\n2. Selecionar o grupo e a cota que será usada (cota contemplada).\n3. Informações do consorciado: endereço de entrega + dados (Nome/Razão Social, CPF/CNPJ, e-mail). Anexa documentos pessoais e comprovante de endereço.\n4. Informações do imóvel: tipo, titularidade, valor de compra, endereço (exterior). Anexa Promessa de Compra e Venda do imóvel no exterior + Matrícula do imóvel no BRASIL que será dado como garantia.\n5. Informações do proprietário (cessionário/comprador): Nome/Razão, CPF/CNPJ, e-mail, documento de identificação. ATENÇÃO: CNH dentro da validade OU RG (frente e verso, com CPF) dentro da validade máxima de 10 anos no mesmo arquivo.\n6. Finalização: pode usar o campo 'Comentários extras' pra registrar qualquer informação importante sobre a negociação.\n7. Após submeter, o ticket aparece no painel da Tech com a finalidade 'Aquisição de Imóvel no Exterior' — use esse filtro pra encontrar.",
+      "tags": "imóvel exterior, EUA, ticket, garantia, matrícula brasil, promessa compra venda, fluxo, tech, finalidade",
+      "ordem": 18
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Imóvel no Exterior: documentos necessários",
+      "conteudo": "O processo de aquisição de imóvel no exterior exige garantia em imóvel localizado no BRASIL. Documentos obrigatórios:\n\nDo imóvel no exterior (sendo adquirido):\n• Promessa de Compra e Venda — contrato com vendedor.\n\nDo imóvel no Brasil (que será dado em garantia):\n• Matrícula do Imóvel (atualizada);\n• IPTU;\n• Declaração de débitos condominiais (se houver).\n\nDo consorciado (titular da cota):\n• Documento de identificação (CNH ou RG frente+verso com CPF);\n• Comprovante de endereço;\n• Demais documentos pessoais conforme solicitado.\n\nDo proprietário/cessionário (caso seja diferente do titular):\n• Nome completo / Razão Social;\n• CPF / CNPJ;\n• E-mail;\n• Documento de identificação dentro da validade.\n\nO ticket pode ter o campo 'Utilizar FGTS' setado como NÃO (FGTS só é elegível para imóvel residencial urbano no Brasil — não vale pra exterior).",
+      "tags": "imóvel exterior, documentos, garantia, matrícula brasil, promessa compra venda, IPTU, condomínio, FGTS não",
+      "ordem": 19
+    },
+    {
+      "categoria_key": "transferencia",
+      "categoria_label": "Transferência, cancelamento e devoluções",
+      "categoria_ordem": 9,
+      "titulo": "O que é transferência de cota? (3 situações)",
+      "conteudo": "Transferência de cota é a cessão total ou parcial da propriedade de uma cota Porto. Existem 3 situações que entram no processo:\n\n1. TRANSFERIR a cota inteira para um cessionário (sai do nome do cedente, entra no nome do cessionário);\n2. INCLUSÃO de um novo participante na cota (entra um cotitular junto ao titular existente);\n3. EXCLUSÃO de um participante da cota (sai um cotitular, fica o outro).\n\nVale para cota CONTEMPLADA e NÃO CONTEMPLADA, mas o fluxo e as taxas são diferentes em cada caso (ver o guia de Próximos Passos).",
+      "tags": "transferência, cota, cessão, cessionário, cotitular, inclusão, exclusão",
+      "ordem": 8
+    },
+    {
+      "categoria_key": "transferencia",
+      "categoria_label": "Transferência, cancelamento e devoluções",
+      "categoria_ordem": 9,
+      "titulo": "Quais critérios o cessionário precisa cumprir?",
+      "conteudo": "O cessionário (quem recebe a cota) precisa atender:\n\n• Idade: MÍNIMO 18 anos na adesão e MÁXIMO 80 anos no encerramento do grupo. A partir de 76 anos no encerramento, não há cobertura de Seguro de Vida.\n• Limite de saldo devedor: o CPF/CNPJ do cessionário NÃO pode ultrapassar R$ 2,5 milhões somando todas as cotas já cadastradas + as que estão na jornada de transferência.\n• Empresa filial: se for PJ adquirindo, o CNPJ tem que ser da MATRIZ — filiais não podem.\n• Empresas individuais: NÃO podem adquirir cotas de IMÓVEL.\n\nSe o saldo devedor ultrapassar o limite, o caso é encaminhado pra uma pré-análise de crédito antes de seguir.",
+      "tags": "cessionário, idade, 18 anos, 80 anos, 2,5 milhões, saldo devedor, CNPJ matriz, empresa individual, seguro vida",
+      "ordem": 9
+    },
+    {
+      "categoria_key": "transferencia",
+      "categoria_label": "Transferência, cancelamento e devoluções",
+      "categoria_ordem": 9,
+      "titulo": "Etapas da transferência: protocolo, biometria, análise",
+      "conteudo": "Fluxo padrão da transferência de cota Porto:\n\n1. ABERTURA DE PROTOCOLO — cessionário se identifica com CPF/CNPJ e envia documento de identificação (RG ou CNH com menos de 10 anos desde a emissão).\n\n2. BIOMETRIA FACIAL — Porto envia o link por e-mail (PF) ou SMS (PJ). Em local com boa iluminação, o cessionário aponta a câmera pro próprio rosto e segue as instruções até validação.\n\n3. VALIDAÇÃO DO SALDO DEVEDOR — soma o saldo das cotas em transferência + cotas já cadastradas no CPF/CNPJ do cessionário. Se passar de R$ 2,5 milhões, vai pra pré-análise de crédito.\n\n4. ANÁLISE DE CRÉDITO (só pra cotas contempladas) — avalia capacidade de pagamento do cessionário. Leva ATÉ 3 DIAS ÚTEIS pro resultado.\n\nDepois disso, vem o caminho específico de cada caso (cota não contemplada, contemplada sem bem, com bem móvel, com imóvel).",
+      "tags": "transferência, protocolo, biometria facial, saldo devedor, análise crédito, 3 dias úteis, etapas, fluxo",
+      "ordem": 10
+    },
+    {
+      "categoria_key": "transferencia",
+      "categoria_label": "Transferência, cancelamento e devoluções",
+      "categoria_ordem": 9,
+      "titulo": "Transferência: próximos passos e TAXAS por tipo de cota",
+      "conteudo": "Após aprovação das etapas iniciais (biometria + saldo + crédito), o fluxo varia conforme o caso:\n\n• COTA NÃO CONTEMPLADA: cadastro do cessionário no sistema → emissão dos termos de cessão → cedente assina primeiro, cessionário recebe por e-mail e assina → transferência confirmada. SEM TAXA.\n\n• COTA CONTEMPLADA SEM O BEM: cadastro + pagamento da TAXA de transferência de 1% sobre o crédito contratado (ex: crédito R$ 100.000 = taxa R$ 1.000) → termos de cessão → assinaturas → confirmação.\n\n• COTA CONTEMPLADA COM BEM MÓVEL (auto/moto/pesado): envio do ATPV digital (DETRAN, preenchido e com firma do vendedor) → validação → pagamento da TAXA de 1% + Sircof + Gravame (taxas DETRAN por estado) → termos → assinaturas → formalização da transferência de gravame em até 2 dias úteis → fim.\n\n• COTA CONTEMPLADA COM IMÓVEL: cadastro + pagamento da TAXA de 1% + Tarifa de Formalização (garantia do imóvel) → análise jurídica, avaliação econômica, contrato, formalização e registro em cartório (ver Guia da Pós-Contemplação de Imóveis) → termos → assinaturas → confirmação.",
+      "tags": "transferência, taxa 1%, ATPV, sircof, gravame, detran, tarifa formalização, imóvel, contemplada, não contemplada, bem móvel, próximos passos",
+      "ordem": 11
     }
   ],
   "downloads": [
