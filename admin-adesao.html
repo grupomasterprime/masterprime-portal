@@ -405,6 +405,27 @@ async function checkSession() {
 
 // ═══ RENDERIZA OS 4 CARDS DE LINK ═══
 function renderLinks() {
+  const grid = document.getElementById('links-grid');
+  // Se o user logado NÃO tem código, links seriam gerados sem ?c= e a proposta
+  // chegaria sem vendedor atribuído. Bloqueia geração + mostra aviso pra pedir
+  // ao admin que rode o SQL de backfill (_supabase_codigo_link_autofill.sql).
+  if (!currentUserCodigo && currentUserTipo !== 'master' && currentUserTipo !== 'admin') {
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;background:#FEF2F2;border:2px solid #DC2626;border-radius:10px;padding:18px 20px">
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.2" style="flex-shrink:0;margin-top:2px"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div>
+            <div style="font-weight:700;color:#991B1B;font-size:14px;margin-bottom:4px">Seu usuário está sem código de link</div>
+            <div style="font-size:12.5px;color:#7F1D1D;line-height:1.5">
+              Os links gerados aqui não conseguiriam te identificar como vendedor — propostas chegariam sem atribuição.
+              <br><strong>Peça ao admin pra rodar o SQL <code>_supabase_codigo_link_autofill.sql</code> no Supabase.</strong>
+              Depois disso, recarregue essa página.
+            </div>
+          </div>
+        </div>
+      </div>`;
+    return;
+  }
   const base = 'https://grupomasterprime.github.io/masterprime-portal/formulario.html';
   const c = currentUserCodigo ? '?c=' + currentUserCodigo : '';
   const sep = c ? '&' : '?';
@@ -414,7 +435,7 @@ function renderLinks() {
     { key: 'it', label: 'Consórcio Itaú',         sub: 'Apenas Itaú',                  url: base + c + sep + 'admin=itau',      logo: 'logo-itau.png' },
     { key: 'br', label: 'Consórcio Bradesco',     sub: 'Apenas Bradesco',              url: base + c + sep + 'admin=bradesco',  logo: 'logo-bradesco.png' }
   ];
-  document.getElementById('links-grid').innerHTML = links.map(l => `
+  grid.innerHTML = links.map(l => `
     <div class="link-mini ${l.key}">
       <div class="link-mini-badge"><img src="${l.logo}" alt="${l.label}"></div>
       <div class="link-mini-info">
