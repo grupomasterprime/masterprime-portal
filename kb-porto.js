@@ -1111,6 +1111,26 @@ window.KB_ADMIN["porto"] = {
       "titulo": "Formulário do Fiador",
       "descricao": "Documento oficial da Porto pra quando a análise de crédito pede fiador (ou titular adicional na cota). Inclui regras (renda 3× a parcela, sem restrições, só PF) e o e-mail da Porto pra enviar depois de preenchido.",
       "arquivo": "kb-porto-formulario-fiador.pdf"
+    },
+    {
+      "titulo": "Cartilha do FGTS",
+      "descricao": "Como usar o FGTS no consórcio Porto: pagar lance, amortizar saldo devedor ou quitar a cota contemplada de imóvel. Documentação exigida, regras do Banco Central e fluxo passo a passo.",
+      "arquivo": "kb-porto-fgts.pdf"
+    },
+    {
+      "titulo": "Guia da Transferência de Cotas (2025)",
+      "descricao": "Como transferir uma cota Porto para outro CNPJ ou CPF: requisitos, documentos, prazos e taxas. Diferenças entre transferência antes e depois da contemplação.",
+      "arquivo": "kb-porto-transferencia-cotas.pdf"
+    },
+    {
+      "titulo": "Guia do Fluxo de Imóvel no Exterior (01/2026)",
+      "descricao": "Passo a passo do consórcio de imóvel no exterior (EUA): países aceitos, documentação, conversão de moeda, due diligence e jornada da contemplação à entrega das chaves.",
+      "arquivo": "kb-porto-imovel-exterior.pdf"
+    },
+    {
+      "titulo": "Guia da Assembleia (2025)",
+      "descricao": "Como funciona a assembleia da Porto: contemplação por sorteio e lance, modalidades de lance (livre, fixo, embutido), regras de empate e desempate, e horários de envio.",
+      "arquivo": "kb-porto-assembleia.pdf"
     }
   ]
 };
