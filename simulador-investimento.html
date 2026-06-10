@@ -520,15 +520,12 @@ function calcularOperacao(op){
 
     if (vendaVenceRf) {
       melhor = {key:'venda', valor: stVenda, lucro: lucroVendaReal, lucroLiq: lucroVendaLiq, aporteRf: valorInvestidoAteCont, prazoRf: expectativa};
-    } else if (sobraMensalDif > 0 && expectativa > 30) {
-      // Aluguel/Diferença: compara com RF do mesmo aporte (aporteAluguelConkey) e prazo (expectativa)
-      const retornoDif = aporteAluguelConkey > 0 ? lucroDiferencaReal / aporteAluguelConkey : -Infinity;
-      const retornoRfDif = rfRetornoPct(aporteAluguelConkey, expectativa);
-      if (retornoDif > retornoRfDif) {
-        melhor = {key:'diferenca', valor: stImoveis + stDiferenca, lucro: lucroDiferencaReal, lucroLiq: lucroDiferencaReal, aporteRf: aporteAluguelConkey, prazoRf: expectativa};
-      } else {
-        melhor = {key:'previdencia', valor: stPrevidencia, lucro: lucroPrevidenciaReal, lucroLiq: lucroPrevidenciaReal, aporteRf: totalPagoConsorcio, prazoRf: prazo};
-      }
+    } else if (sobraMensalDif > 0 && expectativa > 30 && lucroDiferencaReal > lucroPrevidenciaReal) {
+      // Aluguel/Diferença vence quando o lucro ABSOLUTO supera o da Previdência.
+      // Validado contra Conkey (C05 vs C11): em exp=100 com alu=0,65%, lucroDif R$ 607k <
+      // lucroPrev R$ 1.539k → Conkey escolhe PREVIDÊNCIA. Com alu=1,5%, lucroDif R$ 2.060k >
+      // lucroPrev → Conkey escolhe ALUGUEL.
+      melhor = {key:'diferenca', valor: stImoveis + stDiferenca, lucro: lucroDiferencaReal, lucroLiq: lucroDiferencaReal, aporteRf: aporteAluguelConkey, prazoRf: expectativa};
     } else {
       // Default: PREVIDÊNCIA (mesmo quando perde da RF longa — Conkey faz assim)
       melhor = {key:'previdencia', valor: stPrevidencia, lucro: lucroPrevidenciaReal, lucroLiq: lucroPrevidenciaReal, aporteRf: totalPagoConsorcio, prazoRf: prazo};
@@ -656,7 +653,7 @@ function wireToggles(root){
   }
 }
 
-const ESTRATEGIA_LABEL={venda:'VENDA',imoveis:'IMÓVEIS',diferenca:'DIFERENÇA',previdencia:'PREVIDÊNCIA'};
+const ESTRATEGIA_LABEL={venda:'VENDA',imoveis:'IMÓVEIS',diferenca:'ALUGUEL',previdencia:'PREVIDÊNCIA'};
 const CONT_LABEL={sorteio:'SORTEIO','lance-fixo':'LANCE FIXO','lance-fid':'LANCE FIDELIDADE'};
 
 function renderOps(){
