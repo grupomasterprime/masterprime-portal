@@ -28,7 +28,6 @@
     --text-light: #9CA3AF;
     --soft-blue: #F1F5F9;
     --soft-red: #FFE9EC;
-    --soft-red-border: #F5BCC4;
     --error: #DC2626;
     --warning-bg: #FFF8E8;
     --warning-border: #F0D9A0;
@@ -78,7 +77,7 @@
   .result-primary strong { color: rgba(255,255,255,0.85); font-size: 11.5px; letter-spacing: 1.2px; text-transform: uppercase; font-weight: 500; }
   .result-primary .value { font-size: 20px; font-weight: 700; color: #fff; font-family: 'DM Mono', ui-monospace, monospace; }
 
-  .result-red { background: var(--soft-red); border: 1px solid var(--soft-red-border); border-radius: 8px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+  .result-red { background: var(--soft-red); border: 1px solid #F5BCC4; border-radius: 8px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
   .result-red strong { font-size: 11.5px; color: var(--bradesco-red-dark); letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
   .result-red .value { font-size: 19px; font-weight: 700; color: var(--mp-navy); font-family: 'DM Mono', ui-monospace, monospace; }
 
@@ -108,7 +107,7 @@
   .passo-val { font-family: 'DM Mono', ui-monospace, monospace; font-weight: 700; color: var(--mp-navy); font-size: 14px; white-space: nowrap; }
   .passo-row.final .passo-text { font-weight: 600; color: var(--mp-navy); }
   .passo-row.final .passo-val { font-size: 16px; color: var(--bradesco-red-dark); }
-  .formula-box { margin-top: 16px; padding: 12px 16px; background: var(--soft-red); border: 1px solid var(--soft-red-border); border-radius: 8px; font-family: 'DM Mono', ui-monospace, monospace; font-size: 12.5px; color: var(--bradesco-red-dark); text-align: center; line-height: 1.5; }
+  .formula-box { margin-top: 16px; padding: 12px 16px; background: var(--soft-red); border: 1px solid #F5BCC4; border-radius: 8px; font-family: 'DM Mono', ui-monospace, monospace; font-size: 12.5px; color: var(--bradesco-red-dark); text-align: center; line-height: 1.5; }
 
   /* Resumo de parcelas */
   .resumo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
@@ -133,7 +132,7 @@
   .aviso { background: var(--warning-bg); border: 1px solid var(--warning-border); border-radius: 8px; padding: 14px 18px; color: var(--warning-text); font-size: 12.5px; line-height: 1.5; margin-top: 8px; }
   .aviso strong { color: var(--warning-text); }
 
-  .actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; padding-bottom: 32px; flex-wrap: wrap; }
+  .actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; padding-bottom: 32px; }
   button.primary, button.secondary { padding: 11px 22px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.15s; border: 1px solid transparent; font-family: inherit; }
   button.primary { background: var(--bradesco-red); color: #fff; border-color: var(--bradesco-red); }
   button.primary:hover { background: var(--bradesco-red-dark); }
@@ -147,39 +146,6 @@
   /* Observações textarea */
   .obs-area { width: 100%; min-height: 90px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: inherit; resize: vertical; color: var(--text); background: #fff; }
   .obs-area:focus { outline: none; border-color: var(--bradesco-red); box-shadow: 0 0 0 3px rgba(204,9,47,0.10); }
-
-  /* Toggle genérico */
-  .generic-toggle-bar { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-bottom: 20px; }
-  .generic-toggle-label { font-size: 12px; color: var(--text-muted); font-weight: 500; letter-spacing: 0.3px; }
-  .generic-toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
-  .generic-toggle input { opacity: 0; width: 0; height: 0; }
-  .generic-toggle .slider { position: absolute; cursor: pointer; inset: 0; background: var(--border); border-radius: 24px; transition: .3s; }
-  .generic-toggle .slider::before { content: ""; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
-  .generic-toggle input:checked + .slider { background: var(--mp-navy); }
-  .generic-toggle input:checked + .slider::before { transform: translateX(20px); }
-
-  /* ═══════════════ MODO GENÉRICO (neutro) ═══════════════ */
-  body.generic-mode {
-    --bradesco-red: #4B5563;
-    --bradesco-red-dark: #374151;
-    --soft-red: #F3F4F6;
-    --soft-red-border: #D1D5DB;
-    --focus-ring: rgba(75, 85, 99, 0.15);
-  }
-  body.generic-mode .tag-admin { display: none; }
-  body.generic-mode .field input:focus,
-  body.generic-mode .field select:focus,
-  body.generic-mode .obs-area:focus { border-color: #4B5563; box-shadow: 0 0 0 3px rgba(75, 85, 99, 0.15); }
-  body.generic-mode .btn-eye-lance { color: #4B5563; }
-  body.generic-mode .btn-eye-lance:hover { background: rgba(75,85,99,0.10); color: #374151; }
-  body.generic-mode .result-red strong { color: #374151; }
-  body.generic-mode .pos-row.highlight .val { color: #374151; }
-  body.generic-mode .passo-row.final .passo-val { color: #374151; }
-  body.generic-mode .formula-box { color: #374151; }
-  body.generic-mode .brand-mark { background: #4B5563; }
-  body.generic-mode .card-header .badge-red { background: #4B5563; }
-  body.generic-mode button.primary { background: #4B5563; border-color: #4B5563; }
-  body.generic-mode button.primary:hover { background: #374151; }
 </style>
 <script>if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('embedded');</script>
 </head>
@@ -193,23 +159,14 @@
       <p>Simulador de Consórcio</p>
     </div>
   </div>
-  <span class="tag-admin" id="tagAdminHeader">Bradesco</span>
+  <span class="tag-admin">Bradesco</span>
 </header>
 
 <main>
   <div id="simStoreMount" style="max-width:1400px; margin:16px auto 0; padding:0 32px;"></div>
 
-  <!-- TOGGLE MODO GENÉRICO -->
-  <div class="generic-toggle-bar">
-    <span class="generic-toggle-label">Modo neutro (sem identificação da administradora)</span>
-    <label class="generic-toggle">
-      <input type="checkbox" id="genericModeToggle" onchange="alternarModoGenerico()">
-      <span class="slider"></span>
-    </label>
-  </div>
-
-  <h2 class="section-title" id="mainTitle">Bradesco · Auto</h2>
-  <p class="subtitle" id="mainSubtitle">Cálculo de proposta, contemplação e estratégias de lance</p>
+  <h2 class="section-title">Bradesco · Auto</h2>
+  <p class="subtitle">Cálculo de proposta, contemplação e estratégias de lance</p>
 
   <!-- ════════ PROPOSTA ════════ -->
   <section class="card">
@@ -367,6 +324,7 @@
     </div>
   </section>
 
+  <!-- Resumo de parcelas / Saldo devedor / Seguro: continuam calculados internamente (ids ocultos) mas a seção visual foi removida a pedido. -->
   <div style="display:none">
     <span id="br-saldoDevedor"></span>
     <span id="br-seguroMensal"></span>
@@ -398,31 +356,6 @@
 </main>
 
 <script>
-// ═══════════════════════════════════════════════════════
-// MODO GENÉRICO (toggle)
-// ═══════════════════════════════════════════════════════
-function isModoGenerico() {
-  return document.getElementById('genericModeToggle').checked;
-}
-
-function alternarModoGenerico() {
-  const ativo = isModoGenerico();
-  document.body.classList.toggle('generic-mode', ativo);
-  const titulo = document.getElementById('mainTitle');
-  const tagAdmin = document.getElementById('tagAdminHeader');
-  const pageTitle = document.querySelector('title');
-
-  if (ativo) {
-    titulo.textContent = 'Simulador de Consórcio · Auto';
-    if (tagAdmin) tagAdmin.textContent = 'Genérico';
-    if (pageTitle) pageTitle.textContent = 'Master Prime - Simulador de Consórcio';
-  } else {
-    titulo.textContent = 'Bradesco · Auto';
-    if (tagAdmin) tagAdmin.textContent = 'Bradesco';
-    if (pageTitle) pageTitle.textContent = 'Master Prime - Bradesco Auto';
-  }
-}
-
 // ═══════════════════════════════════════════════════════
 // MÁSCARAS
 // ═══════════════════════════════════════════════════════
@@ -522,6 +455,30 @@ function readInputs() {
 // ═══════════════════════════════════════════════════════
 // FÓRMULAS — engenharia reversa COMPLETA da planilha Bradesco
 // ═══════════════════════════════════════════════════════
+// Vars: bem, adm, fr, txAnt, prazoAnt, red, prazo, seguro, pctLance, contempla
+//
+// Saldo Devedor    = bem × (1 + adm + fr)
+// Parc Inicial     = bem × (1 − red + adm + fr) / prazo + saldo × seguro
+// Parc Pós-Antec   = bem × (1 − red + adm − txAnt + fr) / prazo + saldo × seguro
+//
+// % por categoria (composição da parcela):
+//   D7 (% COMUM pós-ant)   = (1 − red + txAnt) / prazo
+//   B7 (% COMUM inicial)   = (1 − red)/prazo − txAnt × (prazo − prazoAnt)/(prazo × prazoAnt)
+//
+// Lance Total (E27 do Excel):
+//   Se D7 × (prazo − prazoAnt) <= pctLance:
+//     C21 = prazo − prazoAnt
+//     B21 = (pctLance − D7 × (prazo − prazoAnt)) / B7
+//   Senão:
+//     C21 = pctLance / D7
+//     B21 = 0
+//   Lance Total = (B21 + C21) × ParcInicial(s/seguro)
+//
+// Pós contemplação:
+//   Lance entra ENTRE parcela L7 e L7+1 (parcs cheias até L7+1)
+//   Saldo Pós = SaldoDevedor − parcsPagas − Lance
+//   Diluir nas Parcelas:  novaParc = saldoPos / (prazo − (L7+1))
+//   Antecipar Parcelas:   novoPrazo = (prazo − L7) − Lance/ParcInicial
 function calc(i) {
   const r = {};
   const bem = i.credito;
@@ -531,6 +488,7 @@ function calc(i) {
   const txAnt = i.taxaAntecipacao || 0;
   const prazoAnt = i.qtdAntecipacao || 0;
 
+  // Constantes
   r.saldoDevedor = bem * (1 + i.taxaAdm + i.fundo);
   r.seguroMensal = r.saldoDevedor * i.seguro;
   const parcInicialSemSeg = (prazo > 0) ? bem * (1 - red + i.taxaAdm + i.fundo) / prazo : NaN;
@@ -538,6 +496,7 @@ function calc(i) {
   r.parcelaInicial = parcInicialSemSeg + r.seguroMensal;
   r.parcelaPosAnt  = parcPosAntSemSeg  + r.seguroMensal;
 
+  // Lance — fórmula completa replicada do Excel
   if (i.lanceManual > 0) {
     r.lanceTotal = i.lanceManual;
     r.lanceB21 = 0;
@@ -562,6 +521,8 @@ function calc(i) {
     r.lanceTotal = (B21 + C21) * parcInicialSemSeg;
   }
 
+  // PÓS CONTEMPLAÇÃO
+  // Lance entra entre a parcela L7 e L7+1 → 2 parcelas cheias pagas (1 a L7+1) antes da nova parcela
   const cont = Math.max(1, i.contempla || 1);
   const parcsAteCont = Math.min(cont + 1, prazo);
   const parcsInicialPagas = Math.min(parcsAteCont, prazoAnt);
@@ -569,14 +530,22 @@ function calc(i) {
   const totalParcsPagas = parcsInicialPagas * r.parcelaInicial + parcsPosAntPagas * r.parcelaPosAnt;
   r.saldoPos = r.saldoDevedor - totalParcsPagas - r.lanceTotal;
 
+  // Diluir nas Parcelas
+  // Internamente, parcDiluir é calculada dividindo o saldoPos pelo nº de parcelas com o
+  // valor novo (178 = prazo − 2 parcelas iniciais pagas).
+  // Mas o "Prazo Restante" exibido ao cliente é o total ainda a pagar = prazo − contempla (179),
+  // que é mais intuitivo ("quantos meses faltam até quitar").
   const prazoNovaParcela = Math.max(0, prazo - parcsAteCont);
   r.parcDiluir = (prazoNovaParcela > 0) ? (r.saldoPos / prazoNovaParcela) : NaN;
   r.prazoDiluir = Math.max(0, prazo - cont);
 
+  // Antecipar Parcelas: lance amortiza N parcelas iguais à ParcInicial
+  //   novoPrazo = (prazo − contempla) − Lance/ParcInicial
   r.parcAntecipar = r.parcelaInicial;
   const nParcelasAmort = (parcInicialSemSeg > 0) ? r.lanceTotal / parcInicialSemSeg : 0;
   r.prazoAntecipar = Math.max(0, (prazo - cont) - nParcelasAmort);
 
+  // DEMONSTRATIVO TAXAS
   r.taxaMes = (prazo > 0) ? i.taxaAdm / prazo : NaN;
   r.taxaAno = r.taxaMes * 12;
 
@@ -667,132 +636,109 @@ document.getElementById('btnLimparTudo').addEventListener('click', limparTudo);
 recalc();
 
 // ═════════════════════════════════════════════════════════════
-// PDF — FALLBACK GARANTIDO (SEM DEPENDÊNCIA EXTERNA)
+// PDF — usa módulo compartilhado pdf-master-prime.js
 // ═════════════════════════════════════════════════════════════
-function _gerarPDFFallback(dados) {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF('p', 'mm', 'a4');
-  const margem = 15;
-  let y = margem;
+function _coletarBlocosBradesco() {
+  const _v = (id) => { const el = document.getElementById(id); return (el?.value || '').trim(); };
+  const _t = (id) => { const el = document.getElementById(id); return (el?.textContent || '').trim(); };
+  const _selTxt = (id) => { const el = document.getElementById(id); return (el?.selectedOptions?.[0]?.textContent || '').trim() || '—'; };
+  const _has = (s) => s && s !== '—' && s !== '?' && s !== '';
 
-  // Cabeçalho neutro
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(18);
-  doc.setTextColor(45, 63, 94); // navy
-  doc.text(dados.titulo, margem, y);
-  y += 8;
-  doc.setFontSize(10);
-  doc.setTextColor(107, 114, 128);
-  doc.text(dados.subtitulo, margem, y);
-  y += 6;
-  doc.setDrawColor(229, 231, 235);
-  doc.line(margem, y, 210 - margem, y);
-  y += 8;
+  const prazoVal = _v('br-prazo');
+  const redutorTxt = _selTxt('br-redutor');
+  const qtdAntec = _v('br-qtdAntecipacao');
+  const contemplaN = parseInt(_v('br-contempla') || '0', 10) || 0;
 
-  // Inputs
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  dados.inputs.forEach(inp => {
-    doc.setTextColor(107,114,128);
-    doc.text(inp.label, margem, y);
-    doc.setTextColor(31,41,55);
-    doc.text(inp.value, margem + 50, y);
-    y += 6;
+  // BLOCO 1: PROPOSTA
+  const propostaLinha1 = [
+    { label: 'Crédito Contratado', value: _v('br-credito') || 'R$ 0,00' },
+    { label: 'Prazo total', value: (prazoVal || '0') + ' meses' },
+    { label: 'Redutor', value: redutorTxt },
+    { label: 'Contemplação na parcela', value: String(contemplaN) }
+  ];
+  const propostaLinha2 = [];
+  if (_has(qtdAntec)) propostaLinha2.push({ label: 'Decomposição antecipação', value: qtdAntec + ' primeiras parcelas' });
+  propostaLinha2.push({ label: 'Saldo devedor', value: _t('br-saldoDevedor') || '—' });
+
+  const propostaLinhas = [
+    { campos: propostaLinha1, destaque: { label: 'Saldo devedor', value: _t('br-saldoDevedor') || '—' } }
+  ];
+  if (propostaLinha2.length > 0) propostaLinhas.push({ campos: propostaLinha2 });
+
+  // BLOCO 2: TAXAS DO GRUPO
+  const taxaMes = _t('br-taxaMes');
+  const taxaAno = _t('br-taxaAno');
+  const taxaCombo = (_has(taxaMes) || _has(taxaAno)) ? `${taxaMes || '—'} a.m. · ${taxaAno || '—'} a.a.` : '—';
+
+  const taxasLinhas = [{
+    campos: [
+      { label: 'Taxa antecipação', value: _v('br-taxaAntecipacao') || '0,00 %' },
+      { label: 'Taxa administrativa', value: _v('br-taxaAdm') || '0,00 %' },
+      { label: 'Fundo de reserva', value: _v('br-fundo') || '0,00 %' },
+      { label: 'Seguro de vida', value: _v('br-seguro') || '0,0000 %' }
+    ],
+    destaque: { label: 'Taxa por mês / ano', value: taxaCombo }
+  }];
+
+  // BLOCO 3: OFERTA DE LANCE
+  const lanceLinhas = [{
+    campos: [
+      { label: '% Lance', value: _v('br-pctLance') || '0,00 %' },
+      { label: 'Valor manual', value: _v('br-lanceManual') || 'R$ 0,00' }
+    ],
+    destaque: { label: 'Valor lance total', value: _t('br-lanceTotal') || '—' }
+  }];
+
+  const blocos = [
+    { tipo: 'card', titulo: 'PROPOSTA', linhas: propostaLinhas },
+    { tipo: 'card', titulo: 'TAXAS DO GRUPO', linhas: taxasLinhas },
+    { tipo: 'card', titulo: 'OFERTA DE LANCE', linhas: lanceLinhas }
+  ];
+
+  // BLOCO 4: ESTIMATIVA PÓS-CONTEMPLAÇÃO (sempre, contempla default = 1)
+  const saldoPos = _t('br-saldoPos');
+  const parcDiluir = _t('br-parcDiluir');
+  const prazoDiluir = _t('br-prazoDiluir');
+  const parcAntecipar = _t('br-parcAntecipar');
+  const prazoAntecipar = _t('br-prazoAntecipar');
+
+  const posLinhas = [
+    { campos: [{ label: 'Saldo após contempla', value: saldoPos || '—' }] }
+  ];
+  posLinhas.push({
+    campos: [
+      { label: 'Nova parcela', value: parcDiluir || '—' },
+      { label: 'Prazo restante', value: prazoDiluir || '—' }
+    ],
+    destaque: { label: 'Diluir nas parcelas', value: parcDiluir || '—' }
   });
-  y += 4;
+  posLinhas.push({
+    campos: [
+      { label: 'Novo prazo', value: prazoAntecipar || '—' },
+      { label: 'Parcela mantida', value: parcAntecipar || '—' }
+    ],
+    destaque: { label: 'Antecipar parcelas', value: prazoAntecipar || '—' }
+  });
+  blocos.push({ tipo: 'card', titulo: 'ESTIMATIVA PÓS-CONTEMPLAÇÃO', linhas: posLinhas });
 
-  // Lance
-  if (dados.lance) {
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.setTextColor(45,63,94);
-    doc.text('Lance', margem, y);
-    y += 6;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.text(`% Lance: ${dados.lance.total.pct} %`, margem, y);
-    doc.text(`Valor: R$ ${dados.lance.total.rs}`, margem + 60, y);
-    y += 8;
-  }
-
-  // Outputs
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
-  doc.setTextColor(45,63,94);
-  doc.text('Resultados', margem, y);
-  y += 7;
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  dados.outputs.forEach(out => {
-    doc.setTextColor(107,114,128);
-    doc.text(out.label, margem, y);
-    doc.setTextColor(31,41,55);
-    doc.text(out.value, margem + 70, y);
-    if (out.subAcima) {
-      y += 4;
-      doc.setFontSize(7);
-      doc.setTextColor(156,163,175);
-      doc.text(out.subAcima, margem + 70, y);
-      doc.setFontSize(9);
+  // BLOCO 5: RESUMO DE PARCELAS
+  const lblInicial = _t('br-lblParcelaInicial') || 'Parcela inicial';
+  const lblDemais = _t('br-lblParcelaDemais') || 'Parcela após antecipação';
+  const resumoLinhas = [
+    { campos: [
+        { label: lblInicial, value: _t('br-parcelaInicial') || '—' },
+        { label: lblDemais, value: _t('br-parcelaPosAnt') || '—' }
+      ],
+      destaque: { multi: [
+        { label: lblInicial, value: _t('br-parcelaInicial') || '—' },
+        { label: lblDemais, value: _t('br-parcelaPosAnt') || '—' }
+      ]}
     }
-    y += 6;
-  });
-  y += 6;
+  ];
+  blocos.push({ tipo: 'card', titulo: 'RESUMO DE PARCELAS', linhas: resumoLinhas });
 
-  // Observações
-  if (dados.observacoes && dados.observacoes.trim() !== '') {
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.setTextColor(45,63,94);
-    doc.text('Observações', margem, y);
-    y += 6;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(31,41,55);
-    const obsLinhas = doc.splitTextToSize(dados.observacoes, 180);
-    obsLinhas.forEach(linha => {
-      if (y > 270) { doc.addPage(); y = margem; }
-      doc.text(linha, margem, y);
-      y += 5;
-    });
-  }
-
-  // Rodapé
-  y += 8;
-  doc.setDrawColor(229,231,235);
-  doc.line(margem, y, 210 - margem, y);
-  y += 5;
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(156,163,175);
-  doc.text('Simulação gerada pelo Master Prime · Caráter ilustrativo', margem, y);
-
-  return doc;
+  return blocos;
 }
-
-document.getElementById('baixarPdfBradesco').addEventListener('click', async () => {
-  const btn = document.getElementById('baixarPdfBradesco');
-  const txt = btn.textContent;
-  btn.textContent = 'Gerando PDF...';
-  btn.disabled = true;
-  try {
-    // Tenta usar módulo externo se existir e função disponível
-    if (typeof window.PdfMasterPrime !== 'undefined' && typeof window.PdfMasterPrime.gerarComercial === 'function') {
-      await window.PdfMasterPrime.gerarComercial(_montarPdfComercialBradesco());
-    } else {
-      // Fallback com jsPDF próprio
-      const dados = _montarPdfComercialBradesco();
-      const doc = _gerarPDFFallback(dados);
-      doc.save((dados.filename || 'simulacao') + '.pdf');
-    }
-  } catch (err) {
-    console.error(err);
-    alert('Erro ao gerar PDF: ' + err.message);
-  } finally {
-    btn.textContent = txt;
-    btn.disabled = false;
-  }
-});
 
 function _montarPdfComercialBradesco() {
   const _v = (id) => { const el = document.getElementById(id); return (el?.value || '').trim(); };
@@ -800,20 +746,22 @@ function _montarPdfComercialBradesco() {
   const _selTxt = (id) => { const el = document.getElementById(id); return (el?.selectedOptions?.[0]?.textContent || '').trim(); };
 
   const redutorTxt = _selTxt('br-redutor') || 'Sem redutor';
+  const redutorPct = redutorTxt.replace(/[^\d%]/g, '');
   const qtdAntec = _v('br-qtdAntecipacao') || '6';
+
+  // Crédito Líquido no Bradesco = Crédito Contratado (lance abate no saldo devedor, não reduz o crédito recebido)
   const creditoLiquido = _v('br-credito') || 'R$ 0,00';
 
-  const generico = isModoGenerico();
-
   return {
-    filename: generico ? 'simulacao-consorcio' : 'bradesco-auto',
-    logoAdmin: generico ? null : 'bradesco',
+    filename: 'bradesco-auto',
+    logoAdmin: 'bradesco',
     titulo: 'Simulador de Crédito',
-    subtitulo: generico ? 'Consórcio Auto' : 'Bradesco Auto',
-    representanteTexto: generico ? 'Consórcio' : 'Consórcio Bradesco',
+    subtitulo: 'Bradesco Auto',
+    representanteTexto: 'Consórcio Bradesco',
     inputs: [
       { label: 'Taxa Administrativa', value: _v('br-taxaAdm') || '0,00 %' },
       { label: 'Fundo de Reserva', value: _v('br-fundo') || '0,00 %' },
+      { label: 'Seguro Prestamista', value: _v('br-seguro') || '0,0000 %', highlight: 'Somente PF' },
       { label: 'Valor do crédito', value: _v('br-credito') || 'R$ 0,00' },
       { label: 'Prazo do Grupo', value: (_v('br-prazo') || '0') + ' Meses' },
     ],
@@ -832,8 +780,28 @@ function _montarPdfComercialBradesco() {
   };
 }
 
+document.getElementById('baixarPdfBradesco').addEventListener('click', async () => {
+  const btn = document.getElementById('baixarPdfBradesco');
+  const txt = btn.textContent;
+  btn.textContent = 'Gerando PDF...';
+  btn.disabled = true;
+  try {
+    await PdfMasterPrime.gerarComercial(_montarPdfComercialBradesco());
+  } catch (err) {
+    console.error(err);
+    alert('Erro ao gerar PDF: ' + err.message);
+  } finally {
+    btn.textContent = txt;
+    btn.disabled = false;
+  }
+});
+
 // ═══════════════════════════════════════════════════════
 // OLHINHO — MEMÓRIA DE CÁLCULO DO LANCE
+// ═══════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════
+// SYNC % LANCE ↔ VALOR DO LANCE (R$)
+// Usa a mesma fórmula: Lance = (Categoria × %Lance) ÷ Fator
 // ═══════════════════════════════════════════════════════
 let _syncingLance = false;
 function _baseCatEFator() {
