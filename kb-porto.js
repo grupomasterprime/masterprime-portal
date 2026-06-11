@@ -1110,42 +1110,6 @@ window.KB_ADMIN["porto"] = {
       "categoria_key": "credito_imovel",
       "categoria_label": "Crédito e compra — Imóvel",
       "categoria_ordem": 7,
-      "titulo": "FGTS: a quem se destina e quais imóveis aceitam?",
-      "conteudo": "O FGTS pode ser usado no consórcio Porto pela pessoa física titular de conta vinculada, desde que adquira IMÓVEL RESIDENCIAL URBANO destinado à moradia.\n\nO crédito pode ter sido usado para:\n• Imóvel residencial urbano novo ou usado;\n• Construção em terreno próprio urbanizado;\n• Aquisição de terreno + construção;\n• Imóvel residencial na planta.\n\nO FGTS NÃO PODE ser concedido se o crédito foi usado para:\n• Quitação de financiamento próprio;\n• Imóvel comercial;\n• Terreno (puro, sem construção);\n• Reforma.\n\nLimite de avaliação do imóvel (data da aquisição):\n• 30/07/2002 a 27/01/2005: R$ 300 mil\n• 28/01/2005 a 26/03/2009: R$ 350 mil\n• 27/03/2009 a 07/10/2013: R$ 500 mil\n• A partir de 25/11/2016: R$ 950 mil (SP, RJ, MG, DF) / R$ 800 mil (demais estados)\n• Imóvel novo entre 20/02/2017 e 31/12/2017: R$ 1,5 milhão (qualquer estado)",
-      "tags": "FGTS, imóvel, residencial, limite, SFH, financiamento, moradia, construção, terreno",
-      "ordem": 14
-    },
-    {
-      "categoria_key": "credito_imovel",
-      "categoria_label": "Crédito e compra — Imóvel",
-      "categoria_ordem": 7,
-      "titulo": "FGTS: requisitos do consorciado e do cônjuge",
-      "conteudo": "Pode usar o FGTS o consorciado, o cônjuge, ou os dois juntos, desde que NA DATA DA AQUISIÇÃO do imóvel:\n\na) Data do casamento ou união estável anterior à alienação (consta na Matrícula);\nb) Tenha pelo menos 3 anos de trabalho sob regime do FGTS (somando empresas);\nc) Quando casal usa as duas contas, a MODALIDADE escolhida tem que ser a mesma;\nd) Não pode ter financiamento habitacional ativo pelo SFH em qualquer parte do Brasil;\ne) Não pode ter imóvel residencial concluído ou em construção no município de residência, no município da ocupação principal ou em municípios limítrofes;\nf) Não pode ter fração superior a 40% de imóvel residencial quitado ou financiado;\ng) Se for proprietário de imóvel mas estiver impedido de morar nele, ainda pode usar;\nh) Se for fração remanescente de imóvel quitado adquirido com FGTS na mesma escritura como coproprietário, pode ultrapassar 40%.\n\nSe casal usa as duas contas, ambos precisam atender separadamente.",
-      "tags": "FGTS, cônjuge, requisitos, casamento, união estável, 3 anos, SFH, fração ideal",
-      "ordem": 15
-    },
-    {
-      "categoria_key": "credito_imovel",
-      "categoria_label": "Crédito e compra — Imóvel",
-      "categoria_ordem": 7,
-      "titulo": "FGTS: quais modalidades de uso estão disponíveis?",
-      "conteudo": "São 3 modalidades (Resolução CCFGTS nº 616):\n\n1. LIQUIDAÇÃO DO SALDO DEVEDOR — quita 100% do saldo da cota. Pode estar inadimplente, mas só rola se o FGTS cobrir TODA a dívida.\n\n2. AMORTIZAÇÃO EXTRAORDINÁRIA — paga um valor menor que o saldo. Consorciado precisa estar em dia. Duas sub-opções:\n   • Redução do VALOR da parcela (todas as parcelas vincendas ficam menores);\n   • Redução do PRAZO (corta parcelas da última pra primeira).\n\n3. PAGAMENTO DE PARTE DAS PARCELAS — até 80% do valor de 12 parcelas consecutivas. Restrições:\n   • Não pode ter mais de 3 parcelas em atraso até a operação concluir;\n   • Parcelas em atraso entram no pacote das 12;\n   • Só pode usar FGTS de novo nessa cota depois das 12 parcelas amortizadas.\n\nLiquidação e Amortização: intervalo mínimo de 2 ANOS entre cada movimentação por trabalhador. Liquidação e Pagamento de Parte de Parcelas podem ser usados SIMULTANEAMENTE (mas uma solicitação por vez).",
-      "tags": "FGTS, liquidação, amortização extraordinária, redução prazo, redução parcela, pagamento parcelas, intervalo 2 anos, Resolução 616, CCFGTS",
-      "ordem": 16
-    },
-    {
-      "categoria_key": "credito_imovel",
-      "categoria_label": "Crédito e compra — Imóvel",
-      "categoria_ordem": 7,
-      "titulo": "FGTS: lista de documentos e como enviar",
-      "conteudo": "Documentos pra abrir o processo de FGTS (originais ou cópias autenticadas conforme indicado):\n\n• RG, CNH ou outro documento oficial (cópia);\n• Extratos analíticos das contas vinculadas dos últimos 3 anos (cópia);\n• Declaração de Imposto de Renda completa + recibo de entrega à Receita Federal (do consorciado e cônjuge, se for o caso) — da época da aquisição do imóvel E do último exercício. Se isento: declaração de isenção;\n• Certidão de Inteiro Teor da Matrícula do imóvel ATUALIZADA (original) — validade de 30 dias a contar da emissão;\n• Instrumento Particular ou Escritura Pública (original ou cópia autenticada);\n• Comprovante de residência DA ÉPOCA da aquisição do imóvel (conta de água, luz, telefone fixo, IPTU ou gás);\n• Certidão de casamento ou Declaração de União Estável (se aplicável);\n• Termo de Escolha de Modalidade (preenchido todo);\n• Autorização de Saque (individual, por titular de conta);\n• Termo Aditivo de inclusão de cônjuge (se for o caso).\n\nCanetas: usar apenas esferográfica AZUL ou PRETA. Não precisa reconhecimento de firma.\n\nEnvio: SEDEX para 'Caixa Consórcios — SHN Quadra 01, Conjunto A, Bloco E, Brasília/DF, CEP 70.701-050'. Identificar o envelope com GRUPO e COTA, e indicar que é processo de FGTS.\n\nAtenção: o envio NÃO garante a operação; é só o início da análise. Mantenha as parcelas em dia até a operação processar.",
-      "tags": "FGTS, documentação, lista documentos, sedex, caixa consórcios, brasília, matrícula, termo escolha, autorização saque, comprovante residência",
-      "ordem": 17
-    },
-    {
-      "categoria_key": "credito_imovel",
-      "categoria_label": "Crédito e compra — Imóvel",
-      "categoria_ordem": 7,
       "titulo": "Imóvel no Exterior: como abrir o ticket?",
       "conteudo": "A Porto tem fluxo dedicado pra consórcio de imóvel no exterior (atualmente EUA). Pra abrir o ticket:\n\n1. No portal da Tech (cliente contemplado), escolher a opção 'AQUISIÇÃO DE IMÓVEL NO EXTERIOR' (não usar 'Aquisição do Bem Imóvel' nem 'Aquisição de Bem Imóvel + Construção').\n2. Selecionar o grupo e a cota que será usada (cota contemplada).\n3. Informações do consorciado: endereço de entrega + dados (Nome/Razão Social, CPF/CNPJ, e-mail). Anexa documentos pessoais e comprovante de endereço.\n4. Informações do imóvel: tipo, titularidade, valor de compra, endereço (exterior). Anexa Promessa de Compra e Venda do imóvel no exterior + Matrícula do imóvel no BRASIL que será dado como garantia.\n5. Informações do proprietário (cessionário/comprador): Nome/Razão, CPF/CNPJ, e-mail, documento de identificação. ATENÇÃO: CNH dentro da validade OU RG (frente e verso, com CPF) dentro da validade máxima de 10 anos no mesmo arquivo.\n6. Finalização: pode usar o campo 'Comentários extras' pra registrar qualquer informação importante sobre a negociação.\n7. Após submeter, o ticket aparece no painel da Tech com a finalidade 'Aquisição de Imóvel no Exterior' — use esse filtro pra encontrar.",
       "tags": "imóvel exterior, EUA, ticket, garantia, matrícula brasil, promessa compra venda, fluxo, tech, finalidade",
@@ -1237,11 +1201,6 @@ window.KB_ADMIN["porto"] = {
       "titulo": "Formulário do Fiador",
       "descricao": "Documento oficial da Porto pra quando a análise de crédito pede fiador (ou titular adicional na cota). Inclui regras (renda 3× a parcela, sem restrições, só PF) e o e-mail da Porto pra enviar depois de preenchido.",
       "arquivo": "kb-porto-formulario-fiador.pdf"
-    },
-    {
-      "titulo": "Cartilha do FGTS",
-      "descricao": "Como usar o FGTS no consórcio Porto: pagar lance, amortizar saldo devedor ou quitar a cota contemplada de imóvel. Documentação exigida, regras do Banco Central e fluxo passo a passo.",
-      "arquivo": "kb-porto-fgts.pdf"
     },
     {
       "titulo": "Guia da Transferência de Cotas (2025)",
