@@ -304,6 +304,40 @@ body.embedded-mode .portal-menu-fab { display:flex; }
 ::-webkit-scrollbar-thumb { background:var(--border2); border-radius:10px; }
 .sidebar-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:100; }
 @media (max-width:768px) { .sidebar-backdrop.open { display:block; } }
+
+/* ═══ CHAMADOS DE COMISSÃO ═══ */
+.cham-filtro-btn { background:#fff; border:1px solid var(--border); color:var(--text2); font-size:11px; font-weight:600; padding:6px 11px; border-radius:6px; cursor:pointer; transition:all .15s; }
+.cham-filtro-btn:hover { border-color:var(--mp-navy); color:var(--mp-navy); }
+.cham-filtro-btn.cham-filtro-ativo { background:var(--mp-navy); color:#fff; border-color:var(--mp-navy); }
+.cham-card { background:#fff; border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-bottom:10px; cursor:pointer; transition:all .15s; display:flex; align-items:center; gap:14px; }
+.cham-card:hover { border-color:var(--mp-navy); transform:translateX(2px); box-shadow:0 2px 8px rgba(0,0,0,.06); }
+.cham-card.tem-resposta-nova { border-left:3px solid #DC2626; background:#FEFCE8; }
+.cham-st { font-size:10px; font-weight:700; padding:3px 9px; border-radius:999px; text-transform:uppercase; letter-spacing:.4px; }
+.cham-st-aberto { background:#FEF3C7; color:#92400E; }
+.cham-st-respondido { background:#DBEAFE; color:#1E40AF; }
+.cham-st-fechado { background:#E5E7EB; color:#374151; }
+.cham-novo-dot { width:8px; height:8px; background:#DC2626; border-radius:50%; flex-shrink:0; }
+
+/* Modal de chamado / thread */
+.cham-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px; }
+.cham-overlay.hidden { display:none; }
+.cham-modal { background:#fff; border-radius:14px; box-shadow:0 20px 60px rgba(0,0,0,.3); width:100%; max-width:680px; max-height:90vh; display:flex; flex-direction:column; }
+.cham-modal-head { padding:18px 22px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.cham-modal-body { padding:18px 22px; overflow-y:auto; flex:1; }
+.cham-modal-foot { padding:14px 22px; border-top:1px solid var(--border); display:flex; gap:10px; justify-content:flex-end; }
+.cham-input { width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:7px; font-size:13px; font-family:inherit; outline:none; box-sizing:border-box; }
+.cham-input:focus { border-color:var(--mp-navy); }
+.cham-textarea { min-height:110px; resize:vertical; }
+.cham-msg { padding:11px 14px; border-radius:10px; margin-bottom:10px; max-width:85%; font-size:12.5px; line-height:1.45; }
+.cham-msg-consultor { background:#F1F5F9; color:var(--text); align-self:flex-start; border-bottom-left-radius:3px; }
+.cham-msg-master { background:var(--mp-navy); color:#fff; align-self:flex-end; border-bottom-right-radius:3px; margin-left:auto; }
+.cham-msg-meta { font-size:10px; opacity:.7; margin-bottom:4px; font-weight:600; }
+.cham-anexo-pill { display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25); padding:4px 9px; border-radius:6px; font-size:10.5px; margin:4px 4px 0 0; cursor:pointer; }
+.cham-msg-consultor .cham-anexo-pill { background:#fff; border-color:var(--border); color:var(--mp-navy); }
+.cham-thread { display:flex; flex-direction:column; gap:6px; }
+/* Badge no item Histórico da sidebar */
+.sb-item .ni-badge { display:none; background:#DC2626; color:#fff; font-size:9.5px; padding:2px 6px; border-radius:999px; font-weight:700; margin-left:auto; }
+.sb-item .ni-badge.visible { display:inline-block; }
 </style>
 </head>
 <body>
@@ -383,7 +417,7 @@ body.embedded-mode .portal-menu-fab { display:flex; }
       <!-- Formulários (Adesão Bradesco): em stand-by até refinamento. Tela e backend continuam funcionais via /adesao.html — basta remover a classe `hidden` para reativar. -->
       <div class="sb-item hidden" onclick="nav('adesao')" id="ni-adesao"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></span> Formulários</div>
       <div class="sb-item" onclick="nav('dashboard')" id="ni-dashboard"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></span> Demonstrativo</div>
-      <div class="sb-item" onclick="nav('historico')" id="ni-historico"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg></span> Historico</div>
+      <div class="sb-item" onclick="nav('historico')" id="ni-historico"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg></span> Historico <span class="ni-badge" id="ni-historico-badge">0</span></div>
       <div id="admin-nav" class="hidden">
         <div class="sb-section">Administracao</div>
         <!-- Feedbacks (master e sócio) — dentro da Administração -->
@@ -408,16 +442,53 @@ body.embedded-mode .portal-menu-fab { display:flex; }
 
       <!-- DASHBOARD -->
       <div class="screen active" id="s-dashboard">
-        <div class="page-title">Demonstrativo</div>
-        <div class="page-sub" id="dash-sub">Seu demonstrativo de comissoes do mes atual</div>
+        <div style="display:flex;align-items:start;justify-content:space-between;gap:16px;flex-wrap:wrap">
+          <div>
+            <div class="page-title">Demonstrativo</div>
+            <div class="page-sub" id="dash-sub">Seu demonstrativo de comissoes do mes atual</div>
+          </div>
+          <button id="btn-abrir-chamado-demo" onclick="abrirNovoChamado()" style="background:var(--mp-navy);color:#fff;border:0;padding:9px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;white-space:nowrap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Tirar dúvida sobre comissão
+          </button>
+        </div>
         <div id="dash-content"><div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="empty-state-title">Nenhum demonstrativo disponivel</div><div class="empty-state-desc">Seu demonstrativo do mes ainda nao foi publicado.</div></div></div>
       </div>
 
       <!-- HISTORICO -->
       <div class="screen" id="s-historico">
-        <div class="page-title">Historico</div>
-        <div class="page-sub">Todos os seus demonstrativos anteriores</div>
+        <div style="display:flex;align-items:start;justify-content:space-between;gap:16px;flex-wrap:wrap">
+          <div>
+            <div class="page-title">Historico</div>
+            <div class="page-sub">Todos os seus demonstrativos anteriores</div>
+          </div>
+          <button onclick="abrirNovoChamado()" style="background:var(--mp-navy);color:#fff;border:0;padding:9px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;white-space:nowrap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Abrir chamado de comissão
+          </button>
+        </div>
         <div id="hist-content"><div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="empty-state-title">Nenhum historico</div><div class="empty-state-desc">Seus demonstrativos anteriores aparecerao aqui.</div></div></div>
+
+        <!-- ═══ CHAMADOS DE COMISSÃO ═══ -->
+        <div style="margin-top:30px;border-top:1px solid var(--border);padding-top:24px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+            <div>
+              <div style="font-size:15px;font-weight:700;color:var(--mp-navy);display:flex;align-items:center;gap:8px">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Chamados de Comissão
+                <span id="cham-badge-titulo" style="display:none;background:#DC2626;color:#fff;font-size:10px;padding:2px 7px;border-radius:999px;font-weight:700">0</span>
+              </div>
+              <div style="font-size:11.5px;color:var(--text2);margin-top:2px" id="cham-sub-titulo">Suas dúvidas de comissão registradas. Veja respostas, abra novos chamados.</div>
+            </div>
+            <div style="display:flex;gap:6px">
+              <button class="cham-filtro-btn cham-filtro-ativo" data-filtro="todos">Todos</button>
+              <button class="cham-filtro-btn" data-filtro="aberto">Abertos</button>
+              <button class="cham-filtro-btn" data-filtro="respondido">Respondidos</button>
+              <button class="cham-filtro-btn" data-filtro="fechado">Fechados</button>
+            </div>
+          </div>
+          <div id="cham-lista"></div>
+        </div>
       </div>
 
       <!-- ASSEMBLEIA (iframe carregado sob demanda) -->
@@ -2425,5 +2496,363 @@ async function delUser(cpf) {
 // ═══ INIT ═══
 (async()=>{ await DB.init(); await checkSession(); })();
 </script>
+
+<!-- ════════════ MODAL DE CHAMADOS DE COMISSÃO ════════════ -->
+<div class="cham-overlay hidden" id="cham-overlay">
+  <div class="cham-modal" id="cham-modal">
+    <div class="cham-modal-head">
+      <div>
+        <div id="cham-modal-titulo" style="font-size:15px;font-weight:700;color:var(--mp-navy)">Novo chamado de comissão</div>
+        <div id="cham-modal-sub" style="font-size:11px;color:var(--text2);margin-top:2px"></div>
+      </div>
+      <button onclick="fecharChamadoModal()" style="background:transparent;border:0;font-size:22px;color:var(--text2);cursor:pointer;line-height:1">×</button>
+    </div>
+    <div class="cham-modal-body" id="cham-modal-body"></div>
+    <div class="cham-modal-foot" id="cham-modal-foot"></div>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div id="cham-toast" style="display:none;position:fixed;bottom:24px;right:24px;background:var(--mp-navy);color:#fff;padding:13px 20px;border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.3);z-index:10000;font-size:13px;font-weight:600;max-width:340px"></div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════
+// SISTEMA DE CHAMADOS DE COMISSÃO
+// ════════════════════════════════════════════════════════════════════
+let _chamFiltro = 'todos';
+let _chamLista = [];
+let _chamRealtimeSub = null;
+
+function _chamEhMaster() {
+  return currentUser && currentUser.tipo === 'master';
+}
+function _chamFmtData(ts) {
+  if (!ts) return '—';
+  const d = new Date(ts);
+  const hoje = new Date();
+  const ontem = new Date(Date.now() - 86400000);
+  if (d.toDateString() === hoje.toDateString()) return 'Hoje ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+  if (d.toDateString() === ontem.toDateString()) return 'Ontem ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+  return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+}
+function _chamEscape(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function _chamShowToast(msg, ms=4000) {
+  const t = document.getElementById('cham-toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  clearTimeout(t._tm);
+  t._tm = setTimeout(() => t.style.display = 'none', ms);
+}
+
+// ─── Carregar e renderizar lista de chamados ──────────────────────
+async function carregarChamados() {
+  try {
+    const { data, error } = await sb.from('portal_chamados_comissao')
+      .select('*')
+      .order('atualizado_em', { ascending: false });
+    if (error) throw error;
+    _chamLista = data || [];
+    renderChamadosLista();
+    atualizarBadgeHistorico();
+  } catch (e) {
+    console.error('Erro ao carregar chamados:', e);
+  }
+}
+
+function renderChamadosLista() {
+  const el = document.getElementById('cham-lista');
+  if (!el) return;
+  const lista = _chamLista.filter(c => _chamFiltro === 'todos' ? true : c.status === _chamFiltro);
+  if (lista.length === 0) {
+    el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text2);font-size:13px">${_chamLista.length === 0 ? 'Nenhum chamado aberto ainda. Clique em "Abrir chamado de comissão" pra criar.' : 'Nenhum chamado com esse filtro.'}</div>`;
+    return;
+  }
+  const ehMaster = _chamEhMaster();
+  el.innerHTML = lista.map(c => {
+    const stCls = 'cham-st-' + c.status;
+    const stLbl = c.status === 'aberto' ? 'Aberto' : c.status === 'respondido' ? 'Respondido' : 'Fechado';
+    // Tem resposta nova? Depende se é master ou consultor
+    let temNova = false;
+    if (ehMaster) {
+      temNova = c.status === 'aberto' && (!c.master_leu_em || new Date(c.master_leu_em) < new Date(c.atualizado_em));
+    } else {
+      temNova = c.status !== 'fechado' && c.ultima_resposta_em && (!c.consultor_leu_em || new Date(c.consultor_leu_em) < new Date(c.ultima_resposta_em));
+    }
+    return `
+      <div class="cham-card ${temNova ? 'tem-resposta-nova' : ''}" onclick="abrirThread('${c.id}')">
+        ${temNova ? '<div class="cham-novo-dot"></div>' : ''}
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:600;color:var(--mp-navy);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_chamEscape(c.assunto)}</div>
+          <div style="font-size:11px;color:var(--text2)">
+            ${ehMaster ? _chamEscape(c.consultor_nome) + ' · ' : ''}Última atualização: ${_chamFmtData(c.atualizado_em)}
+          </div>
+        </div>
+        <span class="cham-st ${stCls}">${stLbl}</span>
+      </div>`;
+  }).join('');
+}
+
+// ─── Badge no Histórico ───────────────────────────────────────────
+function atualizarBadgeHistorico() {
+  const badge = document.getElementById('ni-historico-badge');
+  if (!badge) return;
+  const ehMaster = _chamEhMaster();
+  const count = _chamLista.filter(c => {
+    if (ehMaster) return c.status === 'aberto' && (!c.master_leu_em || new Date(c.master_leu_em) < new Date(c.atualizado_em));
+    return c.status !== 'fechado' && c.ultima_resposta_em && (!c.consultor_leu_em || new Date(c.consultor_leu_em) < new Date(c.ultima_resposta_em));
+  }).length;
+  if (count > 0) { badge.textContent = count; badge.classList.add('visible'); }
+  else { badge.classList.remove('visible'); }
+  const titBadge = document.getElementById('cham-badge-titulo');
+  if (titBadge) {
+    if (count > 0) { titBadge.textContent = count + ' não lido' + (count>1?'s':''); titBadge.style.display = 'inline-block'; }
+    else { titBadge.style.display = 'none'; }
+  }
+}
+
+// ─── Filtros ──────────────────────────────────────────────────────
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.cham-filtro-btn');
+  if (!btn) return;
+  document.querySelectorAll('.cham-filtro-btn').forEach(b => b.classList.remove('cham-filtro-ativo'));
+  btn.classList.add('cham-filtro-ativo');
+  _chamFiltro = btn.dataset.filtro;
+  renderChamadosLista();
+});
+
+// ─── Modal: novo chamado ──────────────────────────────────────────
+function abrirNovoChamado() {
+  if (!currentUser) { alert('Faça login pra abrir um chamado.'); return; }
+  document.getElementById('cham-modal-titulo').textContent = 'Novo chamado de comissão';
+  document.getElementById('cham-modal-sub').textContent = 'Descreva sua dúvida. Você será notificado quando responderem.';
+  document.getElementById('cham-modal-body').innerHTML = `
+    <div style="margin-bottom:14px">
+      <label style="display:block;font-size:11px;font-weight:600;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px">Assunto</label>
+      <input type="text" id="cham-novo-assunto" class="cham-input" placeholder="Ex: Comissão da venda Itaú VP025/513 não veio" maxlength="120">
+    </div>
+    <div style="margin-bottom:14px">
+      <label style="display:block;font-size:11px;font-weight:600;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px">Descrição</label>
+      <textarea id="cham-novo-texto" class="cham-input cham-textarea" placeholder="Explique com calma a dúvida ou problema..."></textarea>
+    </div>
+    <div>
+      <label style="display:block;font-size:11px;font-weight:600;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px">Anexos (opcional)</label>
+      <input type="file" id="cham-novo-anexos" multiple style="font-size:12px">
+      <div style="font-size:10.5px;color:var(--text2);margin-top:4px">PDF, imagens, planilhas. Máx 10 MB por arquivo.</div>
+    </div>`;
+  document.getElementById('cham-modal-foot').innerHTML = `
+    <button onclick="fecharChamadoModal()" style="background:#fff;border:1px solid var(--border);color:var(--text2);padding:9px 16px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer">Cancelar</button>
+    <button onclick="salvarNovoChamado()" id="cham-btn-salvar" style="background:var(--mp-navy);color:#fff;border:0;padding:9px 18px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer">Abrir chamado</button>`;
+  document.getElementById('cham-overlay').classList.remove('hidden');
+  setTimeout(() => document.getElementById('cham-novo-assunto').focus(), 100);
+}
+
+async function salvarNovoChamado() {
+  const assunto = document.getElementById('cham-novo-assunto').value.trim();
+  const texto = document.getElementById('cham-novo-texto').value.trim();
+  const arquivos = Array.from(document.getElementById('cham-novo-anexos').files || []);
+  if (!assunto) { alert('Informe o assunto.'); return; }
+  if (!texto) { alert('Descreva sua dúvida.'); return; }
+  const btn = document.getElementById('cham-btn-salvar');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  try {
+    // Upload de anexos (se houver)
+    const anexos = await _chamUploadAnexos(arquivos);
+    const { data, error } = await sb.rpc('criar_chamado_comissao', {
+      p_assunto: assunto, p_mensagem: texto, p_anexos: anexos
+    });
+    if (error) throw error;
+    fecharChamadoModal();
+    await carregarChamados();
+    _chamShowToast('Chamado aberto! Você será notificado quando responderem.');
+    // Abre direto a thread
+    if (data) setTimeout(() => abrirThread(data), 400);
+  } catch (e) {
+    console.error(e);
+    alert('Erro ao abrir chamado: ' + (e.message || e));
+  } finally {
+    btn.disabled = false; btn.textContent = 'Abrir chamado';
+  }
+}
+
+// ─── Upload anexos pro bucket ─────────────────────────────────────
+async function _chamUploadAnexos(arquivos) {
+  if (!arquivos.length) return [];
+  const uid = currentUser?.auth_id || (await sb.auth.getSession()).data?.session?.user?.id;
+  if (!uid) throw new Error('Sem sessão');
+  const result = [];
+  for (const file of arquivos) {
+    if (file.size > 10 * 1024 * 1024) {
+      throw new Error('Arquivo "' + file.name + '" tem mais de 10 MB.');
+    }
+    const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const path = `${uid}/${Date.now()}_${safe}`;
+    const { error } = await sb.storage.from('chamados-anexos').upload(path, file, { cacheControl: '3600', upsert: false });
+    if (error) throw error;
+    result.push({ nome: file.name, path, tamanho: file.size, tipo: file.type });
+  }
+  return result;
+}
+
+async function _chamBaixarAnexo(path, nome) {
+  try {
+    const { data, error } = await sb.storage.from('chamados-anexos').createSignedUrl(path, 300);
+    if (error) throw error;
+    window.open(data.signedUrl, '_blank');
+  } catch (e) {
+    alert('Erro ao baixar anexo: ' + (e.message || e));
+  }
+}
+
+// ─── Modal: thread do chamado ─────────────────────────────────────
+async function abrirThread(chamadoId) {
+  const chamado = _chamLista.find(c => c.id === chamadoId);
+  if (!chamado) { alert('Chamado não encontrado.'); return; }
+  document.getElementById('cham-modal-titulo').textContent = chamado.assunto;
+  const stLbl = chamado.status === 'aberto' ? 'Aberto' : chamado.status === 'respondido' ? 'Respondido' : 'Fechado';
+  const ehMaster = _chamEhMaster();
+  document.getElementById('cham-modal-sub').innerHTML = `${ehMaster ? _chamEscape(chamado.consultor_nome) + ' · ' : ''}Status: <strong>${stLbl}</strong> · Aberto em ${_chamFmtData(chamado.criado_em)}`;
+  document.getElementById('cham-modal-body').innerHTML = '<div style="text-align:center;padding:20px;color:var(--text2);font-size:12px">Carregando mensagens...</div>';
+  document.getElementById('cham-modal-foot').innerHTML = '';
+  document.getElementById('cham-overlay').classList.remove('hidden');
+
+  try {
+    const { data: msgs, error } = await sb.from('portal_chamados_mensagens')
+      .select('*').eq('chamado_id', chamadoId).order('criado_em', { ascending: true });
+    if (error) throw error;
+    _renderThread(chamado, msgs || []);
+    await sb.rpc('marcar_chamado_lido', { p_chamado_id: chamadoId });
+    await carregarChamados();
+  } catch (e) {
+    document.getElementById('cham-modal-body').innerHTML = '<div style="color:#DC2626;padding:14px">Erro: ' + (e.message || e) + '</div>';
+  }
+}
+
+function _renderThread(chamado, msgs) {
+  const ehMaster = _chamEhMaster();
+  const meuId = currentUser?.auth_id;
+  const html = msgs.map(m => {
+    const ehMinha = m.autor_auth_id === meuId;
+    const classe = m.autor_tipo === 'master' ? 'cham-msg-master' : 'cham-msg-consultor';
+    const anexos = (m.anexos || []).map(a => `<span class="cham-anexo-pill" onclick="_chamBaixarAnexo('${a.path}', '${_chamEscape(a.nome)}')"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>${_chamEscape(a.nome)}</span>`).join('');
+    return `
+      <div class="cham-msg ${classe}">
+        <div class="cham-msg-meta">${_chamEscape(m.autor_nome)} · ${_chamFmtData(m.criado_em)}</div>
+        <div>${_chamEscape(m.texto).replace(/\n/g,'<br>')}</div>
+        ${anexos ? '<div style="margin-top:6px">' + anexos + '</div>' : ''}
+      </div>`;
+  }).join('');
+  document.getElementById('cham-modal-body').innerHTML = `<div class="cham-thread">${html}</div>`;
+  // Footer: caixa de resposta (se não fechado)
+  if (chamado.status === 'fechado') {
+    let html2 = `<div style="flex:1;font-size:12px;color:var(--text2);align-self:center">Chamado fechado.</div>`;
+    if (ehMaster) html2 += `<button onclick="acaoReabrir('${chamado.id}')" style="background:#fff;border:1px solid var(--border);color:var(--text2);padding:8px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer">Reabrir</button>`;
+    document.getElementById('cham-modal-foot').innerHTML = html2;
+  } else {
+    document.getElementById('cham-modal-foot').innerHTML = `
+      <div style="flex:1">
+        <textarea id="cham-resp-texto" class="cham-input" style="min-height:60px;resize:vertical" placeholder="Escreva sua resposta..."></textarea>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+          <input type="file" id="cham-resp-anexos" multiple style="font-size:11px;flex:1">
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-self:flex-end">
+        ${ehMaster ? `<button onclick="acaoFechar('${chamado.id}')" style="background:#fff;border:1px solid var(--border);color:var(--text2);padding:7px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer">Marcar como fechado</button>` : ''}
+        <button onclick="enviarResposta('${chamado.id}')" id="cham-btn-resp" style="background:var(--mp-navy);color:#fff;border:0;padding:9px 18px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer">Enviar resposta</button>
+      </div>`;
+  }
+  // Scroll pro fim
+  const body = document.getElementById('cham-modal-body');
+  setTimeout(() => body.scrollTop = body.scrollHeight, 50);
+}
+
+async function enviarResposta(chamadoId) {
+  const texto = document.getElementById('cham-resp-texto').value.trim();
+  const arquivos = Array.from(document.getElementById('cham-resp-anexos').files || []);
+  if (!texto) { alert('Escreva a resposta.'); return; }
+  const btn = document.getElementById('cham-btn-resp');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  try {
+    const anexos = await _chamUploadAnexos(arquivos);
+    const { error } = await sb.rpc('responder_chamado_comissao', {
+      p_chamado_id: chamadoId, p_texto: texto, p_anexos: anexos
+    });
+    if (error) throw error;
+    await abrirThread(chamadoId);  // recarrega a thread
+    _chamShowToast('Resposta enviada.');
+  } catch (e) {
+    alert('Erro: ' + (e.message || e));
+    btn.disabled = false; btn.textContent = 'Enviar resposta';
+  }
+}
+async function acaoFechar(chamadoId) {
+  if (!confirm('Marcar este chamado como fechado?')) return;
+  try {
+    const { error } = await sb.rpc('fechar_chamado_comissao', { p_chamado_id: chamadoId });
+    if (error) throw error;
+    await carregarChamados();
+    await abrirThread(chamadoId);
+  } catch (e) { alert('Erro: ' + (e.message || e)); }
+}
+async function acaoReabrir(chamadoId) {
+  try {
+    const { error } = await sb.rpc('reabrir_chamado_comissao', { p_chamado_id: chamadoId });
+    if (error) throw error;
+    await carregarChamados();
+    await abrirThread(chamadoId);
+  } catch (e) { alert('Erro: ' + (e.message || e)); }
+}
+function fecharChamadoModal() {
+  document.getElementById('cham-overlay').classList.add('hidden');
+}
+
+// ─── Realtime: badge atualiza sozinho ─────────────────────────────
+function _chamSetupRealtime() {
+  if (_chamRealtimeSub) return;
+  _chamRealtimeSub = sb.channel('chamados-realtime')
+    .on('postgres_changes', { event:'*', schema:'public', table:'portal_chamados_comissao' }, async () => {
+      await carregarChamados();
+    })
+    .on('postgres_changes', { event:'INSERT', schema:'public', table:'portal_chamados_mensagens' }, async (payload) => {
+      // Notifica via toast se a mensagem é de outra pessoa
+      const meuId = currentUser?.auth_id;
+      if (payload.new.autor_auth_id !== meuId) {
+        const ehMasterMsg = payload.new.autor_tipo === 'master';
+        if (_chamEhMaster() && !ehMasterMsg) {
+          _chamShowToast('Novo chamado de ' + payload.new.autor_nome);
+        } else if (!_chamEhMaster() && ehMasterMsg) {
+          _chamShowToast('Resposta recebida no seu chamado de comissão');
+        }
+        await carregarChamados();
+      }
+    })
+    .subscribe();
+}
+
+// Inicializa quando o usuário estiver logado
+function _chamInit() {
+  if (currentUser && currentUser.auth_id) {
+    carregarChamados();
+    _chamSetupRealtime();
+  }
+}
+// Tenta inicializar a cada 2s até logar (simples; o sistema chama renderDashboard depois do login)
+const _chamInterval = setInterval(() => {
+  if (currentUser && currentUser.auth_id) {
+    _chamInit();
+    clearInterval(_chamInterval);
+  }
+}, 1500);
+
+// Fecha modal com ESC
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fecharChamadoModal(); });
+// Fecha modal clicando fora
+document.getElementById('cham-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'cham-overlay') fecharChamadoModal();
+});
+</script>
+
 </body>
 </html>
