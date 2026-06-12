@@ -22,8 +22,8 @@ window.KB_ADMIN["comissoes"] = {
       "categoria_label": "Como sua comissão é paga",
       "categoria_ordem": 1,
       "titulo": "Como funciona o cálculo do meu líquido?",
-      "conteudo": "Toda comissão segue o mesmo fluxo:\n\n1. COMISSÃO BASE — % da venda × valor do crédito\n2. − NF 17,43% (retenção fiscal, obrigatória)\n3. − ADM Master 10% (sobre o líquido pós-NF)\n4. = LÍQUIDO que cai na sua conta\n\nFórmula resumida: Líquido = Base × 0,8257 × 0,90\n\nPra cada R$ 1.000 de comissão base você recebe R$ 743,13 líquido.\n\nEXCEÇÕES (não descontam ADM, só NF):\n• Fernando Sublime\n• João Portomax\n\nVendedores que emitem NF própria (LE — Edson, Erik Gonçalves) recebem como parceiros, fora do split do consultor principal.",
-      "tags": "calculo, NF, ADM, liquido, formula, 17.43, 10%, fernando sublime, joao portomax, edson, erik",
+      "conteudo": "Toda comissão segue o mesmo fluxo:\n\n1. COMISSÃO BASE — % da venda × valor do crédito\n2. − NF 17,43% (retenção fiscal, obrigatória)\n3. − ADM Master 10% (sobre o líquido pós-NF)\n4. = LÍQUIDO que cai na sua conta\n\nFórmula resumida: Líquido = Base × 0,8257 × 0,90\n\nPra cada R$ 1.000 de comissão base você recebe R$ 743,13 líquido.",
+      "tags": "calculo, NF, ADM, liquido, formula, 17.43, 10%",
       "ordem": 2
     },
     {
