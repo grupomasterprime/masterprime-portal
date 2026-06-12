@@ -251,6 +251,9 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
     <button class="adm-pill" id="adm-fgts" data-adm="fgts">
       <span class="dot" style="background:#0058a0"></span> FGTS Caixa
     </button>
+    <button class="adm-pill" id="adm-comissoes" data-adm="comissoes">
+      <span class="dot" style="background:#10B981"></span> Comissões
+    </button>
   </div>
 
   <div class="search-box">
@@ -284,6 +287,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
 <script src="kb-porto.js?v=20260611b"></script>
 <script src="kb-itau.js?v=20260603a"></script>
 <script src="kb-fgts.js?v=20260611a"></script>
+<script src="kb-comissoes.js?v=20260612a"></script>
 <script>
 (function () {
   var ADM = window.KB_ADMIN || {};
@@ -890,13 +894,13 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
   if (_chipsInit) _chipsInit.style.display = 'none';
   var _dlJumpInit = document.getElementById('dl-jump');
   if (_dlJumpInit) _dlJumpInit.style.display = 'none';
-  var temAlgum = ADM['bradesco'] || ADM['porto'] || ADM['itau'] || ADM['fgts'];
+  var temAlgum = ADM['bradesco'] || ADM['porto'] || ADM['itau'] || ADM['fgts'] || ADM['comissoes'];
   if (!temAlgum) {
     document.getElementById('content').innerHTML =
-      emptyHTML('Conteúdo não carregado', 'Os arquivos de conteúdo (kb-bradesco.js / kb-porto.js / kb-itau.js / kb-fgts.js) não foram encontrados.');
+      emptyHTML('Conteúdo não carregado', 'Os arquivos de conteúdo (kb-bradesco.js / kb-porto.js / kb-itau.js / kb-fgts.js / kb-comissoes.js) não foram encontrados.');
   } else {
     document.getElementById('content').innerHTML =
-      emptyHTML('Escolha uma seção', 'Selecione Porto, Itaú, Bradesco ou FGTS Caixa acima para ver o material de apoio.');
+      emptyHTML('Escolha uma seção', 'Selecione Porto, Itaú, Bradesco, FGTS Caixa ou Comissões acima para ver o material de apoio.');
   }
 })();
 </script>
