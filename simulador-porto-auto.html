@@ -47,16 +47,14 @@
   h2.section-title .tag-bank { color: var(--mp-teal-dark); }
   body.neutral-mode h2.section-title .tag-bank { color: var(--mp-navy); }
   .subtitle { font-size: 11px; color: var(--text-muted); text-align: center; margin-bottom: 14px; letter-spacing: 0.8px; text-transform: uppercase; }
-  /* Toggle Modo Neutro flutuante (canto direito) */
-  .neutral-toggle { position: absolute; top: 18px; right: 24px; display: inline-flex; align-items: center; gap: 10px; padding: 8px 14px; background: #fff; border: 1px solid var(--border); border-radius: 8px; font-size: 12px; color: var(--text-muted); cursor: pointer; user-select: none; transition: 0.15s; z-index: 5; }
-  .neutral-toggle:hover { border-color: var(--mp-navy); }
-  .neutral-toggle .switch { position: relative; width: 32px; height: 18px; background: #CBD5E1; border-radius: 999px; transition: 0.2s; flex-shrink: 0; }
-  .neutral-toggle .switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; background: #fff; border-radius: 50%; transition: 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,.15); }
-  .neutral-toggle.on .switch { background: var(--mp-navy); }
-  .neutral-toggle.on .switch::after { left: 16px; }
-  .neutral-toggle .label-txt { font-weight: 600; }
-  .neutral-toggle.on .label-txt { color: var(--mp-navy); }
-  @media (max-width: 1024px) { .neutral-toggle { position: static; margin: 0 auto 8px; display: flex; max-width: max-content; } }
+  /* Toggle Modo Neutro (estilo Erik — barra à direita acima do título) */
+  .neutral-row { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin: 6px 0 10px; padding-right: 4px; }
+  .neutral-row .neutral-label { font-size: 13px; color: var(--text); user-select: none; }
+  .neutral-row .neutral-label .muted { color: var(--text-muted); font-weight: 400; }
+  .neutral-row .neutral-switch { position: relative; width: 42px; height: 22px; background: #CBD5E1; border-radius: 999px; transition: 0.2s; flex-shrink: 0; cursor: pointer; border: 0; padding: 0; }
+  .neutral-row .neutral-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,.20); }
+  .neutral-row .neutral-switch.on { background: var(--mp-navy); }
+  .neutral-row .neutral-switch.on::after { left: 23px; }
   /* Esconde tag-admin do header global quando neutral */
   body.neutral-mode .tag-admin { display: none; }
 
@@ -207,13 +205,13 @@
   <span class="tag-admin">Porto</span>
 </header>
 
-<main style="position:relative;">
+<main>
   <div id="simStoreMount" style="max-width:1440px; margin:0 auto 8px; padding:0;"></div>
 
-  <button type="button" class="neutral-toggle" id="btnModoNeutro" title="Gera PDF sem identificação da administradora — usa identidade Master Prime padrão">
-    <span class="switch"></span>
-    <span class="label-txt">Modo neutro <span style="color:var(--text-muted); font-weight:500;">(sem identificação da administradora)</span></span>
-  </button>
+  <div class="neutral-row">
+    <label class="neutral-label" for="btnModoNeutro">Modo neutro <span class="muted">(sem identificação da administradora)</span></label>
+    <button type="button" class="neutral-switch" id="btnModoNeutro" role="switch" aria-checked="false" title="Gera PDF sem identificação da administradora — usa identidade Master Prime padrão"></button>
+  </div>
 
   <h2 class="section-title">Simulador de Crédito · <span class="tag-bank" id="sim-titulo-banco">Porto · Auto</span></h2>
   <p class="subtitle">Cálculo de proposta, contemplação e estratégias de lance</p>
@@ -813,13 +811,19 @@ function aplicaModoNeutro(on) {
   window._paNeutro = !!on;
   document.body.classList.toggle('neutral-mode', !!on);
   const btn = document.getElementById('btnModoNeutro');
-  if (btn) btn.classList.toggle('on', !!on);
+  if (btn) {
+    btn.classList.toggle('on', !!on);
+    btn.setAttribute('aria-checked', !!on);
+  }
   const tit = document.getElementById('sim-titulo-banco');
   if (tit) tit.textContent = on ? 'Consórcio · Auto' : 'Porto · Auto';
 }
 (function() {
   const btn = document.getElementById('btnModoNeutro');
   if (btn) btn.addEventListener('click', () => aplicaModoNeutro(!window._paNeutro));
+  // Clicar na label também ativa
+  const lbl = document.querySelector('.neutral-label');
+  if (lbl) lbl.addEventListener('click', () => aplicaModoNeutro(!window._paNeutro));
 })();
 
 // ─── Toggle de modo de redução (parcela vs prazo) ────────────────────
