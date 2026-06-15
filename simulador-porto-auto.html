@@ -42,18 +42,13 @@
   .brand-text p { font-size: 11px; color: rgba(255,255,255,0.7); letter-spacing: 1.2px; text-transform: uppercase; margin-top: 2px; }
   .tag-admin { background: var(--mp-teal); color: var(--mp-navy-dark); padding: 6px 14px; border-radius: 4px; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; }
 
-  main { max-width: 1440px; margin: 0 auto; padding: 16px 24px 12px; }
-  /* Título estilo PDF (Inter pesada, letter-spacing apertado) */
-  h2.section-title { font-size: 36px; font-weight: 700; color: #0F172A; margin: 6px 0 2px; text-align: left; letter-spacing: -1px; line-height: 1.1; font-family: 'Inter', -apple-system, system-ui, sans-serif; }
-  h2.section-title .tag-bank { color: var(--mp-teal-dark); font-weight: 700; }
-  body.neutral-mode h2.section-title .tag-bank { color: #0F172A; }
-  .subtitle { font-size: 13px; color: #64748B; text-align: left; margin-bottom: 16px; letter-spacing: -0.1px; font-weight: 500; text-transform: none; }
-  /* Header do simulador com toggle Modo Neutro */
-  .sim-header-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 4px; }
-  .sim-title-block { flex: 1; }
-  .sim-pre-tag { display: inline-block; font-size: 11px; font-weight: 700; color: var(--mp-teal-dark); letter-spacing: 2px; text-transform: uppercase; padding: 5px 12px; background: rgba(77,188,200,0.10); border-radius: 999px; margin-bottom: 8px; }
-  body.neutral-mode .sim-pre-tag { color: #475569; background: rgba(71,85,105,0.10); }
-  .neutral-toggle { display: inline-flex; align-items: center; gap: 10px; padding: 8px 14px; background: #fff; border: 1px solid var(--border); border-radius: 8px; font-size: 12px; color: var(--text-muted); cursor: pointer; user-select: none; transition: 0.15s; }
+  main { max-width: 1440px; margin: 0 auto; padding: 18px 24px 12px; }
+  h2.section-title { font-size: 19px; font-weight: 600; color: var(--mp-navy); margin-bottom: 0; text-align: center; letter-spacing: 0.3px; }
+  h2.section-title .tag-bank { color: var(--mp-teal-dark); }
+  body.neutral-mode h2.section-title .tag-bank { color: var(--mp-navy); }
+  .subtitle { font-size: 11px; color: var(--text-muted); text-align: center; margin-bottom: 14px; letter-spacing: 0.8px; text-transform: uppercase; }
+  /* Toggle Modo Neutro flutuante (canto direito) */
+  .neutral-toggle { position: absolute; top: 18px; right: 24px; display: inline-flex; align-items: center; gap: 10px; padding: 8px 14px; background: #fff; border: 1px solid var(--border); border-radius: 8px; font-size: 12px; color: var(--text-muted); cursor: pointer; user-select: none; transition: 0.15s; z-index: 5; }
   .neutral-toggle:hover { border-color: var(--mp-navy); }
   .neutral-toggle .switch { position: relative; width: 32px; height: 18px; background: #CBD5E1; border-radius: 999px; transition: 0.2s; flex-shrink: 0; }
   .neutral-toggle .switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; background: #fff; border-radius: 50%; transition: 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,.15); }
@@ -61,6 +56,7 @@
   .neutral-toggle.on .switch::after { left: 16px; }
   .neutral-toggle .label-txt { font-weight: 600; }
   .neutral-toggle.on .label-txt { color: var(--mp-navy); }
+  @media (max-width: 1024px) { .neutral-toggle { position: static; margin: 0 auto 8px; display: flex; max-width: max-content; } }
   /* Esconde tag-admin do header global quando neutral */
   body.neutral-mode .tag-admin { display: none; }
 
@@ -98,21 +94,21 @@
   /* Output cards */
   .result { background: var(--soft-blue); border-radius: 6px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
   .result strong { font-size: 10.5px; color: var(--mp-navy); letter-spacing: 0.8px; text-transform: uppercase; font-weight: 500; }
-  .result .value { font-size: 14px; font-weight: 600; color: var(--mp-navy); font-family: 'DM Mono', ui-monospace, monospace; }
+  .result .value { font-size: 14px; font-weight: 600; color: var(--mp-navy); font-family: 'Inter', -apple-system, system-ui, sans-serif; }
 
   .result-primary { background: linear-gradient(135deg, var(--mp-navy) 0%, var(--mp-navy-soft) 100%); color: white; padding: 10px 14px; border-radius: 7px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
   .result-primary strong { color: rgba(255,255,255,0.75); font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase; font-weight: 500; }
-  .result-primary .value { font-size: 16px; font-weight: 700; color: #fff; font-family: 'DM Mono', ui-monospace, monospace; }
+  .result-primary .value { font-size: 16px; font-weight: 700; color: #fff; font-family: 'Inter', -apple-system, system-ui, sans-serif; }
 
   .result-teal { background: var(--soft-teal); border: 1px solid #C2E5EA; border-radius: 6px; padding: 9px 13px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
   .result-teal strong { font-size: 10.5px; color: var(--mp-teal-dark); letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; }
-  .result-teal .value { font-size: 15px; font-weight: 700; color: var(--mp-navy); font-family: 'DM Mono', ui-monospace, monospace; }
+  .result-teal .value { font-size: 15px; font-weight: 700; color: var(--mp-navy); font-family: 'Inter', -apple-system, system-ui, sans-serif; }
 
   /* Output box (lado direito) */
   .out-box { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; }
   .out-box .lbl { font-size: 10px; color: var(--text-muted); letter-spacing: 0.7px; text-transform: uppercase; font-weight: 600; margin-bottom: 3px; display: block; }
   .out-box .lbl small { text-transform: none; font-weight: 500; color: var(--text-light); letter-spacing: 0.2px; }
-  .out-box .val { font-size: 16px; font-weight: 700; color: var(--mp-navy); font-family: 'DM Mono', ui-monospace, monospace; }
+  .out-box .val { font-size: 16px; font-weight: 700; color: var(--mp-navy); font-family: 'Inter', -apple-system, system-ui, sans-serif; }
   .out-box.primary { background: linear-gradient(135deg, var(--mp-navy) 0%, var(--mp-navy-soft) 100%); border-color: var(--mp-navy); }
   .out-box.primary .lbl { color: rgba(255,255,255,0.7); }
   .out-box.primary .val { color: #fff; }
@@ -142,7 +138,7 @@
   @media (max-width: 768px) { .resumo-grid { grid-template-columns: 1fr; } }
   .resumo-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--soft-blue); border-radius: 6px; }
   .resumo-row .lbl { font-size: 11.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600; }
-  .resumo-row .val { font-size: 14px; font-weight: 700; color: var(--mp-navy); font-family: 'DM Mono', ui-monospace, monospace; }
+  .resumo-row .val { font-size: 14px; font-weight: 700; color: var(--mp-navy); font-family: 'Inter', -apple-system, system-ui, sans-serif; }
   .resumo-row.highlight { background: var(--soft-teal); border: 1px solid #C2E5EA; }
 
   /* Pós contemplação */
@@ -152,7 +148,7 @@
   .pos-card h4 { font-size: 11.5px; font-weight: 700; color: var(--mp-navy); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
   .pos-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; font-size: 13px; }
   .pos-row .lbl { color: var(--text-muted); font-size: 12px; letter-spacing: 0.3px; }
-  .pos-row .val { font-weight: 600; color: var(--mp-navy); font-family: 'DM Mono', ui-monospace, monospace; }
+  .pos-row .val { font-weight: 600; color: var(--mp-navy); font-family: 'Inter', -apple-system, system-ui, sans-serif; }
   .pos-row.highlight { background: #fff; padding: 10px 12px; border-radius: 6px; margin: 4px -4px; border: 1px solid var(--border); }
   .pos-row.highlight .val { font-size: 16px; font-weight: 700; color: var(--mp-teal-dark); }
 
@@ -211,20 +207,16 @@
   <span class="tag-admin">Porto</span>
 </header>
 
-<main>
+<main style="position:relative;">
   <div id="simStoreMount" style="max-width:1440px; margin:0 auto 8px; padding:0;"></div>
 
-  <div class="sim-header-row">
-    <div class="sim-title-block">
-      <div class="sim-pre-tag" id="sim-pre-tag">SIMULAÇÃO DE CRÉDITO</div>
-      <h2 class="section-title"><span class="tag-bank" id="sim-titulo-banco">Porto · Auto</span></h2>
-      <p class="subtitle">Cálculo de proposta, contemplação e estratégias de lance</p>
-    </div>
-    <button type="button" class="neutral-toggle" id="btnModoNeutro" title="Gera PDF sem identificação da administradora — usa identidade Master Prime padrão">
-      <span class="switch"></span>
-      <span class="label-txt">Modo neutro <span style="color:var(--text-muted); font-weight:500;">(sem identificação da administradora)</span></span>
-    </button>
-  </div>
+  <button type="button" class="neutral-toggle" id="btnModoNeutro" title="Gera PDF sem identificação da administradora — usa identidade Master Prime padrão">
+    <span class="switch"></span>
+    <span class="label-txt">Modo neutro <span style="color:var(--text-muted); font-weight:500;">(sem identificação da administradora)</span></span>
+  </button>
+
+  <h2 class="section-title">Simulador de Crédito · <span class="tag-bank" id="sim-titulo-banco">Porto · Auto</span></h2>
+  <p class="subtitle">Cálculo de proposta, contemplação e estratégias de lance</p>
 
   <div class="layout-grid">
 
@@ -405,7 +397,7 @@
       <!-- Detalhes complementares (sempre visíveis pra consultor) -->
       <details style="background:#fff; border:1px solid var(--border); border-radius:7px; padding:8px 11px; font-size:11.5px;">
         <summary style="cursor:pointer; color:var(--text-muted); font-weight:600; letter-spacing:0.4px; text-transform:uppercase; font-size:10.5px;">Detalhes ▾</summary>
-        <div style="margin-top:8px; display:grid; gap:6px; font-family:'DM Mono', ui-monospace, monospace;">
+        <div style="margin-top:8px; display:grid; gap:6px;">
           <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Categoria</span><strong id="pa-categoria">—</strong></div>
           <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Saldo devedor</span><strong id="pa-saldoDevedor">—</strong></div>
           <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Parcela int. PF</span><strong id="pa-parcelaPF">—</strong></div>
