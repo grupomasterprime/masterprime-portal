@@ -9,7 +9,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="pdf-master-prime.js?v=20260526e"></script>
+<script src="pdf-master-prime.js?v=20260615f"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="simulacao-store.js"></script>
 <style>
@@ -42,10 +42,27 @@
   .brand-text p { font-size: 11px; color: rgba(255,255,255,0.7); letter-spacing: 1.2px; text-transform: uppercase; margin-top: 2px; }
   .tag-admin { background: var(--mp-teal); color: var(--mp-navy-dark); padding: 6px 14px; border-radius: 4px; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; }
 
-  main { max-width: 1440px; margin: 0 auto; padding: 18px 24px 12px; }
-  h2.section-title { font-size: 19px; font-weight: 600; color: var(--mp-navy); margin-bottom: 0; text-align: center; letter-spacing: 0.3px; }
-  h2.section-title .tag-bank { color: var(--mp-teal-dark); }
-  .subtitle { font-size: 11px; color: var(--text-muted); text-align: center; margin-bottom: 14px; letter-spacing: 0.8px; text-transform: uppercase; }
+  main { max-width: 1440px; margin: 0 auto; padding: 16px 24px 12px; }
+  /* Título estilo PDF (Inter pesada, letter-spacing apertado) */
+  h2.section-title { font-size: 36px; font-weight: 700; color: #0F172A; margin: 6px 0 2px; text-align: left; letter-spacing: -1px; line-height: 1.1; font-family: 'Inter', -apple-system, system-ui, sans-serif; }
+  h2.section-title .tag-bank { color: var(--mp-teal-dark); font-weight: 700; }
+  body.neutral-mode h2.section-title .tag-bank { color: #0F172A; }
+  .subtitle { font-size: 13px; color: #64748B; text-align: left; margin-bottom: 16px; letter-spacing: -0.1px; font-weight: 500; text-transform: none; }
+  /* Header do simulador com toggle Modo Neutro */
+  .sim-header-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 4px; }
+  .sim-title-block { flex: 1; }
+  .sim-pre-tag { display: inline-block; font-size: 11px; font-weight: 700; color: var(--mp-teal-dark); letter-spacing: 2px; text-transform: uppercase; padding: 5px 12px; background: rgba(77,188,200,0.10); border-radius: 999px; margin-bottom: 8px; }
+  body.neutral-mode .sim-pre-tag { color: #475569; background: rgba(71,85,105,0.10); }
+  .neutral-toggle { display: inline-flex; align-items: center; gap: 10px; padding: 8px 14px; background: #fff; border: 1px solid var(--border); border-radius: 8px; font-size: 12px; color: var(--text-muted); cursor: pointer; user-select: none; transition: 0.15s; }
+  .neutral-toggle:hover { border-color: var(--mp-navy); }
+  .neutral-toggle .switch { position: relative; width: 32px; height: 18px; background: #CBD5E1; border-radius: 999px; transition: 0.2s; flex-shrink: 0; }
+  .neutral-toggle .switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; background: #fff; border-radius: 50%; transition: 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,.15); }
+  .neutral-toggle.on .switch { background: var(--mp-navy); }
+  .neutral-toggle.on .switch::after { left: 16px; }
+  .neutral-toggle .label-txt { font-weight: 600; }
+  .neutral-toggle.on .label-txt { color: var(--mp-navy); }
+  /* Esconde tag-admin do header global quando neutral */
+  body.neutral-mode .tag-admin { display: none; }
 
   /* Layout single-screen 2 colunas */
   .layout-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 14px; align-items: start; }
@@ -197,8 +214,17 @@
 <main>
   <div id="simStoreMount" style="max-width:1440px; margin:0 auto 8px; padding:0;"></div>
 
-  <h2 class="section-title">Simulador de Crédito · <span class="tag-bank">Porto · Auto</span></h2>
-  <p class="subtitle">Cálculo de proposta, contemplação e estratégias de lance</p>
+  <div class="sim-header-row">
+    <div class="sim-title-block">
+      <div class="sim-pre-tag" id="sim-pre-tag">SIMULAÇÃO DE CRÉDITO</div>
+      <h2 class="section-title"><span class="tag-bank" id="sim-titulo-banco">Porto · Auto</span></h2>
+      <p class="subtitle">Cálculo de proposta, contemplação e estratégias de lance</p>
+    </div>
+    <button type="button" class="neutral-toggle" id="btnModoNeutro" title="Gera PDF sem identificação da administradora — usa identidade Master Prime padrão">
+      <span class="switch"></span>
+      <span class="label-txt">Modo neutro <span style="color:var(--text-muted); font-weight:500;">(sem identificação da administradora)</span></span>
+    </button>
+  </div>
 
   <div class="layout-grid">
 
@@ -789,6 +815,21 @@ get('pa-modal-pctLivre').addEventListener('keydown', e => {
   if (e.key === 'Enter') get('pa-modal-confirmar').click();
 });
 
+// ─── Toggle Modo Neutro (sem identificação da administradora) ───────
+window._paNeutro = false;
+function aplicaModoNeutro(on) {
+  window._paNeutro = !!on;
+  document.body.classList.toggle('neutral-mode', !!on);
+  const btn = document.getElementById('btnModoNeutro');
+  if (btn) btn.classList.toggle('on', !!on);
+  const tit = document.getElementById('sim-titulo-banco');
+  if (tit) tit.textContent = on ? 'Consórcio · Auto' : 'Porto · Auto';
+}
+(function() {
+  const btn = document.getElementById('btnModoNeutro');
+  if (btn) btn.addEventListener('click', () => aplicaModoNeutro(!window._paNeutro));
+})();
+
 // ─── Toggle de modo de redução (parcela vs prazo) ────────────────────
 window._paRedmode = 'parcela';
 function aplicaRedmode(modo) {
@@ -962,15 +1003,17 @@ function _montarPdfComercialPortoAuto() {
   const _pctApg = _categoria > 0 ? _fmtPct((_apgRS / _categoria) * 100) : '0,00';
   const _pctTot = _categoria > 0 ? _fmtPct((_totRS / _categoria) * 100) : '0,00';
 
+  const _neutro = !!window._paNeutro;
   return {
-    filename: 'porto-consorcio-auto',
-    logoAdmin: 'porto',
+    filename: _neutro ? 'simulacao-consorcio-auto' : 'porto-consorcio-auto',
+    logoAdmin: 'porto', // Porto já é navy (mesmo neutro continua porto pra manter tema azul)
+    hideAdminLogo: _neutro,
     titulo: 'Simulador de Crédito',
-    subtitulo: 'Porto · Auto',
+    subtitulo: _neutro ? 'Consórcio · Auto' : 'Porto · Auto',
     subtituloSecundario: redutorPct && redutorPct !== '0%'
       ? `(Redução de ${redutorPct} até a Contemplação)`
       : '(Sem redutor de parcela)',
-    representanteTexto: 'Consórcio Porto',
+    representanteTexto: _neutro ? 'Master Prime' : 'Consórcio Porto',
     inputs: [
       { label: 'Taxa Administrativa', value: _v('pa-taxaAdm') || '0,00 %' },
       { label: 'Fundo Reserva', value: _v('pa-fundo') || '0,00 %' },

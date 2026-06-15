@@ -793,12 +793,14 @@
               <div style="height:96px; padding:0 4px; border-radius:18px; background:#fff; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; box-shadow:0 1px 2px rgba(15,23,42,0.04);">
                 <img src="${LOGO_DATA_URL}" alt="Master Prime" style="height:92px; width:auto; display:block;">
               </div>
+              ${opts.hideAdminLogo ? '' : `
               <div style="width:1px; height:56px; background:#E2E8F0;"></div>
               <div style="width:96px; height:96px; border-radius:18px; background:#fff; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; padding:10px; box-shadow:0 1px 2px rgba(15,23,42,0.04);">
                 <img src="${logoUrl}" alt="Admin" style="max-width:100%; max-height:100%; object-fit:contain;">
               </div>
+              `}
             </div>
-            <div style="font-size:10.5px; color:#94A3B8; letter-spacing:1.5px; text-transform:uppercase; margin-top:12px; font-weight:600;">Representante Autorizado</div>
+            <div style="font-size:10.5px; color:#94A3B8; letter-spacing:1.5px; text-transform:uppercase; margin-top:12px; font-weight:600;">${opts.hideAdminLogo ? 'Master Prime' : 'Representante Autorizado'}</div>
           </div>
         </div>
 
