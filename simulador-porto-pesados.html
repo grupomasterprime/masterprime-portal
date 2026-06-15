@@ -6,10 +6,10 @@
 <title>Master Prime - Porto Consórcio Pesados</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="pdf-master-prime.js?v=20260526e"></script>
+<script src="pdf-master-prime.js?v=20260615f"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="simulacao-store.js"></script>
 <style>
@@ -28,7 +28,6 @@
     --text-light: #9CA3AF;
     --soft-blue: #F1F5F9;
     --soft-teal: #E8F6F8;
-    --error: #DC2626;
     --warning-bg: #FFF8E8;
     --warning-border: #F0D9A0;
     --warning-text: #8B6A2A;
@@ -42,18 +41,34 @@
   .brand-text p { font-size: 11px; color: rgba(255,255,255,0.7); letter-spacing: 1.2px; text-transform: uppercase; margin-top: 2px; }
   .tag-admin { background: var(--mp-teal); color: var(--mp-navy-dark); padding: 6px 14px; border-radius: 4px; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; }
 
-  main { max-width: 1280px; margin: 0 auto; padding: 32px; }
-  h2.section-title { font-size: 22px; font-weight: 600; color: var(--mp-navy); margin-bottom: 4px; text-align: center; letter-spacing: 0.5px; }
-  .subtitle { font-size: 12px; color: var(--text-muted); text-align: center; margin-bottom: 24px; letter-spacing: 1px; text-transform: uppercase; }
+  main { max-width: 1440px; margin: 0 auto; padding: 18px 24px 12px; }
+  h2.section-title { font-size: 19px; font-weight: 600; color: var(--mp-navy); margin-bottom: 0; text-align: center; letter-spacing: 0.3px; }
+  h2.section-title .tag-bank { color: var(--mp-teal-dark); }
+  body.neutral-mode h2.section-title .tag-bank { color: var(--mp-navy); }
+  .subtitle { font-size: 11px; color: var(--text-muted); text-align: center; margin-bottom: 14px; letter-spacing: 0.8px; text-transform: uppercase; }
+  .neutral-row { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin: 6px 0 10px; padding-right: 4px; }
+  .neutral-row .neutral-label { font-size: 13px; color: var(--text); user-select: none; }
+  .neutral-row .neutral-label .muted { color: var(--text-muted); font-weight: 400; }
+  .neutral-row .neutral-switch { position: relative; width: 42px; height: 22px; background: #CBD5E1; border-radius: 999px; transition: 0.2s; flex-shrink: 0; cursor: pointer; border: 0; padding: 0; }
+  .neutral-row .neutral-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,.20); }
+  .neutral-row .neutral-switch.on { background: var(--mp-navy); }
+  .neutral-row .neutral-switch.on::after { left: 23px; }
+  body.neutral-mode .tag-admin { display: none; }
 
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 16px; }
-  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
-  .card-header h3 { font-size: 13px; font-weight: 600; color: var(--mp-navy); letter-spacing: 1.5px; text-transform: uppercase; }
-  .card-header .badge-teal { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--mp-teal); }
-  .card-header .reset-btn { margin-left: auto; background: none; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-family: inherit; }
+  .layout-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+  @media (max-width: 1024px) { .layout-grid { grid-template-columns: 1fr; } }
+  .col-inputs { display: flex; flex-direction: column; gap: 12px; }
+  .col-outputs { display: flex; flex-direction: column; gap: 10px; position: sticky; top: 12px; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 0; }
+  .card-compact { padding: 12px 14px; }
+  .card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .card-header h3 { font-size: 11.5px; font-weight: 700; color: var(--mp-navy); letter-spacing: 1.2px; text-transform: uppercase; }
+  .card-header .badge-teal { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--mp-teal); }
+  .card-header .reset-btn { margin-left: auto; background: none; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; padding: 3px 9px; border-radius: 4px; font-size: 10.5px; font-family: inherit; }
   .card-header .reset-btn:hover { background: var(--bg); }
 
-  .grid { display: grid; gap: 16px; }
+  .grid { display: grid; gap: 10px; }
   .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -61,84 +76,70 @@
   @media (max-width: 768px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
 
   .field { position: relative; }
-  .field label { position: absolute; top: -7px; left: 12px; background: var(--card); padding: 0 6px; font-size: 11px; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; font-weight: 500; z-index: 1; }
-  .field input, .field select { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; background: #fff; color: var(--text); transition: border-color 0.15s; }
+  .field label { position: absolute; top: -6px; left: 10px; background: var(--card); padding: 0 5px; font-size: 10px; color: var(--text-muted); letter-spacing: 0.4px; text-transform: uppercase; font-weight: 500; z-index: 1; }
+  .field input, .field select { width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: 7px; font-size: 13px; font-family: inherit; background: #fff; color: var(--text); transition: border-color 0.15s; }
   .field input:focus, .field select:focus { outline: none; border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,0.12); }
   .field input:disabled, .field select:disabled { background: var(--soft-blue); color: var(--text-light); cursor: not-allowed; }
-  .field select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
-  .field-suffix { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--text-light); letter-spacing: 0.5px; pointer-events: none; }
+  .field select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+  .field-suffix { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 10px; color: var(--text-light); letter-spacing: 0.4px; pointer-events: none; }
 
-  /* Output cards */
-  .result { background: var(--soft-blue); border-radius: 8px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-  .result strong { font-size: 11.5px; color: var(--mp-navy); letter-spacing: 1px; text-transform: uppercase; font-weight: 500; }
-  .result .value { font-size: 17px; font-weight: 600; color: var(--mp-navy); font-family: 'DM Mono', ui-monospace, monospace; }
+  .out-box { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; }
+  .out-box .lbl { font-size: 10px; color: var(--text-muted); letter-spacing: 0.7px; text-transform: uppercase; font-weight: 600; margin-bottom: 3px; display: block; }
+  .out-box .lbl small { text-transform: none; font-weight: 500; color: var(--text-light); letter-spacing: 0.2px; }
+  .out-box .val { font-size: 16px; font-weight: 700; color: var(--mp-navy); font-family: 'Inter', -apple-system, system-ui, sans-serif; }
+  .out-box.primary { background: linear-gradient(135deg, var(--mp-navy) 0%, var(--mp-navy-soft) 100%); border-color: var(--mp-navy); }
+  .out-box.primary .lbl { color: rgba(255,255,255,0.7); }
+  .out-box.primary .val { color: #fff; }
+  .out-box.teal { background: var(--soft-teal); border-color: #C2E5EA; }
+  .out-box.teal .val { color: var(--mp-teal-dark); }
+  .result-teal { background: var(--soft-teal); border: 1px solid #C2E5EA; border-radius: 6px; padding: 9px 13px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .result-teal strong { font-size: 10.5px; color: var(--mp-teal-dark); letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; }
+  .result-teal .value { font-size: 15px; font-weight: 700; color: var(--mp-navy); font-family: 'Inter', -apple-system, system-ui, sans-serif; }
 
-  .result-primary { background: linear-gradient(135deg, var(--mp-navy) 0%, var(--mp-navy-soft) 100%); color: white; padding: 14px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-  .result-primary strong { color: rgba(255,255,255,0.75); font-size: 11.5px; letter-spacing: 1.2px; text-transform: uppercase; font-weight: 500; }
-  .result-primary .value { font-size: 20px; font-weight: 700; color: #fff; font-family: 'DM Mono', ui-monospace, monospace; }
-
-  .result-teal { background: var(--soft-teal); border: 1px solid #C2E5EA; border-radius: 8px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-  .result-teal strong { font-size: 11.5px; color: var(--mp-teal-dark); letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
-  .result-teal .value { font-size: 19px; font-weight: 700; color: var(--mp-navy); font-family: 'DM Mono', ui-monospace, monospace; }
-
-  /* Lance buttons - 6 estratégias + limpar */
-  .lance-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 18px; }
-  .lance-max-hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; padding-left: 4px; letter-spacing: 0.2px; font-style: italic; }
+  /* Pesados — 6 estratégias em grid 3×2 */
+  .lance-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px; }
+  @media (max-width: 768px) { .lance-buttons { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .lance-buttons { grid-template-columns: 1fr; } }
+  .lance-max-hint { font-size: 10.5px; color: var(--text-muted); margin-top: 4px; padding-left: 2px; letter-spacing: 0.2px; font-style: italic; }
   .lance-max-hint strong { color: var(--mp-teal-dark); font-weight: 600; font-style: normal; }
-  .lance-buttons .clear-btn-row { grid-column: 1 / -1; display: flex; justify-content: flex-end; }
-  @media (max-width: 1024px) { .lance-buttons { grid-template-columns: repeat(2, 1fr); } }
-  @media (max-width: 600px) { .lance-buttons { grid-template-columns: 1fr; } }
-  .lance-btn { padding: 12px 14px; background: #fff; border: 1px solid var(--mp-teal); color: var(--mp-teal-dark); border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: 0.15s; letter-spacing: 0.3px; line-height: 1.3; }
+  .lance-btn { padding: 7px 9px; background: #fff; border: 1px solid var(--mp-teal); color: var(--mp-teal-dark); border-radius: 7px; font-size: 10.5px; font-weight: 600; cursor: pointer; font-family: inherit; transition: 0.15s; letter-spacing: 0.2px; line-height: 1.2; }
   .lance-btn:hover { background: var(--mp-teal); color: #fff; }
-  .lance-btn:active { transform: translateY(1px); }
   .lance-btn.fixo30 { border-color: var(--gold); color: #8B6A2A; }
   .lance-btn.fixo30:hover { background: var(--gold); color: #fff; }
   .lance-btn.fixo40 { border-color: var(--mp-navy); color: var(--mp-navy); }
   .lance-btn.fixo40:hover { background: var(--mp-navy); color: #fff; }
-  .clear-btn { background: #fff; border: 1px solid var(--border); color: var(--text-muted); padding: 12px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
-  .clear-btn:hover { background: var(--bg); border-color: var(--text-muted); }
+  .clear-btn-row { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+  .clear-btn-row .clear-btn { background: #fff; border: 1px solid var(--border); color: var(--text-muted); padding: 6px 12px; border-radius: 6px; font-size: 10.5px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .clear-btn-row .clear-btn:hover { background: var(--bg); border-color: var(--text-muted); }
 
-  /* Resumo de parcelas */
-  .resumo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  @media (max-width: 768px) { .resumo-grid { grid-template-columns: 1fr; } }
-  .resumo-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--soft-blue); border-radius: 6px; }
-  .resumo-row .lbl { font-size: 11.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600; }
-  .resumo-row .val { font-size: 14px; font-weight: 700; color: var(--mp-navy); font-family: 'DM Mono', ui-monospace, monospace; }
-  .resumo-row.highlight { background: var(--soft-teal); border: 1px solid #C2E5EA; }
+  .lance-bloco { background: #E8EEF8; border-radius: 8px; padding: 12px; margin-top: 4px; }
+  .lance-bloco .grid { gap: 8px; }
+  .lance-bloco .field input { background: #fff; }
 
-  /* Pós contemplação */
-  .pos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  @media (max-width: 768px) { .pos-grid { grid-template-columns: 1fr; } }
-  .pos-card { background: var(--soft-blue); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
-  .pos-card h4 { font-size: 11.5px; font-weight: 700; color: var(--mp-navy); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
-  .pos-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; font-size: 13px; }
-  .pos-row .lbl { color: var(--text-muted); font-size: 12px; letter-spacing: 0.3px; }
-  .pos-row .val { font-weight: 600; color: var(--mp-navy); font-family: 'DM Mono', ui-monospace, monospace; }
-  .pos-row.highlight { background: #fff; padding: 10px 12px; border-radius: 6px; margin: 4px -4px; border: 1px solid var(--border); }
-  .pos-row.highlight .val { font-size: 16px; font-weight: 700; color: var(--mp-teal-dark); }
-
-  /* Footer aviso */
-  .aviso { background: var(--warning-bg); border: 1px solid var(--warning-border); border-radius: 8px; padding: 14px 18px; color: var(--warning-text); font-size: 12.5px; line-height: 1.5; margin-top: 8px; }
+  .aviso { background: var(--warning-bg); border: 1px solid var(--warning-border); border-radius: 7px; padding: 9px 13px; color: var(--warning-text); font-size: 11.5px; line-height: 1.45; margin-top: 6px; }
   .aviso strong { color: var(--warning-text); }
+  .info-pesados { background: #FFF8E8; border: 1px solid var(--warning-border); border-radius: 6px; padding: 8px 11px; font-size: 11px; color: var(--warning-text); margin-bottom: 8px; line-height: 1.35; }
 
-  .info-pesados { background: #FFF8E8; border: 1px solid var(--warning-border); border-radius: 6px; padding: 10px 14px; font-size: 12px; color: var(--warning-text); margin-bottom: 14px; line-height: 1.4; }
+  .obs-area { width: 100%; min-height: 64px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 7px; font-size: 12px; font-family: inherit; resize: vertical; color: var(--text); background: #fff; }
+  .obs-area:focus { outline: none; border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,0.12); }
 
-  .actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; padding-bottom: 32px; }
+  .redmode-toggle { padding: 8px 11px; background: var(--soft-blue); border-radius: 7px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .redmode-toggle .lbl { font-size: 11.5px; color: #475569; font-weight: 600; }
+  .redmode-toggle .group { display: flex; gap: 3px; background: #fff; padding: 2px; border-radius: 5px; border: 1px solid #e2e8f0; }
+  .redmode-btn { padding: 5px 11px; border: 0; background: transparent; color: #475569; border-radius: 4px; font-size: 11.5px; font-weight: 600; cursor: pointer; }
+  .redmode-btn.active { background: var(--mp-navy); color: #fff; }
+  .redmode-toggle .hint { font-size: 10.5px; color: #64748b; font-style: italic; }
+
+  .actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; padding-bottom: 16px; }
   button.primary, button.secondary { padding: 11px 22px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.15s; border: 1px solid transparent; font-family: inherit; }
   button.primary { background: var(--mp-navy); color: #fff; border-color: var(--mp-navy); }
   button.primary:hover { background: var(--mp-navy-dark); }
   button.secondary { background: transparent; color: var(--text-muted); border-color: var(--border); }
   button.secondary:hover { background: var(--bg); border-color: var(--text-muted); }
 
-  /* Embed mode (iframe) */
   html.embedded header { display: none; }
   html.embedded main { padding-top: 18px; }
 
-  /* Observações textarea */
-  .obs-area { width: 100%; min-height: 90px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: inherit; resize: vertical; color: var(--text); background: #fff; }
-  .obs-area:focus { outline: none; border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,0.12); }
-
-  /* Modal de % de Lance Livre */
   .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,.55); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
   .modal-overlay.aberto { display: flex; }
   .modal-box { background: #fff; border-radius: 14px; width: 100%; max-width: 420px; box-shadow: 0 25px 60px rgba(0,0,0,.30); }
@@ -164,228 +165,219 @@
 </header>
 
 <main>
-  <div id="simStoreMount" style="max-width:1400px; margin:16px auto 0; padding:0 32px;"></div>
+  <div id="simStoreMount" style="max-width:1440px; margin:0 auto 8px; padding:0;"></div>
 
-  <h2 class="section-title">Porto · Consórcio Pesados</h2>
-  <p class="subtitle">Cálculo de proposta, contemplação e estratégias de lance</p>
-
-  <!-- ════════ PROPOSTA ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-teal"></span>
-      <h3>Proposta</h3>
-      <button type="button" class="reset-btn" id="btnLimparProposta">Limpar</button>
-    </div>
-    <div class="grid grid-3">
-      <div class="field">
-        <label>Crédito contratado</label>
-        <input type="text" id="pp-credito" placeholder="R$ 0,00" data-mask="money">
-      </div>
-      <div class="field">
-        <label>Tipo de contratação</label>
-        <select id="pp-tipo">
-          <option value="" selected>Selecione…</option>
-          <option value="PF">Física</option>
-          <option value="PJ">Jurídica</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Prazo total (meses)</label>
-        <input type="text" id="pp-prazo" placeholder="0" data-mask="int">
-      </div>
-      <div class="field">
-        <label>Redutor do grupo</label>
-        <select id="pp-redutor">
-          <option value="" selected>Selecione…</option>
-          <option value="0">0% (sem redutor)</option>
-          <option value="0.20">20%</option>
-          <option value="0.25">25%</option>
-          <option value="0.30">30%</option>
-          <option value="0.35">35%</option>
-          <option value="0.40">40%</option>
-          <option value="0.45">45%</option>
-          <option value="0.50">50%</option>
-          <option value="campanha">Campanha Parcela Original</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Contemplação na parcela</label>
-        <input type="text" id="pp-contempla" placeholder="0" data-mask="int">
-      </div>
-    </div>
-  </section>
-
-  <!-- ════════ TAXAS DO GRUPO ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-teal"></span>
-      <h3>Taxas do grupo</h3>
-      <button type="button" class="reset-btn" id="btnTaxasDefault">Restaurar padrão</button>
-    </div>
-    <div class="grid grid-3">
-      <div class="field">
-        <label>Taxa administrativa</label>
-        <input type="text" id="pp-taxaAdm" data-mask="pct2" placeholder="0,00 %">
-      </div>
-      <div class="field">
-        <label>Fundo de reserva</label>
-        <input type="text" id="pp-fundo" data-mask="pct2" placeholder="0,00 %">
-      </div>
-      <div class="field">
-        <label>Seguro de vida (PF)</label>
-        <input type="text" id="pp-seguro" data-mask="pct4" placeholder="0,0000 %">
-      </div>
-    </div>
-
-    <div class="grid grid-2" style="margin-top: 16px;">
-      <div class="result"><strong>Taxa por mês</strong><span class="value" id="pp-taxaMes">—</span></div>
-      <div class="result"><strong>Taxa por ano</strong><span class="value" id="pp-taxaAno">—</span></div>
-    </div>
-
-    <div class="grid grid-2" style="margin-top: 16px;">
-      <div class="result-primary">
-        <strong>Parcela inicial · PF</strong>
-        <span class="value" id="pp-parcelaInicialPFDestaque">—</span>
-      </div>
-      <div class="result-primary">
-        <strong>Parcela inicial · PJ</strong>
-        <span class="value" id="pp-parcelaInicialPJDestaque">—</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- ════════ OFERTA DE LANCE ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-teal"></span>
-      <h3>Oferta de Lance</h3>
-      <button type="button" class="reset-btn" id="btnLimparLance">Limpar</button>
-    </div>
-
-    <div class="info-pesados">
-      <strong>Atenção:</strong> Existem grupos de Pesados com Lance Fixo de 30% e 40%. Verifique a característica do grupo antes de enviar a simulação.
-    </div>
-
-    <div class="lance-buttons">
-      <button type="button" class="lance-btn" data-strat="livre-bolso">Lance Livre · Recursos próprios</button>
-      <button type="button" class="lance-btn" data-strat="livre-embutido">Lance Livre + Embutido</button>
-      <button type="button" class="lance-btn fixo30" data-strat="fixo30-bolso">Lance Fixo 30% · Recursos próprios</button>
-      <button type="button" class="lance-btn fixo30" data-strat="fixo30-embutido">Lance Fixo 30% + Embutido</button>
-      <button type="button" class="lance-btn fixo40" data-strat="fixo40-bolso">Lance Fixo 40% · Recursos próprios</button>
-      <button type="button" class="lance-btn fixo40" data-strat="fixo40-embutido">Lance Fixo 40% + Embutido</button>
-      <div class="clear-btn-row">
-        <button type="button" class="clear-btn" data-strat="limpar">Limpar dados</button>
-      </div>
-    </div>
-
-    <div class="grid grid-3">
-      <div class="field">
-        <label>Recurso próprio</label>
-        <input type="text" id="pp-recProp" placeholder="R$ 0,00" data-mask="money">
-      </div>
-      <div class="field">
-        <label>Embutido (% máx. do crédito)</label>
-        <input type="text" id="pp-pctEmbutido" data-mask="pct2" placeholder="0,00 %">
-        <span class="field-suffix">do crédito</span>
-      </div>
-      <div class="field">
-        <label>Embutido</label>
-        <input type="text" id="pp-embutido" placeholder="R$ 0,00" data-mask="money">
-        <div class="lance-max-hint" id="pp-embutidoMaxHint">Máx. R$ 0,00 · verificar característica do grupo</div>
-      </div>
-    </div>
-
-    <div style="margin-top: 14px;">
-      <div class="result-teal">
-        <strong>Representatividade do lance</strong>
-        <span class="value" id="pp-representatividade">—</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- ════════ ESTIMATIVA PÓS-CONTEMPLAÇÃO ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-teal"></span>
-      <h3>Estimativa pós-contemplação</h3>
-    </div>
-
-    <div style="margin-bottom: 16px;">
-      <div class="result-primary">
-        <strong>Crédito liberado (após embutido)</strong>
-        <span class="value" id="pp-creditoLiberado">—</span>
-      </div>
-    </div>
-
-    <div class="redmode-toggle" style="margin-bottom: 14px; padding: 10px 14px; background: #f1f5f9; border-radius: 8px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-      <span style="font-size: 13px; color: #475569; font-weight: 600;">O lance reduz:</span>
-      <div style="display: flex; gap: 4px; background: #fff; padding: 3px; border-radius: 6px; border: 1px solid #e2e8f0;">
-        <button type="button" class="redmode-btn active" data-redmode="parcela" style="padding: 6px 14px; border: 0; background: #2d3f5e; color: #fff; border-radius: 4px; font-size: 12.5px; font-weight: 600; cursor: pointer;">Parcela</button>
-        <button type="button" class="redmode-btn" data-redmode="prazo" style="padding: 6px 14px; border: 0; background: transparent; color: #475569; border-radius: 4px; font-size: 12.5px; font-weight: 600; cursor: pointer;">Prazo</button>
-      </div>
-      <span style="font-size: 11.5px; color: #64748b; font-style: italic;">— escolha o cenário que vai pro PDF</span>
-    </div>
-
-    <div class="pos-grid">
-      <div class="pos-card" id="pp-card-parcela">
-        <h4>Abatimento na parcela</h4>
-        <div class="pos-row highlight"><span class="lbl">Nova parcela</span><span class="val" id="pp-novaParcela">—</span></div>
-        <div class="pos-row"><span class="lbl">Prazo restante</span><span class="val" id="pp-novoPrazo">—</span></div>
-        <div class="pos-row"><span class="lbl">Saldo devedor pós-contempla</span><span class="val" id="pp-saldoPos">—</span></div>
-        <div class="pos-row"><span class="lbl">Novo seguro mensal (PF)</span><span class="val" id="pp-novoSeguro">—</span></div>
-      </div>
-      <div class="pos-card" id="pp-card-prazo">
-        <h4>Reduzir somente o prazo</h4>
-        <div class="pos-row highlight"><span class="lbl">Prazo restante</span><span class="val" id="pp-prazoReduzido">—</span></div>
-        <div class="pos-row"><span class="lbl">Com parcela de</span><span class="val" id="pp-parcelaSeReduzPrazo">—</span></div>
-        <div class="pos-row"><span class="lbl">(parcela mantém o valor da integral)</span><span class="val">&nbsp;</span></div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ════════ RESUMO DE PARCELAS ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-teal"></span>
-      <h3>Resumo de parcelas</h3>
-    </div>
-
-    <div class="resumo-grid" style="margin-bottom: 12px;">
-      <div class="resumo-row"><span class="lbl">Categoria</span><span class="val" id="pp-categoria">—</span></div>
-      <div class="resumo-row"><span class="lbl">Saldo devedor</span><span class="val" id="pp-saldoDevedor">—</span></div>
-
-      <div class="resumo-row"><span class="lbl">Parcela integral · PF</span><span class="val" id="pp-parcelaPF">—</span></div>
-      <div class="resumo-row"><span class="lbl">Parcela integral · PJ</span><span class="val" id="pp-parcelaPJ">—</span></div>
-    </div>
-
-    <div class="resumo-grid">
-      <div class="resumo-row highlight"><span class="lbl">Parcela reduzida · PF</span><span class="val" id="pp-parcelaReduzPF">—</span></div>
-      <div class="resumo-row highlight"><span class="lbl">Parcela reduzida · PJ</span><span class="val" id="pp-parcelaReduzPJ">—</span></div>
-    </div>
-  </section>
-
-  <!-- ════════ OBSERVAÇÕES ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-teal"></span>
-      <h3>Observações (opcional)</h3>
-      <button type="button" class="reset-btn" id="btnLimparObs">Limpar</button>
-    </div>
-    <textarea id="pp-observacoes" class="obs-area" placeholder="Adicione anotações que devem aparecer no PDF…"></textarea>
-  </section>
-
-  <!-- ════════ AVISO ════════ -->
-  <div class="aviso">
-    <strong>Atenção:</strong> Os valores da simulação são mera referência e buscam refletir o cenário mais próximo da realidade. Variáveis específicas do grupo podem alterar o resultado final.
+  <div class="neutral-row">
+    <label class="neutral-label" for="btnModoNeutro">Modo neutro <span class="muted">(sem identificação da administradora)</span></label>
+    <button type="button" class="neutral-switch" id="btnModoNeutro" role="switch" aria-checked="false" title="Gera PDF sem identificação da administradora — usa identidade Master Prime padrão"></button>
   </div>
 
-  <div class="actions">
-    <button type="button" id="baixarPdfPorto" class="primary" style="margin-right:8px;">Baixar PDF</button>
-    <button class="secondary" id="btnLimparTudo">Limpar tudo</button>
+  <h2 class="section-title">Simulador de Crédito · <span class="tag-bank" id="sim-titulo-banco">Porto · Pesados</span></h2>
+  <p class="subtitle">Cálculo de proposta, contemplação e estratégias de lance</p>
+
+  <div class="layout-grid">
+
+    <!-- ═════════════ COLUNA INPUTS (esquerda) ═════════════ -->
+    <div class="col-inputs">
+
+      <!-- ───── Proposta + Taxas (compacto) ───── -->
+      <section class="card card-compact">
+        <div class="card-header">
+          <span class="badge-teal"></span>
+          <h3>Dados da proposta</h3>
+          <button type="button" class="reset-btn" id="btnTaxasDefault">Taxas padrão</button>
+          <button type="button" class="reset-btn" id="btnLimparProposta" style="margin-left:6px">Limpar</button>
+        </div>
+
+        <div class="grid grid-4">
+          <div class="field">
+            <label>Taxa adm.</label>
+            <input type="text" id="pp-taxaAdm" data-mask="pct2" placeholder="0,00 %">
+          </div>
+          <div class="field">
+            <label>Fundo Reserva</label>
+            <input type="text" id="pp-fundo" data-mask="pct2" placeholder="0,00 %">
+          </div>
+          <div class="field">
+            <label>Seguro (PF)</label>
+            <input type="text" id="pp-seguro" data-mask="pct4" placeholder="0,0000 %">
+          </div>
+          <div class="field">
+            <label>Tipo</label>
+            <select id="pp-tipo">
+              <option value="" selected>Selecione…</option>
+              <option value="PF">Física</option>
+              <option value="PJ">Jurídica</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Valor do crédito</label>
+            <input type="text" id="pp-credito" placeholder="R$ 0,00" data-mask="money">
+          </div>
+          <div class="field">
+            <label>Prazo (meses)</label>
+            <input type="text" id="pp-prazo" placeholder="0" data-mask="int">
+          </div>
+          <div class="field">
+            <label>Contempla mês</label>
+            <input type="text" id="pp-contempla" placeholder="0" data-mask="int">
+          </div>
+          <div class="field">
+            <label>Redutor grupo</label>
+            <select id="pp-redutor">
+              <option value="" selected>Selecione…</option>
+              <option value="0">0% (sem redutor)</option>
+              <option value="0.20">20%</option>
+              <option value="0.25">25%</option>
+              <option value="0.30">30%</option>
+              <option value="0.35">35%</option>
+              <option value="0.40">40%</option>
+              <option value="0.45">45%</option>
+              <option value="0.50">50%</option>
+              <option value="campanha">Campanha Parcela Original</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="redmode-toggle" style="margin-top: 10px;">
+          <span class="lbl">Reduzir após contemplação:</span>
+          <div class="group">
+            <button type="button" class="redmode-btn active" data-redmode="parcela">Parcela</button>
+            <button type="button" class="redmode-btn" data-redmode="prazo">Prazo</button>
+          </div>
+          <span class="hint">— cenário que vai pro PDF</span>
+        </div>
+      </section>
+
+      <!-- ───── Oferta de Lance (6 estratégias) ───── -->
+      <section class="card card-compact">
+        <div class="card-header">
+          <span class="badge-teal"></span>
+          <h3>Oferta de Lance</h3>
+          <button type="button" class="reset-btn" id="btnLimparLance">Limpar</button>
+        </div>
+
+        <div class="info-pesados">
+          <strong>Atenção:</strong> Grupos de Pesados podem ter Lance Fixo de 30% ou 40%. Verifique a característica do grupo.
+        </div>
+
+        <div class="lance-buttons">
+          <button type="button" class="lance-btn" data-strat="livre-bolso">Livre · Bolso</button>
+          <button type="button" class="lance-btn fixo30" data-strat="fixo30-bolso">Fixo 30% · Bolso</button>
+          <button type="button" class="lance-btn fixo40" data-strat="fixo40-bolso">Fixo 40% · Bolso</button>
+          <button type="button" class="lance-btn" data-strat="livre-embutido">Livre + Embutido</button>
+          <button type="button" class="lance-btn fixo30" data-strat="fixo30-embutido">Fixo 30% + Emb.</button>
+          <button type="button" class="lance-btn fixo40" data-strat="fixo40-embutido">Fixo 40% + Emb.</button>
+        </div>
+        <div class="clear-btn-row">
+          <button type="button" class="clear-btn" data-strat="limpar">Limpar</button>
+        </div>
+
+        <div class="lance-bloco">
+          <div class="grid grid-3">
+            <div class="field">
+              <label>% Embutido máx</label>
+              <input type="text" id="pp-pctEmbutido" data-mask="pct2" placeholder="0,00 %">
+              <span class="field-suffix">%</span>
+            </div>
+            <div class="field">
+              <label>Valor Embutido</label>
+              <input type="text" id="pp-embutido" placeholder="R$ 0,00" data-mask="money">
+              <div class="lance-max-hint" id="pp-embutidoMaxHint">Máx. R$ 0,00</div>
+            </div>
+            <div class="field">
+              <label>Recurso próprio</label>
+              <input type="text" id="pp-recProp" placeholder="R$ 0,00" data-mask="money">
+            </div>
+          </div>
+          <div style="margin-top: 8px;">
+            <div class="result-teal" style="padding: 7px 11px;">
+              <strong>% Lance Total</strong>
+              <span class="value" id="pp-representatividade" style="font-size:14px;">—</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card card-compact">
+        <div class="card-header">
+          <span class="badge-teal"></span>
+          <h3>Observações (opcional)</h3>
+          <button type="button" class="reset-btn" id="btnLimparObs">Limpar</button>
+        </div>
+        <textarea id="pp-observacoes" class="obs-area" placeholder="Anotações que devem aparecer no PDF…"></textarea>
+      </section>
+
+      <div class="aviso">
+        <strong>Atenção:</strong> Os valores da simulação são mera referência. Variáveis específicas do grupo podem alterar o resultado final.
+      </div>
+
+    </div>
+
+    <!-- ═════════════ COLUNA OUTPUTS (direita) ═════════════ -->
+    <div class="col-outputs">
+
+      <div class="out-box primary">
+        <span class="lbl">Crédito Líquido</span>
+        <div class="val" id="pp-creditoLiberado">—</div>
+      </div>
+
+      <div class="out-box">
+        <span class="lbl">Parcela inicial · PF</span>
+        <div class="val" id="pp-parcelaInicialPFDestaque">—</div>
+      </div>
+
+      <div class="out-box">
+        <span class="lbl">Parcela inicial · PJ</span>
+        <div class="val" id="pp-parcelaInicialPJDestaque">—</div>
+      </div>
+
+      <div class="grid grid-2" style="gap:8px;">
+        <div class="out-box">
+          <span class="lbl">Parcela reduzida · PF</span>
+          <div class="val" id="pp-parcelaReduzPF" style="font-size:14px;">—</div>
+        </div>
+        <div class="out-box">
+          <span class="lbl">Parcela reduzida · PJ</span>
+          <div class="val" id="pp-parcelaReduzPJ" style="font-size:14px;">—</div>
+        </div>
+      </div>
+
+      <div class="out-box teal" id="pp-card-parcela">
+        <span class="lbl">Valor Parcela <small>(pós-contemplado)</small></span>
+        <div class="val" id="pp-novaParcela">—</div>
+      </div>
+
+      <div class="out-box" id="pp-card-prazo">
+        <span class="lbl">Prazo Restante</span>
+        <div class="val" id="pp-novoPrazo">—</div>
+      </div>
+
+      <details style="background:#fff; border:1px solid var(--border); border-radius:7px; padding:8px 11px; font-size:11.5px;">
+        <summary style="cursor:pointer; color:var(--text-muted); font-weight:600; letter-spacing:0.4px; text-transform:uppercase; font-size:10.5px;">Detalhes ▾</summary>
+        <div style="margin-top:8px; display:grid; gap:6px;">
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Categoria</span><strong id="pp-categoria">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Saldo devedor</span><strong id="pp-saldoDevedor">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Parcela int. PF</span><strong id="pp-parcelaPF">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Parcela int. PJ</span><strong id="pp-parcelaPJ">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Saldo pós-contempla</span><strong id="pp-saldoPos">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Novo seguro (PF)</span><strong id="pp-novoSeguro">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Taxa/mês</span><strong id="pp-taxaMes">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Taxa/ano</span><strong id="pp-taxaAno">—</strong></div>
+          <div style="display:flex; justify-content:space-between; padding-top:4px; border-top:1px dashed var(--border)"><span style="color:var(--text-muted)">Se reduz só prazo:</span><strong id="pp-prazoReduzido">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Parcela mantém em</span><strong id="pp-parcelaSeReduzPrazo">—</strong></div>
+        </div>
+      </details>
+
+      <div class="actions" style="margin-top:4px;">
+        <button class="secondary" id="btnLimparTudo">Limpar tudo</button>
+        <button type="button" id="baixarPdfPorto" class="primary">Gerar PDF</button>
+      </div>
+
+    </div>
   </div>
 </main>
 
-<!-- Modal % Lance Livre -->
 <div id="modalLanceLivre" class="modal-overlay" onclick="if(event.target===this)fecharModalLance()">
   <div class="modal-box">
     <div class="modal-head">
@@ -406,9 +398,6 @@
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════
-// MÁSCARAS
-// ═══════════════════════════════════════════════════════
 function maskMoney(value) {
   const digits = String(value).replace(/\D/g, '');
   if (!digits) return '';
@@ -462,9 +451,6 @@ document.querySelectorAll('select').forEach(el => {
   el.addEventListener('change', recalc);
 });
 
-// ═══════════════════════════════════════════════════════
-// FORMATTERS
-// ═══════════════════════════════════════════════════════
 function formatMoney(num) {
   if (!Number.isFinite(num) || isNaN(num)) return '—';
   return 'R$ ' + num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -483,9 +469,6 @@ function setOut(id, value) {
   if (el) el.textContent = value;
 }
 
-// ═══════════════════════════════════════════════════════
-// LEITURA DE INPUTS
-// ═══════════════════════════════════════════════════════
 function readInputs() {
   return {
     credito: unmaskMoney(get('pp-credito').value),
@@ -502,64 +485,52 @@ function readInputs() {
   };
 }
 
-// ═══════════════════════════════════════════════════════
-// FÓRMULAS — EXATAS DA PLANILHA (aba PESADOS)
-// PESADOS não tem taxa de adesão — Categoria = Saldo Devedor
-// P62 = F65*(1+(F88+F89))  (credito × (1 + adm + fundo))
-// ═══════════════════════════════════════════════════════
+// FÓRMULAS — PESADOS (Categoria == Saldo Devedor; sem adesão)
 function calc(i) {
   const r = {};
   const isPF = i.tipo === 'PF';
   const seguroPF = isPF ? i.seguro : 0;
 
-  // CONSTANTES DO CRÉDITO
-  r.categoria    = i.credito * (1 + i.taxaAdm + i.fundo);                                   // P62
-  r.saldoDevedor = r.categoria;                                                             // mesmo
-  r.valorSeguro  = r.categoria * seguroPF;                                                  // P63
-  r.maxEmbutido  = i.credito * i.pctEmbutido;                                               // K74 (configurável)
+  r.categoria    = i.credito * (1 + i.taxaAdm + i.fundo);
+  r.saldoDevedor = r.categoria;
+  r.valorSeguro  = r.categoria * seguroPF;
+  r.maxEmbutido  = i.credito * i.pctEmbutido;
 
-  // PARCELAS PRÉ-CONTEMPLAÇÃO
-  r.parcelaPJ = (i.prazo > 0) ? r.categoria / i.prazo : NaN;                                // P65
-  r.parcelaPF = r.parcelaPJ + r.valorSeguro;                                                // P64
+  r.parcelaPJ = (i.prazo > 0) ? r.categoria / i.prazo : NaN;
+  r.parcelaPF = r.parcelaPJ + r.valorSeguro;
 
-  // REDUZIDA
-  // Aceita qualquer valor decimal (0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50…) ou 'campanha'
   let redutorPct = parseFloat(i.redutor);
   if (!Number.isFinite(redutorPct)) redutorPct = 0;
   if (i.redutor === 'campanha') {
     r.parcelaReduzidaPJ = (i.credito * (1 + i.taxaAdm + i.fundo)) / 200;
   } else {
-    r.parcelaReduzidaPJ = (i.prazo > 0) ? (r.categoria / i.prazo) * (1 - redutorPct) : NaN; // P67
+    r.parcelaReduzidaPJ = (i.prazo > 0) ? (r.categoria / i.prazo) * (1 - redutorPct) : NaN;
   }
-  r.parcelaReduzidaPF = r.parcelaReduzidaPJ + r.valorSeguro;                                // P66
+  r.parcelaReduzidaPF = r.parcelaReduzidaPJ + r.valorSeguro;
 
-  // REPRESENTATIVIDADE DO LANCE — F75 = (F74+F73)/P62
   const totalLance = i.recProp + i.embutido;
   r.representatividade = (r.categoria > 0) ? (totalLance / r.categoria) : NaN;
 
-  // CRÉDITO LIBERADO — F80
   r.creditoLiberado = i.credito - i.embutido;
 
-  // PÓS-CONTEMPLAÇÃO
-  r.saldoAposParcNormal   = r.categoria - (r.parcelaPJ * i.contempla) - totalLance;         // P86
-  r.saldoAposParcReduzida = r.categoria - (r.parcelaReduzidaPJ * i.contempla) - totalLance; // P87
+  r.saldoAposParcNormal   = r.categoria - (r.parcelaPJ * i.contempla) - totalLance;
+  r.saldoAposParcReduzida = r.categoria - (r.parcelaReduzidaPJ * i.contempla) - totalLance;
 
   const saldoUsadoPos = (redutorPct !== 0 || i.redutor === 'campanha')
     ? r.saldoAposParcReduzida
     : r.saldoAposParcNormal;
-  r.novoSeguro = saldoUsadoPos * seguroPF;                                                  // P88
+  r.novoSeguro = saldoUsadoPos * seguroPF;
 
-  // Regra atualizada 2026: o lance reduz TUDO na parcela (sem o piso antigo de 50%).
-  // Prazo permanece igual ao prazoRestante (não é mais "fatiado" entre parcela e prazo).
+  // 2026: lance abate TUDO na parcela (sem piso 50%)
   const prazoRestante = i.prazo - i.contempla;
-  r.parcelaTeoricaPJ = (prazoRestante > 0) ? saldoUsadoPos / prazoRestante : NaN;           // P89
-  r.parcelaRealPJ = r.parcelaTeoricaPJ;                                                     // P91 (sem piso)
-  r.parcelaRealPF = r.parcelaRealPJ + r.novoSeguro;                                         // P92
+  r.parcelaTeoricaPJ = (prazoRestante > 0) ? saldoUsadoPos / prazoRestante : NaN;
+  r.parcelaRealPJ = r.parcelaTeoricaPJ;
+  r.parcelaRealPF = r.parcelaRealPJ + r.novoSeguro;
   r.novaParcela = isPF ? r.parcelaRealPF : r.parcelaRealPJ;
-  r.novoPrazo = prazoRestante;                                                              // P93
+  r.novoPrazo = prazoRestante;
 
-  r.prazoReduzidoNormal   = (r.parcelaPJ > 0) ? r.saldoAposParcNormal / r.parcelaPJ : NaN;  // P95
-  r.prazoReduzidoReduzida = (r.parcelaPJ > 0) ? r.saldoAposParcReduzida / r.parcelaPJ : NaN; // P96
+  r.prazoReduzidoNormal   = (r.parcelaPJ > 0) ? r.saldoAposParcNormal / r.parcelaPJ : NaN;
+  r.prazoReduzidoReduzida = (r.parcelaPJ > 0) ? r.saldoAposParcReduzida / r.parcelaPJ : NaN;
   if (redutorPct !== 0 || i.redutor === 'campanha') {
     if (isPF) {
       r.parcelaSeReduzPrazo = (r.prazoReduzidoReduzida > 0)
@@ -584,17 +555,12 @@ function calc(i) {
     r.prazoReduzidoFinal = r.prazoReduzidoNormal;
   }
 
-  // DEMONSTRATIVO TAXAS — F94 = (F88+F89)/F67 — em PESADOS o Excel usa adm+fundo;
-  // mantemos só taxaAdm/prazo pra paridade com Imóvel
   r.taxaMes = (i.prazo > 0) ? i.taxaAdm / i.prazo : NaN;
   r.taxaAno = r.taxaMes * 12;
 
   return r;
 }
 
-// ═══════════════════════════════════════════════════════
-// PINTA OUTPUTS
-// ═══════════════════════════════════════════════════════
 function recalc() {
   const i = readInputs();
 
@@ -612,11 +578,10 @@ function recalc() {
   var hintEl = document.getElementById('pp-embutidoMaxHint');
   if (hintEl) {
     var pctTxt = i.pctEmbutido > 0 ? (i.pctEmbutido * 100).toFixed(2).replace('.', ',') + '%' : '—';
-    hintEl.innerHTML = 'Máx. <strong>' + formatMoney(r.maxEmbutido) + '</strong> (' + pctTxt + ' do crédito) · verificar característica do grupo';
+    hintEl.innerHTML = 'Máx. <strong>' + formatMoney(r.maxEmbutido) + '</strong> (' + pctTxt + ')';
   }
   setOut('pp-parcelaPF', formatMoney(r.parcelaPF));
   setOut('pp-parcelaPJ', formatMoney(r.parcelaPJ));
-  // Quando há redutor ativo, mostra a parcela reduzida no destaque.
   var redAtivoPp = (parseFloat(i.redutor) > 0) || (i.redutor === 'campanha');
   setOut('pp-parcelaInicialPFDestaque', formatMoney(redAtivoPp ? r.parcelaReduzidaPF : r.parcelaPF));
   setOut('pp-parcelaInicialPJDestaque', formatMoney(redAtivoPp ? r.parcelaReduzidaPJ : r.parcelaPJ));
@@ -639,8 +604,7 @@ function recalc() {
 }
 
 // ═══════════════════════════════════════════════════════
-// ESTRATÉGIAS DE LANCE
-// 6 estratégias: Livre/Bolso, Livre/Embutido, Fixo30/Bolso, Fixo30/Embutido, Fixo40/Bolso, Fixo40/Embutido
+// ESTRATÉGIAS DE LANCE — 6 (Livre/Fixo30/Fixo40 × Bolso/Embutido)
 // ═══════════════════════════════════════════════════════
 let estrategiaPendente = null;
 
@@ -659,8 +623,7 @@ function aplicaEstrategia(strat, pctLivre = null) {
   switch (strat) {
     case 'livre-bolso': {
       const lance = categoria * pctLivre;
-      recProp = lance;
-      embutido = 0;
+      recProp = lance; embutido = 0;
       break;
     }
     case 'livre-embutido': {
@@ -671,9 +634,8 @@ function aplicaEstrategia(strat, pctLivre = null) {
       break;
     }
     case 'fixo30-bolso': {
-      const fixo = categoria * 0.30; // O82 = P62 * 30%
-      recProp = fixo;
-      embutido = 0;
+      const fixo = categoria * 0.30;
+      recProp = fixo; embutido = 0;
       break;
     }
     case 'fixo30-embutido': {
@@ -684,9 +646,8 @@ function aplicaEstrategia(strat, pctLivre = null) {
       break;
     }
     case 'fixo40-bolso': {
-      const fixo = categoria * 0.40; // Q82 = P62 * 40%
-      recProp = fixo;
-      embutido = 0;
+      const fixo = categoria * 0.40;
+      recProp = fixo; embutido = 0;
       break;
     }
     case 'fixo40-embutido': {
@@ -707,10 +668,7 @@ function aplicaEstrategia(strat, pctLivre = null) {
 document.querySelectorAll('.lance-btn, .clear-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const strat = btn.dataset.strat;
-    if (strat === 'limpar') {
-      limparTudo();
-      return;
-    }
+    if (strat === 'limpar') { limparTudo(); return; }
     if (strat === 'livre-bolso' || strat === 'livre-embutido') {
       estrategiaPendente = strat;
       get('modalLanceLivre').classList.add('aberto');
@@ -723,10 +681,7 @@ document.querySelectorAll('.lance-btn, .clear-btn').forEach(btn => {
 
 get('pp-modal-confirmar').addEventListener('click', () => {
   const pct = unmaskPct(get('pp-modal-pctLivre').value) / 100;
-  if (!(pct > 0)) {
-    alert('Informe um percentual válido.');
-    return;
-  }
+  if (!(pct > 0)) { alert('Informe um percentual válido.'); return; }
   fecharModalLance();
   if (estrategiaPendente) {
     aplicaEstrategia(estrategiaPendente, pct);
@@ -738,9 +693,6 @@ function fecharModalLance() {
   get('modalLanceLivre').classList.remove('aberto');
 }
 
-// ═══════════════════════════════════════════════════════
-// LIMPAR
-// ═══════════════════════════════════════════════════════
 function limparTudo() {
   ['pp-credito','pp-prazo','pp-contempla','pp-recProp','pp-embutido','pp-pctEmbutido','pp-taxaAdm','pp-fundo','pp-seguro'].forEach(id => { const el = get(id); if (el) el.value = ''; });
   get('pp-tipo').value = '';
@@ -774,12 +726,27 @@ document.getElementById('btnTaxasDefault').addEventListener('click', () => {
 
 document.getElementById('btnLimparTudo').addEventListener('click', limparTudo);
 
-// Enter no modal
 get('pp-modal-pctLivre').addEventListener('keydown', e => {
   if (e.key === 'Enter') get('pp-modal-confirmar').click();
 });
 
-// ─── Toggle de modo de redução (parcela vs prazo) ────────────────────
+// ─── Toggle Modo Neutro ───────
+window._ppNeutro = false;
+function aplicaModoNeutro(on) {
+  window._ppNeutro = !!on;
+  document.body.classList.toggle('neutral-mode', !!on);
+  const btn = document.getElementById('btnModoNeutro');
+  if (btn) { btn.classList.toggle('on', !!on); btn.setAttribute('aria-checked', !!on); }
+  const tit = document.getElementById('sim-titulo-banco');
+  if (tit) tit.textContent = on ? 'Consórcio · Pesados' : 'Porto · Pesados';
+}
+(function() {
+  const btn = document.getElementById('btnModoNeutro');
+  if (btn) btn.addEventListener('click', () => aplicaModoNeutro(!window._ppNeutro));
+  const lbl = document.querySelector('.neutral-label');
+  if (lbl) lbl.addEventListener('click', () => aplicaModoNeutro(!window._ppNeutro));
+})();
+
 window._ppRedmode = 'parcela';
 function aplicaRedmodePesados(modo) {
   window._ppRedmode = modo;
@@ -801,132 +768,9 @@ document.querySelectorAll('.redmode-btn').forEach(b => {
 });
 aplicaRedmodePesados('parcela');
 
-// inicial
 recalc();
 
-// ═════════════════════════════════════════════════════════════
-// PDF — usa módulo compartilhado pdf-master-prime.js
-// ═════════════════════════════════════════════════════════════
-function _coletarBlocosPortoPesados() {
-  const _v = (id) => { const el = document.getElementById(id); return (el?.value || '').trim(); };
-  const _t = (id) => { const el = document.getElementById(id); return (el?.textContent || '').trim(); };
-  const _selTxt = (id) => { const el = document.getElementById(id); return (el?.selectedOptions?.[0]?.textContent || '').trim() || '—'; };
-  const _has = (s) => s && s !== '—' && s !== '?' && s !== '';
-
-  const tipoTxt = _selTxt('pp-tipo');
-  const redutorTxt = _selTxt('pp-redutor');
-  const prazoVal = _v('pp-prazo');
-  const contemplaN = parseInt(_v('pp-contempla') || '0', 10) || 0;
-
-  // ─── BLOCO 1: PROPOSTA ───
-  const propostaLinha1Campos = [
-    { label: 'Crédito Contratado', value: _v('pp-credito') || 'R$ 0,00' },
-    { label: 'Tipo', value: tipoTxt },
-    { label: 'Prazo total', value: (prazoVal || '0') + ' meses' },
-    { label: 'Redutor', value: redutorTxt }
-  ];
-
-  const propostaLinha2Campos = [];
-  if (contemplaN > 0) propostaLinha2Campos.push({ label: 'Contemplação na parcela', value: String(contemplaN) });
-  const saldoDevedor = _t('pp-saldoDevedor');
-  if (_has(saldoDevedor)) propostaLinha2Campos.push({ label: 'Saldo devedor', value: saldoDevedor });
-
-  const propostaLinhas = [
-    { campos: propostaLinha1Campos, destaque: { label: 'Categoria', value: _t('pp-categoria') || '—' } }
-  ];
-  if (propostaLinha2Campos.length) propostaLinhas.push({ campos: propostaLinha2Campos });
-
-  // ─── BLOCO 2: TAXAS DO GRUPO ───
-  const taxaMes = _t('pp-taxaMes');
-  const taxaAno = _t('pp-taxaAno');
-  const taxaCombo = (_has(taxaMes) || _has(taxaAno))
-    ? `${taxaMes || '—'} a.m. · ${taxaAno || '—'} a.a.`
-    : '—';
-
-  const taxasLinhas = [{
-    campos: [
-      { label: 'Taxa administrativa', value: _v('pp-taxaAdm') || '0,00 %' },
-      { label: 'Fundo de reserva', value: _v('pp-fundo') || '0,00 %' },
-      { label: 'Seguro de vida (PF)', value: _v('pp-seguro') || '0,0000 %' }
-    ],
-    destaque: { label: 'Taxa por mês / ano', value: taxaCombo }
-  }];
-
-  // ─── BLOCO 3: OFERTA DE LANCE ───
-  const lanceCampos = [
-    { label: 'Recurso próprio', value: _v('pp-recProp') || 'R$ 0,00' },
-    { label: 'Embutido', value: _v('pp-embutido') || 'R$ 0,00' },
-    { label: '% Embutido (máx)', value: _v('pp-pctEmbutido') || '0,00 %' }
-  ];
-  const lanceLinhas = [{
-    campos: lanceCampos,
-    destaque: { label: 'Representatividade', value: _t('pp-representatividade') || '—' }
-  }];
-
-  // ─── BLOCOS ───
-  const blocos = [
-    { tipo: 'card', titulo: 'PROPOSTA', linhas: propostaLinhas },
-    { tipo: 'card', titulo: 'TAXAS DO GRUPO', linhas: taxasLinhas },
-    { tipo: 'card', titulo: 'OFERTA DE LANCE', linhas: lanceLinhas }
-  ];
-
-  // ─── BLOCO 4: ESTIMATIVA PÓS-CONTEMPLAÇÃO ───
-  if (contemplaN > 0) {
-    const credLib = _t('pp-creditoLiberado');
-    const saldoPos = _t('pp-saldoPos');
-    const novoSeg = _t('pp-novoSeguro');
-    const novaParc = _t('pp-novaParcela');
-    const novoPrazo = _t('pp-novoPrazo');
-    const prazoRed = _t('pp-prazoReduzido');
-    const parcSeRedPrazo = _t('pp-parcelaSeReduzPrazo');
-
-    const posCampos1 = [];
-    if (_has(credLib)) posCampos1.push({ label: 'Crédito liberado', value: credLib });
-    if (_has(saldoPos)) posCampos1.push({ label: 'Saldo devedor pós', value: saldoPos });
-    if (_has(novoSeg)) posCampos1.push({ label: 'Novo seguro mensal (PF)', value: novoSeg });
-
-    const posLinhas = [];
-    if (posCampos1.length) posLinhas.push({ campos: posCampos1 });
-    posLinhas.push({
-      campos: [
-        { label: 'Nova parcela', value: novaParc || '—' },
-        { label: 'Prazo restante (referência)', value: novoPrazo || '—' }
-      ],
-      destaque: { label: 'Abatimento na parcela', value: novaParc || '—' }
-    });
-    posLinhas.push({
-      campos: [
-        { label: 'Prazo restante (reduzir prazo)', value: prazoRed || '—' },
-        { label: 'Com parcela de', value: parcSeRedPrazo || '—' }
-      ],
-      destaque: { label: 'Reduzir somente o prazo', value: prazoRed || '—' }
-    });
-
-    blocos.push({ tipo: 'card', titulo: 'ESTIMATIVA PÓS-CONTEMPLAÇÃO', linhas: posLinhas });
-  }
-
-  // ─── BLOCO 5: RESUMO DE PARCELAS ───
-  const resumoLinhas = [
-    { campos: [
-        { label: 'Parcela integral · PF', value: _t('pp-parcelaPF') || '—' },
-        { label: 'Parcela integral · PJ', value: _t('pp-parcelaPJ') || '—' }
-      ]
-    },
-    { campos: [
-        { label: 'Parcela reduzida · PF', value: _t('pp-parcelaReduzPF') || '—' },
-        { label: 'Parcela reduzida · PJ', value: _t('pp-parcelaReduzPJ') || '—' }
-      ],
-      destaque: { multi: [
-        { label: 'Reduzida PF', value: _t('pp-parcelaReduzPF') || '—' },
-        { label: 'Reduzida PJ', value: _t('pp-parcelaReduzPJ') || '—' }
-      ]}
-    }
-  ];
-  blocos.push({ tipo: 'card', titulo: 'RESUMO DE PARCELAS', linhas: resumoLinhas });
-
-  return blocos;
-}
-
+// PDF
 function _montarPdfComercialPortoPesados() {
   const _v = (id) => { const el = document.getElementById(id); return (el?.value || '').trim(); };
   const _t = (id) => { const el = document.getElementById(id); return (el?.textContent || '').trim(); };
@@ -938,7 +782,6 @@ function _montarPdfComercialPortoPesados() {
   const redutorTxt = _selTxt('pp-redutor') || '';
   const redutorPct = redutorTxt.replace(/[^\d%]/g, '');
 
-  // Computa % de cada parte do lance a partir do R$ sobre a Categoria
   const _parseRS = (s) => parseFloat(String(s||'').replace(/[R$\s.]/g,'').replace(',','.')) || 0;
   const _fmtRS = (n) => 'R$ ' + n.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   const _categoria = _parseRS(_t('pp-categoria'));
@@ -950,15 +793,17 @@ function _montarPdfComercialPortoPesados() {
   const _pctApg = _categoria > 0 ? _fmtPct((_apgRS / _categoria) * 100) : '0,00';
   const _pctTot = _categoria > 0 ? _fmtPct((_totRS / _categoria) * 100) : '0,00';
 
+  const _neutro = !!window._ppNeutro;
   return {
-    filename: 'porto-consorcio-pesados',
+    filename: _neutro ? 'simulacao-consorcio-pesados' : 'porto-consorcio-pesados',
     logoAdmin: 'porto',
+    hideAdminLogo: _neutro,
     titulo: 'Simulador de Crédito',
-    subtitulo: 'Porto · Pesados',
+    subtitulo: _neutro ? 'Consórcio · Pesados' : 'Porto · Pesados',
     subtituloSecundario: redutorPct && redutorPct !== '0%'
       ? `(Redução de ${redutorPct} até a Contemplação)`
       : '(Sem redutor de parcela)',
-    representanteTexto: 'Consórcio Porto',
+    representanteTexto: _neutro ? 'Master Prime' : 'Consórcio Porto',
     inputs: [
       { label: 'Taxa Administrativa', value: _v('pp-taxaAdm') || '0,00 %' },
       { label: 'Fundo Reserva', value: _v('pp-fundo') || '0,00 %' },
@@ -976,7 +821,7 @@ function _montarPdfComercialPortoPesados() {
       const novaParc = (modo === 'prazo') ? _t('pp-parcelaSeReduzPrazo') : _t('pp-novaParcela');
       const prazoFinal = (modo === 'prazo') ? _t('pp-prazoReduzido') : _t('pp-novoPrazo');
       return [
-        { label: 'Valor parcela (antes contemplação)', value: parcelaAntes || _t('pp-parcelaDemais') || '—' },
+        { label: 'Valor parcela (antes contemplação)', value: parcelaAntes || '—' },
         { label: 'Valor parcela (pós-contemplado)',    value: novaParc || '—' },
         { label: 'Crédito Líquido',                    value: _t('pp-creditoLiberado') || '—' },
         { label: 'Prazo Restante',                     value: prazoFinal || '—' },
@@ -1002,9 +847,6 @@ document.getElementById('baixarPdfPorto').addEventListener('click', async () => 
   }
 });
 
-// ═══════════════════════════════════════════════════════
-// SIMULAÇÕES SALVAS (48h) — SimulacaoStore
-// ═══════════════════════════════════════════════════════
 (function initSimStore() {
   if (!window.SimulacaoStore) return;
   window.SimulacaoStore.init({

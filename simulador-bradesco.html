@@ -6,10 +6,10 @@
 <title>Master Prime - Bradesco Imóvel</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="pdf-master-prime.js?v=20260526e"></script>
+<script src="pdf-master-prime.js?v=20260615f"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="simulacao-store.js"></script>
 <style>
@@ -17,6 +17,8 @@
     --mp-navy: #2D3F5E;
     --mp-navy-dark: #1E2D45;
     --mp-navy-soft: #3A4F73;
+    --mp-teal: #4DBCC8;
+    --mp-teal-dark: #2EA0AD;
     --bradesco-red: #CC092F;
     --bradesco-red-dark: #A50723;
     --gold: #E8B86D;
@@ -27,8 +29,8 @@
     --text-muted: #6B7280;
     --text-light: #9CA3AF;
     --soft-blue: #F1F5F9;
+    --soft-teal: #E8F6F8;
     --soft-red: #FFE9EC;
-    --error: #DC2626;
     --warning-bg: #FFF8E8;
     --warning-border: #F0D9A0;
     --warning-text: #8B6A2A;
@@ -42,18 +44,35 @@
   .brand-text p { font-size: 11px; color: rgba(255,255,255,0.7); letter-spacing: 1.2px; text-transform: uppercase; margin-top: 2px; }
   .tag-admin { background: var(--bradesco-red); color: #fff; padding: 6px 14px; border-radius: 4px; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; }
 
-  main { max-width: 1280px; margin: 0 auto; padding: 32px; }
-  h2.section-title { font-size: 22px; font-weight: 600; color: var(--mp-navy); margin-bottom: 4px; text-align: center; letter-spacing: 0.5px; }
-  .subtitle { font-size: 12px; color: var(--text-muted); text-align: center; margin-bottom: 24px; letter-spacing: 1px; text-transform: uppercase; }
+  main { max-width: 1440px; margin: 0 auto; padding: 18px 24px 12px; }
+  h2.section-title { font-size: 19px; font-weight: 600; color: var(--mp-navy); margin-bottom: 0; text-align: center; letter-spacing: 0.3px; }
+  h2.section-title .tag-bank { color: var(--bradesco-red); }
+  body.neutral-mode h2.section-title .tag-bank { color: var(--mp-navy); }
+  .subtitle { font-size: 11px; color: var(--text-muted); text-align: center; margin-bottom: 14px; letter-spacing: 0.8px; text-transform: uppercase; }
+  .neutral-row { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin: 6px 0 10px; padding-right: 4px; }
+  .neutral-row .neutral-label { font-size: 13px; color: var(--text); user-select: none; }
+  .neutral-row .neutral-label .muted { color: var(--text-muted); font-weight: 400; }
+  .neutral-row .neutral-switch { position: relative; width: 42px; height: 22px; background: #CBD5E1; border-radius: 999px; transition: 0.2s; flex-shrink: 0; cursor: pointer; border: 0; padding: 0; }
+  .neutral-row .neutral-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,.20); }
+  .neutral-row .neutral-switch.on { background: var(--mp-navy); }
+  .neutral-row .neutral-switch.on::after { left: 23px; }
+  body.neutral-mode .tag-admin { display: none; }
 
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 16px; }
-  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
-  .card-header h3 { font-size: 13px; font-weight: 600; color: var(--mp-navy); letter-spacing: 1.5px; text-transform: uppercase; }
-  .card-header .badge-red { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--bradesco-red); }
-  .card-header .reset-btn { margin-left: auto; background: none; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-family: inherit; }
+  .layout-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+  @media (max-width: 1024px) { .layout-grid { grid-template-columns: 1fr; } }
+  .col-inputs { display: flex; flex-direction: column; gap: 12px; }
+  .col-outputs { display: flex; flex-direction: column; gap: 10px; position: sticky; top: 12px; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 0; }
+  .card-compact { padding: 12px 14px; }
+  .card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .card-header h3 { font-size: 11.5px; font-weight: 700; color: var(--mp-navy); letter-spacing: 1.2px; text-transform: uppercase; }
+  .card-header .badge-red { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--bradesco-red); }
+  body.neutral-mode .card-header .badge-red { background: var(--mp-teal); }
+  .card-header .reset-btn { margin-left: auto; background: none; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; padding: 3px 9px; border-radius: 4px; font-size: 10.5px; font-family: inherit; }
   .card-header .reset-btn:hover { background: var(--bg); }
 
-  .grid { display: grid; gap: 16px; }
+  .grid { display: grid; gap: 10px; }
   .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -61,31 +80,52 @@
   @media (max-width: 768px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
 
   .field { position: relative; }
-  .field label { position: absolute; top: -7px; left: 12px; background: var(--card); padding: 0 6px; font-size: 11px; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; font-weight: 500; z-index: 1; }
-  .field input, .field select { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; background: #fff; color: var(--text); transition: border-color 0.15s; }
+  .field label { position: absolute; top: -6px; left: 10px; background: var(--card); padding: 0 5px; font-size: 10px; color: var(--text-muted); letter-spacing: 0.4px; text-transform: uppercase; font-weight: 500; z-index: 1; }
+  .field input, .field select { width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: 7px; font-size: 13px; font-family: inherit; background: #fff; color: var(--text); transition: border-color 0.15s; }
   .field input:focus, .field select:focus { outline: none; border-color: var(--bradesco-red); box-shadow: 0 0 0 3px rgba(204,9,47,0.10); }
+  body.neutral-mode .field input:focus, body.neutral-mode .field select:focus { border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,0.12); }
   .field input:disabled, .field select:disabled { background: var(--soft-blue); color: var(--text-light); cursor: not-allowed; }
-  .field select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
-  .field-suffix { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--text-light); letter-spacing: 0.5px; pointer-events: none; }
+  .field select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+  .field-suffix { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 10px; color: var(--text-light); letter-spacing: 0.4px; pointer-events: none; }
 
-  /* Output cards */
-  .result { background: var(--soft-blue); border-radius: 8px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-  .result strong { font-size: 11.5px; color: var(--mp-navy); letter-spacing: 1px; text-transform: uppercase; font-weight: 500; }
-  .result .value { font-size: 17px; font-weight: 600; color: var(--mp-navy); font-family: 'DM Mono', ui-monospace, monospace; }
+  .out-box { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; }
+  .out-box .lbl { font-size: 10px; color: var(--text-muted); letter-spacing: 0.7px; text-transform: uppercase; font-weight: 600; margin-bottom: 3px; display: block; }
+  .out-box .lbl small { text-transform: none; font-weight: 500; color: var(--text-light); letter-spacing: 0.2px; }
+  .out-box .val { font-size: 16px; font-weight: 700; color: var(--mp-navy); font-family: 'Inter', -apple-system, system-ui, sans-serif; }
+  .out-box.primary { background: linear-gradient(135deg, var(--bradesco-red) 0%, var(--bradesco-red-dark) 100%); border-color: var(--bradesco-red); }
+  body.neutral-mode .out-box.primary { background: linear-gradient(135deg, var(--mp-navy) 0%, var(--mp-navy-soft) 100%); border-color: var(--mp-navy); }
+  .out-box.primary .lbl { color: rgba(255,255,255,0.85); }
+  .out-box.primary .val { color: #fff; }
+  .out-box.red { background: var(--soft-red); border-color: #F5BCC4; }
+  .out-box.red .val { color: var(--bradesco-red-dark); }
+  body.neutral-mode .out-box.red { background: var(--soft-teal); border-color: #C2E5EA; }
+  body.neutral-mode .out-box.red .val { color: var(--mp-teal-dark); }
+  .result-red { background: var(--soft-red); border: 1px solid #F5BCC4; border-radius: 6px; padding: 9px 13px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  body.neutral-mode .result-red { background: var(--soft-teal); border-color: #C2E5EA; }
+  .result-red strong { font-size: 10.5px; color: var(--bradesco-red-dark); letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; }
+  body.neutral-mode .result-red strong { color: var(--mp-teal-dark); }
+  .result-red .value { font-size: 15px; font-weight: 700; color: var(--mp-navy); font-family: 'Inter', -apple-system, system-ui, sans-serif; }
 
-  .result-primary { background: linear-gradient(135deg, var(--bradesco-red) 0%, var(--bradesco-red-dark) 100%); color: white; padding: 14px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-  .result-primary strong { color: rgba(255,255,255,0.85); font-size: 11.5px; letter-spacing: 1.2px; text-transform: uppercase; font-weight: 500; }
-  .result-primary .value { font-size: 20px; font-weight: 700; color: #fff; font-family: 'DM Mono', ui-monospace, monospace; }
+  .lance-bloco { background: #FFF7E6; border: 1px solid #FBE3B5; border-radius: 8px; padding: 12px; margin-top: 4px; }
+  body.neutral-mode .lance-bloco { background: var(--soft-blue); border-color: var(--border); }
+  .lance-bloco .grid { gap: 8px; }
+  .lance-bloco .field input { background: #fff; }
 
-  .result-red { background: var(--soft-red); border: 1px solid #F5BCC4; border-radius: 8px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-  .result-red strong { font-size: 11.5px; color: var(--bradesco-red-dark); letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
-  .result-red .value { font-size: 19px; font-weight: 700; color: var(--mp-navy); font-family: 'DM Mono', ui-monospace, monospace; }
+  .redmode-toggle { padding: 8px 11px; background: var(--soft-blue); border-radius: 7px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .redmode-toggle .lbl { font-size: 11.5px; color: #475569; font-weight: 600; }
+  .redmode-toggle .group { display: flex; gap: 3px; background: #fff; padding: 2px; border-radius: 5px; border: 1px solid #e2e8f0; }
+  .redmode-btn { padding: 5px 11px; border: 0; background: transparent; color: #475569; border-radius: 4px; font-size: 11.5px; font-weight: 600; cursor: pointer; }
+  .redmode-btn.active { background: var(--bradesco-red); color: #fff; }
+  body.neutral-mode .redmode-btn.active { background: var(--mp-navy); }
+  .redmode-toggle .hint { font-size: 10.5px; color: #64748b; font-style: italic; }
 
-  /* Botão olho — memória de cálculo do lance */
+  /* Olho memória cálculo */
   .btn-eye-lance { background: transparent; border: none; padding: 4px; cursor: pointer; color: var(--bradesco-red-dark); display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; transition: all .15s; }
+  body.neutral-mode .btn-eye-lance { color: var(--mp-teal-dark); }
   .btn-eye-lance:hover { background: rgba(204,9,47,0.12); color: var(--bradesco-red); }
+  body.neutral-mode .btn-eye-lance:hover { background: rgba(77,188,200,0.12); color: var(--mp-teal); }
 
-  /* Modal do analítico do lance */
+  /* Modal analítico */
   .modal-lance-bg { display: none; position: fixed; inset: 0; background: rgba(15,23,42,.55); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
   .modal-lance-bg.aberto { display: flex; }
   .modal-lance-box { background: #fff; border-radius: 14px; max-width: 680px; width: 100%; max-height: 88vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(15,23,42,0.3); }
@@ -98,54 +138,37 @@
   .modal-lance-close:hover { background: var(--bg); color: var(--text); }
   .modal-lance-btn { background: var(--mp-navy); color: #fff; border: none; padding: 10px 22px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; font-family: inherit; }
   .modal-lance-btn:hover { background: var(--mp-navy-dark); }
-
   .passo-row { display: grid; grid-template-columns: 26px 1fr auto; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px dashed var(--border); }
   .passo-row:last-of-type { border-bottom: none; }
   .passo-num { width: 26px; height: 26px; border-radius: 50%; background: var(--bradesco-red); color: #fff; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+  body.neutral-mode .passo-num { background: var(--mp-navy); }
   .passo-text { color: var(--text); font-size: 13.5px; line-height: 1.45; }
   .passo-sub { display: block; font-size: 11.5px; color: var(--text-muted); margin-top: 2px; font-weight: 400; }
-  .passo-val { font-family: 'DM Mono', ui-monospace, monospace; font-weight: 700; color: var(--mp-navy); font-size: 14px; white-space: nowrap; }
+  .passo-val { font-weight: 700; color: var(--mp-navy); font-size: 14px; white-space: nowrap; }
   .passo-row.final .passo-text { font-weight: 600; color: var(--mp-navy); }
   .passo-row.final .passo-val { font-size: 16px; color: var(--bradesco-red-dark); }
-  .formula-box { margin-top: 16px; padding: 12px 16px; background: var(--soft-red); border: 1px solid #F5BCC4; border-radius: 8px; font-family: 'DM Mono', ui-monospace, monospace; font-size: 12.5px; color: var(--bradesco-red-dark); text-align: center; line-height: 1.5; }
+  body.neutral-mode .passo-row.final .passo-val { color: var(--mp-teal-dark); }
+  .formula-box { margin-top: 16px; padding: 12px 16px; background: var(--soft-red); border: 1px solid #F5BCC4; border-radius: 8px; font-size: 12.5px; color: var(--bradesco-red-dark); text-align: center; line-height: 1.5; }
+  body.neutral-mode .formula-box { background: var(--soft-teal); border-color: #C2E5EA; color: var(--mp-teal-dark); }
 
-  /* Resumo de parcelas */
-  .resumo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  @media (max-width: 768px) { .resumo-grid { grid-template-columns: 1fr; } }
-  .resumo-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--soft-blue); border-radius: 6px; }
-  .resumo-row .lbl { font-size: 11.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600; }
-  .resumo-row .val { font-size: 14px; font-weight: 700; color: var(--mp-navy); font-family: 'DM Mono', ui-monospace, monospace; }
-  .resumo-row.highlight { background: var(--soft-red); border: 1px solid #F5BCC4; }
-
-  /* Pós contemplação */
-  .pos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  @media (max-width: 768px) { .pos-grid { grid-template-columns: 1fr; } }
-  .pos-card { background: var(--soft-blue); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
-  .pos-card h4 { font-size: 11.5px; font-weight: 700; color: var(--mp-navy); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
-  .pos-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; font-size: 13px; }
-  .pos-row .lbl { color: var(--text-muted); font-size: 12px; letter-spacing: 0.3px; }
-  .pos-row .val { font-weight: 600; color: var(--mp-navy); font-family: 'DM Mono', ui-monospace, monospace; }
-  .pos-row.highlight { background: #fff; padding: 10px 12px; border-radius: 6px; margin: 4px -4px; border: 1px solid var(--border); }
-  .pos-row.highlight .val { font-size: 16px; font-weight: 700; color: var(--bradesco-red-dark); }
-
-  /* Footer aviso */
-  .aviso { background: var(--warning-bg); border: 1px solid var(--warning-border); border-radius: 8px; padding: 14px 18px; color: var(--warning-text); font-size: 12.5px; line-height: 1.5; margin-top: 8px; }
+  .aviso { background: var(--warning-bg); border: 1px solid var(--warning-border); border-radius: 7px; padding: 9px 13px; color: var(--warning-text); font-size: 11.5px; line-height: 1.45; margin-top: 6px; }
   .aviso strong { color: var(--warning-text); }
 
-  .actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; padding-bottom: 32px; }
+  .obs-area { width: 100%; min-height: 64px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 7px; font-size: 12px; font-family: inherit; resize: vertical; color: var(--text); background: #fff; }
+  .obs-area:focus { outline: none; border-color: var(--bradesco-red); box-shadow: 0 0 0 3px rgba(204,9,47,0.10); }
+  body.neutral-mode .obs-area:focus { border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,0.12); }
+
+  .actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; padding-bottom: 16px; }
   button.primary, button.secondary { padding: 11px 22px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.15s; border: 1px solid transparent; font-family: inherit; }
   button.primary { background: var(--bradesco-red); color: #fff; border-color: var(--bradesco-red); }
   button.primary:hover { background: var(--bradesco-red-dark); }
+  body.neutral-mode button.primary { background: var(--mp-navy); border-color: var(--mp-navy); }
+  body.neutral-mode button.primary:hover { background: var(--mp-navy-dark); }
   button.secondary { background: transparent; color: var(--text-muted); border-color: var(--border); }
   button.secondary:hover { background: var(--bg); border-color: var(--text-muted); }
 
-  /* Embed mode (iframe) */
   html.embedded header { display: none; }
   html.embedded main { padding-top: 18px; }
-
-  /* Observações textarea */
-  .obs-area { width: 100%; min-height: 90px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: inherit; resize: vertical; color: var(--text); background: #fff; }
-  .obs-area:focus { outline: none; border-color: var(--bradesco-red); box-shadow: 0 0 0 3px rgba(204,9,47,0.10); }
 </style>
 <script>if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('embedded');</script>
 </head>
@@ -163,202 +186,197 @@
 </header>
 
 <main>
-  <div id="simStoreMount" style="max-width:1400px; margin:16px auto 0; padding:0 32px;"></div>
+  <div id="simStoreMount" style="max-width:1440px; margin:0 auto 8px; padding:0;"></div>
 
-  <h2 class="section-title">Bradesco · Imóvel</h2>
+  <div class="neutral-row">
+    <label class="neutral-label" for="btnModoNeutro">Modo neutro <span class="muted">(sem identificação da administradora)</span></label>
+    <button type="button" class="neutral-switch" id="btnModoNeutro" role="switch" aria-checked="false" title="Gera PDF sem identificação da administradora — usa identidade Master Prime padrão"></button>
+  </div>
+
+  <h2 class="section-title">Simulador de Crédito · <span class="tag-bank" id="sim-titulo-banco">Bradesco · Imóvel</span></h2>
   <p class="subtitle">Cálculo de proposta, contemplação e estratégias de lance</p>
 
-  <!-- ════════ PROPOSTA ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-red"></span>
-      <h3>Proposta</h3>
-      <button type="button" class="reset-btn" id="btnLimparProposta">Limpar</button>
-    </div>
-    <div class="grid grid-4">
-      <div class="field">
-        <label>Valor do bem (crédito)</label>
-        <input type="text" id="br-credito" placeholder="R$ 0,00" data-mask="money">
-      </div>
-      <div class="field">
-        <label>Prazo total (meses)</label>
-        <input type="text" id="br-prazo" placeholder="0" data-mask="int">
-      </div>
-      <div class="field">
-        <label>Redutor de parcela</label>
-        <select id="br-redutor">
-          <option value="" selected>Selecione…</option>
-          <option value="0">0% (sem redutor)</option>
-          <option value="0.30">30%</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Contemplação na parcela</label>
-        <input type="text" id="br-contempla" placeholder="0" data-mask="int">
-      </div>
-    </div>
-  </section>
+  <div class="layout-grid">
 
-  <!-- ════════ TAXAS DO GRUPO ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-red"></span>
-      <h3>Taxas do grupo</h3>
-      <button type="button" class="reset-btn" id="btnTaxasDefault">Restaurar padrão</button>
-    </div>
-    <div class="grid grid-2">
-      <div class="field">
-        <label>Taxa antecipação</label>
-        <input type="text" id="br-taxaAntecipacao" data-mask="pct2" value="4,25 %">
-      </div>
-      <div class="field">
-        <label>Decomposição parcelas antecipação</label>
-        <input type="text" id="br-qtdAntecipacao" value="8" data-mask="int">
-        <span class="field-suffix">primeiras parcelas</span>
-      </div>
-    </div>
-    <div class="grid grid-3" style="margin-top: 16px;">
-      <div class="field">
-        <label>Taxa administrativa</label>
-        <input type="text" id="br-taxaAdm" data-mask="pct2" placeholder="0,00 %">
-      </div>
-      <div class="field">
-        <label>Fundo de reserva</label>
-        <input type="text" id="br-fundo" data-mask="pct2" placeholder="0,00 %">
-      </div>
-      <div class="field">
-        <label>Seguro de vida</label>
-        <input type="text" id="br-seguro" data-mask="pct4" placeholder="0,0000 %">
-      </div>
-    </div>
+    <div class="col-inputs">
 
-    <div class="grid grid-2" style="margin-top: 16px;">
-      <div class="field">
-        <label>Tipo de Reajuste</label>
-        <select id="br-tipoReajuste">
-          <option value="Mensal" selected>Mensal</option>
-          <option value="Anual">Anual</option>
-          <option value="Sem">Sem reajuste</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>% Anual médio</label>
-        <input type="text" id="br-anualMedio" data-mask="pct2" placeholder="0,00 %" value="0,00 %">
-      </div>
-    </div>
+      <section class="card card-compact">
+        <div class="card-header">
+          <span class="badge-red"></span>
+          <h3>Dados da proposta</h3>
+          <button type="button" class="reset-btn" id="btnTaxasDefault">Taxas padrão</button>
+          <button type="button" class="reset-btn" id="btnLimparProposta" style="margin-left:6px">Limpar</button>
+        </div>
 
-    <div class="grid grid-2" style="margin-top: 16px;">
-      <div class="result"><strong>Taxa por mês</strong><span class="value" id="br-taxaMes">—</span></div>
-      <div class="result"><strong>Taxa por ano</strong><span class="value" id="br-taxaAno">—</span></div>
-    </div>
+        <div class="grid grid-4">
+          <div class="field">
+            <label>Taxa adm.</label>
+            <input type="text" id="br-taxaAdm" data-mask="pct2" placeholder="0,00 %">
+          </div>
+          <div class="field">
+            <label>Fundo Reserva</label>
+            <input type="text" id="br-fundo" data-mask="pct2" placeholder="0,00 %">
+          </div>
+          <div class="field">
+            <label>Seguro</label>
+            <input type="text" id="br-seguro" data-mask="pct4" placeholder="0,0000 %">
+          </div>
+          <div class="field">
+            <label>Tx antecipação</label>
+            <input type="text" id="br-taxaAntecipacao" data-mask="pct2" value="4,25 %">
+          </div>
+          <div class="field">
+            <label>Valor do crédito</label>
+            <input type="text" id="br-credito" placeholder="R$ 0,00" data-mask="money">
+          </div>
+          <div class="field">
+            <label>Prazo (meses)</label>
+            <input type="text" id="br-prazo" placeholder="0" data-mask="int">
+          </div>
+          <div class="field">
+            <label>Redutor</label>
+            <select id="br-redutor">
+              <option value="" selected>Selecione…</option>
+              <option value="0">0% (sem redutor)</option>
+              <option value="0.30">30%</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Contempla mês</label>
+            <input type="text" id="br-contempla" placeholder="0" data-mask="int">
+          </div>
+          <div class="field">
+            <label>Antecipação em</label>
+            <input type="text" id="br-qtdAntecipacao" value="8" data-mask="int">
+            <span class="field-suffix">parc.</span>
+          </div>
+          <div class="field">
+            <label>Tipo Reajuste</label>
+            <select id="br-tipoReajuste">
+              <option value="Mensal" selected>Mensal</option>
+              <option value="Anual">Anual</option>
+              <option value="Sem">Sem reajuste</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>% Anual médio</label>
+            <input type="text" id="br-anualMedio" data-mask="pct2" placeholder="0,00 %" value="0,00 %">
+          </div>
+        </div>
 
-    <div class="grid" style="margin-top: 16px;">
-      <div class="result-primary">
-        <strong>Parcela inicial</strong>
-        <span class="value" id="br-parcelaInicialDestaque">—</span>
-      </div>
-    </div>
-    <span id="br-parcelaDemaisDestaque" style="display:none">—</span>
-  </section>
+        <div class="redmode-toggle" style="margin-top: 10px;">
+          <span class="lbl">Pós-contemplação:</span>
+          <div class="group">
+            <button type="button" class="redmode-btn active" data-redmode="diluir">Diluir nas parcelas</button>
+            <button type="button" class="redmode-btn" data-redmode="antecipar">Antecipar parcelas</button>
+          </div>
+          <span class="hint">— cenário que vai pro PDF</span>
+        </div>
+      </section>
 
-  <!-- ════════ OFERTA DE LANCE ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-red"></span>
-      <h3>Oferta de Lance</h3>
-      <button type="button" class="reset-btn" id="btnLimparLance">Limpar</button>
-    </div>
+      <section class="card card-compact">
+        <div class="card-header">
+          <span class="badge-red"></span>
+          <h3>Oferta de Lance</h3>
+          <button type="button" class="reset-btn" id="btnLimparLance">Limpar</button>
+        </div>
 
-    <div class="grid grid-2">
-      <div class="field">
-        <label>% Lance (sobre crédito)</label>
-        <input type="text" id="br-pctLance" data-mask="pct2" placeholder="0,00 %">
-      </div>
-      <div class="field">
-        <label>Valor do lance (R$)</label>
-        <input type="text" id="br-lanceManual" placeholder="R$ 0,00" data-mask="money">
-      </div>
-    </div>
+        <div class="lance-bloco">
+          <div class="grid grid-2">
+            <div class="field">
+              <label>% Lance (sobre crédito)</label>
+              <input type="text" id="br-pctLance" data-mask="pct2" placeholder="0,00 %">
+              <span class="field-suffix">%</span>
+            </div>
+            <div class="field">
+              <label>Valor do lance (R$)</label>
+              <input type="text" id="br-lanceManual" placeholder="R$ 0,00" data-mask="money">
+            </div>
+          </div>
+          <div style="margin-top: 8px;">
+            <div class="result-red" style="padding: 7px 11px;">
+              <strong>Valor lance total</strong>
+              <span style="display:inline-flex; align-items:center; gap:8px;">
+                <span class="value" id="br-lanceTotal" style="font-size:14px;">—</span>
+                <button type="button" class="btn-eye-lance" onclick="abrirAnaliticoLance()" title="Ver memória de cálculo do lance">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
 
-    <div style="margin-top: 14px;">
-      <div class="result-red">
-        <strong>Valor lance total</strong>
-        <span style="display:inline-flex; align-items:center; gap:10px;">
-          <span class="value" id="br-lanceTotal">—</span>
-          <button type="button" class="btn-eye-lance" onclick="abrirAnaliticoLance()" title="Ver memória de cálculo do lance">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-          </button>
-        </span>
-      </div>
-    </div>
-  </section>
+      <section class="card card-compact">
+        <div class="card-header">
+          <span class="badge-red"></span>
+          <h3>Observações (opcional)</h3>
+          <button type="button" class="reset-btn" id="btnLimparObs">Limpar</button>
+        </div>
+        <textarea id="br-observacoes" class="obs-area" placeholder="Anotações que devem aparecer no PDF…"></textarea>
+      </section>
 
-  <!-- ════════ ESTIMATIVA PÓS-CONTEMPLAÇÃO ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-red"></span>
-      <h3>Estimativa pós-contemplação</h3>
-    </div>
-
-    <div style="margin-bottom: 16px;">
-      <div class="result-primary">
-        <strong>Saldo após contemplação</strong>
-        <span class="value" id="br-saldoPos">—</span>
-      </div>
-    </div>
-
-    <div class="pos-grid">
-      <div class="pos-card">
-        <h4>Diluir nas parcelas</h4>
-        <div class="pos-row highlight"><span class="lbl">Nova parcela</span><span class="val" id="br-parcDiluir">—</span></div>
-        <div class="pos-row"><span class="lbl">Prazo restante</span><span class="val" id="br-prazoDiluir">—</span></div>
-        <div class="pos-row"><span class="lbl">Estratégia</span><span class="val" style="font-family:inherit;font-weight:600;">Lance dilui no saldo restante</span></div>
+      <div class="aviso">
+        <strong>Atenção:</strong> Os valores da simulação são mera referência. Variáveis do grupo, reajustes anuais e amortização podem alterar o resultado final.
       </div>
 
-      <div class="pos-card">
-        <h4>Antecipar parcelas</h4>
-        <div class="pos-row highlight"><span class="lbl">Novo prazo</span><span class="val" id="br-prazoAntecipar">—</span></div>
-        <div class="pos-row"><span class="lbl">Parcela mantida</span><span class="val" id="br-parcAntecipar">—</span></div>
-        <div class="pos-row"><span class="lbl">Estratégia</span><span class="val" style="font-family:inherit;font-weight:600;">Lance quita N parcelas finais</span></div>
+    </div>
+
+    <div class="col-outputs">
+
+      <div class="out-box primary">
+        <span class="lbl">Crédito Líquido</span>
+        <div class="val" id="br-creditoLiquidoOut">—</div>
       </div>
+
+      <div class="out-box">
+        <span class="lbl">Parcela inicial <small>(com antecipação)</small></span>
+        <div class="val" id="br-parcelaInicialDestaque">—</div>
+      </div>
+
+      <div class="out-box">
+        <span class="lbl" id="br-lblParcelaDemaisOut">Parcela após antecipação</span>
+        <div class="val" id="br-parcelaDemaisDestaque" style="font-size:14px;">—</div>
+      </div>
+
+      <div class="out-box red" id="br-card-diluir">
+        <span class="lbl">Valor Parcela <small>(pós-contemplado)</small></span>
+        <div class="val" id="br-parcDiluir">—</div>
+      </div>
+
+      <div class="out-box" id="br-card-antecipar">
+        <span class="lbl">Prazo Restante</span>
+        <div class="val" id="br-prazoOut">—</div>
+      </div>
+
+      <details style="background:#fff; border:1px solid var(--border); border-radius:7px; padding:8px 11px; font-size:11.5px;">
+        <summary style="cursor:pointer; color:var(--text-muted); font-weight:600; letter-spacing:0.4px; text-transform:uppercase; font-size:10.5px;">Detalhes ▾</summary>
+        <div style="margin-top:8px; display:grid; gap:6px;">
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Saldo devedor</span><strong id="br-saldoDevedor">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Seguro mensal</span><strong id="br-seguroMensal">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Parcela inicial</span><strong id="br-parcelaInicial">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Parcela pós-antecip.</span><strong id="br-parcelaPosAnt">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Saldo pós-contempla</span><strong id="br-saldoPos">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Taxa/mês</span><strong id="br-taxaMes">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Taxa/ano</span><strong id="br-taxaAno">—</strong></div>
+          <div style="display:flex; justify-content:space-between; padding-top:4px; border-top:1px dashed var(--border)"><span style="color:var(--text-muted)">Diluir: prazo restante</span><strong id="br-prazoDiluir">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Antecipar: novo prazo</span><strong id="br-prazoAntecipar">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Antecipar: parcela</span><strong id="br-parcAntecipar">—</strong></div>
+          <span id="br-lblParcelaInicial" style="display:none">—</span>
+          <span id="br-lblParcelaDemais" style="display:none">—</span>
+        </div>
+      </details>
+
+      <div class="actions" style="margin-top:4px;">
+        <button class="secondary" id="btnLimparTudo">Limpar tudo</button>
+        <button type="button" id="baixarPdfBradesco" class="primary">Gerar PDF</button>
+      </div>
+
     </div>
-  </section>
-
-  <!-- Resumo de parcelas / Saldo devedor / Seguro: continuam calculados internamente (ids ocultos) mas a seção visual foi removida a pedido. -->
-  <div style="display:none">
-    <span id="br-saldoDevedor"></span>
-    <span id="br-seguroMensal"></span>
-    <span id="br-parcelaInicial"></span>
-    <span id="br-parcelaPosAnt"></span>
-    <span id="br-lblParcelaInicial"></span>
-    <span id="br-lblParcelaDemais"></span>
-  </div>
-
-  <!-- ════════ OBSERVAÇÕES ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-red"></span>
-      <h3>Observações (opcional)</h3>
-      <button type="button" class="reset-btn" id="btnLimparObs">Limpar</button>
-    </div>
-    <textarea id="br-observacoes" class="obs-area" placeholder="Adicione anotações que devem aparecer no PDF…"></textarea>
-  </section>
-
-  <!-- ════════ AVISO ════════ -->
-  <div class="aviso">
-    <strong>Atenção:</strong> Os valores da simulação são mera referência e buscam refletir o cenário mais próximo da realidade. Variáveis específicas do grupo, reajustes anuais e a forma de amortização podem alterar o resultado final.
-  </div>
-
-  <div class="actions">
-    <button type="button" id="baixarPdfBradesco" class="primary" style="margin-right:8px;">Baixar PDF</button>
-    <button class="secondary" id="btnLimparTudo">Limpar tudo</button>
   </div>
 </main>
 
 <script>
-// ═══════════════════════════════════════════════════════
-// MÁSCARAS
-// ═══════════════════════════════════════════════════════
 function maskMoney(value) {
   const digits = String(value).replace(/\D/g, '');
   if (!digits) return '';
@@ -412,9 +430,6 @@ document.querySelectorAll('select').forEach(el => {
   el.addEventListener('change', recalc);
 });
 
-// ═══════════════════════════════════════════════════════
-// FORMATTERS
-// ═══════════════════════════════════════════════════════
 function formatMoney(num) {
   if (!Number.isFinite(num) || isNaN(num)) return '—';
   return 'R$ ' + num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -433,9 +448,6 @@ function setOut(id, value) {
   if (el) el.textContent = value;
 }
 
-// ═══════════════════════════════════════════════════════
-// LEITURA DE INPUTS
-// ═══════════════════════════════════════════════════════
 function readInputs() {
   return {
     credito: unmaskMoney(get('br-credito').value),
@@ -452,33 +464,6 @@ function readInputs() {
   };
 }
 
-// ═══════════════════════════════════════════════════════
-// FÓRMULAS — engenharia reversa COMPLETA da planilha Bradesco
-// ═══════════════════════════════════════════════════════
-// Vars: bem, adm, fr, txAnt, prazoAnt, red, prazo, seguro, pctLance, contempla
-//
-// Saldo Devedor    = bem × (1 + adm + fr)
-// Parc Inicial     = bem × (1 − red + adm + fr) / prazo + saldo × seguro
-// Parc Pós-Antec   = bem × (1 − red + adm − txAnt + fr) / prazo + saldo × seguro
-//
-// % por categoria (composição da parcela):
-//   D7 (% COMUM pós-ant)   = (1 − red + txAnt) / prazo
-//   B7 (% COMUM inicial)   = (1 − red)/prazo − txAnt × (prazo − prazoAnt)/(prazo × prazoAnt)
-//
-// Lance Total (E27 do Excel):
-//   Se D7 × (prazo − prazoAnt) <= pctLance:
-//     C21 = prazo − prazoAnt
-//     B21 = (pctLance − D7 × (prazo − prazoAnt)) / B7
-//   Senão:
-//     C21 = pctLance / D7
-//     B21 = 0
-//   Lance Total = (B21 + C21) × ParcInicial(s/seguro)
-//
-// Pós contemplação:
-//   Lance entra ENTRE parcela L7 e L7+1 (parcs cheias até L7+1)
-//   Saldo Pós = SaldoDevedor − parcsPagas − Lance
-//   Diluir nas Parcelas:  novaParc = saldoPos / (prazo − (L7+1))
-//   Antecipar Parcelas:   novoPrazo = (prazo − L7) − Lance/ParcInicial
 function calc(i) {
   const r = {};
   const bem = i.credito;
@@ -488,7 +473,6 @@ function calc(i) {
   const txAnt = i.taxaAntecipacao || 0;
   const prazoAnt = i.qtdAntecipacao || 0;
 
-  // Constantes
   r.saldoDevedor = bem * (1 + i.taxaAdm + i.fundo);
   r.seguroMensal = r.saldoDevedor * i.seguro;
   const parcInicialSemSeg = (prazo > 0) ? bem * (1 - red + i.taxaAdm + i.fundo) / prazo : NaN;
@@ -496,7 +480,6 @@ function calc(i) {
   r.parcelaInicial = parcInicialSemSeg + r.seguroMensal;
   r.parcelaPosAnt  = parcPosAntSemSeg  + r.seguroMensal;
 
-  // Lance — fórmula completa replicada do Excel
   if (i.lanceManual > 0) {
     r.lanceTotal = i.lanceManual;
     r.lanceB21 = 0;
@@ -521,8 +504,6 @@ function calc(i) {
     r.lanceTotal = (B21 + C21) * parcInicialSemSeg;
   }
 
-  // PÓS CONTEMPLAÇÃO
-  // Lance entra entre a parcela L7 e L7+1 → 2 parcelas cheias pagas (1 a L7+1) antes da nova parcela
   const cont = Math.max(1, i.contempla || 1);
   const parcsAteCont = Math.min(cont + 1, prazo);
   const parcsInicialPagas = Math.min(parcsAteCont, prazoAnt);
@@ -530,36 +511,25 @@ function calc(i) {
   const totalParcsPagas = parcsInicialPagas * r.parcelaInicial + parcsPosAntPagas * r.parcelaPosAnt;
   r.saldoPos = r.saldoDevedor - totalParcsPagas - r.lanceTotal;
 
-  // Diluir nas Parcelas
-  // Internamente, parcDiluir é calculada dividindo o saldoPos pelo nº de parcelas com o
-  // valor novo (178 = prazo − 2 parcelas iniciais pagas).
-  // Mas o "Prazo Restante" exibido ao cliente é o total ainda a pagar = prazo − contempla (179),
-  // que é mais intuitivo ("quantos meses faltam até quitar").
   const prazoNovaParcela = Math.max(0, prazo - parcsAteCont);
   r.parcDiluir = (prazoNovaParcela > 0) ? (r.saldoPos / prazoNovaParcela) : NaN;
   r.prazoDiluir = Math.max(0, prazo - cont);
 
-  // Antecipar Parcelas: lance amortiza N parcelas iguais à ParcInicial
-  //   novoPrazo = (prazo − contempla) − Lance/ParcInicial
   r.parcAntecipar = r.parcelaInicial;
   const nParcelasAmort = (parcInicialSemSeg > 0) ? r.lanceTotal / parcInicialSemSeg : 0;
   r.prazoAntecipar = Math.max(0, (prazo - cont) - nParcelasAmort);
 
-  // DEMONSTRATIVO TAXAS
   r.taxaMes = (prazo > 0) ? i.taxaAdm / prazo : NaN;
   r.taxaAno = r.taxaMes * 12;
 
   return r;
 }
 
-// ═══════════════════════════════════════════════════════
-// PINTA OUTPUTS
-// ═══════════════════════════════════════════════════════
 function recalc() {
   const i = readInputs();
 
   if (!(i.credito > 0) || !(i.prazo > 0)) {
-    const ids = ['br-saldoDevedor','br-seguroMensal','br-parcelaInicial','br-parcelaInicialDestaque','br-parcelaPosAnt','br-parcelaDemaisDestaque','br-lanceTotal','br-saldoPos','br-parcDiluir','br-prazoDiluir','br-parcAntecipar','br-prazoAntecipar','br-taxaMes','br-taxaAno'];
+    const ids = ['br-saldoDevedor','br-seguroMensal','br-parcelaInicial','br-parcelaInicialDestaque','br-parcelaPosAnt','br-parcelaDemaisDestaque','br-lanceTotal','br-saldoPos','br-parcDiluir','br-prazoDiluir','br-parcAntecipar','br-prazoAntecipar','br-taxaMes','br-taxaAno','br-prazoOut','br-creditoLiquidoOut'];
     ids.forEach(id => setOut(id, '—'));
     atualizaLabelsParcela(i);
     return;
@@ -582,6 +552,17 @@ function recalc() {
   setOut('br-taxaMes', Number.isFinite(r.taxaMes) ? formatPct(r.taxaMes * 100, 4) : '—');
   setOut('br-taxaAno', Number.isFinite(r.taxaAno) ? formatPct(r.taxaAno * 100, 2) : '—');
 
+  // Crédito Líquido = crédito (Bradesco: lance abate saldo, não crédito)
+  setOut('br-creditoLiquidoOut', formatMoney(i.credito));
+
+  // Modo: diluir mostra parcela diluída, antecipar mostra parcela mantida + prazo encurtado
+  const modo = window._brRedmode || 'diluir';
+  if (modo === 'antecipar') {
+    setOut('br-prazoOut', Number.isFinite(r.prazoAntecipar) ? formatInt(r.prazoAntecipar) + ' meses' : '—');
+  } else {
+    setOut('br-prazoOut', Number.isFinite(r.prazoDiluir) ? formatInt(r.prazoDiluir) + ' meses' : '—');
+  }
+
   atualizaLabelsParcela(i);
 }
 
@@ -590,15 +571,14 @@ function atualizaLabelsParcela(i) {
   if (qtd > 0) {
     setOut('br-lblParcelaInicial', '1ª a ' + qtd + 'ª (com antecipação)');
     setOut('br-lblParcelaDemais', 'A partir da ' + (qtd + 1) + 'ª');
+    setOut('br-lblParcelaDemaisOut', 'A partir da ' + (qtd + 1) + 'ª');
   } else {
     setOut('br-lblParcelaInicial', 'Parcela inicial');
     setOut('br-lblParcelaDemais', 'Parcela após antecipação');
+    setOut('br-lblParcelaDemaisOut', 'Parcela após antecipação');
   }
 }
 
-// ═══════════════════════════════════════════════════════
-// LIMPAR
-// ═══════════════════════════════════════════════════════
 function limparTudo() {
   ['br-credito','br-prazo','br-contempla','br-qtdAntecipacao','br-taxaAntecipacao','br-taxaAdm','br-fundo','br-seguro','br-pctLance','br-lanceManual'].forEach(id => get(id).value = '');
   get('br-redutor').value = '';
@@ -632,114 +612,47 @@ document.getElementById('btnTaxasDefault').addEventListener('click', () => {
 
 document.getElementById('btnLimparTudo').addEventListener('click', limparTudo);
 
-// inicial
+// Modo Neutro
+window._brNeutro = false;
+function aplicaModoNeutro(on) {
+  window._brNeutro = !!on;
+  document.body.classList.toggle('neutral-mode', !!on);
+  const btn = document.getElementById('btnModoNeutro');
+  if (btn) { btn.classList.toggle('on', !!on); btn.setAttribute('aria-checked', !!on); }
+  const tit = document.getElementById('sim-titulo-banco');
+  if (tit) tit.textContent = on ? 'Consórcio · Imóvel' : 'Bradesco · Imóvel';
+}
+(function() {
+  const btn = document.getElementById('btnModoNeutro');
+  if (btn) btn.addEventListener('click', () => aplicaModoNeutro(!window._brNeutro));
+  const lbl = document.querySelector('.neutral-label');
+  if (lbl) lbl.addEventListener('click', () => aplicaModoNeutro(!window._brNeutro));
+})();
+
+// Toggle Redmode (Diluir / Antecipar)
+window._brRedmode = 'diluir';
+function aplicaRedmode(modo) {
+  window._brRedmode = modo;
+  document.querySelectorAll('.redmode-btn').forEach(b => {
+    const isActive = b.dataset.redmode === modo;
+    b.classList.toggle('active', isActive);
+  });
+  const cardP = document.getElementById('br-card-diluir');
+  const cardT = document.getElementById('br-card-antecipar');
+  if (cardP) cardP.style.opacity = (modo === 'diluir') ? '1' : '0.55';
+  if (cardT) cardT.style.opacity = (modo === 'antecipar') ? '1' : '0.55';
+  if (cardP) cardP.style.boxShadow = (modo === 'diluir') ? '0 0 0 2px var(--bradesco-red)' : 'none';
+  if (cardT) cardT.style.boxShadow = (modo === 'antecipar') ? '0 0 0 2px var(--mp-navy)' : 'none';
+  recalc();
+}
+document.querySelectorAll('.redmode-btn').forEach(b => {
+  b.addEventListener('click', () => aplicaRedmode(b.dataset.redmode));
+});
+aplicaRedmode('diluir');
+
 recalc();
 
-// ═════════════════════════════════════════════════════════════
-// PDF — usa módulo compartilhado pdf-master-prime.js
-// ═════════════════════════════════════════════════════════════
-function _coletarBlocosBradesco() {
-  const _v = (id) => { const el = document.getElementById(id); return (el?.value || '').trim(); };
-  const _t = (id) => { const el = document.getElementById(id); return (el?.textContent || '').trim(); };
-  const _selTxt = (id) => { const el = document.getElementById(id); return (el?.selectedOptions?.[0]?.textContent || '').trim() || '—'; };
-  const _has = (s) => s && s !== '—' && s !== '?' && s !== '';
-
-  const prazoVal = _v('br-prazo');
-  const redutorTxt = _selTxt('br-redutor');
-  const qtdAntec = _v('br-qtdAntecipacao');
-  const contemplaN = parseInt(_v('br-contempla') || '0', 10) || 0;
-
-  // BLOCO 1: PROPOSTA
-  const propostaLinha1 = [
-    { label: 'Crédito Contratado', value: _v('br-credito') || 'R$ 0,00' },
-    { label: 'Prazo total', value: (prazoVal || '0') + ' meses' },
-    { label: 'Redutor', value: redutorTxt },
-    { label: 'Contemplação na parcela', value: String(contemplaN) }
-  ];
-  const propostaLinha2 = [];
-  if (_has(qtdAntec)) propostaLinha2.push({ label: 'Decomposição antecipação', value: qtdAntec + ' primeiras parcelas' });
-  propostaLinha2.push({ label: 'Saldo devedor', value: _t('br-saldoDevedor') || '—' });
-
-  const propostaLinhas = [
-    { campos: propostaLinha1, destaque: { label: 'Saldo devedor', value: _t('br-saldoDevedor') || '—' } }
-  ];
-  if (propostaLinha2.length > 0) propostaLinhas.push({ campos: propostaLinha2 });
-
-  // BLOCO 2: TAXAS DO GRUPO
-  const taxaMes = _t('br-taxaMes');
-  const taxaAno = _t('br-taxaAno');
-  const taxaCombo = (_has(taxaMes) || _has(taxaAno)) ? `${taxaMes || '—'} a.m. · ${taxaAno || '—'} a.a.` : '—';
-
-  const taxasLinhas = [{
-    campos: [
-      { label: 'Taxa antecipação', value: _v('br-taxaAntecipacao') || '0,00 %' },
-      { label: 'Taxa administrativa', value: _v('br-taxaAdm') || '0,00 %' },
-      { label: 'Fundo de reserva', value: _v('br-fundo') || '0,00 %' },
-      { label: 'Seguro de vida', value: _v('br-seguro') || '0,0000 %' }
-    ],
-    destaque: { label: 'Taxa por mês / ano', value: taxaCombo }
-  }];
-
-  // BLOCO 3: OFERTA DE LANCE
-  const lanceLinhas = [{
-    campos: [
-      { label: '% Lance', value: _v('br-pctLance') || '0,00 %' },
-      { label: 'Valor manual', value: _v('br-lanceManual') || 'R$ 0,00' }
-    ],
-    destaque: { label: 'Valor lance total', value: _t('br-lanceTotal') || '—' }
-  }];
-
-  const blocos = [
-    { tipo: 'card', titulo: 'PROPOSTA', linhas: propostaLinhas },
-    { tipo: 'card', titulo: 'TAXAS DO GRUPO', linhas: taxasLinhas },
-    { tipo: 'card', titulo: 'OFERTA DE LANCE', linhas: lanceLinhas }
-  ];
-
-  // BLOCO 4: ESTIMATIVA PÓS-CONTEMPLAÇÃO (sempre, contempla default = 1)
-  const saldoPos = _t('br-saldoPos');
-  const parcDiluir = _t('br-parcDiluir');
-  const prazoDiluir = _t('br-prazoDiluir');
-  const parcAntecipar = _t('br-parcAntecipar');
-  const prazoAntecipar = _t('br-prazoAntecipar');
-
-  const posLinhas = [
-    { campos: [{ label: 'Saldo após contempla', value: saldoPos || '—' }] }
-  ];
-  posLinhas.push({
-    campos: [
-      { label: 'Nova parcela', value: parcDiluir || '—' },
-      { label: 'Prazo restante', value: prazoDiluir || '—' }
-    ],
-    destaque: { label: 'Diluir nas parcelas', value: parcDiluir || '—' }
-  });
-  posLinhas.push({
-    campos: [
-      { label: 'Novo prazo', value: prazoAntecipar || '—' },
-      { label: 'Parcela mantida', value: parcAntecipar || '—' }
-    ],
-    destaque: { label: 'Antecipar parcelas', value: prazoAntecipar || '—' }
-  });
-  blocos.push({ tipo: 'card', titulo: 'ESTIMATIVA PÓS-CONTEMPLAÇÃO', linhas: posLinhas });
-
-  // BLOCO 5: RESUMO DE PARCELAS
-  const lblInicial = _t('br-lblParcelaInicial') || 'Parcela inicial';
-  const lblDemais = _t('br-lblParcelaDemais') || 'Parcela após antecipação';
-  const resumoLinhas = [
-    { campos: [
-        { label: lblInicial, value: _t('br-parcelaInicial') || '—' },
-        { label: lblDemais, value: _t('br-parcelaPosAnt') || '—' }
-      ],
-      destaque: { multi: [
-        { label: lblInicial, value: _t('br-parcelaInicial') || '—' },
-        { label: lblDemais, value: _t('br-parcelaPosAnt') || '—' }
-      ]}
-    }
-  ];
-  blocos.push({ tipo: 'card', titulo: 'RESUMO DE PARCELAS', linhas: resumoLinhas });
-
-  return blocos;
-}
-
+// PDF
 function _montarPdfComercialBradesco() {
   const _v = (id) => { const el = document.getElementById(id); return (el?.value || '').trim(); };
   const _t = (id) => { const el = document.getElementById(id); return (el?.textContent || '').trim(); };
@@ -747,17 +660,27 @@ function _montarPdfComercialBradesco() {
 
   const redutorTxt = _selTxt('br-redutor') || 'Sem redutor';
   const redutorPct = redutorTxt.replace(/[^\d%]/g, '');
-  const qtdAntec = _v('br-qtdAntecipacao') || '8';
+  const _neutro = !!window._brNeutro;
+  const modo = window._brRedmode || 'diluir';
 
-  // Crédito Líquido no Bradesco = Crédito Contratado (lance abate no saldo devedor, não reduz o crédito recebido)
   const creditoLiquido = _v('br-credito') || 'R$ 0,00';
 
+  const novaParc = (modo === 'antecipar') ? _t('br-parcAntecipar') : _t('br-parcDiluir');
+  const prazoFinal = (modo === 'antecipar') ? _t('br-prazoAntecipar') : _t('br-prazoDiluir');
+  const subPosLabel = (modo === 'antecipar')
+    ? '(Lance quita N parcelas finais — parcela mantém valor)'
+    : '(Lance dilui no saldo restante — parcela cai)';
+
   return {
-    filename: 'bradesco-imovel',
+    filename: _neutro ? 'simulacao-consorcio-imovel' : 'bradesco-imovel',
     logoAdmin: 'bradesco',
+    hideAdminLogo: _neutro,
     titulo: 'Simulador de Crédito',
-    subtitulo: 'Bradesco Imóvel',
-    representanteTexto: 'Consórcio Bradesco',
+    subtitulo: _neutro ? 'Consórcio · Imóvel' : 'Bradesco · Imóvel',
+    subtituloSecundario: redutorPct && redutorPct !== '0%'
+      ? `(Redução de ${redutorPct} até a Contemplação)`
+      : '(Sem redutor de parcela)',
+    representanteTexto: _neutro ? 'Master Prime' : 'Consórcio Bradesco',
     inputs: [
       { label: 'Taxa Administrativa', value: _v('br-taxaAdm') || '0,00 %' },
       { label: 'Fundo de Reserva', value: _v('br-fundo') || '0,00 %' },
@@ -770,11 +693,10 @@ function _montarPdfComercialBradesco() {
       total: { pct: _v('br-pctLance').replace(' %','') || '0,00', rs: (_t('br-lanceTotal') || 'R$ 0,00').replace('R$ ','') }
     },
     outputs: [
-      { label: 'Crédito Líquido',                                                                          value: creditoLiquido },
-      { label: 'Parcela Inicial',                                                                          value: _t('br-parcelaInicial') || '—' },
-      { label: '1ª parcela pós-contemplação',     subAcima: '(Mantém o valor da parcela inicial)',         value: _t('br-parcelaInicial') || '—' },
-      { label: 'Demais parcelas pós-contemplação', subAcima: '(A partir da 2ª pós contemplação, Diluir nas Parcelas)', value: _t('br-parcDiluir') || '—' },
-      { label: 'Prazo Restante',                                                                           value: _t('br-prazoDiluir') || '—' },
+      { label: 'Crédito Líquido',                                                  value: creditoLiquido },
+      { label: 'Parcela Inicial',                                                  value: _t('br-parcelaInicial') || '—' },
+      { label: 'Valor parcela (pós-contemplado)', subAcima: subPosLabel,           value: novaParc || '—' },
+      { label: 'Prazo Restante',                                                   value: prazoFinal || '—' },
     ],
     observacoes: _v('br-observacoes')
   };
@@ -797,11 +719,7 @@ document.getElementById('baixarPdfBradesco').addEventListener('click', async () 
 });
 
 // ═══════════════════════════════════════════════════════
-// OLHINHO — MEMÓRIA DE CÁLCULO DO LANCE
-// ═══════════════════════════════════════════════════════
-// ═══════════════════════════════════════════════════════
 // SYNC % LANCE ↔ VALOR DO LANCE (R$)
-// Usa a mesma fórmula do Vlamir: Lance = (Categoria × %Lance) ÷ Fator
 // ═══════════════════════════════════════════════════════
 let _syncingLance = false;
 function _baseCatEFator() {
@@ -841,7 +759,6 @@ function syncValorParaPct() {
 }
 get('br-pctLance').addEventListener('input', syncPctParaValor);
 get('br-lanceManual').addEventListener('input', syncValorParaPct);
-// Quando muda crédito/taxas, refaz a partir do % (que é o input mais natural)
 ['br-credito','br-taxaAdm','br-fundo','br-taxaAntecipacao'].forEach(id => {
   const el = get(id);
   if (el) el.addEventListener('input', () => { if (!_syncingLance) setTimeout(syncPctParaValor, 0); });
@@ -898,9 +815,6 @@ function fecharAnaliticoLance() {
   document.getElementById('modalLance').classList.remove('aberto');
 }
 
-// ═══════════════════════════════════════════════════════
-// SIMULAÇÕES SALVAS (7 dias) — SimulacaoStore
-// ═══════════════════════════════════════════════════════
 (function initSimStore() {
   if (!window.SimulacaoStore) return;
   window.SimulacaoStore.init({
@@ -914,7 +828,6 @@ function fecharAnaliticoLance() {
 })();
 </script>
 
-<!-- Modal: Memória de cálculo do lance -->
 <div id="modalLance" class="modal-lance-bg" onclick="if(event.target===this)fecharAnaliticoLance()">
   <div class="modal-lance-box">
     <div class="modal-lance-head">

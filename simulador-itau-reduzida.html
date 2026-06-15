@@ -6,10 +6,10 @@
 <title>Master Prime - Itaú Parcela Reduzida</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="pdf-master-prime.js?v=20260526e"></script>
+<script src="pdf-master-prime.js?v=20260615f"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="simulacao-store.js"></script>
 <style>
@@ -31,7 +31,6 @@
     --soft-blue: #F1F5F9;
     --soft-teal: #E8F6F8;
     --soft-orange: #FFF4E8;
-    --error: #DC2626;
     --warning-bg: #FFF8E8;
     --warning-border: #F0D9A0;
     --warning-text: #8B6A2A;
@@ -45,18 +44,35 @@
   .brand-text p { font-size: 11px; color: rgba(255,255,255,0.7); letter-spacing: 1.2px; text-transform: uppercase; margin-top: 2px; }
   .tag-admin { background: var(--itau-orange); color: #fff; padding: 6px 14px; border-radius: 4px; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; }
 
-  main { max-width: 1280px; margin: 0 auto; padding: 32px; }
-  h2.section-title { font-size: 22px; font-weight: 600; color: var(--mp-navy); margin-bottom: 4px; text-align: center; letter-spacing: 0.5px; }
-  .subtitle { font-size: 12px; color: var(--text-muted); text-align: center; margin-bottom: 24px; letter-spacing: 1px; text-transform: uppercase; }
+  main { max-width: 1440px; margin: 0 auto; padding: 18px 24px 12px; }
+  h2.section-title { font-size: 19px; font-weight: 600; color: var(--mp-navy); margin-bottom: 0; text-align: center; letter-spacing: 0.3px; }
+  h2.section-title .tag-bank { color: var(--itau-orange); }
+  body.neutral-mode h2.section-title .tag-bank { color: var(--mp-navy); }
+  .subtitle { font-size: 11px; color: var(--text-muted); text-align: center; margin-bottom: 14px; letter-spacing: 0.8px; text-transform: uppercase; }
+  .neutral-row { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin: 6px 0 10px; padding-right: 4px; }
+  .neutral-row .neutral-label { font-size: 13px; color: var(--text); user-select: none; }
+  .neutral-row .neutral-label .muted { color: var(--text-muted); font-weight: 400; }
+  .neutral-row .neutral-switch { position: relative; width: 42px; height: 22px; background: #CBD5E1; border-radius: 999px; transition: 0.2s; flex-shrink: 0; cursor: pointer; border: 0; padding: 0; }
+  .neutral-row .neutral-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,.20); }
+  .neutral-row .neutral-switch.on { background: var(--mp-navy); }
+  .neutral-row .neutral-switch.on::after { left: 23px; }
+  body.neutral-mode .tag-admin { display: none; }
 
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 16px; }
-  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
-  .card-header h3 { font-size: 13px; font-weight: 600; color: var(--mp-navy); letter-spacing: 1.5px; text-transform: uppercase; }
-  .card-header .badge-orange { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--itau-orange); }
-  .card-header .reset-btn { margin-left: auto; background: none; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-family: inherit; }
+  .layout-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+  @media (max-width: 1024px) { .layout-grid { grid-template-columns: 1fr; } }
+  .col-inputs { display: flex; flex-direction: column; gap: 12px; }
+  .col-outputs { display: flex; flex-direction: column; gap: 10px; position: sticky; top: 12px; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 0; }
+  .card-compact { padding: 12px 14px; }
+  .card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .card-header h3 { font-size: 11.5px; font-weight: 700; color: var(--mp-navy); letter-spacing: 1.2px; text-transform: uppercase; }
+  .card-header .badge-orange { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--itau-orange); }
+  body.neutral-mode .card-header .badge-orange { background: var(--mp-teal); }
+  .card-header .reset-btn { margin-left: auto; background: none; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; padding: 3px 9px; border-radius: 4px; font-size: 10.5px; font-family: inherit; }
   .card-header .reset-btn:hover { background: var(--bg); }
 
-  .grid { display: grid; gap: 16px; }
+  .grid { display: grid; gap: 10px; }
   .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -64,97 +80,72 @@
   @media (max-width: 768px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
 
   .field { position: relative; }
-  .field label { position: absolute; top: -7px; left: 12px; background: var(--card); padding: 0 6px; font-size: 11px; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; font-weight: 500; z-index: 1; }
-  .field input, .field select { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; background: #fff; color: var(--text); transition: border-color 0.15s; }
+  .field label { position: absolute; top: -6px; left: 10px; background: var(--card); padding: 0 5px; font-size: 10px; color: var(--text-muted); letter-spacing: 0.4px; text-transform: uppercase; font-weight: 500; z-index: 1; }
+  .field input, .field select { width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: 7px; font-size: 13px; font-family: inherit; background: #fff; color: var(--text); transition: border-color 0.15s; }
   .field input:focus, .field select:focus { outline: none; border-color: var(--itau-orange); box-shadow: 0 0 0 3px rgba(236,112,0,0.12); }
+  body.neutral-mode .field input:focus, body.neutral-mode .field select:focus { border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,0.12); }
   .field input:disabled, .field select:disabled { background: var(--soft-blue); color: var(--text-light); cursor: not-allowed; }
-  .field select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
-  .field-suffix { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--text-light); letter-spacing: 0.5px; pointer-events: none; }
+  .field select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+  .field-suffix { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 10px; color: var(--text-light); letter-spacing: 0.4px; pointer-events: none; }
+  .field-hint { font-size: 10.5px; color: var(--text-muted); margin-top: 4px; padding-left: 2px; font-style: italic; }
+  .field-hint strong { color: var(--itau-orange-dark); font-weight: 600; font-style: normal; }
+  body.neutral-mode .field-hint strong { color: var(--mp-teal-dark); }
 
-  /* Output cards */
-  .result { background: var(--soft-blue); border-radius: 8px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-  .result strong { font-size: 11.5px; color: var(--mp-navy); letter-spacing: 1px; text-transform: uppercase; font-weight: 500; }
-  .result .value { font-size: 17px; font-weight: 600; color: var(--mp-navy); font-family: 'DM Mono', ui-monospace, monospace; }
+  .out-box { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; }
+  .out-box .lbl { font-size: 10px; color: var(--text-muted); letter-spacing: 0.7px; text-transform: uppercase; font-weight: 600; margin-bottom: 3px; display: block; }
+  .out-box .lbl small { text-transform: none; font-weight: 500; color: var(--text-light); letter-spacing: 0.2px; }
+  .out-box .val { font-size: 16px; font-weight: 700; color: var(--mp-navy); font-family: 'Inter', -apple-system, system-ui, sans-serif; }
+  .out-box.primary { background: linear-gradient(135deg, var(--itau-orange) 0%, var(--itau-orange-dark) 100%); border-color: var(--itau-orange); }
+  body.neutral-mode .out-box.primary { background: linear-gradient(135deg, var(--mp-navy) 0%, var(--mp-navy-soft) 100%); border-color: var(--mp-navy); }
+  .out-box.primary .lbl { color: rgba(255,255,255,0.85); }
+  .out-box.primary .val { color: #fff; }
+  .out-box.orange { background: var(--soft-orange); border-color: #F5D4AB; }
+  .out-box.orange .val { color: var(--itau-orange-dark); }
+  body.neutral-mode .out-box.orange { background: var(--soft-teal); border-color: #C2E5EA; }
+  body.neutral-mode .out-box.orange .val { color: var(--mp-teal-dark); }
+  .result-orange { background: var(--soft-orange); border: 1px solid #F5D4AB; border-radius: 6px; padding: 9px 13px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  body.neutral-mode .result-orange { background: var(--soft-teal); border-color: #C2E5EA; }
+  .result-orange strong { font-size: 10.5px; color: var(--itau-orange-dark); letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; }
+  body.neutral-mode .result-orange strong { color: var(--mp-teal-dark); }
+  .result-orange .value { font-size: 15px; font-weight: 700; color: var(--mp-navy); font-family: 'Inter', -apple-system, system-ui, sans-serif; }
 
-  .result-primary { background: linear-gradient(135deg, var(--itau-orange) 0%, var(--itau-orange-dark) 100%); color: white; padding: 14px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-  .result-primary strong { color: rgba(255,255,255,0.85); font-size: 11.5px; letter-spacing: 1.2px; text-transform: uppercase; font-weight: 500; }
-  .result-primary .value { font-size: 20px; font-weight: 700; color: #fff; font-family: 'DM Mono', ui-monospace, monospace; }
+  .lance-presets-row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 10px; padding: 8px 11px; background: #FFF7E6; border: 1px solid #FBE3B5; border-radius: 7px; }
+  body.neutral-mode .lance-presets-row { background: var(--soft-blue); border-color: var(--border); }
+  .lance-presets-row .lpr-lbl { font-size: 10.5px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.4px; text-transform: uppercase; }
+  .lance-presets-row button { background: #fff; border: 1px solid var(--border); border-radius: 6px; padding: 5px 11px; font-size: 11px; color: var(--mp-navy); cursor: pointer; font-weight: 600; font-family: inherit; }
+  .lance-presets-row button:hover { background: var(--itau-orange); color: #fff; border-color: var(--itau-orange); }
+  body.neutral-mode .lance-presets-row button:hover { background: var(--mp-teal); color: #fff; border-color: var(--mp-teal); }
 
-  .result-orange { background: var(--soft-orange); border: 1px solid #F5D4AB; border-radius: 8px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-  .result-orange strong { font-size: 11.5px; color: var(--itau-orange-dark); letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
-  .result-orange .value { font-size: 19px; font-weight: 700; color: var(--mp-navy); font-family: 'DM Mono', ui-monospace, monospace; }
+  .lance-bloco { background: #E8EEF8; border-radius: 8px; padding: 12px; margin-top: 4px; }
+  .lance-bloco .grid { gap: 8px; }
+  .lance-bloco .field input { background: #fff; }
 
-  /* Radio "Reduzir após contemplação" */
-  .radio-group { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
-  .radio-group label { display: inline-flex; align-items: center; gap: 7px; cursor: pointer; font-size: 13px; color: var(--text); }
-  .radio-group input[type="radio"] { accent-color: var(--itau-orange); cursor: pointer; }
+  .redmode-toggle { padding: 8px 11px; background: var(--soft-blue); border-radius: 7px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .redmode-toggle .lbl { font-size: 11.5px; color: #475569; font-weight: 600; }
+  .redmode-toggle .group { display: flex; gap: 3px; background: #fff; padding: 2px; border-radius: 5px; border: 1px solid #e2e8f0; }
+  .redmode-btn { padding: 5px 11px; border: 0; background: transparent; color: #475569; border-radius: 4px; font-size: 11.5px; font-weight: 600; cursor: pointer; }
+  .redmode-btn.active { background: var(--itau-orange); color: #fff; }
+  body.neutral-mode .redmode-btn.active { background: var(--mp-navy); }
+  .redmode-toggle .hint { font-size: 10.5px; color: #64748b; font-style: italic; }
 
-  /* Resumo de parcelas */
-  .resumo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  @media (max-width: 768px) { .resumo-grid { grid-template-columns: 1fr; } }
-  .resumo-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--soft-blue); border-radius: 6px; }
-  .resumo-row .lbl { font-size: 11.5px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; font-weight: 600; }
-  .resumo-row .val { font-size: 14px; font-weight: 700; color: var(--mp-navy); font-family: 'DM Mono', ui-monospace, monospace; }
-  .resumo-row.highlight { background: var(--soft-orange); border: 1px solid #F5D4AB; }
-
-  /* Pós contemplação */
-  .pos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-  @media (max-width: 768px) { .pos-grid { grid-template-columns: 1fr; } }
-  .pos-card { background: var(--soft-blue); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
-  .pos-card h4 { font-size: 11.5px; font-weight: 700; color: var(--mp-navy); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
-  .pos-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; font-size: 13px; }
-  .pos-row .lbl { color: var(--text-muted); font-size: 12px; letter-spacing: 0.3px; }
-  .pos-row .val { font-weight: 600; color: var(--mp-navy); font-family: 'DM Mono', ui-monospace, monospace; }
-  .pos-row.highlight { background: #fff; padding: 10px 12px; border-radius: 6px; margin: 4px -4px; border: 1px solid var(--border); }
-  .pos-row.highlight .val { font-size: 16px; font-weight: 700; color: var(--itau-orange-dark); }
-
-  /* Footer aviso */
-  .aviso { background: var(--warning-bg); border: 1px solid var(--warning-border); border-radius: 8px; padding: 14px 18px; color: var(--warning-text); font-size: 12.5px; line-height: 1.5; margin-top: 8px; }
+  .aviso { background: var(--warning-bg); border: 1px solid var(--warning-border); border-radius: 7px; padding: 9px 13px; color: var(--warning-text); font-size: 11.5px; line-height: 1.45; margin-top: 6px; }
   .aviso strong { color: var(--warning-text); }
 
-  .actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; padding-bottom: 32px; }
+  .obs-area { width: 100%; min-height: 64px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 7px; font-size: 12px; font-family: inherit; resize: vertical; color: var(--text); background: #fff; }
+  .obs-area:focus { outline: none; border-color: var(--itau-orange); box-shadow: 0 0 0 3px rgba(236,112,0,0.12); }
+  body.neutral-mode .obs-area:focus { border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,0.12); }
+
+  .actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; padding-bottom: 16px; }
   button.primary, button.secondary { padding: 11px 22px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.15s; border: 1px solid transparent; font-family: inherit; }
   button.primary { background: var(--itau-orange); color: #fff; border-color: var(--itau-orange); }
   button.primary:hover { background: var(--itau-orange-dark); }
+  body.neutral-mode button.primary { background: var(--mp-navy); border-color: var(--mp-navy); }
+  body.neutral-mode button.primary:hover { background: var(--mp-navy-dark); }
   button.secondary { background: transparent; color: var(--text-muted); border-color: var(--border); }
   button.secondary:hover { background: var(--bg); border-color: var(--text-muted); }
 
-  /* Embed mode (iframe) */
   html.embedded header { display: none; }
   html.embedded main { padding-top: 18px; }
-
-  /* Observações textarea */
-  .obs-area { width: 100%; min-height: 90px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: inherit; resize: vertical; color: var(--text); background: #fff; }
-  .obs-area:focus { outline: none; border-color: var(--itau-orange); box-shadow: 0 0 0 3px rgba(236,112,0,0.12); }
-
-  /* Toggle genérico (modo neutro) */
-  .generic-toggle-bar { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-bottom: 20px; }
-  .generic-toggle-label { font-size: 12px; color: var(--text-muted); font-weight: 500; letter-spacing: 0.3px; }
-  .generic-toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
-  .generic-toggle input { opacity: 0; width: 0; height: 0; }
-  .generic-toggle .slider { position: absolute; cursor: pointer; inset: 0; background: var(--border); border-radius: 24px; transition: .3s; }
-  .generic-toggle .slider::before { content: ""; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
-  .generic-toggle input:checked + .slider { background: var(--mp-navy); }
-  .generic-toggle input:checked + .slider::before { transform: translateX(20px); }
-
-  /* ═══════════════ MODO GENÉRICO (neutro) ═══════════════ */
-  body.generic-mode {
-    --itau-orange: #4B5563;
-    --itau-orange-dark: #374151;
-    --soft-orange: #F3F4F6;
-    --focus-ring: rgba(75, 85, 99, 0.15);
-  }
-  body.generic-mode .tag-admin { display: none; }
-  body.generic-mode .field input:focus,
-  body.generic-mode .field select:focus,
-  body.generic-mode .obs-area:focus { border-color: #4B5563; box-shadow: 0 0 0 3px rgba(75, 85, 99, 0.15); }
-  body.generic-mode .result-orange strong { color: #374151; }
-  body.generic-mode .pos-row.highlight .val { color: #374151; }
-  body.generic-mode .brand-mark { background: #4B5563; }
-  body.generic-mode .card-header .badge-orange { background: #4B5563; }
-  body.generic-mode button.primary { background: #4B5563; border-color: #4B5563; }
-  body.generic-mode button.primary:hover { background: #374151; }
-  body.generic-mode .radio-group input[type="radio"] { accent-color: #4B5563; }
 </style>
 <script>if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('embedded');</script>
 </head>
@@ -168,238 +159,197 @@
       <p>Simulador de Consórcio</p>
     </div>
   </div>
-  <span class="tag-admin" id="tagAdminHeader">Itaú · Reduzida</span>
+  <span class="tag-admin">Itaú · Reduzida</span>
 </header>
 
 <main>
-  <div id="simStoreMount" style="max-width:1400px; margin:16px auto 0; padding:0 32px;"></div>
+  <div id="simStoreMount" style="max-width:1440px; margin:0 auto 8px; padding:0;"></div>
 
-  <!-- TOGGLE MODO GENÉRICO -->
-  <div class="generic-toggle-bar">
-    <span class="generic-toggle-label">Modo neutro (sem identificação da administradora)</span>
-    <label class="generic-toggle">
-      <input type="checkbox" id="genericModeToggle" onchange="alternarModoGenerico()">
-      <span class="slider"></span>
-    </label>
+  <div class="neutral-row">
+    <label class="neutral-label" for="btnModoNeutro">Modo neutro <span class="muted">(sem identificação da administradora)</span></label>
+    <button type="button" class="neutral-switch" id="btnModoNeutro" role="switch" aria-checked="false" title="Gera PDF sem identificação da administradora — usa identidade Master Prime padrão"></button>
   </div>
 
-  <h2 class="section-title" id="mainTitle">Itaú · Parcela Reduzida</h2>
-  <p class="subtitle" id="mainSubtitle">Cálculo de proposta, contemplação e estratégias de lance</p>
+  <h2 class="section-title">Simulador de Crédito · <span class="tag-bank" id="sim-titulo-banco">Itaú · Parcela Reduzida</span></h2>
+  <p class="subtitle">Cálculo de proposta, contemplação e estratégias de lance</p>
 
-  <!-- ════════ PROPOSTA ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-orange"></span>
-      <h3>Proposta</h3>
-      <button type="button" class="reset-btn" id="btnLimparProposta">Limpar</button>
-    </div>
-    <div class="grid grid-3">
-      <div class="field">
-        <label>Crédito contratado</label>
-        <input type="text" id="ir-credito" placeholder="R$ 0,00" data-mask="money">
-      </div>
-      <div class="field">
-        <label>Prazo total (meses)</label>
-        <input type="text" id="ir-prazo" placeholder="0" data-mask="int">
-      </div>
-      <div class="field">
-        <label>Redução até a contemplação</label>
-        <select id="ir-reducao">
-          <option value="" selected>Selecione…</option>
-          <option value="0.30">30%</option>
-          <option value="0.50">50%</option>
-        </select>
-      </div>
-    </div>
-  </section>
+  <div class="layout-grid">
 
-  <!-- ════════ TAXAS DO GRUPO ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-orange"></span>
-      <h3>Taxas do grupo</h3>
-      <button type="button" class="reset-btn" id="btnTaxasDefault">Restaurar padrão</button>
-    </div>
-    <div class="grid grid-3">
-      <div class="field">
-        <label>Taxa administrativa</label>
-        <input type="text" id="ir-taxaAdm" data-mask="pct2" placeholder="0,00 %">
-      </div>
-      <div class="field">
-        <label>Fundo de reserva</label>
-        <input type="text" id="ir-fundo" data-mask="pct2" placeholder="0,00 %">
-      </div>
-      <div class="field">
-        <label>Seguro de vida</label>
-        <input type="text" id="ir-seguro" data-mask="pct4" placeholder="0,0000 %">
-      </div>
-    </div>
+    <div class="col-inputs">
 
-    <div class="grid grid-2" style="margin-top: 16px;">
-      <div class="result"><strong>Taxa por mês</strong><span class="value" id="ir-taxaMes">—</span></div>
-      <div class="result"><strong>Taxa por ano</strong><span class="value" id="ir-taxaAno">—</span></div>
-    </div>
+      <section class="card card-compact">
+        <div class="card-header">
+          <span class="badge-orange"></span>
+          <h3>Dados da proposta</h3>
+          <button type="button" class="reset-btn" id="btnTaxasDefault">Taxas padrão</button>
+          <button type="button" class="reset-btn" id="btnLimparProposta" style="margin-left:6px">Limpar</button>
+        </div>
 
-    <div style="margin-top: 16px;">
-      <div class="result-primary">
-        <strong>Parcela inicial <span style="font-weight:400;font-size:11px;opacity:.85">(até contemplação · com redutor)</span></strong>
-        <span class="value" id="ir-parcelaReduzidaDestaque">—</span>
-      </div>
-      <span id="ir-parcelaIntegralDestaque" style="display:none">—</span>
-    </div>
-  </section>
+        <div class="grid grid-3">
+          <div class="field">
+            <label>Taxa adm.</label>
+            <input type="text" id="ir-taxaAdm" data-mask="pct2" placeholder="0,00 %">
+          </div>
+          <div class="field">
+            <label>Fundo Reserva</label>
+            <input type="text" id="ir-fundo" data-mask="pct2" placeholder="0,00 %">
+          </div>
+          <div class="field">
+            <label>Seguro</label>
+            <input type="text" id="ir-seguro" data-mask="pct4" placeholder="0,0000 %">
+          </div>
+          <div class="field">
+            <label>Valor do crédito</label>
+            <input type="text" id="ir-credito" placeholder="R$ 0,00" data-mask="money">
+          </div>
+          <div class="field">
+            <label>Prazo (meses)</label>
+            <input type="text" id="ir-prazo" placeholder="0" data-mask="int">
+          </div>
+          <div class="field">
+            <label>Redução até contempla</label>
+            <select id="ir-reducao">
+              <option value="" selected>Selecione…</option>
+              <option value="0.30">30%</option>
+              <option value="0.50">50%</option>
+            </select>
+          </div>
+        </div>
 
-  <!-- ════════ OFERTA DE LANCE ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-orange"></span>
-      <h3>Oferta de Lance</h3>
-      <button type="button" class="reset-btn" id="btnLimparLance">Limpar</button>
-    </div>
+        <div class="field-hint" style="margin-top: 6px;">
+          <strong>Seguro Itaú:</strong> 0,0472% a.m. (imóvel) · 0,056% a.m. (veículo)
+        </div>
 
-    <div class="lance-presets" style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:14px; padding:10px 14px; background:#FFF7E6; border:1px solid #FBE3B5; border-radius:8px;">
-      <span style="font-size:11px; color:var(--text-muted); font-weight:600; letter-spacing:.5px; text-transform:uppercase;">Lance Fixo 40%:</span>
-      <button type="button" id="btnPresetFixo40Proprio" style="background:#fff; border:1px solid var(--border); border-radius:6px; padding:6px 12px; font-size:12px; color:var(--mp-navy); cursor:pointer; font-weight:600;">40% recursos próprios</button>
-      <button type="button" id="btnPresetFixo40Emb" style="background:#fff; border:1px solid var(--border); border-radius:6px; padding:6px 12px; font-size:12px; color:var(--mp-navy); cursor:pointer; font-weight:600;">30% embutido + 10% próprios</button>
-    </div>
+        <div class="redmode-toggle" style="margin-top: 10px;">
+          <span class="lbl">Reduzir após contemplação:</span>
+          <div class="group">
+            <button type="button" class="redmode-btn active" data-redmode="parcela">Parcela</button>
+            <button type="button" class="redmode-btn" data-redmode="prazo">Prazo</button>
+          </div>
+          <span class="hint">— cenário que vai pro PDF</span>
+        </div>
+      </section>
 
-    <div class="grid grid-2">
-      <div class="field">
-        <label>Lance embutido (% do crédito)</label>
-        <input type="text" id="ir-pctEmbutido" data-mask="pct2" placeholder="0,00 %">
-      </div>
-      <div class="field">
-        <label>Lance a pagar (% do crédito)</label>
-        <input type="text" id="ir-pctAPagar" data-mask="pct2" placeholder="0,00 %">
-      </div>
-    </div>
+      <section class="card card-compact">
+        <div class="card-header">
+          <span class="badge-orange"></span>
+          <h3>Oferta de Lance</h3>
+          <button type="button" class="reset-btn" id="btnLimparLance">Limpar</button>
+        </div>
 
-    <div class="grid grid-2" style="margin-top: 14px;">
-      <div class="result"><strong>Lance embutido (R$)</strong><span class="value" id="ir-lanceEmbutido">—</span></div>
-      <div class="result"><strong>Lance a pagar (R$)</strong><span class="value" id="ir-lanceAPagar">—</span></div>
-    </div>
+        <div class="lance-presets-row">
+          <span class="lpr-lbl">Lance Fixo 40%:</span>
+          <button type="button" id="btnPresetFixo40Proprio">40% recursos próprios</button>
+          <button type="button" id="btnPresetFixo40Emb">30% embutido + 10% próprios</button>
+        </div>
 
-    <div style="margin-top: 14px;">
-      <div class="result-orange">
-        <strong>Total do lance</strong>
-        <span class="value" id="ir-totalLance">—</span>
-      </div>
-    </div>
-  </section>
+        <div class="lance-bloco">
+          <div class="grid grid-2">
+            <div class="field">
+              <label>% Lance Embutido</label>
+              <input type="text" id="ir-pctEmbutido" data-mask="pct2" placeholder="0,00 %">
+              <span class="field-suffix">%</span>
+            </div>
+            <div class="field">
+              <label>% Lance a Pagar</label>
+              <input type="text" id="ir-pctAPagar" data-mask="pct2" placeholder="0,00 %">
+              <span class="field-suffix">%</span>
+            </div>
+            <div class="field">
+              <label>Lance Embutido (R$)</label>
+              <input type="text" id="ir-lanceEmbutidoView" placeholder="—" disabled>
+            </div>
+            <div class="field">
+              <label>Lance a Pagar (R$)</label>
+              <input type="text" id="ir-lanceAPagarView" placeholder="—" disabled>
+            </div>
+          </div>
+          <div style="margin-top: 8px;">
+            <div class="result-orange" style="padding: 7px 11px;">
+              <strong>Total do Lance</strong>
+              <span class="value" id="ir-totalLance" style="font-size:14px;">—</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
-  <!-- ════════ REDUZIR APÓS CONTEMPLAÇÃO ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-orange"></span>
-      <h3>Reduzir após contemplação</h3>
-    </div>
-    <div class="radio-group">
-      <label><input type="radio" name="ir-reduzir" value="parcela" checked> Reduzir parcela</label>
-      <label><input type="radio" name="ir-reduzir" value="prazo"> Reduzir prazo</label>
-    </div>
-  </section>
+      <section class="card card-compact">
+        <div class="card-header">
+          <span class="badge-orange"></span>
+          <h3>Observações (opcional)</h3>
+          <button type="button" class="reset-btn" id="btnLimparObs">Limpar</button>
+        </div>
+        <textarea id="ir-observacoes" class="obs-area" placeholder="Anotações que devem aparecer no PDF…"></textarea>
+      </section>
 
-  <!-- ════════ ESTIMATIVA PÓS-CONTEMPLAÇÃO ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-orange"></span>
-      <h3>Estimativa pós-contemplação</h3>
-    </div>
-
-    <div style="margin-bottom: 16px;">
-      <div class="result-primary">
-        <strong>Crédito líquido (após embutido)</strong>
-        <span class="value" id="ir-creditoLiquido">—</span>
-      </div>
-    </div>
-
-    <div class="pos-grid">
-      <div class="pos-card" id="ir-posReduzirParcela">
-        <h4>Se reduzir a parcela</h4>
-        <div class="pos-row highlight"><span class="lbl">Nova parcela</span><span class="val" id="ir-novaParcela">—</span></div>
-        <div class="pos-row"><span class="lbl">Prazo restante</span><span class="val" id="ir-prazoRestante">—</span></div>
-        <div class="pos-row"><span class="lbl">Saldo devedor pós-contempla</span><span class="val" id="ir-saldoPos">—</span></div>
+      <div class="aviso">
+        <strong>Atenção:</strong> A Parcela Reduzida é aplicada até a contemplação. Após, a parcela volta para a integral (ajustada pelo saldo devedor, lance e estratégia). Valores são mera referência.
       </div>
 
-      <div class="pos-card" id="ir-posReduzirPrazo">
-        <h4>Se reduzir o prazo</h4>
-        <div class="pos-row highlight"><span class="lbl">Novo prazo</span><span class="val" id="ir-novoPrazo">—</span></div>
-        <div class="pos-row"><span class="lbl">Parcela mantida</span><span class="val" id="ir-parcelaMantida">—</span></div>
-        <div class="pos-row"><span class="lbl">Saldo devedor pós-contempla</span><span class="val" id="ir-saldoPosPrazo">—</span></div>
+    </div>
+
+    <div class="col-outputs">
+
+      <div class="out-box primary">
+        <span class="lbl">Crédito Líquido</span>
+        <div class="val" id="ir-creditoLiquido">—</div>
       </div>
+
+      <div class="out-box">
+        <span class="lbl">Parcela inicial <small>(reduzida · até contempla)</small></span>
+        <div class="val" id="ir-parcelaReduzidaDestaque">—</div>
+      </div>
+
+      <div class="out-box">
+        <span class="lbl">Parcela integral <small>(após contempla)</small></span>
+        <div class="val" id="ir-parcelaIntegralDestaque" style="font-size:14px;">—</div>
+      </div>
+
+      <div class="out-box">
+        <span class="lbl">Seguro mensal <small>(incluso)</small></span>
+        <div class="val" id="ir-seguroMensal" style="font-size:14px;">—</div>
+      </div>
+
+      <div class="out-box orange" id="ir-posReduzirParcela">
+        <span class="lbl">Valor Parcela <small>(pós-contemplado)</small></span>
+        <div class="val" id="ir-novaParcela">—</div>
+      </div>
+
+      <div class="out-box" id="ir-posReduzirPrazo">
+        <span class="lbl">Prazo Restante</span>
+        <div class="val" id="ir-novoPrazoOut">—</div>
+      </div>
+
+      <details style="background:#fff; border:1px solid var(--border); border-radius:7px; padding:8px 11px; font-size:11.5px;">
+        <summary style="cursor:pointer; color:var(--text-muted); font-weight:600; letter-spacing:0.4px; text-transform:uppercase; font-size:10.5px;">Detalhes ▾</summary>
+        <div style="margin-top:8px; display:grid; gap:6px;">
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Categoria</span><strong id="ir-categoria">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Saldo devedor</span><strong id="ir-saldoDevedor">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Parcela integral</span><strong id="ir-parcelaIntegral">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Parcela reduzida</span><strong id="ir-parcelaReduzida">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">% redução aplicada</span><strong id="ir-pctReducao">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Saldo pós-contempla</span><strong id="ir-saldoPos">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Lance embutido</span><strong id="ir-lanceEmbutido">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Lance a pagar</span><strong id="ir-lanceAPagar">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Taxa/mês</span><strong id="ir-taxaMes">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Taxa/ano</span><strong id="ir-taxaAno">—</strong></div>
+          <div style="display:flex; justify-content:space-between; padding-top:4px; border-top:1px dashed var(--border)"><span style="color:var(--text-muted)">Prazo restante (parcela)</span><strong id="ir-prazoRestante">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Novo prazo (reduz prazo)</span><strong id="ir-novoPrazo">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Parcela mantida</span><strong id="ir-parcelaMantida">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Saldo pós (prazo)</span><strong id="ir-saldoPosPrazo">—</strong></div>
+        </div>
+      </details>
+
+      <div class="actions" style="margin-top:4px;">
+        <button class="secondary" id="btnLimparTudo">Limpar tudo</button>
+        <button type="button" id="baixarPdfItau" class="primary">Gerar PDF</button>
+      </div>
+
     </div>
-  </section>
-
-  <!-- ════════ RESUMO DE PARCELAS ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-orange"></span>
-      <h3>Resumo de parcelas</h3>
-    </div>
-
-    <div class="resumo-grid" style="margin-bottom: 12px;">
-      <div class="resumo-row"><span class="lbl">Categoria</span><span class="val" id="ir-categoria">—</span></div>
-      <div class="resumo-row"><span class="lbl">Saldo devedor</span><span class="val" id="ir-saldoDevedor">—</span></div>
-      <div class="resumo-row"><span class="lbl">Parcela integral (sem redução)</span><span class="val" id="ir-parcelaIntegral">—</span></div>
-      <div class="resumo-row"><span class="lbl">Seguro mensal (incluso)</span><span class="val" id="ir-seguroMensal">—</span></div>
-    </div>
-
-    <div class="resumo-grid">
-      <div class="resumo-row highlight"><span class="lbl">Parcela reduzida (até contemplação)</span><span class="val" id="ir-parcelaReduzida">—</span></div>
-      <div class="resumo-row highlight"><span class="lbl">% de redução aplicada</span><span class="val" id="ir-pctReducao">—</span></div>
-    </div>
-  </section>
-
-  <!-- ════════ OBSERVAÇÕES ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-orange"></span>
-      <h3>Observações (opcional)</h3>
-      <button type="button" class="reset-btn" id="btnLimparObs">Limpar</button>
-    </div>
-    <textarea id="ir-observacoes" class="obs-area" placeholder="Adicione anotações que devem aparecer no PDF…"></textarea>
-  </section>
-
-  <!-- ════════ AVISO ════════ -->
-  <div class="aviso">
-    <strong>Atenção:</strong> A Parcela Reduzida é aplicada até a contemplação. Após a contemplação, a parcela volta para a integral (ajustada pelo saldo devedor remanescente, lance e estratégia escolhida). Os valores são mera referência.
-  </div>
-
-  <div class="actions">
-    <button type="button" id="baixarPdfItau" class="primary" style="margin-right:8px;">Baixar PDF</button>
-    <button class="secondary" id="btnLimparTudo">Limpar tudo</button>
   </div>
 </main>
 
 <script>
-// ═══════════════════════════════════════════════════════
-// MODO GENÉRICO (toggle)
-// ═══════════════════════════════════════════════════════
-function isModoGenerico() {
-  return document.getElementById('genericModeToggle').checked;
-}
-
-function alternarModoGenerico() {
-  const ativo = isModoGenerico();
-  document.body.classList.toggle('generic-mode', ativo);
-  const titulo = document.getElementById('mainTitle');
-  const tagAdmin = document.getElementById('tagAdminHeader');
-  const pageTitle = document.querySelector('title');
-
-  if (ativo) {
-    titulo.textContent = 'Simulador de Consórcio · Parcela Reduzida';
-    if (tagAdmin) tagAdmin.textContent = 'Genérico';
-    if (pageTitle) pageTitle.textContent = 'Master Prime - Simulador de Consórcio';
-  } else {
-    titulo.textContent = 'Itaú · Parcela Reduzida';
-    if (tagAdmin) tagAdmin.textContent = 'Itaú · Reduzida';
-    if (pageTitle) pageTitle.textContent = 'Master Prime - Itaú Parcela Reduzida';
-  }
-}
-
-// ═══════════════════════════════════════════════════════
-// MÁSCARAS
-// ═══════════════════════════════════════════════════════
 function maskMoney(value) {
   const digits = String(value).replace(/\D/g, '');
   if (!digits) return '';
@@ -453,13 +403,6 @@ document.querySelectorAll('select').forEach(el => {
   el.addEventListener('change', recalc);
 });
 
-document.querySelectorAll('input[name="ir-reduzir"]').forEach(el => {
-  el.addEventListener('change', recalc);
-});
-
-// ═══════════════════════════════════════════════════════
-// FORMATTERS
-// ═══════════════════════════════════════════════════════
 function formatMoney(num) {
   if (!Number.isFinite(num) || isNaN(num)) return '—';
   return 'R$ ' + num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -477,41 +420,26 @@ function setOut(id, value) {
   const el = get(id);
   if (el) el.textContent = value;
 }
+function setVal(id, value) {
+  const el = get(id);
+  if (el) el.value = value;
+}
 
-// ═══════════════════════════════════════════════════════
-// LEITURA DE INPUTS
-// ═══════════════════════════════════════════════════════
 function readInputs() {
-  const reduzirEl = document.querySelector('input[name="ir-reduzir"]:checked');
   return {
     credito: unmaskMoney(get('ir-credito').value),
     prazo: parseInt(get('ir-prazo').value || '0', 10),
-    contempla: 1,  // fixo: contemplação na 1ª parcela (igual plataforma Itaú)
+    contempla: 1,
     reducao: get('ir-reducao').value,
     taxaAdm: unmaskPct(get('ir-taxaAdm').value) / 100,
     fundo: unmaskPct(get('ir-fundo').value) / 100,
     seguro: unmaskPct(get('ir-seguro').value) / 100,
     pctEmbutido: unmaskPct(get('ir-pctEmbutido').value) / 100,
     pctAPagar: unmaskPct(get('ir-pctAPagar').value) / 100,
-    reduzir: reduzirEl ? reduzirEl.value : 'parcela',
+    reduzir: window._irRedmode || 'parcela',
   };
 }
 
-// ═══════════════════════════════════════════════════════
-// FÓRMULAS — engenharia reversa da plataforma Itaú
-// ═══════════════════════════════════════════════════════
-// Vars:
-//   t = credito; h = taxaAdm; c = fundo; l = seguro;
-//   b = redução (0.30 ou 0.50); i = prazo;
-//   e = pctEmbutido; o = pctAPagar
-// g = t * l                                        (seguro mensal em R$)
-// SaldoDevedorTotal3 = t * (1 + h + c)             (sem seguro)
-// nt = SaldoDevedorTotal3 / i * b                  (redução por parcela)
-// SaldoDevedorTotal1 = SaldoDevedorTotal3 * (1-b) + g*i   (saldo reduzido + seguro)
-// VparcelaReduzida = SaldoDevedorTotal1 / i        (parcela ANTES da contempla)
-// VparcelaIntegral = (SaldoDevedorTotal3 + g*i) / i   (parcela cheia, pós-contempla)
-// LanceEmbutido = t * e
-// LanceApagar   = t * o
 function calc(i) {
   const r = {};
   const t = i.credito;
@@ -522,15 +450,12 @@ function calc(i) {
   let b = parseFloat(i.reducao);
   if (!Number.isFinite(b)) b = 0;
 
-  // Constantes
-  const g = t * l;                                  // seguro mensal R$
-  r.saldoDevedorTotal3 = t * (1 + h + c);           // saldo sem seguro, sem reduz
+  const g = t * l;
+  r.saldoDevedorTotal3 = t * (1 + h + c);
   r.categoria = r.saldoDevedorTotal3;
-  // SaldoTotal1 = saldo COM reducao (vale enquanto está pagando reduzida)
   r.saldoDevedorTotal1 = r.saldoDevedorTotal3 * (1 - b) + g * prazo;
-  // SaldoTotal2 = saldo SEM reducao = SaldoTotal3 + g*prazo (vale pra reduzir prazo após contempla)
   r.saldoDevedorTotal2 = r.saldoDevedorTotal3 + g * prazo;
-  r.saldoDevedor = r.saldoDevedorTotal1;            // exibido no resumo (parcela reduzida × prazo)
+  r.saldoDevedor = r.saldoDevedorTotal1;
   r.parcelaReduzida = (prazo > 0) ? r.saldoDevedorTotal1 / prazo : NaN;
   r.parcelaIntegral = (prazo > 0) ? r.saldoDevedorTotal2 / prazo : NaN;
   r.seguroMensal = g;
@@ -539,13 +464,8 @@ function calc(i) {
   r.totalLance = r.lanceEmbutido + r.lanceApagar;
   r.pctReducao = b;
 
-  // Crédito líquido (após embutido)
   r.creditoLiquido = t - r.lanceEmbutido;
 
-  // PÓS CONTEMPLAÇÃO — fórmula da plataforma Itaú validada lado a lado:
-  //   saldoPos = SaldoTotal2 − parcelaReduzida × contempla − lance
-  //   Reduzir Parcela: novaParcela = saldoPos / prazoRestante  (parcela cai, prazo mantém)
-  //   Reduzir Prazo:   novoPrazo   = saldoPos / parcelaIntegral (parcela volta cheia, prazo encurta)
   const lanceTotal = r.totalLance;
   const prazoRestante = Math.max(0, prazo - i.contempla);
   r.saldoPos = r.saldoDevedorTotal2 - (r.parcelaReduzida * i.contempla) - lanceTotal;
@@ -555,28 +475,25 @@ function calc(i) {
   r.parcelaMantida = r.parcelaIntegral;
   r.prazoRestante = prazoRestante;
 
-  // DEMONSTRATIVO TAXAS
   r.taxaMes = (prazo > 0) ? i.taxaAdm / prazo : NaN;
   r.taxaAno = r.taxaMes * 12;
 
   return r;
 }
 
-// ═══════════════════════════════════════════════════════
-// PINTA OUTPUTS
-// ═══════════════════════════════════════════════════════
 function recalc() {
   const i = readInputs();
 
   if (!(i.credito > 0) || !(i.prazo > 0)) {
-    const ids = ['ir-categoria','ir-saldoDevedor','ir-parcelaIntegral','ir-parcelaIntegralDestaque','ir-parcelaReduzida','ir-parcelaReduzidaDestaque','ir-pctReducao','ir-seguroMensal','ir-lanceEmbutido','ir-lanceAPagar','ir-totalLance','ir-creditoLiquido','ir-novaParcela','ir-prazoRestante','ir-saldoPos','ir-novoPrazo','ir-parcelaMantida','ir-saldoPosPrazo','ir-taxaMes','ir-taxaAno'];
+    const ids = ['ir-categoria','ir-saldoDevedor','ir-parcelaIntegral','ir-parcelaIntegralDestaque','ir-parcelaReduzida','ir-parcelaReduzidaDestaque','ir-pctReducao','ir-seguroMensal','ir-lanceEmbutido','ir-lanceAPagar','ir-totalLance','ir-creditoLiquido','ir-novaParcela','ir-novoPrazoOut','ir-prazoRestante','ir-saldoPos','ir-novoPrazo','ir-parcelaMantida','ir-saldoPosPrazo','ir-taxaMes','ir-taxaAno'];
     ids.forEach(id => setOut(id, '—'));
+    setVal('ir-lanceEmbutidoView', '');
+    setVal('ir-lanceAPagarView', '');
     return;
   }
 
   const r = calc(i);
 
-  // Resumo
   setOut('ir-categoria', formatMoney(r.categoria));
   setOut('ir-saldoDevedor', formatMoney(r.saldoDevedor));
   setOut('ir-parcelaIntegral', formatMoney(r.parcelaIntegral));
@@ -586,12 +503,12 @@ function recalc() {
   setOut('ir-pctReducao', r.pctReducao > 0 ? formatPct(r.pctReducao * 100, 0) : '—');
   setOut('ir-seguroMensal', formatMoney(r.seguroMensal));
 
-  // Lance
   setOut('ir-lanceEmbutido', formatMoney(r.lanceEmbutido));
   setOut('ir-lanceAPagar', formatMoney(r.lanceApagar));
   setOut('ir-totalLance', formatMoney(r.totalLance));
+  setVal('ir-lanceEmbutidoView', formatMoney(r.lanceEmbutido));
+  setVal('ir-lanceAPagarView', formatMoney(r.lanceApagar));
 
-  // Pós contemplação
   setOut('ir-creditoLiquido', formatMoney(r.creditoLiquido));
   setOut('ir-novaParcela', formatMoney(r.novaParcela));
   setOut('ir-prazoRestante', Number.isFinite(r.prazoRestante) ? formatInt(r.prazoRestante) + ' meses' : '—');
@@ -600,23 +517,20 @@ function recalc() {
   setOut('ir-parcelaMantida', formatMoney(r.parcelaMantida));
   setOut('ir-saldoPosPrazo', formatMoney(r.saldoPos));
 
-  // Taxas
+  if (i.reduzir === 'prazo') {
+    setOut('ir-novoPrazoOut', Number.isFinite(r.novoPrazo) ? formatInt(r.novoPrazo) + ' meses' : '—');
+  } else {
+    setOut('ir-novoPrazoOut', Number.isFinite(r.prazoRestante) ? formatInt(r.prazoRestante) + ' meses' : '—');
+  }
+
   setOut('ir-taxaMes', Number.isFinite(r.taxaMes) ? formatPct(r.taxaMes * 100, 4) : '—');
   setOut('ir-taxaAno', Number.isFinite(r.taxaAno) ? formatPct(r.taxaAno * 100, 2) : '—');
-
-  // Realce do card escolhido
-  document.getElementById('ir-posReduzirParcela').style.opacity = (i.reduzir === 'parcela') ? '1' : '0.5';
-  document.getElementById('ir-posReduzirPrazo').style.opacity = (i.reduzir === 'prazo') ? '1' : '0.5';
 }
 
-// ═══════════════════════════════════════════════════════
-// LIMPAR
-// ═══════════════════════════════════════════════════════
 function limparTudo() {
   ['ir-credito','ir-prazo','ir-taxaAdm','ir-fundo','ir-seguro','ir-pctEmbutido','ir-pctAPagar'].forEach(id => get(id).value = '');
   get('ir-reducao').value = '';
   get('ir-observacoes').value = '';
-  document.querySelector('input[name="ir-reduzir"][value="parcela"]').checked = true;
   recalc();
 }
 
@@ -646,7 +560,7 @@ document.getElementById('btnPresetFixo40Emb').addEventListener('click', () => {
 document.getElementById('btnTaxasDefault').addEventListener('click', () => {
   get('ir-taxaAdm').value = '20,00 %';
   get('ir-fundo').value = '2,00 %';
-  get('ir-seguro').value = '0,0380 %';
+  get('ir-seguro').value = '0,0560 %';
   recalc();
 });
 
@@ -656,239 +570,47 @@ document.getElementById('btnLimparObs').addEventListener('click', () => {
 
 document.getElementById('btnLimparTudo').addEventListener('click', limparTudo);
 
-// inicial
+// Modo Neutro
+window._irNeutro = false;
+function aplicaModoNeutro(on) {
+  window._irNeutro = !!on;
+  document.body.classList.toggle('neutral-mode', !!on);
+  const btn = document.getElementById('btnModoNeutro');
+  if (btn) { btn.classList.toggle('on', !!on); btn.setAttribute('aria-checked', !!on); }
+  const tit = document.getElementById('sim-titulo-banco');
+  if (tit) tit.textContent = on ? 'Consórcio · Parcela Reduzida' : 'Itaú · Parcela Reduzida';
+}
+(function() {
+  const btn = document.getElementById('btnModoNeutro');
+  if (btn) btn.addEventListener('click', () => aplicaModoNeutro(!window._irNeutro));
+  const lbl = document.querySelector('.neutral-label');
+  if (lbl) lbl.addEventListener('click', () => aplicaModoNeutro(!window._irNeutro));
+})();
+
+// Toggle Redmode
+window._irRedmode = 'parcela';
+function aplicaRedmode(modo) {
+  window._irRedmode = modo;
+  document.querySelectorAll('.redmode-btn').forEach(b => {
+    const isActive = b.dataset.redmode === modo;
+    b.classList.toggle('active', isActive);
+  });
+  const cardP = document.getElementById('ir-posReduzirParcela');
+  const cardT = document.getElementById('ir-posReduzirPrazo');
+  if (cardP) cardP.style.opacity = (modo === 'parcela') ? '1' : '0.55';
+  if (cardT) cardT.style.opacity = (modo === 'prazo') ? '1' : '0.55';
+  if (cardP) cardP.style.boxShadow = (modo === 'parcela') ? '0 0 0 2px var(--itau-orange)' : 'none';
+  if (cardT) cardT.style.boxShadow = (modo === 'prazo') ? '0 0 0 2px var(--mp-navy)' : 'none';
+  recalc();
+}
+document.querySelectorAll('.redmode-btn').forEach(b => {
+  b.addEventListener('click', () => aplicaRedmode(b.dataset.redmode));
+});
+aplicaRedmode('parcela');
+
 recalc();
 
-// ═════════════════════════════════════════════════════════════
-// PDF — FALLBACK GARANTIDO (SEM DEPENDÊNCIA EXTERNA)
-// ═════════════════════════════════════════════════════════════
-function _gerarPDFFallback(dados) {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF('p', 'mm', 'a4');
-  const margem = 15;
-  let y = margem;
-
-  // Cabeçalho neutro
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(18);
-  doc.setTextColor(45, 63, 94); // navy
-  doc.text(dados.titulo, margem, y);
-  y += 8;
-  doc.setFontSize(10);
-  doc.setTextColor(107, 114, 128);
-  doc.text(dados.subtitulo, margem, y);
-  if (dados.subtituloSecundario) {
-    y += 5;
-    doc.text(dados.subtituloSecundario, margem, y);
-  }
-  y += 6;
-  doc.setDrawColor(229, 231, 235);
-  doc.line(margem, y, 210 - margem, y);
-  y += 8;
-
-  // Inputs
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  dados.inputs.forEach(inp => {
-    doc.setTextColor(107,114,128);
-    doc.text(inp.label, margem, y);
-    doc.setTextColor(31,41,55);
-    doc.text(inp.value, margem + 50, y);
-    y += 6;
-  });
-  y += 4;
-
-  // Lance
-  if (dados.lance) {
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.setTextColor(45,63,94);
-    doc.text('Lance', margem, y);
-    y += 6;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    if (dados.lance.total) {
-      doc.text(`% Lance: ${dados.lance.total.pct} %`, margem, y);
-      doc.text(`Valor: R$ ${dados.lance.total.rs}`, margem + 60, y);
-    }
-    y += 8;
-  }
-
-  // Outputs
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
-  doc.setTextColor(45,63,94);
-  doc.text('Resultados', margem, y);
-  y += 7;
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  dados.outputs.forEach(out => {
-    doc.setTextColor(107,114,128);
-    doc.text(out.label, margem, y);
-    doc.setTextColor(31,41,55);
-    doc.text(out.value, margem + 70, y);
-    if (out.subAcima) {
-      y += 4;
-      doc.setFontSize(7);
-      doc.setTextColor(156,163,175);
-      doc.text(out.subAcima, margem + 70, y);
-      doc.setFontSize(9);
-    }
-    y += 6;
-  });
-  y += 6;
-
-  // Observações
-  if (dados.observacoes && dados.observacoes.trim() !== '') {
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.setTextColor(45,63,94);
-    doc.text('Observações', margem, y);
-    y += 6;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(31,41,55);
-    const obsLinhas = doc.splitTextToSize(dados.observacoes, 180);
-    obsLinhas.forEach(linha => {
-      if (y > 270) { doc.addPage(); y = margem; }
-      doc.text(linha, margem, y);
-      y += 5;
-    });
-  }
-
-  // Rodapé
-  y += 8;
-  doc.setDrawColor(229,231,235);
-  doc.line(margem, y, 210 - margem, y);
-  y += 5;
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(156,163,175);
-  doc.text('Simulação gerada pelo Master Prime · Caráter ilustrativo', margem, y);
-
-  return doc;
-}
-
-function _coletarBlocosItauReduzida() {
-  const _v = (id) => { const el = document.getElementById(id); return (el?.value || '').trim(); };
-  const _t = (id) => { const el = document.getElementById(id); return (el?.textContent || '').trim(); };
-  const _selTxt = (id) => { const el = document.getElementById(id); return (el?.selectedOptions?.[0]?.textContent || '').trim() || '—'; };
-  const _has = (s) => s && s !== '—' && s !== '?' && s !== '';
-
-  const prazoVal = _v('ir-prazo');
-  const reducaoTxt = _selTxt('ir-reducao');
-  const contemplaN = 1; // fixo na 1ª parcela (lógica plataforma Itaú)
-  const reduzirEl = document.querySelector('input[name="ir-reduzir"]:checked');
-  const reduzirTxt = reduzirEl?.value === 'prazo' ? 'Reduzir prazo' : 'Reduzir parcela';
-
-  // ─── BLOCO 1: PROPOSTA ───
-  const propostaLinha1 = [
-    { label: 'Crédito Contratado', value: _v('ir-credito') || 'R$ 0,00' },
-    { label: 'Prazo total', value: (prazoVal || '0') + ' meses' },
-    { label: 'Redução até contemplação', value: reducaoTxt }
-  ];
-  const saldoDevedor = _t('ir-saldoDevedor');
-  const propostaLinhas = [
-    { campos: propostaLinha1, destaque: { label: 'Categoria', value: _t('ir-categoria') || '—' } }
-  ];
-  if (_has(saldoDevedor)) {
-    propostaLinhas.push({ campos: [{ label: 'Saldo devedor', value: saldoDevedor }] });
-  }
-
-  // ─── BLOCO 2: TAXAS DO GRUPO ───
-  const taxaMes = _t('ir-taxaMes');
-  const taxaAno = _t('ir-taxaAno');
-  const taxaCombo = (_has(taxaMes) || _has(taxaAno))
-    ? `${taxaMes || '—'} a.m. · ${taxaAno || '—'} a.a.`
-    : '—';
-
-  const taxasLinhas = [{
-    campos: [
-      { label: 'Taxa administrativa', value: _v('ir-taxaAdm') || '0,00 %' },
-      { label: 'Fundo de reserva', value: _v('ir-fundo') || '0,00 %' },
-      { label: 'Seguro de vida', value: _v('ir-seguro') || '0,0000 %' }
-    ],
-    destaque: { label: 'Taxa por mês / ano', value: taxaCombo }
-  }];
-
-  // ─── BLOCO 3: OFERTA DE LANCE ───
-  const lanceCampos = [
-    { label: 'Embutido (%)', value: _v('ir-pctEmbutido') || '0,00 %' },
-    { label: 'A pagar (%)', value: _v('ir-pctAPagar') || '0,00 %' },
-    { label: 'Embutido (R$)', value: _t('ir-lanceEmbutido') || 'R$ 0,00' },
-    { label: 'A pagar (R$)', value: _t('ir-lanceAPagar') || 'R$ 0,00' }
-  ];
-  const lanceLinhas = [{
-    campos: lanceCampos,
-    destaque: { label: 'Total do lance', value: _t('ir-totalLance') || '—' }
-  }];
-
-  const blocos = [
-    { tipo: 'card', titulo: 'PROPOSTA', linhas: propostaLinhas },
-    { tipo: 'card', titulo: 'TAXAS DO GRUPO', linhas: taxasLinhas },
-    { tipo: 'card', titulo: 'OFERTA DE LANCE', linhas: lanceLinhas }
-  ];
-
-  // ─── BLOCO 4: ESTIMATIVA PÓS-CONTEMPLAÇÃO (só se contempla > 0) ───
-  if (contemplaN > 0) {
-    const credLiq = _t('ir-creditoLiquido');
-    const saldoPos = _t('ir-saldoPos');
-    const novaParc = _t('ir-novaParcela');
-    const prazoRest = _t('ir-prazoRestante');
-    const novoPrazo = _t('ir-novoPrazo');
-    const parcMantida = _t('ir-parcelaMantida');
-
-    const posLinhas = [
-      { campos: [
-          { label: 'Crédito líquido', value: credLiq || '—' },
-          { label: 'Saldo devedor pós-contempla', value: saldoPos || '—' },
-          { label: 'Estratégia', value: reduzirTxt }
-        ]
-      }
-    ];
-    posLinhas.push({
-      campos: [
-        { label: 'Nova parcela', value: novaParc || '—' },
-        { label: 'Prazo restante', value: prazoRest || '—' }
-      ],
-      destaque: { label: 'Se reduzir a parcela', value: novaParc || '—' }
-    });
-    posLinhas.push({
-      campos: [
-        { label: 'Novo prazo', value: novoPrazo || '—' },
-        { label: 'Parcela mantida', value: parcMantida || '—' }
-      ],
-      destaque: { label: 'Se reduzir o prazo', value: novoPrazo || '—' }
-    });
-
-    blocos.push({ tipo: 'card', titulo: 'ESTIMATIVA PÓS-CONTEMPLAÇÃO', linhas: posLinhas });
-  }
-
-  // ─── BLOCO 5: RESUMO DE PARCELAS ───
-  const resumoLinhas = [
-    { campos: [
-        { label: 'Parcela integral (sem reduz)', value: _t('ir-parcelaIntegral') || '—' },
-        { label: 'Parcela reduzida', value: _t('ir-parcelaReduzida') || '—' },
-        { label: '% de redução aplicada', value: _t('ir-pctReducao') || '—' },
-        { label: 'Seguro mensal (incluso)', value: _t('ir-seguroMensal') || '—' }
-      ],
-      destaque: { multi: [
-        { label: 'Parcela reduzida (até contemplação)', value: _t('ir-parcelaReduzida') || '—' },
-        { label: 'Parcela integral (após contempla)', value: _t('ir-parcelaIntegral') || '—' }
-      ]}
-    }
-  ];
-  blocos.push({ tipo: 'card', titulo: 'RESUMO DE PARCELAS', linhas: resumoLinhas });
-
-  // ─── BLOCO 6: OBSERVAÇÕES (se houver) ───
-  const obs = _v('ir-observacoes');
-  if (_has(obs)) {
-    blocos.push({ tipo: 'texto', titulo: 'OBSERVAÇÕES', texto: obs });
-  }
-
-  return blocos;
-}
-
+// PDF
 function _montarPdfComercialItauReduzida() {
   const _v = (id) => { const el = document.getElementById(id); return (el?.value || '').trim(); };
   const _t = (id) => { const el = document.getElementById(id); return (el?.textContent || '').trim(); };
@@ -896,16 +618,19 @@ function _montarPdfComercialItauReduzida() {
 
   const reducaoTxt = _selTxt('ir-reducao') || '—';
   const reducaoPct = reducaoTxt.replace(/[^\d%]/g, '');
-
-  const generico = isModoGenerico();
+  const _neutro = !!window._irNeutro;
+  const modo = window._irRedmode || 'parcela';
+  const novaParc = (modo === 'prazo') ? _t('ir-parcelaMantida') : _t('ir-novaParcela');
+  const prazoFinal = (modo === 'prazo') ? _t('ir-novoPrazo') : _t('ir-prazoRestante');
 
   return {
-    filename: generico ? 'simulacao-consorcio-reduzida' : 'itau-parcela-reduzida',
-    logoAdmin: generico ? null : 'itau',
+    filename: _neutro ? 'simulacao-consorcio-reduzida' : 'itau-parcela-reduzida',
+    logoAdmin: 'itau',
+    hideAdminLogo: _neutro,
     titulo: 'Simulador de Crédito',
-    subtitulo: generico ? 'Consórcio Parcela Reduzida' : 'Parcela Reduzida',
+    subtitulo: _neutro ? 'Consórcio · Parcela Reduzida' : 'Itaú · Parcela Reduzida',
     subtituloSecundario: `(Redução de ${reducaoPct || '30%'} até a Contemplação)`,
-    representanteTexto: generico ? 'Consórcio' : 'Consórcio Itaú',
+    representanteTexto: _neutro ? 'Master Prime' : 'Consórcio Itaú',
     inputs: [
       { label: 'Taxa de adm. do Grupo', value: _v('ir-taxaAdm') || '0,00 %' },
       { label: 'Fundo Reserva', value: _v('ir-fundo') || '0,00 %' },
@@ -923,9 +648,9 @@ function _montarPdfComercialItauReduzida() {
     },
     outputs: [
       { label: 'Valor parcela (antes contemplação)', value: _t('ir-parcelaReduzida') || '—' },
-      { label: 'Valor parcela (pós-contemplado)',    value: _t('ir-novaParcela') || '—' },
+      { label: 'Valor parcela (pós-contemplado)',    value: novaParc || '—' },
       { label: 'Crédito Líquido',                    value: _t('ir-creditoLiquido') || '—' },
-      { label: 'Prazo Restante',                     value: _t('ir-prazoRestante') || '—' },
+      { label: 'Prazo Restante',                     value: prazoFinal || '—' },
     ],
     observacoes: _v('ir-observacoes')
   };
@@ -937,15 +662,7 @@ document.getElementById('baixarPdfItau').addEventListener('click', async () => {
   btn.textContent = 'Gerando PDF...';
   btn.disabled = true;
   try {
-    // Tenta usar módulo externo se existir e função disponível
-    if (typeof window.PdfMasterPrime !== 'undefined' && typeof window.PdfMasterPrime.gerarComercial === 'function') {
-      await window.PdfMasterPrime.gerarComercial(_montarPdfComercialItauReduzida());
-    } else {
-      // Fallback com jsPDF próprio
-      const dados = _montarPdfComercialItauReduzida();
-      const doc = _gerarPDFFallback(dados);
-      doc.save((dados.filename || 'simulacao') + '.pdf');
-    }
+    await PdfMasterPrime.gerarComercial(_montarPdfComercialItauReduzida());
   } catch (err) {
     console.error(err);
     alert('Erro ao gerar PDF: ' + err.message);
@@ -955,9 +672,6 @@ document.getElementById('baixarPdfItau').addEventListener('click', async () => {
   }
 });
 
-// ═══════════════════════════════════════════════════════
-// SIMULAÇÕES SALVAS (48h) — SimulacaoStore
-// ═══════════════════════════════════════════════════════
 (function initSimStore() {
   if (!window.SimulacaoStore) return;
   window.SimulacaoStore.init({
