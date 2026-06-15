@@ -673,7 +673,7 @@ function _montarPdfComercialBradesco() {
 
   return {
     filename: _neutro ? 'simulacao-consorcio-imovel' : 'bradesco-imovel',
-    logoAdmin: 'bradesco',
+    logoAdmin: _neutro ? 'porto' : 'bradesco',
     hideAdminLogo: _neutro,
     titulo: 'Simulador de Crédito',
     subtitulo: _neutro ? 'Consórcio · Imóvel' : 'Bradesco · Imóvel',

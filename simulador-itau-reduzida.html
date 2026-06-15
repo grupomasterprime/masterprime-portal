@@ -625,7 +625,7 @@ function _montarPdfComercialItauReduzida() {
 
   return {
     filename: _neutro ? 'simulacao-consorcio-reduzida' : 'itau-parcela-reduzida',
-    logoAdmin: 'itau',
+    logoAdmin: _neutro ? 'porto' : 'itau',
     hideAdminLogo: _neutro,
     titulo: 'Simulador de Crédito',
     subtitulo: _neutro ? 'Consórcio · Parcela Reduzida' : 'Itaú · Parcela Reduzida',

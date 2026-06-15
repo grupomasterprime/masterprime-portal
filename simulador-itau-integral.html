@@ -598,7 +598,7 @@ function _montarPdfComercialItauIntegral() {
 
   return {
     filename: _neutro ? 'simulacao-consorcio-integral' : 'itau-parcela-integral',
-    logoAdmin: 'itau',
+    logoAdmin: _neutro ? 'porto' : 'itau',
     hideAdminLogo: _neutro,
     titulo: 'Simulador de Crédito',
     subtitulo: _neutro ? 'Consórcio · Parcela Integral' : 'Itaú · Parcela Integral',
