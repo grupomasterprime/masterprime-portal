@@ -42,18 +42,26 @@
   .brand-text p { font-size: 11px; color: rgba(255,255,255,0.7); letter-spacing: 1.2px; text-transform: uppercase; margin-top: 2px; }
   .tag-admin { background: var(--mp-teal); color: var(--mp-navy-dark); padding: 6px 14px; border-radius: 4px; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; }
 
-  main { max-width: 1280px; margin: 0 auto; padding: 32px; }
-  h2.section-title { font-size: 22px; font-weight: 600; color: var(--mp-navy); margin-bottom: 4px; text-align: center; letter-spacing: 0.5px; }
-  .subtitle { font-size: 12px; color: var(--text-muted); text-align: center; margin-bottom: 24px; letter-spacing: 1px; text-transform: uppercase; }
+  main { max-width: 1440px; margin: 0 auto; padding: 18px 24px 12px; }
+  h2.section-title { font-size: 19px; font-weight: 600; color: var(--mp-navy); margin-bottom: 0; text-align: center; letter-spacing: 0.3px; }
+  h2.section-title .tag-bank { color: var(--mp-teal-dark); }
+  .subtitle { font-size: 11px; color: var(--text-muted); text-align: center; margin-bottom: 14px; letter-spacing: 0.8px; text-transform: uppercase; }
 
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 16px; }
-  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
-  .card-header h3 { font-size: 13px; font-weight: 600; color: var(--mp-navy); letter-spacing: 1.5px; text-transform: uppercase; }
-  .card-header .badge-teal { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--mp-teal); }
-  .card-header .reset-btn { margin-left: auto; background: none; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-family: inherit; }
+  /* Layout single-screen 2 colunas */
+  .layout-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+  @media (max-width: 1024px) { .layout-grid { grid-template-columns: 1fr; } }
+  .col-inputs { display: flex; flex-direction: column; gap: 12px; }
+  .col-outputs { display: flex; flex-direction: column; gap: 10px; position: sticky; top: 12px; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 0; }
+  .card-compact { padding: 12px 14px; }
+  .card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .card-header h3 { font-size: 11.5px; font-weight: 700; color: var(--mp-navy); letter-spacing: 1.2px; text-transform: uppercase; }
+  .card-header .badge-teal { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--mp-teal); }
+  .card-header .reset-btn { margin-left: auto; background: none; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; padding: 3px 9px; border-radius: 4px; font-size: 10.5px; font-family: inherit; }
   .card-header .reset-btn:hover { background: var(--bg); }
 
-  .grid { display: grid; gap: 16px; }
+  .grid { display: grid; gap: 10px; }
   .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -61,37 +69,56 @@
   @media (max-width: 768px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
 
   .field { position: relative; }
-  .field label { position: absolute; top: -7px; left: 12px; background: var(--card); padding: 0 6px; font-size: 11px; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; font-weight: 500; z-index: 1; }
-  .field input, .field select { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; background: #fff; color: var(--text); transition: border-color 0.15s; }
+  .field label { position: absolute; top: -6px; left: 10px; background: var(--card); padding: 0 5px; font-size: 10px; color: var(--text-muted); letter-spacing: 0.4px; text-transform: uppercase; font-weight: 500; z-index: 1; }
+  .field input, .field select { width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: 7px; font-size: 13px; font-family: inherit; background: #fff; color: var(--text); transition: border-color 0.15s; }
   .field input:focus, .field select:focus { outline: none; border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,0.12); }
   .field input:disabled, .field select:disabled { background: var(--soft-blue); color: var(--text-light); cursor: not-allowed; }
-  .field select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
-  .field-suffix { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--text-light); letter-spacing: 0.5px; pointer-events: none; }
+  .field select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+  .field-suffix { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 10px; color: var(--text-light); letter-spacing: 0.4px; pointer-events: none; }
+  .field-hint { font-size: 10.5px; color: var(--text-muted); margin-top: 4px; padding-left: 2px; font-style: italic; }
+  .field-hint strong { color: var(--mp-teal-dark); font-weight: 600; font-style: normal; }
 
   /* Output cards */
-  .result { background: var(--soft-blue); border-radius: 8px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-  .result strong { font-size: 11.5px; color: var(--mp-navy); letter-spacing: 1px; text-transform: uppercase; font-weight: 500; }
-  .result .value { font-size: 17px; font-weight: 600; color: var(--mp-navy); font-family: 'DM Mono', ui-monospace, monospace; }
+  .result { background: var(--soft-blue); border-radius: 6px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .result strong { font-size: 10.5px; color: var(--mp-navy); letter-spacing: 0.8px; text-transform: uppercase; font-weight: 500; }
+  .result .value { font-size: 14px; font-weight: 600; color: var(--mp-navy); font-family: 'DM Mono', ui-monospace, monospace; }
 
-  .result-primary { background: linear-gradient(135deg, var(--mp-navy) 0%, var(--mp-navy-soft) 100%); color: white; padding: 14px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-  .result-primary strong { color: rgba(255,255,255,0.75); font-size: 11.5px; letter-spacing: 1.2px; text-transform: uppercase; font-weight: 500; }
-  .result-primary .value { font-size: 20px; font-weight: 700; color: #fff; font-family: 'DM Mono', ui-monospace, monospace; }
+  .result-primary { background: linear-gradient(135deg, var(--mp-navy) 0%, var(--mp-navy-soft) 100%); color: white; padding: 10px 14px; border-radius: 7px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .result-primary strong { color: rgba(255,255,255,0.75); font-size: 10.5px; letter-spacing: 1px; text-transform: uppercase; font-weight: 500; }
+  .result-primary .value { font-size: 16px; font-weight: 700; color: #fff; font-family: 'DM Mono', ui-monospace, monospace; }
 
-  .result-teal { background: var(--soft-teal); border: 1px solid #C2E5EA; border-radius: 8px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-  .result-teal strong { font-size: 11.5px; color: var(--mp-teal-dark); letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
-  .result-teal .value { font-size: 19px; font-weight: 700; color: var(--mp-navy); font-family: 'DM Mono', ui-monospace, monospace; }
+  .result-teal { background: var(--soft-teal); border: 1px solid #C2E5EA; border-radius: 6px; padding: 9px 13px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .result-teal strong { font-size: 10.5px; color: var(--mp-teal-dark); letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; }
+  .result-teal .value { font-size: 15px; font-weight: 700; color: var(--mp-navy); font-family: 'DM Mono', ui-monospace, monospace; }
+
+  /* Output box (lado direito) */
+  .out-box { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; }
+  .out-box .lbl { font-size: 10px; color: var(--text-muted); letter-spacing: 0.7px; text-transform: uppercase; font-weight: 600; margin-bottom: 3px; display: block; }
+  .out-box .lbl small { text-transform: none; font-weight: 500; color: var(--text-light); letter-spacing: 0.2px; }
+  .out-box .val { font-size: 16px; font-weight: 700; color: var(--mp-navy); font-family: 'DM Mono', ui-monospace, monospace; }
+  .out-box.primary { background: linear-gradient(135deg, var(--mp-navy) 0%, var(--mp-navy-soft) 100%); border-color: var(--mp-navy); }
+  .out-box.primary .lbl { color: rgba(255,255,255,0.7); }
+  .out-box.primary .val { color: #fff; }
+  .out-box.teal { background: var(--soft-teal); border-color: #C2E5EA; }
+  .out-box.teal .val { color: var(--mp-teal-dark); }
 
   /* Lance buttons */
-  .lance-buttons { display: grid; grid-template-columns: repeat(4, 1fr) auto; gap: 8px; margin-bottom: 18px; }
+  .lance-buttons { display: grid; grid-template-columns: repeat(4, 1fr) auto; gap: 6px; margin-bottom: 10px; }
   @media (max-width: 1024px) { .lance-buttons { grid-template-columns: repeat(2, 1fr); } .lance-buttons .clear-btn { grid-column: 1 / -1; } }
   @media (max-width: 600px) { .lance-buttons { grid-template-columns: 1fr; } }
-  .lance-max-hint { font-size: 11px; color: var(--text-muted); margin-top: 6px; padding-left: 4px; letter-spacing: 0.2px; font-style: italic; }
+  .lance-max-hint { font-size: 10.5px; color: var(--text-muted); margin-top: 4px; padding-left: 2px; letter-spacing: 0.2px; font-style: italic; }
   .lance-max-hint strong { color: var(--mp-teal-dark); font-weight: 600; font-style: normal; }
-  .lance-btn { padding: 12px 14px; background: #fff; border: 1px solid var(--mp-teal); color: var(--mp-teal-dark); border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; transition: 0.15s; letter-spacing: 0.3px; line-height: 1.3; }
+  .lance-btn { padding: 8px 10px; background: #fff; border: 1px solid var(--mp-teal); color: var(--mp-teal-dark); border-radius: 7px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; transition: 0.15s; letter-spacing: 0.2px; line-height: 1.2; }
   .lance-btn:hover { background: var(--mp-teal); color: #fff; }
   .lance-btn:active { transform: translateY(1px); }
-  .lance-buttons .clear-btn { background: #fff; border: 1px solid var(--border); color: var(--text-muted); padding: 12px 16px; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .lance-buttons .clear-btn { background: #fff; border: 1px solid var(--border); color: var(--text-muted); padding: 8px 12px; border-radius: 7px; font-size: 11px; font-weight: 600; cursor: pointer; font-family: inherit; }
   .lance-buttons .clear-btn:hover { background: var(--bg); border-color: var(--text-muted); }
+
+  /* Bloco azul claro de lance (estilo Ololu) */
+  .lance-bloco { background: #E8EEF8; border-radius: 8px; padding: 12px; margin-top: 8px; }
+  .lance-bloco .grid { gap: 8px; }
+  .lance-bloco .field input { background: #fff; }
+  .lance-bloco-titulo { font-size: 11.5px; font-weight: 700; color: var(--mp-navy); letter-spacing: 0.6px; text-transform: uppercase; margin-bottom: 8px; }
 
   /* Resumo de parcelas */
   .resumo-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
@@ -113,10 +140,21 @@
   .pos-row.highlight .val { font-size: 16px; font-weight: 700; color: var(--mp-teal-dark); }
 
   /* Footer aviso */
-  .aviso { background: var(--warning-bg); border: 1px solid var(--warning-border); border-radius: 8px; padding: 14px 18px; color: var(--warning-text); font-size: 12.5px; line-height: 1.5; margin-top: 8px; }
+  .aviso { background: var(--warning-bg); border: 1px solid var(--warning-border); border-radius: 7px; padding: 9px 13px; color: var(--warning-text); font-size: 11.5px; line-height: 1.45; margin-top: 6px; }
   .aviso strong { color: var(--warning-text); }
 
-  .actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 20px; padding-bottom: 32px; }
+  .obs-area { width: 100%; min-height: 64px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 7px; font-size: 12px; font-family: inherit; resize: vertical; color: var(--text); background: #fff; }
+  .obs-area:focus { outline: none; border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,0.12); }
+
+  /* Toggle redmode compacto */
+  .redmode-toggle { padding: 8px 11px; background: var(--soft-blue); border-radius: 7px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .redmode-toggle .lbl { font-size: 11.5px; color: #475569; font-weight: 600; }
+  .redmode-toggle .group { display: flex; gap: 3px; background: #fff; padding: 2px; border-radius: 5px; border: 1px solid #e2e8f0; }
+  .redmode-btn { padding: 5px 11px; border: 0; background: transparent; color: #475569; border-radius: 4px; font-size: 11.5px; font-weight: 600; cursor: pointer; }
+  .redmode-btn.active { background: var(--mp-navy); color: #fff; }
+  .redmode-toggle .hint { font-size: 10.5px; color: #64748b; font-style: italic; }
+
+  .actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; padding-bottom: 16px; }
   button.primary, button.secondary { padding: 11px 22px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.15s; border: 1px solid transparent; font-family: inherit; }
   button.primary { background: var(--mp-navy); color: #fff; border-color: var(--mp-navy); }
   button.primary:hover { background: var(--mp-navy-dark); }
@@ -157,221 +195,210 @@
 </header>
 
 <main>
-  <div id="simStoreMount" style="max-width:1400px; margin:16px auto 0; padding:0 32px;"></div>
+  <div id="simStoreMount" style="max-width:1440px; margin:0 auto 8px; padding:0;"></div>
 
-  <h2 class="section-title">Porto · Consórcio Auto</h2>
+  <h2 class="section-title">Simulador de Crédito · <span class="tag-bank">Porto · Auto</span></h2>
   <p class="subtitle">Cálculo de proposta, contemplação e estratégias de lance</p>
 
-  <!-- ════════ PROPOSTA ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-teal"></span>
-      <h3>Proposta</h3>
-      <button type="button" class="reset-btn" id="btnLimparProposta">Limpar</button>
-    </div>
-    <div class="grid grid-3">
-      <div class="field">
-        <label>Crédito contratado</label>
-        <input type="text" id="pa-credito" placeholder="R$ 0,00" data-mask="money">
-      </div>
-      <div class="field">
-        <label>Tipo de contratação</label>
-        <select id="pa-tipo">
-          <option value="" selected>Selecione…</option>
-          <option value="PF">Física</option>
-          <option value="PJ">Jurídica</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Prazo total (meses)</label>
-        <input type="text" id="pa-prazo" placeholder="0" data-mask="int">
-      </div>
-      <div class="field">
-        <label>Redutor do grupo</label>
-        <select id="pa-redutor">
-          <option value="" selected>Selecione…</option>
-          <option value="0">0% (sem redutor)</option>
-          <option value="0.20">20%</option>
-          <option value="0.25">25%</option>
-          <option value="0.30">30%</option>
-          <option value="0.35">35%</option>
-          <option value="0.40">40%</option>
-          <option value="0.45">45%</option>
-          <option value="0.50">50%</option>
-          <option value="campanha">Campanha Parcela Original</option>
-        </select>
-      </div>
-      <div class="field">
-        <label>Contemplação na parcela</label>
-        <input type="text" id="pa-contempla" placeholder="0" data-mask="int">
-      </div>
-    </div>
-  </section>
+  <div class="layout-grid">
 
-  <!-- ════════ TAXAS DO GRUPO ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-teal"></span>
-      <h3>Taxas do grupo</h3>
-      <button type="button" class="reset-btn" id="btnTaxasDefault">Restaurar padrão</button>
-    </div>
-    <div class="grid grid-3">
-      <div class="field">
-        <label>Taxa administrativa</label>
-        <input type="text" id="pa-taxaAdm" data-mask="pct2" placeholder="0,00 %">
-      </div>
-      <div class="field">
-        <label>Fundo de reserva</label>
-        <input type="text" id="pa-fundo" data-mask="pct2" placeholder="0,00 %">
-      </div>
-      <div class="field">
-        <label>Seguro de vida (PF)</label>
-        <input type="text" id="pa-seguro" data-mask="pct4" placeholder="0,0000 %">
-      </div>
-    </div>
+    <!-- ═════════════ COLUNA INPUTS (esquerda) ═════════════ -->
+    <div class="col-inputs">
 
-    <div class="grid grid-2" style="margin-top: 16px;">
-      <div class="result"><strong>Taxa por mês</strong><span class="value" id="pa-taxaMes">—</span></div>
-      <div class="result"><strong>Taxa por ano</strong><span class="value" id="pa-taxaAno">—</span></div>
-    </div>
+      <!-- ───── Proposta + Taxas (compacto) ───── -->
+      <section class="card card-compact">
+        <div class="card-header">
+          <span class="badge-teal"></span>
+          <h3>Dados da proposta</h3>
+          <button type="button" class="reset-btn" id="btnTaxasDefault">Taxas padrão</button>
+          <button type="button" class="reset-btn" id="btnLimparProposta" style="margin-left:6px">Limpar</button>
+        </div>
 
-    <div class="grid grid-2" style="margin-top: 16px;">
-      <div class="result-primary">
-        <strong>Parcela inicial · PF</strong>
-        <span class="value" id="pa-parcelaInicialPFDestaque">—</span>
-      </div>
-      <div class="result-primary">
-        <strong>Parcela inicial · PJ</strong>
-        <span class="value" id="pa-parcelaInicialPJDestaque">—</span>
-      </div>
-    </div>
-  </section>
+        <div class="grid grid-4">
+          <div class="field">
+            <label>Taxa adm.</label>
+            <input type="text" id="pa-taxaAdm" data-mask="pct2" placeholder="0,00 %">
+          </div>
+          <div class="field">
+            <label>Fundo Reserva</label>
+            <input type="text" id="pa-fundo" data-mask="pct2" placeholder="0,00 %">
+          </div>
+          <div class="field">
+            <label>Seguro (PF)</label>
+            <input type="text" id="pa-seguro" data-mask="pct4" placeholder="0,0000 %">
+          </div>
+          <div class="field">
+            <label>Tipo</label>
+            <select id="pa-tipo">
+              <option value="" selected>Selecione…</option>
+              <option value="PF">Física</option>
+              <option value="PJ">Jurídica</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Valor do crédito</label>
+            <input type="text" id="pa-credito" placeholder="R$ 0,00" data-mask="money">
+          </div>
+          <div class="field">
+            <label>Prazo (meses)</label>
+            <input type="text" id="pa-prazo" placeholder="0" data-mask="int">
+          </div>
+          <div class="field">
+            <label>Contempla mês</label>
+            <input type="text" id="pa-contempla" placeholder="0" data-mask="int">
+          </div>
+          <div class="field">
+            <label>Redutor grupo</label>
+            <select id="pa-redutor">
+              <option value="" selected>Selecione…</option>
+              <option value="0">0% (sem redutor)</option>
+              <option value="0.20">20%</option>
+              <option value="0.25">25%</option>
+              <option value="0.30">30%</option>
+              <option value="0.35">35%</option>
+              <option value="0.40">40%</option>
+              <option value="0.45">45%</option>
+              <option value="0.50">50%</option>
+              <option value="campanha">Campanha Parcela Original</option>
+            </select>
+          </div>
+        </div>
 
-  <!-- ════════ OFERTA DE LANCE ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-teal"></span>
-      <h3>Oferta de Lance</h3>
-      <button type="button" class="reset-btn" id="btnLimparLance">Limpar</button>
-    </div>
+        <div class="redmode-toggle" style="margin-top: 10px;">
+          <span class="lbl">Reduzir após contemplação:</span>
+          <div class="group">
+            <button type="button" class="redmode-btn active" data-redmode="parcela">Parcela</button>
+            <button type="button" class="redmode-btn" data-redmode="prazo">Prazo</button>
+          </div>
+          <span class="hint">— cenário que vai pro PDF</span>
+        </div>
+      </section>
 
-    <div class="lance-buttons">
-      <button type="button" class="lance-btn" data-strat="livre-bolso">Lance Livre · Recursos próprios</button>
-      <button type="button" class="lance-btn" data-strat="livre-embutido">Lance Livre + Embutido</button>
-      <button type="button" class="lance-btn" data-strat="fixo-bolso">Lance Fixo · Recursos próprios</button>
-      <button type="button" class="lance-btn" data-strat="fixo-embutido">Lance Fixo + Embutido</button>
-      <button type="button" class="clear-btn" data-strat="limpar">Limpar dados</button>
-    </div>
+      <!-- ───── Oferta de Lance ───── -->
+      <section class="card card-compact">
+        <div class="card-header">
+          <span class="badge-teal"></span>
+          <h3>Oferta de Lance</h3>
+          <button type="button" class="reset-btn" id="btnLimparLance">Limpar</button>
+        </div>
 
-    <div class="grid grid-3">
-      <div class="field">
-        <label>Recurso próprio</label>
-        <input type="text" id="pa-recProp" placeholder="R$ 0,00" data-mask="money">
-      </div>
-      <div class="field">
-        <label>Embutido (% máx. do crédito)</label>
-        <input type="text" id="pa-pctEmbutido" data-mask="pct2" placeholder="0,00 %">
-        <span class="field-suffix">do crédito</span>
-      </div>
-      <div class="field">
-        <label>Embutido</label>
-        <input type="text" id="pa-embutido" placeholder="R$ 0,00" data-mask="money">
-        <div class="lance-max-hint" id="pa-embutidoMaxHint">Máx. R$ 0,00 · verificar característica do grupo</div>
-      </div>
-      <div class="field">
-        <label>% Lance Fixo</label>
-        <input type="text" id="pa-pctLanceFixo" data-mask="pct2" placeholder="0,00 %">
-        <span class="field-suffix">sobre categoria</span>
-      </div>
-    </div>
+        <div class="lance-buttons">
+          <button type="button" class="lance-btn" data-strat="livre-bolso">Livre · Bolso</button>
+          <button type="button" class="lance-btn" data-strat="livre-embutido">Livre + Embutido</button>
+          <button type="button" class="lance-btn" data-strat="fixo-bolso">Fixo · Bolso</button>
+          <button type="button" class="lance-btn" data-strat="fixo-embutido">Fixo + Embutido</button>
+          <button type="button" class="clear-btn" data-strat="limpar">Limpar</button>
+        </div>
 
-    <div style="margin-top: 14px;">
-      <div class="result-teal">
-        <strong>Representatividade do lance</strong>
-        <span class="value" id="pa-representatividade">—</span>
-      </div>
-    </div>
-  </section>
+        <div class="lance-bloco">
+          <div class="grid grid-2">
+            <div class="field">
+              <label>% Lance Embutido</label>
+              <input type="text" id="pa-pctEmbutido" data-mask="pct2" placeholder="0,00 %">
+              <span class="field-suffix">%</span>
+            </div>
+            <div class="field">
+              <label>Valor Embutido</label>
+              <input type="text" id="pa-embutido" placeholder="R$ 0,00" data-mask="money">
+              <div class="lance-max-hint" id="pa-embutidoMaxHint">Máx. R$ 0,00</div>
+            </div>
+            <div class="field">
+              <label>% Lance a Pagar</label>
+              <input type="text" id="pa-pctLanceFixo" data-mask="pct2" placeholder="0,00 %">
+              <span class="field-suffix">%</span>
+            </div>
+            <div class="field">
+              <label>Recurso próprio</label>
+              <input type="text" id="pa-recProp" placeholder="R$ 0,00" data-mask="money">
+            </div>
+          </div>
+          <div style="margin-top: 8px;">
+            <div class="result-teal" style="padding: 7px 11px;">
+              <strong>% Lance Total</strong>
+              <span class="value" id="pa-representatividade" style="font-size:14px;">—</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
-  <!-- ════════ ESTIMATIVA PÓS-CONTEMPLAÇÃO ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-teal"></span>
-      <h3>Estimativa pós-contemplação</h3>
-    </div>
+      <!-- ───── Observações ───── -->
+      <section class="card card-compact">
+        <div class="card-header">
+          <span class="badge-teal"></span>
+          <h3>Observações (opcional)</h3>
+          <button type="button" class="reset-btn" id="btnLimparObs">Limpar</button>
+        </div>
+        <textarea id="pa-observacoes" class="obs-area" placeholder="Anotações que devem aparecer no PDF…"></textarea>
+      </section>
 
-    <div style="margin-bottom: 16px;">
-      <div class="result-primary">
-        <strong>Crédito liberado (após embutido)</strong>
-        <span class="value" id="pa-creditoLiberado">—</span>
+      <div class="aviso">
+        <strong>Atenção:</strong> Os valores da simulação são mera referência. Variáveis específicas do grupo podem alterar o resultado final.
       </div>
+
     </div>
 
-    <div class="redmode-toggle" style="margin-bottom: 14px; padding: 10px 14px; background: #f1f5f9; border-radius: 8px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-      <span style="font-size: 13px; color: #475569; font-weight: 600;">O lance reduz:</span>
-      <div style="display: flex; gap: 4px; background: #fff; padding: 3px; border-radius: 6px; border: 1px solid #e2e8f0;">
-        <button type="button" class="redmode-btn active" data-redmode="parcela" style="padding: 6px 14px; border: 0; background: #2d3f5e; color: #fff; border-radius: 4px; font-size: 12.5px; font-weight: 600; cursor: pointer;">Parcela</button>
-        <button type="button" class="redmode-btn" data-redmode="prazo" style="padding: 6px 14px; border: 0; background: transparent; color: #475569; border-radius: 4px; font-size: 12.5px; font-weight: 600; cursor: pointer;">Prazo</button>
+    <!-- ═════════════ COLUNA OUTPUTS (direita) ═════════════ -->
+    <div class="col-outputs">
+
+      <div class="out-box primary">
+        <span class="lbl">Crédito Líquido</span>
+        <div class="val" id="pa-creditoLiberado">—</div>
       </div>
-      <span style="font-size: 11.5px; color: #64748b; font-style: italic;">— escolha o cenário que vai pro PDF</span>
-    </div>
 
-    <div class="pos-grid">
-      <div class="pos-card" id="pa-card-parcela">
-        <h4>Abatimento na parcela</h4>
-        <div class="pos-row highlight"><span class="lbl">Nova parcela</span><span class="val" id="pa-novaParcela">—</span></div>
-        <div class="pos-row"><span class="lbl">Prazo restante</span><span class="val" id="pa-novoPrazo">—</span></div>
-        <div class="pos-row"><span class="lbl">Saldo devedor pós-contempla</span><span class="val" id="pa-saldoPos">—</span></div>
-        <div class="pos-row"><span class="lbl">Novo seguro mensal (PF)</span><span class="val" id="pa-novoSeguro">—</span></div>
+      <div class="out-box">
+        <span class="lbl">Parcela inicial · PF</span>
+        <div class="val" id="pa-parcelaInicialPFDestaque">—</div>
       </div>
-      <div class="pos-card" id="pa-card-prazo">
-        <h4>Reduzir somente o prazo</h4>
-        <div class="pos-row highlight"><span class="lbl">Prazo restante</span><span class="val" id="pa-prazoReduzido">—</span></div>
-        <div class="pos-row"><span class="lbl">Com parcela de</span><span class="val" id="pa-parcelaSeReduzPrazo">—</span></div>
-        <div class="pos-row"><span class="lbl">(parcela mantém o valor da integral)</span><span class="val">&nbsp;</span></div>
+
+      <div class="out-box">
+        <span class="lbl">Parcela inicial · PJ</span>
+        <div class="val" id="pa-parcelaInicialPJDestaque">—</div>
       </div>
+
+      <div class="grid grid-2" style="gap:8px;">
+        <div class="out-box">
+          <span class="lbl">Parcela reduzida · PF</span>
+          <div class="val" id="pa-parcelaReduzPF" style="font-size:14px;">—</div>
+        </div>
+        <div class="out-box">
+          <span class="lbl">Parcela reduzida · PJ</span>
+          <div class="val" id="pa-parcelaReduzPJ" style="font-size:14px;">—</div>
+        </div>
+      </div>
+
+      <div class="out-box teal" id="pa-card-parcela">
+        <span class="lbl">Valor Parcela <small>(pós-contemplado)</small></span>
+        <div class="val" id="pa-novaParcela">—</div>
+      </div>
+
+      <div class="out-box" id="pa-card-prazo">
+        <span class="lbl">Prazo Restante</span>
+        <div class="val" id="pa-novoPrazo">—</div>
+      </div>
+
+      <!-- Detalhes complementares (sempre visíveis pra consultor) -->
+      <details style="background:#fff; border:1px solid var(--border); border-radius:7px; padding:8px 11px; font-size:11.5px;">
+        <summary style="cursor:pointer; color:var(--text-muted); font-weight:600; letter-spacing:0.4px; text-transform:uppercase; font-size:10.5px;">Detalhes ▾</summary>
+        <div style="margin-top:8px; display:grid; gap:6px; font-family:'DM Mono', ui-monospace, monospace;">
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Categoria</span><strong id="pa-categoria">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Saldo devedor</span><strong id="pa-saldoDevedor">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Parcela int. PF</span><strong id="pa-parcelaPF">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Parcela int. PJ</span><strong id="pa-parcelaPJ">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Saldo pós-contempla</span><strong id="pa-saldoPos">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Novo seguro (PF)</span><strong id="pa-novoSeguro">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Taxa/mês</span><strong id="pa-taxaMes">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Taxa/ano</span><strong id="pa-taxaAno">—</strong></div>
+          <div style="display:flex; justify-content:space-between; padding-top:4px; border-top:1px dashed var(--border)"><span style="color:var(--text-muted)">Se reduz só prazo:</span><strong id="pa-prazoReduzido">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Parcela mantém em</span><strong id="pa-parcelaSeReduzPrazo">—</strong></div>
+        </div>
+      </details>
+
+      <div class="actions" style="margin-top:4px;">
+        <button class="secondary" id="btnLimparTudo">Limpar tudo</button>
+        <button type="button" id="baixarPdfPorto" class="primary">Gerar PDF</button>
+      </div>
+
     </div>
-  </section>
-
-  <!-- ════════ RESUMO DE PARCELAS ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-teal"></span>
-      <h3>Resumo de parcelas</h3>
-    </div>
-
-    <div class="resumo-grid" style="margin-bottom: 12px;">
-      <div class="resumo-row"><span class="lbl">Categoria</span><span class="val" id="pa-categoria">—</span></div>
-      <div class="resumo-row"><span class="lbl">Saldo devedor</span><span class="val" id="pa-saldoDevedor">—</span></div>
-
-      <div class="resumo-row"><span class="lbl">Parcela integral · PF</span><span class="val" id="pa-parcelaPF">—</span></div>
-      <div class="resumo-row"><span class="lbl">Parcela integral · PJ</span><span class="val" id="pa-parcelaPJ">—</span></div>
-    </div>
-
-    <div class="resumo-grid">
-      <div class="resumo-row highlight"><span class="lbl">Parcela reduzida · PF</span><span class="val" id="pa-parcelaReduzPF">—</span></div>
-      <div class="resumo-row highlight"><span class="lbl">Parcela reduzida · PJ</span><span class="val" id="pa-parcelaReduzPJ">—</span></div>
-    </div>
-  </section>
-
-  <!-- ════════ OBSERVAÇÕES ════════ -->
-  <section class="card">
-    <div class="card-header">
-      <span class="badge-teal"></span>
-      <h3>Observações (opcional)</h3>
-      <button type="button" class="reset-btn" id="btnLimparObs">Limpar</button>
-    </div>
-    <textarea id="pa-observacoes" class="obs-area" placeholder="Adicione anotações que devem aparecer no PDF…"></textarea>
-  </section>
-
-  <!-- ════════ AVISO ════════ -->
-  <div class="aviso">
-    <strong>Atenção:</strong> Os valores da simulação são mera referência e buscam refletir o cenário mais próximo da realidade. Variáveis específicas do grupo podem alterar o resultado final.
-  </div>
-
-  <div class="actions">
-    <button type="button" id="baixarPdfPorto" class="primary" style="margin-right:8px;">Baixar PDF</button>
-    <button class="secondary" id="btnLimparTudo">Limpar tudo</button>
   </div>
 </main>
 
