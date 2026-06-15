@@ -223,7 +223,7 @@
           </div>
           <div class="field">
             <label>Tx antecipação</label>
-            <input type="text" id="br-taxaAntecipacao" data-mask="pct2" value="5,25 %">
+            <input type="text" id="br-taxaAntecipacao" data-mask="pct2" value="5,25 %" disabled title="Valor padrão do grupo (uso interno do cálculo)">
           </div>
           <div class="field">
             <label>Valor do crédito</label>
@@ -247,7 +247,7 @@
           </div>
           <div class="field">
             <label>Antecipação em</label>
-            <input type="text" id="br-qtdAntecipacao" value="6" data-mask="int">
+            <input type="text" id="br-qtdAntecipacao" value="6" data-mask="int" disabled title="Valor padrão do grupo (uso interno do cálculo)">
             <span class="field-suffix">parc.</span>
           </div>
           <div class="field">
@@ -330,17 +330,17 @@
       </div>
 
       <div class="out-box">
-        <span class="lbl">Parcela inicial <small>(com antecipação)</small></span>
+        <span class="lbl">Parcela Inicial</span>
         <div class="val" id="br-parcelaInicialDestaque">—</div>
       </div>
 
       <div class="out-box">
-        <span class="lbl" id="br-lblParcelaDemaisOut">Parcela após antecipação</span>
-        <div class="val" id="br-parcelaDemaisDestaque" style="font-size:14px;">—</div>
+        <span class="lbl">1ª Parcela pós-contemplação <small>(mantém o valor)</small></span>
+        <div class="val" id="br-parcelaPos1" style="font-size:14px;">—</div>
       </div>
 
       <div class="out-box red" id="br-card-diluir">
-        <span class="lbl">Valor Parcela <small>(pós-contemplado)</small></span>
+        <span class="lbl">Demais parcelas pós-contempla <small>(reduz a partir da 2ª)</small></span>
         <div class="val" id="br-parcDiluir">—</div>
       </div>
 
@@ -348,6 +348,7 @@
         <span class="lbl">Prazo Restante</span>
         <div class="val" id="br-prazoOut">—</div>
       </div>
+      <span id="br-parcelaDemaisDestaque" style="display:none">—</span>
 
       <details style="background:#fff; border:1px solid var(--border); border-radius:7px; padding:8px 11px; font-size:11.5px;">
         <summary style="cursor:pointer; color:var(--text-muted); font-weight:600; letter-spacing:0.4px; text-transform:uppercase; font-size:10.5px;">Detalhes ▾</summary>
@@ -529,7 +530,7 @@ function recalc() {
   const i = readInputs();
 
   if (!(i.credito > 0) || !(i.prazo > 0)) {
-    const ids = ['br-saldoDevedor','br-seguroMensal','br-parcelaInicial','br-parcelaInicialDestaque','br-parcelaPosAnt','br-parcelaDemaisDestaque','br-lanceTotal','br-saldoPos','br-parcDiluir','br-prazoDiluir','br-parcAntecipar','br-prazoAntecipar','br-taxaMes','br-taxaAno','br-prazoOut','br-creditoLiquidoOut'];
+    const ids = ['br-saldoDevedor','br-seguroMensal','br-parcelaInicial','br-parcelaInicialDestaque','br-parcelaPosAnt','br-parcelaDemaisDestaque','br-lanceTotal','br-saldoPos','br-parcDiluir','br-prazoDiluir','br-parcAntecipar','br-prazoAntecipar','br-taxaMes','br-taxaAno','br-prazoOut','br-creditoLiquidoOut','br-parcelaPos1'];
     ids.forEach(id => setOut(id, '—'));
     atualizaLabelsParcela(i);
     return;
@@ -541,6 +542,8 @@ function recalc() {
   setOut('br-seguroMensal', i.seguro > 0 ? formatMoney(r.seguroMensal) : '—');
   setOut('br-parcelaInicial', formatMoney(r.parcelaInicial));
   setOut('br-parcelaInicialDestaque', formatMoney(r.parcelaInicial));
+  // 1ª parcela pós-contemplação MANTÉM o valor da inicial (a redução só vem na 2ª)
+  setOut('br-parcelaPos1', formatMoney(r.parcelaInicial));
   setOut('br-parcelaPosAnt', formatMoney(r.parcelaPosAnt));
   setOut('br-parcelaDemaisDestaque', formatMoney(r.parcelaPosAnt));
   setOut('br-lanceTotal', formatMoney(r.lanceTotal));
@@ -567,16 +570,9 @@ function recalc() {
 }
 
 function atualizaLabelsParcela(i) {
-  const qtd = i.qtdAntecipacao || 0;
-  if (qtd > 0) {
-    setOut('br-lblParcelaInicial', '1ª a ' + qtd + 'ª (com antecipação)');
-    setOut('br-lblParcelaDemais', 'A partir da ' + (qtd + 1) + 'ª');
-    setOut('br-lblParcelaDemaisOut', 'A partir da ' + (qtd + 1) + 'ª');
-  } else {
-    setOut('br-lblParcelaInicial', 'Parcela inicial');
-    setOut('br-lblParcelaDemais', 'Parcela após antecipação');
-    setOut('br-lblParcelaDemaisOut', 'Parcela após antecipação');
-  }
+  // Labels internos preservados pra compat com PDF/store (não aparecem mais na UI principal)
+  setOut('br-lblParcelaInicial', 'Parcela inicial');
+  setOut('br-lblParcelaDemais', 'Parcela após antecipação');
 }
 
 function limparTudo() {
@@ -661,15 +657,8 @@ function _montarPdfComercialBradesco() {
   const redutorTxt = _selTxt('br-redutor') || 'Sem redutor';
   const redutorPct = redutorTxt.replace(/[^\d%]/g, '');
   const _neutro = !!window._brNeutro;
-  const modo = window._brRedmode || 'diluir';
 
   const creditoLiquido = _v('br-credito') || 'R$ 0,00';
-
-  const novaParc = (modo === 'antecipar') ? _t('br-parcAntecipar') : _t('br-parcDiluir');
-  const prazoFinal = (modo === 'antecipar') ? _t('br-prazoAntecipar') : _t('br-prazoDiluir');
-  const subPosLabel = (modo === 'antecipar')
-    ? '(Lance quita N parcelas finais — parcela mantém valor)'
-    : '(Lance dilui no saldo restante — parcela cai)';
 
   return {
     filename: _neutro ? 'simulacao-consorcio-auto' : 'bradesco-auto',
@@ -693,10 +682,11 @@ function _montarPdfComercialBradesco() {
       total: { pct: _v('br-pctLance').replace(' %','') || '0,00', rs: (_t('br-lanceTotal') || 'R$ 0,00').replace('R$ ','') }
     },
     outputs: [
-      { label: 'Crédito Líquido',                                                  value: creditoLiquido },
-      { label: 'Parcela Inicial',                                                  value: _t('br-parcelaInicial') || '—' },
-      { label: 'Valor parcela (pós-contemplado)', subAcima: subPosLabel,           value: novaParc || '—' },
-      { label: 'Prazo Restante',                                                   value: prazoFinal || '—' },
+      { label: 'Crédito Líquido',                                                                          value: creditoLiquido },
+      { label: 'Parcela Inicial',                                                                          value: _t('br-parcelaInicial') || '—' },
+      { label: '1ª parcela pós-contemplação',     subAcima: '(Mantém o valor da parcela inicial)',         value: _t('br-parcelaInicial') || '—' },
+      { label: 'Demais parcelas pós-contemplação', subAcima: '(A partir da 2ª pós contemplação)',          value: _t('br-parcDiluir') || '—' },
+      { label: 'Prazo Restante',                                                                           value: _t('br-prazoDiluir') || '—' },
     ],
     observacoes: _v('br-observacoes')
   };
