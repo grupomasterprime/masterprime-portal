@@ -147,39 +147,6 @@
   .modal-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
   .modal-body { padding: 18px 22px; }
   .modal-foot { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
-
-  /* Toggle genérico (modo neutro) */
-  .generic-toggle-bar { display: flex; align-items: center; justify-content: flex-end; gap: 12px; margin-bottom: 20px; }
-  .generic-toggle-label { font-size: 12px; color: var(--text-muted); font-weight: 500; letter-spacing: 0.3px; }
-  .generic-toggle { position: relative; display: inline-block; width: 44px; height: 24px; }
-  .generic-toggle input { opacity: 0; width: 0; height: 0; }
-  .generic-toggle .slider { position: absolute; cursor: pointer; inset: 0; background: var(--border); border-radius: 24px; transition: .3s; }
-  .generic-toggle .slider::before { content: ""; position: absolute; height: 18px; width: 18px; left: 3px; bottom: 3px; background: white; border-radius: 50%; transition: .3s; box-shadow: 0 1px 3px rgba(0,0,0,0.12); }
-  .generic-toggle input:checked + .slider { background: var(--mp-navy); }
-  .generic-toggle input:checked + .slider::before { transform: translateX(20px); }
-
-  /* ═══════════════ MODO GENÉRICO (neutro) ═══════════════ */
-  body.generic-mode {
-    --mp-teal: #4B5563;
-    --mp-teal-dark: #374151;
-    --soft-teal: #F3F4F6;
-    --focus-ring: rgba(75, 85, 99, 0.15);
-  }
-  body.generic-mode .tag-admin { display: none; }
-  body.generic-mode .field input:focus,
-  body.generic-mode .field select:focus,
-  body.generic-mode .obs-area:focus { border-color: #4B5563; box-shadow: 0 0 0 3px rgba(75, 85, 99, 0.15); }
-  body.generic-mode .result-teal strong { color: #374151; }
-  body.generic-mode .pos-row.highlight .val { color: #374151; }
-  body.generic-mode .brand-mark { background: #4B5563; }
-  body.generic-mode .card-header .badge-teal { background: #4B5563; }
-  body.generic-mode .lance-btn { border-color: #4B5563; color: #374151; }
-  body.generic-mode .lance-btn:hover { background: #4B5563; color: #fff; }
-  body.generic-mode .lance-btn.fixo30 { border-color: #4B5563; color: #374151; }
-  body.generic-mode .lance-btn.fixo30:hover { background: #4B5563; color: #fff; }
-  body.generic-mode .lance-btn.fixo40 { border-color: #4B5563; color: #374151; }
-  body.generic-mode .lance-btn.fixo40:hover { background: #4B5563; color: #fff; }
-  body.generic-mode .lance-max-hint strong { color: #374151; }
 </style>
 <script>if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('embedded');</script>
 </head>
@@ -193,23 +160,14 @@
       <p>Simulador de Consórcio</p>
     </div>
   </div>
-  <span class="tag-admin" id="tagAdminHeader">Porto</span>
+  <span class="tag-admin">Porto</span>
 </header>
 
 <main>
   <div id="simStoreMount" style="max-width:1400px; margin:16px auto 0; padding:0 32px;"></div>
 
-  <!-- TOGGLE MODO GENÉRICO -->
-  <div class="generic-toggle-bar">
-    <span class="generic-toggle-label">Modo neutro (sem identificação da administradora)</span>
-    <label class="generic-toggle">
-      <input type="checkbox" id="genericModeToggle" onchange="alternarModoGenerico()">
-      <span class="slider"></span>
-    </label>
-  </div>
-
-  <h2 class="section-title" id="mainTitle">Porto · Consórcio Pesados</h2>
-  <p class="subtitle" id="mainSubtitle">Cálculo de proposta, contemplação e estratégias de lance</p>
+  <h2 class="section-title">Porto · Consórcio Pesados</h2>
+  <p class="subtitle">Cálculo de proposta, contemplação e estratégias de lance</p>
 
   <!-- ════════ PROPOSTA ════════ -->
   <section class="card">
@@ -359,15 +317,24 @@
       </div>
     </div>
 
+    <div class="redmode-toggle" style="margin-bottom: 14px; padding: 10px 14px; background: #f1f5f9; border-radius: 8px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+      <span style="font-size: 13px; color: #475569; font-weight: 600;">O lance reduz:</span>
+      <div style="display: flex; gap: 4px; background: #fff; padding: 3px; border-radius: 6px; border: 1px solid #e2e8f0;">
+        <button type="button" class="redmode-btn active" data-redmode="parcela" style="padding: 6px 14px; border: 0; background: #2d3f5e; color: #fff; border-radius: 4px; font-size: 12.5px; font-weight: 600; cursor: pointer;">Parcela</button>
+        <button type="button" class="redmode-btn" data-redmode="prazo" style="padding: 6px 14px; border: 0; background: transparent; color: #475569; border-radius: 4px; font-size: 12.5px; font-weight: 600; cursor: pointer;">Prazo</button>
+      </div>
+      <span style="font-size: 11.5px; color: #64748b; font-style: italic;">— escolha o cenário que vai pro PDF</span>
+    </div>
+
     <div class="pos-grid">
-      <div class="pos-card">
+      <div class="pos-card" id="pp-card-parcela">
         <h4>Abatimento na parcela</h4>
         <div class="pos-row highlight"><span class="lbl">Nova parcela</span><span class="val" id="pp-novaParcela">—</span></div>
-        <div class="pos-row"><span class="lbl">Prazo restante (referência)</span><span class="val" id="pp-novoPrazo">—</span></div>
+        <div class="pos-row"><span class="lbl">Prazo restante</span><span class="val" id="pp-novoPrazo">—</span></div>
         <div class="pos-row"><span class="lbl">Saldo devedor pós-contempla</span><span class="val" id="pp-saldoPos">—</span></div>
         <div class="pos-row"><span class="lbl">Novo seguro mensal (PF)</span><span class="val" id="pp-novoSeguro">—</span></div>
       </div>
-      <div class="pos-card">
+      <div class="pos-card" id="pp-card-prazo">
         <h4>Reduzir somente o prazo</h4>
         <div class="pos-row highlight"><span class="lbl">Prazo restante</span><span class="val" id="pp-prazoReduzido">—</span></div>
         <div class="pos-row"><span class="lbl">Com parcela de</span><span class="val" id="pp-parcelaSeReduzPrazo">—</span></div>
@@ -439,31 +406,6 @@
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════
-// MODO GENÉRICO (toggle)
-// ═══════════════════════════════════════════════════════
-function isModoGenerico() {
-  return document.getElementById('genericModeToggle').checked;
-}
-
-function alternarModoGenerico() {
-  const ativo = isModoGenerico();
-  document.body.classList.toggle('generic-mode', ativo);
-  const titulo = document.getElementById('mainTitle');
-  const tagAdmin = document.getElementById('tagAdminHeader');
-  const pageTitle = document.querySelector('title');
-
-  if (ativo) {
-    titulo.textContent = 'Simulador de Consórcio · Pesados';
-    if (tagAdmin) tagAdmin.textContent = 'Genérico';
-    if (pageTitle) pageTitle.textContent = 'Master Prime - Simulador de Consórcio';
-  } else {
-    titulo.textContent = 'Porto · Consórcio Pesados';
-    if (tagAdmin) tagAdmin.textContent = 'Porto';
-    if (pageTitle) pageTitle.textContent = 'Master Prime - Porto Consórcio Pesados';
-  }
-}
-
 // ═══════════════════════════════════════════════════════
 // MÁSCARAS
 // ═══════════════════════════════════════════════════════
@@ -607,12 +549,14 @@ function calc(i) {
     : r.saldoAposParcNormal;
   r.novoSeguro = saldoUsadoPos * seguroPF;                                                  // P88
 
+  // Regra atualizada 2026: o lance reduz TUDO na parcela (sem o piso antigo de 50%).
+  // Prazo permanece igual ao prazoRestante (não é mais "fatiado" entre parcela e prazo).
   const prazoRestante = i.prazo - i.contempla;
   r.parcelaTeoricaPJ = (prazoRestante > 0) ? saldoUsadoPos / prazoRestante : NaN;           // P89
-  r.parcelaRealPJ = Math.max(r.parcelaTeoricaPJ, r.parcelaPJ / 2);                          // P91
+  r.parcelaRealPJ = r.parcelaTeoricaPJ;                                                     // P91 (sem piso)
   r.parcelaRealPF = r.parcelaRealPJ + r.novoSeguro;                                         // P92
   r.novaParcela = isPF ? r.parcelaRealPF : r.parcelaRealPJ;
-  r.novoPrazo = (r.parcelaRealPJ > 0) ? saldoUsadoPos / r.parcelaRealPJ : NaN;              // P93
+  r.novoPrazo = prazoRestante;                                                              // P93
 
   r.prazoReduzidoNormal   = (r.parcelaPJ > 0) ? r.saldoAposParcNormal / r.parcelaPJ : NaN;  // P95
   r.prazoReduzidoReduzida = (r.parcelaPJ > 0) ? r.saldoAposParcReduzida / r.parcelaPJ : NaN; // P96
@@ -835,119 +779,34 @@ get('pp-modal-pctLivre').addEventListener('keydown', e => {
   if (e.key === 'Enter') get('pp-modal-confirmar').click();
 });
 
+// ─── Toggle de modo de redução (parcela vs prazo) ────────────────────
+window._ppRedmode = 'parcela';
+function aplicaRedmodePesados(modo) {
+  window._ppRedmode = modo;
+  document.querySelectorAll('.redmode-btn').forEach(b => {
+    const isActive = b.dataset.redmode === modo;
+    b.classList.toggle('active', isActive);
+    b.style.background = isActive ? '#2d3f5e' : 'transparent';
+    b.style.color = isActive ? '#fff' : '#475569';
+  });
+  const cardP = document.getElementById('pp-card-parcela');
+  const cardT = document.getElementById('pp-card-prazo');
+  if (cardP) cardP.style.opacity = (modo === 'parcela') ? '1' : '0.55';
+  if (cardT) cardT.style.opacity = (modo === 'prazo') ? '1' : '0.55';
+  if (cardP) cardP.style.boxShadow = (modo === 'parcela') ? '0 0 0 2px #2d3f5e' : 'none';
+  if (cardT) cardT.style.boxShadow = (modo === 'prazo') ? '0 0 0 2px #2d3f5e' : 'none';
+}
+document.querySelectorAll('.redmode-btn').forEach(b => {
+  b.addEventListener('click', () => aplicaRedmodePesados(b.dataset.redmode));
+});
+aplicaRedmodePesados('parcela');
+
 // inicial
 recalc();
 
 // ═════════════════════════════════════════════════════════════
-// PDF — FALLBACK GARANTIDO (SEM DEPENDÊNCIA EXTERNA)
+// PDF — usa módulo compartilhado pdf-master-prime.js
 // ═════════════════════════════════════════════════════════════
-function _gerarPDFFallback(dados) {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF('p', 'mm', 'a4');
-  const margem = 15;
-  let y = margem;
-
-  // Cabeçalho neutro
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(18);
-  doc.setTextColor(45, 63, 94); // navy
-  doc.text(dados.titulo, margem, y);
-  y += 8;
-  doc.setFontSize(10);
-  doc.setTextColor(107, 114, 128);
-  doc.text(dados.subtitulo, margem, y);
-  if (dados.subtituloSecundario) {
-    y += 5;
-    doc.text(dados.subtituloSecundario, margem, y);
-  }
-  y += 6;
-  doc.setDrawColor(229, 231, 235);
-  doc.line(margem, y, 210 - margem, y);
-  y += 8;
-
-  // Inputs
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  dados.inputs.forEach(inp => {
-    doc.setTextColor(107,114,128);
-    doc.text(inp.label, margem, y);
-    doc.setTextColor(31,41,55);
-    doc.text(inp.value, margem + 50, y);
-    y += 6;
-  });
-  y += 4;
-
-  // Lance
-  if (dados.lance) {
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.setTextColor(45,63,94);
-    doc.text('Lance', margem, y);
-    y += 6;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    if (dados.lance.total) {
-      doc.text(`% Lance: ${dados.lance.total.pct} %`, margem, y);
-      doc.text(`Valor: R$ ${dados.lance.total.rs}`, margem + 60, y);
-    }
-    y += 8;
-  }
-
-  // Outputs
-  doc.setFont('helvetica', 'bold');
-  doc.setFontSize(10);
-  doc.setTextColor(45,63,94);
-  doc.text('Resultados', margem, y);
-  y += 7;
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(9);
-  dados.outputs.forEach(out => {
-    doc.setTextColor(107,114,128);
-    doc.text(out.label, margem, y);
-    doc.setTextColor(31,41,55);
-    doc.text(out.value, margem + 70, y);
-    if (out.subAcima) {
-      y += 4;
-      doc.setFontSize(7);
-      doc.setTextColor(156,163,175);
-      doc.text(out.subAcima, margem + 70, y);
-      doc.setFontSize(9);
-    }
-    y += 6;
-  });
-  y += 6;
-
-  // Observações
-  if (dados.observacoes && dados.observacoes.trim() !== '') {
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(10);
-    doc.setTextColor(45,63,94);
-    doc.text('Observações', margem, y);
-    y += 6;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(31,41,55);
-    const obsLinhas = doc.splitTextToSize(dados.observacoes, 180);
-    obsLinhas.forEach(linha => {
-      if (y > 270) { doc.addPage(); y = margem; }
-      doc.text(linha, margem, y);
-      y += 5;
-    });
-  }
-
-  // Rodapé
-  y += 8;
-  doc.setDrawColor(229,231,235);
-  doc.line(margem, y, 210 - margem, y);
-  y += 5;
-  doc.setFont('helvetica', 'normal');
-  doc.setFontSize(8);
-  doc.setTextColor(156,163,175);
-  doc.text('Simulação gerada pelo Master Prime · Caráter ilustrativo', margem, y);
-
-  return doc;
-}
-
 function _coletarBlocosPortoPesados() {
   const _v = (id) => { const el = document.getElementById(id); return (el?.value || '').trim(); };
   const _t = (id) => { const el = document.getElementById(id); return (el?.textContent || '').trim(); };
@@ -1091,17 +950,15 @@ function _montarPdfComercialPortoPesados() {
   const _pctApg = _categoria > 0 ? _fmtPct((_apgRS / _categoria) * 100) : '0,00';
   const _pctTot = _categoria > 0 ? _fmtPct((_totRS / _categoria) * 100) : '0,00';
 
-  const generico = isModoGenerico();
-
   return {
-    filename: generico ? 'simulacao-consorcio-pesados' : 'porto-consorcio-pesados',
-    logoAdmin: generico ? null : 'porto',
+    filename: 'porto-consorcio-pesados',
+    logoAdmin: 'porto',
     titulo: 'Simulador de Crédito',
-    subtitulo: generico ? 'Consórcio Pesados' : 'Porto · Pesados',
+    subtitulo: 'Porto · Pesados',
     subtituloSecundario: redutorPct && redutorPct !== '0%'
       ? `(Redução de ${redutorPct} até a Contemplação)`
       : '(Sem redutor de parcela)',
-    representanteTexto: generico ? 'Consórcio' : 'Consórcio Porto',
+    representanteTexto: 'Consórcio Porto',
     inputs: [
       { label: 'Taxa Administrativa', value: _v('pp-taxaAdm') || '0,00 %' },
       { label: 'Fundo Reserva', value: _v('pp-fundo') || '0,00 %' },
@@ -1114,12 +971,17 @@ function _montarPdfComercialPortoPesados() {
       apagar:   { pct: _pctApg, rs: _fmtRS(_apgRS).replace('R$ ','') },
       total:    { pct: _pctTot, rs: _fmtRS(_totRS).replace('R$ ','') }
     },
-    outputs: [
-      { label: 'Valor parcela (antes contemplação)', value: parcelaAntes || _t('pp-parcelaDemais') || '—' },
-      { label: 'Valor parcela (pós-contemplado)',    value: _t('pp-novaParcela') || '—' },
-      { label: 'Crédito Líquido',                    value: _t('pp-creditoLiberado') || '—' },
-      { label: 'Prazo Restante',                     value: _t('pp-novoPrazo') || '—' },
-    ],
+    outputs: (function() {
+      const modo = (window._ppRedmode === 'prazo') ? 'prazo' : 'parcela';
+      const novaParc = (modo === 'prazo') ? _t('pp-parcelaSeReduzPrazo') : _t('pp-novaParcela');
+      const prazoFinal = (modo === 'prazo') ? _t('pp-prazoReduzido') : _t('pp-novoPrazo');
+      return [
+        { label: 'Valor parcela (antes contemplação)', value: parcelaAntes || _t('pp-parcelaDemais') || '—' },
+        { label: 'Valor parcela (pós-contemplado)',    value: novaParc || '—' },
+        { label: 'Crédito Líquido',                    value: _t('pp-creditoLiberado') || '—' },
+        { label: 'Prazo Restante',                     value: prazoFinal || '—' },
+      ];
+    })(),
     observacoes: _v('pp-observacoes')
   };
 }
@@ -1130,15 +992,7 @@ document.getElementById('baixarPdfPorto').addEventListener('click', async () => 
   btn.textContent = 'Gerando PDF...';
   btn.disabled = true;
   try {
-    // Tenta usar módulo externo se existir e função disponível
-    if (typeof window.PdfMasterPrime !== 'undefined' && typeof window.PdfMasterPrime.gerarComercial === 'function') {
-      await window.PdfMasterPrime.gerarComercial(_montarPdfComercialPortoPesados());
-    } else {
-      // Fallback com jsPDF próprio
-      const dados = _montarPdfComercialPortoPesados();
-      const doc = _gerarPDFFallback(dados);
-      doc.save((dados.filename || 'simulacao') + '.pdf');
-    }
+    await PdfMasterPrime.gerarComercial(_montarPdfComercialPortoPesados());
   } catch (err) {
     console.error(err);
     alert('Erro ao gerar PDF: ' + err.message);
