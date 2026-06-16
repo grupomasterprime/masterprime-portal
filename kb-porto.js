@@ -1125,6 +1125,15 @@ window.KB_ADMIN["porto"] = {
       "ordem": 19
     },
     {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Baixa de Hipoteca — como funciona após quitar a cota",
+      "conteudo": "Após o cliente quitar a cota, ele precisa INICIAR o processo manualmente acessando o portal da Porto e entrando na esteira de Baixa de Hipoteca. Não é automático.\n\n🔗 Link: portoseguroatendimento.com.br/consorcio\n\nPRAZO E FORMATO:\n• A Porto emite a documentação em até 10 dias úteis após a solicitação.\n• Tudo é digital — não há envio pelos Correios.\n\nO QUE O CLIENTE FAZ AO RECEBER O KIT DIGITAL:\n1. Lê o Guia Prático que vem no Kit;\n2. Acessa o Portal de Entrada pelo link informado no Guia;\n3. Segue as orientações pra dar entrada no processo de liberação da hipoteca.\n\nPONTOS IMPORTANTES:\n• Validade da documentação (principalmente a procuração do Kit): 90 dias a partir da data informada nela. Se expirar, é necessário solicitar um novo Kit junto à Porto.\n• Averbação (Cartório): NÃO é necessário ir ao Cartório de Registro de Imóveis — a averbação é feita de forma digital.\n• Custos: TODAS as despesas geradas pela baixa da hipoteca / alienação fiduciária e as averbações necessárias são de responsabilidade exclusiva do(s) proprietário(s) do imóvel.",
+      "tags": "baixa hipoteca, alienação fiduciária, quitação, esteira, kit digital, procuração, 90 dias, averbação, cartório, portal porto",
+      "ordem": 20
+    },
+    {
       "categoria_key": "transferencia",
       "categoria_label": "Transferência, cancelamento e devoluções",
       "categoria_ordem": 9,
