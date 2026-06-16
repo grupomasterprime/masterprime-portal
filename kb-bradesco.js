@@ -1132,6 +1132,11 @@ window.KB_ADMIN["bradesco"] = {
       "titulo": "Checklist — Atualização Cadastral (Monitoramento)",
       "descricao": "Documentos necessários na atualização cadastral periódica do Bradesco, separados por perfil: Pessoa Física, Pessoa Jurídica e Produtor Rural.",
       "arquivo": "kb-bradesco-atualizacao-cadastral.pdf"
+    },
+    {
+      "titulo": "Manual do Parceiro Bradesco (Out/2024)",
+      "descricao": "Manual oficial completo (68 págs): conceitos do consórcio, contemplação, lance, regras de aquisição (bens móveis e imóveis), restrições (leilão/sinistro/chassi remarcado), penalidades, sistema de venda e canais de atendimento.",
+      "arquivo": "kb-bradesco-manual-parceiro.pdf"
     }
   ]
 };
