@@ -326,25 +326,14 @@
       </div>
 
       <div class="out-box">
-        <span class="lbl">Parcela inicial · PF</span>
-        <div class="val" id="pp-parcelaInicialPFDestaque">—</div>
+        <span class="lbl" id="pp-parcelaInicialLbl">Parcela inicial</span>
+        <div class="val" id="pp-parcelaInicialDestaqueAtual">—</div>
       </div>
 
-      <div class="out-box">
-        <span class="lbl">Parcela inicial · PJ</span>
-        <div class="val" id="pp-parcelaInicialPJDestaque">—</div>
-      </div>
-
-      <div class="grid grid-2" style="gap:8px;">
-        <div class="out-box">
-          <span class="lbl">Parcela reduzida · PF</span>
-          <div class="val" id="pp-parcelaReduzPF" style="font-size:14px;">—</div>
-        </div>
-        <div class="out-box">
-          <span class="lbl">Parcela reduzida · PJ</span>
-          <div class="val" id="pp-parcelaReduzPJ" style="font-size:14px;">—</div>
-        </div>
-      </div>
+      <span id="pp-parcelaInicialPFDestaque" style="display:none">—</span>
+      <span id="pp-parcelaInicialPJDestaque" style="display:none">—</span>
+      <span id="pp-parcelaReduzPF" style="display:none">—</span>
+      <span id="pp-parcelaReduzPJ" style="display:none">—</span>
 
       <div class="out-box teal" id="pp-card-parcela">
         <span class="lbl">Valor Parcela <small>(pós-contemplado)</small></span>
@@ -569,7 +558,7 @@ function recalc() {
   const i = readInputs();
 
   if (!(i.credito > 0) || !(i.prazo > 0)) {
-    const ids = ['pp-categoria','pp-saldoDevedor','pp-parcelaPF','pp-parcelaPJ','pp-parcelaInicialPFDestaque','pp-parcelaInicialPJDestaque','pp-parcelaReduzPF','pp-parcelaReduzPJ','pp-representatividade','pp-lanceTotalRs','pp-creditoLiberado','pp-novaParcela','pp-novoPrazo','pp-saldoPos','pp-novoSeguro','pp-prazoReduzido','pp-parcelaSeReduzPrazo','pp-taxaMes','pp-taxaAno'];
+    const ids = ['pp-categoria','pp-saldoDevedor','pp-parcelaPF','pp-parcelaPJ','pp-parcelaInicialPFDestaque','pp-parcelaInicialPJDestaque','pp-parcelaInicialDestaqueAtual','pp-parcelaReduzPF','pp-parcelaReduzPJ','pp-representatividade','pp-lanceTotalRs','pp-creditoLiberado','pp-novaParcela','pp-novoPrazo','pp-saldoPos','pp-novoSeguro','pp-prazoReduzido','pp-parcelaSeReduzPrazo','pp-taxaMes','pp-taxaAno'];
     ids.forEach(id => setOut(id, '—'));
     return;
   }
@@ -589,6 +578,20 @@ function recalc() {
   var redAtivoPp = (parseFloat(i.redutor) > 0) || (i.redutor === 'campanha');
   setOut('pp-parcelaInicialPFDestaque', formatMoney(redAtivoPp ? r.parcelaReduzidaPF : r.parcelaPF));
   setOut('pp-parcelaInicialPJDestaque', formatMoney(redAtivoPp ? r.parcelaReduzidaPJ : r.parcelaPJ));
+  // Display único — escolhe PF ou PJ baseado no tipo selecionado
+  var pTipo = i.tipo || 'PF';
+  var valorAtual = pTipo === 'PJ'
+    ? (redAtivoPp ? r.parcelaReduzidaPJ : r.parcelaPJ)
+    : (redAtivoPp ? r.parcelaReduzidaPF : r.parcelaPF);
+  setOut('pp-parcelaInicialDestaqueAtual', formatMoney(valorAtual));
+  // Label dinâmico
+  var lblBase = 'Parcela inicial · ' + (pTipo === 'PJ' ? 'PJ' : 'PF');
+  if (redAtivoPp) {
+    var redTxt = i.redutor === 'campanha' ? 'Campanha' : (parseFloat(i.redutor) * 100).toFixed(0) + '%';
+    lblBase += ' <small>(com redutor ' + redTxt + ')</small>';
+  }
+  var lblEl = document.getElementById('pp-parcelaInicialLbl');
+  if (lblEl) lblEl.innerHTML = lblBase;
   setOut('pp-parcelaReduzPF', formatMoney(r.parcelaReduzidaPF));
   setOut('pp-parcelaReduzPJ', formatMoney(r.parcelaReduzidaPJ));
 

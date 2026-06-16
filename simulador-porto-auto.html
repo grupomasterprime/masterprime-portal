@@ -365,25 +365,14 @@
       </div>
 
       <div class="out-box">
-        <span class="lbl">Parcela inicial · PF</span>
-        <div class="val" id="pa-parcelaInicialPFDestaque">—</div>
+        <span class="lbl" id="pa-parcelaInicialLbl">Parcela inicial</span>
+        <div class="val" id="pa-parcelaInicialDestaqueAtual">—</div>
       </div>
 
-      <div class="out-box">
-        <span class="lbl">Parcela inicial · PJ</span>
-        <div class="val" id="pa-parcelaInicialPJDestaque">—</div>
-      </div>
-
-      <div class="grid grid-2" style="gap:8px;">
-        <div class="out-box">
-          <span class="lbl">Parcela reduzida · PF</span>
-          <div class="val" id="pa-parcelaReduzPF" style="font-size:14px;">—</div>
-        </div>
-        <div class="out-box">
-          <span class="lbl">Parcela reduzida · PJ</span>
-          <div class="val" id="pa-parcelaReduzPJ" style="font-size:14px;">—</div>
-        </div>
-      </div>
+      <span id="pa-parcelaInicialPFDestaque" style="display:none">—</span>
+      <span id="pa-parcelaInicialPJDestaque" style="display:none">—</span>
+      <span id="pa-parcelaReduzPF" style="display:none">—</span>
+      <span id="pa-parcelaReduzPJ" style="display:none">—</span>
 
       <div class="out-box teal" id="pa-card-parcela">
         <span class="lbl">Valor Parcela <small>(pós-contemplado)</small></span>
@@ -643,7 +632,7 @@ function recalc() {
   const i = readInputs();
 
   if (!(i.credito > 0) || !(i.prazo > 0)) {
-    const ids = ['pa-categoria','pa-saldoDevedor','pa-parcelaPF','pa-parcelaPJ','pa-parcelaInicialPFDestaque','pa-parcelaInicialPJDestaque','pa-parcelaReduzPF','pa-parcelaReduzPJ','pa-representatividade','pa-lanceTotalRs','pa-creditoLiberado','pa-novaParcela','pa-novoPrazo','pa-saldoPos','pa-novoSeguro','pa-prazoReduzido','pa-parcelaSeReduzPrazo','pa-taxaMes','pa-taxaAno'];
+    const ids = ['pa-categoria','pa-saldoDevedor','pa-parcelaPF','pa-parcelaPJ','pa-parcelaInicialPFDestaque','pa-parcelaInicialPJDestaque','pa-parcelaInicialDestaqueAtual','pa-parcelaReduzPF','pa-parcelaReduzPJ','pa-representatividade','pa-lanceTotalRs','pa-creditoLiberado','pa-novaParcela','pa-novoPrazo','pa-saldoPos','pa-novoSeguro','pa-prazoReduzido','pa-parcelaSeReduzPrazo','pa-taxaMes','pa-taxaAno'];
     ids.forEach(id => setOut(id, '—'));
     return;
   }
@@ -666,6 +655,20 @@ function recalc() {
   var redAtivoPa = (parseFloat(i.redutor) > 0) || (i.redutor === 'campanha');
   setOut('pa-parcelaInicialPFDestaque', formatMoney(redAtivoPa ? r.parcelaReduzidaPF : r.parcelaPF));
   setOut('pa-parcelaInicialPJDestaque', formatMoney(redAtivoPa ? r.parcelaReduzidaPJ : r.parcelaPJ));
+  // Display único — escolhe PF ou PJ baseado no tipo selecionado
+  var pTipo = i.tipo || 'PF';
+  var valorAtual = pTipo === 'PJ'
+    ? (redAtivoPa ? r.parcelaReduzidaPJ : r.parcelaPJ)
+    : (redAtivoPa ? r.parcelaReduzidaPF : r.parcelaPF);
+  setOut('pa-parcelaInicialDestaqueAtual', formatMoney(valorAtual));
+  // Label dinâmico
+  var lblBase = 'Parcela inicial · ' + (pTipo === 'PJ' ? 'PJ' : 'PF');
+  if (redAtivoPa) {
+    var redTxt = i.redutor === 'campanha' ? 'Campanha' : (parseFloat(i.redutor) * 100).toFixed(0) + '%';
+    lblBase += ' <small>(com redutor ' + redTxt + ')</small>';
+  }
+  var lblEl = document.getElementById('pa-parcelaInicialLbl');
+  if (lblEl) lblEl.innerHTML = lblBase;
 
   setOut('pa-representatividade', Number.isFinite(r.representatividade) ? formatPct(r.representatividade * 100, 2) : '—');
   setOut('pa-lanceTotalRs', r.totalLance > 0 ? formatMoney(r.totalLance) : '—');
