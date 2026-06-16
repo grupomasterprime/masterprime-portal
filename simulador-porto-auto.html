@@ -555,7 +555,33 @@ function _gerarPDFFallback(dados){
   y+=8;doc.setDrawColor(accentRgb.r,accentRgb.g,accentRgb.b);doc.setLineWidth(0.5);doc.line(margem,y,pageWidth-margem,y);y+=5;doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(mutedColor.r,mutedColor.g,mutedColor.b);doc.text('Master Prime - Simulacao de consorcio - Carater ilustrativo',margem,y);return doc;
 }
 
-document.getElementById('baixarPdfPorto').addEventListener('click',async()=>{const btn=document.getElementById('baixarPdfPorto');const txt=btn.textContent;btn.textContent='Gerando PDF...';btn.disabled=true;try{const dados=_montarPdfComercialPortoAuto();if(typeof PdfMasterPrime!=='undefined'&&typeof PdfMasterPrime.gerarComercial==='function'){await PdfMasterPrime.gerarComercial(dados);}else{const doc=_gerarPDFFallback(dados);doc.save((dados.filename||'simulacao')+'.pdf');}}catch(err){console.error(err);alert('Erro ao gerar PDF: '+err.message);}finally{btn.textContent=txt;btn.disabled=false;}});
+document.getElementById('baixarPdfPorto').addEventListener('click', async () => {
+  const btn = document.getElementById('baixarPdfPorto');
+  const txt = btn.textContent;
+  btn.textContent = 'Gerando PDF...';
+  btn.disabled = true;
+  try {
+    const dados = _montarPdfComercialPortoAuto();
+    // Força fallback se o tema NÃO for o padrão (VIP, personalizado ou modo escuro ativo)
+    const temaNaoPadrao = (window._currentTheme !== 'default');
+    const escuroAtivo = document.getElementById('dark-bg-checkbox')?.checked || false;
+    const usarFallback = temaNaoPadrao || escuroAtivo
+                      || (typeof PdfMasterPrime === 'undefined')
+                      || (typeof PdfMasterPrime.gerarComercial !== 'function');
+    if (usarFallback) {
+      const doc = _gerarPDFFallback(dados);
+      doc.save((dados.filename || 'simulacao') + '.pdf');
+    } else {
+      await PdfMasterPrime.gerarComercial(dados);
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Erro ao gerar PDF: ' + err.message);
+  } finally {
+    btn.textContent = txt;
+    btn.disabled = false;
+  }
+});
 
 (function initSimStore(){if(!window.SimulacaoStore)return;window.SimulacaoStore.init({supabaseUrl:'https://jhwciwvgagnuxakukyob.supabase.co',supabaseKey:'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx',simulador:'porto-auto',mountPoint:document.getElementById('simStoreMount'),serialize:()=>window.SimulacaoStore.snapshotForm(),restore:(dados)=>window.SimulacaoStore.restoreForm(dados,{recalc:recalc})});})();
 </script>
