@@ -670,89 +670,6 @@
     bradesco: { corAcento: '#CC092F', corPanel: '#9F0625', repTexto: 'Consórcio Bradesco' },
   };
 
-  function _stripComercial(txt) {
-    return String(txt || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-  }
-
-  function _pdfFieldEnabled(key) {
-    const el = document.querySelector('.pdf-field[data-key="' + key + '"]');
-    return el ? el.checked : true;
-  }
-
-  function _pdfKeyFromLabel(label) {
-    const s = _stripComercial(label);
-    if (s.includes('taxa') && (s.includes('adm') || s.includes('administrativa'))) return 'taxaAdm';
-    if (s.includes('fundo')) return 'fundoReserva';
-    if (s.includes('seguro')) return 'seguro';
-    if (s.includes('valor do credito')) return 'creditoContratado';
-    if (s.includes('prazo do grupo')) return 'prazo';
-    if (s.includes('credito liquido')) return 'creditoLiquido';
-    if (s.includes('saldo devedor')) return 'saldoDevedor';
-    if (s.includes('parcela inicial pf')) return 'parcelaInicialPF';
-    if (s.includes('parcela inicial pj')) return 'parcelaInicialPJ';
-    if (s === 'parcela inicial' || s.includes('primeiras')) return 'parcelaInicial';
-    if (s.includes('parcela reduzida pf')) return 'parcelaReduzPF';
-    if (s.includes('parcela reduzida pj')) return 'parcelaReduzPJ';
-    if (s.includes('antes') && s.includes('contemplac')) return 'parcelaAntes';
-    if (s.includes('pos') || s.includes('contemplado') || s.includes('contemplacao')) return 'parcelaPos';
-    if (s.includes('prazo restante')) return 'prazoRestante';
-    return '';
-  }
-
-  function _normalizarLanceComercial(lance) {
-    if (!lance) return null;
-    const out = { modo: lance.modo };
-    if (lance.embutido || lance.embutidoPct || lance.embutidoRs) out.embutido = lance.embutido || { pct: lance.embutidoPct || '0,00', rs: lance.embutidoRs || '0,00' };
-    if (lance.apagar || lance.apagarPct || lance.apagarRs) out.apagar = lance.apagar || { pct: lance.apagarPct || '0,00', rs: lance.apagarRs || '0,00' };
-    if (lance.total || lance.totalPct || lance.totalRs) out.total = lance.total || { pct: lance.totalPct || '0,00', rs: lance.totalRs || '0,00' };
-    return (out.embutido || out.apagar || out.total) ? out : null;
-  }
-
-  function _filtrarLanceComercial(lance) {
-    const l = _normalizarLanceComercial(lance);
-    if (!l) return null;
-    const out = { modo: l.modo };
-    if (l.embutido && (_pdfFieldEnabled('pctEmbutido') || _pdfFieldEnabled('valorEmbutido'))) out.embutido = { pct: _pdfFieldEnabled('pctEmbutido') ? l.embutido.pct : '0,00', rs: _pdfFieldEnabled('valorEmbutido') ? l.embutido.rs : '0,00' };
-    if (l.apagar && (_pdfFieldEnabled('pctAPagar') || _pdfFieldEnabled('recProp'))) out.apagar = { pct: _pdfFieldEnabled('pctAPagar') ? l.apagar.pct : '0,00', rs: _pdfFieldEnabled('recProp') ? l.apagar.rs : '0,00' };
-    if (l.total && (_pdfFieldEnabled('pctTotal') || _pdfFieldEnabled('valorTotal'))) out.total = { pct: _pdfFieldEnabled('pctTotal') ? l.total.pct : '0,00', rs: _pdfFieldEnabled('valorTotal') ? l.total.rs : '0,00' };
-    return (out.embutido || out.apagar || out.total) ? out : null;
-  }
-
-  function _filtrarComercial(opts) {
-    return Object.assign({}, opts, {
-      inputs: (opts.inputs || []).filter(item => {
-        const key = item.key || _pdfKeyFromLabel(item.label);
-        return !key || _pdfFieldEnabled(key);
-      }),
-      outputs: (opts.outputs || []).filter(item => {
-        const key = item.key || _pdfKeyFromLabel(item.label);
-        return !key || _pdfFieldEnabled(key);
-      }),
-      lance: _filtrarLanceComercial(opts.lance)
-    });
-  }
-
-  function _instalarPainelPdfComercial() {
-    if (document.getElementById('cfg-panel') || document.getElementById('mp-pdf-cfg-panel')) return;
-    const file = (location.pathname.split('/').pop() || '').toLowerCase();
-    const ok = ['simulador-porto-auto.html','simulador-porto-imovel.html','simulador-porto-pesados.html','simulador-itau-integral.html','simulador-itau-reduzida.html','simulador-bradesco.html','simulador-bradesco-auto.html'].includes(file);
-    if (!ok) return;
-    const labels = {taxaAdm:'Taxa Administrativa',fundoReserva:'Fundo de Reserva',seguro:'Seguro Prestamista',creditoContratado:'Valor do credito',prazo:'Prazo do Grupo',pctEmbutido:'% Lance Embutido',valorEmbutido:'Valor Embutido',pctAPagar:'% Lance a Pagar',recProp:'Recurso Proprio',pctTotal:'% Lance Total',valorTotal:'Valor Total',creditoLiquido:'Credito Liquido',saldoDevedor:'Saldo Devedor',parcelaInicialPF:'Parcela Inicial PF',parcelaInicialPJ:'Parcela Inicial PJ',parcelaInicial:'Parcela Inicial',parcelaReduzPF:'Parcela Reduzida PF',parcelaReduzPJ:'Parcela Reduzida PJ',parcelaAntes:'Parcela antes da contemplacao',parcelaPos:'Parcela pos-contemplacao',prazoRestante:'Prazo Restante'};
-    const groups = [['Taxas e dados do grupo',['taxaAdm','fundoReserva','seguro','creditoContratado','prazo']],['Lance',['pctEmbutido','valorEmbutido','pctAPagar','recProp','pctTotal','valorTotal']],['Resultados',['creditoLiquido','saldoDevedor','parcelaInicialPF','parcelaInicialPJ','parcelaInicial','parcelaReduzPF','parcelaReduzPJ','parcelaAntes','parcelaPos','prazoRestante']]];
-    const style = document.createElement('style');
-    style.textContent = '#mp-pdf-cfg-fab{position:fixed;right:18px;bottom:18px;z-index:3000;font-family:Inter,-apple-system,system-ui,sans-serif}#mp-pdf-cfg-panel{display:none;width:340px;max-height:78vh;overflow:auto;background:#fff;border:1px solid #E5E7EB;border-radius:12px;box-shadow:0 18px 50px rgba(15,23,42,.22);margin-bottom:10px}#mp-pdf-cfg-panel.open{display:block}.mp-pdf-cfg-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #E5E7EB;font-weight:700;color:#0F172A}.mp-pdf-cfg-section{padding:12px 16px}.mp-pdf-cfg-title{font-size:11px;font-weight:800;color:#2D3F5E;text-transform:uppercase;letter-spacing:.8px;margin:12px 0 8px}.mp-pdf-cfg-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;font-size:12px;color:#334155;border-bottom:1px solid #F1F5F9}.mp-pdf-cfg-sw{position:relative;width:38px;height:21px;flex:0 0 auto}.mp-pdf-cfg-sw input{opacity:0;width:0;height:0}.mp-pdf-cfg-track{position:absolute;inset:0;background:#CBD5E1;border-radius:999px;cursor:pointer}.mp-pdf-cfg-track:before{content:"";position:absolute;width:15px;height:15px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.15s;box-shadow:0 1px 2px rgba(0,0,0,.25)}.mp-pdf-cfg-sw input:checked+.mp-pdf-cfg-track{background:#0033A0}.mp-pdf-cfg-sw input:checked+.mp-pdf-cfg-track:before{transform:translateX(17px)}#mp-pdf-cfg-toggle{border:0;border-radius:9px;background:#2D3F5E;color:#fff;padding:11px 15px;font-weight:700;font-size:12px;box-shadow:0 8px 24px rgba(15,23,42,.25);cursor:pointer}#mp-pdf-cfg-reset{width:100%;border:1px solid #E2E8F0;background:#F8FAFC;color:#334155;border-radius:8px;padding:9px 12px;font-weight:700;cursor:pointer}';
-    document.head.appendChild(style);
-    const html = groups.map(g => '<div class="mp-pdf-cfg-title">' + g[0] + '</div>' + g[1].map(key => '<div class="mp-pdf-cfg-item"><span>' + labels[key] + '</span><label class="mp-pdf-cfg-sw"><input type="checkbox" class="pdf-field" data-key="' + key + '" checked><span class="mp-pdf-cfg-track"></span></label></div>').join('')).join('');
-    const wrap = document.createElement('div');
-    wrap.id = 'mp-pdf-cfg-fab';
-    wrap.innerHTML = '<div id="mp-pdf-cfg-panel"><div class="mp-pdf-cfg-head"><span>Configuracoes do PDF</span><button type="button" style="border:0;background:transparent;font-size:18px;cursor:pointer;color:#64748B" data-close>&times;</button></div><div class="mp-pdf-cfg-section"><div style="font-size:11px;color:#64748B;margin-bottom:8px">Desative os campos que nao devem aparecer no PDF gerado.</div>' + html + '<div style="padding-top:12px"><button type="button" id="mp-pdf-cfg-reset">Restaurar campos</button></div></div></div><button type="button" id="mp-pdf-cfg-toggle">Configuracoes</button>';
-    document.body.appendChild(wrap);
-    const panel = document.getElementById('mp-pdf-cfg-panel');
-    document.getElementById('mp-pdf-cfg-toggle').addEventListener('click', () => panel.classList.toggle('open'));
-    wrap.querySelector('[data-close]').addEventListener('click', () => panel.classList.remove('open'));
-    document.getElementById('mp-pdf-cfg-reset').addEventListener('click', () => document.querySelectorAll('.pdf-field').forEach(cb => cb.checked = true));
-  }
-
   function _renderInputComercial(inp) {
     const highlight = inp.highlight
       ? `<div style="font-size:11.5px; color:#94A3B8; font-weight:600; margin-bottom:3px; letter-spacing:0.6px; text-transform:uppercase;">${inp.highlight}</div>`
@@ -833,12 +750,7 @@
   }
 
   function buildTemplateComercial(opts) {
-    opts = _filtrarComercial(opts || {});
-    const theme = Object.assign({}, ADMIN_THEME[opts.logoAdmin] || ADMIN_THEME.porto);
-    if (opts.themeColors) {
-      if (opts.themeColors.accent) theme.corAcento = opts.themeColors.accent;
-      if (opts.themeColors.navy) theme.corPanel = opts.themeColors.navy;
-    }
+    const theme = ADMIN_THEME[opts.logoAdmin] || ADMIN_THEME.porto;
     const logoUrl = LOGO_ADMIN_DATA[opts.logoAdmin] || '';
 
     // Inputs (DADOS DA PROPOSTA)
@@ -864,7 +776,7 @@
       });
     }
 
-    const lanceHtml = _renderLanceCaixa(_normalizarLanceComercial(opts.lance), theme.corAcento);
+    const lanceHtml = _renderLanceCaixa(opts.lance, theme.corAcento);
 
     return `
       <div style="width:1300px; background:#fff; font-family:'Inter','Helvetica Neue',-apple-system,system-ui,sans-serif; color:#0F172A; padding:44px 52px 32px; box-sizing:border-box;">
@@ -877,10 +789,18 @@
             ${opts.subtituloSecundario ? `<div style="font-size:18px; color:#64748B; font-weight:500; margin-top:10px; letter-spacing:-0.1px;">${opts.subtituloSecundario}</div>` : ''}
           </div>
           <div style="display:flex; flex-direction:column; align-items:flex-end;">
-            <div style="width:350px; height:100px; border-radius:18px; background:#fff; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; box-shadow:0 1px 2px rgba(15,23,42,0.04);">
-              <img src="${LOGO_DATA_URL}" alt="Master Prime" style="height:92px; width:auto; display:block;">
+            <div style="display:flex; align-items:center; gap:14px;">
+              <div style="height:96px; padding:0 4px; border-radius:18px; background:#fff; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; box-shadow:0 1px 2px rgba(15,23,42,0.04);">
+                <img src="${LOGO_DATA_URL}" alt="Master Prime" style="height:92px; width:auto; display:block;">
+              </div>
+              ${opts.hideAdminLogo ? '' : `
+              <div style="width:1px; height:56px; background:#E2E8F0;"></div>
+              <div style="width:96px; height:96px; border-radius:18px; background:#fff; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; padding:10px; box-shadow:0 1px 2px rgba(15,23,42,0.04);">
+                <img src="${logoUrl}" alt="Admin" style="max-width:100%; max-height:100%; object-fit:contain;">
+              </div>
+              `}
             </div>
-            <div style="font-size:10.5px; color:#94A3B8; letter-spacing:1.5px; text-transform:uppercase; margin-top:12px; font-weight:600;">Master Prime</div>
+            <div style="font-size:10.5px; color:#94A3B8; letter-spacing:1.5px; text-transform:uppercase; margin-top:12px; font-weight:600;">${opts.hideAdminLogo ? 'Master Prime' : 'Representante Autorizado'}</div>
           </div>
         </div>
 
@@ -900,9 +820,12 @@
           </div>
 
           <!-- COLUNA DIREITA: RESULTADO DA SIMULAÇÃO -->
-          <div style="background:linear-gradient(160deg, ${theme.corPanel} 0%, ${theme.corPanel}EE 100%); border-radius:20px; padding:30px 32px; color:#fff; position:relative; overflow:hidden;">
+          <div style="background:linear-gradient(160deg, ${theme.corPanel} 0%, ${theme.corPanel}EE 60%, ${theme.corPanel}DD 100%); border-radius:20px; padding:30px 32px; color:#fff; position:relative; overflow:hidden;">
+            <!-- ornamento sutil de fundo -->
+            <div style="position:absolute; top:-60px; right:-60px; width:240px; height:240px; border-radius:50%; background:${theme.corAcento}; opacity:0.10; pointer-events:none;"></div>
             <div style="position:relative;">
               <div style="display:flex; align-items:center; gap:10px; margin-bottom:24px;">
+                <span style="width:6px; height:24px; background:${theme.corAcento}; border-radius:3px;"></span>
                 <div style="font-size:13.5px; color:#fff; letter-spacing:2px; text-transform:uppercase; font-weight:700;">Resultado da Simulação</div>
               </div>
               ${outputsHtml}
@@ -1038,14 +961,4 @@
 
   // ─── EXPORT PUBLIC API ───
   window.PdfMasterPrime = { gerar, gerarComercial, preview, buildTemplate, buildTemplateComercial, LOGO_ADMIN_DATA, ADMIN_THEME, _internals: { DISCLAIMER_PADRAO, NAVY, CARD_BG } };
-
-  function _instalarPainelPdfComercialSeguro() {
-    try { _instalarPainelPdfComercial(); } catch (e) { console.warn('Falha ao instalar configuracoes do PDF', e); }
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', _instalarPainelPdfComercialSeguro);
-  } else {
-    _instalarPainelPdfComercialSeguro();
-  }
 })();
