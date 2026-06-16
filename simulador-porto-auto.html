@@ -432,6 +432,7 @@
       <div class="cfg-item"><span>% Lance a Pagar</span><label class="sw"><input type="checkbox" class="pdf-field" data-key="pctAPagar" checked><span class="sw-track"></span></label></div>
       <div class="cfg-item"><span>Recurso Proprio</span><label class="sw"><input type="checkbox" class="pdf-field" data-key="recProp" checked><span class="sw-track"></span></label></div>
       <div class="cfg-item"><span>% Lance Total</span><label class="sw"><input type="checkbox" class="pdf-field" data-key="pctTotal" checked><span class="sw-track"></span></label></div>
+      <div class="cfg-item"><span>Valor Total</span><label class="sw"><input type="checkbox" class="pdf-field" data-key="valorTotal" checked><span class="sw-track"></span></label></div>
       <div style="font-size:11px;font-weight:600;color:var(--mp-navy);margin:12px 0 4px;text-transform:uppercase;letter-spacing:.5px;">Resultados</div>
       <div class="cfg-item"><span>Credito Contratado</span><label class="sw"><input type="checkbox" class="pdf-field" data-key="creditoContratado" checked><span class="sw-track"></span></label></div>
       <div class="cfg-item"><span>Credito Liquido</span><label class="sw"><input type="checkbox" class="pdf-field" data-key="creditoLiquido" checked><span class="sw-track"></span></label></div>
@@ -522,10 +523,11 @@ function _montarPdfComercialPortoAuto(){
   if(getPdfField('prazo'))inputs.push({label:'Prazo do Grupo',value:(_v('pa-prazo')||'0')+' Meses'});
   const lanceObj={};let temLance=false;
   if(getPdfField('pctEmbutido')){lanceObj.embutidoPct=_v('pa-pctEmbutido').replace(' %','')||'0,00';temLance=true;}
-  if(getPdfField('valorEmbutido')){lanceObj.embutidoRs=(_t('pa-embutido')||'R$ 0,00').replace('R$ ','');temLance=true;}
+  if(getPdfField('valorEmbutido')){lanceObj.embutidoRs=(_v('pa-embutido')||'R$ 0,00').replace('R$ ','');temLance=true;}
   if(getPdfField('pctAPagar')){lanceObj.apagarPct=_v('pa-pctLanceFixo').replace(' %','')||'0,00';temLance=true;}
-  if(getPdfField('recProp')){lanceObj.apagarRs=(_t('pa-recProp')||'R$ 0,00').replace('R$ ','');temLance=true;}
+  if(getPdfField('recProp')){lanceObj.apagarRs=(_v('pa-recProp')||'R$ 0,00').replace('R$ ','');temLance=true;}
   if(getPdfField('pctTotal')){lanceObj.totalPct=_t('pa-representatividade')||'';temLance=true;}
+  if(getPdfField('valorTotal')){const _parse=s=>parseFloat(String(s||'').replace(/[R$\s.]/g,'').replace(',','.'))||0;const _fmt=n=>n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});lanceObj.totalRs=_fmt(_parse(_v('pa-embutido'))+_parse(_v('pa-recProp')));temLance=true;}
   const outputs=[];
   if(getPdfField('creditoLiquido'))outputs.push({label:'Credito Liquido',value:_t('pa-creditoLiberado')||''});
   if(getPdfField('saldoDevedor'))outputs.push({label:'Saldo Devedor',value:_t('pa-saldoDevedor')||''});
