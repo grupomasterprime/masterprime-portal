@@ -297,8 +297,11 @@
           </div>
           <div style="margin-top: 8px;">
             <div class="result-teal" style="padding: 7px 11px;">
-              <strong>% Lance Total</strong>
-              <span class="value" id="pi-representatividade" style="font-size:14px;">—</span>
+              <strong>Lance Total</strong>
+              <span style="display:inline-flex; align-items:center; gap:10px;">
+                <span class="value" id="pi-representatividade" style="font-size:13px; opacity:.85;">—</span>
+                <span class="value" id="pi-lanceTotalRs" style="font-size:14px;">—</span>
+              </span>
             </div>
           </div>
         </div>
@@ -546,6 +549,7 @@ function calc(i) {
   r.parcelaDemais  = baseParcelaPre;
 
   const totalLance = i.recProp + i.fgts + i.embutido;
+  r.totalLance = totalLance;
   r.representatividade = (r.categoria > 0) ? (totalLance / r.categoria) : NaN;
 
   r.creditoLiberado = i.credito - i.embutido;
@@ -606,7 +610,7 @@ function recalc() {
   const i = readInputs();
 
   if (!(i.credito > 0) || !(i.prazo > 0)) {
-    const ids = ['pi-categoria','pi-saldoDevedor','pi-parcelaPF','pi-parcelaPJ','pi-parcelaInicialPFDestaque','pi-parcelaInicialPJDestaque','pi-parcelaReduzPF','pi-parcelaReduzPJ','pi-parcelaInicial','pi-parcelaDemais','pi-representatividade','pi-creditoLiberado','pi-novaParcela','pi-novoPrazo','pi-saldoPos','pi-novoSeguro','pi-prazoReduzido','pi-parcelaSeReduzPrazo','pi-taxaMes','pi-taxaAno'];
+    const ids = ['pi-categoria','pi-saldoDevedor','pi-parcelaPF','pi-parcelaPJ','pi-parcelaInicialPFDestaque','pi-parcelaInicialPJDestaque','pi-parcelaReduzPF','pi-parcelaReduzPJ','pi-parcelaInicial','pi-parcelaDemais','pi-representatividade','pi-lanceTotalRs','pi-creditoLiberado','pi-novaParcela','pi-novoPrazo','pi-saldoPos','pi-novoSeguro','pi-prazoReduzido','pi-parcelaSeReduzPrazo','pi-taxaMes','pi-taxaAno'];
     ids.forEach(id => setOut(id, '—'));
     atualizaLabelsParcelaInicial(i);
     return;
@@ -631,6 +635,7 @@ function recalc() {
   atualizaLabelsParcelaInicial(i);
 
   setOut('pi-representatividade', Number.isFinite(r.representatividade) ? formatPct(r.representatividade * 100, 2) : '—');
+  setOut('pi-lanceTotalRs', r.totalLance > 0 ? formatMoney(r.totalLance) : '—');
 
   setOut('pi-creditoLiberado', formatMoney(r.creditoLiberado));
   setOut('pi-novaParcela', formatMoney(r.novaParcela));

@@ -292,8 +292,11 @@
           </div>
           <div style="margin-top: 8px;">
             <div class="result-teal" style="padding: 7px 11px;">
-              <strong>% Lance Total</strong>
-              <span class="value" id="pp-representatividade" style="font-size:14px;">—</span>
+              <strong>Lance Total</strong>
+              <span style="display:inline-flex; align-items:center; gap:10px;">
+                <span class="value" id="pp-representatividade" style="font-size:13px; opacity:.85;">—</span>
+                <span class="value" id="pp-lanceTotalRs" style="font-size:14px;">—</span>
+              </span>
             </div>
           </div>
         </div>
@@ -509,6 +512,7 @@ function calc(i) {
   r.parcelaReduzidaPF = r.parcelaReduzidaPJ + r.valorSeguro;
 
   const totalLance = i.recProp + i.embutido;
+  r.totalLance = totalLance;
   r.representatividade = (r.categoria > 0) ? (totalLance / r.categoria) : NaN;
 
   r.creditoLiberado = i.credito - i.embutido;
@@ -565,7 +569,7 @@ function recalc() {
   const i = readInputs();
 
   if (!(i.credito > 0) || !(i.prazo > 0)) {
-    const ids = ['pp-categoria','pp-saldoDevedor','pp-parcelaPF','pp-parcelaPJ','pp-parcelaInicialPFDestaque','pp-parcelaInicialPJDestaque','pp-parcelaReduzPF','pp-parcelaReduzPJ','pp-representatividade','pp-creditoLiberado','pp-novaParcela','pp-novoPrazo','pp-saldoPos','pp-novoSeguro','pp-prazoReduzido','pp-parcelaSeReduzPrazo','pp-taxaMes','pp-taxaAno'];
+    const ids = ['pp-categoria','pp-saldoDevedor','pp-parcelaPF','pp-parcelaPJ','pp-parcelaInicialPFDestaque','pp-parcelaInicialPJDestaque','pp-parcelaReduzPF','pp-parcelaReduzPJ','pp-representatividade','pp-lanceTotalRs','pp-creditoLiberado','pp-novaParcela','pp-novoPrazo','pp-saldoPos','pp-novoSeguro','pp-prazoReduzido','pp-parcelaSeReduzPrazo','pp-taxaMes','pp-taxaAno'];
     ids.forEach(id => setOut(id, '—'));
     return;
   }
@@ -589,6 +593,7 @@ function recalc() {
   setOut('pp-parcelaReduzPJ', formatMoney(r.parcelaReduzidaPJ));
 
   setOut('pp-representatividade', Number.isFinite(r.representatividade) ? formatPct(r.representatividade * 100, 2) : '—');
+  setOut('pp-lanceTotalRs', r.totalLance > 0 ? formatMoney(r.totalLance) : '—');
 
   setOut('pp-creditoLiberado', formatMoney(r.creditoLiberado));
   setOut('pp-novaParcela', formatMoney(r.novaParcela));

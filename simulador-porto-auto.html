@@ -330,8 +330,11 @@
           </div>
           <div style="margin-top: 8px;">
             <div class="result-teal" style="padding: 7px 11px;">
-              <strong>% Lance Total</strong>
-              <span class="value" id="pa-representatividade" style="font-size:14px;">—</span>
+              <strong>Lance Total</strong>
+              <span style="display:inline-flex; align-items:center; gap:10px;">
+                <span class="value" id="pa-representatividade" style="font-size:13px; opacity:.85;">—</span>
+                <span class="value" id="pa-lanceTotalRs" style="font-size:14px;">—</span>
+              </span>
             </div>
           </div>
         </div>
@@ -572,6 +575,7 @@ function calc(i) {
   // REPRESENTATIVIDADE DO LANCE
   // F76 = (F75+F74)/Q63 = (embutido + recProp) / categoria
   const totalLance = i.recProp + i.embutido;
+  r.totalLance = totalLance;
   r.representatividade = (r.categoria > 0) ? (totalLance / r.categoria) : NaN;
 
   // CRÉDITO LIBERADO
@@ -639,7 +643,7 @@ function recalc() {
   const i = readInputs();
 
   if (!(i.credito > 0) || !(i.prazo > 0)) {
-    const ids = ['pa-categoria','pa-saldoDevedor','pa-parcelaPF','pa-parcelaPJ','pa-parcelaInicialPFDestaque','pa-parcelaInicialPJDestaque','pa-parcelaReduzPF','pa-parcelaReduzPJ','pa-representatividade','pa-creditoLiberado','pa-novaParcela','pa-novoPrazo','pa-saldoPos','pa-novoSeguro','pa-prazoReduzido','pa-parcelaSeReduzPrazo','pa-taxaMes','pa-taxaAno'];
+    const ids = ['pa-categoria','pa-saldoDevedor','pa-parcelaPF','pa-parcelaPJ','pa-parcelaInicialPFDestaque','pa-parcelaInicialPJDestaque','pa-parcelaReduzPF','pa-parcelaReduzPJ','pa-representatividade','pa-lanceTotalRs','pa-creditoLiberado','pa-novaParcela','pa-novoPrazo','pa-saldoPos','pa-novoSeguro','pa-prazoReduzido','pa-parcelaSeReduzPrazo','pa-taxaMes','pa-taxaAno'];
     ids.forEach(id => setOut(id, '—'));
     return;
   }
@@ -664,6 +668,7 @@ function recalc() {
   setOut('pa-parcelaInicialPJDestaque', formatMoney(redAtivoPa ? r.parcelaReduzidaPJ : r.parcelaPJ));
 
   setOut('pa-representatividade', Number.isFinite(r.representatividade) ? formatPct(r.representatividade * 100, 2) : '—');
+  setOut('pa-lanceTotalRs', r.totalLance > 0 ? formatMoney(r.totalLance) : '—');
 
   setOut('pa-creditoLiberado', formatMoney(r.creditoLiberado));
   setOut('pa-novaParcela', formatMoney(r.novaParcela));

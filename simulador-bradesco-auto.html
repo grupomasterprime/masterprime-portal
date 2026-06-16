@@ -296,7 +296,8 @@
           <div style="margin-top: 8px;">
             <div class="result-red" style="padding: 7px 11px;">
               <strong>Valor lance total</strong>
-              <span style="display:inline-flex; align-items:center; gap:8px;">
+              <span style="display:inline-flex; align-items:center; gap:10px;">
+                <span class="value" id="br-lanceTotalPct" style="font-size:13px; opacity:.85;">—</span>
                 <span class="value" id="br-lanceTotal" style="font-size:14px;">—</span>
                 <button type="button" class="btn-eye-lance" onclick="abrirAnaliticoLance()" title="Ver memória de cálculo do lance">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -530,7 +531,7 @@ function recalc() {
   const i = readInputs();
 
   if (!(i.credito > 0) || !(i.prazo > 0)) {
-    const ids = ['br-saldoDevedor','br-seguroMensal','br-parcelaInicial','br-parcelaInicialDestaque','br-parcelaPosAnt','br-parcelaDemaisDestaque','br-lanceTotal','br-saldoPos','br-parcDiluir','br-prazoDiluir','br-parcAntecipar','br-prazoAntecipar','br-taxaMes','br-taxaAno','br-prazoOut','br-creditoLiquidoOut','br-parcelaPos1'];
+    const ids = ['br-saldoDevedor','br-seguroMensal','br-parcelaInicial','br-parcelaInicialDestaque','br-parcelaPosAnt','br-parcelaDemaisDestaque','br-lanceTotal','br-lanceTotalPct','br-saldoPos','br-parcDiluir','br-prazoDiluir','br-parcAntecipar','br-prazoAntecipar','br-taxaMes','br-taxaAno','br-prazoOut','br-creditoLiquidoOut','br-parcelaPos1'];
     ids.forEach(id => setOut(id, '—'));
     atualizaLabelsParcela(i);
     return;
@@ -547,6 +548,10 @@ function recalc() {
   setOut('br-parcelaPosAnt', formatMoney(r.parcelaPosAnt));
   setOut('br-parcelaDemaisDestaque', formatMoney(r.parcelaPosAnt));
   setOut('br-lanceTotal', formatMoney(r.lanceTotal));
+  // % total do lance — pega do input pctLance (já sincronizado com o valor R$)
+  const _pctLanceTxt = get('br-pctLance').value || '';
+  const _pctLanceNum = unmaskPct(_pctLanceTxt);
+  setOut('br-lanceTotalPct', _pctLanceNum > 0 ? formatPct(_pctLanceNum, 2) : '—');
   setOut('br-saldoPos', formatMoney(r.saldoPos));
   setOut('br-parcDiluir', formatMoney(r.parcDiluir));
   setOut('br-prazoDiluir', Number.isFinite(r.prazoDiluir) ? formatInt(r.prazoDiluir) + ' meses' : '—');
