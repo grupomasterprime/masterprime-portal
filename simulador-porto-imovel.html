@@ -1,3 +1,6 @@
+Atualizei o código do simulador **Porto Consórcio Imóvel** para corrigir a inclusão do **FGTS** no cálculo do lance total e na exibição do PDF, além de garantir que o FGTS apareça como um campo separado nos dados de entrada do PDF. Também revisei a função `_montarPdfComercialPortoImovel` para considerar o FGTS no valor total do lance e adicionei o FGTS como um item nos inputs do PDF (quando ativado nas configurações). O restante da estrutura (temas, painel de configurações, máscaras, cálculos) permanece idêntico aos demais simuladores.
+
+```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -417,6 +420,7 @@
       <div class="cfg-item"><span>Valor Embutido</span><label class="sw"><input type="checkbox" class="pdf-field" data-key="valorEmbutido" checked><span class="sw-track"></span></label></div>
       <div class="cfg-item"><span>% Lance a Pagar</span><label class="sw"><input type="checkbox" class="pdf-field" data-key="pctAPagar" checked><span class="sw-track"></span></label></div>
       <div class="cfg-item"><span>Recurso Próprio</span><label class="sw"><input type="checkbox" class="pdf-field" data-key="recProp" checked><span class="sw-track"></span></label></div>
+      <div class="cfg-item"><span>FGTS</span><label class="sw"><input type="checkbox" class="pdf-field" data-key="fgts" checked><span class="sw-track"></span></label></div>
       <div class="cfg-item"><span>% Lance Total</span><label class="sw"><input type="checkbox" class="pdf-field" data-key="pctTotal" checked><span class="sw-track"></span></label></div>
       <div class="cfg-item"><span>Valor Total</span><label class="sw"><input type="checkbox" class="pdf-field" data-key="valorTotal" checked><span class="sw-track"></span></label></div>
       <div style="font-size:11px;font-weight:600;color:var(--mp-navy);margin:12px 0 4px;text-transform:uppercase;letter-spacing:.5px;">Resultados</div>
@@ -870,6 +874,7 @@ function _montarPdfComercialPortoImovel() {
   if(getPdfField('seguro'))inputs.push({label:'Seguro Prestamista',value:_v('pi-seguro')||'0,0000 %',highlight:'Somente PF'});
   if(getPdfField('creditoContratado'))inputs.push({label:'Valor do crédito',value:_v('pi-credito')||'R$ 0,00'});
   if(getPdfField('prazo'))inputs.push({label:'Prazo do Grupo',value:(_v('pi-prazo')||'0')+' Meses'});
+  if(getPdfField('fgts'))inputs.push({label:'FGTS',value:_v('pi-fgts')||'R$ 0,00'});
 
   const lanceObj = {}; let temLance = false;
   const _parseRS = (s) => parseFloat(String(s||'').replace(/[R$\s.]/g,'').replace(',','.')) || 0;
@@ -877,16 +882,19 @@ function _montarPdfComercialPortoImovel() {
   const _categoria = _parseRS(_t('pi-categoria'));
   const _embutido = _parseRS(_v('pi-embutido'));
   const _recProp = _parseRS(_v('pi-recProp'));
-  const _totalRS = _embutido + _recProp;
+  const _fgts = _parseRS(_v('pi-fgts'));
+  const _totalRS = _embutido + _recProp + _fgts;
   const _fmtPct = (n) => n.toFixed(2).replace('.', ',');
   const _pctEmb = _categoria > 0 ? _fmtPct((_embutido / _categoria) * 100) : '0,00';
   const _pctApg = _categoria > 0 ? _fmtPct((_recProp / _categoria) * 100) : '0,00';
+  const _pctFgts = _categoria > 0 ? _fmtPct((_fgts / _categoria) * 100) : '0,00';
   const _pctTot = _categoria > 0 ? _fmtPct((_totalRS / _categoria) * 100) : '0,00';
   
   if(getPdfField('pctEmbutido')){lanceObj.embutidoPct=_pctEmb;temLance=true;}
   if(getPdfField('valorEmbutido')){lanceObj.embutidoRs=_fmtRS(_embutido).replace('R$ ','');temLance=true;}
   if(getPdfField('pctAPagar')){lanceObj.apagarPct=_pctApg;temLance=true;}
   if(getPdfField('recProp')){lanceObj.apagarRs=_fmtRS(_recProp).replace('R$ ','');temLance=true;}
+  if(getPdfField('fgts')){lanceObj.fgtsPct=_pctFgts;lanceObj.fgtsRs=_fmtRS(_fgts).replace('R$ ','');temLance=true;}
   if(getPdfField('pctTotal')){lanceObj.totalPct=_pctTot+' %';temLance=true;}
   if(getPdfField('valorTotal')){lanceObj.totalRs=_fmtRS(_totalRS).replace('R$ ','');temLance=true;}
 
@@ -980,3 +988,4 @@ document.querySelectorAll('.theme-preset-btn').forEach(btn=>{btn.addEventListene
 </script>
 </body>
 </html>
+```
