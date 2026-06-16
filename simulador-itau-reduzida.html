@@ -267,7 +267,10 @@
           <div style="margin-top: 8px;">
             <div class="result-orange" style="padding: 7px 11px;">
               <strong>Total do Lance</strong>
-              <span class="value" id="ir-totalLance" style="font-size:14px;">—</span>
+              <span style="display:inline-flex; align-items:center; gap:10px;">
+                <span class="value" id="ir-totalLancePct" style="font-size:13px; opacity:.85;">—</span>
+                <span class="value" id="ir-totalLance" style="font-size:14px;">—</span>
+              </span>
             </div>
           </div>
         </div>
@@ -485,7 +488,7 @@ function recalc() {
   const i = readInputs();
 
   if (!(i.credito > 0) || !(i.prazo > 0)) {
-    const ids = ['ir-categoria','ir-saldoDevedor','ir-parcelaIntegral','ir-parcelaIntegralDestaque','ir-parcelaReduzida','ir-parcelaReduzidaDestaque','ir-pctReducao','ir-seguroMensal','ir-lanceEmbutido','ir-lanceAPagar','ir-totalLance','ir-creditoLiquido','ir-novaParcela','ir-novoPrazoOut','ir-prazoRestante','ir-saldoPos','ir-novoPrazo','ir-parcelaMantida','ir-saldoPosPrazo','ir-taxaMes','ir-taxaAno'];
+    const ids = ['ir-categoria','ir-saldoDevedor','ir-parcelaIntegral','ir-parcelaIntegralDestaque','ir-parcelaReduzida','ir-parcelaReduzidaDestaque','ir-pctReducao','ir-seguroMensal','ir-lanceEmbutido','ir-lanceAPagar','ir-totalLance','ir-totalLancePct','ir-creditoLiquido','ir-novaParcela','ir-novoPrazoOut','ir-prazoRestante','ir-saldoPos','ir-novoPrazo','ir-parcelaMantida','ir-saldoPosPrazo','ir-taxaMes','ir-taxaAno'];
     ids.forEach(id => setOut(id, '—'));
     setVal('ir-lanceEmbutidoView', '');
     setVal('ir-lanceAPagarView', '');
@@ -506,6 +509,8 @@ function recalc() {
   setOut('ir-lanceEmbutido', formatMoney(r.lanceEmbutido));
   setOut('ir-lanceAPagar', formatMoney(r.lanceApagar));
   setOut('ir-totalLance', formatMoney(r.totalLance));
+  const _pctTot = (i.pctEmbutido + i.pctAPagar) * 100;
+  setOut('ir-totalLancePct', _pctTot > 0 ? formatPct(_pctTot, 2) : '—');
   setVal('ir-lanceEmbutidoView', formatMoney(r.lanceEmbutido));
   setVal('ir-lanceAPagarView', formatMoney(r.lanceApagar));
 

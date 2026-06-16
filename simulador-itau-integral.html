@@ -263,7 +263,10 @@
           <div style="margin-top: 8px;">
             <div class="result-orange" style="padding: 7px 11px;">
               <strong>Total do Lance</strong>
-              <span class="value" id="ii-totalLance" style="font-size:14px;">—</span>
+              <span style="display:inline-flex; align-items:center; gap:10px;">
+                <span class="value" id="ii-totalLancePct" style="font-size:13px; opacity:.85;">—</span>
+                <span class="value" id="ii-totalLance" style="font-size:14px;">—</span>
+              </span>
             </div>
           </div>
         </div>
@@ -465,7 +468,7 @@ function recalc() {
   const i = readInputs();
 
   if (!(i.credito > 0) || !(i.prazo > 0)) {
-    const ids = ['ii-categoria','ii-saldoDevedor','ii-parcelaIntegral','ii-parcelaInicialDestaque','ii-seguroMensal','ii-lanceEmbutido','ii-lanceAPagar','ii-totalLance','ii-creditoLiquido','ii-novaParcela','ii-novoPrazoOut','ii-prazoRestante','ii-saldoPos','ii-novoPrazo','ii-parcelaMantida','ii-saldoPosPrazo','ii-taxaMes','ii-taxaAno'];
+    const ids = ['ii-categoria','ii-saldoDevedor','ii-parcelaIntegral','ii-parcelaInicialDestaque','ii-seguroMensal','ii-lanceEmbutido','ii-lanceAPagar','ii-totalLance','ii-totalLancePct','ii-creditoLiquido','ii-novaParcela','ii-novoPrazoOut','ii-prazoRestante','ii-saldoPos','ii-novoPrazo','ii-parcelaMantida','ii-saldoPosPrazo','ii-taxaMes','ii-taxaAno'];
     ids.forEach(id => setOut(id, '—'));
     setVal('ii-lanceEmbutidoView', '');
     setVal('ii-lanceAPagarView', '');
@@ -483,6 +486,8 @@ function recalc() {
   setOut('ii-lanceEmbutido', formatMoney(r.lanceEmbutido));
   setOut('ii-lanceAPagar', formatMoney(r.lanceApagar));
   setOut('ii-totalLance', formatMoney(r.totalLance));
+  const _pctTot = (i.pctEmbutido + i.pctAPagar) * 100;
+  setOut('ii-totalLancePct', _pctTot > 0 ? formatPct(_pctTot, 2) : '—');
   setVal('ii-lanceEmbutidoView', formatMoney(r.lanceEmbutido));
   setVal('ii-lanceAPagarView', formatMoney(r.lanceApagar));
 
