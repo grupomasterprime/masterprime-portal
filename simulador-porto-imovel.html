@@ -248,7 +248,7 @@
           </div>
           <div class="field">
             <label>Adesão diluída em</label>
-            <input type="text" id="pi-qtdAdesao" placeholder="12" data-mask="int">
+            <input type="text" id="pi-qtdAdesao" placeholder="Ex: 12" data-mask="int">
             <span class="field-suffix">parcelas</span>
           </div>
         </div>
@@ -532,7 +532,8 @@ function calc(i) {
   r.parcelaReduzidaPF = r.parcelaReduzidaPJ + r.valorSeguro;
 
   r.adesaoTotal  = i.credito * i.adesao;
-  r.adesaoMensal = (i.qtdAdesao > 0) ? r.adesaoTotal / i.qtdAdesao : NaN;
+  // Se qtdAdesao = 0 (vazio), assume adesão não diluída — adesaoMensal = 0
+  r.adesaoMensal = (i.qtdAdesao > 0) ? r.adesaoTotal / i.qtdAdesao : 0;
   const baseParcelaPre = (i.tipo === 'PJ') ? r.parcelaReduzidaPJ : r.parcelaReduzidaPF;
   r.parcelaInicial = r.adesaoMensal + baseParcelaPre;
   r.parcelaDemais  = baseParcelaPre;
