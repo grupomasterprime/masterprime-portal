@@ -7,11 +7,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="pdf-master-prime.js?v=20260615f"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="simulacao-store.js"></script>
 <style>
   :root {
     --mp-navy: #2D3F5E;
@@ -250,35 +247,6 @@
   body.theme-vip .card-header .badge-teal { background: var(--gold); }
   body.theme-vip .field-suffix { color: #777; }
   body.theme-vip .lance-max-hint strong { color: var(--gold); }
-
-  body.theme-vip .out-box {
-    flex: 1 1 auto; display: flex; flex-direction: column; justify-content: center;
-    transition: all 0.25s ease; border: 1px solid #3a3a3a;
-    background: linear-gradient(145deg, #1e1e1e 0%, #2a2a2a 100%);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3); border-radius: 12px; position: relative; overflow: hidden;
-  }
-  body.theme-vip .out-box::before {
-    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-    background: linear-gradient(90deg, var(--gold), #C8A04A); opacity: 0.8; transition: opacity 0.3s;
-  }
-  body.theme-vip .out-box:hover {
-    border-color: rgba(232,184,109,0.5); box-shadow: 0 8px 24px rgba(0,0,0,0.5), 0 0 12px rgba(232,184,109,0.15);
-    transform: translateY(-2px);
-  }
-  body.theme-vip .out-box:hover::before { opacity: 1; }
-  body.theme-vip .out-box.primary { background: linear-gradient(145deg, #E8B86D 0%, #C8A04A 100%); border-color: var(--gold); }
-  body.theme-vip .out-box.primary::before { background: rgba(255,255,255,0.4); }
-  body.theme-vip .out-box.teal { background: linear-gradient(145deg, #2e1a1a 0%, #3a2020 100%); border-color: #5a3a3a; }
-  body.theme-vip .out-box.teal::before { background: linear-gradient(90deg, #E8B86D, #C8A04A); }
-  body.theme-vip .out-box .val { font-size: 18px; color: #f0e6d2; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
-  body.theme-vip .out-box.primary .val { color: #1a1a1a; text-shadow: none; }
-  body.theme-vip .out-box.teal .val { color: var(--gold); }
-  body.theme-vip details {
-    background: linear-gradient(145deg, #1e1e1e 0%, #2a2a2a 100%); border-color: #333;
-    border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); padding: 10px 14px; transition: all 0.25s;
-  }
-  body.theme-vip details:hover { border-color: var(--gold); }
-  body.theme-vip details summary { color: #ccc; }
 </style>
 <script>if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('embedded');</script>
 </head>
@@ -449,21 +417,28 @@
 </div>
 
 <script>
+// Funções auxiliares
 function maskMoney(v){const d=String(v).replace(/\D/g,'');if(!d)return '';const c=parseInt(d,10);return 'R$ '+Math.floor(c/100).toLocaleString('pt-BR')+','+(c%100+'').padStart(2,'0');}
 function unmaskMoney(v){return parseInt(String(v).replace(/\D/g,'')||'0',10)/100;}
 function maskPct(v,d=2){const c=String(v).replace('%','').replace(',','.').replace(/[^\d.\-]/g,'').trim();if(!c)return'';const n=parseFloat(c);if(isNaN(n))return'';return n.toFixed(d).replace('.',',')+' %';}
 function unmaskPct(v){return parseFloat(String(v).replace('%','').replace(',','.').replace(/[^\d.\-]/g,'').trim()||'0');}
 function maskInt(v){return String(v).replace(/\D/g,'');}
-document.querySelectorAll('input[data-mask]').forEach(inp=>{const t=inp.dataset.mask;inp.addEventListener('input',e=>{const v=e.target.value;if(t==='money')e.target.value=maskMoney(v);else if(t==='int')e.target.value=maskInt(v);recalc();});inp.addEventListener('blur',e=>{const v=e.target.value;if(t==='pct2')e.target.value=maskPct(v,2);else if(t==='pct4')e.target.value=maskPct(v,4);recalc();});inp.addEventListener('focus',e=>{if(t==='pct2'||t==='pct4'){const n=unmaskPct(e.target.value);if(n)e.target.value=String(n).replace('.',',');}});});
-document.querySelectorAll('select').forEach(el=>el.addEventListener('change',recalc));
 function formatMoney(n){if(!Number.isFinite(n)||isNaN(n))return'';return'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
 function formatPct(n,d=2){if(!Number.isFinite(n)||isNaN(n))return'';return n.toFixed(d).replace('.',',')+' %';}
 function formatInt(n){if(!Number.isFinite(n)||isNaN(n))return'';return Math.round(n).toString();}
 function get(id){return document.getElementById(id);}
 function setOut(id,v){const el=get(id);if(el)el.textContent=v;}
+
+// Aplicar máscaras
+document.querySelectorAll('input[data-mask]').forEach(inp=>{const t=inp.dataset.mask;inp.addEventListener('input',e=>{const v=e.target.value;if(t==='money')e.target.value=maskMoney(v);else if(t==='int')e.target.value=maskInt(v);recalc();});inp.addEventListener('blur',e=>{const v=e.target.value;if(t==='pct2')e.target.value=maskPct(v,2);else if(t==='pct4')e.target.value=maskPct(v,4);recalc();});inp.addEventListener('focus',e=>{if(t==='pct2'||t==='pct4'){const n=unmaskPct(e.target.value);if(n)e.target.value=String(n).replace('.',',');}});});
+document.querySelectorAll('select').forEach(el=>el.addEventListener('change',recalc));
+
 function readInputs(){return{credito:unmaskMoney(get('pa-credito').value),tipo:get('pa-tipo').value,prazo:parseInt(get('pa-prazo').value||'0',10),redutor:get('pa-redutor').value,contempla:parseInt(get('pa-contempla').value||'0',10),recProp:unmaskMoney(get('pa-recProp').value),embutido:unmaskMoney(get('pa-embutido').value),pctEmbutido:unmaskPct(get('pa-pctEmbutido').value)/100,pctLanceFixo:unmaskPct(get('pa-pctLanceFixo').value)/100,taxaAdm:unmaskPct(get('pa-taxaAdm').value)/100,fundo:unmaskPct(get('pa-fundo').value)/100,seguro:unmaskPct(get('pa-seguro').value)/100};}
+
 function calc(i){const r={};const isPF=i.tipo==='PF';const seguroPF=isPF?i.seguro:0;r.categoria=i.credito*(1+i.taxaAdm+i.fundo);r.saldoDevedor=r.categoria;r.valorSeguro=r.categoria*seguroPF;r.maxEmbutido=i.credito*i.pctEmbutido;r.parcelaPJ=(i.prazo>0)?r.categoria/i.prazo:NaN;r.parcelaPF=r.parcelaPJ+r.valorSeguro;let redutorPct=parseFloat(i.redutor);if(!Number.isFinite(redutorPct))redutorPct=0;if(i.redutor==='campanha'){r.parcelaReduzidaPJ=(i.credito*(1+i.taxaAdm+i.fundo))/200;}else{r.parcelaReduzidaPJ=(i.prazo>0)?(r.categoria/i.prazo)*(1-redutorPct):NaN;}r.parcelaReduzidaPF=r.parcelaReduzidaPJ+r.valorSeguro;const totalLance=i.recProp+i.embutido;r.representatividade=(r.categoria>0)?(totalLance/r.categoria):NaN;r.creditoLiberado=i.credito-i.embutido;r.saldoAposParcNormal=r.categoria-(r.parcelaPJ*i.contempla)-totalLance;r.saldoAposParcReduzida=r.categoria-(r.parcelaReduzidaPJ*i.contempla)-totalLance;const saldoUsadoPos=(redutorPct!==0||i.redutor==='campanha')?r.saldoAposParcReduzida:r.saldoAposParcNormal;r.novoSeguro=saldoUsadoPos*seguroPF;const prazoRestante=i.prazo-i.contempla;r.parcelaTeoricaPJ=(prazoRestante>0)?saldoUsadoPos/prazoRestante:NaN;r.parcelaRealPJ=r.parcelaTeoricaPJ;r.parcelaRealPF=r.parcelaRealPJ+r.novoSeguro;r.novaParcela=isPF?r.parcelaRealPF:r.parcelaRealPJ;r.novoPrazo=prazoRestante;r.prazoReduzidoNormal=(r.parcelaPJ>0)?r.saldoAposParcNormal/r.parcelaPJ:NaN;r.prazoReduzidoReduzida=(r.parcelaPJ>0)?r.saldoAposParcReduzida/r.parcelaPJ:NaN;if(redutorPct!==0||i.redutor==='campanha'){if(isPF){r.parcelaSeReduzPrazo=(r.prazoReduzidoReduzida>0)?(r.saldoAposParcReduzida/r.prazoReduzidoReduzida)+r.novoSeguro:NaN;}else{r.parcelaSeReduzPrazo=(r.prazoReduzidoNormal>0)?r.saldoAposParcNormal/r.prazoReduzidoNormal:NaN;}r.prazoReduzidoFinal=isPF?r.prazoReduzidoReduzida:r.prazoReduzidoNormal;}else{if(i.tipo==='PJ'){r.parcelaSeReduzPrazo=(r.prazoReduzidoNormal>0)?r.saldoAposParcNormal/r.prazoReduzidoNormal:NaN;}else{r.parcelaSeReduzPrazo=(r.prazoReduzidoNormal>0)?(r.saldoAposParcNormal/r.prazoReduzidoNormal)+r.novoSeguro:NaN;}r.prazoReduzidoFinal=r.prazoReduzidoNormal;}r.taxaMes=(i.prazo>0)?i.taxaAdm/i.prazo:NaN;r.taxaAno=r.taxaMes*12;return r;}
+
 function recalc(){const i=readInputs();if(!(i.credito>0)||!(i.prazo>0)){const ids=['pa-categoria','pa-saldoDevedor','pa-parcelaPF','pa-parcelaPJ','pa-parcelaInicialPFDestaque','pa-parcelaInicialPJDestaque','pa-parcelaReduzPF','pa-parcelaReduzPJ','pa-representatividade','pa-creditoLiberado','pa-novaParcela','pa-novoPrazo','pa-saldoPos','pa-novoSeguro','pa-prazoReduzido','pa-parcelaSeReduzPrazo','pa-taxaMes','pa-taxaAno'];ids.forEach(id=>setOut(id,''));return;}const r=calc(i);const isPF=i.tipo==='PF';setOut('pa-categoria',formatMoney(r.categoria));setOut('pa-saldoDevedor',formatMoney(r.saldoDevedor));var hintEl=document.getElementById('pa-embutidoMaxHint');if(hintEl){var pctTxt=i.pctEmbutido>0?(i.pctEmbutido*100).toFixed(2).replace('.',',')+'%':'';hintEl.innerHTML='Max. <strong>'+formatMoney(r.maxEmbutido)+'</strong> ('+pctTxt+' do credito)';}setOut('pa-parcelaPF',formatMoney(r.parcelaPF));setOut('pa-parcelaPJ',formatMoney(r.parcelaPJ));setOut('pa-parcelaReduzPF',formatMoney(r.parcelaReduzidaPF));setOut('pa-parcelaReduzPJ',formatMoney(r.parcelaReduzidaPJ));var redAtivoPa=(parseFloat(i.redutor)>0)||(i.redutor==='campanha');setOut('pa-parcelaInicialPFDestaque',formatMoney(redAtivoPa?r.parcelaReduzidaPF:r.parcelaPF));setOut('pa-parcelaInicialPJDestaque',formatMoney(redAtivoPa?r.parcelaReduzidaPJ:r.parcelaPJ));setOut('pa-representatividade',Number.isFinite(r.representatividade)?formatPct(r.representatividade*100,2):'');setOut('pa-creditoLiberado',formatMoney(r.creditoLiberado));setOut('pa-novaParcela',formatMoney(r.novaParcela));setOut('pa-novoPrazo',Number.isFinite(r.novoPrazo)?formatInt(r.novoPrazo)+' meses':'');const saldoUsado=(i.redutor!=='0')?r.saldoAposParcReduzida:r.saldoAposParcNormal;setOut('pa-saldoPos',formatMoney(saldoUsado));setOut('pa-novoSeguro',isPF?formatMoney(r.novoSeguro):'');setOut('pa-prazoReduzido',Number.isFinite(r.prazoReduzidoFinal)?formatInt(r.prazoReduzidoFinal)+' meses':'');setOut('pa-parcelaSeReduzPrazo',formatMoney(r.parcelaSeReduzPrazo));setOut('pa-taxaMes',Number.isFinite(r.taxaMes)?formatPct(r.taxaMes*100,4):'');setOut('pa-taxaAno',Number.isFinite(r.taxaAno)?formatPct(r.taxaAno*100,2):'');}
+
 let estrategiaPendente=null;
 function aplicaEstrategia(strat,pctLivre=null){const i=readInputs();if(!(i.credito>0)){alert('Informe o credito contratado antes de calcular a estrategia.');return;}const r=calc(i);const categoria=r.categoria;const maxEmb=r.maxEmbutido;let recProp=0,embutido=0;switch(strat){case'livre-bolso':{const lance=categoria*pctLivre;recProp=lance;embutido=0;break;}case'livre-embutido':{const lance=categoria*pctLivre;embutido=maxEmb;recProp=lance-maxEmb;if(recProp<0)recProp=0;break;}case'fixo-bolso':{const fixo=categoria*i.pctLanceFixo;recProp=fixo;embutido=0;break;}case'fixo-embutido':{const fixo=categoria*i.pctLanceFixo;embutido=maxEmb;recProp=fixo-maxEmb;if(recProp<0)recProp=0;break;}}if(recProp<0)recProp=0;get('pa-recProp').value=recProp>0?maskMoney(String(Math.round(recProp*100))):'';get('pa-embutido').value=embutido>0?maskMoney(String(Math.round(embutido*100))):'';recalc();}
 document.querySelectorAll('.lance-btn, .clear-btn').forEach(btn=>{btn.addEventListener('click',()=>{const strat=btn.dataset.strat;if(strat==='limpar'){limparTudo();return;}if(strat==='livre-bolso'||strat==='livre-embutido'){estrategiaPendente=strat;get('modalLanceLivre').classList.add('aberto');setTimeout(()=>get('pa-modal-pctLivre').focus(),50);}else{aplicaEstrategia(strat);}});});
@@ -504,87 +479,279 @@ function hexToRgb(hex){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(
 function isDarkTheme(){const bgHex=getThemeColorHex('--bg');const rgb=hexToRgb(bgHex);return(rgb.r*299+rgb.g*587+rgb.b*114)/1000<80;}
 function getPdfField(key){const el=document.querySelector('.pdf-field[data-key="'+key+'"]');return el?el.checked:true;}
 
-function _montarPdfComercialPortoAuto(){
-  const _v=id=>(document.getElementById(id)?.value||'').trim();
-  const _t=id=>(document.getElementById(id)?.textContent||'').trim();
-  const _selTxt=id=>{const el=document.getElementById(id);return(el?.selectedOptions?.[0]?.textContent||'').trim();};
-  const tipoTxt=_selTxt('pa-tipo')||'PF';
-  const isPF=(tipoTxt==='Fisica'||tipoTxt.includes('PF'));
-  const parcelaAntes=isPF?_t('pa-parcelaReduzPF'):_t('pa-parcelaReduzPJ');
-  const redutorTxt=_selTxt('pa-redutor')||'';const redutorPct=redutorTxt.replace(/[^\d%]/g,'');
-  const _neutro=document.getElementById('wl-checkbox').checked;
-  const modo=window._paRedmode==='prazo'?'prazo':'parcela';
-  const inputs=[];
-  if(getPdfField('taxaAdm'))inputs.push({label:'Taxa Administrativa',value:_v('pa-taxaAdm')||'0,00 %'});
-  if(getPdfField('fundoReserva'))inputs.push({label:'Fundo Reserva',value:_v('pa-fundo')||'0,00 %'});
-  if(getPdfField('seguro'))inputs.push({label:'Seguro Prestamista',value:_v('pa-seguro')||'0,0000 %',highlight:'Somente PF'});
-  if(getPdfField('creditoContratado'))inputs.push({label:'Valor do credito',value:_v('pa-credito')||'R$ 0,00'});
-  if(getPdfField('prazo'))inputs.push({label:'Prazo do Grupo',value:(_v('pa-prazo')||'0')+' Meses'});
-  const lanceObj={};let temLance=false;
-  if(getPdfField('pctEmbutido')){lanceObj.embutidoPct=_v('pa-pctEmbutido').replace(' %','')||'0,00';temLance=true;}
-  if(getPdfField('valorEmbutido')){lanceObj.embutidoRs=(_t('pa-embutido')||'R$ 0,00').replace('R$ ','');temLance=true;}
-  if(getPdfField('pctAPagar')){lanceObj.apagarPct=_v('pa-pctLanceFixo').replace(' %','')||'0,00';temLance=true;}
-  if(getPdfField('recProp')){lanceObj.apagarRs=(_t('pa-recProp')||'R$ 0,00').replace('R$ ','');temLance=true;}
-  if(getPdfField('pctTotal')){lanceObj.totalPct=_t('pa-representatividade')||'';temLance=true;}
-  const outputs=[];
-  if(getPdfField('creditoLiquido'))outputs.push({label:'Credito Liquido',value:_t('pa-creditoLiberado')||''});
-  if(getPdfField('saldoDevedor'))outputs.push({label:'Saldo Devedor',value:_t('pa-saldoDevedor')||''});
-  if(getPdfField('parcelaInicialPF'))outputs.push({label:'Parcela Inicial PF',value:_t('pa-parcelaInicialPFDestaque')||''});
-  if(getPdfField('parcelaInicialPJ'))outputs.push({label:'Parcela Inicial PJ',value:_t('pa-parcelaInicialPJDestaque')||''});
-  if(getPdfField('parcelaReduzPF'))outputs.push({label:'Parcela Reduzida PF',value:_t('pa-parcelaReduzPF')||''});
-  if(getPdfField('parcelaReduzPJ'))outputs.push({label:'Parcela Reduzida PJ',value:_t('pa-parcelaReduzPJ')||''});
-  if(getPdfField('parcelaPos'))outputs.push({label:'Parcela pos-contemplacao',value:(modo==='prazo'?_t('pa-parcelaSeReduzPrazo'):_t('pa-novaParcela'))||''});
-  if(getPdfField('prazoRestante'))outputs.push({label:'Prazo Restante',value:(modo==='prazo'?_t('pa-prazoReduzido'):_t('pa-novoPrazo'))||''});
-  const accentHex=getThemeColorHex('--mp-teal');const navyHex=getThemeColorHex('--mp-navy');
-  return{filename:_neutro?'simulacao-consorcio-auto':'porto-consorcio-auto',logoAdmin:'porto',hideAdminLogo:_neutro,titulo:'Simulador de Credito',subtitulo:_neutro?'Consorcio Auto':'Porto Auto',subtituloSecundario:redutorPct&&redutorPct!=='0%'?`(Reducao de ${redutorPct} ate a Contemplacao)`:'(Sem redutor de parcela)',representanteTexto:_neutro?'Master Prime':'Consorcio Porto',inputs,lance:temLance?lanceObj:null,outputs,observacoes:_v('pa-observacoes'),themeColors:{accent:accentHex,navy:navyHex}};
+// Função que gera o PDF exatamente no formato original do normal.pdf
+function gerarPDFNormalOriginal(dados) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('p', 'mm', 'a4');
+  const margem = 20;
+  const larguraPagina = 210;
+  let y = 25;
+  
+  const isDark = isDarkTheme();
+  const corDestaque = dados.themeColors?.accent ? hexToRgb(dados.themeColors.accent) : (isDark ? [232, 184, 109] : [77, 188, 200]);
+  const corTexto = isDark ? [229, 229, 229] : [0, 0, 0];
+  const corLabel = isDark ? [150, 150, 150] : [100, 100, 100];
+  
+  // Fundo da página (apenas se for dark)
+  if (isDark) {
+    doc.setFillColor(15, 15, 15);
+    doc.rect(0, 0, larguraPagina, 297, 'F');
+  }
+  
+  // ========== TÍTULO ==========
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(18);
+  doc.setTextColor(corTexto[0], corTexto[1], corTexto[2]);
+  doc.text(dados.titulo, larguraPagina / 2, y, { align: 'center' });
+  y += 8;
+  
+  // ========== SUBTÍTULO ==========
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(11);
+  doc.setTextColor(corLabel[0], corLabel[1], corLabel[2]);
+  doc.text(dados.subtitulo, larguraPagina / 2, y, { align: 'center' });
+  y += 6;
+  
+  // ========== LINHA DECORATIVA ==========
+  doc.setDrawColor(corDestaque[0], corDestaque[1], corDestaque[2]);
+  doc.setLineWidth(0.5);
+  doc.line(margem, y, larguraPagina - margem, y);
+  y += 8;
+  
+  // ========== REDUTOR ==========
+  if (dados.subtituloSecundario) {
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(9);
+    doc.setTextColor(corLabel[0], corLabel[1], corLabel[2]);
+    doc.text(dados.subtituloSecundario, larguraPagina / 2, y, { align: 'center' });
+    y += 8;
+  }
+  
+  // ========== DADOS DA PROPOSTA ==========
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(corTexto[0], corTexto[1], corTexto[2]);
+  doc.text('DADOS DA PROPOSTA', margem, y);
+  y += 8;
+  
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  for (const inp of dados.inputs) {
+    let label = inp.label;
+    let valor = inp.value;
+    
+    doc.setTextColor(corLabel[0], corLabel[1], corLabel[2]);
+    doc.text(label + ':', margem, y);
+    doc.setTextColor(corTexto[0], corTexto[1], corTexto[2]);
+    
+    if (inp.highlight === 'Somente PF') {
+      doc.setTextColor(corDestaque[0], corDestaque[1], corDestaque[2]);
+      doc.text(valor + ' (Somente PF)', margem + 60, y);
+      doc.setTextColor(corTexto[0], corTexto[1], corTexto[2]);
+    } else {
+      doc.text(valor, margem + 60, y);
+    }
+    y += 7;
+  }
+  y += 5;
+  
+  // ========== OFERTA DE LANCE ==========
+  if (dados.lance && Object.keys(dados.lance).length > 0) {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(corTexto[0], corTexto[1], corTexto[2]);
+    doc.text('OFERTA DE LANCE', margem, y);
+    y += 8;
+    
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    
+    const itensLance = [];
+    if (dados.lance.embutidoPct !== undefined && dados.lance.embutidoPct !== '') itensLance.push({ label: '% Lance Embutido', valor: dados.lance.embutidoPct + ' %' });
+    if (dados.lance.embutidoRs !== undefined && dados.lance.embutidoRs !== '0,00') itensLance.push({ label: 'Valor Embutido', valor: 'R$ ' + dados.lance.embutidoRs });
+    if (dados.lance.apagarPct !== undefined && dados.lance.apagarPct !== '') itensLance.push({ label: '% Lance a Pagar', valor: dados.lance.apagarPct + ' %' });
+    if (dados.lance.apagarRs !== undefined && dados.lance.apagarRs !== '0,00') itensLance.push({ label: 'Recurso Próprio', valor: 'R$ ' + dados.lance.apagarRs });
+    if (dados.lance.totalPct !== undefined && dados.lance.totalPct !== '') itensLance.push({ label: '% Lance Total', valor: dados.lance.totalPct });
+    
+    for (const item of itensLance) {
+      doc.setTextColor(corLabel[0], corLabel[1], corLabel[2]);
+      doc.text(item.label + ':', margem, y);
+      doc.setTextColor(corTexto[0], corTexto[1], corTexto[2]);
+      doc.text(item.valor, margem + 60, y);
+      y += 7;
+    }
+    y += 5;
+  }
+  
+  // ========== RESULTADO DA SIMULAÇÃO ==========
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.setTextColor(corTexto[0], corTexto[1], corTexto[2]);
+  doc.text('RESULTADO DA SIMULAÇÃO', margem, y);
+  y += 8;
+  
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  for (const out of dados.outputs) {
+    if (out.value && out.value !== '') {
+      doc.setTextColor(corLabel[0], corLabel[1], corLabel[2]);
+      doc.text(out.label + ':', margem, y);
+      doc.setTextColor(corTexto[0], corTexto[1], corTexto[2]);
+      doc.text(out.value, margem + 80, y);
+      y += 7;
+    }
+  }
+  y += 8;
+  
+  // ========== OBSERVAÇÕES ==========
+  if (dados.observacoes && dados.observacoes.trim() !== '') {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(10);
+    doc.setTextColor(corTexto[0], corTexto[1], corTexto[2]);
+    doc.text('Observações:', margem, y);
+    y += 6;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(corLabel[0], corLabel[1], corLabel[2]);
+    const linhasObs = doc.splitTextToSize(dados.observacoes, larguraPagina - margem * 2);
+    for (const linha of linhasObs) {
+      if (y > 270) {
+        doc.addPage();
+        y = 20;
+        if (isDark) {
+          doc.setFillColor(15, 15, 15);
+          doc.rect(0, 0, larguraPagina, 297, 'F');
+        }
+      }
+      doc.text(linha, margem, y);
+      y += 5;
+    }
+    y += 5;
+  }
+  
+  // ========== LINHA FINAL ==========
+  doc.setDrawColor(corDestaque[0], corDestaque[1], corDestaque[2]);
+  doc.setLineWidth(0.3);
+  doc.line(margem, y, larguraPagina - margem, y);
+  y += 5;
+  
+  // ========== RODAPÉ ==========
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.setTextColor(corLabel[0], corLabel[1], corLabel[2]);
+  const textoRodape = dados.representanteTexto + ' - Simulação meramente informativa - valores sujeitos às condições do grupo e à análise da administradora';
+  const linhasRodape = doc.splitTextToSize(textoRodape, larguraPagina - margem * 2);
+  for (const linha of linhasRodape) {
+    doc.text(linha, larguraPagina / 2, y, { align: 'center' });
+    y += 4;
+  }
+  doc.text('grupomasterprime.com.br', larguraPagina / 2, y, { align: 'center' });
+  
+  return doc;
 }
 
-function _gerarPDFFallback(dados){
-  const{jsPDF}=window.jspdf;const doc=new jsPDF('p','mm','a4');const margem=15;const pageWidth=210;const contentWidth=pageWidth-2*margem;let y=margem;
-  const accentRgb=hexToRgb(dados.themeColors?.accent||'#4DBCC8');const navyRgb=hexToRgb(dados.themeColors?.navy||'#2D3F5E');const darkMode=isDarkTheme();
-  const bgColor=darkMode?{r:15,g:15,b:15}:{r:255,g:255,b:255};const textColor=darkMode?{r:229,g:229,b:229}:{r:31,g:41,b:55};const mutedColor=darkMode?{r:153,g:153,b:153}:{r:107,g:114,b:128};const headerTextColor=darkMode?{r:26,g:26,b:26}:{r:255,g:255,b:255};
-  if(darkMode){doc.setFillColor(bgColor.r,bgColor.g,bgColor.b);doc.rect(0,0,pageWidth,297,'F');}
-  if(darkMode){doc.setFillColor(accentRgb.r,accentRgb.g,accentRgb.b);doc.rect(margem,y,contentWidth,18,'F');}else{doc.setFillColor(navyRgb.r,navyRgb.g,navyRgb.b);doc.rect(margem,y,contentWidth,18,'F');}
-  doc.setFont('helvetica','bold');doc.setFontSize(14);doc.setTextColor(headerTextColor.r,headerTextColor.g,headerTextColor.b);doc.text(dados.titulo,margem+4,y+12);y+=22;
-  doc.setFontSize(10);doc.setTextColor(mutedColor.r,mutedColor.g,mutedColor.b);doc.text(dados.subtitulo,margem,y);if(dados.subtituloSecundario){y+=5;doc.text(dados.subtituloSecundario,margem,y);}y+=6;doc.setDrawColor(accentRgb.r,accentRgb.g,accentRgb.b);doc.setLineWidth(0.5);doc.line(margem,y,pageWidth-margem,y);y+=8;
-  doc.setFont('helvetica','normal');doc.setFontSize(9);dados.inputs.forEach(inp=>{doc.setTextColor(mutedColor.r,mutedColor.g,mutedColor.b);doc.text(inp.label,margem,y);doc.setTextColor(textColor.r,textColor.g,textColor.b);doc.text(inp.value,margem+50,y);y+=6;});y+=4;
-  if(dados.lance){doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(darkMode?accentRgb.r:navyRgb.r,darkMode?accentRgb.g:navyRgb.g,darkMode?accentRgb.b:navyRgb.b);doc.text('Lance',margem,y);y+=6;doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(textColor.r,textColor.g,textColor.b);if(dados.lance.embutidoPct){doc.text('Embutido: '+dados.lance.embutidoPct+' %',margem,y);y+=5;}if(dados.lance.embutidoRs){doc.text('Embutido: R$ '+dados.lance.embutidoRs,margem,y);y+=5;}if(dados.lance.apagarPct){doc.text('A pagar: '+dados.lance.apagarPct+' %',margem,y);y+=5;}if(dados.lance.apagarRs){doc.text('A pagar: R$ '+dados.lance.apagarRs,margem,y);y+=5;}if(dados.lance.totalPct){doc.text('Total: '+dados.lance.totalPct,margem,y);y+=5;}y+=3;}
-  doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(darkMode?accentRgb.r:navyRgb.r,darkMode?accentRgb.g:navyRgb.g,darkMode?accentRgb.b:navyRgb.b);doc.text('Resultados',margem,y);y+=7;doc.setFont('helvetica','normal');doc.setFontSize(9);
-  dados.outputs.forEach(out=>{doc.setTextColor(mutedColor.r,mutedColor.g,mutedColor.b);doc.text(out.label,margem,y);doc.setTextColor(textColor.r,textColor.g,textColor.b);doc.text(out.value,margem+70,y);y+=6;});y+=6;
-  if(dados.observacoes&&dados.observacoes.trim()!==''){doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(darkMode?accentRgb.r:navyRgb.r,darkMode?accentRgb.g:navyRgb.g,darkMode?accentRgb.b:navyRgb.b);doc.text('Observacoes',margem,y);y+=6;doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(textColor.r,textColor.g,textColor.b);const obsLinhas=doc.splitTextToSize(dados.observacoes,contentWidth);obsLinhas.forEach(linha=>{if(y>270){doc.addPage();y=margem;}doc.text(linha,margem,y);y+=5;});}
-  y+=8;doc.setDrawColor(accentRgb.r,accentRgb.g,accentRgb.b);doc.setLineWidth(0.5);doc.line(margem,y,pageWidth-margem,y);y+=5;doc.setFont('helvetica','normal');doc.setFontSize(8);doc.setTextColor(mutedColor.r,mutedColor.g,mutedColor.b);doc.text('Master Prime - Simulacao de consorcio - Carater ilustrativo',margem,y);return doc;
+function montarDadosPDF() {
+  const getValor = (id) => document.getElementById(id)?.value?.trim() || '';
+  const getTexto = (id) => document.getElementById(id)?.textContent?.trim() || '';
+  const getSelectTexto = (id) => {
+    const el = document.getElementById(id);
+    return el?.selectedOptions?.[0]?.textContent?.trim() || '';
+  };
+  
+  const redutorTexto = getSelectTexto('pa-redutor');
+  let redutorDisplay = '';
+  if (redutorTexto === '0% (sem redutor)' || redutorTexto === '0') {
+    redutorDisplay = '(Sem redutor de parcela)';
+  } else if (redutorTexto.includes('Campanha')) {
+    redutorDisplay = '(Campanha Parcela Original)';
+  } else if (redutorTexto) {
+    const pctMatch = redutorTexto.match(/(\d+)%/);
+    if (pctMatch) {
+      redutorDisplay = `(Redução de ${pctMatch[1]}% até a Contemplação)`;
+    } else {
+      redutorDisplay = `(${redutorTexto})`;
+    }
+  }
+  
+  const modoNeutro = document.getElementById('wl-checkbox')?.checked || false;
+  const modo = window._paRedmode === 'prazo' ? 'prazo' : 'parcela';
+  
+  const inputs = [];
+  if (getPdfField('taxaAdm')) inputs.push({ label: 'Taxa Administrativa', value: getValor('pa-taxaAdm') || '0,00 %' });
+  if (getPdfField('fundoReserva')) inputs.push({ label: 'Fundo Reserva', value: getValor('pa-fundo') || '0,00 %' });
+  if (getPdfField('seguro')) inputs.push({ label: 'Seguro Prestamista', value: getValor('pa-seguro') || '0,0000 %', highlight: 'Somente PF' });
+  if (getPdfField('creditoContratado')) inputs.push({ label: 'Valor do crédito', value: getValor('pa-credito') || 'R$ 0,00' });
+  if (getPdfField('prazo')) inputs.push({ label: 'Prazo do Grupo', value: (getValor('pa-prazo') || '0') + ' Meses' });
+  
+  const lance = {};
+  let temLance = false;
+  if (getPdfField('pctEmbutido')) { lance.embutidoPct = getValor('pa-pctEmbutido').replace(' %', '') || '0,00'; temLance = true; }
+  if (getPdfField('valorEmbutido')) { lance.embutidoRs = (getTexto('pa-embutido') || 'R$ 0,00').replace('R$ ', ''); temLance = true; }
+  if (getPdfField('pctAPagar')) { lance.apagarPct = getValor('pa-pctLanceFixo').replace(' %', '') || '0,00'; temLance = true; }
+  if (getPdfField('recProp')) { lance.apagarRs = (getTexto('pa-recProp') || 'R$ 0,00').replace('R$ ', ''); temLance = true; }
+  if (getPdfField('pctTotal')) { lance.totalPct = getTexto('pa-representatividade') || ''; temLance = true; }
+  
+  const outputs = [];
+  if (getPdfField('creditoLiquido')) outputs.push({ label: 'Crédito Líquido', value: getTexto('pa-creditoLiberado') || '' });
+  if (getPdfField('saldoDevedor')) outputs.push({ label: 'Saldo Devedor', value: getTexto('pa-saldoDevedor') || '' });
+  if (getPdfField('parcelaInicialPF')) outputs.push({ label: 'Parcela Inicial PF', value: getTexto('pa-parcelaInicialPFDestaque') || '' });
+  if (getPdfField('parcelaInicialPJ')) outputs.push({ label: 'Parcela Inicial PJ', value: getTexto('pa-parcelaInicialPJDestaque') || '' });
+  if (getPdfField('parcelaReduzPF')) outputs.push({ label: 'Parcela Reduzida PF', value: getTexto('pa-parcelaReduzPF') || '' });
+  if (getPdfField('parcelaReduzPJ')) outputs.push({ label: 'Parcela Reduzida PJ', value: getTexto('pa-parcelaReduzPJ') || '' });
+  if (getPdfField('parcelaPos')) outputs.push({ label: 'Parcela pos-contemplação', value: (modo === 'prazo' ? getTexto('pa-parcelaSeReduzPrazo') : getTexto('pa-novaParcela')) || '' });
+  if (getPdfField('prazoRestante')) outputs.push({ label: 'Prazo Restante', value: (modo === 'prazo' ? getTexto('pa-prazoReduzido') : getTexto('pa-novoPrazo')) || '' });
+  
+  const corDestaque = getThemeColorHex('--mp-teal');
+  const corNavy = getThemeColorHex('--mp-navy');
+  
+  return {
+    filename: modoNeutro ? 'simulacao-consorcio-auto' : 'porto-consorcio-auto',
+    titulo: modoNeutro ? 'MASTER PRIME - CONSORCIO AUTO' : 'MASTER PRIME - PORTO CONSORCIO AUTO',
+    subtitulo: 'Simulação de Crédito',
+    subtituloSecundario: redutorDisplay,
+    representanteTexto: modoNeutro ? 'Master Prime' : 'Consórcio Porto',
+    inputs: inputs,
+    lance: temLance ? lance : null,
+    outputs: outputs,
+    observacoes: getValor('pa-observacoes'),
+    themeColors: { accent: corDestaque, navy: corNavy }
+  };
 }
 
+// Evento do botão de PDF
 document.getElementById('baixarPdfPorto').addEventListener('click', async () => {
   const btn = document.getElementById('baixarPdfPorto');
-  const txt = btn.textContent;
+  const textoOriginal = btn.textContent;
   btn.textContent = 'Gerando PDF...';
   btn.disabled = true;
+  
   try {
-    const dados = _montarPdfComercialPortoAuto();
-    // Força fallback se o tema NÃO for o padrão (VIP, personalizado ou modo escuro ativo)
-    const temaNaoPadrao = (window._currentTheme !== 'default');
-    const escuroAtivo = document.getElementById('dark-bg-checkbox')?.checked || false;
-    const usarFallback = temaNaoPadrao || escuroAtivo
-                      || (typeof PdfMasterPrime === 'undefined')
-                      || (typeof PdfMasterPrime.gerarComercial !== 'function');
-    if (usarFallback) {
-      const doc = _gerarPDFFallback(dados);
-      doc.save((dados.filename || 'simulacao') + '.pdf');
-    } else {
-      await PdfMasterPrime.gerarComercial(dados);
-    }
-  } catch (err) {
-    console.error(err);
-    alert('Erro ao gerar PDF: ' + err.message);
+    const dados = montarDadosPDF();
+    const doc = gerarPDFNormalOriginal(dados);
+    doc.save(dados.filename + '.pdf');
+  } catch (erro) {
+    console.error('Erro ao gerar PDF:', erro);
+    alert('Erro ao gerar PDF: ' + erro.message);
   } finally {
-    btn.textContent = txt;
+    btn.textContent = textoOriginal;
     btn.disabled = false;
   }
 });
 
-(function initSimStore(){if(!window.SimulacaoStore)return;window.SimulacaoStore.init({supabaseUrl:'https://jhwciwvgagnuxakukyob.supabase.co',supabaseKey:'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx',simulador:'porto-auto',mountPoint:document.getElementById('simStoreMount'),serialize:()=>window.SimulacaoStore.snapshotForm(),restore:(dados)=>window.SimulacaoStore.restoreForm(dados,{recalc:recalc})});})();
-</script>
+// Inicialização
+recalc();
 
+// Inicialização do SimulacaoStore (apenas se o script estiver carregado)
+if (typeof SimulacaoStore !== 'undefined') {
+  SimulacaoStore.init({
+    supabaseUrl: 'https://jhwciwvgagnuxakukyob.supabase.co',
+    supabaseKey: 'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx',
+    simulador: 'porto-auto',
+    mountPoint: document.getElementById('simStoreMount'),
+    serialize: () => SimulacaoStore.snapshotForm(),
+    restore: (dados) => SimulacaoStore.restoreForm(dados, { recalc: recalc })
+  });
+}
+</script>
 </body>
 </html>
