@@ -577,11 +577,25 @@ function applyFilter() {
   if (!query) {
     filteredAdesoes = [...allAdesoes];
   } else {
-    // Usa as strings de busca pré-computadas (a._haystack) — muito mais rápido.
+    // Divide em "termos" por espaço — cada termo precisa estar no haystack (AND).
+    // Assim "Gabriel rodri" acha "Gabriel de Andrade Rodrigues" (cada palavra solta).
+    // Termos com >= 4 dígitos rodam contra _haystackDigits (CPF/telefone/protocolo).
+    const termos = query.split(/\s+/).filter(Boolean);
     filteredAdesoes = allAdesoes.filter(a => {
-      if (qOnlyDigits && qOnlyDigits.length >= 4 && (a._haystackDigits || '').includes(qOnlyDigits)) return true;
-      return (a._haystack || '').includes(query);
+      const hs = a._haystack || '';
+      const hsDig = a._haystackDigits || '';
+      // Todo termo precisa bater (AND)
+      return termos.every(t => {
+        const tDig = t.replace(/\D/g, '');
+        if (tDig.length >= 4) return hsDig.includes(tDig);  // dígitos → CPF/tel
+        return hs.includes(t);                              // texto → nome/email/etc
+      });
     });
+    // Fallback: se NÃO achou ninguém mas a query inteira (sem espaços) era um bloco
+    // de dígitos longo, ainda tenta o match direto (caso de digitar CPF com pontos).
+    if (filteredAdesoes.length === 0 && qOnlyDigits.length >= 4) {
+      filteredAdesoes = allAdesoes.filter(a => (a._haystackDigits || '').includes(qOnlyDigits));
+    }
   }
   document.getElementById('search-info').textContent = `${filteredAdesoes.length} de ${allAdesoes.length} adesões`;
   _pagAtual = 1; // toda busca nova volta pra primeira página
