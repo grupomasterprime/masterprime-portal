@@ -435,9 +435,9 @@ window.KB_ADMIN["porto"] = {
       "categoria_key": "credito_movel",
       "categoria_label": "Crédito e compra — Bens móveis",
       "categoria_ordem": 6,
-      "titulo": "É possível comprar veículo de parente ou de sócio?",
-      "conteudo": "Não. É vedado ao consorciado adquirir o bem:\n\n• do cônjuge;\n• de empresa da qual seja sócio ou acionista.\n\nNo caso de Pessoa Jurídica, também é vedado adquirir de sócios/acionistas ou dos cônjuges deles.",
-      "tags": "cônjuge, sócio, restrição, vedado",
+      "titulo": "É possível comprar veículo de parente, cônjuge, sócio ou da empresa do cônjuge?",
+      "conteudo": "Não. É vedado ao consorciado adquirir o bem:\n\n• do cônjuge (PF);\n• de empresa da qual seja sócio ou acionista;\n• de empresa cujo SÓCIO seja o cônjuge do consorciado — mesmo que o consorciado não tenha participação societária.\n\nNo caso de Pessoa Jurídica, também é vedado adquirir de sócios/acionistas ou dos cônjuges deles.\n\nPor quê o veto também atinge a empresa do cônjuge? Porque a Porto entende essa operação como LEVANTAMENTO DE CAPITAL DE GIRO — o consorciado estaria, na prática, injetando dinheiro do consórcio na empresa do casal (uso vedado pela Lei do Consórcio).\n\nExemplo prático que NÃO PODE: consorciado PF tem cota de auto, é casado, e a esposa tem auto-escola (PJ). Mesmo o consorciado não sendo sócio da auto-escola, ele não pode comprar carro dessa empresa — entra como capital de giro disfarçado.\n\nFonte: regra confirmada pela Porto (analista de aquisições). Regulamento Porto, art. 44.3 + Guia da Pós-contemplação Bens Móveis.",
+      "tags": "cônjuge, sócio, restrição, vedado, empresa do cônjuge, auto-escola, capital de giro, levantamento, simulação, parente",
       "ordem": 8
     },
     {
