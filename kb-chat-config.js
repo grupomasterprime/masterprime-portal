@@ -18,7 +18,7 @@ window.KB_CHAT_CONFIG = {
   supabaseAnonKey: 'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx',
 
   // Quantos cards do material são enviados como contexto a cada pergunta
-  maxCardsContext: 12,
+  maxCardsContext: 20,
 
   // Habilita a pill da Maia (false = aparece a tela "configure")
   enabled: true
