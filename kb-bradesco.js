@@ -562,8 +562,8 @@ window.KB_ADMIN["bradesco"] = {
       "categoria_label": "Crédito e compra — Automóvel",
       "categoria_ordem": 8,
       "titulo": "O cliente pode usar a sobra de crédito para despesas?",
-      "conteudo": "Sim. Havendo sobra de crédito, o cliente pode usar até 10% para reembolso de despesas — IPVA, licenciamento, transferência de propriedade, registros de cartório, acessórios e também a contratação do Seguro Bradesco.\n\nO reembolso é feito pela BPO de contratação, que pede a documentação específica. Se o cliente não usar a sobra para isso, ela quita parcelas do saldo devedor na ordem inversa.",
-      "tags": "10%, sobra de crédito, despesas, seguro, ipva",
+      "conteudo": "Sim. Havendo sobra de crédito, o cliente pode usar até 10% do valor do crédito liberado para reembolso de despesas — IPVA, licenciamento, transferência de propriedade, registros de cartório, acessórios e também a contratação do Seguro Bradesco.\n\nComo funciona o reembolso:\n• O pagamento é feito por reembolso pela BPO de contratação, mediante apresentação da documentação dos custos.\n• Prazo para solicitar: até 30 dias após o faturamento do veículo.\n• Se o cliente não usar a sobra para essas despesas (ou se sobrar algum valor depois), o saldo é automaticamente abatido do saldo devedor — amortizando as parcelas na ordem inversa.",
+      "tags": "10%, sobra de crédito, despesas, seguro, ipva, 30 dias, reembolso, bpo",
       "ordem": 6
     },
     {
