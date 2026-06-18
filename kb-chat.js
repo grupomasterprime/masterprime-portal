@@ -188,26 +188,46 @@
   }
 
   // ── Pega sessão Supabase do usuário logado ─────────────────
+  // Tenta 3 estratégias: (1) cliente global, (2) cliente do top frame,
+  // (3) ler direto do localStorage (onde o Supabase guarda a sessão).
   function getSupabaseSession() {
-    // O portal cria um cliente supabase com nome "supabase" global.
-    // Caso a Maia seja embedada via iframe, busca também no top.
-    var sb = null;
-    try { sb = window.supabase && window.supabase.createClient ? null : window.supabaseClient; } catch (e) {}
-    // Procura por instância já criada que tenha .auth
-    var candidates = [
-      window.supabaseClient,
-      window.supabase && window.supabase._client,
-      window.sb,
-      window.top && window.top.supabaseClient
-    ].filter(Boolean);
+    // Estratégia 1 + 2: procura cliente Supabase já inicializado
+    var candidates = [];
+    try { if (window.supabaseClient) candidates.push(window.supabaseClient); } catch(e) {}
+    try { if (window.sb) candidates.push(window.sb); } catch(e) {}
+    try { if (window.top && window.top !== window && window.top.supabaseClient) candidates.push(window.top.supabaseClient); } catch(e) {}
     for (var i = 0; i < candidates.length; i++) {
-      if (candidates[i] && candidates[i].auth) return candidates[i].auth.getSession();
+      if (candidates[i] && candidates[i].auth) {
+        try { return candidates[i].auth.getSession(); } catch(e) {}
+      }
     }
-    // Fallback: cria um cliente novo usando as creds em CFG
-    if (window.supabase && window.supabase.createClient && CFG.supabaseUrl && CFG.supabaseAnonKey) {
-      window._maiaSb = window._maiaSb || window.supabase.createClient(CFG.supabaseUrl, CFG.supabaseAnonKey);
-      return window._maiaSb.auth.getSession();
-    }
+    // Estratégia 3: lê direto do localStorage
+    // Supabase salva como sb-<projectRef>-auth-token (ou variantes)
+    try {
+      var projRef = (CFG.supabaseUrl || '').replace(/^https?:\/\//, '').split('.')[0];
+      var keysToTry = [
+        'sb-' + projRef + '-auth-token',
+        'supabase.auth.token'
+      ];
+      // Adiciona qualquer key que comece com sb- e termine com -auth-token
+      for (var k = 0; k < localStorage.length; k++) {
+        var kn = localStorage.key(k);
+        if (kn && kn.indexOf('sb-') === 0 && kn.indexOf('-auth-token') > 0) {
+          if (keysToTry.indexOf(kn) === -1) keysToTry.push(kn);
+        }
+      }
+      for (var j = 0; j < keysToTry.length; j++) {
+        var raw = localStorage.getItem(keysToTry[j]);
+        if (!raw) continue;
+        var parsed;
+        try { parsed = JSON.parse(raw); } catch(e) { continue; }
+        // Formato novo: { access_token, refresh_token, user, ... }
+        var token = parsed?.access_token || parsed?.currentSession?.access_token;
+        if (token) {
+          return Promise.resolve({ data: { session: { access_token: token } }, error: null });
+        }
+      }
+    } catch(e) {}
     return Promise.resolve({ data: { session: null }, error: null });
   }
 
