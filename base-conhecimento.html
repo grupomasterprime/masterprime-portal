@@ -219,6 +219,206 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
   .kb-bank-block { padding: 10px 12px 11px; }
   .kb-bank-body p, .kb-bank-body li { font-size: 12.5px; }
 }
+
+/* ─── Maia (Assistente IA) · pill com gradient ─── */
+.adm-pill[data-adm="ia"] {
+  position: relative;
+}
+.adm-pill[data-adm="ia"] .maia-pill-dot {
+  background:
+    var(--maia-photo, linear-gradient(135deg, #4DBCC8 0%, #7A9BC8 50%, #2D3F5E 100%));
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 0 0 2px rgba(77,188,200,.18);
+}
+.adm-pill[data-adm="ia"]::after {
+  content: 'IA';
+  position: absolute; top: -6px; right: -8px;
+  background: linear-gradient(135deg, var(--mp-teal), var(--mp-navy));
+  color: #fff; font-size: 8px; font-weight: 800; letter-spacing: .5px;
+  padding: 2px 5px; border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(45,63,94,.25);
+}
+
+/* ─── Avatar da Maia (com fallback "M" enquanto não tem foto) ─── */
+/* Quando você commitar maia.png na raiz do repositório, basta trocar a linha
+   `--maia-photo` abaixo de `none` para `url(maia.png)` e o avatar aparece. */
+:root {
+  --maia-photo: none;  /* trocar pra url(maia.png) quando subir a foto */
+  --maia-gradient: linear-gradient(135deg, #4DBCC8 0%, #7A9BC8 45%, #2D3F5E 100%);
+}
+.maia-avatar {
+  border-radius: 50%;
+  background: var(--maia-photo, var(--maia-gradient)), var(--maia-gradient);
+  background-size: cover; background-position: center;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700;
+  position: relative; flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(45,63,94,.15);
+}
+/* Letra M quando não tem foto (fallback). Some quando --maia-photo é definida */
+.maia-avatar::before {
+  content: 'M';
+  font-family: 'Inter', sans-serif;
+}
+:root.has-maia-photo .maia-avatar::before { display: none; }
+.maia-avatar-sm { width: 28px; height: 28px; font-size: 12px; }
+.maia-avatar-md { width: 40px; height: 40px; font-size: 16px; }
+.maia-avatar-lg { width: 80px; height: 80px; font-size: 32px; margin-bottom: 4px; }
+
+/* ─── Chat ─── */
+.kbc-root {
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  overflow: hidden; display: flex; flex-direction: column;
+  height: calc(100vh - 240px); min-height: 480px;
+  box-shadow: 0 2px 12px rgba(45,63,94,.05);
+}
+.kbc-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 18px; border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, #FBFCFE 0%, #fff 100%);
+}
+.kbc-head-l { display: flex; align-items: center; gap: 12px; }
+.kbc-head-icon {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--mp-teal), var(--mp-navy));
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.kbc-head-title {
+  font-size: 14px; font-weight: 700; color: var(--mp-navy);
+  display: flex; align-items: center; gap: 8px;
+}
+.kbc-head-status {
+  font-size: 10.5px; font-weight: 600; color: #16A34A;
+  letter-spacing: .3px;
+}
+.kbc-head-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.kbc-examples-label {
+  font-size: 11.5px; color: var(--text2); margin-top: 18px;
+  text-transform: uppercase; letter-spacing: .8px; font-weight: 600;
+}
+.kbc-clear {
+  display: inline-flex; align-items: center; gap: 5px;
+  border: 1px solid var(--border2); background: #fff; color: var(--text2);
+  font-size: 11.5px; font-weight: 600; padding: 6px 10px; border-radius: 7px;
+  cursor: pointer; font-family: inherit;
+}
+.kbc-clear:hover { background: #FEF2F2; color: #DC2626; border-color: #FCA5A5; }
+
+.kbc-messages {
+  flex: 1; overflow-y: auto; padding: 18px 18px 8px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+
+.kbc-welcome {
+  text-align: center; padding: 30px 20px; color: var(--text2);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+}
+.kbc-welcome-icon {
+  font-size: 36px; width: 70px; height: 70px; border-radius: 50%;
+  background: linear-gradient(135deg, rgba(77,188,200,.12), rgba(45,63,94,.08));
+  display: flex; align-items: center; justify-content: center; margin-bottom: 6px;
+}
+.kbc-welcome h3 { font-size: 16px; font-weight: 700; color: var(--mp-navy); }
+.kbc-welcome p { font-size: 13px; max-width: 460px; line-height: 1.55; margin-top: 4px; }
+.kbc-examples {
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 18px;
+  max-width: 600px;
+}
+.kbc-example {
+  padding: 7px 13px; border-radius: 18px; border: 1px solid var(--border2);
+  background: #fff; color: var(--text); font-size: 12px; font-family: inherit;
+  cursor: pointer; transition: all .12s;
+}
+.kbc-example:hover {
+  background: var(--mp-navy); color: #fff; border-color: var(--mp-navy);
+  transform: translateY(-1px);
+}
+
+.kbc-msg { display: flex; max-width: 90%; gap: 9px; align-items: flex-end; }
+.kbc-msg.user { align-self: flex-end; justify-content: flex-end; }
+.kbc-msg.bot  { align-self: flex-start; }
+.kbc-msg.bot .maia-avatar { margin-bottom: 2px; }
+.kbc-bubble {
+  padding: 11px 14px; border-radius: 12px; font-size: 13.5px; line-height: 1.55;
+  word-wrap: break-word; overflow-wrap: break-word;
+}
+.kbc-msg.user .kbc-bubble {
+  background: var(--mp-navy); color: #fff; border-bottom-right-radius: 4px;
+}
+.kbc-msg.bot .kbc-bubble {
+  background: #F3F6FB; color: var(--text); border-bottom-left-radius: 4px;
+}
+.kbc-bubble p { margin: 0 0 6px; }
+.kbc-bubble p:last-child { margin-bottom: 0; }
+.kbc-bubble strong { font-weight: 700; color: var(--mp-navy); }
+.kbc-msg.user .kbc-bubble strong { color: #fff; }
+.kbc-bubble ul { margin: 5px 0 5px 18px; padding: 0; }
+.kbc-bubble li { margin-bottom: 3px; font-size: 13px; }
+.kbc-bubble code {
+  background: rgba(45,63,94,.08); color: var(--mp-navy);
+  padding: 1px 5px; border-radius: 3px; font-family: ui-monospace, Menlo, monospace; font-size: 12px;
+}
+.kbc-sources {
+  margin-top: 10px; padding-top: 9px; border-top: 1px dashed rgba(45,63,94,.18);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.kbc-src {
+  font-size: 11px; color: var(--text2); font-weight: 500;
+  display: inline-block;
+}
+
+.kbc-typing {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 18px 4px;
+}
+.kbc-typing .kbc-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--mp-teal);
+  opacity: .5; animation: kbcBounce 1.1s infinite ease-in-out;
+}
+.kbc-typing .kbc-dot:nth-child(2) { animation-delay: .15s; }
+.kbc-typing .kbc-dot:nth-child(3) { animation-delay: .3s; }
+.kbc-typing-label { font-size: 11.5px; color: var(--text2); margin-left: 6px; font-style: italic; }
+@keyframes kbcBounce {
+  0%, 80%, 100% { opacity: .3; transform: translateY(0); }
+  40% { opacity: 1; transform: translateY(-3px); }
+}
+
+.kbc-form {
+  display: flex; gap: 8px; padding: 12px 14px;
+  border-top: 1px solid var(--border); background: #FAFBFD;
+}
+#kbc-input {
+  flex: 1; padding: 11px 14px; border: 1px solid var(--border2); border-radius: 10px;
+  font-size: 14px; font-family: inherit; color: var(--text); background: #fff; outline: none;
+}
+#kbc-input:focus { border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,.14); }
+#kbc-input:disabled { opacity: .6; cursor: not-allowed; }
+.kbc-send {
+  width: 42px; height: 42px; border-radius: 10px; border: 0;
+  background: linear-gradient(135deg, var(--mp-teal), var(--mp-navy));
+  color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all .12s;
+}
+.kbc-send:hover:not(:disabled) { transform: scale(1.04); box-shadow: 0 4px 10px rgba(45,63,94,.25); }
+.kbc-send:disabled { opacity: .5; cursor: not-allowed; }
+.kbc-foot {
+  padding: 8px 18px 12px; font-size: 10.5px; color: var(--text3);
+  background: #FAFBFD; line-height: 1.4; text-align: center;
+}
+.kbc-foot::before { content: 'ℹ️ '; }
+
+.kbc-config-warning {
+  margin: 30px auto; max-width: 540px;
+  background: #FFF8E8; border: 1px solid #F0D9A0; border-radius: 12px;
+  padding: 20px; color: #8B6A2A; font-size: 13px; line-height: 1.6;
+}
+.kbc-config-warning h4 { font-size: 15px; font-weight: 700; margin-bottom: 8px; color: #8B6A2A; }
+.kbc-config-warning code {
+  background: rgba(139,106,42,.12); padding: 2px 6px; border-radius: 3px;
+  font-family: ui-monospace, Menlo, monospace; font-size: 12px;
+}
 </style>
 </head>
 <body>
@@ -254,6 +454,9 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
     <button class="adm-pill" id="adm-comissoes" data-adm="comissoes">
       <span class="dot" style="background:#10B981"></span> Comissões
     </button>
+    <button class="adm-pill" id="adm-ia" data-adm="ia" title="Maia · Assistente IA Master Prime — pergunte em linguagem natural">
+      <span class="dot maia-pill-dot"></span> Maia
+    </button>
   </div>
 
   <div class="search-box">
@@ -288,6 +491,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
 <script src="kb-itau.js?v=20260603a"></script>
 <script src="kb-fgts.js?v=20260611a"></script>
 <script src="kb-comissoes.js?v=20260612d"></script>
+<script src="kb-chat-config.js?v=20260618a"></script>
+<script src="kb-chat.js?v=20260618a"></script>
 <script>
 (function () {
   var ADM = window.KB_ADMIN || {};
@@ -872,6 +1077,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
       if (k === activeAdm) return;
       if (k === 'comparar') {
         loadComparativo();
+      } else if (k === 'ia') {
+        loadAssistenteIA();
       } else if (ADM[k]) {
         loadAdmin(k);
       } else {
@@ -881,11 +1088,69 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
     });
   });
 
+  // ── Assistente IA — chat com Gemini ──
+  function loadAssistenteIA() {
+    activeAdm = 'ia';
+    document.querySelectorAll('.adm-pill[data-adm]').forEach(function (p) {
+      p.classList.toggle('active', p.getAttribute('data-adm') === 'ia');
+    });
+    // Esconde elementos do material normal
+    var hideIds = ['chips', 'result-info', 'downloads-section', 'kb-foot'];
+    hideIds.forEach(function (id) { var el = document.getElementById(id); if (el) el.style.display = 'none'; });
+    var sb = document.querySelector('.search-box'); if (sb) sb.style.display = 'none';
+    var dlJ = document.getElementById('dl-jump'); if (dlJ) dlJ.style.display = 'none';
+    var content = document.getElementById('content');
+    if (!content) return;
+
+    if (window.KB_CHAT && window.KB_CHAT.isConfigured()) {
+      window.KB_CHAT.mount(content);
+    } else {
+      content.innerHTML =
+        '<div class="kbc-config-warning">' +
+          '<h4>⚙️ Assistente IA — Configuração pendente</h4>' +
+          '<p>Pra ativar o chat, é preciso:</p>' +
+          '<ol style="margin: 8px 0 8px 22px;">' +
+            '<li>Pegar uma chave grátis do Google Gemini em <code>aistudio.google.com/apikey</code></li>' +
+            '<li>Restringir a chave aos domínios do portal (Google Cloud Console)</li>' +
+            '<li>Editar o arquivo <code>kb-chat-config.js</code> e colar a chave</li>' +
+            '<li>Commitar e dar refresh nessa página</li>' +
+          '</ol>' +
+          '<p style="margin-top:10px;font-size:12px;">Instruções completas estão dentro do arquivo <code>kb-chat-config.js</code> no repositório.</p>' +
+        '</div>';
+    }
+  }
+
+  // Quando troca pra outro banco/comparativo, restaura visibilidade dos elementos
+  // que o loadAssistenteIA() escondeu.
+  function restoreFromIA() {
+    var sb = document.querySelector('.search-box'); if (sb) sb.style.display = '';
+    var dlJ = document.getElementById('dl-jump'); if (dlJ) dlJ.style.display = '';
+    var ri = document.getElementById('result-info'); if (ri) ri.style.display = '';
+    var ch = document.getElementById('chips'); if (ch) ch.style.display = '';
+    var ds = document.getElementById('downloads-section'); if (ds) ds.style.display = '';
+    var ft = document.getElementById('kb-foot'); if (ft) ft.style.display = '';
+  }
+  var _origLoadAdmin = loadAdmin;
+  loadAdmin = function (key) {
+    restoreFromIA();
+    return _origLoadAdmin(key);
+  };
+  if (typeof loadComparativo === 'function') {
+    var _origLoadComp = loadComparativo;
+    loadComparativo = function () {
+      restoreFromIA();
+      // Comparativo não tem downloads próprios — mantém escondido
+      var ds = document.getElementById('downloads-section'); if (ds) ds.style.display = 'none';
+      var dlJ = document.getElementById('dl-jump'); if (dlJ) dlJ.style.display = 'none';
+      return _origLoadComp();
+    };
+  }
+
   // ── init ──
   document.querySelectorAll('.adm-pill[data-adm]').forEach(function (p) {
     var k = p.getAttribute('data-adm');
-    // "comparar" não corresponde a um banco em ADM — sempre habilitado.
-    if (k !== 'comparar' && !ADM[k]) { p.disabled = true; p.classList.add('soon'); }
+    // "comparar" e "ia" não correspondem a bancos em ADM — sempre habilitados.
+    if (k !== 'comparar' && k !== 'ia' && !ADM[k]) { p.disabled = true; p.classList.add('soon'); }
   });
   // Estado inicial: nenhuma administradora selecionada — o usuário escolhe na barra.
   var _sbInit = document.querySelector('.search-box');
