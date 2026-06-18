@@ -241,6 +241,7 @@ tbody td:nth-child(4){font-weight:700;color:#16A34A}
               <th data-col="dataVenda" style="min-width:100px;cursor:pointer">Data ▾</th>
               <th data-col="contrato" style="min-width:110px">Contrato</th>
               <th data-col="grupoCota" style="min-width:90px">Grupo/Cota</th>
+              <th data-col="venc" style="min-width:90px">Venc/Part</th>
               <th data-col="adm" style="min-width:130px">Administradora</th>
               <th data-col="sitRaw" style="min-width:150px">Situação</th>
               <th data-col="consultor" style="min-width:140px">Consultor</th>
@@ -253,6 +254,7 @@ tbody td:nth-child(4){font-weight:700;color:#16A34A}
               <th><input type="text" placeholder="dd/mm" data-filter-col="dataVenda"></th>
               <th><input type="text" placeholder="..." data-filter-col="contrato"></th>
               <th><input type="text" placeholder="..." data-filter-col="grupoCota"></th>
+              <th><input type="text" placeholder="..." data-filter-col="venc"></th>
               <th><div class="ms-wrap col-msw" id="wrapColAdm" data-filter-col="adm"></div></th>
               <th><div class="ms-wrap col-msw" id="wrapColSit" data-filter-col="sitRaw"></div></th>
               <th><input type="text" placeholder="..." data-filter-col="consultor"></th>
@@ -396,7 +398,7 @@ async function loadDataFromOneDrive() {
     const iContrato = headers.indexOf('CONTRATO');
     const iGrupo = headers.indexOf('GRUPO');
     const iCota = headers.indexOf('COTA');
-    const iVenc = headers.indexOf('VENC.');
+    const iVenc = headers.findIndex(h => { const x = (h||'').toString().toUpperCase().replace(/[\s./]+/g,''); return x === 'VENC' || x === 'VENCPART' || x.startsWith('VENC'); });
     const iTipo = headers.indexOf('TIPO');
     const iCredito = headers.indexOf('CREDITO');
     const iConsultor = headers.indexOf('CONSULTOR RESPONSAVEL');
@@ -445,6 +447,7 @@ async function loadDataFromOneDrive() {
         cliente: iCliente >= 0 ? (row[iCliente]||'').toString().trim() : '',
         dataVenda: iData >= 0 ? (row[iData]||'').toString().trim() : '',
         grupoCota: (iGrupo >= 0 ? (row[iGrupo]||'').toString().trim() : '') + '/' + (iCota >= 0 ? (row[iCota]||'').toString().trim() : ''),
+        venc: iVenc >= 0 ? (row[iVenc]||'').toString().trim() : '',
         cpf: iCpf >= 0 ? (row[iCpf]||'').toString().trim() : '',
         sitRaw: (row[iSit]||'').toString().trim(),
         credito: credito,
@@ -1025,6 +1028,7 @@ function drawVendasTable() {
       '<td>' + formatBR(d.dataVenda) + '</td>' +
       '<td>' + (d.contrato||'-') + '</td>' +
       '<td>' + (d.grupoCota||'-') + '</td>' +
+      '<td>' + (d.venc||'-') + '</td>' +
       '<td><span class="adm-badge" style="background:'+ac.bg+';color:'+ac.fg+'">'+(d.adm||'-')+'</span></td>' +
       '<td>' + (d.sitRaw ? ('<span style="padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;background:'+sitRawColor(d.sitRaw).bg+';color:'+sitRawColor(d.sitRaw).fg+'">'+d.sitRaw+'</span>') : '-') + '</td>' +
       '<td>' + (d.consultor||'-') + '</td>' +
@@ -1049,17 +1053,17 @@ function getFilteredRowsForExport() {
 function exportXLSX() {
   if (typeof XLSX === 'undefined') { alert('Biblioteca Excel não carregou. Usando CSV.'); return exportCSV(); }
   const rows = getFilteredRowsForExport();
-  const data = rows.map(d => ({ 'Data': formatBR(d.dataVenda), 'Contrato': d.contrato||'', 'Grupo/Cota': d.grupoCota||'', 'Administradora': d.adm||'', 'Situação': d.sitRaw||'', 'Consultor': d.consultor||'', 'Cliente': d.cliente||'', 'CPF/CNPJ': d.cpf||'', 'Crédito': d.credito||0, 'Status': d.status||'' }));
+  const data = rows.map(d => ({ 'Data': formatBR(d.dataVenda), 'Contrato': d.contrato||'', 'Grupo/Cota': d.grupoCota||'', 'Venc/Part': d.venc||'', 'Administradora': d.adm||'', 'Situação': d.sitRaw||'', 'Consultor': d.consultor||'', 'Cliente': d.cliente||'', 'CPF/CNPJ': d.cpf||'', 'Crédito': d.credito||0, 'Status': d.status||'' }));
   const ws = XLSX.utils.json_to_sheet(data);
-  ws['!cols'] = [{wch:12},{wch:14},{wch:12},{wch:18},{wch:22},{wch:22},{wch:26},{wch:18},{wch:14},{wch:14}];
+  ws['!cols'] = [{wch:12},{wch:14},{wch:12},{wch:12},{wch:18},{wch:22},{wch:22},{wch:26},{wch:18},{wch:14},{wch:14}];
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Vendas');
   XLSX.writeFile(wb, 'vendas-master-prime-' + new Date().toISOString().slice(0,10) + '.xlsx');
 }
 function exportCSV() {
   const rows = getFilteredRowsForExport();
-  const h = ['Data','Contrato','Grupo/Cota','Administradora','Situacao','Consultor','Cliente','CPF/CNPJ','Credito','Status'];
-  const csv = [h.join(';'), ...rows.map(d => [formatBR(d.dataVenda), d.contrato||'', d.grupoCota||'', d.adm||'', d.sitRaw||'', d.consultor||'', d.cliente||'', d.cpf||'', (d.credito||0).toFixed(2).replace('.',','), d.status||''].map(v => String(v).replace(/;/g,',')).join(';'))].join('\n');
+  const h = ['Data','Contrato','Grupo/Cota','Venc/Part','Administradora','Situacao','Consultor','Cliente','CPF/CNPJ','Credito','Status'];
+  const csv = [h.join(';'), ...rows.map(d => [formatBR(d.dataVenda), d.contrato||'', d.grupoCota||'', d.venc||'', d.adm||'', d.sitRaw||'', d.consultor||'', d.cliente||'', d.cpf||'', (d.credito||0).toFixed(2).replace('.',','), d.status||''].map(v => String(v).replace(/;/g,',')).join(';'))].join('\n');
   const blob = new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8'});
   const url = URL.createObjectURL(blob); const a = document.createElement('a');
   a.href = url; a.download = 'vendas-master-prime-' + new Date().toISOString().slice(0,10) + '.csv';
