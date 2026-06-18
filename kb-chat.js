@@ -89,96 +89,14 @@
       .replace(/\s+/g, ' ').trim();
   }
 
-  // Lista mínima de stopwords pt-BR pra não pesar a busca
-  var STOPWORDS = {
-    'a':1,'o':1,'as':1,'os':1,'um':1,'uma':1,'uns':1,'umas':1,'de':1,'do':1,'da':1,'dos':1,'das':1,
-    'em':1,'no':1,'na':1,'nos':1,'nas':1,'e':1,'ou':1,'que':1,'se':1,'ao':1,'aos':1,
-    'para':1,'por':1,'com':1,'como':1,'esse':1,'essa':1,'isso':1,'este':1,'esta':1,'isto':1,
-    'meu':1,'minha':1,'seu':1,'sua':1,'eu':1,'voce':1,'eles':1,'elas':1,'nós':1,'nos':1,
-    'pode':1,'posso':1,'poder':1,'preciso':1,'quero':1,'tem':1,'ter':1,'ser':1,'sou':1,'é':1,
-    'qual':1,'quais':1,'quando':1,'onde':1,'porque':1,'por que':1,'oque':1,'q':1,
-    'mais':1,'menos':1,'muito':1,'pouco':1,'sim':1,'nao':1
-  };
-
-  // Sinônimos do domínio (consórcio/seguros) — chave = grupo, value = lista de palavras
-  // Quando QUALQUER termo do grupo aparece na pergunta, TODOS os outros também são adicionados
-  // à busca. Resolve casos como "carro" vs "automóvel".
-  var SYNONYM_GROUPS = [
-    ['carro', 'carros', 'automovel', 'automoveis', 'auto', 'veiculo', 'veiculos'],
-    ['moto', 'motos', 'motocicleta', 'motocicletas'],
-    ['caminhao', 'caminhoes', 'pesado', 'pesados'],
-    ['imovel', 'imoveis', 'casa', 'casas', 'apartamento', 'apartamentos', 'apto', 'residencia'],
-    ['terreno', 'terrenos', 'lote', 'lotes'],
-    ['idade', 'ano', 'anos', 'fabricacao', 'fabricado', 'velho', 'velha', 'usado', 'usada', 'novo', 'nova'],
-    ['comprar', 'compra', 'adquirir', 'aquisicao'],
-    ['parcela', 'parcelas', 'mensalidade', 'mensalidades', 'prestacao', 'prestacoes'],
-    ['credito', 'creditos', 'carta'],
-    ['lance', 'lances', 'oferta', 'ofertas'],
-    ['contemplar', 'contemplado', 'contemplacao', 'sorteado'],
-    ['reajuste', 'reajustes', 'correcao', 'ipca', 'incc'],
-    ['seguro', 'seguros', 'protecao'],
-    ['taxa', 'taxas', 'administracao', 'adm'],
-    ['prazo', 'prazos', 'tempo', 'duracao'],
-    ['documento', 'documentos', 'doc', 'docs', 'documentacao'],
-    ['fgts', 'fundo de garantia', 'fgts caixa'],
-    ['cancelar', 'cancelamento', 'desistir', 'desistencia', 'sair', 'saida'],
-    ['transferir', 'transferencia', 'passar', 'repassar']
-  ];
-
-  function extractTerms(q) {
-    var n = norm(q);
-    var raw = n.split(' ').filter(function (t) {
-      return t.length >= 2 && !STOPWORDS[t];
-    });
-    // Expande com sinônimos
-    var expanded = raw.slice();
-    raw.forEach(function (term) {
-      SYNONYM_GROUPS.forEach(function (group) {
-        if (group.indexOf(term) !== -1) {
-          group.forEach(function (syn) {
-            if (expanded.indexOf(syn) === -1) expanded.push(syn);
-          });
-        }
-      });
-    });
-    return expanded;
-  }
-
-  // ── Score: quantos termos batem no card (peso título > tags > conteudo) ──
-  function scoreCard(card, terms) {
-    var t = norm(card.titulo);
-    var tg = norm(card.tags);
-    var c = norm(card.conteudo);
-    var cat = norm(card.categoria);
-    var adm = norm(card.admNome);
-    var score = 0;
-    terms.forEach(function (term) {
-      if (t.indexOf(term) !== -1) score += 6;
-      if (tg.indexOf(term) !== -1) score += 4;
-      if (cat.indexOf(term) !== -1) score += 3;
-      if (adm.indexOf(term) !== -1) score += 3;
-      if (c.indexOf(term) !== -1) score += 1;
-    });
-    return score;
-  }
-
-  // ── Pega top-N cards mais relevantes pra pergunta ──
+  // ── Manda TODOS os cards pra Maia ────────────────────────────
+  // O contexto do Gemini 2.5 Flash é 1M tokens. Os ~400 cards do
+  // portal somam ~60k tokens — cabe folgado. Em vez de fazer busca
+  // local com palavras-chave (que falha em sinônimos como "carro"
+  // vs "automóvel"), confiamos na Maia pra ler tudo e interpretar.
   function findRelevantCards(question, max) {
-    var allCards = gatherAllCards();
-    var terms = extractTerms(question);
-    if (terms.length === 0) return allCards.slice(0, max);
-
-    var scored = allCards.map(function (c, i) {
-      return { card: c, score: scoreCard(c, terms), idx: i };
-    }).filter(function (x) { return x.score > 0; });
-
-    scored.sort(function (a, b) {
-      return b.score - a.score || a.idx - b.idx;
-    });
-
-    // Se não encontrou nada, devolve uma amostra geral
-    if (scored.length === 0) return allCards.slice(0, max);
-    return scored.slice(0, max).map(function (x) { return x.card; });
+    // Mantém a assinatura por compatibilidade, mas ignora "max"
+    return gatherAllCards();
   }
 
   // ── Monta prompt pro Gemini ──
@@ -491,7 +409,7 @@
           '<span class="kbc-typing-label">Maia está digitando…</span>' +
         '</div>' +
         '<form class="kbc-form" id="kbc-form">' +
-          '<input id="kbc-input" type="text" autocomplete="off" placeholder="Pergunte para a Maia… ex.: Sobra de crédito Bradesco prazo?" />' +
+          '<input id="kbc-input" type="text" autocomplete="off" placeholder="Pergunte para a Maia…" />' +
           '<button type="submit" id="kbc-send" class="kbc-send" title="Enviar (Enter)">' +
             '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>' +
           '</button>' +
