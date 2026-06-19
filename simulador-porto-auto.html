@@ -240,12 +240,9 @@
             <label>Fundo Reserva</label>
             <input type="text" id="pa-fundo" data-mask="pct2" placeholder="0,00 %">
           </div>
-          <div class="field" style="position:relative;">
-            <label>Seguro (PF) <small style="color:#8a92a3">opcional</small></label>
+          <div class="field">
+            <label>Seguro (PF)</label>
             <input type="text" id="pa-seguro" data-mask="pct4" placeholder="0,0000 %">
-            <label style="display:inline-flex; align-items:center; gap:5px; margin-top:4px; font-size:11.5px; color:#475569; cursor:pointer;">
-              <input type="checkbox" id="pa-isPJ" style="margin:0;"> Jurídica (sem seguro)
-            </label>
           </div>
           <div class="field">
             <label>Valor do crédito</label>
@@ -278,6 +275,11 @@
               <option value="campanha">Campanha Parcela Original</option>
             </select>
           </div>
+        </div>
+
+        <div style="margin-top:8px; padding:6px 10px; background:#f6f8fb; border-radius:6px; display:inline-flex; align-items:center; gap:6px; font-size:12px; color:#475569;">
+          <input type="checkbox" id="pa-isPJ" style="margin:0; cursor:pointer;">
+          <label for="pa-isPJ" style="margin:0; padding:0; font-size:12px; text-transform:none; letter-spacing:0; font-weight:500; color:#475569; cursor:pointer;">Pessoa Jurídica (sem seguro)</label>
         </div>
 
         <div class="redmode-toggle" style="margin-top: 10px;">
