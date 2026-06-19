@@ -256,13 +256,13 @@
               <input type="text" id="ir-pctAPagar" data-mask="pct2" placeholder="0,00 %">
               <span class="field-suffix">%</span>
             </div>
-            <div class="field">
+            <div class="field" title="Digite o R$ que o % do lado preenche automaticamente (e vice-versa)">
               <label>Lance Embutido (R$)</label>
-              <input type="text" id="ir-lanceEmbutidoView" placeholder="—" disabled>
+              <input type="text" id="ir-lanceEmbutidoView" placeholder="R$ 0,00" data-mask="money">
             </div>
-            <div class="field">
+            <div class="field" title="Digite o R$ que o % do lado preenche automaticamente (e vice-versa)">
               <label>Lance a Pagar (R$)</label>
-              <input type="text" id="ir-lanceAPagarView" placeholder="—" disabled>
+              <input type="text" id="ir-lanceAPagarView" placeholder="R$ 0,00" data-mask="money">
             </div>
           </div>
           <div style="margin-top: 8px;">
@@ -512,8 +512,13 @@ function recalc() {
   setOut('ir-totalLance', formatMoney(r.totalLance));
   const _pctTot = (i.pctEmbutido + i.pctAPagar) * 100;
   setOut('ir-totalLancePct', _pctTot > 0 ? formatPct(_pctTot, 2) : '—');
-  setVal('ir-lanceEmbutidoView', formatMoney(r.lanceEmbutido));
-  setVal('ir-lanceAPagarView', formatMoney(r.lanceApagar));
+  // Sincronização espelhada: só sobrescreve R$ se o usuário NÃO estava editando aquele R$
+  if (!window._irLastEdit || !window._irLastEdit.startsWith('rs-emb')) {
+    setVal('ir-lanceEmbutidoView', formatMoney(r.lanceEmbutido));
+  }
+  if (!window._irLastEdit || !window._irLastEdit.startsWith('rs-apg')) {
+    setVal('ir-lanceAPagarView', formatMoney(r.lanceApagar));
+  }
 
   setOut('ir-creditoLiquido', formatMoney(r.creditoLiquido));
   setOut('ir-novaParcela', formatMoney(r.novaParcela));
@@ -547,9 +552,30 @@ document.getElementById('btnLimparProposta').addEventListener('click', () => {
 });
 
 document.getElementById('btnLimparLance').addEventListener('click', () => {
-  ['ir-pctEmbutido','ir-pctAPagar'].forEach(id => get(id).value = '');
+  ['ir-pctEmbutido','ir-pctAPagar','ir-lanceEmbutidoView','ir-lanceAPagarView'].forEach(id => get(id).value = '');
+  window._irLastEdit = null;
   recalc();
 });
+
+// ═══════════════════════════════════════════════════════
+// SINCRONIZAÇÃO ESPELHADA % ↔ R$ (Itaú Reduzida — base = CRÉDITO)
+// ═══════════════════════════════════════════════════════
+function _irRsToPct(idRs, idPct, tag) {
+  const credito = unmaskMoney(get('ir-credito').value);
+  const v = unmaskMoney(get(idRs).value);
+  if (!(credito > 0)) return;
+  window._irLastEdit = tag;
+  if (v > 0) {
+    get(idPct).value = ((v / credito) * 100).toFixed(2).replace('.', ',') + ' %';
+  } else {
+    get(idPct).value = '';
+  }
+  recalc();
+}
+get('ir-lanceEmbutidoView').addEventListener('input', () => _irRsToPct('ir-lanceEmbutidoView', 'ir-pctEmbutido', 'rs-emb'));
+get('ir-lanceAPagarView').addEventListener('input', () => _irRsToPct('ir-lanceAPagarView', 'ir-pctAPagar', 'rs-apg'));
+get('ir-pctEmbutido').addEventListener('input', () => { window._irLastEdit = 'pct-emb'; });
+get('ir-pctAPagar').addEventListener('input', () => { window._irLastEdit = 'pct-apg'; });
 
 document.getElementById('btnPresetFixo40Proprio').addEventListener('click', () => {
   get('ir-pctEmbutido').value = '0,00 %';

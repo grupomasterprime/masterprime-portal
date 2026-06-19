@@ -252,13 +252,13 @@
               <input type="text" id="ii-pctAPagar" data-mask="pct2" placeholder="0,00 %">
               <span class="field-suffix">%</span>
             </div>
-            <div class="field">
+            <div class="field" title="Digite o R$ que o % do lado preenche automaticamente (e vice-versa)">
               <label>Lance Embutido (R$)</label>
-              <input type="text" id="ii-lanceEmbutidoView" placeholder="—" disabled>
+              <input type="text" id="ii-lanceEmbutidoView" placeholder="R$ 0,00" data-mask="money">
             </div>
-            <div class="field">
+            <div class="field" title="Digite o R$ que o % do lado preenche automaticamente (e vice-versa)">
               <label>Lance a Pagar (R$)</label>
-              <input type="text" id="ii-lanceAPagarView" placeholder="—" disabled>
+              <input type="text" id="ii-lanceAPagarView" placeholder="R$ 0,00" data-mask="money">
             </div>
           </div>
           <div style="margin-top: 8px;">
@@ -489,8 +489,13 @@ function recalc() {
   setOut('ii-totalLance', formatMoney(r.totalLance));
   const _pctTot = (i.pctEmbutido + i.pctAPagar) * 100;
   setOut('ii-totalLancePct', _pctTot > 0 ? formatPct(_pctTot, 2) : '—');
-  setVal('ii-lanceEmbutidoView', formatMoney(r.lanceEmbutido));
-  setVal('ii-lanceAPagarView', formatMoney(r.lanceApagar));
+  // Sincronização espelhada: só sobrescreve R$ se o usuário NÃO estava editando aquele R$
+  if (!window._iiLastEdit || !window._iiLastEdit.startsWith('rs-emb')) {
+    setVal('ii-lanceEmbutidoView', formatMoney(r.lanceEmbutido));
+  }
+  if (!window._iiLastEdit || !window._iiLastEdit.startsWith('rs-apg')) {
+    setVal('ii-lanceAPagarView', formatMoney(r.lanceApagar));
+  }
 
   setOut('ii-creditoLiquido', formatMoney(r.creditoLiquido));
   setOut('ii-novaParcela', formatMoney(r.novaParcela));
@@ -523,9 +528,32 @@ document.getElementById('btnLimparProposta').addEventListener('click', () => {
 });
 
 document.getElementById('btnLimparLance').addEventListener('click', () => {
-  ['ii-pctEmbutido','ii-pctAPagar'].forEach(id => get(id).value = '');
+  ['ii-pctEmbutido','ii-pctAPagar','ii-lanceEmbutidoView','ii-lanceAPagarView'].forEach(id => get(id).value = '');
+  window._iiLastEdit = null;
   recalc();
 });
+
+// ═══════════════════════════════════════════════════════
+// SINCRONIZAÇÃO ESPELHADA % ↔ R$ (Itaú — base = CRÉDITO)
+// Usuário pode digitar tanto no % quanto no R$
+// ═══════════════════════════════════════════════════════
+function _iiRsToPct(idRs, idPct, tag) {
+  const credito = unmaskMoney(get('ii-credito').value);
+  const v = unmaskMoney(get(idRs).value);
+  if (!(credito > 0)) return;
+  window._iiLastEdit = tag;
+  if (v > 0) {
+    get(idPct).value = ((v / credito) * 100).toFixed(2).replace('.', ',') + ' %';
+  } else {
+    get(idPct).value = '';
+  }
+  recalc();
+}
+get('ii-lanceEmbutidoView').addEventListener('input', () => _iiRsToPct('ii-lanceEmbutidoView', 'ii-pctEmbutido', 'rs-emb'));
+get('ii-lanceAPagarView').addEventListener('input', () => _iiRsToPct('ii-lanceAPagarView', 'ii-pctAPagar', 'rs-apg'));
+// Quando o user volta a editar o %, volta a regra antiga (% → R$)
+get('ii-pctEmbutido').addEventListener('input', () => { window._iiLastEdit = 'pct-emb'; });
+get('ii-pctAPagar').addEventListener('input', () => { window._iiLastEdit = 'pct-apg'; });
 
 document.getElementById('btnPresetFixo40Proprio').addEventListener('click', () => {
   get('ii-pctEmbutido').value = '0,00 %';

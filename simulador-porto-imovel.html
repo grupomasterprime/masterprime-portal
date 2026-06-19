@@ -208,17 +208,12 @@
             <label>Fundo Reserva</label>
             <input type="text" id="pi-fundo" data-mask="pct2" placeholder="0,00 %">
           </div>
-          <div class="field">
-            <label>Seguro (PF)</label>
+          <div class="field" style="position:relative;">
+            <label>Seguro (PF) <small style="color:#8a92a3">opcional</small></label>
             <input type="text" id="pi-seguro" data-mask="pct4" placeholder="0,0000 %">
-          </div>
-          <div class="field">
-            <label>Tipo</label>
-            <select id="pi-tipo">
-              <option value="" selected>Selecione…</option>
-              <option value="PF">Física</option>
-              <option value="PJ">Jurídica</option>
-            </select>
+            <label style="display:inline-flex; align-items:center; gap:5px; margin-top:4px; font-size:11.5px; color:#475569; cursor:pointer;">
+              <input type="checkbox" id="pi-isPJ" style="margin:0;"> Jurídica (sem seguro)
+            </label>
           </div>
           <div class="field">
             <label>Valor do crédito</label>
@@ -281,17 +276,32 @@
         </div>
 
         <div class="lance-bloco">
-          <div class="grid grid-3">
+          <div class="grid grid-2">
+            <div class="field" title="% sobre crédito (digite % ou R$, o outro preenche)">
+              <label>% Lance a Pagar</label>
+              <input type="text" id="pi-pctRecProp" data-mask="pct2" placeholder="0,00 %">
+              <span class="field-suffix">%</span>
+            </div>
             <div class="field">
-              <label>Recurso próprio</label>
+              <label>Recurso próprio (R$)</label>
               <input type="text" id="pi-recProp" placeholder="R$ 0,00" data-mask="money">
             </div>
-            <div class="field">
-              <label>FGTS</label>
-              <input type="text" id="pi-fgts" placeholder="R$ 0,00" data-mask="money">
+            <div class="field" title="% sobre crédito (digite % ou R$, o outro preenche)">
+              <label>% FGTS</label>
+              <input type="text" id="pi-pctFgts" data-mask="pct2" placeholder="0,00 %">
+              <span class="field-suffix">%</span>
             </div>
             <div class="field">
-              <label>Embutido (máx. 30%)</label>
+              <label>FGTS (R$)</label>
+              <input type="text" id="pi-fgts" placeholder="R$ 0,00" data-mask="money">
+            </div>
+            <div class="field" title="% sobre crédito (digite % ou R$, o outro preenche)">
+              <label>% Lance Embutido</label>
+              <input type="text" id="pi-pctEmbutido" data-mask="pct2" placeholder="0,00 %">
+              <span class="field-suffix">%</span>
+            </div>
+            <div class="field">
+              <label>Embutido R$ <small style="color:#8a92a3">(máx 30%)</small></label>
               <input type="text" id="pi-embutido" placeholder="R$ 0,00" data-mask="money">
               <div class="lance-max-hint" id="pi-embutidoMaxHint">Máx. R$ 0,00</div>
             </div>
@@ -490,9 +500,12 @@ function setOut(id, value) {
 // LEITURA DE INPUTS
 // ═══════════════════════════════════════════════════════
 function readInputs() {
+  const isPJ = !!(get('pi-isPJ') && get('pi-isPJ').checked);
+  // PJ marcado → seguro 0. Caso contrário (PF) lê o campo (pode ser 0 = sem seguro)
+  const seguro = isPJ ? 0 : (unmaskPct(get('pi-seguro').value) / 100);
   return {
     credito: unmaskMoney(get('pi-credito').value),
-    tipo: get('pi-tipo').value,
+    tipo: isPJ ? 'PJ' : 'PF',
     prazo: parseInt(get('pi-prazo').value || '0', 10),
     redutor: get('pi-redutor').value,
     qtdAdesao: parseInt(get('pi-qtdAdesao').value || '0', 10),
@@ -503,7 +516,7 @@ function readInputs() {
     adesao: unmaskPct(get('pi-adesao').value) / 100,
     taxaAdm: unmaskPct(get('pi-taxaAdm').value) / 100,
     fundo: unmaskPct(get('pi-fundo').value) / 100,
-    seguro: unmaskPct(get('pi-seguro').value) / 100,
+    seguro,
   };
 }
 
@@ -711,6 +724,11 @@ function aplicaEstrategia(strat, pctLivre = null) {
   if (recProp < 0) recProp = 0;
   get('pi-recProp').value = recProp > 0 ? maskMoney(String(Math.round(recProp * 100))) : '';
   get('pi-embutido').value = embutido > 0 ? maskMoney(String(Math.round(embutido * 100))) : '';
+  // Preenche também os % correspondentes (espelhamento sobre crédito)
+  if (i.credito > 0) {
+    get('pi-pctRecProp').value = recProp > 0 ? ((recProp / i.credito) * 100).toFixed(2).replace('.', ',') + ' %' : '';
+    get('pi-pctEmbutido').value = embutido > 0 ? ((embutido / i.credito) * 100).toFixed(2).replace('.', ',') + ' %' : '';
+  }
   recalc();
 }
 
@@ -752,8 +770,7 @@ function fecharModalLance() {
 // LIMPAR
 // ═══════════════════════════════════════════════════════
 function limparTudo() {
-  ['pi-credito','pi-prazo','pi-qtdAdesao','pi-contempla','pi-recProp','pi-fgts','pi-embutido','pi-adesao','pi-taxaAdm','pi-fundo','pi-seguro'].forEach(id => { const el = get(id); if (el) el.value = ''; });
-  get('pi-tipo').value = '';
+  ['pi-credito','pi-prazo','pi-qtdAdesao','pi-contempla','pi-recProp','pi-fgts','pi-embutido','pi-pctRecProp','pi-pctFgts','pi-pctEmbutido','pi-adesao','pi-taxaAdm','pi-fundo','pi-seguro'].forEach(id => { const el = get(id); if (el) el.value = ''; });
   get('pi-redutor').value = '';
   const obsEl = get('pi-observacoes'); if (obsEl) obsEl.value = '';
   recalc();
@@ -765,15 +782,66 @@ document.getElementById('btnLimparObs').addEventListener('click', () => {
 
 document.getElementById('btnLimparProposta').addEventListener('click', () => {
   ['pi-credito','pi-prazo','pi-qtdAdesao','pi-contempla'].forEach(id => get(id).value = '');
-  get('pi-tipo').value = '';
   get('pi-redutor').value = '';
   recalc();
 });
 
 document.getElementById('btnLimparLance').addEventListener('click', () => {
-  ['pi-recProp','pi-fgts','pi-embutido'].forEach(id => get(id).value = '');
+  ['pi-recProp','pi-fgts','pi-embutido','pi-pctRecProp','pi-pctFgts','pi-pctEmbutido'].forEach(id => get(id).value = '');
   recalc();
 });
+
+// ═══════════════════════════════════════════════════════
+// SINCRONIZAÇÃO ESPELHADA % ↔ R$ (estilo Ololu)
+// Base: CRÉDITO. Digite % → R$ aparece. Digite R$ → % aparece.
+// ═══════════════════════════════════════════════════════
+let _piSyncing = false;
+function piSyncPctToRs(idPct, idRs) {
+  if (_piSyncing) return;
+  const credito = unmaskMoney(get('pi-credito').value);
+  const pct = unmaskPct(get(idPct).value) / 100;
+  if (!(credito > 0) || !(pct >= 0)) return;
+  _piSyncing = true;
+  const v = credito * pct;
+  get(idRs).value = v > 0 ? maskMoney(String(Math.round(v * 100))) : '';
+  _piSyncing = false;
+  recalc();
+}
+function piSyncRsToPct(idRs, idPct) {
+  if (_piSyncing) return;
+  const credito = unmaskMoney(get('pi-credito').value);
+  const v = unmaskMoney(get(idRs).value);
+  if (!(credito > 0)) return;
+  _piSyncing = true;
+  if (v > 0) {
+    get(idPct).value = ((v / credito) * 100).toFixed(2).replace('.', ',') + ' %';
+  } else {
+    get(idPct).value = '';
+  }
+  _piSyncing = false;
+  recalc();
+}
+// Recurso próprio
+get('pi-pctRecProp').addEventListener('blur', () => piSyncPctToRs('pi-pctRecProp', 'pi-recProp'));
+get('pi-recProp').addEventListener('blur', () => piSyncRsToPct('pi-recProp', 'pi-pctRecProp'));
+// FGTS
+get('pi-pctFgts').addEventListener('blur', () => piSyncPctToRs('pi-pctFgts', 'pi-fgts'));
+get('pi-fgts').addEventListener('blur', () => piSyncRsToPct('pi-fgts', 'pi-pctFgts'));
+// Embutido
+get('pi-pctEmbutido').addEventListener('blur', () => piSyncPctToRs('pi-pctEmbutido', 'pi-embutido'));
+get('pi-embutido').addEventListener('blur', () => piSyncRsToPct('pi-embutido', 'pi-pctEmbutido'));
+
+// Toggle Jurídica: desabilita o campo de seguro quando marcado
+(function() {
+  const cb = get('pi-isPJ');
+  const seg = get('pi-seguro');
+  if (!cb || !seg) return;
+  cb.addEventListener('change', () => {
+    if (cb.checked) { seg.value = ''; seg.disabled = true; seg.style.opacity = '0.5'; }
+    else { seg.disabled = false; seg.style.opacity = ''; }
+    recalc();
+  });
+})();
 
 document.getElementById('btnTaxasDefault').addEventListener('click', () => {
   get('pi-adesao').value = '2,00 %';
@@ -842,7 +910,9 @@ function _montarPdfComercialPortoImovel() {
   const _t = (id) => { const el = document.getElementById(id); return (el?.textContent || '').trim(); };
   const _selTxt = (id) => { const el = document.getElementById(id); return (el?.selectedOptions?.[0]?.textContent || '').trim(); };
 
-  const tipoTxt = _selTxt('pi-tipo') || 'PF';
+  // Tipo: checkbox PJ tem prioridade. Caso contrário PF (com ou sem seguro)
+  const _isPJ_v = !!(document.getElementById('pi-isPJ') && document.getElementById('pi-isPJ').checked);
+  const tipoTxt = _isPJ_v ? 'Jurídica' : 'Física';
   const isPF = (tipoTxt === 'Física' || tipoTxt.includes('PF'));
   const parcelaAntes = isPF ? _t('pi-parcelaReduzPF') : _t('pi-parcelaReduzPJ');
   const redutorTxt = _selTxt('pi-redutor') || 'Sem redutor';

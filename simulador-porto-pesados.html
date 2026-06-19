@@ -199,17 +199,12 @@
             <label>Fundo Reserva</label>
             <input type="text" id="pp-fundo" data-mask="pct2" placeholder="0,00 %">
           </div>
-          <div class="field">
-            <label>Seguro (PF)</label>
+          <div class="field" style="position:relative;">
+            <label>Seguro (PF) <small style="color:#8a92a3">opcional</small></label>
             <input type="text" id="pp-seguro" data-mask="pct4" placeholder="0,0000 %">
-          </div>
-          <div class="field">
-            <label>Tipo</label>
-            <select id="pp-tipo">
-              <option value="" selected>Selecione…</option>
-              <option value="PF">Física</option>
-              <option value="PJ">Jurídica</option>
-            </select>
+            <label style="display:inline-flex; align-items:center; gap:5px; margin-top:4px; font-size:11.5px; color:#475569; cursor:pointer;">
+              <input type="checkbox" id="pp-isPJ" style="margin:0;"> Jurídica (sem seguro)
+            </label>
           </div>
           <div class="field">
             <label>Valor do crédito</label>
@@ -222,6 +217,10 @@
           <div class="field">
             <label>Contempla mês</label>
             <input type="text" id="pp-contempla" placeholder="0" data-mask="int">
+          </div>
+          <div class="field" title="% máximo de embutido permitido pelo grupo (regra Porto Pesados: 30% ou 40%)">
+            <label>% Embutido máx do grupo</label>
+            <input type="text" id="pp-pctEmbMax" data-mask="pct2" placeholder="30,00 %">
           </div>
           <div class="field">
             <label>Redutor grupo</label>
@@ -275,19 +274,24 @@
         </div>
 
         <div class="lance-bloco">
-          <div class="grid grid-3">
-            <div class="field">
-              <label>% Embutido máx</label>
+          <div class="grid grid-2">
+            <div class="field" title="% sobre crédito (digite % ou R$, o outro preenche)">
+              <label>% Lance Embutido</label>
               <input type="text" id="pp-pctEmbutido" data-mask="pct2" placeholder="0,00 %">
               <span class="field-suffix">%</span>
             </div>
             <div class="field">
-              <label>Valor Embutido</label>
+              <label>Valor Embutido (R$)</label>
               <input type="text" id="pp-embutido" placeholder="R$ 0,00" data-mask="money">
               <div class="lance-max-hint" id="pp-embutidoMaxHint">Máx. R$ 0,00</div>
             </div>
+            <div class="field" title="% sobre crédito (digite % ou R$, o outro preenche)">
+              <label>% Lance a Pagar</label>
+              <input type="text" id="pp-pctRecProp" data-mask="pct2" placeholder="0,00 %">
+              <span class="field-suffix">%</span>
+            </div>
             <div class="field">
-              <label>Recurso próprio</label>
+              <label>Recurso próprio (R$)</label>
               <input type="text" id="pp-recProp" placeholder="R$ 0,00" data-mask="money">
             </div>
           </div>
@@ -463,18 +467,25 @@ function setOut(id, value) {
 }
 
 function readInputs() {
+  const isPJ = !!(get('pp-isPJ') && get('pp-isPJ').checked);
+  // PJ marcado → seguro 0. Caso contrário (PF) lê o campo (pode ser 0 = sem seguro)
+  const seguro = isPJ ? 0 : (unmaskPct(get('pp-seguro').value) / 100);
   return {
     credito: unmaskMoney(get('pp-credito').value),
-    tipo: get('pp-tipo').value,
+    tipo: isPJ ? 'PJ' : 'PF',
     prazo: parseInt(get('pp-prazo').value || '0', 10),
     redutor: get('pp-redutor').value,
     contempla: parseInt(get('pp-contempla').value || '0', 10),
     recProp: unmaskMoney(get('pp-recProp').value),
     embutido: unmaskMoney(get('pp-embutido').value),
+    // % digitado no lance (espelhamento com R$)
     pctEmbutido: unmaskPct(get('pp-pctEmbutido').value) / 100,
+    pctRecProp: unmaskPct(get('pp-pctRecProp').value) / 100,
+    // % Embutido máx do grupo (em Dados da Proposta). Default 30% se vazio.
+    pctEmbMax: (unmaskPct(get('pp-pctEmbMax').value) / 100) || 0.30,
     taxaAdm: unmaskPct(get('pp-taxaAdm').value) / 100,
     fundo: unmaskPct(get('pp-fundo').value) / 100,
-    seguro: unmaskPct(get('pp-seguro').value) / 100,
+    seguro,
   };
 }
 
@@ -487,7 +498,8 @@ function calc(i) {
   r.categoria    = i.credito * (1 + i.taxaAdm + i.fundo);
   r.saldoDevedor = r.categoria;
   r.valorSeguro  = r.categoria * seguroPF;
-  r.maxEmbutido  = i.credito * i.pctEmbutido;
+  // Embutido máximo do grupo (configurável em "Dados da Proposta") — default 30%
+  r.maxEmbutido  = i.credito * i.pctEmbMax;
 
   r.parcelaPJ = (i.prazo > 0) ? r.categoria / i.prazo : NaN;
   r.parcelaPF = r.parcelaPJ + r.valorSeguro;
@@ -571,8 +583,8 @@ function recalc() {
   setOut('pp-saldoDevedor', formatMoney(r.saldoDevedor));
   var hintEl = document.getElementById('pp-embutidoMaxHint');
   if (hintEl) {
-    var pctTxt = i.pctEmbutido > 0 ? (i.pctEmbutido * 100).toFixed(2).replace('.', ',') + '%' : '—';
-    hintEl.innerHTML = 'Máx. <strong>' + formatMoney(r.maxEmbutido) + '</strong> (' + pctTxt + ')';
+    var pctTxt = (i.pctEmbMax * 100).toFixed(2).replace('.', ',') + '%';
+    hintEl.innerHTML = 'Máx. <strong>' + formatMoney(r.maxEmbutido) + '</strong> (' + pctTxt + ' do crédito)';
   }
   setOut('pp-parcelaPF', formatMoney(r.parcelaPF));
   setOut('pp-parcelaPJ', formatMoney(r.parcelaPJ));
@@ -671,6 +683,11 @@ function aplicaEstrategia(strat, pctLivre = null) {
   if (recProp < 0) recProp = 0;
   get('pp-recProp').value = recProp > 0 ? maskMoney(String(Math.round(recProp * 100))) : '';
   get('pp-embutido').value = embutido > 0 ? maskMoney(String(Math.round(embutido * 100))) : '';
+  // Preenche também os % correspondentes (espelhamento sobre crédito)
+  if (i.credito > 0) {
+    get('pp-pctEmbutido').value = embutido > 0 ? ((embutido / i.credito) * 100).toFixed(2).replace('.', ',') + ' %' : '';
+    get('pp-pctRecProp').value = recProp > 0 ? ((recProp / i.credito) * 100).toFixed(2).replace('.', ',') + ' %' : '';
+  }
   recalc();
 }
 
@@ -703,8 +720,7 @@ function fecharModalLance() {
 }
 
 function limparTudo() {
-  ['pp-credito','pp-prazo','pp-contempla','pp-recProp','pp-embutido','pp-pctEmbutido','pp-taxaAdm','pp-fundo','pp-seguro'].forEach(id => { const el = get(id); if (el) el.value = ''; });
-  get('pp-tipo').value = '';
+  ['pp-credito','pp-prazo','pp-contempla','pp-recProp','pp-embutido','pp-pctEmbutido','pp-pctRecProp','pp-pctEmbMax','pp-taxaAdm','pp-fundo','pp-seguro'].forEach(id => { const el = get(id); if (el) el.value = ''; });
   get('pp-redutor').value = '';
   const obsEl = get('pp-observacoes'); if (obsEl) obsEl.value = '';
   recalc();
@@ -715,14 +731,13 @@ document.getElementById('btnLimparObs').addEventListener('click', () => {
 });
 
 document.getElementById('btnLimparProposta').addEventListener('click', () => {
-  ['pp-credito','pp-prazo','pp-contempla'].forEach(id => get(id).value = '');
-  get('pp-tipo').value = '';
+  ['pp-credito','pp-prazo','pp-contempla','pp-pctEmbMax'].forEach(id => get(id).value = '');
   get('pp-redutor').value = '';
   recalc();
 });
 
 document.getElementById('btnLimparLance').addEventListener('click', () => {
-  ['pp-recProp','pp-embutido'].forEach(id => get(id).value = '');
+  ['pp-recProp','pp-embutido','pp-pctEmbutido','pp-pctRecProp'].forEach(id => get(id).value = '');
   recalc();
 });
 
@@ -730,8 +745,56 @@ document.getElementById('btnTaxasDefault').addEventListener('click', () => {
   get('pp-taxaAdm').value = '14,00 %';
   get('pp-fundo').value = '2,00 %';
   get('pp-seguro').value = '0,0380 %';
+  get('pp-pctEmbMax').value = '30,00 %';
   recalc();
 });
+
+// ═══════════════════════════════════════════════════════
+// SINCRONIZAÇÃO ESPELHADA % ↔ R$ (estilo Ololu)
+// Base: CRÉDITO. Digite % → R$ aparece. Digite R$ → % aparece.
+// ═══════════════════════════════════════════════════════
+let _ppSyncing = false;
+function ppSyncPctToRs(idPct, idRs) {
+  if (_ppSyncing) return;
+  const credito = unmaskMoney(get('pp-credito').value);
+  const pct = unmaskPct(get(idPct).value) / 100;
+  if (!(credito > 0) || !(pct >= 0)) return;
+  _ppSyncing = true;
+  const v = credito * pct;
+  get(idRs).value = v > 0 ? maskMoney(String(Math.round(v * 100))) : '';
+  _ppSyncing = false;
+  recalc();
+}
+function ppSyncRsToPct(idRs, idPct) {
+  if (_ppSyncing) return;
+  const credito = unmaskMoney(get('pp-credito').value);
+  const v = unmaskMoney(get(idRs).value);
+  if (!(credito > 0)) return;
+  _ppSyncing = true;
+  if (v > 0) {
+    get(idPct).value = ((v / credito) * 100).toFixed(2).replace('.', ',') + ' %';
+  } else {
+    get(idPct).value = '';
+  }
+  _ppSyncing = false;
+  recalc();
+}
+get('pp-pctEmbutido').addEventListener('blur', () => ppSyncPctToRs('pp-pctEmbutido', 'pp-embutido'));
+get('pp-embutido').addEventListener('blur', () => ppSyncRsToPct('pp-embutido', 'pp-pctEmbutido'));
+get('pp-pctRecProp').addEventListener('blur', () => ppSyncPctToRs('pp-pctRecProp', 'pp-recProp'));
+get('pp-recProp').addEventListener('blur', () => ppSyncRsToPct('pp-recProp', 'pp-pctRecProp'));
+
+// Toggle Jurídica: desabilita o campo de seguro quando marcado
+(function() {
+  const cb = get('pp-isPJ');
+  const seg = get('pp-seguro');
+  if (!cb || !seg) return;
+  cb.addEventListener('change', () => {
+    if (cb.checked) { seg.value = ''; seg.disabled = true; seg.style.opacity = '0.5'; }
+    else { seg.disabled = false; seg.style.opacity = ''; }
+    recalc();
+  });
+})();
 
 document.getElementById('btnLimparTudo').addEventListener('click', limparTudo);
 
@@ -785,7 +848,9 @@ function _montarPdfComercialPortoPesados() {
   const _t = (id) => { const el = document.getElementById(id); return (el?.textContent || '').trim(); };
   const _selTxt = (id) => { const el = document.getElementById(id); return (el?.selectedOptions?.[0]?.textContent || '').trim(); };
 
-  const tipoTxt = _selTxt('pp-tipo') || 'PF';
+  // Tipo: checkbox PJ tem prioridade. Caso contrário PF (com ou sem seguro)
+  const _isPJ_v = !!(document.getElementById('pp-isPJ') && document.getElementById('pp-isPJ').checked);
+  const tipoTxt = _isPJ_v ? 'Jurídica' : 'Física';
   const isPF = (tipoTxt === 'Física' || tipoTxt.includes('PF'));
   const parcelaAntes = isPF ? _t('pp-parcelaReduzPF') : _t('pp-parcelaReduzPJ');
   const redutorTxt = _selTxt('pp-redutor') || '';

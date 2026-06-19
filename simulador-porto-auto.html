@@ -240,17 +240,12 @@
             <label>Fundo Reserva</label>
             <input type="text" id="pa-fundo" data-mask="pct2" placeholder="0,00 %">
           </div>
-          <div class="field">
-            <label>Seguro (PF)</label>
+          <div class="field" style="position:relative;">
+            <label>Seguro (PF) <small style="color:#8a92a3">opcional</small></label>
             <input type="text" id="pa-seguro" data-mask="pct4" placeholder="0,0000 %">
-          </div>
-          <div class="field">
-            <label>Tipo</label>
-            <select id="pa-tipo">
-              <option value="" selected>Selecione…</option>
-              <option value="PF">Física</option>
-              <option value="PJ">Jurídica</option>
-            </select>
+            <label style="display:inline-flex; align-items:center; gap:5px; margin-top:4px; font-size:11.5px; color:#475569; cursor:pointer;">
+              <input type="checkbox" id="pa-isPJ" style="margin:0;"> Jurídica (sem seguro)
+            </label>
           </div>
           <div class="field">
             <label>Valor do crédito</label>
@@ -263,6 +258,10 @@
           <div class="field">
             <label>Contempla mês</label>
             <input type="text" id="pa-contempla" placeholder="0" data-mask="int">
+          </div>
+          <div class="field" title="% máximo de embutido permitido pelo grupo (regra Porto: 30%)">
+            <label>% Embutido máx do grupo</label>
+            <input type="text" id="pa-pctEmbMax" data-mask="pct2" placeholder="30,00 %">
           </div>
           <div class="field">
             <label>Redutor grupo</label>
@@ -309,23 +308,23 @@
 
         <div class="lance-bloco">
           <div class="grid grid-2">
-            <div class="field">
+            <div class="field" title="% sobre crédito (digite % ou R$, o outro preenche)">
               <label>% Lance Embutido</label>
               <input type="text" id="pa-pctEmbutido" data-mask="pct2" placeholder="0,00 %">
               <span class="field-suffix">%</span>
             </div>
             <div class="field">
-              <label>Valor Embutido</label>
+              <label>Valor Embutido (R$)</label>
               <input type="text" id="pa-embutido" placeholder="R$ 0,00" data-mask="money">
               <div class="lance-max-hint" id="pa-embutidoMaxHint">Máx. R$ 0,00</div>
             </div>
-            <div class="field">
+            <div class="field" title="% sobre crédito (digite % ou R$, o outro preenche)">
               <label>% Lance a Pagar</label>
               <input type="text" id="pa-pctLanceFixo" data-mask="pct2" placeholder="0,00 %">
               <span class="field-suffix">%</span>
             </div>
             <div class="field">
-              <label>Recurso próprio</label>
+              <label>Recurso próprio (R$)</label>
               <input type="text" id="pa-recProp" placeholder="R$ 0,00" data-mask="money">
             </div>
           </div>
@@ -513,19 +512,25 @@ function setOut(id, value) {
 // LEITURA DE INPUTS
 // ═══════════════════════════════════════════════════════
 function readInputs() {
+  const isPJ = !!(get('pa-isPJ') && get('pa-isPJ').checked);
+  // Se PJ marcado → seguro zerado. Caso contrário, lê o que o user digitou (pode ser 0 = PF sem seguro)
+  const seguro = isPJ ? 0 : (unmaskPct(get('pa-seguro').value) / 100);
   return {
     credito: unmaskMoney(get('pa-credito').value),
-    tipo: get('pa-tipo').value,
+    tipo: isPJ ? 'PJ' : 'PF',
     prazo: parseInt(get('pa-prazo').value || '0', 10),
     redutor: get('pa-redutor').value,
     contempla: parseInt(get('pa-contempla').value || '0', 10),
     recProp: unmaskMoney(get('pa-recProp').value),
     embutido: unmaskMoney(get('pa-embutido').value),
+    // % do lance — atual digitado pelo user
     pctEmbutido: unmaskPct(get('pa-pctEmbutido').value) / 100,
     pctLanceFixo: unmaskPct(get('pa-pctLanceFixo').value) / 100,
+    // % Embutido máx do grupo (em Dados da Proposta). Default 30% se vazio.
+    pctEmbMax: (unmaskPct(get('pa-pctEmbMax').value) / 100) || 0.30,
     taxaAdm: unmaskPct(get('pa-taxaAdm').value) / 100,
     fundo: unmaskPct(get('pa-fundo').value) / 100,
-    seguro: unmaskPct(get('pa-seguro').value) / 100,
+    seguro,
   };
 }
 
@@ -544,7 +549,8 @@ function calc(i) {
   r.categoria    = i.credito * (1 + i.taxaAdm + i.fundo);                                   // Q63
   r.saldoDevedor = r.categoria;                                                             // mesmo
   r.valorSeguro  = r.categoria * seguroPF;                                                  // Q64
-  r.maxEmbutido  = i.credito * i.pctEmbutido;                                               // K75 (configurável)
+  // Embutido máximo do grupo (configurável em "Dados da Proposta") — default 30% × crédito
+  r.maxEmbutido  = i.credito * i.pctEmbMax;
 
   // PARCELAS PRÉ-CONTEMPLAÇÃO
   r.parcelaPJ = (i.prazo > 0) ? r.categoria / i.prazo : NaN;                                // Q66
@@ -736,6 +742,11 @@ function aplicaEstrategia(strat, pctLivre = null) {
   if (recProp < 0) recProp = 0;
   get('pa-recProp').value = recProp > 0 ? maskMoney(String(Math.round(recProp * 100))) : '';
   get('pa-embutido').value = embutido > 0 ? maskMoney(String(Math.round(embutido * 100))) : '';
+  // Preenche também os % correspondentes (espelhamento sobre crédito)
+  if (i.credito > 0) {
+    get('pa-pctEmbutido').value = embutido > 0 ? ((embutido / i.credito) * 100).toFixed(2).replace('.', ',') + ' %' : '';
+    get('pa-pctLanceFixo').value = recProp > 0 ? ((recProp / i.credito) * 100).toFixed(2).replace('.', ',') + ' %' : '';
+  }
   recalc();
 }
 
@@ -777,8 +788,7 @@ function fecharModalLance() {
 // LIMPAR
 // ═══════════════════════════════════════════════════════
 function limparTudo() {
-  ['pa-credito','pa-prazo','pa-contempla','pa-recProp','pa-embutido','pa-pctEmbutido','pa-pctLanceFixo','pa-taxaAdm','pa-fundo','pa-seguro'].forEach(id => { const el = get(id); if (el) el.value = ''; });
-  get('pa-tipo').value = '';
+  ['pa-credito','pa-prazo','pa-contempla','pa-recProp','pa-embutido','pa-pctEmbutido','pa-pctLanceFixo','pa-pctEmbMax','pa-taxaAdm','pa-fundo','pa-seguro'].forEach(id => { const el = get(id); if (el) el.value = ''; });
   get('pa-redutor').value = '';
   const obsEl = get('pa-observacoes'); if (obsEl) obsEl.value = '';
   recalc();
@@ -789,14 +799,13 @@ document.getElementById('btnLimparObs').addEventListener('click', () => {
 });
 
 document.getElementById('btnLimparProposta').addEventListener('click', () => {
-  ['pa-credito','pa-prazo','pa-contempla'].forEach(id => get(id).value = '');
-  get('pa-tipo').value = '';
+  ['pa-credito','pa-prazo','pa-contempla','pa-pctEmbMax'].forEach(id => get(id).value = '');
   get('pa-redutor').value = '';
   recalc();
 });
 
 document.getElementById('btnLimparLance').addEventListener('click', () => {
-  ['pa-recProp','pa-embutido'].forEach(id => get(id).value = '');
+  ['pa-recProp','pa-embutido','pa-pctEmbutido','pa-pctLanceFixo'].forEach(id => get(id).value = '');
   recalc();
 });
 
@@ -804,8 +813,65 @@ document.getElementById('btnTaxasDefault').addEventListener('click', () => {
   get('pa-taxaAdm').value = '18,00 %';
   get('pa-fundo').value = '2,00 %';
   get('pa-seguro').value = '0,0380 %';
+  get('pa-pctEmbMax').value = '30,00 %';
   recalc();
 });
+
+// ═══════════════════════════════════════════════════════
+// SINCRONIZAÇÃO ESPELHADA % ↔ R$ (estilo Ololu)
+// Base: CRÉDITO. User digita % → R$ aparece. Digita R$ → % aparece.
+// ═══════════════════════════════════════════════════════
+let _paSyncing = false;
+function syncPctToRs(idPct, idRs) {
+  if (_paSyncing) return;
+  const credito = unmaskMoney(get('pa-credito').value);
+  const pct = unmaskPct(get(idPct).value) / 100;
+  if (!(credito > 0) || !(pct >= 0)) return;
+  _paSyncing = true;
+  const v = credito * pct;
+  get(idRs).value = v > 0 ? maskMoney(String(Math.round(v * 100))) : '';
+  _paSyncing = false;
+  recalc();
+}
+function syncRsToPct(idRs, idPct) {
+  if (_paSyncing) return;
+  const credito = unmaskMoney(get('pa-credito').value);
+  const v = unmaskMoney(get(idRs).value);
+  if (!(credito > 0)) return;
+  _paSyncing = true;
+  if (v > 0) {
+    const pct = (v / credito) * 100;
+    get(idPct).value = pct.toFixed(2).replace('.', ',') + ' %';
+  } else {
+    get(idPct).value = '';
+  }
+  _paSyncing = false;
+  recalc();
+}
+// Embutido: % ↔ R$
+get('pa-pctEmbutido').addEventListener('blur', () => syncPctToRs('pa-pctEmbutido', 'pa-embutido'));
+get('pa-embutido').addEventListener('blur', () => syncRsToPct('pa-embutido', 'pa-pctEmbutido'));
+// Lance a Pagar (Recurso próprio): % ↔ R$
+get('pa-pctLanceFixo').addEventListener('blur', () => syncPctToRs('pa-pctLanceFixo', 'pa-recProp'));
+get('pa-recProp').addEventListener('blur', () => syncRsToPct('pa-recProp', 'pa-pctLanceFixo'));
+
+// Toggle Jurídica: desabilita o campo de seguro quando marcado
+(function() {
+  const cb = get('pa-isPJ');
+  const seg = get('pa-seguro');
+  if (!cb || !seg) return;
+  cb.addEventListener('change', () => {
+    if (cb.checked) {
+      seg.value = '';
+      seg.disabled = true;
+      seg.style.opacity = '0.5';
+    } else {
+      seg.disabled = false;
+      seg.style.opacity = '';
+    }
+    recalc();
+  });
+})();
 
 document.getElementById('btnLimparTudo').addEventListener('click', limparTudo);
 
@@ -870,7 +936,9 @@ function _coletarBlocosPortoAuto() {
   const _selTxt = (id) => { const el = document.getElementById(id); return (el?.selectedOptions?.[0]?.textContent || '').trim() || '—'; };
   const _has = (s) => s && s !== '—' && s !== '?' && s !== '';
 
-  const tipoTxt = _selTxt('pa-tipo');
+  // Tipo: checkbox PJ tem prioridade. Caso contrário PF (com ou sem seguro)
+  const _isPJ_v = !!(document.getElementById('pa-isPJ') && document.getElementById('pa-isPJ').checked);
+  const tipoTxt = _isPJ_v ? 'Jurídica' : 'Física';
   const redutorTxt = _selTxt('pa-redutor');
   const prazoVal = _v('pa-prazo');
   const contemplaN = parseInt(_v('pa-contempla') || '0', 10) || 0;
@@ -990,8 +1058,10 @@ function _montarPdfComercialPortoAuto() {
   const _t = (id) => { const el = document.getElementById(id); return (el?.textContent || '').trim(); };
   const _selTxt = (id) => { const el = document.getElementById(id); return (el?.selectedOptions?.[0]?.textContent || '').trim(); };
 
-  const tipoTxt = _selTxt('pa-tipo') || 'PF';
-  const isPF = (tipoTxt === 'Física' || tipoTxt.includes('PF'));
+  // Tipo deduzido pelo seguro (sem dropdown PF/PJ explícito)
+  const _seguroPF = parseFloat((_v('pa-seguro') || '0').replace('%','').replace(',','.').trim()) || 0;
+  const isPF = _seguroPF > 0;
+  const tipoTxt = isPF ? 'Física' : 'Jurídica';
   const parcelaAntes = isPF ? _t('pa-parcelaReduzPF') : _t('pa-parcelaReduzPJ');
   const redutorTxt = _selTxt('pa-redutor') || '';
   const redutorPct = redutorTxt.replace(/[^\d%]/g, '');
