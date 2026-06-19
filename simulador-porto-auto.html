@@ -815,28 +815,40 @@ document.getElementById('btnTaxasDefault').addEventListener('click', () => {
 
 // ═══════════════════════════════════════════════════════
 // SINCRONIZAÇÃO ESPELHADA % ↔ R$ (estilo Ololu)
-// Base: CRÉDITO. User digita % → R$ aparece. Digita R$ → % aparece.
+// Bases:
+//  • Embutido     → CRÉDITO (limite 30%)
+//  • Lance a Pagar → CATEGORIA (= crédito × (1 + adm + fundo))
+// Assim "Lance Total %" no output bate com a soma efetiva sobre categoria.
 // ═══════════════════════════════════════════════════════
 let _paSyncing = false;
+function _paBase(idPct) {
+  // idPct = 'pa-pctEmbutido' → base CRÉDITO
+  // idPct = 'pa-pctLanceFixo' → base CATEGORIA
+  const credito = unmaskMoney(get('pa-credito').value);
+  if (idPct === 'pa-pctEmbutido' || idPct === 'pa-embutido') return credito;
+  const adm = unmaskPct(get('pa-taxaAdm').value) / 100;
+  const fundo = unmaskPct(get('pa-fundo').value) / 100;
+  return credito * (1 + adm + fundo);
+}
 function syncPctToRs(idPct, idRs) {
   if (_paSyncing) return;
-  const credito = unmaskMoney(get('pa-credito').value);
+  const base = _paBase(idPct);
   const pct = unmaskPct(get(idPct).value) / 100;
-  if (!(credito > 0) || !(pct >= 0)) return;
+  if (!(base > 0) || !(pct >= 0)) return;
   _paSyncing = true;
-  const v = credito * pct;
+  const v = base * pct;
   get(idRs).value = v > 0 ? maskMoney(String(Math.round(v * 100))) : '';
   _paSyncing = false;
   recalc();
 }
 function syncRsToPct(idRs, idPct) {
   if (_paSyncing) return;
-  const credito = unmaskMoney(get('pa-credito').value);
+  const base = _paBase(idPct);
   const v = unmaskMoney(get(idRs).value);
-  if (!(credito > 0)) return;
+  if (!(base > 0)) return;
   _paSyncing = true;
   if (v > 0) {
-    const pct = (v / credito) * 100;
+    const pct = (v / base) * 100;
     get(idPct).value = pct.toFixed(2).replace('.', ',') + ' %';
   } else {
     get(idPct).value = '';

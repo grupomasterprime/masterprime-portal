@@ -747,28 +747,37 @@ document.getElementById('btnTaxasDefault').addEventListener('click', () => {
 
 // ═══════════════════════════════════════════════════════
 // SINCRONIZAÇÃO ESPELHADA % ↔ R$ (estilo Ololu)
-// Base: CRÉDITO. Digite % → R$ aparece. Digite R$ → % aparece.
+// Bases:
+//  • Embutido       → CRÉDITO (limite 30%)
+//  • Lance a Pagar  → CATEGORIA (= crédito × (1 + adm + fundo))
 // ═══════════════════════════════════════════════════════
 let _ppSyncing = false;
+function _ppBase(id) {
+  const credito = unmaskMoney(get('pp-credito').value);
+  if (id === 'pp-pctEmbutido' || id === 'pp-embutido') return credito;
+  const adm = unmaskPct(get('pp-taxaAdm').value) / 100;
+  const fundo = unmaskPct(get('pp-fundo').value) / 100;
+  return credito * (1 + adm + fundo);
+}
 function ppSyncPctToRs(idPct, idRs) {
   if (_ppSyncing) return;
-  const credito = unmaskMoney(get('pp-credito').value);
+  const base = _ppBase(idPct);
   const pct = unmaskPct(get(idPct).value) / 100;
-  if (!(credito > 0) || !(pct >= 0)) return;
+  if (!(base > 0) || !(pct >= 0)) return;
   _ppSyncing = true;
-  const v = credito * pct;
+  const v = base * pct;
   get(idRs).value = v > 0 ? maskMoney(String(Math.round(v * 100))) : '';
   _ppSyncing = false;
   recalc();
 }
 function ppSyncRsToPct(idRs, idPct) {
   if (_ppSyncing) return;
-  const credito = unmaskMoney(get('pp-credito').value);
+  const base = _ppBase(idPct);
   const v = unmaskMoney(get(idRs).value);
-  if (!(credito > 0)) return;
+  if (!(base > 0)) return;
   _ppSyncing = true;
   if (v > 0) {
-    get(idPct).value = ((v / credito) * 100).toFixed(2).replace('.', ',') + ' %';
+    get(idPct).value = ((v / base) * 100).toFixed(2).replace('.', ',') + ' %';
   } else {
     get(idPct).value = '';
   }
