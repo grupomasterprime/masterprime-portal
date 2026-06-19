@@ -263,14 +263,15 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
 .maia-avatar::before { display: none; }
 .maia-avatar-sm { width: 26px; height: 26px; font-size: 12px; }
 .maia-avatar-md { width: 36px; height: 36px; font-size: 15px; }
-/* Avatar grande (boas-vindas): mostra a foto inteira com o anel colorido decorativo.
-   background-size 115% deixa o avatar levemente maior que a imagem, mostrando o anel
-   nas bordas. position 22% puxa o foco pra cima (esconde o badge "MAIA AGENTE VIRTUAL"
-   no rodapé da foto, que ficaria parcialmente visível em 50%). */
+/* Avatar grande (boas-vindas): mostra a foto inteira com o anel decorativo
+   alinhado com o crop circular. background-size 105% deixa a imagem levemente
+   maior pra esconder o badge "MAIA AGENTE VIRTUAL" no rodapé.
+   position center 5% mostra o topo da foto (onde está o anel) e desce a Maia
+   pra o centro visual, alinhando o anel da imagem com o crop circular. */
 .maia-avatar-lg {
   width: 110px; height: 110px; font-size: 26px; margin-bottom: 2px;
-  background-size: 115% auto;
-  background-position: center 22%;
+  background-size: 105% auto;
+  background-position: center 5%;
 }
 
 /* ─── Chat ─── */
@@ -498,8 +499,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
 <script src="kb-itau.js?v=20260603a"></script>
 <script src="kb-fgts.js?v=20260611a"></script>
 <script src="kb-comissoes.js?v=20260612d"></script>
-<script src="kb-chat-config.js?v=20260619b"></script>
-<script src="kb-chat.js?v=20260619b"></script>
+<script src="kb-chat-config.js?v=20260619c"></script>
+<script src="kb-chat.js?v=20260619c"></script>
 <script>
 (function () {
   var ADM = window.KB_ADMIN || {};
