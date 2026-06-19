@@ -775,10 +775,26 @@ function ppSyncRsToPct(idRs, idPct) {
   _ppSyncing = false;
   recalc();
 }
-get('pp-pctEmbutido').addEventListener('blur', () => ppSyncPctToRs('pp-pctEmbutido', 'pp-embutido'));
-get('pp-embutido').addEventListener('blur', () => ppSyncRsToPct('pp-embutido', 'pp-pctEmbutido'));
+// Limita embutido ao pctEmbMax (Porto Pesados: 30% ou 40%)
+function ppClampEmbutido() {
+  const credito = unmaskMoney(get('pp-credito').value);
+  const pctMax = (unmaskPct(get('pp-pctEmbMax').value) / 100) || 0.30;
+  if (!(credito > 0)) return;
+  const maxRs = credito * pctMax;
+  const pct = unmaskPct(get('pp-pctEmbutido').value) / 100;
+  const v = unmaskMoney(get('pp-embutido').value);
+  if (pct > pctMax || v > maxRs) {
+    _ppSyncing = true;
+    get('pp-pctEmbutido').value = (pctMax * 100).toFixed(2).replace('.', ',') + ' %';
+    get('pp-embutido').value = maskMoney(String(Math.round(maxRs * 100)));
+    _ppSyncing = false;
+  }
+}
+get('pp-pctEmbutido').addEventListener('blur', () => { ppSyncPctToRs('pp-pctEmbutido', 'pp-embutido'); ppClampEmbutido(); recalc(); });
+get('pp-embutido').addEventListener('blur', () => { ppSyncRsToPct('pp-embutido', 'pp-pctEmbutido'); ppClampEmbutido(); recalc(); });
 get('pp-pctRecProp').addEventListener('blur', () => ppSyncPctToRs('pp-pctRecProp', 'pp-recProp'));
 get('pp-recProp').addEventListener('blur', () => ppSyncRsToPct('pp-recProp', 'pp-pctRecProp'));
+['pp-credito','pp-pctEmbMax'].forEach(id => { const el = get(id); if (el) el.addEventListener('blur', () => { ppClampEmbutido(); recalc(); }); });
 
 
 document.getElementById('btnLimparTudo').addEventListener('click', limparTudo);
