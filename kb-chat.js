@@ -340,11 +340,13 @@
 
     askMaia(question, relevant, convHist)
       .then(function (answer) {
-        // Extrai os "📘 Fonte:" do texto se vierem inline, ou usa os cards relevantes top
+        // Extrai os "📘 Fonte:" do texto se vierem inline, ou NÃO mostra cards
+        // (antes mostrava 3 cards aleatórios quando a resposta não cita fonte —
+        //  isso confundia em perguntas triviais como "Qual seu nome?")
         var foundInlineSources = (answer.match(/📘\s*Fonte[:：]?\s*[^\n]+/g) || []);
         var srcUsed = foundInlineSources.length > 0
           ? foundInlineSources.map(function (s) { return s.replace(/^📘\s*Fonte[:：]?\s*/, '').trim(); })
-          : sources.slice(0, 3);
+          : [];
         // Remove a linha "Fonte:" duplicada do corpo
         var cleanAnswer = answer.replace(/(\n+)?📘\s*Fonte[:：]?\s*[^\n]+/g, '').trim();
         addMessage('assistant', cleanAnswer, srcUsed);
