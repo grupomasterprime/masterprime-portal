@@ -888,14 +888,33 @@ function paClampEmbutido() {
     _paSyncing = false;
   }
 }
-get('pa-pctEmbutido').addEventListener('blur', () => { syncPctToRs('pa-pctEmbutido', 'pa-embutido'); paClampEmbutido(); recalc(); });
-get('pa-embutido').addEventListener('blur', () => { syncRsToPct('pa-embutido', 'pa-pctEmbutido'); paClampEmbutido(); recalc(); });
+get('pa-pctEmbutido').addEventListener('blur', () => { syncPctToRs('pa-pctEmbutido', 'pa-embutido'); recalc(); });
+get('pa-embutido').addEventListener('blur', () => { syncRsToPct('pa-embutido', 'pa-pctEmbutido'); recalc(); });
 // Lance a Pagar (Recurso próprio): % ↔ R$
 get('pa-pctLanceFixo').addEventListener('blur', () => syncPctToRs('pa-pctLanceFixo', 'pa-recProp'));
 get('pa-recProp').addEventListener('blur', () => syncRsToPct('pa-recProp', 'pa-pctLanceFixo'));
-// Quando crédito ou pctEmbMax mudam, re-aplicar limite e atualizar hint
-['pa-credito','pa-pctEmbMax','pa-taxaAdm','pa-fundo'].forEach(id => {
-  const el = get(id); if (el) el.addEventListener('blur', () => { paClampEmbutido(); recalc(); });
+
+// Recalcula % do lance dinamicamente quando taxas/crédito/limite mudam
+function _paRefreshPcts() {
+  if (_paSyncing) return;
+  const cat = _paCategoria();
+  if (!(cat > 0)) return;
+  _paSyncing = true;
+  // Re-clamp embutido (caso o crédito ou pctEmbMax tenham reduzido o max)
+  let vEmb = unmaskMoney(get('pa-embutido').value);
+  const maxRs = _paMaxEmbutidoRs();
+  if (vEmb > maxRs) {
+    vEmb = maxRs;
+    get('pa-embutido').value = maskMoney(String(Math.round(vEmb * 100)));
+  }
+  get('pa-pctEmbutido').value = vEmb > 0 ? ((vEmb / cat) * 100).toFixed(2).replace('.', ',') + ' %' : '';
+  const vPag = unmaskMoney(get('pa-recProp').value);
+  get('pa-pctLanceFixo').value = vPag > 0 ? ((vPag / cat) * 100).toFixed(2).replace('.', ',') + ' %' : '';
+  _paSyncing = false;
+  recalc();
+}
+['pa-taxaAdm','pa-fundo','pa-credito','pa-pctEmbMax'].forEach(id => {
+  const el = get(id); if (el) el.addEventListener('blur', _paRefreshPcts);
 });
 
 

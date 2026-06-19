@@ -850,22 +850,33 @@ get('pi-recProp').addEventListener('blur', () => piSyncRsToPct('pi-recProp', 'pi
 // FGTS
 get('pi-pctFgts').addEventListener('blur', () => piSyncPctToRs('pi-pctFgts', 'pi-fgts'));
 get('pi-fgts').addEventListener('blur', () => piSyncRsToPct('pi-fgts', 'pi-pctFgts'));
-// Embutido (com limite 30% do crédito — regra Porto Imóvel)
-const PI_PCT_EMB_MAX = 0.30;
-function piClampEmbutido() {
-  const credito = unmaskMoney(get('pi-credito').value);
-  if (!(credito > 0)) return;
-  const maxRs = credito * PI_PCT_EMB_MAX;
-  const vEmb = unmaskMoney(get('pi-embutido').value);
+// Embutido (clamp já tratado dentro de piSyncPctToRs/piSyncRsToPct)
+get('pi-pctEmbutido').addEventListener('blur', () => { piSyncPctToRs('pi-pctEmbutido', 'pi-embutido'); recalc(); });
+get('pi-embutido').addEventListener('blur', () => { piSyncRsToPct('pi-embutido', 'pi-pctEmbutido'); recalc(); });
+
+// Recalcula % do lance dinamicamente quando taxas/crédito/adesão mudam
+function _piRefreshPcts() {
+  if (_piSyncing) return;
+  const cat = _piCategoria();
+  if (!(cat > 0)) return;
+  _piSyncing = true;
+  let vEmb = unmaskMoney(get('pi-embutido').value);
+  const maxRs = _piMaxEmbutidoRs();
   if (vEmb > maxRs) {
-    _piSyncing = true;
-    get('pi-embutido').value = maskMoney(String(Math.round(maxRs * 100)));
-    get('pi-pctEmbutido').value = (PI_PCT_EMB_MAX * 100).toFixed(2).replace('.', ',') + ' %';
-    _piSyncing = false;
+    vEmb = maxRs;
+    get('pi-embutido').value = maskMoney(String(Math.round(vEmb * 100)));
   }
+  get('pi-pctEmbutido').value = vEmb > 0 ? ((vEmb / cat) * 100).toFixed(2).replace('.', ',') + ' %' : '';
+  const vPag = unmaskMoney(get('pi-recProp').value);
+  get('pi-pctRecProp').value = vPag > 0 ? ((vPag / cat) * 100).toFixed(2).replace('.', ',') + ' %' : '';
+  const vFgts = unmaskMoney(get('pi-fgts').value);
+  get('pi-pctFgts').value = vFgts > 0 ? ((vFgts / cat) * 100).toFixed(2).replace('.', ',') + ' %' : '';
+  _piSyncing = false;
+  recalc();
 }
-get('pi-pctEmbutido').addEventListener('blur', () => { piSyncPctToRs('pi-pctEmbutido', 'pi-embutido'); piClampEmbutido(); recalc(); });
-get('pi-embutido').addEventListener('blur', () => { piSyncRsToPct('pi-embutido', 'pi-pctEmbutido'); piClampEmbutido(); recalc(); });
+['pi-adesao','pi-taxaAdm','pi-fundo','pi-credito'].forEach(id => {
+  const el = get(id); if (el) el.addEventListener('blur', _piRefreshPcts);
+});
 
 
 document.getElementById('btnTaxasDefault').addEventListener('click', () => {
