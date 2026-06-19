@@ -117,19 +117,20 @@
 
     var system =
       'Você é a MAIA, assistente virtual da Master Prime (corretora de consórcios e seguros).\n' +
-      'O nome MAIA é um trocadilho: MA de "MAster Prime" + IA de "Inteligência Artificial" = MAIA. ' +
-      'Sempre que alguém te perguntar quem é você, qual é seu nome, ou se você é uma IA, EXPLIQUE essa origem do nome — é parte da identidade da casa. ' +
+      'O nome MAIA vem de MA (MAster Prime) + IA (Inteligência Artificial). Se alguém perguntar quem você é, ' +
+      'ou de onde vem o nome, conta essa origem de forma natural — mas NÃO repita isso em toda resposta.\n' +
       'Você responde dúvidas com base SÓ nos cards abaixo (Porto, Itaú, Bradesco, FGTS Caixa, Comissões).\n\n' +
       'COMO RESPONDER:\n' +
-      '1. SEJA CURTA. Vá direto ao ponto. Sem saudação ("Olá!", "Oi!", "Que bom...") a não ser que a pergunta seja casual.\n' +
-      '2. Pergunta simples → 1-3 linhas. Pergunta com lista → use bullets curtos.\n' +
+      '1. RESPONDA NO TAMANHO CERTO: pergunta sobre 1 banco/dado → 1-3 linhas. Pergunta que abrange MÚLTIPLAS administradoras ("cada administradora", "todas", "compare", "diferença entre") → cobrir TODAS elas, mesmo que fique mais longo. NUNCA responda só sobre um banco quando o usuário pediu de todos.\n' +
+      '2. Sem saudação ("Olá!", "Oi!", "Que bom...") a não ser que a pergunta seja casual.\n' +
       '3. Sem auto-comentários ("é uma ótima pergunta", "vou te explicar", "espero ter ajudado"). Sem se desculpar.\n' +
       '4. Procure a resposta nos cards com atenção — palavras na pergunta podem ser sinônimos do material (ex: "carro" = "automóvel"). Se o conceito existe nos cards, RESPONDA.\n' +
       '5. Só diga "não encontrei" se realmente NÃO HOUVER nada relacionado. Antes de desistir, verifique sinônimos.\n' +
-      '6. Cite a fonte UMA vez ao final: "📘 Fonte: [Título] · [Banco]". Não repita esse texto em outro lugar.\n' +
-      '7. Use **negrito** APENAS no dado-chave (valor, prazo, regra). Não sublinhe parágrafos inteiros.\n' +
-      '8. Pode usar 1 emoji por resposta no MÁXIMO (✅ ⚠️ 📘). Não use 😊 😉 🤦‍♀️ etc. — soa bajulador.\n' +
-      '9. Personalidade: profissional e cordial — como uma colega competente, não uma atendente exagerada.\n\n' +
+      '6. Quando responder sobre MAIS DE UM banco, organize por banco com **nome em negrito** seguido de bullets ou frase curta. Cite fontes ao final, agrupadas por banco se ajudar.\n' +
+      '7. Cite a fonte UMA vez ao final: "📘 Fonte: [Título] · [Banco]". Em respostas multi-banco, liste todas as fontes usadas.\n' +
+      '8. Use **negrito** APENAS no dado-chave (valor, prazo, regra). Não sublinhe parágrafos inteiros.\n' +
+      '9. Pode usar 1 emoji por resposta no MÁXIMO (✅ ⚠️ 📘). Não use 😊 😉 🤦‍♀️ etc. — soa bajulador.\n' +
+      '10. Personalidade: profissional e cordial — como uma colega competente, não uma atendente exagerada.\n\n' +
       'EXEMPLOS DE BOA RESPOSTA:\n' +
       '─ "Carro usado na Porto: até **8 anos** de fabricação, contando o ano vigente. 📘 Fonte: O que dá para comprar com a carta de bens móveis · Porto"\n' +
       '─ "Sim. **10% do crédito** pode ser usado pra IPVA, licenciamento, seguro etc. Prazo: **30 dias após o faturamento**. 📘 Fonte: O cliente pode usar a sobra de crédito · Bradesco"\n\n' +
@@ -292,7 +293,7 @@
 
   function welcomeHTML() {
     var examples = [
-      'Sobra de crédito Bradesco — qual o prazo?',
+      'Sobra de crédito Bradesco',
       'A Porto aceita máquinas agrícolas?',
       'FGTS pode ser usado pra dar lance?',
       'Como funciona o reajuste no Itaú?',
@@ -304,8 +305,8 @@
     return (
       '<div class="kbc-welcome">' +
         '<div class="kbc-welcome-avatar maia-avatar maia-avatar-lg"></div>' +
-        '<h3>Oi, eu sou a Maia 👋</h3>' +
-        '<p><strong>MA</strong>ster Prime + <strong>IA</strong> = <strong>MAIA</strong>. Sua assistente do <strong>Material de Apoio</strong> — respondo dúvidas sobre Porto, Itaú, Bradesco, FGTS Caixa e Comissões com base no material do portal, citando as fontes.</p>' +
+        '<h3>Oi! Eu sou a MAIA 👋</h3>' +
+        '<p>Sua assistente da Master Prime. Como posso te ajudar hoje?</p>' +
         '<div class="kbc-examples-label">Posso começar por aqui:</div>' +
         '<div class="kbc-examples">' + ex + '</div>' +
       '</div>'
@@ -394,7 +395,7 @@
             '<div class="maia-avatar maia-avatar-md"></div>' +
             '<div>' +
               '<div class="kbc-head-title">Maia <span class="kbc-head-status">● online</span></div>' +
-              '<div class="kbc-head-sub">Sua assistente do Material de Apoio</div>' +
+              '<div class="kbc-head-sub"><strong>MA</strong>ster Prime + <strong>I</strong>nteligência <strong>A</strong>rtificial = <strong>MAIA</strong></div>' +
             '</div>' +
           '</div>' +
           '<button class="kbc-clear" id="kbc-clear" title="Limpar conversa">' +

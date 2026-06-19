@@ -225,10 +225,11 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
   position: relative;
 }
 .adm-pill[data-adm="ia"] .maia-pill-dot {
-  background:
-    var(--maia-photo, linear-gradient(135deg, #4DBCC8 0%, #7A9BC8 50%, #2D3F5E 100%));
-  background-size: cover;
-  background-position: center;
+  background-image: var(--maia-photo);
+  background-color: #2D3F5E;
+  background-size: 145% auto;
+  background-position: center 28%;
+  background-repeat: no-repeat;
   box-shadow: 0 0 0 2px rgba(77,188,200,.18);
 }
 .adm-pill[data-adm="ia"]::after {
@@ -240,42 +241,40 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
   box-shadow: 0 2px 5px rgba(45,63,94,.25);
 }
 
-/* ─── Avatar da Maia (com fallback "M" enquanto não tem foto) ─── */
-/* Quando você commitar maia.png na raiz do repositório, basta trocar a linha
-   `--maia-photo` abaixo de `none` para `url(maia.png)` e o avatar aparece. */
+/* ─── Avatar da Maia (foto da personagem, com fallback "M") ─── */
 :root {
-  --maia-photo: none;  /* trocar pra url(maia.png) quando subir a foto */
+  --maia-photo: url('maia.png');
   --maia-gradient: linear-gradient(135deg, #4DBCC8 0%, #7A9BC8 45%, #2D3F5E 100%);
 }
 .maia-avatar {
   border-radius: 50%;
-  background: var(--maia-photo, var(--maia-gradient)), var(--maia-gradient);
-  background-size: cover; background-position: center;
+  background-image: var(--maia-photo);
+  background-color: #2D3F5E;
+  background-size: 145% auto;  /* zoom no rosto, esconde o texto "MAIA" embaixo */
+  background-position: center 28%;
+  background-repeat: no-repeat;
   display: flex; align-items: center; justify-content: center;
   color: #fff; font-weight: 700;
   position: relative; flex-shrink: 0;
   box-shadow: 0 2px 6px rgba(45,63,94,.15);
+  overflow: hidden;
 }
-/* Letra M quando não tem foto (fallback). Some quando --maia-photo é definida */
-.maia-avatar::before {
-  content: 'M';
-  font-family: 'Inter', sans-serif;
-}
-:root.has-maia-photo .maia-avatar::before { display: none; }
-.maia-avatar-sm { width: 28px; height: 28px; font-size: 12px; }
-.maia-avatar-md { width: 40px; height: 40px; font-size: 16px; }
-.maia-avatar-lg { width: 80px; height: 80px; font-size: 32px; margin-bottom: 4px; }
+/* Letra M só aparece se a foto não carregar (não acontece se maia.png existe) */
+.maia-avatar::before { display: none; }
+.maia-avatar-sm { width: 26px; height: 26px; font-size: 12px; }
+.maia-avatar-md { width: 36px; height: 36px; font-size: 15px; }
+.maia-avatar-lg { width: 64px; height: 64px; font-size: 26px; margin-bottom: 2px; }
 
 /* ─── Chat ─── */
 .kbc-root {
   background: var(--card); border: 1px solid var(--border); border-radius: 14px;
   overflow: hidden; display: flex; flex-direction: column;
-  height: calc(100vh - 240px); min-height: 480px;
+  height: calc(100vh - 200px); min-height: 420px; max-height: 720px;
   box-shadow: 0 2px 12px rgba(45,63,94,.05);
 }
 .kbc-head {
   display: flex; justify-content: space-between; align-items: center;
-  padding: 14px 18px; border-bottom: 1px solid var(--border);
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
   background: linear-gradient(180deg, #FBFCFE 0%, #fff 100%);
 }
 .kbc-head-l { display: flex; align-items: center; gap: 12px; }
@@ -295,7 +294,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
 }
 .kbc-head-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
 .kbc-examples-label {
-  font-size: 11.5px; color: var(--text2); margin-top: 18px;
+  font-size: 10.5px; color: var(--text2); margin-top: 10px;
   text-transform: uppercase; letter-spacing: .8px; font-weight: 600;
 }
 .kbc-clear {
@@ -312,18 +311,18 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
 }
 
 .kbc-welcome {
-  text-align: center; padding: 30px 20px; color: var(--text2);
-  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  text-align: center; padding: 18px 20px 12px; color: var(--text2);
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
 }
 .kbc-welcome-icon {
-  font-size: 36px; width: 70px; height: 70px; border-radius: 50%;
+  font-size: 30px; width: 60px; height: 60px; border-radius: 50%;
   background: linear-gradient(135deg, rgba(77,188,200,.12), rgba(45,63,94,.08));
-  display: flex; align-items: center; justify-content: center; margin-bottom: 6px;
+  display: flex; align-items: center; justify-content: center; margin-bottom: 2px;
 }
-.kbc-welcome h3 { font-size: 16px; font-weight: 700; color: var(--mp-navy); }
-.kbc-welcome p { font-size: 13px; max-width: 460px; line-height: 1.55; margin-top: 4px; }
+.kbc-welcome h3 { font-size: 15px; font-weight: 700; color: var(--mp-navy); margin-top: 2px; }
+.kbc-welcome p { font-size: 12.5px; max-width: 420px; line-height: 1.45; margin-top: 2px; }
 .kbc-examples {
-  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 18px;
+  display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 10px;
   max-width: 600px;
 }
 .kbc-example {
@@ -491,8 +490,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
 <script src="kb-itau.js?v=20260603a"></script>
 <script src="kb-fgts.js?v=20260611a"></script>
 <script src="kb-comissoes.js?v=20260612d"></script>
-<script src="kb-chat-config.js?v=20260618e"></script>
-<script src="kb-chat.js?v=20260618e"></script>
+<script src="kb-chat-config.js?v=20260618g"></script>
+<script src="kb-chat.js?v=20260618g"></script>
 <script>
 (function () {
   var ADM = window.KB_ADMIN || {};
