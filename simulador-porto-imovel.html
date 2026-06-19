@@ -789,38 +789,55 @@ document.getElementById('btnLimparLance').addEventListener('click', () => {
 
 // ═══════════════════════════════════════════════════════
 // SINCRONIZAÇÃO ESPELHADA % ↔ R$ (estilo Ololu)
-// Bases:
-//  • Embutido        → CRÉDITO (limite 30%)
-//  • Lance a Pagar / FGTS → CATEGORIA (= crédito × (1 + adesão + adm + fundo))
+// AMBAS as % sobre CATEGORIA (= crédito × (1 + adesão + adm + fundo)).
+// Embutido tem limite físico = 30% × CRÉDITO. Quando o user digita
+// % maior, o R$ é clampado no max e o % é recalculado pra refletir.
 // ═══════════════════════════════════════════════════════
 let _piSyncing = false;
-function _piBase(id) {
+function _piCategoria() {
   const credito = unmaskMoney(get('pi-credito').value);
-  if (id === 'pi-pctEmbutido' || id === 'pi-embutido') return credito;
   const adesao = unmaskPct(get('pi-adesao').value) / 100;
   const adm = unmaskPct(get('pi-taxaAdm').value) / 100;
   const fundo = unmaskPct(get('pi-fundo').value) / 100;
   return credito * (1 + adesao + adm + fundo);
 }
+function _piMaxEmbutidoRs() {
+  const credito = unmaskMoney(get('pi-credito').value);
+  return credito * 0.30; // Porto Imóvel: 30% do crédito
+}
 function piSyncPctToRs(idPct, idRs) {
   if (_piSyncing) return;
-  const base = _piBase(idPct);
+  const cat = _piCategoria();
   const pct = unmaskPct(get(idPct).value) / 100;
-  if (!(base > 0) || !(pct >= 0)) return;
+  if (!(cat > 0) || !(pct >= 0)) return;
   _piSyncing = true;
-  const v = base * pct;
+  let v = cat * pct;
+  if (idPct === 'pi-pctEmbutido') {
+    const maxRs = _piMaxEmbutidoRs();
+    if (v > maxRs) {
+      v = maxRs;
+      get(idPct).value = ((v / cat) * 100).toFixed(2).replace('.', ',') + ' %';
+    }
+  }
   get(idRs).value = v > 0 ? maskMoney(String(Math.round(v * 100))) : '';
   _piSyncing = false;
   recalc();
 }
 function piSyncRsToPct(idRs, idPct) {
   if (_piSyncing) return;
-  const base = _piBase(idPct);
-  const v = unmaskMoney(get(idRs).value);
-  if (!(base > 0)) return;
+  const cat = _piCategoria();
+  let v = unmaskMoney(get(idRs).value);
+  if (!(cat > 0)) return;
   _piSyncing = true;
+  if (idRs === 'pi-embutido') {
+    const maxRs = _piMaxEmbutidoRs();
+    if (v > maxRs) {
+      v = maxRs;
+      get(idRs).value = maskMoney(String(Math.round(v * 100)));
+    }
+  }
   if (v > 0) {
-    get(idPct).value = ((v / base) * 100).toFixed(2).replace('.', ',') + ' %';
+    get(idPct).value = ((v / cat) * 100).toFixed(2).replace('.', ',') + ' %';
   } else {
     get(idPct).value = '';
   }

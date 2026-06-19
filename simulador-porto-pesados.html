@@ -747,37 +747,54 @@ document.getElementById('btnTaxasDefault').addEventListener('click', () => {
 
 // ═══════════════════════════════════════════════════════
 // SINCRONIZAÇÃO ESPELHADA % ↔ R$ (estilo Ololu)
-// Bases:
-//  • Embutido       → CRÉDITO (limite 30%)
-//  • Lance a Pagar  → CATEGORIA (= crédito × (1 + adm + fundo))
+// AMBAS as % sobre CATEGORIA (somam diretamente).
+// R$ Embutido tem limite físico = pctEmbMax × CRÉDITO.
 // ═══════════════════════════════════════════════════════
 let _ppSyncing = false;
-function _ppBase(id) {
+function _ppCategoria() {
   const credito = unmaskMoney(get('pp-credito').value);
-  if (id === 'pp-pctEmbutido' || id === 'pp-embutido') return credito;
   const adm = unmaskPct(get('pp-taxaAdm').value) / 100;
   const fundo = unmaskPct(get('pp-fundo').value) / 100;
   return credito * (1 + adm + fundo);
 }
+function _ppMaxEmbutidoRs() {
+  const credito = unmaskMoney(get('pp-credito').value);
+  const pctMax = (unmaskPct(get('pp-pctEmbMax').value) / 100) || 0.30;
+  return credito * pctMax;
+}
 function ppSyncPctToRs(idPct, idRs) {
   if (_ppSyncing) return;
-  const base = _ppBase(idPct);
+  const cat = _ppCategoria();
   const pct = unmaskPct(get(idPct).value) / 100;
-  if (!(base > 0) || !(pct >= 0)) return;
+  if (!(cat > 0) || !(pct >= 0)) return;
   _ppSyncing = true;
-  const v = base * pct;
+  let v = cat * pct;
+  if (idPct === 'pp-pctEmbutido') {
+    const maxRs = _ppMaxEmbutidoRs();
+    if (v > maxRs) {
+      v = maxRs;
+      get(idPct).value = ((v / cat) * 100).toFixed(2).replace('.', ',') + ' %';
+    }
+  }
   get(idRs).value = v > 0 ? maskMoney(String(Math.round(v * 100))) : '';
   _ppSyncing = false;
   recalc();
 }
 function ppSyncRsToPct(idRs, idPct) {
   if (_ppSyncing) return;
-  const base = _ppBase(idPct);
-  const v = unmaskMoney(get(idRs).value);
-  if (!(base > 0)) return;
+  const cat = _ppCategoria();
+  let v = unmaskMoney(get(idRs).value);
+  if (!(cat > 0)) return;
   _ppSyncing = true;
+  if (idRs === 'pp-embutido') {
+    const maxRs = _ppMaxEmbutidoRs();
+    if (v > maxRs) {
+      v = maxRs;
+      get(idRs).value = maskMoney(String(Math.round(v * 100)));
+    }
+  }
   if (v > 0) {
-    get(idPct).value = ((v / base) * 100).toFixed(2).replace('.', ',') + ' %';
+    get(idPct).value = ((v / cat) * 100).toFixed(2).replace('.', ',') + ' %';
   } else {
     get(idPct).value = '';
   }

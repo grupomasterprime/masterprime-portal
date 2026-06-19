@@ -815,40 +815,59 @@ document.getElementById('btnTaxasDefault').addEventListener('click', () => {
 
 // ═══════════════════════════════════════════════════════
 // SINCRONIZAÇÃO ESPELHADA % ↔ R$ (estilo Ololu)
-// Bases:
-//  • Embutido     → CRÉDITO (limite 30%)
-//  • Lance a Pagar → CATEGORIA (= crédito × (1 + adm + fundo))
-// Assim "Lance Total %" no output bate com a soma efetiva sobre categoria.
+// AMBAS as % são sobre CATEGORIA (= crédito × (1 + adm + fundo)).
+// Assim os % somam diretamente no Lance Total.
+// O R$ Embutido tem limite físico de 30% × CRÉDITO — quando o user
+// digita % que excederia esse limite, o R$ é clampado e o % recalculado.
 // ═══════════════════════════════════════════════════════
 let _paSyncing = false;
-function _paBase(idPct) {
-  // idPct = 'pa-pctEmbutido' → base CRÉDITO
-  // idPct = 'pa-pctLanceFixo' → base CATEGORIA
+function _paCategoria() {
   const credito = unmaskMoney(get('pa-credito').value);
-  if (idPct === 'pa-pctEmbutido' || idPct === 'pa-embutido') return credito;
   const adm = unmaskPct(get('pa-taxaAdm').value) / 100;
   const fundo = unmaskPct(get('pa-fundo').value) / 100;
   return credito * (1 + adm + fundo);
 }
+function _paMaxEmbutidoRs() {
+  const credito = unmaskMoney(get('pa-credito').value);
+  const pctMax = (unmaskPct(get('pa-pctEmbMax').value) / 100) || 0.30;
+  return credito * pctMax;
+}
 function syncPctToRs(idPct, idRs) {
   if (_paSyncing) return;
-  const base = _paBase(idPct);
+  const cat = _paCategoria();
   const pct = unmaskPct(get(idPct).value) / 100;
-  if (!(base > 0) || !(pct >= 0)) return;
+  if (!(cat > 0) || !(pct >= 0)) return;
   _paSyncing = true;
-  const v = base * pct;
+  let v = cat * pct;
+  // Embutido tem limite físico (30% × crédito)
+  if (idPct === 'pa-pctEmbutido') {
+    const maxRs = _paMaxEmbutidoRs();
+    if (v > maxRs) {
+      v = maxRs;
+      const pctReal = (v / cat) * 100;
+      get(idPct).value = pctReal.toFixed(2).replace('.', ',') + ' %';
+    }
+  }
   get(idRs).value = v > 0 ? maskMoney(String(Math.round(v * 100))) : '';
   _paSyncing = false;
   recalc();
 }
 function syncRsToPct(idRs, idPct) {
   if (_paSyncing) return;
-  const base = _paBase(idPct);
-  const v = unmaskMoney(get(idRs).value);
-  if (!(base > 0)) return;
+  const cat = _paCategoria();
+  let v = unmaskMoney(get(idRs).value);
+  if (!(cat > 0)) return;
   _paSyncing = true;
+  // Embutido tem limite físico — clampa R$ se exceder
+  if (idRs === 'pa-embutido') {
+    const maxRs = _paMaxEmbutidoRs();
+    if (v > maxRs) {
+      v = maxRs;
+      get(idRs).value = maskMoney(String(Math.round(v * 100)));
+    }
+  }
   if (v > 0) {
-    const pct = (v / base) * 100;
+    const pct = (v / cat) * 100;
     get(idPct).value = pct.toFixed(2).replace('.', ',') + ' %';
   } else {
     get(idPct).value = '';
