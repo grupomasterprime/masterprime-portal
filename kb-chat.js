@@ -172,10 +172,15 @@
 
   // ── Monta prompt pro Gemini ──
   function buildPrompt(question, relevantCards, conversationHistory) {
+    // Trunca conteúdo de cada card pra não estourar TPM do Groq (30k tokens/min)
+    // 15 cards × ~1500 chars = ~22k chars total (~5.5k tokens) — folga grande
+    var MAX_CARD_CONTENT = 1500;
     var contextBlocks = relevantCards.map(function (c, i) {
+      var conteudo = (c.conteudo || '').slice(0, MAX_CARD_CONTENT);
+      if ((c.conteudo || '').length > MAX_CARD_CONTENT) conteudo += '…';
       return '[CARD ' + (i+1) + ' · ' + c.admNome + ' · ' + c.categoria + ']\n' +
              'Título: ' + c.titulo + '\n' +
-             'Conteúdo: ' + c.conteudo;
+             'Conteúdo: ' + conteudo;
     }).join('\n\n');
 
     var historyBlock = '';
