@@ -789,28 +789,38 @@ document.getElementById('btnLimparLance').addEventListener('click', () => {
 
 // ═══════════════════════════════════════════════════════
 // SINCRONIZAÇÃO ESPELHADA % ↔ R$ (estilo Ololu)
-// Base: CRÉDITO. Digite % → R$ aparece. Digite R$ → % aparece.
+// Bases:
+//  • Embutido        → CRÉDITO (limite 30%)
+//  • Lance a Pagar / FGTS → CATEGORIA (= crédito × (1 + adesão + adm + fundo))
 // ═══════════════════════════════════════════════════════
 let _piSyncing = false;
+function _piBase(id) {
+  const credito = unmaskMoney(get('pi-credito').value);
+  if (id === 'pi-pctEmbutido' || id === 'pi-embutido') return credito;
+  const adesao = unmaskPct(get('pi-adesao').value) / 100;
+  const adm = unmaskPct(get('pi-taxaAdm').value) / 100;
+  const fundo = unmaskPct(get('pi-fundo').value) / 100;
+  return credito * (1 + adesao + adm + fundo);
+}
 function piSyncPctToRs(idPct, idRs) {
   if (_piSyncing) return;
-  const credito = unmaskMoney(get('pi-credito').value);
+  const base = _piBase(idPct);
   const pct = unmaskPct(get(idPct).value) / 100;
-  if (!(credito > 0) || !(pct >= 0)) return;
+  if (!(base > 0) || !(pct >= 0)) return;
   _piSyncing = true;
-  const v = credito * pct;
+  const v = base * pct;
   get(idRs).value = v > 0 ? maskMoney(String(Math.round(v * 100))) : '';
   _piSyncing = false;
   recalc();
 }
 function piSyncRsToPct(idRs, idPct) {
   if (_piSyncing) return;
-  const credito = unmaskMoney(get('pi-credito').value);
+  const base = _piBase(idPct);
   const v = unmaskMoney(get(idRs).value);
-  if (!(credito > 0)) return;
+  if (!(base > 0)) return;
   _piSyncing = true;
   if (v > 0) {
-    get(idPct).value = ((v / credito) * 100).toFixed(2).replace('.', ',') + ' %';
+    get(idPct).value = ((v / base) * 100).toFixed(2).replace('.', ',') + ' %';
   } else {
     get(idPct).value = '';
   }
