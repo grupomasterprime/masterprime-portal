@@ -89,14 +89,85 @@
       .replace(/\s+/g, ' ').trim();
   }
 
-  // ── Manda TODOS os cards pra Maia ────────────────────────────
-  // O contexto do Gemini 2.5 Flash é 1M tokens. Os ~400 cards do
-  // portal somam ~60k tokens — cabe folgado. Em vez de fazer busca
-  // local com palavras-chave (que falha em sinônimos como "carro"
-  // vs "automóvel"), confiamos na Maia pra ler tudo e interpretar.
+  // ── Busca local por relevância ───────────────────────────────
+  // Provider primário (Groq) tem TPM=30k. Mandar todos os ~400 cards
+  // (~28k tokens) bate o limite em UMA pergunta. Solução: scoring
+  // local + top N cards. Inclui sinônimos comuns pra não falhar em
+  // "carro" vs "automóvel", "imóvel" vs "casa", etc.
+  var SYNONYMS = {
+    'carro': ['auto', 'automovel', 'veiculo'],
+    'auto': ['carro', 'automovel', 'veiculo'],
+    'automovel': ['carro', 'auto', 'veiculo'],
+    'veiculo': ['carro', 'auto', 'automovel'],
+    'moto': ['motocicleta', 'motoneta'],
+    'caminhao': ['pesado', 'caminhonete'],
+    'pesado': ['caminhao', 'caminhonete'],
+    'imovel': ['casa', 'apartamento', 'terreno', 'apto'],
+    'casa': ['imovel', 'apartamento', 'residencia'],
+    'apartamento': ['imovel', 'apto', 'casa'],
+    'apto': ['apartamento', 'imovel'],
+    'comissao': ['comissionamento', 'pagamento', 'cronograma'],
+    'lance': ['oferta', 'embutido', 'fixo', 'livre'],
+    'fgts': ['fundo de garantia'],
+    'cancelamento': ['desistencia', 'cancelar', 'desistir'],
+    'transferencia': ['transferir', 'venda', 'cessao'],
+    'reajuste': ['inpc', 'correcao', 'atualizacao'],
+    'porto': ['portoseguro', 'porto seguro', 'portobank'],
+    'itau': ['itau consorcio'],
+    'bradesco': ['bradesco consorcios'],
+    'estorno': ['estornar', 'devolver', 'devolucao'],
+    'adesao': ['antecipada'],
+    'maquina': ['agricola', 'agro', 'pesada'],
+  };
+  var STOPWORDS = new Set(['a','o','as','os','um','uma','de','da','do','das','dos','em','no','na','nos','nas','para','por','que','e','é','ou','pra','com','sem','se','meu','minha','seu','sua','este','esta','isso','isto','aquilo','tem','ser','está','ja','já','muito','mais','menos','quanto','qual','quais','onde','como','quando','quem','porque','pq','vc','você','eu']);
+
+  function tokenize(text) {
+    var toks = norm(text).split(' ').filter(function(t) {
+      return t.length >= 2 && !STOPWORDS.has(t);
+    });
+    // Expande com sinônimos
+    var expanded = new Set(toks);
+    toks.forEach(function(t) {
+      if (SYNONYMS[t]) SYNONYMS[t].forEach(function(s) { expanded.add(norm(s)); });
+    });
+    return Array.from(expanded);
+  }
+
+  function scoreCard(card, queryTokens) {
+    var hayTitulo = norm(card.titulo);
+    var hayCat = norm(card.categoria);
+    var hayConteudo = norm(card.conteudo);
+    var hayTags = norm(card.tags || '');
+    var hayAdm = norm(card.admNome);
+    var score = 0;
+    queryTokens.forEach(function(tok) {
+      if (hayTitulo.indexOf(tok) !== -1) score += 10;
+      if (hayCat.indexOf(tok) !== -1) score += 4;
+      if (hayTags.indexOf(tok) !== -1) score += 6;
+      if (hayAdm.indexOf(tok) !== -1) score += 3;
+      // Conteúdo: conta ocorrências (até 3 pra evitar explosão)
+      var idx = 0, hits = 0;
+      while ((idx = hayConteudo.indexOf(tok, idx)) !== -1 && hits < 3) {
+        hits++; idx += tok.length;
+      }
+      score += hits * 2;
+    });
+    return score;
+  }
+
   function findRelevantCards(question, max) {
-    // Mantém a assinatura por compatibilidade, mas ignora "max"
-    return gatherAllCards();
+    var all = gatherAllCards();
+    var qToks = tokenize(question);
+    if (!qToks.length) return all.slice(0, max || 15);
+    var scored = all.map(function(c) {
+      return { card: c, score: scoreCard(c, qToks) };
+    });
+    // Mantém só os que tiveram score > 0
+    var relevant = scored.filter(function(s) { return s.score > 0; });
+    relevant.sort(function(a, b) { return b.score - a.score; });
+    var top = relevant.slice(0, max || 15).map(function(s) { return s.card; });
+    // Se nenhum match, devolve uma amostra (15 primeiros) — Maia decide
+    return top.length > 0 ? top : all.slice(0, max || 15);
   }
 
   // ── Monta prompt pro Gemini ──
