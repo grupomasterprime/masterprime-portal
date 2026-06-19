@@ -215,8 +215,8 @@
             <label>Contempla mês</label>
             <input type="text" id="pp-contempla" placeholder="0" data-mask="int">
           </div>
-          <div class="field" title="% máximo de embutido permitido pelo grupo (regra Porto Pesados: 30% ou 40%)">
-            <label>% Embutido máx do grupo</label>
+          <div class="field" title="% máximo de embutido permitido pelo grupo (Porto Pesados: 30% ou 40%)">
+            <label>% Embutido máx</label>
             <input type="text" id="pp-pctEmbMax" data-mask="pct2" placeholder="30,00 %">
           </div>
           <div class="field">
@@ -234,11 +234,6 @@
               <option value="campanha">Campanha Parcela Original</option>
             </select>
           </div>
-        </div>
-
-        <div style="margin-top:8px; padding:6px 10px; background:#f6f8fb; border-radius:6px; display:inline-flex; align-items:center; gap:6px; font-size:12px; color:#475569;">
-          <input type="checkbox" id="pp-isPJ" style="margin:0; cursor:pointer;">
-          <label for="pp-isPJ" style="margin:0; padding:0; font-size:12px; text-transform:none; letter-spacing:0; font-weight:500; color:#475569; cursor:pointer;">Pessoa Jurídica (sem seguro)</label>
         </div>
 
         <div class="redmode-toggle" style="margin-top: 10px;">
@@ -469,12 +464,11 @@ function setOut(id, value) {
 }
 
 function readInputs() {
-  const isPJ = !!(get('pp-isPJ') && get('pp-isPJ').checked);
-  // PJ marcado → seguro 0. Caso contrário (PF) lê o campo (pode ser 0 = sem seguro)
-  const seguro = isPJ ? 0 : (unmaskPct(get('pp-seguro').value) / 100);
+  // Sem dropdown PF/PJ — seguro decide
+  const seguro = unmaskPct(get('pp-seguro').value) / 100;
   return {
     credito: unmaskMoney(get('pp-credito').value),
-    tipo: isPJ ? 'PJ' : 'PF',
+    tipo: seguro > 0 ? 'PF' : 'PJ',
     prazo: parseInt(get('pp-prazo').value || '0', 10),
     redutor: get('pp-redutor').value,
     contempla: parseInt(get('pp-contempla').value || '0', 10),
@@ -733,7 +727,7 @@ document.getElementById('btnLimparObs').addEventListener('click', () => {
 });
 
 document.getElementById('btnLimparProposta').addEventListener('click', () => {
-  ['pp-credito','pp-prazo','pp-contempla','pp-pctEmbMax'].forEach(id => get(id).value = '');
+  ['pp-taxaAdm','pp-fundo','pp-seguro','pp-credito','pp-prazo','pp-contempla','pp-pctEmbMax'].forEach(id => get(id).value = '');
   get('pp-redutor').value = '';
   recalc();
 });
@@ -786,17 +780,6 @@ get('pp-embutido').addEventListener('blur', () => ppSyncRsToPct('pp-embutido', '
 get('pp-pctRecProp').addEventListener('blur', () => ppSyncPctToRs('pp-pctRecProp', 'pp-recProp'));
 get('pp-recProp').addEventListener('blur', () => ppSyncRsToPct('pp-recProp', 'pp-pctRecProp'));
 
-// Toggle Jurídica: desabilita o campo de seguro quando marcado
-(function() {
-  const cb = get('pp-isPJ');
-  const seg = get('pp-seguro');
-  if (!cb || !seg) return;
-  cb.addEventListener('change', () => {
-    if (cb.checked) { seg.value = ''; seg.disabled = true; seg.style.opacity = '0.5'; }
-    else { seg.disabled = false; seg.style.opacity = ''; }
-    recalc();
-  });
-})();
 
 document.getElementById('btnLimparTudo').addEventListener('click', limparTudo);
 
@@ -850,9 +833,9 @@ function _montarPdfComercialPortoPesados() {
   const _t = (id) => { const el = document.getElementById(id); return (el?.textContent || '').trim(); };
   const _selTxt = (id) => { const el = document.getElementById(id); return (el?.selectedOptions?.[0]?.textContent || '').trim(); };
 
-  // Tipo: checkbox PJ tem prioridade. Caso contrário PF (com ou sem seguro)
-  const _isPJ_v = !!(document.getElementById('pp-isPJ') && document.getElementById('pp-isPJ').checked);
-  const tipoTxt = _isPJ_v ? 'Jurídica' : 'Física';
+  // Tipo deduzido pelo seguro
+  const _seguroPP = parseFloat((_v('pp-seguro') || '0').replace('%','').replace(',','.').trim()) || 0;
+  const tipoTxt = _seguroPP > 0 ? 'Física' : 'Jurídica';
   const isPF = (tipoTxt === 'Física' || tipoTxt.includes('PF'));
   const parcelaAntes = isPF ? _t('pp-parcelaReduzPF') : _t('pp-parcelaReduzPJ');
   const redutorTxt = _selTxt('pp-redutor') || '';

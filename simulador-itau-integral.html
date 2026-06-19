@@ -549,11 +549,32 @@ function _iiRsToPct(idRs, idPct, tag) {
   }
   recalc();
 }
+// Seta o flag _iiLastEdit JÁ NO FOCUS — antes da máscara global chamar recalc()
+get('ii-lanceEmbutidoView').addEventListener('focus', () => { window._iiLastEdit = 'rs-emb'; });
+get('ii-lanceAPagarView').addEventListener('focus', () => { window._iiLastEdit = 'rs-apg'; });
+get('ii-pctEmbutido').addEventListener('focus', () => { window._iiLastEdit = 'pct-emb'; });
+get('ii-pctAPagar').addEventListener('focus', () => { window._iiLastEdit = 'pct-apg'; });
+// Sync R$ → % no input
 get('ii-lanceEmbutidoView').addEventListener('input', () => _iiRsToPct('ii-lanceEmbutidoView', 'ii-pctEmbutido', 'rs-emb'));
 get('ii-lanceAPagarView').addEventListener('input', () => _iiRsToPct('ii-lanceAPagarView', 'ii-pctAPagar', 'rs-apg'));
-// Quando o user volta a editar o %, volta a regra antiga (% → R$)
-get('ii-pctEmbutido').addEventListener('input', () => { window._iiLastEdit = 'pct-emb'; });
-get('ii-pctAPagar').addEventListener('input', () => { window._iiLastEdit = 'pct-apg'; });
+
+// Limita embutido a 30% do crédito (regra Itaú)
+const II_PCT_EMB_MAX = 0.30;
+function iiClampEmbutido() {
+  const credito = unmaskMoney(get('ii-credito').value);
+  if (!(credito > 0)) return;
+  const pct = unmaskPct(get('ii-pctEmbutido').value) / 100;
+  const v = unmaskMoney(get('ii-lanceEmbutidoView').value);
+  const maxRs = credito * II_PCT_EMB_MAX;
+  if (pct > II_PCT_EMB_MAX || v > maxRs) {
+    get('ii-pctEmbutido').value = (II_PCT_EMB_MAX * 100).toFixed(2).replace('.', ',') + ' %';
+    get('ii-lanceEmbutidoView').value = maskMoney(String(Math.round(maxRs * 100)));
+    window._iiLastEdit = 'pct-emb';
+    recalc();
+  }
+}
+get('ii-pctEmbutido').addEventListener('blur', iiClampEmbutido);
+get('ii-lanceEmbutidoView').addEventListener('blur', iiClampEmbutido);
 
 document.getElementById('btnPresetFixo40Proprio').addEventListener('click', () => {
   get('ii-pctEmbutido').value = '0,00 %';

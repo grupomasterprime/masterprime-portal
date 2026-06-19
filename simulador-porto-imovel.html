@@ -246,11 +246,6 @@
           </div>
         </div>
 
-        <div style="margin-top:8px; padding:6px 10px; background:#f6f8fb; border-radius:6px; display:inline-flex; align-items:center; gap:6px; font-size:12px; color:#475569;">
-          <input type="checkbox" id="pi-isPJ" style="margin:0; cursor:pointer;">
-          <label for="pi-isPJ" style="margin:0; padding:0; font-size:12px; text-transform:none; letter-spacing:0; font-weight:500; color:#475569; cursor:pointer;">Pessoa Jurídica (sem seguro)</label>
-        </div>
-
         <div class="redmode-toggle" style="margin-top: 10px;">
           <span class="lbl">Reduzir após contemplação:</span>
           <div class="group">
@@ -502,12 +497,11 @@ function setOut(id, value) {
 // LEITURA DE INPUTS
 // ═══════════════════════════════════════════════════════
 function readInputs() {
-  const isPJ = !!(get('pi-isPJ') && get('pi-isPJ').checked);
-  // PJ marcado → seguro 0. Caso contrário (PF) lê o campo (pode ser 0 = sem seguro)
-  const seguro = isPJ ? 0 : (unmaskPct(get('pi-seguro').value) / 100);
+  // Sem dropdown PF/PJ — seguro decide
+  const seguro = unmaskPct(get('pi-seguro').value) / 100;
   return {
     credito: unmaskMoney(get('pi-credito').value),
-    tipo: isPJ ? 'PJ' : 'PF',
+    tipo: seguro > 0 ? 'PF' : 'PJ',
     prazo: parseInt(get('pi-prazo').value || '0', 10),
     redutor: get('pi-redutor').value,
     qtdAdesao: parseInt(get('pi-qtdAdesao').value || '0', 10),
@@ -783,7 +777,7 @@ document.getElementById('btnLimparObs').addEventListener('click', () => {
 });
 
 document.getElementById('btnLimparProposta').addEventListener('click', () => {
-  ['pi-credito','pi-prazo','pi-qtdAdesao','pi-contempla'].forEach(id => get(id).value = '');
+  ['pi-adesao','pi-taxaAdm','pi-fundo','pi-seguro','pi-credito','pi-prazo','pi-qtdAdesao','pi-contempla'].forEach(id => get(id).value = '');
   get('pi-redutor').value = '';
   recalc();
 });
@@ -829,21 +823,23 @@ get('pi-recProp').addEventListener('blur', () => piSyncRsToPct('pi-recProp', 'pi
 // FGTS
 get('pi-pctFgts').addEventListener('blur', () => piSyncPctToRs('pi-pctFgts', 'pi-fgts'));
 get('pi-fgts').addEventListener('blur', () => piSyncRsToPct('pi-fgts', 'pi-pctFgts'));
-// Embutido
-get('pi-pctEmbutido').addEventListener('blur', () => piSyncPctToRs('pi-pctEmbutido', 'pi-embutido'));
-get('pi-embutido').addEventListener('blur', () => piSyncRsToPct('pi-embutido', 'pi-pctEmbutido'));
+// Embutido (com limite 30% do crédito — regra Porto Imóvel)
+const PI_PCT_EMB_MAX = 0.30;
+function piClampEmbutido() {
+  const credito = unmaskMoney(get('pi-credito').value);
+  if (!(credito > 0)) return;
+  const maxRs = credito * PI_PCT_EMB_MAX;
+  const vEmb = unmaskMoney(get('pi-embutido').value);
+  if (vEmb > maxRs) {
+    _piSyncing = true;
+    get('pi-embutido').value = maskMoney(String(Math.round(maxRs * 100)));
+    get('pi-pctEmbutido').value = (PI_PCT_EMB_MAX * 100).toFixed(2).replace('.', ',') + ' %';
+    _piSyncing = false;
+  }
+}
+get('pi-pctEmbutido').addEventListener('blur', () => { piSyncPctToRs('pi-pctEmbutido', 'pi-embutido'); piClampEmbutido(); recalc(); });
+get('pi-embutido').addEventListener('blur', () => { piSyncRsToPct('pi-embutido', 'pi-pctEmbutido'); piClampEmbutido(); recalc(); });
 
-// Toggle Jurídica: desabilita o campo de seguro quando marcado
-(function() {
-  const cb = get('pi-isPJ');
-  const seg = get('pi-seguro');
-  if (!cb || !seg) return;
-  cb.addEventListener('change', () => {
-    if (cb.checked) { seg.value = ''; seg.disabled = true; seg.style.opacity = '0.5'; }
-    else { seg.disabled = false; seg.style.opacity = ''; }
-    recalc();
-  });
-})();
 
 document.getElementById('btnTaxasDefault').addEventListener('click', () => {
   get('pi-adesao').value = '2,00 %';
@@ -912,9 +908,9 @@ function _montarPdfComercialPortoImovel() {
   const _t = (id) => { const el = document.getElementById(id); return (el?.textContent || '').trim(); };
   const _selTxt = (id) => { const el = document.getElementById(id); return (el?.selectedOptions?.[0]?.textContent || '').trim(); };
 
-  // Tipo: checkbox PJ tem prioridade. Caso contrário PF (com ou sem seguro)
-  const _isPJ_v = !!(document.getElementById('pi-isPJ') && document.getElementById('pi-isPJ').checked);
-  const tipoTxt = _isPJ_v ? 'Jurídica' : 'Física';
+  // Tipo deduzido pelo seguro
+  const _seguroPI = parseFloat((_v('pi-seguro') || '0').replace('%','').replace(',','.').trim()) || 0;
+  const tipoTxt = _seguroPI > 0 ? 'Física' : 'Jurídica';
   const isPF = (tipoTxt === 'Física' || tipoTxt.includes('PF'));
   const parcelaAntes = isPF ? _t('pi-parcelaReduzPF') : _t('pi-parcelaReduzPJ');
   const redutorTxt = _selTxt('pi-redutor') || 'Sem redutor';

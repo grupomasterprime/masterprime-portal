@@ -257,7 +257,7 @@
             <input type="text" id="pa-contempla" placeholder="0" data-mask="int">
           </div>
           <div class="field" title="% máximo de embutido permitido pelo grupo (regra Porto: 30%)">
-            <label>% Embutido máx do grupo</label>
+            <label>% Embutido máx</label>
             <input type="text" id="pa-pctEmbMax" data-mask="pct2" placeholder="30,00 %">
           </div>
           <div class="field">
@@ -275,11 +275,6 @@
               <option value="campanha">Campanha Parcela Original</option>
             </select>
           </div>
-        </div>
-
-        <div style="margin-top:8px; padding:6px 10px; background:#f6f8fb; border-radius:6px; display:inline-flex; align-items:center; gap:6px; font-size:12px; color:#475569;">
-          <input type="checkbox" id="pa-isPJ" style="margin:0; cursor:pointer;">
-          <label for="pa-isPJ" style="margin:0; padding:0; font-size:12px; text-transform:none; letter-spacing:0; font-weight:500; color:#475569; cursor:pointer;">Pessoa Jurídica (sem seguro)</label>
         </div>
 
         <div class="redmode-toggle" style="margin-top: 10px;">
@@ -514,12 +509,11 @@ function setOut(id, value) {
 // LEITURA DE INPUTS
 // ═══════════════════════════════════════════════════════
 function readInputs() {
-  const isPJ = !!(get('pa-isPJ') && get('pa-isPJ').checked);
-  // Se PJ marcado → seguro zerado. Caso contrário, lê o que o user digitou (pode ser 0 = PF sem seguro)
-  const seguro = isPJ ? 0 : (unmaskPct(get('pa-seguro').value) / 100);
+  // Sem dropdown PF/PJ — se o user preencher seguro, é PF; se deixar 0/vazio, PJ
+  const seguro = unmaskPct(get('pa-seguro').value) / 100;
   return {
     credito: unmaskMoney(get('pa-credito').value),
-    tipo: isPJ ? 'PJ' : 'PF',
+    tipo: seguro > 0 ? 'PF' : 'PJ',
     prazo: parseInt(get('pa-prazo').value || '0', 10),
     redutor: get('pa-redutor').value,
     contempla: parseInt(get('pa-contempla').value || '0', 10),
@@ -653,8 +647,8 @@ function recalc() {
   setOut('pa-saldoDevedor', formatMoney(r.saldoDevedor));
   var hintEl = document.getElementById('pa-embutidoMaxHint');
   if (hintEl) {
-    var pctTxt = i.pctEmbutido > 0 ? (i.pctEmbutido * 100).toFixed(2).replace('.', ',') + '%' : '—';
-    hintEl.innerHTML = 'Máx. <strong>' + formatMoney(r.maxEmbutido) + '</strong> (' + pctTxt + ' do crédito) · verificar característica do grupo';
+    var pctTxt = (i.pctEmbMax * 100).toFixed(2).replace('.', ',') + '%';
+    hintEl.innerHTML = 'Máx. <strong>' + formatMoney(r.maxEmbutido) + '</strong> (' + pctTxt + ' do crédito)';
   }
   setOut('pa-parcelaPF', formatMoney(r.parcelaPF));
   setOut('pa-parcelaPJ', formatMoney(r.parcelaPJ));
@@ -801,7 +795,7 @@ document.getElementById('btnLimparObs').addEventListener('click', () => {
 });
 
 document.getElementById('btnLimparProposta').addEventListener('click', () => {
-  ['pa-credito','pa-prazo','pa-contempla','pa-pctEmbMax'].forEach(id => get(id).value = '');
+  ['pa-taxaAdm','pa-fundo','pa-seguro','pa-credito','pa-prazo','pa-contempla','pa-pctEmbMax'].forEach(id => get(id).value = '');
   get('pa-redutor').value = '';
   recalc();
 });
@@ -850,30 +844,29 @@ function syncRsToPct(idRs, idPct) {
   _paSyncing = false;
   recalc();
 }
-// Embutido: % ↔ R$
-get('pa-pctEmbutido').addEventListener('blur', () => syncPctToRs('pa-pctEmbutido', 'pa-embutido'));
-get('pa-embutido').addEventListener('blur', () => syncRsToPct('pa-embutido', 'pa-pctEmbutido'));
+// Embutido: % ↔ R$ (com limite max do grupo)
+function paClampEmbutido() {
+  const credito = unmaskMoney(get('pa-credito').value);
+  const pctMax = (unmaskPct(get('pa-pctEmbMax').value) / 100) || 0.30;
+  const maxRs = credito * pctMax;
+  const vEmb = unmaskMoney(get('pa-embutido').value);
+  if (credito > 0 && vEmb > maxRs) {
+    _paSyncing = true;
+    get('pa-embutido').value = maskMoney(String(Math.round(maxRs * 100)));
+    get('pa-pctEmbutido').value = (pctMax * 100).toFixed(2).replace('.', ',') + ' %';
+    _paSyncing = false;
+  }
+}
+get('pa-pctEmbutido').addEventListener('blur', () => { syncPctToRs('pa-pctEmbutido', 'pa-embutido'); paClampEmbutido(); recalc(); });
+get('pa-embutido').addEventListener('blur', () => { syncRsToPct('pa-embutido', 'pa-pctEmbutido'); paClampEmbutido(); recalc(); });
 // Lance a Pagar (Recurso próprio): % ↔ R$
 get('pa-pctLanceFixo').addEventListener('blur', () => syncPctToRs('pa-pctLanceFixo', 'pa-recProp'));
 get('pa-recProp').addEventListener('blur', () => syncRsToPct('pa-recProp', 'pa-pctLanceFixo'));
+// Quando crédito ou pctEmbMax mudam, re-aplicar limite e atualizar hint
+['pa-credito','pa-pctEmbMax','pa-taxaAdm','pa-fundo'].forEach(id => {
+  const el = get(id); if (el) el.addEventListener('blur', () => { paClampEmbutido(); recalc(); });
+});
 
-// Toggle Jurídica: desabilita o campo de seguro quando marcado
-(function() {
-  const cb = get('pa-isPJ');
-  const seg = get('pa-seguro');
-  if (!cb || !seg) return;
-  cb.addEventListener('change', () => {
-    if (cb.checked) {
-      seg.value = '';
-      seg.disabled = true;
-      seg.style.opacity = '0.5';
-    } else {
-      seg.disabled = false;
-      seg.style.opacity = '';
-    }
-    recalc();
-  });
-})();
 
 document.getElementById('btnLimparTudo').addEventListener('click', limparTudo);
 
@@ -938,9 +931,9 @@ function _coletarBlocosPortoAuto() {
   const _selTxt = (id) => { const el = document.getElementById(id); return (el?.selectedOptions?.[0]?.textContent || '').trim() || '—'; };
   const _has = (s) => s && s !== '—' && s !== '?' && s !== '';
 
-  // Tipo: checkbox PJ tem prioridade. Caso contrário PF (com ou sem seguro)
-  const _isPJ_v = !!(document.getElementById('pa-isPJ') && document.getElementById('pa-isPJ').checked);
-  const tipoTxt = _isPJ_v ? 'Jurídica' : 'Física';
+  // Tipo deduzido pelo seguro: > 0 = Física (com seguro), 0 = Jurídica (sem)
+  const _seguroVal = parseFloat((_v('pa-seguro') || '0').replace('%','').replace(',','.').trim()) || 0;
+  const tipoTxt = _seguroVal > 0 ? 'Física' : 'Jurídica';
   const redutorTxt = _selTxt('pa-redutor');
   const prazoVal = _v('pa-prazo');
   const contemplaN = parseInt(_v('pa-contempla') || '0', 10) || 0;

@@ -572,10 +572,32 @@ function _irRsToPct(idRs, idPct, tag) {
   }
   recalc();
 }
+// Seta o flag _irLastEdit JÁ NO FOCUS — antes da máscara global chamar recalc()
+get('ir-lanceEmbutidoView').addEventListener('focus', () => { window._irLastEdit = 'rs-emb'; });
+get('ir-lanceAPagarView').addEventListener('focus', () => { window._irLastEdit = 'rs-apg'; });
+get('ir-pctEmbutido').addEventListener('focus', () => { window._irLastEdit = 'pct-emb'; });
+get('ir-pctAPagar').addEventListener('focus', () => { window._irLastEdit = 'pct-apg'; });
+// Sync R$ → % no input
 get('ir-lanceEmbutidoView').addEventListener('input', () => _irRsToPct('ir-lanceEmbutidoView', 'ir-pctEmbutido', 'rs-emb'));
 get('ir-lanceAPagarView').addEventListener('input', () => _irRsToPct('ir-lanceAPagarView', 'ir-pctAPagar', 'rs-apg'));
-get('ir-pctEmbutido').addEventListener('input', () => { window._irLastEdit = 'pct-emb'; });
-get('ir-pctAPagar').addEventListener('input', () => { window._irLastEdit = 'pct-apg'; });
+
+// Limita embutido a 30% do crédito (regra Itaú)
+const IR_PCT_EMB_MAX = 0.30;
+function irClampEmbutido() {
+  const credito = unmaskMoney(get('ir-credito').value);
+  if (!(credito > 0)) return;
+  const pct = unmaskPct(get('ir-pctEmbutido').value) / 100;
+  const v = unmaskMoney(get('ir-lanceEmbutidoView').value);
+  const maxRs = credito * IR_PCT_EMB_MAX;
+  if (pct > IR_PCT_EMB_MAX || v > maxRs) {
+    get('ir-pctEmbutido').value = (IR_PCT_EMB_MAX * 100).toFixed(2).replace('.', ',') + ' %';
+    get('ir-lanceEmbutidoView').value = maskMoney(String(Math.round(maxRs * 100)));
+    window._irLastEdit = 'pct-emb';
+    recalc();
+  }
+}
+get('ir-pctEmbutido').addEventListener('blur', irClampEmbutido);
+get('ir-lanceEmbutidoView').addEventListener('blur', irClampEmbutido);
 
 document.getElementById('btnPresetFixo40Proprio').addEventListener('click', () => {
   get('ir-pctEmbutido').value = '0,00 %';
