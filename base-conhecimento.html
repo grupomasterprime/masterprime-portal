@@ -263,7 +263,12 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
 .maia-avatar::before { display: none; }
 .maia-avatar-sm { width: 26px; height: 26px; font-size: 12px; }
 .maia-avatar-md { width: 36px; height: 36px; font-size: 15px; }
-.maia-avatar-lg { width: 64px; height: 64px; font-size: 26px; margin-bottom: 2px; }
+/* Avatar grande (boas-vindas): mostra a foto inteira com o círculo decorativo */
+.maia-avatar-lg {
+  width: 96px; height: 96px; font-size: 26px; margin-bottom: 2px;
+  background-size: 100% auto;
+  background-position: center 18%;
+}
 
 /* ─── Chat ─── */
 .kbc-root {
@@ -490,8 +495,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
 <script src="kb-itau.js?v=20260603a"></script>
 <script src="kb-fgts.js?v=20260611a"></script>
 <script src="kb-comissoes.js?v=20260612d"></script>
-<script src="kb-chat-config.js?v=20260618g"></script>
-<script src="kb-chat.js?v=20260618g"></script>
+<script src="kb-chat-config.js?v=20260619a"></script>
+<script src="kb-chat.js?v=20260619a"></script>
 <script>
 (function () {
   var ADM = window.KB_ADMIN || {};
