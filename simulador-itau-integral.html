@@ -210,6 +210,10 @@
             <label>Prazo (meses)</label>
             <input type="text" id="ii-prazo" placeholder="0" data-mask="int">
           </div>
+          <div class="field" style="grid-column: span 3;">
+            <label>Contempla mês <small style="color:var(--text-muted)">(opcional — expectativa de contemplação)</small></label>
+            <input type="text" id="ii-contempla" placeholder="0" data-mask="int">
+          </div>
         </div>
 
         <div class="field-hint" style="margin-top: 6px;">
@@ -419,7 +423,7 @@ function readInputs() {
   return {
     credito: unmaskMoney(get('ii-credito').value),
     prazo: parseInt(get('ii-prazo').value || '0', 10),
-    contempla: 1,
+    contempla: parseInt(get('ii-contempla').value || '0', 10),
     taxaAdm: unmaskPct(get('ii-taxaAdm').value) / 100,
     fundo: unmaskPct(get('ii-fundo').value) / 100,
     seguro: unmaskPct(get('ii-seguro').value) / 100,
@@ -517,13 +521,13 @@ function recalc() {
 }
 
 function limparTudo() {
-  ['ii-credito','ii-prazo','ii-taxaAdm','ii-fundo','ii-seguro','ii-pctEmbutido','ii-pctAPagar'].forEach(id => get(id).value = '');
+  ['ii-credito','ii-prazo','ii-contempla','ii-taxaAdm','ii-fundo','ii-seguro','ii-pctEmbutido','ii-pctAPagar'].forEach(id => get(id).value = '');
   get('ii-observacoes').value = '';
   recalc();
 }
 
 document.getElementById('btnLimparProposta').addEventListener('click', () => {
-  ['ii-credito','ii-prazo'].forEach(id => get(id).value = '');
+  ['ii-credito','ii-prazo','ii-contempla'].forEach(id => get(id).value = '');
   recalc();
 });
 
