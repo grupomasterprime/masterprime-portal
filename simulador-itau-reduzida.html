@@ -215,6 +215,10 @@
               <option value="0.50">50%</option>
             </select>
           </div>
+          <div class="field">
+            <label>Contempla mês</label>
+            <input type="text" id="ir-contempla" placeholder="0" data-mask="int">
+          </div>
         </div>
 
         <div class="field-hint" style="margin-top: 6px;">
@@ -433,7 +437,7 @@ function readInputs() {
   return {
     credito: unmaskMoney(get('ir-credito').value),
     prazo: parseInt(get('ir-prazo').value || '0', 10),
-    contempla: 1,
+    contempla: parseInt(get('ir-contempla').value || '0', 10),
     reducao: get('ir-reducao').value,
     taxaAdm: unmaskPct(get('ir-taxaAdm').value) / 100,
     fundo: unmaskPct(get('ir-fundo').value) / 100,
@@ -539,14 +543,14 @@ function recalc() {
 }
 
 function limparTudo() {
-  ['ir-credito','ir-prazo','ir-taxaAdm','ir-fundo','ir-seguro','ir-pctEmbutido','ir-pctAPagar'].forEach(id => get(id).value = '');
+  ['ir-credito','ir-prazo','ir-contempla','ir-taxaAdm','ir-fundo','ir-seguro','ir-pctEmbutido','ir-pctAPagar'].forEach(id => get(id).value = '');
   get('ir-reducao').value = '';
   get('ir-observacoes').value = '';
   recalc();
 }
 
 document.getElementById('btnLimparProposta').addEventListener('click', () => {
-  ['ir-credito','ir-prazo'].forEach(id => get(id).value = '');
+  ['ir-credito','ir-prazo','ir-contempla'].forEach(id => get(id).value = '');
   get('ir-reducao').value = '';
   recalc();
 });
