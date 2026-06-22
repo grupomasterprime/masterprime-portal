@@ -130,7 +130,7 @@ window.KB_ADMIN["itau"] = {
       "categoria_label": "Por que vender consórcio",
       "categoria_ordem": 3,
       "titulo": "Consórcio x financiamento — qual a diferença?",
-      "conteudo": "A diferença é o custo. Financiamento tem juros, IOF e tarifas; o consórcio não tem juros — só a taxa de administração, normalmente bem menor.\n\nNo financiamento o cliente leva o bem na hora, mas paga caro. No consórcio ele planeja a compra (e pode antecipar com lance) por um custo bem menor. O portal tem o simulador Consórcio x Financiamento para mostrar isso.",
+      "conteudo": "A diferença é o custo. Financiamento tem juros, IOF e tarifas; o consórcio não tem juros — só a taxa de administração, normalmente bem menor.\n\nNo financiamento o cliente leva o bem na hora, mas paga caro. No consórcio ele planeja a compra (e pode antecipar com lance) por um custo bem menor. O portal tem o simulador Consórcio e Financiamento para mostrar isso.",
       "tags": "financiamento, comparação, juros",
       "ordem": 2
     },

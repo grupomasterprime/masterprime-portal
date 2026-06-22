@@ -156,7 +156,7 @@
 <main>
   <div id="simStoreMount" style="max-width:1400px; margin:16px auto 0; padding:0 32px;"></div>
 
-  <h2 class="section-title">Operação Simples</h2>
+  <h2 class="section-title">Simulação Rápida</h2>
   <p class="subtitle">Simulação de consórcio com proposta, contemplação e pós-contemplação</p>
 
   <!-- ════ PROPOSTA ════ -->
@@ -1160,7 +1160,7 @@ document.getElementById('baixarPdf').addEventListener('click', async () => {
   btn.disabled = true;
   try {
     await PdfMasterPrime.gerar({
-      tituloEstrategia: 'Operação Simples',
+      tituloEstrategia: 'Simulação Rápida',
       filename: 'master-prime-operacao-simples',
       blocos: _coletarBlocos(),
       observacoes: (document.getElementById('mp-observacoes')?.value || '').trim()
@@ -1179,7 +1179,7 @@ document.getElementById('baixarPdf').addEventListener('click', async () => {
   const params = new URLSearchParams(location.search);
   if (params.get('preview') !== '1') return;
   PdfMasterPrime.preview({
-    tituloEstrategia: 'Operação Simples',
+    tituloEstrategia: 'Simulação Rápida',
     blocos: _blocosDemo()
   });
 })();

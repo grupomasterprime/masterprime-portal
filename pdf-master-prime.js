@@ -8,7 +8,7 @@
  *   <script src="pdf-master-prime.js"></script>
  *
  *   PdfMasterPrime.gerar({
- *     tituloEstrategia: 'Operação Simples',
+ *     tituloEstrategia: 'Simulação Rápida',
  *     filename: 'master-prime-op-simples',
  *     blocos: [
  *       { tipo: 'card', titulo: 'DADOS DA COTA', linhas: [...] },

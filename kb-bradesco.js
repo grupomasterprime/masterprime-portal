@@ -175,7 +175,7 @@ window.KB_ADMIN["bradesco"] = {
       "categoria_label": "Por que vender consórcio",
       "categoria_ordem": 3,
       "titulo": "Consórcio x financiamento — qual a diferença?",
-      "conteudo": "A diferença central é o custo. Financiamento tem juros, IOF e tarifas; consórcio não tem juros — só a taxa de administração, normalmente bem menor.\n\nNo financiamento o cliente leva o bem na hora, mas paga caro. No consórcio o cliente espera a contemplação (ou antecipa com lance), com um custo bem menor. O portal tem o simulador Consórcio x Financiamento, que mostra a economia em números.",
+      "conteudo": "A diferença central é o custo. Financiamento tem juros, IOF e tarifas; consórcio não tem juros — só a taxa de administração, normalmente bem menor.\n\nNo financiamento o cliente leva o bem na hora, mas paga caro. No consórcio o cliente espera a contemplação (ou antecipa com lance), com um custo bem menor. O portal tem o simulador Consórcio e Financiamento, que mostra a economia em números.",
       "tags": "financiamento, comparação, juros, economia",
       "ordem": 2
     },
@@ -184,7 +184,7 @@ window.KB_ADMIN["bradesco"] = {
       "categoria_label": "Por que vender consórcio",
       "categoria_ordem": 3,
       "titulo": "Consórcio x comprar à vista — faz sentido?",
-      "conteudo": "Faz sentido em muitos casos. Em vez de investir todo o capital de uma vez num bem, o cliente pode programar a compra sem juros e manter o dinheiro rendendo.\n\nNum cenário de juros altos, manter a liquidez investida e comprar via consórcio pode render mais do que descapitalizar para comprar à vista. O portal tem o simulador Consórcio x À Vista para essa conta.",
+      "conteudo": "Faz sentido em muitos casos. Em vez de investir todo o capital de uma vez num bem, o cliente pode programar a compra sem juros e manter o dinheiro rendendo.\n\nNum cenário de juros altos, manter a liquidez investida e comprar via consórcio pode render mais do que descapitalizar para comprar à vista. O portal tem o simulador Consórcio e À Vista para essa conta.",
       "tags": "à vista, comparação, liquidez, investimento",
       "ordem": 3
     },
@@ -193,7 +193,7 @@ window.KB_ADMIN["bradesco"] = {
       "categoria_label": "Por que vender consórcio",
       "categoria_ordem": 3,
       "titulo": "Consórcio serve como investimento e formação de patrimônio?",
-      "conteudo": "Sim — e esse é um dos melhores argumentos. O consórcio é um planejamento para aumentar o patrimônio: com um esforço mensal, o cliente conquista um bem que pode valorizar, gerar renda ou servir de base para o próximo passo.\n\nÉ a chance de conquistar patrimônio sem se descapitalizar. O portal tem os simuladores de Investimento e de Alavancagem Patrimonial para mostrar isso.",
+      "conteudo": "Sim — e esse é um dos melhores argumentos. O consórcio é um planejamento para aumentar o patrimônio: com um esforço mensal, o cliente conquista um bem que pode valorizar, gerar renda ou servir de base para o próximo passo.\n\nÉ a chance de conquistar patrimônio sem se descapitalizar. O portal tem os simuladores Modo Investidor e Construindo Patrimônio para mostrar isso.",
       "tags": "investimento, patrimônio, alavancagem",
       "ordem": 4
     },

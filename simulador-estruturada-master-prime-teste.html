@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Master Prime - Simulador Operação Estruturada (Teste)</title>
+<title>Master Prime - Simulador Proposta Estruturada (Teste)</title>
 <style>
   :root {
     --navy: #2D3F5E;
@@ -157,7 +157,7 @@
 
 <main>
 
-  <h2 class="section-title">Operação Estruturada</h2>
+  <h2 class="section-title">Proposta Estruturada</h2>
   <div class="subtitle">Empilhe múltiplas operações e veja o portfólio consolidado</div>
 
   <!-- ════ BARRA DE SIMULAÇÕES SALVAS (injetada por simulacao-store.js) ════ -->
@@ -961,7 +961,7 @@ function renderOps() {
       </div>
     `).join('');
     AnaliticoCet.set('agregado', {
-      titulo: 'Operação Estruturada · CET agregado',
+      titulo: 'Proposta Estruturada · CET agregado',
       credito: sumTotal,
       parcelaInicial: sumParc,
       expectativa: 1,
@@ -1114,7 +1114,7 @@ document.getElementById('btnPdf').addEventListener('click', async () => {
       return;
     }
     await PdfMasterPrime.gerar({
-      tituloEstrategia: 'Operação Estruturada',
+      tituloEstrategia: 'Proposta Estruturada',
       filename: 'master-prime-operacao-estruturada',
       orientation: 'landscape',
       blocos: _coletarBlocosEstruturada(),
@@ -1134,7 +1134,7 @@ document.getElementById('btnPdf').addEventListener('click', async () => {
   if (new URLSearchParams(location.search).get('preview') !== '1') return;
   // injeta dados de demonstração e renderiza
   PdfMasterPrime.preview({
-    tituloEstrategia: 'Operação Estruturada',
+    tituloEstrategia: 'Proposta Estruturada',
     orientation: 'landscape',
     blocos: [
       { tipo:'tabela-ampla',
