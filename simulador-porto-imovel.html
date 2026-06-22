@@ -845,14 +845,14 @@ function piSyncRsToPct(idRs, idPct) {
   recalc();
 }
 // Recurso próprio
-get('pi-pctRecProp').addEventListener('blur', () => piSyncPctToRs('pi-pctRecProp', 'pi-recProp'));
-get('pi-recProp').addEventListener('blur', () => piSyncRsToPct('pi-recProp', 'pi-pctRecProp'));
+get('pi-pctRecProp').addEventListener('input', () => piSyncPctToRs('pi-pctRecProp', 'pi-recProp'));
+get('pi-recProp').addEventListener('input', () => piSyncRsToPct('pi-recProp', 'pi-pctRecProp'));
 // FGTS
-get('pi-pctFgts').addEventListener('blur', () => piSyncPctToRs('pi-pctFgts', 'pi-fgts'));
-get('pi-fgts').addEventListener('blur', () => piSyncRsToPct('pi-fgts', 'pi-pctFgts'));
+get('pi-pctFgts').addEventListener('input', () => piSyncPctToRs('pi-pctFgts', 'pi-fgts'));
+get('pi-fgts').addEventListener('input', () => piSyncRsToPct('pi-fgts', 'pi-pctFgts'));
 // Embutido (clamp já tratado dentro de piSyncPctToRs/piSyncRsToPct)
-get('pi-pctEmbutido').addEventListener('blur', () => { piSyncPctToRs('pi-pctEmbutido', 'pi-embutido'); recalc(); });
-get('pi-embutido').addEventListener('blur', () => { piSyncRsToPct('pi-embutido', 'pi-pctEmbutido'); recalc(); });
+get('pi-pctEmbutido').addEventListener('input', () => { piSyncPctToRs('pi-pctEmbutido', 'pi-embutido'); recalc(); });
+get('pi-embutido').addEventListener('input', () => { piSyncRsToPct('pi-embutido', 'pi-pctEmbutido'); recalc(); });
 
 // Recalcula % do lance dinamicamente quando taxas/crédito/adesão mudam
 function _piRefreshPcts() {

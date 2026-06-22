@@ -801,10 +801,10 @@ function ppSyncRsToPct(idRs, idPct) {
   _ppSyncing = false;
   recalc();
 }
-get('pp-pctEmbutido').addEventListener('blur', () => { ppSyncPctToRs('pp-pctEmbutido', 'pp-embutido'); recalc(); });
-get('pp-embutido').addEventListener('blur', () => { ppSyncRsToPct('pp-embutido', 'pp-pctEmbutido'); recalc(); });
-get('pp-pctRecProp').addEventListener('blur', () => ppSyncPctToRs('pp-pctRecProp', 'pp-recProp'));
-get('pp-recProp').addEventListener('blur', () => ppSyncRsToPct('pp-recProp', 'pp-pctRecProp'));
+get('pp-pctEmbutido').addEventListener('input', () => { ppSyncPctToRs('pp-pctEmbutido', 'pp-embutido'); recalc(); });
+get('pp-embutido').addEventListener('input', () => { ppSyncRsToPct('pp-embutido', 'pp-pctEmbutido'); recalc(); });
+get('pp-pctRecProp').addEventListener('input', () => ppSyncPctToRs('pp-pctRecProp', 'pp-recProp'));
+get('pp-recProp').addEventListener('input', () => ppSyncRsToPct('pp-recProp', 'pp-pctRecProp'));
 
 // Recalcula % do lance dinamicamente quando taxas/crédito/limite mudam
 function _ppRefreshPcts() {

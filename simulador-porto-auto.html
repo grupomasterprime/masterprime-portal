@@ -888,11 +888,11 @@ function paClampEmbutido() {
     _paSyncing = false;
   }
 }
-get('pa-pctEmbutido').addEventListener('blur', () => { syncPctToRs('pa-pctEmbutido', 'pa-embutido'); recalc(); });
-get('pa-embutido').addEventListener('blur', () => { syncRsToPct('pa-embutido', 'pa-pctEmbutido'); recalc(); });
+get('pa-pctEmbutido').addEventListener('input', () => { syncPctToRs('pa-pctEmbutido', 'pa-embutido'); recalc(); });
+get('pa-embutido').addEventListener('input', () => { syncRsToPct('pa-embutido', 'pa-pctEmbutido'); recalc(); });
 // Lance a Pagar (Recurso próprio): % ↔ R$
-get('pa-pctLanceFixo').addEventListener('blur', () => syncPctToRs('pa-pctLanceFixo', 'pa-recProp'));
-get('pa-recProp').addEventListener('blur', () => syncRsToPct('pa-recProp', 'pa-pctLanceFixo'));
+get('pa-pctLanceFixo').addEventListener('input', () => syncPctToRs('pa-pctLanceFixo', 'pa-recProp'));
+get('pa-recProp').addEventListener('input', () => syncRsToPct('pa-recProp', 'pa-pctLanceFixo'));
 
 // Recalcula % do lance dinamicamente quando taxas/crédito/limite mudam
 function _paRefreshPcts() {
