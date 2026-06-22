@@ -15,6 +15,8 @@
   // ── Config ─────────────────────────────────────────────────
   var CFG = window.KB_CHAT_CONFIG || {};
   var STORAGE_KEY = 'mp-kb-chat-history-v1';
+  var ACTIVITY_KEY = 'mp-kb-chat-last-activity';
+  var INACTIVITY_TIMEOUT_MS = 30 * 60 * 1000; // 30 min — mesmo timeout da sessão Master Prime
   var MAX_HISTORY_TURNS = 6;       // últimas 6 mensagens do usuário+IA enviadas como contexto
   var MAX_DISPLAY_TURNS = 50;      // máx. mensagens exibidas em tela / salvas
 
@@ -37,6 +39,14 @@
 
   function loadHistory() {
     try {
+      // Se passaram +30 min sem atividade, reseta o histórico
+      // (mesmo timeout da sessão Master Prime — Maia "esquece" junto)
+      var lastActivity = parseInt(localStorage.getItem(ACTIVITY_KEY) || '0', 10);
+      if (lastActivity > 0 && (Date.now() - lastActivity) >= INACTIVITY_TIMEOUT_MS) {
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem(ACTIVITY_KEY);
+        return [];
+      }
       var raw = localStorage.getItem(STORAGE_KEY);
       if (!raw) return [];
       var arr = JSON.parse(raw);
@@ -46,6 +56,7 @@
   function saveHistory() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(-MAX_DISPLAY_TURNS)));
+      localStorage.setItem(ACTIVITY_KEY, String(Date.now())); // marca atividade
     } catch (e) {}
   }
 
