@@ -889,6 +889,78 @@ window.KB_ADMIN["itau"] = {
       "conteudo": "A transferência da cota para outra pessoa, com aprovação da Itaú e pagamento de tarifa.",
       "tags": "glossário, cessão, termo",
       "ordem": 14
+    },
+    {
+      "categoria_key": "pagamentos",
+      "categoria_label": "Pagamentos e parcelas",
+      "categoria_ordem": 4,
+      "titulo": "O que é a Parcela Reduzida 30% / 50% do Itaú?",
+      "conteudo": "Modalidade do Itaú em que o cliente paga **parcelas menores** (reduzidas) **até a contemplação** — facilita o planejamento financeiro:\n\n• Veículos: até **30% de redução** nas parcelas até contemplação.\n• Imóveis: até **50% de redução** nas parcelas até contemplação.\n\nComo funciona o saldo:\n• Durante a fase pré-contemplação, o cliente paga com redutor (30% ou 50% a menos).\n• Após a contemplação, o saldo é **recalculado** considerando a diferença entre o que foi pago com redutor e o valor integral.\n• Se contemplado por **sorteio**: as parcelas seguintes ficam um pouco mais altas (sem o redutor).\n• Se contemplado por **lance**: o valor ofertado abate direto do saldo devedor — ajuda a manter parcelas mais leves.\n• Se a parcela pós-contemplação ficar acima do orçamento, o cliente pode optar por uma **carta menor** pra ajustar a parcela.\n\nIdeal pra cliente que precisa começar com fôlego financeiro e ainda não tem urgência de contemplação imediata.",
+      "tags": "parcela reduzida, 30%, 50%, redutor, contemplação, saldo recalculado, sorteio, lance, carta menor, planejamento",
+      "ordem": 10
+    },
+    {
+      "categoria_key": "lance",
+      "categoria_label": "Lance",
+      "categoria_ordem": 9,
+      "titulo": "Qual o horário e prazo do lance Itaú?",
+      "conteudo": "Regras operacionais do lance no consórcio Itaú:\n\n**Quando ofertar o lance:**\n• Até as **20h do dia útil anterior** à assembleia.\n• Só consegue ofertar se NÃO tiver parcelas em aberto (ou tiver quitado depois do último vencimento).\n\n**Quando pagar (se for vencedor):**\n• **5 dias úteis** após a assembleia.\n• Se não pagar no prazo, a contemplação é **cancelada** e a cota volta a participar normalmente das assembleias mensais.\n\n**Lance com FGTS (só imóvel):**\n• Após contemplação por lance com FGTS, tem **5 dias úteis** pra enviar o extrato do FGTS comprovando o saldo.\n• Se o saldo for menor que o lance ofertado, NÃO é possível seguir com a contemplação.\n• Saque do FGTS acontece no momento da compra do imóvel (não na contemplação).\n\n**Lance Embutido até 30%:**\n• Pode ofertar até 30% do valor TOTAL do consórcio (carta + taxas).\n• Esse valor é descontado da carta de crédito que o cliente vai faturar.\n• Pode combinar com recursos próprios pra chegar a um percentual mais competitivo.\n\nCanais pra ofertar: app Itaú, Bankline, Portal do Consorciado (não correntista), Central de Atendimento.",
+      "tags": "lance, horário, 20h, prazo, 5 dias úteis, fgts, embutido, 30%, cancelamento contemplação, app, bankline",
+      "ordem": 12
+    },
+    {
+      "categoria_key": "exclusao",
+      "categoria_label": "Exclusão, devolução e cessão",
+      "categoria_ordem": 10,
+      "titulo": "Como cancelar o consórcio Itaú e quanto o cliente recebe?",
+      "conteudo": "**Direito de arrependimento (até 7 dias da contratação):**\n• Restituição **integral** do valor pago.\n• Cancela pelo site, internet banking, app ou Central de Atendimento.\n\n**Após 7 dias:**\n• Cliente recebe o valor pago ao **fundo comum** (referente ao crédito que estipulou), descontada a **multa contratual**.\n• Devolução acontece via **sorteios mensais exclusivos para cotas canceladas** ou no **encerramento do grupo**.\n• Não é imediata — cliente pode esperar meses ou anos.\n\n**Alternativas ao cancelamento (vale conversar antes!):**\n• **Reduzir o valor da carta** — Central de Atendimento Consórcio Itaú: 4004 4828 (capitais) ou 0800 970 4828 (demais).\n• **Cessão da cota** — vender pra outra pessoa interessada.\n• **Revender para parceiro Itaú CONSORCIEI** — telefone: **(11) 4040-2057**.\n\n**Reativação:**\n• É possível reativar uma cota cancelada **após 3 meses**, se o grupo ainda tiver vagas.\n• Sujeito a nova análise de crédito.\n• Os valores do período não pago são recalculados nas parcelas restantes.\n\nCanais pra cancelar:\n• App: Produtos → Consórcio → Soluções → Saiba mais sobre cancelamento.\n• Site/Bankline: menu Consórcio → Cancelar consórcio.\n• Central de Atendimento.",
+      "tags": "cancelamento, devolução, 7 dias, arrependimento, fundo comum, multa, consorciei, 4040-2057, reativação, 3 meses, cessão",
+      "ordem": 5
+    },
+    {
+      "categoria_key": "pagamentos",
+      "categoria_label": "Pagamentos e parcelas",
+      "categoria_ordem": 4,
+      "titulo": "Como funciona o reajuste das parcelas Itaú?",
+      "conteudo": "As parcelas são reajustadas **antes e depois da contemplação** pra manter o poder de compra do grupo:\n\n**Consórcio de Imóveis:**\n• **INCC** (Índice Nacional de Custo de Construção) — variação anual acumulada nos 12 meses anteriores.\n• Reajuste no **mês de aniversário do grupo**.\n\n**Consórcio de Veículos** (três formas, varia conforme o grupo):\n• **Tabela FIPE ou FIA**T (pra veículos dessa montadora) — atualização periódica, acompanha valorização do bem.\n• **IPCA** — variação anual acumulada nos 12 meses, no mês de aniversário do grupo.\n• **Taxa pré-fixada** — também no aniversário do grupo.\n\nO índice de cada consórcio está descrito nos termos de contratação. Pode mudar via Assembleia Geral Extraordinária (AGE).\n\nMesmo após a contemplação, as parcelas continuam reajustando — caso o cliente ainda não tenha usado a carta de crédito, o valor fica aplicado e os rendimentos líquidos são revertidos a favor do cliente.",
+      "tags": "reajuste, parcela, incc, ipca, fipe, fiat, taxa pré-fixada, aniversário grupo, índice, age",
+      "ordem": 11
+    },
+    {
+      "categoria_key": "fundamentos",
+      "categoria_label": "Entendendo o consórcio",
+      "categoria_ordem": 2,
+      "titulo": "O que acontece com grupos em formação e o prazo de 90 dias?",
+      "conteudo": "**Grupos em formação** são aqueles em que ainda não aconteceu nenhuma assembleia — Itaú está reunindo participantes.\n\n**Como funciona:**\n• Cliente paga a primeira parcela pra oficializar a adesão.\n• A segunda parcela só é paga no mês em que ocorrer a **primeira assembleia**.\n• Itaú tem até **90 dias** pra formar o grupo, contados a partir do **primeiro contrato**.\n\n**Se o grupo NÃO for formado em 90 dias:**\n• Cliente pode pedir devolução do valor pago — restituição em **até 5 dias úteis**.\n• OU pode estender o prazo em **mais 90 dias**.\n\n**Grupos em andamento:**\n• Já tiveram pelo menos uma assembleia e pelo menos uma contemplação.\n• Cliente pode entrar comprando uma cota direto com o Itaú, ou negociando com um consorciado que quer vender a cota.",
+      "tags": "grupos em formação, 90 dias, primeira parcela, segunda parcela, devolução, em andamento, cota",
+      "ordem": 12
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 5,
+      "titulo": "Sobra de crédito Itaú: 10% pra ITBI e cartório (imóveis)",
+      "conteudo": "Quando o **imóvel custar menos que o valor da carta**, o cliente pode usar a sobra de crédito de duas formas:\n\n**Despesas cobertas (até 10% da carta):**\n• ITBI (Imposto de Transmissão de Bens Imóveis).\n• Custas de cartório (registro do imóvel, alienação fiduciária).\n• Taxas administrativas relacionadas à compra.\n\n**Pré-requisitos:**\n• Imóvel deve ser urbano e ter documentação regularizada.\n• IPTU em dia.\n• Valor do imóvel deve ser inferior ao valor da carta de crédito.\n\nSe a sobra for maior que 10%, o restante volta ao fundo comum do grupo (ou é amortizado no saldo devedor, conforme regras do grupo).\n\nPara veículos a regra é similar: até 10% pra documentação (transferência, registro de garantia) e seguro.",
+      "tags": "sobra, crédito, 10%, itbi, cartório, despesas, imóvel, ipca, regularização, fundo comum",
+      "ordem": 14
+    },
+    {
+      "categoria_key": "fundamentos",
+      "categoria_label": "Entendendo o consórcio",
+      "categoria_ordem": 2,
+      "titulo": "Faixas e prazos do Consórcio Itaú (Auto e Imóvel)",
+      "conteudo": "Faixas oficiais publicadas pelo Itaú no site:\n\n**Consórcio de Carros:**\n• Parcelas a partir de R$ 190,00.\n• Planos com mais de 100 parcelas (máx 175 meses no Auto).\n• Cartas de crédito acima de R$ 300.000,00.\n• Idade do consorciado: 18 a 71 anos.\n• Aceita carros 0km ou usados até 8 anos (obrigatório ter chassi; sem histórico de leilão).\n\n**Consórcio de Imóveis:**\n• Parcelas a partir de R$ 360,00.\n• Prazos com mais de 200 parcelas (máx 192 meses Imóvel).\n• Cartas de crédito acima de R$ 500.000,00.\n• Idade mínima: 16 anos.\n• Pode comprar residencial, comercial, terreno; construir/reformar; quitar financiamento.\n\n**Estatísticas Itaú (uso comercial):**\n• Mais de 400 mil clientes ativos.\n• Mais de 5 mil bens entregues por mês.\n• Mais de 6 mil contemplações por mês.\n• 'É o consórcio que mais contempla no Brasil.'\n\n**Bônus:** 10% de desconto em Seguro Auto e Residencial pela Itaú Corretora (Veículos e Imóveis).",
+      "tags": "faixas, prazos, parcelas, R$ 190, R$ 360, R$ 300.000, R$ 500.000, idade, 18 anos, 16 anos, 71 anos, 175 meses, 192 meses, 400 mil clientes, mais contempla, desconto seguro",
+      "ordem": 13
+    },
+    {
+      "categoria_key": "canais",
+      "categoria_label": "Canais e contatos",
+      "categoria_ordem": 11,
+      "titulo": "WhatsApp e canais oficiais Itaú Consórcios",
+      "conteudo": "Canais oficiais Itaú Consórcios pra o consultor e o cliente:\n\n**Central de Atendimento Consórcio:**\n• 4004 4828 — capitais e regiões metropolitanas.\n• 0800 970 4828 — demais localidades.\n• Horário: segunda a sexta das 8h às 20h, sábados das 9h às 15h (horário de Brasília).\n\n**WhatsApp Itaú Consórcios:**\n• **(11) 3003-8880** — adicionar nos contatos e iniciar conversa.\n• Atendimento via assistente virtual + humano.\n\n**Portal do Consorciado:**\n• itau.com.br/consorcios/portal-do-consorciado\n• Para cliente correntista E não correntista (com Código de Acesso recebido na Carta da Primeira Assembleia).\n\n**Parceiro CONSORCIEI** (revenda de cotas):\n• (11) 4040-2057\n\n**Outros canais Itaú:**\n• SAC Itaú: 0800 728 0728 (24h).\n• Ouvidoria Itaú: 0800 570 0011.\n• Denúncia: itau.com.br/atendimento-itau/para-voce/denuncia.",
+      "tags": "whatsapp, 3003-8880, 4004 4828, 0800 970 4828, consorciei, 4040-2057, sac, ouvidoria, portal consorciado, central",
+      "ordem": 3
     }
   ],
   "downloads": [
@@ -936,6 +1008,11 @@ window.KB_ADMIN["itau"] = {
       "titulo": "Carta de Crédito — Guia Pode e Não Pode (Itaú)",
       "descricao": "Tabela completa por perfil (Varejo PF, Atacado PF, Varejo PJ, Atacado PJ) com o que pode e o que não pode ser adquirido com a carta de imóveis e de veículos.",
       "arquivo": "kb-itau-pode-nao-pode-completo.pdf"
+    },
+    {
+      "titulo": "Kit FGTS para Consórcio (Itaú · Imóveis)",
+      "descricao": "Material oficial do Itaú com as regras de uso do FGTS no consórcio de imóveis: lance, amortização, liquidação, requisitos e formulários. Essencial pra quem vai usar FGTS na cota.",
+      "arquivo": "kb-itau-kit-fgts-consorcio.pdf"
     }
   ]
 };
