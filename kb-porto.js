@@ -1177,6 +1177,60 @@ window.KB_ADMIN["porto"] = {
       "conteudo": "Após aprovação das etapas iniciais (biometria + saldo + crédito), o fluxo varia conforme o caso:\n\n• COTA NÃO CONTEMPLADA: cadastro do cessionário no sistema → emissão dos termos de cessão → cedente assina primeiro, cessionário recebe por e-mail e assina → transferência confirmada. SEM TAXA.\n\n• COTA CONTEMPLADA SEM O BEM: cadastro + pagamento da TAXA de transferência de 1% sobre o crédito contratado (ex: crédito R$ 100.000 = taxa R$ 1.000) → termos de cessão → assinaturas → confirmação.\n\n• COTA CONTEMPLADA COM BEM MÓVEL (auto/moto/pesado): envio do ATPV digital (DETRAN, preenchido e com firma do vendedor) → validação → pagamento da TAXA de 1% + Sircof + Gravame (taxas DETRAN por estado) → termos → assinaturas → formalização da transferência de gravame em até 2 dias úteis → fim.\n\n• COTA CONTEMPLADA COM IMÓVEL: cadastro + pagamento da TAXA de 1% + Tarifa de Formalização (garantia do imóvel) → análise jurídica, avaliação econômica, contrato, formalização e registro em cartório (ver Guia da Pós-Contemplação de Imóveis) → termos → assinaturas → confirmação.",
       "tags": "transferência, taxa 1%, ATPV, sircof, gravame, detran, tarifa formalização, imóvel, contemplada, não contemplada, bem móvel, próximos passos",
       "ordem": 11
+    },
+    {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Contemplação",
+      "categoria_ordem": 4,
+      "titulo": "Contemplado que não usou o bem: crédito parcial (regra pós 01/07/2024)",
+      "conteudo": "Para grupos inaugurados a partir de 01/07/2024, se o consorciado for contemplado mas for excluído (ou desistir) antes de utilizar a carta de crédito, a Porto garante o direito à devolução de um crédito parcial — proporcional ao valor amortizado pelo cliente em relação ao valor atualizado do bem.\n\nNa prática:\n• O cliente recebe a parte que pagou (proporção amortizada).\n• A diferença entre o crédito original e a parte recebida volta para o fundo comum do grupo.\n• Antes dessa regra, em casos similares, o cliente saía do grupo sem a parte que havia integralizado da carta.\n\nÉ uma proteção importante para clientes contemplados por lance que ainda não usaram a carta — e um diferencial que pode ser destacado na venda.",
+      "tags": "crédito parcial, contemplado, sem bem, 01/07/2024, exclusão, desistência, devolução proporcional, regulamento novo",
+      "ordem": 20
+    },
+    {
+      "categoria_key": "fundamentos",
+      "categoria_label": "Entendendo o consórcio",
+      "categoria_ordem": 2,
+      "titulo": "O que é o Consórcio DATA CERTA Porto? (produto novo 2026)",
+      "conteudo": "O DATA CERTA é uma novidade do regulamento 2026 da Porto. O cliente já contrata sabendo a data em que vai ser contemplado — sem precisar contar com sorteio ou lance livre.\n\nComo funciona:\n• A contemplação acontece na data combinada (ex: 12, 24 ou 36 meses).\n• Para garantir a contemplação na data, o cliente contrata uma operação de crédito com a PORTOSEG S/A (a financeira do grupo Porto) que financia o valor do lance.\n• A parcela do financiamento do lance entra no MESMO boleto da parcela do consórcio.\n• Os planos DATA CERTA têm reajuste fixo de 3% ao ano (diferente do IPCA/INCC dos planos normais).\n• Sem entrada — começa só pela parcela.\n\nQuando indicar: cliente que precisa do bem em data específica e tem fôlego pra pagar parcela + financiamento do lance no mesmo boleto.\n\nLink oficial: portoseguro.com.br/consorcio/data-certa.",
+      "tags": "data certa, portoseg, financeira, lance financiado, 2026, regulamento novo, 3% ao ano, data fixa",
+      "ordem": 11
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Tarifas do consórcio de Imóvel (pacote + vistoria + cancelamento)",
+      "conteudo": "Tarifas do consórcio de Imóvel Porto, conforme a Tabela de Tarifas vigente:\n\n• Pacote Consórcio Imóvel (inclui 1ª vistoria de construção/reforma): R$ 3.800,00.\n• Vistoria adicional (após a 1ª): R$ 597,00 cada.\n• Substituição de garantia: 0,5% do saldo devedor.\n• Troca de crédito: 0,5% sobre o novo crédito (regulamentos 2025/2026; em grupos antigos a regra pode ser 2% sobre a diferença — conferir).\n• Transferência de cota não contemplada: sem taxa.\n• Transferência de cota contemplada: 1% sobre o valor atual do bem.\n• Transferência de cota cancelada: 10% do valor pago ao fundo comum (regra a partir de 26/08/2024).\n• Juros de mora: 1% ao mês + multa de 2% sobre a parcela atualizada.\n\nCancelamento da aquisição (escalonado por estágio do processo):\n• Sem análise jurídica: gratuito.\n• Após análise jurídica, sem vistoria: R$ 2.000,00.\n• Após análise jurídica + vistoria: R$ 2.500,00.\n• Após emissão do contrato: R$ 3.800,00.\n• Cancelamento de cota quitada: desconto de R$ 1.800,00 sobre a tabela acima.",
+      "tags": "tarifa, imóvel, pacote, R$ 3.800, vistoria, R$ 597, cancelamento, escalonado, transferência, juros mora, substituição garantia, troca crédito",
+      "ordem": 21
+    },
+    {
+      "categoria_key": "pagamentos",
+      "categoria_label": "Pagamentos e parcelas",
+      "categoria_ordem": 6,
+      "titulo": "Taxa de permanência (recursos não procurados): atenção à data do grupo",
+      "conteudo": "Quando um consorciado tem crédito a receber (cota cancelada, encerramento do grupo, sobra de carta) e não vai buscar, a Porto cobra uma taxa de permanência mensal sobre esse saldo. A alíquota depende da data de inauguração do grupo:\n\n• Grupos inaugurados até 2006: 10% ao mês.\n• Grupos inaugurados de 2007 até 2018: 0,50% ao mês.\n• Grupos inaugurados de 2018 até 21/04/2023: 0,070% ao mês.\n• Grupos inaugurados a partir de 21/04/2023: 10% ao mês.\n\nAtenção: para grupos novos (pós 21/04/2023) a alíquota voltou a ser 10%/mês — um valor muito mais alto. Isso pesa muito se o cliente não buscar o valor logo. Vale orientar o cliente a sacar assim que a Porto avisar.\n\nValor mínimo de recursos não procurados (após dedução da taxa): se ficar abaixo de R$ 100,00 (grupos pós 01/07/2024) ou R$ 5,00 (grupos antigos), o crédito é extinto.",
+      "tags": "taxa permanência, recursos não procurados, 10% ao mês, 0,070%, 21/04/2023, encerramento grupo, devolução, sobra, extinção R$ 100",
+      "ordem": 11
+    },
+    {
+      "categoria_key": "lance",
+      "categoria_label": "Lance",
+      "categoria_ordem": 8,
+      "titulo": "Lance Embutido NÃO é permitido em Imóvel com sigla CA",
+      "conteudo": "Atenção operacional: nos grupos de consórcio de IMÓVEL com sigla CA (planos específicos da linha Porto), o LANCE EMBUTIDO NÃO É PERMITIDO. Quem está nesses grupos só pode ofertar lance livre ou lance fixo (com recurso próprio).\n\nNo Auto e nos Pesados, essa restrição não existe — o lance embutido funciona normalmente, respeitando o limite do campo 'Informações do Grupo' (limite que incide sobre o crédito vigente).\n\nSempre confira o campo 'Informações do Grupo' na proposta antes de orientar o cliente sobre lance embutido em imóvel.",
+      "tags": "lance embutido, sigla CA, imóvel, restrição, regra exclusiva, informações do grupo",
+      "ordem": 11
+    },
+    {
+      "categoria_key": "lance",
+      "categoria_label": "Lance",
+      "categoria_ordem": 8,
+      "titulo": "Quando o Lance Fixo entrou em cada produto Porto?",
+      "conteudo": "O LANCE FIXO foi formalizado em cada produto Porto em datas diferentes:\n\n• Imóvel: já existia desde 2024 (regulamentado no Capítulo de Lance).\n• Auto e Pesados: introduzido a partir do regulamento 2025.\n\nRegras gerais do lance fixo (em todos os produtos):\n• O percentual fixo é informado no campo 'Informações do Grupo' da proposta.\n• O cliente que oferta lance fixo NÃO PODE ofertar lance livre na mesma assembleia (vale a última oferta).\n• Critério de contemplação: 1 cota por lance fixo, demais cotas por lance livre (na mesma assembleia).\n• Em caso de empate no lance fixo, o desempate é feito pela Loteria Federal (cota mais próxima da sorteada).\n\nO lance fixo é útil quando o cliente quer travar uma estratégia de oferta de antemão, sem ficar 'brigando' por percentual com outros.",
+      "tags": "lance fixo, 2024, 2025, imóvel, auto, pesados, percentual fixo, loteria federal, desempate, regulamento, histórico",
+      "ordem": 12
     }
   ],
   "downloads": [
@@ -1234,6 +1288,31 @@ window.KB_ADMIN["porto"] = {
       "titulo": "Guia da Assembleia (2025)",
       "descricao": "Como funciona a assembleia da Porto: contemplação por sorteio e lance, modalidades de lance (livre, fixo, embutido), regras de empate e desempate, e horários de envio.",
       "arquivo": "kb-porto-assembleia.pdf"
+    },
+    {
+      "titulo": "Regulamento Auto 2026 — Porto Bank",
+      "descricao": "Regulamento oficial vigente do consórcio Porto de Automóveis. Inclui cláusula penal nova (regra dupla antes/depois de 01/10/2025), lance fixo, novo produto Data Certa e mais.",
+      "arquivo": "kb-porto-regulamento-auto-2026.pdf"
+    },
+    {
+      "titulo": "Regulamento Imóvel 2026 — Porto Bank",
+      "descricao": "Regulamento oficial vigente do consórcio Porto de Imóveis. Restrição do lance embutido em grupos sigla CA, novas tarifas, uso de FGTS e regras de construção/reforma.",
+      "arquivo": "kb-porto-regulamento-imovel-2026.pdf"
+    },
+    {
+      "titulo": "Regulamento Pesados 2026 — Porto Bank",
+      "descricao": "Regulamento oficial vigente do consórcio Porto de Pesados (caminhões, ônibus, máquinas agrícolas). Inclui idade máxima, garantia substitutiva e regras de aquisição.",
+      "arquivo": "kb-porto-regulamento-pesados-2026.pdf"
+    },
+    {
+      "titulo": "Tabela de Tarifas — Bens Móveis (Auto e Pesados)",
+      "descricao": "Tarifas vigentes do consórcio Porto de bens móveis: substituição de garantia, troca de crédito, transferência de cota, juros de mora e taxa de permanência por data de inauguração do grupo.",
+      "arquivo": "kb-porto-tarifas-bens-moveis.pdf"
+    },
+    {
+      "titulo": "Tabela de Tarifas — Imóvel",
+      "descricao": "Tarifas vigentes do consórcio Porto de Imóveis: pacote R$ 3.800,00, vistoria adicional R$ 597,00, cancelamento escalonado por estágio, transferência e taxa de permanência.",
+      "arquivo": "kb-porto-tarifas-imovel.pdf"
     }
   ]
 };
