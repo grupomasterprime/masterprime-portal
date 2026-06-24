@@ -519,7 +519,7 @@ button.kbc-src-link:focus-visible {
 <script src="kb-fgts.js?v=20260622c"></script>
 <script src="kb-comissoes.js?v=20260612d"></script>
 <script src="kb-chat-config.js?v=20260619d"></script>
-<script src="kb-chat.js?v=20260624b"></script>
+<script src="kb-chat.js?v=20260624c"></script>
 <script>
 (function () {
   var ADM = window.KB_ADMIN || {};
@@ -822,12 +822,37 @@ button.kbc-src-link:focus-visible {
       var content = document.getElementById('content');
       if (!content) return;
       var item = content.querySelector('.kb-item[data-titulo-slug="' + targetSlug + '"]');
-      // Fallback: busca por includes (slug parcial)
+      // Fallback inteligente: score por overlap de palavras (≥3 letras, ignora stopwords)
       if (!item && targetSlug) {
-        var all = content.querySelectorAll('.kb-item[data-titulo-slug]');
-        for (var i = 0; i < all.length; i++) {
-          var s = all[i].getAttribute('data-titulo-slug') || '';
-          if (s.indexOf(targetSlug) >= 0 || targetSlug.indexOf(s) >= 0) { item = all[i]; break; }
+        var STOPWORDS = { 'a':1,'o':1,'as':1,'os':1,'de':1,'do':1,'da':1,'dos':1,'das':1,'e':1,'em':1,
+          'no':1,'na':1,'nos':1,'nas':1,'um':1,'uma':1,'para':1,'pra':1,'por':1,'com':1,'sem':1,
+          'que':1,'qual':1,'quais':1,'quem':1,'quanto':1,'quanta':1,'quantos':1,'quantas':1,
+          'como':1,'onde':1,'quando':1,'porque':1,'porquê':1,'porq':1,'tem':1,'ter':1,'tinha':1,
+          'ser':1,'sou':1,'sao':1,'são':1,'foi':1,'era':1,'eh':1,'é':1,'meu':1,'minha':1,'seu':1,'sua':1,
+          'esse':1,'essa':1,'esses':1,'essas':1,'isso':1,'aquilo':1,'mais':1,'menos':1,'muito':1,
+          'pode':1,'posso':1,'podem':1,'podia':1,'so':1,'só':1,'também':1,'tambem':1
+        };
+        function tokens(s) {
+          return (s || '').split(/[^a-z0-9]+/).filter(function(t){
+            return t && t.length >= 3 && !STOPWORDS[t];
+          });
+        }
+        var qTokens = tokens(targetSlug);
+        if (qTokens.length) {
+          var all = content.querySelectorAll('.kb-item[data-titulo-slug]');
+          var best = null, bestScore = 0;
+          for (var i = 0; i < all.length; i++) {
+            var cTokens = tokens(all[i].getAttribute('data-titulo-slug') || '');
+            // Score = nº de palavras em comum
+            var overlap = 0;
+            for (var j = 0; j < qTokens.length; j++) {
+              if (cTokens.indexOf(qTokens[j]) >= 0) overlap++;
+            }
+            if (overlap > bestScore) { bestScore = overlap; best = all[i]; }
+          }
+          // Só usa se pelo menos 2 palavras em comum (ou metade do query, o que for menor)
+          var minScore = Math.min(2, qTokens.length);
+          if (best && bestScore >= minScore) item = best;
         }
       }
       if (!item) return;
