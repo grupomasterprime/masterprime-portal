@@ -394,12 +394,22 @@
       }
       var sourcesHtml = '';
       if (m.sources && m.sources.length) {
+        // Bancos conhecidos pra detectar inversão de ordem na fonte citada
+        var BANCOS_REGEX = /^(porto|porto bank|porto seguro|ita[uú]|bradesco|fgts|fgts caixa|caixa|comiss[oõ]es)$/i;
         sourcesHtml = '<div class="kbc-sources">' + m.sources.map(function (s) {
-          // Source vem como "Título · Banco" (ou "Título · Banco · Categoria")
-          // Quebra em partes pra montar o botão clicável
+          // Source ideal: "Título · Banco" (ou "Título · Banco · Categoria")
+          // Mas a Maia às vezes inverte e escreve "Banco · Categoria/Título"
           var parts = String(s).split('·').map(function (x) { return x.trim(); });
           var titulo = parts[0] || '';
           var banco = parts[1] || '';
+          // Se o primeiro elemento parecer um banco, inverte: o título tá no 2º (ou 3º)
+          if (BANCOS_REGEX.test(titulo) && parts.length >= 2) {
+            banco = parts[0];
+            titulo = parts.slice(1).join(' · ');
+          } else if (banco && !BANCOS_REGEX.test(banco) && parts[2] && BANCOS_REGEX.test(parts[2])) {
+            // Caso "Título · Categoria · Banco" — banco vem por último
+            banco = parts[2];
+          }
           var hasBanco = banco && titulo;
           if (hasBanco) {
             return '<button type="button" class="kbc-src kbc-src-link" ' +
