@@ -49,6 +49,7 @@
   .row-actions button { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 11px; color: var(--text-muted); }
   .row-actions button:hover { background: var(--bg); }
   .row-actions .btn-edit:hover { color: var(--navy); border-color: var(--navy); }
+  .row-actions .btn-dup:hover { color: var(--navy-soft); border-color: var(--navy-soft); }
   .row-actions .btn-del:hover { color: var(--error); border-color: var(--error); }
 
   /* Resumo */
@@ -177,16 +178,19 @@
           <th>R$ Total Cartas</th>
           <th>Parcela Inicial Total</th>
           <th>Lance Total</th>
+          <th class="col-rec hidden">Rec. Próprio</th>
+          <th class="col-emb hidden">Embutido</th>
+          <th class="col-fgts hidden">FGTS</th>
           <th>Crédito Disponível</th>
           <th>Parcela Pós Contemplação</th>
           <th></th>
         </tr>
       </thead>
       <tbody id="opsBody">
-        <tr class="empty-row"><td colspan="12">Nenhuma operação adicionada. Clique abaixo para começar.</td></tr>
+        <tr class="empty-row"><td colspan="15">Nenhuma operação adicionada. Clique abaixo para começar.</td></tr>
       </tbody>
       <tbody>
-        <tr class="add-row"><td colspan="12"><button type="button" class="add-btn" id="btnAddOp">+ Adicionar Operação</button></td></tr>
+        <tr class="add-row"><td colspan="15"><button type="button" class="add-btn" id="btnAddOp">+ Adicionar Operação</button></td></tr>
       </tbody>
       <tfoot id="opsFoot" class="hidden">
         <tr>
@@ -199,6 +203,9 @@
           <td id="ft_totalCartas">—</td>
           <td id="ft_parcelaInicial">—</td>
           <td id="ft_lance">—</td>
+          <td id="ft_lanceRec" class="col-rec hidden">—</td>
+          <td id="ft_lanceEmb" class="col-emb hidden">—</td>
+          <td id="ft_lanceFgts" class="col-fgts hidden">—</td>
           <td id="ft_creditoDisp">—</td>
           <td id="ft_parcelaPos">—</td>
           <td></td>
@@ -774,6 +781,14 @@ function snapshotForm() {
     lanceProprios_v: unmaskMoney(document.getElementById('lanceProprios_v').value.replace('R$','')),
     lanceEmbutido_v: unmaskMoney(document.getElementById('lanceEmbutido_v').value.replace('R$','')),
     lanceFGTS_v: unmaskMoney(document.getElementById('lanceFGTS_v').value.replace('R$','')),
+    // % digitados pelo usuário (cada admin tem sua base — Bradesco Auto/Imóvel
+    // já dividem por 1,0525/1,0425, Categoria sobre crédito×(1+adm+fr), etc.
+    // Salvamos o % "como o user digitou" pra exibir no resumo/PDF, pois é o
+    // % que a administradora oficial mostra.
+    totalLancePct: unmaskPct(document.getElementById('totalLance').value),
+    lanceProprios_pct: unmaskPct(document.getElementById('lanceProprios').value),
+    lanceEmbutido_pct: unmaskPct(document.getElementById('lanceEmbutido').value),
+    lanceFGTS_pct: unmaskPct(document.getElementById('lanceFGTS').value),
     rentabilidadeUnit: unmaskMoney(document.getElementById('rentabilidade').textContent.replace('R$','')),
     prazoRestante: parseInt(document.getElementById('reducaoParcela_prazo').textContent || '0', 10),
     cetMensal: unmaskPct(document.getElementById('reducaoParcela_cm').textContent),
@@ -851,12 +866,23 @@ function renderOps() {
     return;
   }
 
+  // Detecta quais colunas de Lance precisam aparecer
+  // (cada uma só mostra se PELO MENOS uma operação ofertou esse tipo)
+  const hasEmb  = operacoes.some(op => (op.lanceEmbutido_v || 0) > 0);
+  const hasFgts = operacoes.some(op => (op.lanceFGTS_v || 0) > 0);
+  // Recurso Próprio só faz sentido quando há decomposição (Embutido ou FGTS),
+  // pra não duplicar Lance Total quando o lance é 100% recurso próprio.
+  const hasRec  = (hasEmb || hasFgts) && operacoes.some(op => (op.lanceProprios_v || 0) > 0);
+
   // Linhas
   tbody.innerHTML = operacoes.map(op => {
     const cotaUnit = unmaskMoney(op.credito);
     const totalCartas = cotaUnit * op.qtdCartas;
     const parcelaTotal = (op.parcelaInicialUnit || 0) * op.qtdCartas;
     const lanceTotal = (op.valorTotalLanceUnit || 0) * op.qtdCartas;
+    const lanceRecTotal  = (op.lanceProprios_v || 0) * op.qtdCartas;
+    const lanceEmbTotal  = (op.lanceEmbutido_v || 0) * op.qtdCartas;
+    const lanceFgtsTotal = (op.lanceFGTS_v || 0) * op.qtdCartas;
     const credDispTotal = (op.creditoDispUnit || 0) * op.qtdCartas;
     const parcPosTotal = (op.parcelaPosUnit || 0) * op.qtdCartas;
     return `<tr data-id="${op.id}">
@@ -869,17 +895,30 @@ function renderOps() {
       <td>${formatMoney(totalCartas)}</td>
       <td>${formatMoney(parcelaTotal)}</td>
       <td>${formatMoney(lanceTotal)}</td>
+      <td class="col-rec${hasRec ? '' : ' hidden'}">${formatMoney(lanceRecTotal)}</td>
+      <td class="col-emb${hasEmb ? '' : ' hidden'}">${lanceEmbTotal > 0 ? formatMoney(lanceEmbTotal) : '—'}</td>
+      <td class="col-fgts${hasFgts ? '' : ' hidden'}">${lanceFgtsTotal > 0 ? formatMoney(lanceFgtsTotal) : '—'}</td>
       <td>${formatMoney(credDispTotal)}</td>
       <td>${formatMoney(parcPosTotal)}</td>
-      <td><div class="row-actions"><button class="btn-edit" data-action="edit" data-id="${op.id}">Editar</button><button class="btn-del" data-action="del" data-id="${op.id}">Excluir</button></div></td>
+      <td><div class="row-actions"><button class="btn-edit" data-action="edit" data-id="${op.id}">Editar</button><button class="btn-dup" data-action="dup" data-id="${op.id}">Duplicar</button><button class="btn-del" data-action="del" data-id="${op.id}">Excluir</button></div></td>
     </tr>`;
   }).join('');
+
+  // Mostra/esconde os <th> e <td> do tfoot conforme has*
+  document.querySelectorAll('.col-rec').forEach(el => el.classList.toggle('hidden', !hasRec));
+  document.querySelectorAll('.col-emb').forEach(el => el.classList.toggle('hidden', !hasEmb));
+  document.querySelectorAll('.col-fgts').forEach(el => el.classList.toggle('hidden', !hasFgts));
 
   // Linha TOTAL (média ponderada por R$ Total Cartas)
   let sumCota = 0, sumQtd = 0, sumTotal = 0, sumParc = 0, sumLance = 0, sumCred = 0, sumParcPos = 0;
   let wAdm = 0, wFR = 0, wPrazo = 0, wRest = 0;
   let sumLanceProp = 0, sumLanceEmb = 0, sumLanceFgts = 0, sumRentab = 0;
   let cetMensalAcc = 0, cetAnualAcc = 0;
+  // % ponderados pelo R$ total da operação — usamos os % DIGITADOS pelo usuário
+  // (são os % na base da administradora: Bradesco Auto/Imóvel já com fator;
+  // Categoria sobre crédito×(1+adm+fr); etc.) com fallback pra lance/crédito
+  // pra operações antigas sem o pct salvo.
+  let wLancePct = 0, wRecPct = 0, wEmbPct = 0, wFgtsPct = 0;
 
   operacoes.forEach(op => {
     const cota = unmaskMoney(op.credito);
@@ -906,6 +945,22 @@ function renderOps() {
     wRest += wRestVal * total;
     cetMensalAcc += (op.cetMensal||0) * total;
     cetAnualAcc += (op.cetAnual||0) * total;
+
+    // Acumula % ponderado pelo R$ total da operação.
+    // Se a operação foi salva ANTES do fix (sem totalLancePct), faz fallback
+    // pra lance/crédito (comportamento antigo) — não quebra nada.
+    const _pctTot = (op.totalLancePct != null) ? op.totalLancePct
+                    : (cota > 0 ? ((op.valorTotalLanceUnit||0)/cota*100) : 0);
+    const _pctRec = (op.lanceProprios_pct != null) ? op.lanceProprios_pct
+                    : (cota > 0 ? ((op.lanceProprios_v||0)/cota*100) : 0);
+    const _pctEmb = (op.lanceEmbutido_pct != null) ? op.lanceEmbutido_pct
+                    : (cota > 0 ? ((op.lanceEmbutido_v||0)/cota*100) : 0);
+    const _pctFgts = (op.lanceFGTS_pct != null) ? op.lanceFGTS_pct
+                    : (cota > 0 ? ((op.lanceFGTS_v||0)/cota*100) : 0);
+    wLancePct += _pctTot * total;
+    wRecPct   += _pctRec * total;
+    wEmbPct   += _pctEmb * total;
+    wFgtsPct  += _pctFgts * total;
   });
 
   const admMed = sumTotal>0 ? wAdm/sumTotal : 0;
@@ -925,15 +980,18 @@ function renderOps() {
   document.getElementById('ft_totalCartas').textContent = formatMoney(sumTotal);
   document.getElementById('ft_parcelaInicial').textContent = formatMoney(sumParc);
   document.getElementById('ft_lance').textContent = formatMoney(sumLance);
+  document.getElementById('ft_lanceRec').textContent = sumLanceProp > 0 ? formatMoney(sumLanceProp) : '—';
+  document.getElementById('ft_lanceEmb').textContent = sumLanceEmb > 0 ? formatMoney(sumLanceEmb) : '—';
+  document.getElementById('ft_lanceFgts').textContent = sumLanceFgts > 0 ? formatMoney(sumLanceFgts) : '—';
   document.getElementById('ft_creditoDisp').textContent = formatMoney(sumCred);
   document.getElementById('ft_parcelaPos').textContent = formatMoney(sumParcPos);
   tfoot.classList.remove('hidden');
 
-  // Resumo
-  const lancePct = sumTotal>0 ? (sumLance/sumTotal)*100 : 0;
-  const recPropPct = sumTotal>0 ? (sumLanceProp/sumTotal)*100 : 0;
-  const embPct = sumTotal>0 ? (sumLanceEmb/sumTotal)*100 : 0;
-  const fgtsPct = sumTotal>0 ? (sumLanceFgts/sumTotal)*100 : 0;
+  // Resumo — % é média ponderada do % DIGITADO pelo usuário (= % oficial da admin)
+  const lancePct = sumTotal>0 ? wLancePct/sumTotal : 0;
+  const recPropPct = sumTotal>0 ? wRecPct/sumTotal : 0;
+  const embPct = sumTotal>0 ? wEmbPct/sumTotal : 0;
+  const fgtsPct = sumTotal>0 ? wFgtsPct/sumTotal : 0;
 
   document.getElementById('rs_carta').textContent = formatMoney(sumTotal);
   document.getElementById('rs_creditoDisp').textContent = formatMoney(sumCred);
@@ -1039,6 +1097,13 @@ document.getElementById('opsBody').addEventListener('click', e => {
   const id = parseInt(btn.dataset.id, 10);
   const op = operacoes.find(o => o.id === id);
   if (btn.dataset.action === 'edit') openModal(op);
+  else if (btn.dataset.action === 'dup') {
+    // Duplica a operação: cria nova com mesmos campos e id novo. Insere logo após a original.
+    const idx = operacoes.findIndex(o => o.id === id);
+    const novo = { ...op, id: nextId++ };
+    operacoes.splice(idx + 1, 0, novo);
+    renderOps();
+  }
   else if (btn.dataset.action === 'del') {
     if (confirm(`Excluir operação Grupo ${op.grupo || '—'}?`)) {
       operacoes = operacoes.filter(o => o.id !== id);
@@ -1061,28 +1126,43 @@ document.getElementById('btnLimparObs').addEventListener('click', () => {
 function _coletarBlocosEstruturada() {
   const _txt = id => (document.getElementById(id)?.textContent || '').trim();
 
+  // Detecta colunas condicionais (mesma lógica de renderOps)
+  const _hasRecCol  = !document.querySelector('thead .col-rec')?.classList.contains('hidden');
+  const _hasEmbCol  = !document.querySelector('thead .col-emb')?.classList.contains('hidden');
+  const _hasFgtsCol = !document.querySelector('thead .col-fgts')?.classList.contains('hidden');
+
   // Linhas da tabela: lê direto do DOM da tabela renderizada (uma linha por operação)
+  // Pula células escondidas e a coluna de ações (última)
   const linhas = Array.from(document.querySelectorAll('#opsBody tr'))
     .filter(tr => !tr.classList.contains('empty-row') && !tr.classList.contains('add-row'))
     .map(tr => {
-      const tds = Array.from(tr.querySelectorAll('td')).slice(0, 11);
+      const tds = Array.from(tr.querySelectorAll('td'))
+        .filter(td => !td.classList.contains('hidden') && !td.querySelector('.row-actions'));
       return { celulas: tds.map(td => (td.textContent || '').trim()) };
     });
   // Linha total agregada (lê do footer da tabela)
-  linhas.push({
-    celulas: [
-      'Total',
-      _txt('ft_adm'), _txt('ft_fr'), _txt('ft_prazo'),
-      _txt('ft_cota'), _txt('ft_qtd'), _txt('ft_totalCartas'),
-      _txt('ft_parcelaInicial'), _txt('ft_lance'),
-      _txt('ft_creditoDisp'), _txt('ft_parcelaPos')
-    ],
-    total: true
-  });
+  const totalCelulas = [
+    'Total',
+    _txt('ft_adm'), _txt('ft_fr'), _txt('ft_prazo'),
+    _txt('ft_cota'), _txt('ft_qtd'), _txt('ft_totalCartas'),
+    _txt('ft_parcelaInicial'), _txt('ft_lance')
+  ];
+  if (_hasRecCol)  totalCelulas.push(_txt('ft_lanceRec'));
+  if (_hasEmbCol)  totalCelulas.push(_txt('ft_lanceEmb'));
+  if (_hasFgtsCol) totalCelulas.push(_txt('ft_lanceFgts'));
+  totalCelulas.push(_txt('ft_creditoDisp'), _txt('ft_parcelaPos'));
+  linhas.push({ celulas: totalCelulas, total: true });
+
+  // Monta colunas do PDF com as condicionais inseridas no lugar certo
+  const colunas = ['GRUPO','ADM.','FR','PRAZO','COTA UNITÁRIA','QTD','CRÉDITO TOTAL','PARCELA INICIAL','LANCE'];
+  if (_hasRecCol)  colunas.push('REC. PRÓPRIO');
+  if (_hasEmbCol)  colunas.push('EMBUTIDO');
+  if (_hasFgtsCol) colunas.push('FGTS');
+  colunas.push('CRÉDITO DISPONÍVEL','PARCELA APÓS');
 
   return [
     { tipo: 'tabela-ampla',
-      colunas: ['GRUPO','ADM.','FR','PRAZO','COTA UNITÁRIA','QTD','CRÉDITO TOTAL','PARCELA INICIAL','LANCE','CRÉDITO DISPONÍVEL','PARCELA APÓS'],
+      colunas,
       compact: true,
       linhas
     },

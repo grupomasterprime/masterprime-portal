@@ -25,6 +25,11 @@
   'use strict';
 
   const PDF_WIDTH = 1300;
+  // Em paisagem (A4 297×210mm, ratio 1,414), usamos largura maior pra que o
+  // canvas tenha proporção compatível e o template preencha a folha toda.
+  // Sem isso, html2canvas centraliza o conteúdo (renderizado a 1300px) e sobra
+  // ~73mm de espaço branco em cada lateral da página.
+  const PDF_WIDTH_LANDSCAPE = 1840;
   const NAVY = '#2D3F5E';
   const NAVY_DARK = '#1E2D45';
   const CARD_BG = '#F4F5F7';
@@ -518,8 +523,9 @@
             <div style="font-size:14px; color:#334155; line-height:1.6; white-space:pre-wrap; word-wrap:break-word;">${String(opts.observacoes).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
           </div>` : '';
 
+    const _w = opts._pdfWidth || PDF_WIDTH;
     return `
-      <div style="width:1300px; background:#fff; font-family:'Inter',-apple-system,system-ui,sans-serif; color:#1F2937; font-size:18px; line-height:1.5;">
+      <div style="width:${_w}px; background:#fff; font-family:'Inter',-apple-system,system-ui,sans-serif; color:#1F2937; font-size:18px; line-height:1.5;">
         ${renderHeader(opts.tituloEstrategia, opts.logoAdmin)}
         <div style="padding:14px 52px 0;">
           ${blocosHtml}
@@ -540,10 +546,23 @@
     var _winPdf = null;
     try { _winPdf = window.open('about:blank', '_blank'); } catch (e) { _winPdf = null; }
 
+    // Determina orientação ANTES de renderizar o template, pra escolher a largura
+    // certa do canvas (paisagem usa largura maior pra encher a página A4 horizontal).
+    // Orientação: 'portrait' (default) | 'landscape' | 'auto'
+    let orientation = opts.orientation || 'portrait';
+    if (orientation === 'auto') {
+      const blocos = opts.blocos || [];
+      const temTabelaLarga = blocos.some(b =>
+        b.tipo === 'tabela-ampla' && (b.colunas || []).length >= 8
+      );
+      orientation = temTabelaLarga ? 'landscape' : 'portrait';
+    }
+    const effectiveWidth = (orientation === 'landscape') ? PDF_WIDTH_LANDSCAPE : PDF_WIDTH;
+
     // Cria container off-screen mas dentro da viewport (z-index baixíssimo)
     const wrap = document.createElement('div');
-    wrap.style.cssText = `position:fixed; top:0; left:0; width:${PDF_WIDTH}px; background:#fff; z-index:-99999; pointer-events:none; overflow:hidden;`;
-    wrap.innerHTML = buildTemplate(opts);
+    wrap.style.cssText = `position:fixed; top:0; left:0; width:${effectiveWidth}px; background:#fff; z-index:-99999; pointer-events:none; overflow:hidden;`;
+    wrap.innerHTML = buildTemplate({ ...opts, _pdfWidth: effectiveWidth });
     document.body.appendChild(wrap);
 
     try {
@@ -554,24 +573,14 @@
       const canvas = await html2canvas(target, {
         scale: 2,
         backgroundColor: '#FFFFFF',
-        width: PDF_WIDTH,
-        windowWidth: PDF_WIDTH,
+        width: effectiveWidth,
+        windowWidth: effectiveWidth,
         useCORS: true,
         allowTaint: true,
         logging: false
       });
 
       const { jsPDF } = window.jspdf;
-      // Orientação: 'portrait' (default) | 'landscape' | 'auto'
-      // 'auto' detecta automaticamente baseado em blocos largos (tabela-ampla com 8+ colunas).
-      let orientation = opts.orientation || 'portrait';
-      if (orientation === 'auto') {
-        const blocos = opts.blocos || [];
-        const temTabelaLarga = blocos.some(b =>
-          b.tipo === 'tabela-ampla' && (b.colunas || []).length >= 8
-        );
-        orientation = temTabelaLarga ? 'landscape' : 'portrait';
-      }
       const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation, compress: true });
       const pageW = orientation === 'landscape' ? 297 : 210;
       const pageH = orientation === 'landscape' ? 210 : 297;
