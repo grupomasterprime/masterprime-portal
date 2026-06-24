@@ -1192,8 +1192,8 @@ window.KB_ADMIN["porto"] = {
       "categoria_label": "Entendendo o consórcio",
       "categoria_ordem": 2,
       "titulo": "O que é o Consórcio DATA CERTA Porto? (produto novo 2026)",
-      "conteudo": "O DATA CERTA é uma novidade do regulamento 2026 da Porto. O cliente já contrata sabendo a data em que vai ser contemplado — sem precisar contar com sorteio ou lance livre.\n\nComo funciona:\n• A contemplação acontece na data combinada (ex: 12, 24 ou 36 meses).\n• Para garantir a contemplação na data, o cliente contrata uma operação de crédito com a PORTOSEG S/A (a financeira do grupo Porto) que financia o valor do lance.\n• A parcela do financiamento do lance entra no MESMO boleto da parcela do consórcio.\n• Os planos DATA CERTA têm reajuste fixo de 3% ao ano (diferente do IPCA/INCC dos planos normais).\n• Sem entrada — começa só pela parcela.\n\nQuando indicar: cliente que precisa do bem em data específica e tem fôlego pra pagar parcela + financiamento do lance no mesmo boleto.\n\nLink oficial: portoseguro.com.br/consorcio/data-certa.",
-      "tags": "data certa, portoseg, financeira, lance financiado, 2026, regulamento novo, 3% ao ano, data fixa",
+      "conteudo": "O DATA CERTA é uma novidade do regulamento 2026 da Porto. O cliente já contrata sabendo a data em que vai ser contemplado — sem precisar contar com sorteio ou lance livre.\n\nComo funciona:\n• Prazos disponíveis: 12, 18, 24 ou 36 meses (cliente escolhe na contratação).\n• A contemplação acontece na data combinada.\n• Para garantir a contemplação na data, o cliente contrata uma operação de crédito com a PORTOSEG S/A (a financeira do grupo Porto) que financia o valor do lance.\n• A parcela do financiamento do lance entra no MESMO boleto da parcela do consórcio.\n• Os planos DATA CERTA têm reajuste fixo de 3% ao ano (diferente do IPCA/INCC dos planos normais).\n• Sem entrada — começa só pela parcela.\n• Atualmente disponível para Consórcio de Automóvel (a Porto pode expandir para outros produtos).\n\nQuando indicar: cliente que precisa do bem em data específica e tem fôlego pra pagar parcela + financiamento do lance no mesmo boleto.\n\nLink oficial: portoseguro.com.br/consorcio/data-certa.",
+      "tags": "data certa, portoseg, financeira, lance financiado, 2026, regulamento novo, 3% ao ano, data fixa, 12 meses, 18 meses, 24 meses, 36 meses, prazos",
       "ordem": 11
     },
     {
@@ -1231,6 +1231,33 @@ window.KB_ADMIN["porto"] = {
       "conteudo": "O LANCE FIXO foi formalizado em cada produto Porto em datas diferentes:\n\n• Imóvel: já existia desde 2024 (regulamentado no Capítulo de Lance).\n• Auto e Pesados: introduzido a partir do regulamento 2025.\n\nRegras gerais do lance fixo (em todos os produtos):\n• O percentual fixo é informado no campo 'Informações do Grupo' da proposta.\n• O cliente que oferta lance fixo NÃO PODE ofertar lance livre na mesma assembleia (vale a última oferta).\n• Critério de contemplação: 1 cota por lance fixo, demais cotas por lance livre (na mesma assembleia).\n• Em caso de empate no lance fixo, o desempate é feito pela Loteria Federal (cota mais próxima da sorteada).\n\nO lance fixo é útil quando o cliente quer travar uma estratégia de oferta de antemão, sem ficar 'brigando' por percentual com outros.",
       "tags": "lance fixo, 2024, 2025, imóvel, auto, pesados, percentual fixo, loteria federal, desempate, regulamento, histórico",
       "ordem": 12
+    },
+    {
+      "categoria_key": "fundamentos",
+      "categoria_label": "Entendendo o consórcio",
+      "categoria_ordem": 2,
+      "titulo": "Faixas de crédito Porto (mínimo e máximo)",
+      "conteudo": "As faixas de crédito disponíveis no Consórcio Porto Bank, conforme o simulador oficial do site:\n\n• Automóvel: de R$ 25.000,00 a R$ 300.000,00.\n• Imóvel: de R$ 70.000,00 a R$ 1.500.000,00.\n• Pesados: a Porto não publica faixa fixa — depende da campanha vigente. Para cotas acima dos valores padrão, geralmente é necessário falar com um consultor (esteira de atacado).\n\nPra valores fora dessas faixas, o cliente pode juntar 2 cotas (mesma categoria) ou olhar com a Porto se há campanha especial.",
+      "tags": "faixa crédito, mínimo, máximo, R$ 25.000, R$ 300.000, R$ 70.000, R$ 1.500.000, simulador, valores",
+      "ordem": 12
+    },
+    {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Contemplação",
+      "categoria_ordem": 4,
+      "titulo": "Pós-contemplação Auto/Bens Móveis: passo a passo + prazos",
+      "conteudo": "Fluxo oficial Porto pós-contemplação para bens móveis (auto, moto, pesados leves, bike, placa solar):\n\n1. Pagamento do lance (se contemplado por lance) — boleto em até 2 dias úteis pela Área do Cliente, App Porto ou Chat.\n2. Análise de crédito — resultado em até 3 dias úteis (no caso de lance, contam a partir do pagamento). Comunicação por e-mail e SMS.\n3. Envio da documentação inicial — pela plataforma da Porto, envia documentos + CRLV-e do bem escolhido. Avaliação de elegibilidade em até 2 dias úteis.\n4. Biometria facial — link enviado via SMS.\n5. Envio de documentos de compra e venda — varia por tipo de bem:\n   • 0km ou seminovo (loja/concessionária): NF com alienação à Porto Bank.\n   • Seminovo (transação particular): CRV/ATPV-e preenchido e reconhecido em cartório.\n   • Linha amarela, máquina agrícola, placa solar ou bike: nota fiscal.\n6. Alienação e pagamento — assinatura do contrato digital de alienação (com fiador, se houver). Vendedor recebe em até 2 dias úteis; taxas devidas são descontadas do crédito.\n\nSeguindo todos os passos com a documentação correta, em torno de 3 dias úteis o cliente está com o veículo novo.",
+      "tags": "pós-contemplação, bens móveis, auto, passos, prazos, biometria, alienação, CRLV, ATPV, fiador, 3 dias, 2 dias úteis",
+      "ordem": 21
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Pós-contemplação Imóvel: 8 passos oficiais Porto",
+      "conteudo": "Fluxo oficial da pós-contemplação Porto para Imóvel (do contemplado ao registro do contrato):\n\n1. Envio de documentos — cliente envia documentação inicial.\n2. Análise da documentação + vistoria do imóvel — Porto analisa e faz a vistoria do bem.\n3. Emissão do contrato — depois da aprovação.\n4. Emissão dos certificados digitais — necessário para a assinatura.\n5. Assinatura digital do contrato — cliente, vendedor (e fiador, se houver) assinam.\n6. Pagamento do ITBI e taxas do Cartório — responsabilidade do cliente.\n7. Contrato registrado — em cartório.\n8. Pagamento do valor negociado ao vendedor do imóvel — Porto libera o crédito após o registro.\n\nDicas práticas:\n• ITBI varia de 2% a 4% sobre o valor do imóvel (depende do município).\n• Custas cartoriais podem chegar a 3-5% do valor — o cliente precisa estar preparado.\n• O processo todo (do envio à liberação do pagamento) costuma levar 30 a 60 dias dependendo da regularidade da documentação e da agilidade do cartório local.",
+      "tags": "pós-contemplação, imóvel, 8 passos, itbi, cartório, registro, vistoria, certificado digital, alienação, prazo",
+      "ordem": 22
     }
   ],
   "downloads": [
