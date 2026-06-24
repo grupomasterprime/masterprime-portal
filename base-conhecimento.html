@@ -839,8 +839,14 @@ button.kbc-src-link:focus-visible {
       void item.offsetWidth; // reset anim
       item.classList.add('maia-highlight');
       setTimeout(function () { item.classList.remove('maia-highlight'); }, 2400);
-      // Rola até o card
-      try { item.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { item.scrollIntoView(); }
+      // Rola até o card — usamos scroll instantâneo (smooth às vezes é ignorado
+      // quando há reflow concorrente após loadAdmin). O glow já chama atenção.
+      try {
+        item.scrollIntoView({ block: 'center' });
+      } catch (e) {
+        // fallback antigo (alguns browsers não aceitam o options object)
+        item.scrollIntoView();
+      }
     }
 
     // Se a aba ativa não é a certa, troca e espera o render
