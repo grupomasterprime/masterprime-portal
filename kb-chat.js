@@ -395,6 +395,19 @@
       var sourcesHtml = '';
       if (m.sources && m.sources.length) {
         sourcesHtml = '<div class="kbc-sources">' + m.sources.map(function (s) {
+          // Source vem como "Título · Banco" (ou "Título · Banco · Categoria")
+          // Quebra em partes pra montar o botão clicável
+          var parts = String(s).split('·').map(function (x) { return x.trim(); });
+          var titulo = parts[0] || '';
+          var banco = parts[1] || '';
+          var hasBanco = banco && titulo;
+          if (hasBanco) {
+            return '<button type="button" class="kbc-src kbc-src-link" ' +
+                     'data-titulo="' + esc(titulo) + '" data-adm="' + esc(banco) + '" ' +
+                     'title="Clique para abrir o card no Material de Apoio">' +
+                     '📘 ' + esc(s) +
+                   '</button>';
+          }
           return '<span class="kbc-src">📘 ' + esc(s) + '</span>';
         }).join('') + '</div>';
       }
@@ -560,6 +573,20 @@
         if (input) input.value = q;
         send(q);
       }
+    });
+
+    // Delegate: clica em fonte (card citado) → abre direto no Material de Apoio
+    container.addEventListener('click', function (e) {
+      var src = e.target && e.target.closest ? e.target.closest('.kbc-src-link') : null;
+      if (!src) return;
+      e.preventDefault();
+      var titulo = src.getAttribute('data-titulo') || '';
+      var adm = src.getAttribute('data-adm') || '';
+      try {
+        if (typeof window.maiaAbrirCard === 'function') {
+          window.maiaAbrirCard(adm, titulo);
+        }
+      } catch (err) { console.error('[Maia] erro ao abrir card:', err); }
     });
 
     // Foca o input

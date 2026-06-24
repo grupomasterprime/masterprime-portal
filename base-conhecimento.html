@@ -108,6 +108,12 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
 }
 .kb-item:hover { border-color: var(--border2); }
 .kb-item.open { border-color: var(--mp-teal); box-shadow: 0 3px 12px rgba(45,63,94,.07); }
+@keyframes maiaCardGlow {
+  0%   { box-shadow: 0 0 0 0 rgba(13, 148, 136, .55), 0 3px 12px rgba(45,63,94,.10); border-color: var(--mp-teal); }
+  35%  { box-shadow: 0 0 0 6px rgba(13, 148, 136, .14), 0 6px 20px rgba(13,148,136,.18); border-color: var(--mp-teal); }
+  100% { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0), 0 3px 12px rgba(45,63,94,.07); border-color: var(--mp-teal); }
+}
+.kb-item.maia-highlight { animation: maiaCardGlow 2.2s ease-out; }
 .kb-q {
   width: 100%; text-align: left; background: transparent; border: 0; cursor: pointer;
   padding: 15px 16px; display: flex; align-items: center; gap: 12px;
@@ -376,6 +382,19 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
   font-size: 11px; color: var(--text2); font-weight: 500;
   display: inline-block;
 }
+button.kbc-src-link {
+  background: transparent; border: 1px solid transparent;
+  text-align: left; font: inherit; color: var(--mp-teal); font-weight: 600;
+  padding: 4px 8px; border-radius: 6px; cursor: pointer;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+}
+button.kbc-src-link:hover {
+  background: rgba(13, 148, 136, .08); border-color: rgba(13, 148, 136, .25);
+  color: var(--mp-teal);
+}
+button.kbc-src-link:focus-visible {
+  outline: 2px solid rgba(13, 148, 136, .55); outline-offset: 1px;
+}
 
 .kbc-typing {
   display: flex; align-items: center; gap: 6px;
@@ -500,7 +519,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
 <script src="kb-fgts.js?v=20260622c"></script>
 <script src="kb-comissoes.js?v=20260612d"></script>
 <script src="kb-chat-config.js?v=20260619d"></script>
-<script src="kb-chat.js?v=20260622j"></script>
+<script src="kb-chat.js?v=20260624b"></script>
 <script>
 (function () {
   var ADM = window.KB_ADMIN || {};
@@ -765,7 +784,8 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
   // ── item HTML ──
   function itemHTML(e, showBadge) {
     var badge = showBadge ? '<span class="badge">' + esc(e.categoria_label) + '</span>' : '';
-    return '<div class="kb-item">' +
+    var slug = norm(e.titulo);
+    return '<div class="kb-item" data-titulo-slug="' + esc(slug) + '">' +
       '<button class="kb-q">' + badge +
         '<span class="q-text">' + esc(e.titulo) + '</span>' +
         '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>' +
@@ -773,6 +793,79 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-s
       '<div class="kb-a"><div class="kb-a-inner">' + renderConteudo(e.conteudo) + '</div></div>' +
     '</div>';
   }
+
+  // ── Função global: abrir card específico (usada pela Maia) ──
+  // adm: 'porto' | 'itau' | 'bradesco' | 'fgts' | 'comissoes'
+  // titulo: string com o título exato (ou aproximado) do card
+  window.maiaAbrirCard = function (adm, titulo) {
+    var key = (adm || '').toLowerCase().trim();
+    // Mapeia variações de nome → key interno
+    var map = { 'porto': 'porto', 'itau': 'itau', 'itaú': 'itau', 'bradesco': 'bradesco',
+                'fgts': 'fgts', 'fgts caixa': 'fgts', 'caixa': 'fgts',
+                'comissões': 'comissoes', 'comissoes': 'comissoes' };
+    key = map[key] || key;
+    if (!ADM[key]) return;
+
+    var targetSlug = norm(titulo || '');
+    function abrir() {
+      // Fecha o chat da Maia se estiver aberto
+      try {
+        if (window.MaiaChat && typeof window.MaiaChat.close === 'function') {
+          window.MaiaChat.close();
+        } else {
+          var pane = document.getElementById('kbc-pane');
+          if (pane) pane.classList.remove('open');
+        }
+      } catch (e) {}
+
+      // Procura o card no DOM (limpa filtro/busca pra garantir que está visível)
+      var content = document.getElementById('content');
+      if (!content) return;
+      var item = content.querySelector('.kb-item[data-titulo-slug="' + targetSlug + '"]');
+      // Fallback: busca por includes (slug parcial)
+      if (!item && targetSlug) {
+        var all = content.querySelectorAll('.kb-item[data-titulo-slug]');
+        for (var i = 0; i < all.length; i++) {
+          var s = all[i].getAttribute('data-titulo-slug') || '';
+          if (s.indexOf(targetSlug) >= 0 || targetSlug.indexOf(s) >= 0) { item = all[i]; break; }
+        }
+      }
+      if (!item) return;
+
+      // Abre o accordion
+      if (!item.classList.contains('open')) item.classList.add('open');
+      // Anima destaque
+      item.classList.remove('maia-highlight');
+      void item.offsetWidth; // reset anim
+      item.classList.add('maia-highlight');
+      setTimeout(function () { item.classList.remove('maia-highlight'); }, 2400);
+      // Rola até o card
+      try { item.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { item.scrollIntoView(); }
+    }
+
+    // Se a aba ativa não é a certa, troca e espera o render
+    if (activeAdm !== key) {
+      // Limpa filtro/busca antes de trocar
+      try { if (input) input.value = ''; query = ''; activeChip = 'todas'; } catch(e) {}
+      loadAdmin(key);
+      setTimeout(abrir, 80);
+    } else {
+      // Se tinha filtro ativo ('todas' ou outro chip), garante que renderiza tudo
+      if (activeChip !== 'todas' || query) {
+        activeChip = 'todas';
+        query = '';
+        if (input) input.value = '';
+        if (clearBtn) clearBtn.classList.remove('show');
+        document.querySelectorAll('.chip').forEach(function (x) {
+          x.classList.toggle('active', x.getAttribute('data-cat') === 'todas');
+        });
+        render();
+        setTimeout(abrir, 50);
+      } else {
+        abrir();
+      }
+    }
+  };
 
   // ── render ──
   function render() {
