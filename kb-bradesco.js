@@ -840,6 +840,15 @@ window.KB_ADMIN["bradesco"] = {
       "categoria_key": "seguro",
       "categoria_label": "Seguro prestamista",
       "categoria_ordem": 12,
+      "titulo": "Quanto custa o seguro prestamista Bradesco? (coeficientes por tipo de bem)",
+      "conteudo": "O coeficiente do seguro prestamista Bradesco varia conforme o tipo de bem:\n\n• Imóvel: 0,043% ao mês (alíquota fixa).\n• Pesados: 0,065% ao mês (alíquota fixa).\n• Veículos leves (auto/moto): varia entre 0,0562% e 0,0598% ao mês — depende do grupo e do perfil do consorciado.\n\nO valor incide sobre o saldo devedor / valor da cota + taxas e é cobrado mensalmente junto da parcela. O seguro é opcional na adesão.\n\nReferência rápida pra comparar com outras administradoras:\n• Porto: 0,038% (alíquota única).\n• Itaú: Imóvel 0,047% · Veículos 0,056% · Moto 0,084%.\n• Bradesco: Imóvel 0,043% · Pesados 0,065% · Leves 0,0562%–0,0598%.\n\nValores indicativos — confirmar no contrato/proposta do grupo específico do cliente.",
+      "tags": "seguro, valor, custo, coeficiente, alíquota, 0,043, 0,065, 0,0562, 0,0598, imóvel, pesados, veículos leves, mensal, comparativo, porto, itaú",
+      "ordem": 5
+    },
+    {
+      "categoria_key": "seguro",
+      "categoria_label": "Seguro prestamista",
+      "categoria_ordem": 12,
       "titulo": "Vale a pena oferecer o seguro ao cliente?",
       "conteudo": "Vale sempre apresentar. Por um pequeno adicional na parcela, o cliente protege um plano de vários anos.\n\nO jeito certo de oferecer é como parte do planejamento, não como um custo extra: \"por um valor pequeno, seu plano fica protegido até o fim, para você e para a sua família\".",
       "tags": "seguro, vale a pena, oferecer, argumento",
