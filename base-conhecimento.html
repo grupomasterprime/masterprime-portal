@@ -513,7 +513,7 @@ button.kbc-src-link:focus-visible {
 
 </div>
 
-<script src="kb-bradesco.js?v=20260624d"></script>
+<script src="kb-bradesco.js?v=20260624e"></script>
 <script src="kb-porto.js?v=20260624c"></script>
 <script src="kb-itau.js?v=20260624b"></script>
 <script src="kb-fgts.js?v=20260622c"></script>
@@ -951,7 +951,11 @@ button.kbc-src-link:focus-visible {
   function renderDownloads() {
     var box = document.getElementById('downloads');
     if (!box || !DOWNLOADS.length) return;
-    box.innerHTML = DOWNLOADS.map(function (d) {
+    // Ordena alfabeticamente pelo título (pt-BR, ignora acentos e maiúsculas)
+    var dlOrdenado = DOWNLOADS.slice().sort(function (a, b) {
+      return (a.titulo || '').localeCompare((b.titulo || ''), 'pt-BR', { sensitivity: 'base' });
+    });
+    box.innerHTML = dlOrdenado.map(function (d) {
       return '<div class="dl-card">' +
         '<div class="dl-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>' +
         '<div class="dl-titulo">' + esc(d.titulo) + '</div>' +

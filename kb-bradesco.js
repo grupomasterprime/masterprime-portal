@@ -1215,9 +1215,9 @@ window.KB_ADMIN["bradesco"] = {
       "ordem": 14
     },
     {
-      "categoria_key": "transferencia",
+      "categoria_key": "saida",
       "categoria_label": "Transferência e saída do grupo",
-      "categoria_ordem": 8,
+      "categoria_ordem": 11,
       "titulo": "Tabela oficial de tarifas Bradesco Consórcios (Folheto vigente)",
       "conteudo": "Valores úteis pra apresentar custos ao cliente (Folheto PF, atualização 06.2026):\n\n• 2ª via de documentos: R$ 50,00 por documento.\n• Avaliação de bens móveis usados: R$ 650,00. Novos: R$ 280,00. Não alienáveis: R$ 500,00.\n• Avaliação imóvel residencial / terreno até 5.000m²: até R$ 1.069,00.\n• Avaliação imóvel comercial / terreno acima de 5.000m²: até R$ 3.500,00.\n• Elaboração de instrumento particular + análise jurídica (aquisição, construção ou reforma): R$ 2.791,00 por contrato.\n• Tarifa de avaliação avulsa — término de construção/reforma residencial: até R$ 800,00. Comercial: até R$ 2.251,33.\n• Transferência de bens móveis: 1% do bem de referência atualizado, mínimo R$ 800,00.\n• Transferência de bens imóveis: 1% do saldo devedor, mínimo R$ 750,00.\n• Cessão de bens móveis ou imóveis: 1% do saldo devedor, mínimo R$ 750,00.\n• Substituição de garantia (móvel): 1% sobre bem de referência, mínimo R$ 800,00.\n• Substituição de garantia (imóvel): 1% do saldo devedor, mínimo R$ 1.145,00.\n\nValores podem ser reajustados com 30 dias de aviso. Confirmação sempre no Folheto vigente.",
       "tags": "tarifas, valores, transferência, cessão, substituição garantia, avaliação, 2ª via, R$ 1.069, R$ 2.791, R$ 800, R$ 750, R$ 1.145, móveis, imóveis",
@@ -1233,9 +1233,9 @@ window.KB_ADMIN["bradesco"] = {
       "ordem": 13
     },
     {
-      "categoria_key": "plataforma",
+      "categoria_key": "plataforma_corretor",
       "categoria_label": "Plataforma do corretor",
-      "categoria_ordem": 12,
+      "categoria_ordem": 14,
       "titulo": "Fluxo do contemplado quando o consórcio foi vendido via parceiro/corretora",
       "conteudo": "Quando o cliente comprou via parceiro (corretora), o fluxo de pós-contemplação NÃO passa pela agência — é todo via Portal de Relacionamento:\n\n1. Acesso ao portal — cliente cadastra login e senha.\n2. Indicação do bem — escolhe veículo/imóvel e indica no portal.\n3. Análise de crédito — Bradesco analisa os documentos digitalizados (até 1 dia útil).\n4. Vistoria — para veículos usados, link por SMS pro vendedor fazer on-line.\n5. Autorização de faturamento — emitida e enviada ao vendedor pela Bradesco.\n6. Faturamento — cliente digitaliza nota fiscal ou DUT no portal.\n7. Emissão e assinatura eletrônica — Bradesco envia contrato por e-mail; cliente assina eletronicamente.\n8. Liberação do crédito — pagamento em até 3 dias úteis após docs analisadas.\n\nO consultor deve ORIENTAR O CLIENTE A FAZER O CADASTRO NO PORTAL LOGO QUE FOR CONTEMPLADO — isso evita atraso de 2-3 dias no início do processo. Tudo que é assinatura é eletrônica, o que acelera muito frente ao fluxo de agência.",
       "tags": "parceiro, portal de relacionamento, fluxo, contemplado, assinatura eletrônica, 8 passos, 1 dia útil, 3 dias úteis, corretora, sem agência",
@@ -1252,11 +1252,6 @@ window.KB_ADMIN["bradesco"] = {
     }
   ],
   "downloads": [
-    {
-      "titulo": "Guia do Contemplado — Automóvel",
-      "descricao": "Passo a passo da compra do veículo depois da contemplação. Ótimo para enviar ao cliente recém-contemplado.",
-      "arquivo": "kb-guia-contemplado-auto.pdf"
-    },
     {
       "titulo": "1º acesso ao Canal do Consorciado",
       "descricao": "Guia passo a passo de como o cliente faz o primeiro acesso e cria a senha do Canal do Consorciado.",
