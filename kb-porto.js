@@ -720,6 +720,15 @@ window.KB_ADMIN["porto"] = {
       "ordem": 6
     },
     {
+      "categoria_key": "transferencia",
+      "categoria_label": "Transferência, cancelamento e devoluções",
+      "categoria_ordem": 9,
+      "titulo": "Como funciona a descontemplação na Porto? (Resolução BCB 285/2023)",
+      "conteudo": "A partir da Resolução BCB nº 285/2023 do Banco Central, em vigor desde 01/07/2024:\n\nPara contratos iniciados a partir de 01/07/2024, em caso de descontemplação a cota é automaticamente cancelada.\n\nO que o cliente recebe de volta:\n• Parcelas pagas até o momento da descontemplação/cancelamento (fundo comum).\n• Lance pago com recurso próprio, se houver (fundo comum).\n\nO que é descontado:\n• Taxa de administração total paga até o momento (incluindo a taxa antecipada, se houver).\n• Taxa de administração proporcional ao lance, se houver.\n• Fundo de reserva pago até o momento.\n• Multa por quebra de contrato.\n\nResumo: o cliente não perde tudo — recebe de volta o que pagou, com os descontos previstos em contrato. Em cotas de imóveis, a taxa de administração antecipada também é descontada.",
+      "tags": "descontemplação, cancelamento, resolução 285, bcb, 01/07/2024, devolução, multa, taxa administração",
+      "ordem": 7
+    },
+    {
       "categoria_key": "seguro",
       "categoria_label": "Seguro prestamista",
       "categoria_ordem": 10,

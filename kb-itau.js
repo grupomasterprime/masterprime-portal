@@ -648,6 +648,60 @@ window.KB_ADMIN["itau"] = {
       "ordem": 7
     },
     {
+      "categoria_key": "seguro",
+      "categoria_label": "Seguro consórcio",
+      "categoria_ordem": 10,
+      "titulo": "Quanto custa o seguro do consórcio Itaú? (coeficiente mensal)",
+      "conteudo": "O seguro é mensal, calculado por um coeficiente que incide sobre o valor da cota + taxas, conforme o tipo de bem (independentemente do grupo):\n\n• Imóvel: 0,047% ao mês.\n• Veículos: 0,056% ao mês.\n• Moto: 0,084% ao mês.\n\nO valor sai junto na parcela.",
+      "tags": "seguro, valor, custo, coeficiente, 0,047, 0,056, 0,084, imóvel, veículo, moto",
+      "ordem": 8
+    },
+    {
+      "categoria_key": "seguro",
+      "categoria_label": "Seguro consórcio",
+      "categoria_ordem": 10,
+      "titulo": "Quais os limites de cobertura e a elegibilidade do seguro Itaú?",
+      "conteudo": "Em caso de sinistro coberto, o seguro quita o saldo devedor (total ou parcial), respeitando o limite por tipo de bem (por cota):\n\n• Moto: até R$ 200.000,00.\n• Veículos leves ou pesados: até R$ 700.000,00.\n• Imóvel: até R$ 800.000,00.\n\nVigência: acompanha todo o prazo do contrato do consórcio.\n\nElegibilidade: entre 18 e 75 anos.",
+      "tags": "seguro, limite, cobertura, moto 200, veículos 700, imóvel 800, elegibilidade, idade",
+      "ordem": 9
+    },
+    {
+      "categoria_key": "pode_imoveis",
+      "categoria_label": "Carta de crédito — Imóveis (pode e não pode)",
+      "categoria_ordem": 6,
+      "titulo": "Imóveis — o que dá para comprar com a carta",
+      "conteudo": "Com a carta de crédito de Imóveis (Varejo PF — IA, IU e Personnalité), o cliente pode comprar:\n\n• Casa, apartamento, kitnet, loft, studio, chalé, imóvel multifamiliar, imóvel com edícula.\n• Terreno urbano.\n• Imóvel na planta (com garantia substitutiva).\n• Imóvel rural (com garantia de imóvel urbano).\n• Imóvel Minha Casa Minha Vida (faixas 2 e 3) — só Varejo PF.\n• Imóvel de Habitação de Interesse Social ou Habitação de Mercado Popular — só Varejo PF.\n• Imóvel de praia, comercial (inclusive com locação em andamento), misto residencial/comercial (apenas aquisição).\n• Sítios e chácaras urbanos, flat, hotel, pousada.\n• Imóvel em área de preservação permanente (com regras especiais).\n• Reforma estrutural, construção, imóvel em reforma/construção (exceto modalidade com FGTS).\n• Quitação de financiamento, CCB e GCI (para operações dentro do Itaú).\n• Composição: pode juntar cartas de Imóveis para comprar 1 bem; e comprar mais de 1 bem com 1 carta de Imóveis.",
+      "tags": "imóvel, pode, carta de crédito, casa, apartamento, terreno, mcmv, planta, comercial, juntar cartas",
+      "ordem": 1
+    },
+    {
+      "categoria_key": "pode_imoveis",
+      "categoria_label": "Carta de crédito — Imóveis (pode e não pode)",
+      "categoria_ordem": 6,
+      "titulo": "Imóveis — o que NÃO dá para comprar com a carta",
+      "conteudo": "A carta de Imóveis não aceita:\n\n• Vaga de garagem, estacionamento, imóvel de patrimônio histórico ou tombado (exceto tombamento só da fachada).\n• Imóvel em região de alagamento, ausente de infraestrutura básica (esgoto, energia) ou em locais de risco.\n• Imóvel com divergência de metragem acima de 150%, sem averbação da construção ou com área não delimitada.\n• Imóvel de leilão de qualquer instituição financeira (incluindo o Itaú).\n• Imóvel misto (madeira + alvenaria).\n• Templos, igrejas, imóveis em áreas indígenas.\n• Imóveis com fins sociais (hospital, escola), em locais com risco de contaminação de solo ou com atividade econômica de produtos perigosos.\n• Imóvel que não está em nome dos vendedores.\n• Imóvel com servidão administrativa, transmitido a título de doação de pagamento, ou com garantia em nome de terceiro.\n• Reembolso de reforma e construção já realizadas.",
+      "tags": "imóvel, não pode, restrição, vaga, garagem, leilão, igreja, indígena, doação, reembolso",
+      "ordem": 2
+    },
+    {
+      "categoria_key": "pode_veiculos",
+      "categoria_label": "Carta de crédito — Veículos (pode e não pode)",
+      "categoria_ordem": 7,
+      "titulo": "Veículos — o que dá para comprar com a carta",
+      "conteudo": "Com a carta de crédito de Veículos, o cliente pode comprar:\n\n• Motos elétricas (até 1 ano), motos ≥ 150cc (até 1 ano) e ≥ 250cc (até 3 anos).\n• Veículos de passeio, utilitários e elétricos: até 15 anos para consórcios contratados antes de 01/11/2024; até 8 anos para contratos a partir de 01/11/2024.\n• Vans, Kombi (até 5 anos), ônibus e micro-ônibus urbano/rodoviário (até 5 anos).\n• Implementos rodoviários (até 6 anos) e caminhões / caminhões elétricos (até 8 anos).\n• Máquinas com placa 0Km.\n• Tratores, colheitadeiras, escavadeiras, empilhadeiras, retroescavadeiras 0Km (sem placa) — só para Atacado PF (Produtor Rural) ou Atacado PJ.\n• Quitação de CDC, FINAME e Leasing — apenas para veículos (máquinas não entram).\n\nComposição: pode juntar cartas de mesma categoria (ex.: pesados com pesados) e comprar até 5 veículos com 1 carta.",
+      "tags": "veículo, pode, carta de crédito, carro, moto, caminhão, ônibus, van, máquina, trator, quitação, cdc, finame, leasing",
+      "ordem": 1
+    },
+    {
+      "categoria_key": "pode_veiculos",
+      "categoria_label": "Carta de crédito — Veículos (pode e não pode)",
+      "categoria_ordem": 7,
+      "titulo": "Veículos e outros — o que NÃO dá para comprar com a carta",
+      "conteudo": "A carta de Veículos não aceita:\n\n• Implementos agrícolas (semeadeira, plantadeira, cabine de trator).\n• Aeronaves, drones, pivô de irrigação, trem, metrô, locomotivas.\n• Ônibus 0Km com faturamento em Y, máquinas usadas.\n• Jetski e embarcações.\n• Refrigerador para implemento rodoviário, gerador de energia, compactador de lixo.\n• Carroceria de caminhão não articulada.\n• Quitação de CDC, FINAME e Leasing para máquinas (só vale para veículos).\n• Veículo sem chassi (com exceção de máquinas agrícolas).\n• Veículos sem cadastro na Base de Índice Nacional (BIN).",
+      "tags": "veículo, não pode, restrição, aeronave, drone, jetski, embarcação, máquina usada, sem chassi",
+      "ordem": 2
+    },
+    {
       "categoria_key": "canais",
       "categoria_label": "Canais e contatos",
       "categoria_ordem": 11,
@@ -872,6 +926,16 @@ window.KB_ADMIN["itau"] = {
       "titulo": "Guia do Consorciado — Itaú",
       "descricao": "Material oficial do Itaú para o cliente: linha do tempo do consórcio, serviços disponíveis (2ª via, contemplação, cancelamento, atualização cadastral, IR, resgate), canais de atendimento e dicas.",
       "arquivo": "kb-itau-guia-consorciado.pdf"
+    },
+    {
+      "titulo": "Lâmina Seguro Consórcio PF — Itaú (Novo Marco Dez/25)",
+      "descricao": "Coberturas (morte e invalidez), carências em vigor a partir de 10/12/25, assistências 24h para carro/moto/pesados e imóvel, e canal de atendimento.",
+      "arquivo": "kb-itau-seguro-prestamista.pdf"
+    },
+    {
+      "titulo": "Carta de Crédito — Guia Pode e Não Pode (Itaú)",
+      "descricao": "Tabela completa por perfil (Varejo PF, Atacado PF, Varejo PJ, Atacado PJ) com o que pode e o que não pode ser adquirido com a carta de imóveis e de veículos.",
+      "arquivo": "kb-itau-pode-nao-pode-completo.pdf"
     }
   ]
 };
