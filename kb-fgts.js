@@ -104,6 +104,11 @@ window.KB_ADMIN["fgts"] = {
       "titulo": "Cartilha do FGTS",
       "descricao": "Como usar o FGTS no consórcio de imóvel: pagar lance, amortizar saldo devedor ou quitar a cota contemplada. Documentação exigida, regras do Banco Central e fluxo passo a passo da Caixa.",
       "arquivo": "kb-porto-fgts.pdf"
+    },
+    {
+      "titulo": "Manual da Moradia Própria — Caixa (V.035 · Dez/25)",
+      "descricao": "Manual oficial da Caixa Econômica Federal (70 páginas, versão Dez/25 V.035) sobre uso do FGTS na moradia própria: amortização, liquidação, aquisição, regras de elegibilidade, interstício 2/3 anos, regime de bens e operacionalização. Material denso, é a referência completa do FGTS habitacional.",
+      "arquivo": "kb-fgts-manual-moradia-propria.pdf"
     }
   ]
 };

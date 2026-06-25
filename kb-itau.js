@@ -1347,11 +1347,6 @@ window.KB_ADMIN["itau"] = {
       "arquivo": "kb-itau-condicoes-seguro-consorcio.pdf"
     },
     {
-      "titulo": "Manual da Moradia Própria — FGTS Caixa (V.035 Dez/25)",
-      "descricao": "Manual oficial da Caixa Econômica Federal (70 páginas, versão Dez/25 V.035) sobre uso do FGTS na moradia própria: amortização, liquidação, aquisição, regras de elegibilidade e operacionalização.",
-      "arquivo": "kb-itau-manual-moradia-propria.pdf"
-    },
-    {
       "titulo": "FGTS no Itaú Imóveis — Amortização e Quitação",
       "descricao": "Guia específico do Itaú sobre uso do FGTS para amortizar ou quitar o saldo devedor do consórcio de imóveis. Inclui requisitos, documentação e fluxo operacional.",
       "arquivo": "kb-itau-imovel-fgts-amortizacao.pdf"
