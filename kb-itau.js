@@ -1258,6 +1258,276 @@ window.KB_ADMIN["itau"] = {
       "conteudo": "Quando o cliente é casado ou em união estável, a possibilidade de usar FGTS depende do REGIME DE BENS:\n\n• Comunhão Universal: TODOS os bens se comunicam (antes e depois do casamento). Se um cônjuge tem imóvel impeditivo ou financiamento ativo no SFH, AMBOS ficam impedidos.\n• Comunhão Parcial (regime padrão): bens adquiridos APÓS o casamento se comunicam. Se um adquiriu imóvel impeditivo após o casamento, ambos ficam impedidos. Se a propriedade é anterior, só o titular fica impedido.\n• Separação de Bens: NÃO há comunicação. Só fica impedido o cônjuge que tem imóvel/financiamento impeditivo.\n• União Estável (sem registro): regime presumido é Comunhão Parcial. Bens adquiridos antes da união são pessoais.\n\nAlteração de estado civil após contratação do consórcio: enviar documento que comprove (Certidão de Casamento, Escritura de União Estável, Certidão com averbação de Divórcio + formal de partilha).\n\nReferência: FGTS Itaú Amortização (2025) e Manual Moradia Própria item 3.10.",
       "tags": "fgts, conjuge, uniao estavel, comunhao universal, parcial, separacao bens, impeditivo, regime",
       "ordem": 20
+    },
+    {
+      "categoria_key": "fundamentos",
+      "categoria_label": "Entendendo o consórcio",
+      "categoria_ordem": 2,
+      "titulo": "Como funciona a formação do grupo Itaú (prazo de 90+90 dias)?",
+      "conteudo": "A Itaú tem **até 90 dias** para constituir o grupo após a contratação. Se nesse prazo o grupo **não se formar**, a Itaú comunica o cliente, que deve manifestar formalmente em **até 5 dias úteis** se quer aguardar mais 90 dias adicionais. Se o cliente **não manifestar interesse**, recebe restituição integral do que pagou. Se aguardar e mesmo assim o grupo não se constituir, recebe os valores corrigidos.\n• 1ª janela: 90 dias para formar\n• Se não formar: cliente decide em 5 dias úteis\n• 2ª janela (opcional): mais 90 dias\nFonte: Regulamentos Itaú V1 07/24, cláusula 22.1.a.",
+      "tags": "formação, grupo em formação, prazo, 90 dias, restituição",
+      "ordem": 17
+    },
+    {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Contemplação",
+      "categoria_ordem": 4,
+      "titulo": "Quando o crédito fica disponível depois da contemplação?",
+      "conteudo": "Após homologação da contemplação na AGO, a Itaú **disponibiliza o crédito em até 3 dias úteis**. O dinheiro fica aplicado no Itaú **rendendo a favor do consorciado** até ser efetivamente utilizado para a compra do bem. Ou seja: o cliente não perde rendimento por demorar a usar a carta.\n• Disponibilização: 3 dias úteis após a AGO\n• Rendimentos: líquidos, em favor do consorciado\n• Aplicação encerra quando o crédito é usado\nFonte: Regulamentos Itaú V1 07/24, cláusula 15.1.",
+      "tags": "homologação, crédito disponível, rendimentos, prazo",
+      "ordem": 8
+    },
+    {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Contemplação",
+      "categoria_ordem": 4,
+      "titulo": "Resgate em espécie: 180 dias da contemplação e como funciona",
+      "conteudo": "Para converter a carta em dinheiro (resgate em espécie), o cliente precisa estar **contemplado há pelo menos 180 dias**. O pagamento sai em **até 10 dias** após a solicitação. Se houver saldo devedor, é deduzido. Atenção: **taxa de administração e fundo de reserva já pagos NÃO entram** no valor resgatado. Não há cobrança de multa pelo resgate.\n• Correntista: solicita pelo app (Consórcio › cota contemplada › resgate em dinheiro)\n• Não correntista: Central 4004 4828 / 0800 970 4828\nFonte: Regulamento Itaú 15.4 + Cartilha Contemplação Veículos.",
+      "tags": "resgate, espécie, dinheiro, 180 dias, conversão",
+      "ordem": 9
+    },
+    {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Contemplação",
+      "categoria_ordem": 4,
+      "titulo": "Convocação de Suplente: quando o lance vencedor não paga",
+      "conteudo": "Se o ganhador do lance **não pagar no prazo** (5 dias úteis), o valor da carta volta ao **Fundo Comum** do grupo. Havendo saldo suficiente, a Itaú faz uma **nova rodada de contemplação** na mesma AGO — o segundo maior lance vira o **Lance Suplente** e ganha a vaga. Se não houver lances subsequentes, o suplente é definido por **sorteio**. O suplente também tem 5 dias úteis para pagar.\nFonte: Guia do Consorciado + Regulamento Móveis 14.7.1.",
+      "tags": "suplente, lance suplente, convocação, fundo comum",
+      "ordem": 10
+    },
+    {
+      "categoria_key": "lance",
+      "categoria_label": "Lance",
+      "categoria_ordem": 5,
+      "titulo": "Como o lance vencedor é definido (critério do percentual)",
+      "conteudo": "O lance ganhador NÃO é o de maior valor em reais — é o **de maior percentual em relação à própria carta**. Exemplo: num grupo com cartas diferentes, R$ 5 mil ofertado em uma carta de R$ 50 mil (10%) ganha de R$ 8 mil em uma carta de R$ 200 mil (4%). O sistema compara percentuais, não valores absolutos.\n• Lance livre: mínimo de 1 parcela, máximo o saldo devedor da cota\n• Veículos: lance livre limitado a **95% do valor do bem atualizado**\n• Imóveis: sem teto explícito de 95%\nFonte: Guia do Consorciado + Regulamento Móveis 14.5.1.",
+      "tags": "lance vencedor, percentual, critério, maior lance",
+      "ordem": 16
+    },
+    {
+      "categoria_key": "lance",
+      "categoria_label": "Lance",
+      "categoria_ordem": 5,
+      "titulo": "Lance Livre OU Lance Fixo: só uma modalidade por assembleia (veículos)",
+      "conteudo": "No consórcio de **veículos**, o consorciado precisa optar entre **Lance Livre OU Lance Fixo** em cada AGO — não dá para concorrer nas duas modalidades simultaneamente. Se ofertar lance nas duas, vale **apenas a última oferta registrada** pelo cliente. Nos imóveis, só existe Lance Livre.\n• Veículos: escolha 1 modalidade por AGO\n• Última oferta sobrescreve a anterior\n• Lance Fixo atual: 40% do valor do bem\nFonte: Regulamento Móveis 14.5.3.1 + Guia do Consorciado.",
+      "tags": "lance fixo, lance livre, modalidade, escolha, veículos",
+      "ordem": 17
+    },
+    {
+      "categoria_key": "lance",
+      "categoria_label": "Lance",
+      "categoria_ordem": 5,
+      "titulo": "Lance Embutido tem custo: cobra Taxa de Administração e Fundo de Reserva",
+      "conteudo": "Detalhe pouco divulgado do Lance Embutido em **imóveis**: o valor do lance é descontado da carta de crédito, mas **acrescido da cobrança da Taxa de Administração e do Fundo de Reserva** sobre esse valor embutido. Ou seja, o cliente acaba pagando TA+FR também sobre a parte embutida do lance, não só sobre o crédito utilizado.\n• Limite do embutido: **até 30% da própria carta**\n• Pago com a própria carta (não sai do bolso)\n• Mas leva carga de TA + FR adicional\nFonte: Regulamento Imóveis Itaú 14.6.",
+      "tags": "lance embutido, taxa de administração, fundo de reserva, custo, imóveis",
+      "ordem": 18
+    },
+    {
+      "categoria_key": "lance",
+      "categoria_label": "Lance",
+      "categoria_ordem": 5,
+      "titulo": "Lance com FGTS: o que acontece se a Caixa recusar?",
+      "conteudo": "Quando o cliente oferta lance com FGTS e ganha, ele tem **5 dias úteis** para enviar o extrato do FGTS (ou autorizar a consulta pelo app FGTS Caixa). O saldo do extrato deve ser **igual ou superior ao lance vencedor** — **não são aceitas arrecadações posteriores nem substituição** do valor.\n• Se Caixa recusar a liberação: **contemplação é CANCELADA**\n• Se saldo for menor que o lance: contemplação é CANCELADA\n• Saque acontece só na hora da compra do imóvel (não cai antes)\nFonte: Kit FGTS Consórcio + Regulamento Imóveis 14.10.",
+      "tags": "lance fgts, caixa, recusa, cancelamento, contemplação",
+      "ordem": 19
+    },
+    {
+      "categoria_key": "lance",
+      "categoria_label": "Lance",
+      "categoria_ordem": 5,
+      "titulo": "Sair dos sorteios temporariamente (sem cancelar a cota)",
+      "conteudo": "Cliente em dia que **não quer ser contemplado agora** (ex: vai mudar de emprego, está sem tempo de comprar o bem) pode pedir formalmente para **retirar a cota dos sorteios**. Ele continua pagando normalmente, mas não concorre. Pode **voltar a participar a qualquer momento**, basta solicitar à Central. Útil para evitar contemplação inesperada que poderia ser cancelada por inadimplência de lance.\nFonte: Regulamentos Itaú V1 07/24, cláusula 14.4.3.",
+      "tags": "sair dos sorteios, exclusão de sorteio, retirar cota, voluntário",
+      "ordem": 20
+    },
+    {
+      "categoria_key": "credito_veiculo",
+      "categoria_label": "Crédito e compra — Veículos",
+      "categoria_ordem": 6,
+      "titulo": "Faturamento de veículo: prazos diferentes para correntista e não correntista",
+      "conteudo": "O prazo de pagamento ao vendedor depende do canal:\n• **Correntista Itaú (app, 1 bem com 1 cota):** após assinar contrato digital, pagamento em **até 1 dia útil**\n• **Não correntista ou compra de +1 bem / junção de cartas:** processo via Central de Faturamento — pagamento em **até 7 dias úteis** após documentação ok\n• Comprovante: app (correntista) ou e-mail em 1 dia útil (não correntista)\n• Documento do veículo deve ser emitido em **até 30 dias** após a nota fiscal/CRV — para evitar multa e garantir desalienação\nFonte: Cartilha Contemplação Veículos.",
+      "tags": "faturamento veículo, correntista, prazo, pagamento, app",
+      "ordem": 11
+    },
+    {
+      "categoria_key": "credito_veiculo",
+      "categoria_label": "Crédito e compra — Veículos",
+      "categoria_ordem": 6,
+      "titulo": "Quando os documentos do veículo são exigidos no app (não correntista)?",
+      "conteudo": "Para correntista comprando 1 bem com 1 cota pelo **app Itaú**, a Itaú **só pede documentos** se o veículo tiver:\n• Restrição jurídica\n• Restrição administrativa\n• Alienação a outra instituição (gravame ativo)\n• Favorecido diferente do dono do bem (exige **procuração**)\n\nSe não houver nenhum desses cenários, **nenhum documento é pedido** e o pagamento sai em até 1 dia útil. Para veículos novos: cópia simples da nota fiscal de saída. Para usados: CRV/DUT + NF da loja. CRV/CRLV digital é aceito para emplacados após **01/01/2021**.\nFonte: Cartilha Contemplação Veículos.",
+      "tags": "documentos, veículo, app, restrição, gravame, procuração",
+      "ordem": 12
+    },
+    {
+      "categoria_key": "credito_veiculo",
+      "categoria_label": "Crédito e compra — Veículos",
+      "categoria_ordem": 6,
+      "titulo": "Atenção: regra mudou em 01/11/2024 — idade máxima dos veículos leves caiu",
+      "conteudo": "**Mudança regulatória importante**: a idade máxima de veículos de passeio/utilitários/elétricos depende da **data de contratação do consórcio**:\n• Contratos **antes de 1º/11/2024**: aceitos até **15 anos** (ano/modelo)\n• Contratos **a partir de 1º/11/2024**: aceitos só até **8 anos** (ano/modelo)\n\nDemais idades (motos, pesados, vans) seguem a tabela padrão. Verifique sempre a data de contratação da cota do cliente para evitar surpresa no faturamento.\nFonte: Pode/Não Pode Completo Itaú.",
+      "tags": "idade máxima, veículo leve, 8 anos, 15 anos, novembro 2024, regra antiga",
+      "ordem": 13
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Portal de Faturamento de Imóveis: 7 etapas e canal único de entrada",
+      "conteudo": "Todo processo de faturamento de imóveis Itaú começa **obrigatoriamente** pela Central de Faturamento — telefone **(11) 4084-6190**, seg a sex 8h-18h (Brasília). A Central libera login e senha por e-mail para o **Portal de Faturamento**. Não há autoatendimento.\n\n**7 etapas:**\n1. Ligar para (11) 4084-6190\n2. Acessar Portal com login/senha\n3. Selecionar tipo de operação\n4. Preencher dados (consorciado, vendedor, bem)\n5. Análise de crédito + avaliação do imóvel\n6. Assinar contrato (firma reconhecida + registro em cartório)\n7. Pagamento ao vendedor\nFonte: Guia de Faturamento de Imóveis.",
+      "tags": "portal faturamento, central, 4084-6190, etapas, processo",
+      "ordem": 21
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Documentos do imóvel para faturamento: validade da matrícula é 30 dias",
+      "conteudo": "Documentação mínima obrigatória para iniciar o faturamento de imóvel:\n• **Matrícula atualizada do imóvel** — emitida há **menos de 30 dias**, com averbação da construção e sem ônus (do Cartório de Registro de Imóveis)\n• **Certidão negativa de ônus, ações reais e reipersecutórias**\n• **Carnê do IPTU do ano vigente** (com endereço, metragem terreno+construção, número do contribuinte)\n• Comprovante de estado civil (comprador e vendedor)\n• Para construção/reforma: **cronograma de obras, planta, projeto aprovado e alvará**\n• Se usa FGTS: extrato FGTS + DIRPF + protocolo de entrega (+ DIRPF do cônjuge se for o caso)\nFonte: Guia de Faturamento de Imóveis + Pode/Não Pode Imóvel.",
+      "tags": "documentos imóvel, matrícula, 30 dias, iptu, faturamento",
+      "ordem": 22
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Reembolso de gasto próprio depois da contemplação",
+      "conteudo": "Cliente que **adiantou dinheiro do próprio bolso** para fechar a compra do imóvel após ser contemplado pode pedir **reembolso** à Itaú. O dinheiro entra direto na conta corrente do consorciado. Exigências:\n• Pagamento ocorrido **após a data da contemplação** (gastos anteriores não entram)\n• Comprovante bancário de depósito/transferência ao vendedor\n• Limite: até o valor total da carta aprovada\n\nServe para cliente que deu sinal de seu próprio dinheiro para garantir o imóvel antes da Itaú liberar o crédito.\nFonte: Regulamento Imóveis Itaú V1 07/24, cláusula 15.3.c.",
+      "tags": "reembolso, recurso próprio, sinal, depois da contemplação, gasto",
+      "ordem": 23
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Termo de quitação do imóvel: 30 dias após pagar tudo",
+      "conteudo": "Depois que o consorciado paga **integralmente o saldo devedor**, a Itaú tem **até 30 dias** para emitir o **termo de quitação** que cancela a alienação fiduciária. Esse documento precisa ser apresentado pelo cliente no **Serviço de Registro de Imóveis** para baixar a garantia da matrícula. Sem esse passo, o imóvel continua aparecendo como alienado no cartório, mesmo já estando quitado.\nFonte: Regulamento Imóveis Itaú V1 07/24, cláusula 19.7.",
+      "tags": "termo de quitação, quitação, 30 dias, alienação, cartório, baixa",
+      "ordem": 24
+    },
+    {
+      "categoria_key": "pagamentos",
+      "categoria_label": "Pagamentos e parcelas",
+      "categoria_ordem": 8,
+      "titulo": "Reajuste das parcelas Itaú: índice depende do tipo de bem",
+      "conteudo": "O índice de reajuste varia conforme o consórcio:\n• **Veículos / Motos / Pesados:** preço médio de veículos. **Grupos a partir do nº 50.000** usam IPCA acumulado 12 meses\n• **Imóveis (parcela normal):** INCC acumulado 12 meses, sempre no **mês de aniversário do grupo**\n• **Imóveis Parcela Reduzida:** índice pré-fixado de **3% ao ano** (anual no aniversário do grupo)\n\nO reajuste afeta a carta de crédito, o saldo devedor e a parcela proporcionalmente.\nFonte: Guia do Consorciado Itaú.",
+      "tags": "reajuste, índice, incc, ipca, 3% ano, parcela reduzida",
+      "ordem": 14
+    },
+    {
+      "categoria_key": "pagamentos",
+      "categoria_label": "Pagamentos e parcelas",
+      "categoria_ordem": 8,
+      "titulo": "Rateio de parcelas em atraso: só 1 vez a cada 9 meses",
+      "conteudo": "O cliente pode pedir para **ratear (parcelar) as parcelas atrasadas** diluindo-as nas vincendas — mas com regras estritas:\n• **Apenas 1 vez a cada 9 meses**\n• No mês em que o rateio for feito, o consorciado **NÃO participa da AGO** (não concorre a sorteio nem pode dar lance)\n• Cliente também pode **substituir o preço do bem ou alterar o valor do crédito**, mas isso é permitido **apenas 1 vez durante todo o consórcio**\nFonte: Regulamentos Itaú V1 07/24, cláusulas 10.3.a e 10.3.b.",
+      "tags": "rateio, parcelamento, atraso, 9 meses, ago, substituição de bem",
+      "ordem": 15
+    },
+    {
+      "categoria_key": "pagamentos",
+      "categoria_label": "Pagamentos e parcelas",
+      "categoria_ordem": 8,
+      "titulo": "Imposto de Renda: consórcio acima de R$ 5.000 precisa ser declarado",
+      "conteudo": "Se o cliente já pagou **R$ 5.000,00 ou mais** em parcelas (mesmo sem ter sido contemplado), precisa declarar no IR.\n• **Ficha:** Bens e Direitos\n• **Grupo:** 99 - Outros Bens e Direitos\n• **Código:** 05 - Consórcio não contemplado\n• Informar **CNPJ da Administradora** (Itaú Consórcios)\n• Após contemplação: atualizar para o bem adquirido\n\nDemonstrativo anual fica disponível no Bankline: Documentos › Outros Extratos › Posição de Consórcio.\nFonte: Guia do Consorciado Itaú.",
+      "tags": "imposto de renda, irpf, declaração, 5000, ficha bens",
+      "ordem": 16
+    },
+    {
+      "categoria_key": "saida",
+      "categoria_label": "Exclusão, devolução e cessão",
+      "categoria_ordem": 9,
+      "titulo": "Cancelar em até 7 dias = devolução INTEGRAL (direito de arrependimento)",
+      "conteudo": "**Direito de arrependimento legal**: cliente que desiste do consórcio em **até 7 dias da contratação** (e que ainda **não foi contemplado**) recebe **todo o valor pago de volta, sem multa e sem desconto**. Restituição é imediata.\n\nExceção: parcelas pagas com **cartão de crédito** dependem do estorno da administradora do cartão.\n\nDepois de 7 dias, vira desistência comum: recebe só o **Fundo Comum** com **15% de multa**, via sorteio mensal entre desistentes ou no encerramento do grupo.\nFonte: Regulamentos Itaú V1 07/24, cláusula 22.1.b.",
+      "tags": "arrependimento, 7 dias, devolução integral, desistência, cancelamento",
+      "ordem": 19
+    },
+    {
+      "categoria_key": "saida",
+      "categoria_label": "Exclusão, devolução e cessão",
+      "categoria_ordem": 9,
+      "titulo": "Alternativas ao cancelamento: 3 opções antes de desistir",
+      "conteudo": "Antes de cancelar (perdendo 15% e esperando sorteio), o cliente Itaú tem **3 alternativas**:\n\n• **Reduzir a carta** (e a parcela cai junto) — só se a cota não foi contemplada. Solicita no app ou na Central.\n• **Cessão da cota** — vende a cota para terceiro à vista (pessoa física ou jurídica). Recupera o que foi pago + lucro/desconto negociado.\n• **Cessão a parceiros Itaú** — administradoras que compram cotas para revender: **Consorciei (0800 878 2848)**, **Bom Consórcio (0800 005 3001)**, **Bazar do Consórcio ((11) 4933-0832)**.\nFonte: Guia do Consorciado Itaú.",
+      "tags": "alternativa, reduzir carta, cessão, parceiros, consorciei, bom consórcio",
+      "ordem": 20
+    },
+    {
+      "categoria_key": "saida",
+      "categoria_label": "Exclusão, devolução e cessão",
+      "categoria_ordem": 9,
+      "titulo": "Atraso pós-contemplação: execução de garantia em 30 (veículos) ou 60 dias (imóveis)",
+      "conteudo": "Para quem **JÁ usou o crédito** e está pagando o saldo devedor com o bem alienado em garantia, o atraso de **1 só parcela** já dispara execução de garantia em prazos diferentes:\n• **Veículos:** **30 dias** de atraso → Itaú adota procedimentos legais para **retomar o veículo**\n• **Imóveis:** **60 dias** de atraso → execução das garantias\n\nIsso é mais rigoroso que a regra de exclusão de cliente não contemplado (que é após **2 parcelas em aberto** dentro do grupo). Quem já comprou o bem precisa pagar em dia — o atraso é tratado como inadimplência de financiamento, não de consórcio.\nFonte: Regulamentos Itaú V1 07/24, cláusula 10.5.",
+      "tags": "atraso, execução garantia, retomada, 30 dias, 60 dias, pós-contemplação",
+      "ordem": 21
+    },
+    {
+      "categoria_key": "saida",
+      "categoria_label": "Exclusão, devolução e cessão",
+      "categoria_ordem": 9,
+      "titulo": "Encerramento do grupo: prazos e quando saldo abaixo de R$ 85 é extinto",
+      "conteudo": "Quando o grupo chega ao fim:\n• Itaú comunica o encerramento em **até 60 dias** após a última AGO\n• Encerramento efetivo em **até 120 dias** após a última AGO\n• **Sobra do Fundo de Reserva** é distribuída entre os **ativos**\n• **Cancelados/desistentes** recebem por sorteio mensal entre eles OU no encerramento\n• **Saldo não procurado < R$ 85,00**: a Itaú **pode extinguir** automaticamente, independentemente de prazo de permanência\n• Valores recuperados após encerramento: rateados em até **30 dias**\nFonte: Regulamentos Itaú V1 07/24, cláusula 23.",
+      "tags": "encerramento, grupo, distribuição, fundo de reserva, 85 reais, prazo",
+      "ordem": 22
+    },
+    {
+      "categoria_key": "seguro",
+      "categoria_label": "Seguro consórcio",
+      "categoria_ordem": 10,
+      "titulo": "Seguro Itaú (Dez/25): novas carências por morte natural",
+      "conteudo": "**Mudança regulatória a partir de 10/12/2025**: morte por **doença** (morte natural) passa a ter carências escalonadas:\n• Contratos **até 6 meses**: carência de **30 dias**\n• Contratos entre **6 e 12 meses**: carência de **60 dias**\n• Contratos **acima de 12 meses**: carência de **90 dias**\n\nContado do início da vigência. Morte por **acidente** continua sem carência. **Suicídio**: 2 primeiros anos. As Condições Gerais antigas (sem carência para doença) ficam superadas pela lâmina de dez/25.\nFonte: Lâmina Seguro Prestamista PF Dez/25.",
+      "tags": "carência, doença, morte natural, dezembro 2025, novo marco",
+      "ordem": 17
+    },
+    {
+      "categoria_key": "seguro",
+      "categoria_label": "Seguro consórcio",
+      "categoria_ordem": 10,
+      "titulo": "Prazo de pagamento da indenização: 30 dias + juros se atrasar",
+      "conteudo": "Após o cliente entregar **todos os documentos** do sinistro, a Seguradora Itaú tem **30 dias para pagar a indenização**. Se atrasar:\n• **Juros de mora de 1% ao mês**\n• **Atualização monetária pelo IPCA-IBGE** desde a data do evento\n\nO prazo **fica suspenso** se a Seguradora pedir documentos complementares (uma única vez) — volta a correr quando o cliente entrega. Pagamento sempre **em moeda nacional, parcela única**.\n\nSe o saldo devedor for **menor** que a indenização, a diferença vai para o cliente (ou para o segundo beneficiário indicado).\nFonte: Condições Gerais Seguro, cláusulas 22.3-22.6 + 29.2.",
+      "tags": "indenização, 30 dias, juros, ipca, prazo pagamento, sinistro",
+      "ordem": 18
+    },
+    {
+      "categoria_key": "seguro",
+      "categoria_label": "Seguro consórcio",
+      "categoria_ordem": 10,
+      "titulo": "Junta médica do seguro: como funciona em caso de divergência",
+      "conteudo": "Quando o cliente discorda da decisão da Seguradora sobre **invalidez permanente** (cobertura IPTA), ele pode pedir uma **junta médica** em até 15 dias da contestação. A junta tem **3 membros**:\n• 1 médico nomeado pela Seguradora\n• 1 médico nomeado pelo segurado\n• 1 médico desempatador (escolhido em comum)\n\n**Custos:** cada parte paga o próprio médico; o desempatador é dividido **em partes iguais** entre Seguradora e cliente. Prazo de constituição da junta: 15 dias após a contestação.\n\nIMPORTANTE: aposentadoria por invalidez do INSS **não caracteriza** automaticamente IPTA — é avaliação independente.\nFonte: Condições Gerais Seguro, cláusulas 23.1-23.5.",
+      "tags": "junta médica, sinistro, contestação, ipta, divergência, invalidez",
+      "ordem": 19
+    },
+    {
+      "categoria_key": "seguro",
+      "categoria_label": "Seguro consórcio",
+      "categoria_ordem": 10,
+      "titulo": "Mudou de profissão ou foi morar fora? Comunique o seguro",
+      "conteudo": "O seguro Itaú considera **agravação de risco** (situação que pode invalidar a cobertura) os seguintes eventos — **devem ser comunicados** à Seguradora:\n• **Mudança de profissão** (passou a fazer atividade mais arriscada)\n• **Mudança de residência para outro país**\n• Informações falsas ou incorretas no momento da contratação\n\nSe a Seguradora cancelar o contrato por agravação, a rescisão só vale **30 dias após a notificação ao segurado** e a diferença de prêmio deve ser restituída. Se o cliente provoca o sinistro intencionalmente, fraude documental ou tentativa de receber por meio ilícito: **perde o direito à indenização**.\nFonte: Condições Gerais Seguro, cláusulas 11.3 + 26.",
+      "tags": "agravação, mudança profissão, exterior, comunicar, perda de direito",
+      "ordem": 20
+    },
+    {
+      "categoria_key": "pode_imoveis",
+      "categoria_label": "Carta de crédito — Imóveis (pode e não pode)",
+      "categoria_ordem": 6,
+      "titulo": "Matriz Itaú: o que cada tipo de cliente pode comprar (Varejo × Atacado)",
+      "conteudo": "A Itaú classifica clientes em 4 grupos com regras diferentes:\n• **Varejo PF** (IA, IU, Personnalité): MCMV faixas 2 e 3, habitação interesse social, **NÃO** aceita steel frame / pré-moldado / galpão / armazém\n• **Atacado PF** (Private, Produtor Rural): **SIM** para steel frame, pré-moldado, polo industrial, armazém, imóvel rural sem garantia urbana, máquinas linha verde/amarela sem placa\n• **Varejo PJ** (PRO, Empreenda, TOP, Business): **SIM** para steel frame e galpão, mas MCMV/HIS **NÃO** entram\n• **Atacado PJ** (Middle, Agro, Large): mais permissivo de todos — aceita inclusive máquinas linha amarela 0km com placa\n\nReembolso de reforma/construção: **só Atacado PJ** aceita.\nFonte: Pode/Não Pode Completo Itaú.",
+      "tags": "varejo, atacado, pf, pj, matriz, segmento, mcmv, steel frame",
+      "ordem": 5
+    },
+    {
+      "categoria_key": "pode_veiculos",
+      "categoria_label": "Carta de crédito — Veículos (pode e não pode)",
+      "categoria_ordem": 7,
+      "titulo": "Máquinas pesadas Itaú: regras especiais por segmento",
+      "conteudo": "Máquinas (Linha Verde e Linha Amarela) **0km com placa** podem ser compradas com consórcio Itaú em qualquer segmento. Mas **0km sem placa** tem restrições:\n• **Linha Verde sem placa (trator, colheitadeira):** SÓ Atacado PF (Produtor Rural) e Atacado PJ\n• **Linha Amarela sem placa (escavadeira, empilhadeira, retroescavadeira):** SÓ Atacado PF (Produtor Rural) e Atacado PJ\n\nVarejo PF e Varejo PJ **NÃO podem** comprar máquina 0km sem placa. **Máquinas USADAS são totalmente vedadas** para qualquer segmento. **Quitação de CDC/FINAME/Leasing de máquinas: NÃO permitido** (só veículos).\nFonte: Pode/Não Pode Completo Itaú.",
+      "tags": "máquinas, linha verde, linha amarela, sem placa, segmento, produtor rural",
+      "ordem": 4
+    },
+    {
+      "categoria_key": "pode_veiculos",
+      "categoria_label": "Carta de crédito — Veículos (pode e não pode)",
+      "categoria_ordem": 7,
+      "titulo": "Veículos: o que o Itaú NÃO aceita (lista taxativa)",
+      "conteudo": "Lista do que NÃO pode ser comprado com a carta de veículos Itaú (qualquer segmento):\n• **Implementos agrícolas** (semeadeira, plantadeira, cabine de trator)\n• **Aeronaves** e **drones**\n• **Pivô de irrigação**\n• **Ônibus 0km com faturamento em Y**\n• **Máquinas usadas** (qualquer linha)\n• **Jetski e embarcações**\n• Refrigerador para implemento rodoviário\n• Gerador de energia, compactador de lixo\n• **Trem, metrô, locomotivas**\n• **Carroceria de caminhão não articulada**\n• **Quitação de CDC/FINAME/Leasing de MÁQUINAS** (só veículos)\n• Veículo sem chassi (exceto máquinas agrícolas com placa)\n• Veículos **sem cadastro na BIN** (Base de Índice Nacional)\nFonte: Pode/Não Pode Completo Itaú.",
+      "tags": "não pode, vedações, aeronave, jetski, implemento, bin",
+      "ordem": 5
     }
   ],
   "downloads": [

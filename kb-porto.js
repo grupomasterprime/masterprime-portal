@@ -751,9 +751,18 @@ window.KB_ADMIN["porto"] = {
       "categoria_label": "Seguro prestamista",
       "categoria_ordem": 10,
       "titulo": "Quem pode contratar o seguro prestamista?",
-      "conteudo": "Pode aderir o consorciado Pessoa Física com idade entre 18 e 69 anos, 11 meses e 29 dias na contratação, e até 75 anos no encerramento do grupo.\n\nPara saldo devedor acima de R$ 1.000.000,00 é exigida a Declaração Pessoal de Saúde (DPS) completa. Entre 75 e 80 anos não há inclusão do seguro de vida prestamista.",
-      "tags": "seguro, idade, dps, requisitos",
+      "conteudo": "Pode aderir o consorciado Pessoa Física com idade entre **18 e 69 anos, 11 meses e 29 dias** na contratação, e até **80 anos no encerramento** do grupo.\n\n• Entre **75 e 80 anos** no encerramento → **não há inclusão de seguro de vida prestamista** (atende o cliente, mas sem o seguro).\n• Para saldo devedor acima de **R$ 1.000.000,00** é exigida a **Declaração Pessoal de Saúde (DPS) completa**.\n\nAtualização Newcon: a idade limite no encerramento subiu de 75 para 80 anos.",
+      "tags": "seguro, idade, dps, requisitos, 18 anos, 80 anos, 75 anos, encerramento, contratação, prestamista, newcon",
       "ordem": 3
+    },
+    {
+      "categoria_key": "fundamentos",
+      "categoria_label": "Entendendo o consórcio",
+      "categoria_ordem": 2,
+      "titulo": "Qual a idade limite de contratação na Porto?",
+      "conteudo": "**Idade mínima:** 18 anos completos na contratação.\n\n**Idade máxima:** **80 anos no encerramento do grupo** (esse é o teto). Pra calcular: idade atual + prazo do grupo em meses não pode ultrapassar 80 anos.\n\n**Faixas importantes:**\n• 18 a 69 anos, 11 meses e 29 dias na contratação → seguro prestamista incluso normalmente.\n• Entre 75 e 80 anos no encerramento → **sem seguro de vida prestamista** (cliente é aceito, só não tem cobertura do seguro).\n• Acima de R$ 1.000.000,00 de saldo devedor → exige **DPS (Declaração Pessoal de Saúde) completa**.\n\n**Mudança Newcon:** a idade limite no encerramento subiu de 75 → 80 anos. Conferir antes de fechar com cliente sênior.\n\nFonte: FAQ Oficial Newcon Porto.",
+      "tags": "idade limite, idade contratação, idade máxima, 18 anos, 80 anos, encerramento, sênior, idoso, terceira idade, newcon, prestamista, DPS",
+      "ordem": 14
     },
     {
       "categoria_key": "seguro",
@@ -1272,10 +1281,280 @@ window.KB_ADMIN["porto"] = {
       "categoria_key": "credito_imovel",
       "categoria_label": "Crédito e compra — Imóvel",
       "categoria_ordem": 7,
-      "titulo": "Contrato de Novação Porto — usar o mesmo imóvel em mais de uma cota?",
-      "conteudo": "**Regra geral (Artigo 48 do Regulamento):** O CONSORCIADO CONTEMPLADO precisa dar alienação fiduciária do imóvel em favor da Porto. Enquanto o saldo devedor não for quitado, o imóvel NÃO pode ser liberado nem receber novo gravame.\n\n**O que é o Contrato de Novação:** Documento usado no registro de propriedades que altera a dívida original, cancela a anterior e cria uma nova obrigação que **soma os saldos devedores de duas ou mais cotas**. Permitiria usar o mesmo imóvel como garantia de várias cotas.\n\n**⚠️ Atenção:** Cartórios frequentemente **RECUSAM registrar a novação** por complicações em auditorias e questões legais com o Banco Central — eles entendem que o bem já está vinculado como garantia do grupo de consorciados.\n\n**Orientação Porto:** As cotas devem ser vinculadas **EM CONJUNTO** no ato da compra ou construção. Depois da alienação, o bem NÃO pode ser alienado novamente para outras cotas sem análise específica.\n\n**Análise por exceção** — critérios obrigatórios:\n• Existência de **Contrato Principal** + no mínimo **2 Contratos de Novação**.\n• **Consulta prévia ao cartório de registro** — responsabilidade do consorciado, ANTES de prosseguir.\n• Valor da garantia ≥ saldo devedor das cotas envolvidas.\n\nRegra de exceção incluída no artigo por Débora Hippolito e validada por Mariana Cancelli em 09/04/2024.",
-      "tags": "novação, contrato de novação, alienação fiduciária, mesmo imóvel, várias cotas, garantia, cartório, exceção, artigo 48, débora hippolito, mariana cancelli",
+      "titulo": "Contrato de Novação Porto — adicionar mais cotas a um processo de imóvel já iniciado",
+      "conteudo": "**RESPOSTA DIRETA pra perguntas tipo \"posso adicionar mais cotas no processo de imóvel depois que iniciou?\" ou \"posso usar várias cotas no mesmo imóvel?\":** Sim, **através do Contrato de Novação** — sob critérios específicos.\n\n⚠️ **Não confundir com cotitular**: cotitular (várias pessoas numa MESMA cota) NÃO é permitido no Newcon. **Novação** (várias COTAS no MESMO imóvel) **É permitido** como exceção.\n\n**Regra geral (Artigo 48 do Regulamento):** O CONSORCIADO CONTEMPLADO dá alienação fiduciária do imóvel em favor da Porto. Enquanto o saldo devedor não for quitado, o imóvel NÃO pode ser liberado nem receber novo gravame.\n\n**O que é o Contrato de Novação:** Documento usado no registro de propriedades que altera a dívida original, cancela a anterior e cria uma nova obrigação que **soma os saldos devedores de duas ou mais cotas**. Permite usar o mesmo imóvel como garantia de várias cotas.\n\n**⚠️ Atenção operacional:** Cartórios frequentemente **RECUSAM registrar a novação** por complicações em auditorias e questões legais com o Banco Central — eles entendem que o bem já está vinculado como garantia do grupo de consorciados. POR ISSO a **consulta prévia ao cartório é obrigatória**.\n\n**Orientação Porto:** O ideal é vincular as cotas **EM CONJUNTO no ato da compra**. Depois da alienação, o bem NÃO pode ser alienado novamente para outras cotas SEM análise por exceção.\n\n**Análise por exceção** — 3 critérios obrigatórios:\n• Existência de **Contrato Principal** + no mínimo **2 Contratos de Novação**.\n• **Consulta prévia ao cartório de registro** — responsabilidade do consorciado, ANTES de prosseguir.\n• Valor da garantia ≥ saldo devedor das cotas envolvidas.\n\nRegra de exceção incluída no artigo por Débora Hippolito e validada por Mariana Cancelli em 09/04/2024.",
+      "tags": "novação, contrato de novação, adicionar cotas, mais cotas, processo iniciado, várias cotas mesmo imóvel, alienação fiduciária, garantia, cartório, exceção, artigo 48, débora hippolito, mariana cancelli, juntar cotas",
       "ordem": 23
+    },
+    {
+      "categoria_key": "fundamentos",
+      "categoria_label": "Entendendo o consórcio",
+      "categoria_ordem": 2,
+      "titulo": "Novo processo de venda no Newcon: assinar antes, pagar depois",
+      "conteudo": "Com a chegada do **Newcon (sistema novo da Porto)**, a ordem do processo de venda mudou. Agora o cliente precisa **assinar a proposta via assinatura eletrônica primeiro** e só depois realizar o pagamento da primeira parcela.\n\nIsso garante mais segurança jurídica e formalização antes de movimentar valores. O corretor deve orientar o cliente a manter o e-mail e celular atualizados para receber o link de assinatura.\n\nOutra mudança: **a inclusão dos dados bancários do cliente na proposta passou a ser obrigatória**, em atendimento à **Resolução BCB 285/362**. Esses dados só são usados em casos de devolução de valores.\n\nFonte: FAQ Newcon · Porto Bank.",
+      "tags": "newcon, proposta, assinatura, dados bancarios, processo venda, resolucao 285",
+      "ordem": 15
+    },
+    {
+      "categoria_key": "fundamentos",
+      "categoria_label": "Entendendo o consórcio",
+      "categoria_ordem": 2,
+      "titulo": "Mudança no seguro prestamista a partir de 05/05/2025",
+      "conteudo": "A partir de **05/05/2025**, a alíquota do seguro prestamista no Consórcio Porto passou a ser de **0,038%** para **todos os grupos**, independentemente da data de inauguração.\n\nPor questões sistêmicas do Newcon, o valor exibido pode variar entre cotas. Isso acontece porque a Porto calcula o seguro **sobre o saldo devedor total**, mas o novo sistema só faz cálculo **sobre o valor do crédito**.\n\nPara equivaler aos 0,038% combinados, a Porto ajusta o percentual exibido de acordo com cada valor de crédito. O efeito final no bolso do cliente permanece o mesmo.\n\nFonte: FAQ Newcon · Porto Bank.",
+      "tags": "seguro prestamista, 0.038%, saldo devedor, newcon, alíquota",
+      "ordem": 16
+    },
+    {
+      "categoria_key": "fundamentos",
+      "categoria_label": "Entendendo o consórcio",
+      "categoria_ordem": 2,
+      "titulo": "Mudança no cálculo do lance no Newcon (Imóvel)",
+      "conteudo": "No sistema antigo, a oferta de lance era calculada sobre **crédito + taxa de administração + fundo de reserva**, sem considerar a taxa de administração antecipada nos grupos de imóvel.\n\nA partir do Newcon, **para grupos de Imóvel, a taxa de administração antecipada também entra no cálculo do lance**. Isso significa que o percentual ofertado precisa cobrir uma base maior.\n\nPara grupos de **Auto e Pesados**, a regra permanece sobre crédito + adm + fundo de reserva (sem antecipada).\n\nFonte: FAQ Newcon · Porto Bank.",
+      "tags": "lance, calculo, newcon, taxa antecipada, imovel",
+      "ordem": 17
+    },
+    {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Contemplação",
+      "categoria_ordem": 4,
+      "titulo": "Prazo para ofertar lance no Newcon: até 22h do dia anterior",
+      "conteudo": "Com o Newcon, **as ofertas de lance precisam ser registradas até as 22h do dia anterior** à realização da assembleia para serem válidas naquele mês.\n\nOfertas registradas após esse horário só valerão para a próxima assembleia. O corretor deve avisar o cliente com antecedência para não perder o prazo.\n\nA assembleia também teve mudança de horário: **agora sempre acontece às 15h**, independentemente do dia da semana.\n\nFonte: FAQ Newcon · Porto Bank.",
+      "tags": "lance, prazo, 22h, assembleia, 15h, newcon",
+      "ordem": 14
+    },
+    {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Contemplação",
+      "categoria_ordem": 4,
+      "titulo": "Substituição de lance: novo prazo de 2 dias e limite mensal",
+      "conteudo": "**Atendendo a pedidos**, o prazo para pagamento em **substituição de lance** foi estendido para **2 dias úteis** após a assembleia.\n\nComo consequência da extensão, **só pode existir no máximo UMA substituição por mês** — antes era possível mais de uma. Se o lance vencedor original não for pago, ele cai e o segundo colocado pode assumir, mas só uma vez por ciclo.\n\nFonte: FAQ Newcon · Porto Bank.",
+      "tags": "substituicao lance, 2 dias, prazo pagamento, newcon",
+      "ordem": 15
+    },
+    {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Contemplação",
+      "categoria_ordem": 4,
+      "titulo": "Pagamento do lance vencedor: prazo de 2 dias úteis",
+      "conteudo": "Após contemplação por lance (fixo ou livre), o **pagamento do lance vencedor deve ser feito em até 2 dias úteis** após a realização da assembleia.\n\nO pagamento é feito **via boleto bancário**, gerado pelo cliente no App Porto, chat ou Central de Relacionamento. A Porto envia comunicado por **e-mail, WhatsApp e SMS** informando o caminho para gerar o boleto.\n\nApós o pagamento, o cliente segue para a **análise de crédito**, que leva até 3 dias úteis. Sem pagamento no prazo, o lance pode ser cancelado e o segundo colocado é convocado.\n\nFonte: Guia da Pós-Contemplação Imóvel e Bens Móveis 2025 · Porto Bank.",
+      "tags": "pagamento lance, 2 dias uteis, boleto, contemplacao",
+      "ordem": 16
+    },
+    {
+      "categoria_key": "credito_movel",
+      "categoria_label": "Crédito e compra — Bens móveis",
+      "categoria_ordem": 6,
+      "titulo": "Fluxo completo de pós-contemplação Bens Móveis (5 etapas, 1 dia útil cada)",
+      "conteudo": "Cada etapa da pós-contemplação de **Auto e Pesados** tem prazo de **1 dia útil** para a Porto processar:\n\n• **Etapa 1**: envio dos dados e documentos iniciais pelo cliente\n• **Etapa 2**: análise da documentação pela Porto\n• **Etapa 3**: emissão da autorização de faturamento + envio da biometria + solicitação de NF ou ATPV\n• **Etapa 4**: emissão do contrato de alienação\n• **Etapa 5**: alienação do bem no Detran\n• **Etapa 6**: pagamento do crédito para o vendedor\n\nNa prática, a jornada total leva cerca de **5 a 7 dias úteis** quando o cliente envia tudo certo na primeira tentativa.\n\nFonte: Manual Contemplado Auto · Porto Bank.",
+      "tags": "pos contemplacao, auto, pesados, fluxo, prazos, etapas",
+      "ordem": 13
+    },
+    {
+      "categoria_key": "credito_movel",
+      "categoria_label": "Crédito e compra — Bens móveis",
+      "categoria_ordem": 6,
+      "titulo": "Análise de crédito tem validade de 90 dias",
+      "conteudo": "Após a contemplação, a **análise de crédito leva até 3 dias úteis** e, quando aprovada, tem **validade de 90 dias**.\n\nDentro desses 90 dias o cliente precisa concluir a esteira digital (envio de documentos, biometria, NF/ATPV). Se passar o prazo sem finalizar, a análise expira e precisa ser refeita.\n\nCaso a análise solicite fiador, o **fiador também passa por análise** e precisa ter **renda mínima de 3x o valor da parcela**. **Cônjuge não pode ser fiador em cotas de imóvel**, e **PJ não é aceita como fiador** (apenas PF).\n\nFonte: Manual Contemplado Auto + Formulário do Fiador · Porto Bank.",
+      "tags": "analise credito, validade, 90 dias, fiador, renda 3x, conjuge",
+      "ordem": 14
+    },
+    {
+      "categoria_key": "credito_movel",
+      "categoria_label": "Crédito e compra — Bens móveis",
+      "categoria_ordem": 6,
+      "titulo": "Seminovos: até 8 anos (leves) ou 10 anos (pesados acima de 3,5t)",
+      "conteudo": "Os limites de idade para **veículos seminovos** no Consórcio Porto são:\n\n• **Veículos leves (automóveis)**: até **8 anos** de fabricação, contando o ano vigente\n• **Veículos pesados acima de 3,5 toneladas** (caminhões, semirreboques, vans): até **10 anos** de fabricação\n• **Máquinas agrícolas e linha amarela**: até **2 anos** de fabricação, e só podem ser adquiridas em **lojas com emissão de NF** (não aceita compra de particular)\n\nA garantia substitutiva (veículo no nome do cliente) também segue: **leves até 8 anos**, **pesados até 10 anos**.\n\nFonte: Manual Contemplado Auto · Porto Bank.",
+      "tags": "seminovos, idade veiculo, 8 anos, 10 anos, garantia substitutiva, maquinas agricolas",
+      "ordem": 15
+    },
+    {
+      "categoria_key": "credito_movel",
+      "categoria_label": "Crédito e compra — Bens móveis",
+      "categoria_ordem": 6,
+      "titulo": "Bike/Moto Elétrica: regra do 20% pago do saldo devedor",
+      "conteudo": "Para compra de **bicicleta ou moto elétrica** com o Consórcio Porto, **não é necessária garantia substitutiva** — diferente de placas solares, embarcações e máquinas agrícolas.\n\nO cliente só precisa ter **pago no mínimo 20% do saldo devedor** da cota para liberar o crédito. Documentos exigidos:\n\n• Marca, modelo, tipo de câmbio, tipo de rodas, ano fabricação\n• Valor da compra + valor da carta de crédito\n• **Fotos do quadro, roda dianteira e roda traseira**\n• Pedido de compra emitido pela loja vendedora\n\nFonte: Manual Contemplado Auto · Porto Bank.",
+      "tags": "bike eletrica, moto eletrica, 20% saldo devedor, fotos, sem garantia substitutiva",
+      "ordem": 16
+    },
+    {
+      "categoria_key": "credito_movel",
+      "categoria_label": "Crédito e compra — Bens móveis",
+      "categoria_ordem": 6,
+      "titulo": "Procuração para venda: pública, específica e válida 90 dias",
+      "conteudo": "Quando o vendedor do veículo usa um **intermediário (procurador)**, a Porto exige documento específico:\n\n• Deve ser **Procuração Pública e Específica** — não aceita procuração particular\n• Precisa **detalhar os poderes** concedidos à pessoa intermediária (vender o veículo e receber valores)\n• **Validade máxima de 90 dias corridos** da emissão\n• Emitida em **cartório de notas** da localidade do vendedor\n\nSe o vendedor PJ for loja/concessionária, alternativa: **RENAVE** (Registro Nacional de Veículos em Estoque) lavrado em cartório.\n\nFonte: Manual Contemplado Auto · Porto Bank.",
+      "tags": "procuracao, vendedor, intermediario, 90 dias, publica especifica, renave",
+      "ordem": 17
+    },
+    {
+      "categoria_key": "credito_movel",
+      "categoria_label": "Crédito e compra — Bens móveis",
+      "categoria_ordem": 6,
+      "titulo": "Boleto de pagamento ao vendedor: vencimento mínimo de 3 dias úteis",
+      "conteudo": "Se o cliente optou por **pagamento via boleto bancário** (em vez de transferência bancária ao vendedor), o boleto enviado à Porto precisa atender:\n\n• **Valor exato** conforme a autorização de faturamento (sem divergência)\n• **Vencimento mínimo de 3 dias úteis** a partir do envio\n\nSe o boleto vencer antes da liberação ou tiver valor divergente, é necessário **solicitar novo boleto** ao vendedor. Isso atrasa a jornada.\n\nFonte: Guia da Pós-Contemplação Bens Móveis 2025 · Porto Bank.",
+      "tags": "boleto vendedor, 3 dias uteis, vencimento minimo, valor exato",
+      "ordem": 18
+    },
+    {
+      "categoria_key": "credito_movel",
+      "categoria_label": "Crédito e compra — Bens móveis",
+      "categoria_ordem": 6,
+      "titulo": "Situações especiais Auto: erro em NF, ATPV ou CRV",
+      "conteudo": "Erros documentais comuns na pós-contemplação Auto e como resolver:\n\n• **NF sem alienação à Porto Seguro**: solicitar **carta de correção** à loja vendedora\n• **NF com endereço incorreto**: pedir carta de correção à loja\n• **Endereços divergentes entre NF, CRV/ATPV**: atualizar endereço no app/central + enviar comprovante em nome do cliente ou parente de 1º grau\n• **Valores incorretos em CRV/ATPV**: emitir novo documento com valor correto\n• **Erro de grafia no nome**: declaração solicitando ao Detran a aceitação da correção\n• **Documento em nome da Porto Seguro**: declaração ao Detran local pedindo correção, emitir novo ATPV\n• **Chassi 0km não localizado na base BIN**: vendedor deve registrar o chassi\n• **Veículo 0km já emplacado**: solicitar CRLV em nome do cliente\n\nFonte: Guia da Pós-Contemplação Bens Móveis 2025 · Porto Bank.",
+      "tags": "erro nota fiscal, atpv, crv, alienacao, situacoes especiais, carta correcao",
+      "ordem": 19
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Vistoria do imóvel: prazos por tipo (apartamento vs casa/terreno)",
+      "conteudo": "Após abertura do protocolo na pós-contemplação de Imóvel, a **inspeção/vistoria** tem prazos diferentes:\n\n• **Apartamentos**: vistoria **remota**, sem agendamento de visita. Prazo de conclusão **até 2 dias úteis**\n• **Casas, terrenos e demais imóveis**: a Porto entra em contato com vendedor ou cliente para agendar **vistoria presencial**. Prazo estimado de **até 6 dias úteis** após a abertura do protocolo\n\nA análise dos documentos antes da vistoria leva **até 2 dias úteis** adicionais.\n\nFonte: Guia da Pós-Contemplação Imóvel 2025 · Porto Bank.",
+      "tags": "vistoria imovel, prazo, apartamento, casa, terreno, remota, presencial",
+      "ordem": 24
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Certificado Digital e-Notariado e videoconferência",
+      "conteudo": "Após a vistoria e confirmação dos valores, o cliente passa pela emissão do **Certificado Digital e-Notariado** — usado para garantir autenticidade dos documentos em cartório de forma 100% online.\n\nNesta etapa, o cliente precisa **estar disponível para uma videoconferência** com o cartório. A Porto envia passo a passo completo antes da chamada.\n\nDepois disso, uma **assessoria contratada pela Porto faz uma ligação de confirmação dos valores** da operação — etapa de segurança antes da assinatura final do contrato.\n\nFonte: Guia da Pós-Contemplação Imóvel 2025 · Porto Bank.",
+      "tags": "e-notariado, certificado digital, videoconferencia, confirmacao valores, assessoria",
+      "ordem": 25
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Reembolso de ITBI e taxas de cartório (sobra de crédito)",
+      "conteudo": "Após a assinatura do contrato, o cliente paga **ITBI (Imposto sobre Transmissão de Bens Imóveis)** + **taxas de registro em cartório**.\n\nSe **sobrar parte do crédito** após a aquisição do imóvel, o cliente pode **solicitar o reembolso desses pagamentos (ITBI + taxas de cartório)** usando esse recurso restante.\n\nO reembolso exige:\n• Comprovante bancário do pagamento\n• Dados bancários do cliente para crédito\n\nFonte: Guia da Pós-Contemplação Imóvel 2025 · Porto Bank.",
+      "tags": "reembolso, itbi, taxas cartorio, sobra credito, imovel",
+      "ordem": 26
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Construção/Reforma: liberação em etapas (30%, 60%, 100% com retenção)",
+      "conteudo": "Na **construção ou reforma de imóvel**, a Porto libera o crédito em **etapas conforme o andamento da obra**:\n\n• **1ª liberação**: até **30%** do crédito após assinatura da escritura/registro do contrato de alienação\n• **2ª liberação**: solicitar vistoria do engenheiro credenciado quando atingir 30% da obra; libera mais ~30% (acumulado ~60%)\n• **3ª liberação e seguintes**: novas vistorias conforme execução\n• **Última liberação**: a Porto retém **5% do crédito** como garantia, e só libera após vistoria final + apresentação da matrícula com averbação da construção\n\nÉ obrigatório apresentar **cronograma físico-financeiro, memorial descritivo, ART CREA, projeto aprovado, alvará** e, ao final, o **Habite-se**.\n\nFonte: Consórcio Construção e Reforma · Porto Bank.",
+      "tags": "construcao, reforma, liberacao etapas, vistoria engenheiro, retencao 5%, habite-se, crea",
+      "ordem": 27
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Compra de terreno + construção: até 50% para o terreno",
+      "conteudo": "Quando o cliente quer **comprar terreno e construir** com o mesmo crédito, a Porto permite:\n\n• **100% do crédito para compra de terreno** (somente terreno)\n• **100% do crédito para construção/reforma** (sem terreno)\n• **Combinação terreno + construção**: até **50% do crédito** pode ser usado na compra do terreno, e o restante na construção\n\nNeste caso o cliente terá custas com **ITBI, registro, escritura e vistoria do engenheiro**.\n\nFonte: Consórcio Construção e Reforma · Porto Bank.",
+      "tags": "terreno, construcao, 50%, distribuicao credito, itbi, registro",
+      "ordem": 28
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Construção em terreno de terceiros (pais, cônjuge)",
+      "conteudo": "É possível usar o crédito Porto para **construir em terreno que não está no nome do cliente** — como terrenos de **pais, cônjuges ou terceiros**.\n\nRegras:\n• O **proprietário do terreno é o garantidor** do processo e participa da assinatura da escritura, **mas não precisa entrar na cota**\n• A **alienação do terreno** acontece antes da liberação dos recursos\n• A liberação segue em **etapas conforme andamento da obra**\n• Exige cronograma, memorial, ART CREA, projeto aprovado, alvará e Habite-se\n\nÉ permitido também **reformar 2 imóveis** com um bem em garantia, desde que o imóvel alienado garanta o saldo devedor das cotas envolvidas.\n\nFonte: Consórcio Construção e Reforma · Porto Bank.",
+      "tags": "terreno terceiros, pais, conjuge, garantidor, alienacao, dois imoveis",
+      "ordem": 29
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Móveis Planejados: 10% do crédito + sobra após aquisição",
+      "conteudo": "Desde **18/11/2024**, todos os grupos de Imóvel Porto podem usar parte do crédito para **móveis planejados**:\n\n• Disponível **somente quando há sobra de crédito** após aquisição do imóvel\n• Limite: **10% do valor da avaliação do imóvel**, **respeitando o teto de 10% do crédito original**\n• Exemplo: crédito de R$ 700 mil + imóvel avaliado em R$ 500 mil → considera 10% do menor valor = **R$ 50 mil para móveis**\n• Prazo: usar em até **180 dias após a aquisição do imóvel**\n• Exige NF de **fornecedor PJ especializado** (não aceita PF nem MEI) + projeto\n\nFonte: Material Móveis Planejados · Porto Bank.",
+      "tags": "moveis planejados, 10%, sobra credito, 180 dias, fornecedor pj, avaliacao",
+      "ordem": 30
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Documentos do Imóvel: urbano vs rural",
+      "conteudo": "Documentos exigidos pela Porto **por tipo de imóvel**:\n\n**Imóvel URBANO**:\n• Cartela de **IPTU**\n• **Certidão de Valor Venal** ou certidão de dados cadastrais (emitida há menos de 30 dias) com endereço completo\n\n**Imóvel RURAL**:\n• **CCIR** (Certificado de Cadastro de Imóvel Rural) do ano vigente\n• **DARF** dos últimos 5 anos com comprovantes\n\n**PJ adquirindo imóvel**: empresa individual **NÃO pode** adquirir cotas de imóvel. Para outras PJ: Contrato Social consolidado + Certidão de Breve Relato da Junta Comercial (menos de 180 dias) + CNPJ + Certidão Conjunta Negativa de Débitos Federais.\n\nFonte: Lista de Documentos Consórcio Imóvel · Porto Bank.",
+      "tags": "documentos imovel, urbano, rural, ccir, iptu, valor venal, darf, pj",
+      "ordem": 31
+    },
+    {
+      "categoria_key": "transferencia",
+      "categoria_label": "Transferência, cancelamento e devoluções",
+      "categoria_ordem": 9,
+      "titulo": "Cessionário: critérios obrigatórios para transferência de cota",
+      "conteudo": "Para receber uma cota transferida (**cessionário**), o pretendente precisa atender:\n\n• **Idade mínima 18 anos** na adesão\n• **Idade máxima 80 anos** no encerramento do grupo\n• A partir de **76 anos no encerramento**, **não haverá cobertura do Seguro de Vida**\n• **Limite de saldo devedor agregado de R$ 2,5 milhões** no CPF/CNPJ, somando todas as cotas ativas + cotas em jornada de transferência\n\n**Bloqueios automáticos**:\n• Empresas **FILIAIS** não podem participar — só a **matriz**\n• **Empresas individuais (EI)** não podem adquirir cotas de imóvel\n\nSe o limite de R$ 2,5 mi for excedido, o cessionário passa por **pré-análise de crédito** antes de avançar.\n\nFonte: Guia da Transferência de Cotas 2025 · Porto Bank.",
+      "tags": "cessionario, transferencia, criterios, 18 anos, 80 anos, 76 anos seguro, 2.5 milhoes, matriz filial, empresa individual",
+      "ordem": 13
+    },
+    {
+      "categoria_key": "transferencia",
+      "categoria_label": "Transferência, cancelamento e devoluções",
+      "categoria_ordem": 9,
+      "titulo": "Transferência de cota contemplada com bem móvel: fluxo de Gravame",
+      "conteudo": "Transferência de cota contemplada **com bem móvel** tem fluxo específico:\n\n1. Envio digital do **ATPV** (preenchido + reconhecimento de firma do vendedor)\n2. Validação de autenticidade pela Porto\n3. Pagamento de **1% do crédito** transferido (taxa de transferência)\n4. Pagamento de **Sircof + Gravame** (taxas Detran, variam por estado)\n5. Emissão e assinatura dos termos de cessão (cedente assina primeiro, cessionário depois, via e-mail)\n6. **Formalização da transferência do Gravame em até 2 dias úteis**\n\nExemplo: crédito de R$ 100.000 → R$ 1.000 de taxa Porto + Sircof/Gravame do estado.\n\nFonte: Guia da Transferência de Cotas 2025 · Porto Bank.",
+      "tags": "transferencia, cota contemplada, bem movel, gravame, sircof, 1%, atpv, 2 dias",
+      "ordem": 14
+    },
+    {
+      "categoria_key": "pagamentos",
+      "categoria_label": "Pagamentos e parcelas",
+      "categoria_ordem": 8,
+      "titulo": "Taxa sobre recursos não procurados: variam por inauguração do grupo",
+      "conteudo": "Quando o cliente deixa **recursos parados no Porto Bank** sem solicitar a devolução, a tarifa cobrada **depende da data de inauguração do grupo**:\n\n• Grupos inaugurados **até 2006**: **10% ao mês**\n• Grupos inaugurados **entre 2007 e 2018**: **0,50% ao mês**\n• Grupos inaugurados **entre 2018 e 21/04/2023**: **0,070% ao mês**\n• Grupos inaugurados **a partir de 21/04/2023**: **10,00% ao mês**\n\nAtenção: a tarifa é mensal e prevista em regulamento. Quanto mais antigos os recursos parados, maior o desconto na devolução. Oriente o cliente cancelado/contemplado-sem-uso a solicitar devolução o quanto antes.\n\nFonte: Tabela de Tarifas Bens Móveis + Tarifas Imóvel · Porto Bank.",
+      "tags": "recursos nao procurados, tarifa, 10% mes, inauguracao grupo, 2006, 2018, 2023, devolucao",
+      "ordem": 12
+    },
+    {
+      "categoria_key": "pagamentos",
+      "categoria_label": "Pagamentos e parcelas",
+      "categoria_ordem": 8,
+      "titulo": "Cancelamento Imóvel: tarifas por etapa do processo",
+      "conteudo": "O **valor cobrado para cancelar uma cota de Imóvel** varia conforme o estágio:\n\n• **Antes da análise jurídica**: **não paga nada**\n• **Após análise jurídica, sem laudo de vistoria**: **R$ 2.000,00**\n• **Após análise jurídica E vistoria**: **R$ 2.500,00**\n• **Após emissão do contrato**: **R$ 3.800,00**\n• **Cancelamento de cota já QUITADA**: desconta **R$ 1.800,00** da devolução\n\nPara Bens Móveis (Auto/Pesados), as tarifas de operação pagas são **estornadas** caso o cliente desista da aquisição.\n\nFonte: Tabela de Tarifas Imóvel + Bens Móveis · Porto Bank.",
+      "tags": "cancelamento, imovel, tarifas, analise juridica, vistoria, contrato, 2000, 2500, 3800, 1800, quitada",
+      "ordem": 13
+    },
+    {
+      "categoria_key": "pagamentos",
+      "categoria_label": "Pagamentos e parcelas",
+      "categoria_ordem": 8,
+      "titulo": "Pacote de Tarifas Imóvel + vistorias adicionais",
+      "conteudo": "Tarifas operacionais específicas do Consórcio **Imóvel**:\n\n• **Pacote de Tarifas Consórcio Imóvel**: **R$ 3.800,00** (taxa de formalização, já inclui 1ª vistoria de construção/reforma)\n• **Vistorias posteriores**: **R$ 597,00 cada**\n• **Substituição de garantia**: **0,5% do saldo devedor**\n• **Troca de crédito**: **2% sobre a diferença** entre crédito original e novo (Imóvel) — ou apenas a taxa de adesão original se houver cobrança vigente\n• **Transferência contemplada**: **1% do valor atual do bem**\n• **Transferência cancelada**: **10% do valor pago ao fundo comum** (a partir de 26/08/2024)\n\nFonte: Tabela de Tarifas Imóvel · Porto Bank.",
+      "tags": "pacote tarifas, 3800, vistoria 597, troca credito 2%, substituicao garantia, transferencia, imovel",
+      "ordem": 14
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Imóvel no Exterior: fluxo de abertura de ticket (passo a passo)",
+      "conteudo": "Para usar o crédito Porto em **imóvel no exterior**, o cliente abre ticket na esteira PortoBank em 5 etapas:\n\n1. **Abertura do Ticket**: escolher \"Aquisição de Imóvel no Exterior\" e selecionar grupo/cota contemplada\n2. **Informações do Consorciado**: endereço de entrega, RG/CNH (validade máxima 10 anos), CPF/CNPJ, e-mail, comprovante de endereço\n3. **Informações do Imóvel**: tipo, titularidade, valor de compra, endereço — anexar **Promessa de Compra e Venda do imóvel exterior** + **Matrícula do imóvel BR** (que será dado como garantia)\n4. **Informações do Proprietário** (vendedor)\n5. **Finalização e Conformidade**: comentários extras\n\n**No portal da Tech, use o filtro \"Finalidade\" para acompanhar** — tickets de imóvel exterior têm marcação única.\n\nFonte: Guia do Fluxo de Imóvel no Exterior 01/2026 · Porto Bank.",
+      "tags": "imovel exterior, ticket, fluxo, garantia, matricula brasil, promessa compra venda, finalidade",
+      "ordem": 32
+    },
+    {
+      "categoria_key": "canais",
+      "categoria_label": "Canais e contatos",
+      "categoria_ordem": 12,
+      "titulo": "Apps PF vs PJ — limitações no App Consórcio PJ",
+      "conteudo": "A Porto tem **dois aplicativos diferentes** para clientes do Consórcio:\n\n• **App Porto**: para clientes **Pessoa Física**\n• **App Consórcio Porto Seguro**: para clientes **Pessoa Jurídica**\n\nNo **App PJ**, **3 funcionalidades não estão disponíveis** ainda (estão sendo migradas):\n• Troca de crédito\n• Mapa das cotas\n• Extrato de cotas transferidas\n\nAmbos os públicos também podem acessar a **Área do Cliente pelo site portoseguro.com.br**. No site, neste primeiro momento Newcon estão disponíveis: 2ª via de boleto, extrato de cotas e resultados das assembleias.\n\nFonte: FAQ Newcon · Porto Bank.",
+      "tags": "app porto, app consorcio, pj, pf, mapa cotas, troca credito, area cliente",
+      "ordem": 8
+    },
+    {
+      "categoria_key": "canais",
+      "categoria_label": "Canais e contatos",
+      "categoria_ordem": 12,
+      "titulo": "Cota com 2 titulares: só o 1º titular acessa os canais digitais",
+      "conteudo": "Quando uma cota tem **2 ou mais titulares**, **apenas o 1º titular** consegue acessar a cota no App Porto e na Área do Cliente do site.\n\nO 2º titular **não vê a cota**, ainda que continue sendo proprietário e tenha direitos sobre ela. Isso vale para cotas migradas do sistema antigo: se a pessoa era 2ª titular antes do Newcon, **deixou de visualizar** após a migração.\n\nExemplo: João tem 3 cotas — 1 como 1º titular e 2 como 2º titular. Ele só vê a primeira no app. As outras duas, só o 1º titular da cota consegue ver.\n\n**Para o 2º titular obter informações, o caminho é a Central de Relacionamento**.\n\nFonte: FAQ Newcon · Porto Bank.",
+      "tags": "2 titulares, 1 titular, app, area cliente, visualizacao, newcon",
+      "ordem": 9
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Pacto Antenupcial: quando é obrigatório apresentar",
+      "conteudo": "Na pós-contemplação de Imóvel, a Porto exige **Pacto Antenupcial** (documento dos noivos com acordos pré-casamento) nos seguintes regimes:\n\n• **Comunhão total de bens após 26/12/1977**\n• **Comunhão parcial de bens antes de 26/12/1977**\n• **Separação total de bens** (todos os casos, sem exceção)\n• **Participação final nos aquestos** (todos os casos)\n\nNão é obrigatório no regime de **comunhão parcial de bens após 26/12/1977** (regime legal padrão atual).\n\nOutros documentos pessoais essenciais:\n• RG/CPF (ou CNH, OAB, CRM, CRO) de todos os titulares **e cônjuges/conviventes**\n• Comprovante de estado civil (certidão de nascimento ou casamento atualizada)\n• Comprovante de endereço com **menos de 60 dias**\n• Para estrangeiros: certidão consularizada ou traduzida + registro em cartório\n\nFonte: Lista de Documentos Consórcio Imóvel · Porto Bank.",
+      "tags": "pacto antenupcial, regime bens, comunhao, separacao, aquestos, 1977, conjuge",
+      "ordem": 33
     }
   ],
   "downloads": [

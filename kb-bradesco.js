@@ -1249,6 +1249,249 @@ window.KB_ADMIN["bradesco"] = {
       "conteudo": "Central do Consorciado:\n• 4004 4436 (capitais e regiões metropolitanas).\n• 0800 722 4436 (demais regiões).\n• Eletrônico 24h; personalizado seg-sex, 8h-20h.\n\nFone Fácil Bradesco (banco): 4002 0022 / 0800 570 0022 — 24/7 para consultas e transações.\n\nSAC — Alô Bradesco: 0800 704 8383 — 24/7 — reclamações, cancelamentos e informações gerais.\n\nSAC — Deficiência Auditiva ou de Fala: 0800 722 0099 — 24/7.\n\nOuvidoria: 0800 727 9933 — seg-sex 9h-18h. Usar se o SAC não resolveu.\n\nSeguro Auto Bradesco (pra carta usar até 10% no seguro): 4004 2727 / 0800 701 2727 — seg-sex 7h40-20h20, sábado 8h-14h.\n\nBIA (assistente virtual): banco.bradesco/consorcios.",
       "tags": "telefones, central, sac, ouvidoria, bia, seguro auto, 4004 4436, 0800 722 4436, 4002 0022, 0800 704 8383, deficiência auditiva, canais",
       "ordem": 4
+    },
+    {
+      "categoria_key": "adesao",
+      "categoria_label": "Adesão e atendimento",
+      "categoria_ordem": 5,
+      "titulo": "Qual o limite de idade do cliente PJ? (vale a idade do sócio majoritário)",
+      "conteudo": "Para clientes **Pessoa Jurídica**, a regra de adesão com Seguro Prestamista é determinada pela **idade do sócio majoritário**.\n• **Idade mínima:** 18 anos (ou 16 anos emancipado);\n• **Idade máxima:** 74 anos, 11 meses e 29 dias na data de adesão;\n• **Sem seguro:** o cliente que, somada a idade na adesão + prazo do consórcio, ultrapassar 80 anos.\n\nSe o sócio majoritário não atende a regra, é possível adesão **sem seguro prestamista**. Verifique na simulação do NewConWeb. Fonte: Manual do Parceiro Bradesco Out/2024 — item 1.D.",
+      "tags": "adesão, idade limite, pj, sócio majoritário, seguro, 80 anos",
+      "ordem": 139
+    },
+    {
+      "categoria_key": "adesao",
+      "categoria_label": "Adesão e atendimento",
+      "categoria_ordem": 5,
+      "titulo": "Cliente FATCA (norte-americano) — o que preencher?",
+      "conteudo": "**FATCA** (Foreign Account Tax Compliance Act) é a lei dos EUA que regula contas e investimentos de cidadãos norte-americanos fora dos EUA.\n\nSe o cliente for **escopo FATCA** (americano ou green card), o corretor deve:\n• Preencher **todos os campos** específicos do formulário FATCA;\n• Solicitar a **assinatura do cliente** no documento adicional;\n• Sem isso a proposta não avança no NewConWeb.\n\nA pergunta sobre nacionalidade aparece automaticamente no fluxo de venda. Fonte: Manual do Parceiro Bradesco Out/2024 — item 8.",
+      "tags": "fatca, eua, americano, green card, adesão, newconweb",
+      "ordem": 140
+    },
+    {
+      "categoria_key": "adesao",
+      "categoria_label": "Adesão e atendimento",
+      "categoria_ordem": 5,
+      "titulo": "Quando a venda é computada? (data do pagamento da adesão)",
+      "conteudo": "A venda é computada **na data em que o cliente paga o boleto de adesão** — não na data da proposta.\n• Se o boleto for pago no **final de semana ou feriado**, a venda é computada no **próximo dia útil**;\n• Se o boleto vencer, pode ser **reemitido em até 4 dias corridos** após a venda (mesma data de vencimento e pagamento);\n• Se passar de 4 dias, é necessário refazer a proposta — e o valor da parcela pode mudar.\n\n**Sempre avisar o cliente:** o não pagamento na data não garante a mesma condição. Fonte: Manual do Parceiro Bradesco Out/2024 — item 15.",
+      "tags": "venda computada, boleto adesão, vencimento, primeira parcela, reemissão",
+      "ordem": 141
+    },
+    {
+      "categoria_key": "adesao",
+      "categoria_label": "Adesão e atendimento",
+      "categoria_ordem": 5,
+      "titulo": "Roteiro de atendimento — 13 etapas (Bradesco)",
+      "conteudo": "Etapas oficiais do atendimento Bradesco:\n• **1.** Cumprimentar o cliente;\n• **2.** Ter memorizado um valor de crédito/prazo/parcela (simular antes);\n• **3.** Perguntar se ele pretende adquirir/trocar o bem;\n• **4.** Apresentar a parceria com Bradesco;\n• **5.** Se 'não' agora, pedir contato para outra oportunidade;\n• **6.** Perguntar o valor de parcela que ele pode pagar;\n• **7.** Explicar que lance vencedor pode ser **diluído** reduzindo a parcela;\n• **8.** Pedir documento com foto;\n• **9.** Preencher todos os campos obrigatórios;\n• **10.** Conferir telefone e e-mail (canal de comunicação da jornada);\n• **11.** Consulta de crédito automática — restritivo = 'não atende parâmetros';\n• **12.** Imprimir boleto + proposta + regulamento (de preferência **assinatura eletrônica**);\n• **13.** Avisar: não pagar o boleto na data não garante a mesma condição. Fonte: Manual do Parceiro — item 3.B.",
+      "tags": "atendimento, etapas, roteiro, venda, simulação",
+      "ordem": 142
+    },
+    {
+      "categoria_key": "pagamentos",
+      "categoria_label": "Pagamentos e parcelas",
+      "categoria_ordem": 11,
+      "titulo": "Quando vence a parcela e quanto tempo o débito automático tenta?",
+      "conteudo": "**Vencimento:** todo dia **10** do mês (ou o dia útil seguinte se cair em fim de semana/feriado).\n\n**Débito automático:**\n• Conta-Corrente, Poupança Bradesco ou Next, **da mesma titularidade da cota**;\n• A cobrança permanece tentando debitar por **85 dias úteis** após o vencimento;\n• Exceção: contemplados com bem entregue — só 15 dias corridos de tentativa.\n\n**Encargos por atraso:** multa de **2%** + juros de **1% ao mês**.\n\nParcelas debitadas dentro dos 85 dias úteis são consideradas devidas e **não serão estornadas**, mesmo que o cliente reclame. Fonte: Manual do Parceiro Bradesco Out/2024 — item 1.M.",
+      "tags": "vencimento, dia 10, débito automático, 85 dias, multa 2%, juros 1%",
+      "ordem": 143
+    },
+    {
+      "categoria_key": "pagamentos",
+      "categoria_label": "Pagamentos e parcelas",
+      "categoria_ordem": 11,
+      "titulo": "Diferença entre débito devido (85 dias) e débito indevido (estornável)",
+      "conteudo": "A Bradesco distingue duas situações para estorno:\n\n**Débito DEVIDO (não estorna):**\n• Parcelas pendentes debitadas no **período de busca de 85 dias úteis** — são consideradas devidas;\n• Mesmo se o cliente reclamar, o valor não volta.\n\n**Débito INDEVIDO (estorna em até 10 dias úteis):**\n• Parcela debitada **após a solicitação de cancelamento** da cota;\n• Parcela debitada da conta do **cedente após transferência** da cota.\n\nPara pagamento em duplicidade: o valor amortiza saldo devedor em ordem inversa OU o cliente pode pedir estorno em conta de qualquer banco (titularidade própria) em até 10 dias úteis. Fonte: Manual do Parceiro — item 1.M.",
+      "tags": "débito indevido, estorno, duplicidade, cancelamento, transferência, 10 dias",
+      "ordem": 144
+    },
+    {
+      "categoria_key": "pagamentos",
+      "categoria_label": "Pagamentos e parcelas",
+      "categoria_ordem": 11,
+      "titulo": "Cota contemplada com bem entregue em atraso — vai para escritório de cobrança",
+      "conteudo": "Quando a **cota contemplada com bem entregue** atrasa:\n• A Bradesco **suspende o envio dos boletos/débitos** das parcelas a vencer;\n• A partir de **15 dias corridos de atraso**, um escritório de cobrança contratado entra em contato;\n• O cliente **regulariza diretamente com o escritório de cobrança**, não com a Central;\n• Após regularização, os boletos/débitos mensais voltam a ser enviados.\n\nSe o cliente não foi contactado, ele liga na Central de Atendimento para descobrir qual escritório está com a cota. Fonte: Manual do Parceiro Bradesco Out/2024 — item 1.M.",
+      "tags": "contemplado, bem entregue, atraso, 15 dias, escritório cobrança",
+      "ordem": 145
+    },
+    {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Contemplação",
+      "categoria_ordem": 7,
+      "titulo": "Qual é o valor mínimo do lance Bradesco? (10% veículos / 20% imóveis)",
+      "conteudo": "Valor mínimo do lance Bradesco — sobre o **saldo devedor**:\n• **Veículos leves e pesados** (autos, caminhões, tratores): **mín. 10%** do saldo devedor;\n• **Imóveis:** **mín. 20%** do saldo devedor;\n• **Últimos 12 meses do grupo:** o mínimo pode cair para **uma parcela** (regra única e curta).\n\nO lance vencedor é o que apresenta o **maior percentual**, calculado sobre o valor do bem **acrescido de Taxa de Administração e Fundo de Reserva**.\n\n**Empate:** vence quem tem o número de cota mais próximo do número do prêmio sorteado na Loteria Federal. Fonte: Manual do Parceiro Bradesco Out/2024 — item 1.J + Regulamentos BCB 285.",
+      "tags": "lance mínimo, 10%, 20%, saldo devedor, empate, últimos 12 meses",
+      "ordem": 146
+    },
+    {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Contemplação",
+      "categoria_ordem": 7,
+      "titulo": "Qual o prazo para pagar o lance vencedor? (2 dias corridos)",
+      "conteudo": "Após a contemplação por lance, o pagamento deve ser feito em **2 dias corridos**.\n\nSe o consorciado **não paga** dentro do prazo:\n• A contemplação é **cancelada**;\n• Havendo saldo disponível no grupo, a **próxima cota que ofertou o maior percentual** é contemplada como **suplente**.\n\n**Alterar a forma de amortização** (diluir vs antecipar) só é possível **até o dia anterior ao vencimento da próxima parcela** — depois disso, a opção escolhida na oferta é finalizada e **não pode ser revertida**. Fonte: Manual do Parceiro Bradesco Out/2024 — item 1.J.",
+      "tags": "lance, prazo pagamento, 2 dias, suplente, cancelamento contemplação, amortização",
+      "ordem": 147
+    },
+    {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Contemplação",
+      "categoria_ordem": 7,
+      "titulo": "Lance de quitação — pagar tudo de uma vez na contemplação",
+      "conteudo": "O **lance de quitação** é uma modalidade em que o cliente oferta um valor referente **às parcelas a vencer** (saldo devedor). Quando a cota é contemplada por esse lance, ela **já fica quitada** automaticamente após o pagamento.\n\n**Atenção:** se o consorciado **não contemplado** quita o saldo devedor por antecipação de parcelas, ele **NÃO ganha contemplação** — ele apenas zera as parcelas e continua concorrendo **só por sorteio** nas próximas assembleias (não pode mais ofertar lance).\n\nPara cotas de imóvel, o cliente pode usar **FGTS** no montante do lance (regras CEF). Fonte: Manual do Parceiro — item 1.J.",
+      "tags": "lance quitação, saldo devedor, antecipação, sorteio, fgts",
+      "ordem": 148
+    },
+    {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Contemplação",
+      "categoria_ordem": 7,
+      "titulo": "Centena adicional — como o sorteio Bradesco funciona com Loteria Federal",
+      "conteudo": "A contemplação por sorteio Bradesco usa a **Loteria Federal**:\n• A cota contemplada é definida pela **centena do 1º prêmio**;\n• A centena é formada pelo **3º, 4º e 5º algarismos** do 1º prêmio, **lidos da esquerda pra direita**.\n\n**Centena adicional:** cada consorciado concorre com **o número da própria cota** + **uma centena adicional** que está sempre no **Demonstrativo Mensal do Consorciado** (canais digitais).\n\nIsso dobra as chances de sorteio dentro do mesmo grupo. Fonte: Manual do Parceiro Bradesco Out/2024 — item 1.J.",
+      "tags": "sorteio, loteria federal, centena adicional, demonstrativo, assembleia",
+      "ordem": 149
+    },
+    {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Contemplação",
+      "categoria_ordem": 7,
+      "titulo": "Mudança de bem antes da contemplação — só 1 alteração no plano",
+      "conteudo": "O consorciado pode pedir **mudança de bem** pela Central de Atendimento, **desde que a cota não esteja contemplada**.\n\nRegras:\n• O novo bem deve ser **compatível com a faixa de crédito do grupo**;\n• Deve ser da **mesma categoria** (Automóvel, Imóvel ou Pesados);\n• A mudança pode causar **diferença na cota**, dividida nas parcelas a vencer;\n• **Só é possível 1 alteração durante a vigência do plano**.\n\nSe a parcela do mês já foi emitida ou debitada, a diferença é ajustada na parcela **seguinte**, não na atual. Fonte: Manual do Parceiro Bradesco Out/2024 — Mudança do bem.",
+      "tags": "mudança bem, troca bem, alteração plano, categoria, parcela",
+      "ordem": 150
+    },
+    {
+      "categoria_key": "credito_auto",
+      "categoria_label": "Crédito e compra — Automóvel",
+      "categoria_ordem": 8,
+      "titulo": "Enquadramento de motos no Bradesco — por cilindradas e idade",
+      "conteudo": "**Motos** no Bradesco — qualquer marca/modelo com chassi alienável:\n• A partir de **300 cc**: somente **0km**;\n• A partir de **400 cc**: com até **3 anos** de fabricação;\n• A partir de **600 cc**: com até **5 anos** de fabricação;\n• Motos pequenas (abaixo de 300cc) não são aceitas como bem alienável.\n\nGrupos exclusivos de motocicletas têm cotas **0001 a 960** (em vez do limite normal 961-000), permitindo grupos maiores. Fonte: Manual do Parceiro Bradesco Out/2024 — item 1.O + Regulamento BCB 285 Móveis.",
+      "tags": "moto, motocicleta, cilindrada, 300cc, 400cc, 600cc, anos uso",
+      "ordem": 151
+    },
+    {
+      "categoria_key": "credito_auto",
+      "categoria_label": "Crédito e compra — Automóvel",
+      "categoria_ordem": 8,
+      "titulo": "Sobra de crédito até 10% — em que despesas o cliente pode usar?",
+      "conteudo": "Quando o bem custa menos que a carta, o cliente pode usar **até 10% do crédito como sobra para reembolso de despesas**:\n\n**Despesas reembolsáveis (auto):**\n• **Departamento de trânsito:** IPVA, licenciamento, transferência;\n• **Cartório:** registros;\n• **Acessórios** do veículo;\n• **Importação:** armazenagem, capatazias, despachantes, impostos;\n• **Seguro Bradesco Auto** (até 10% da carta).\n\nO reembolso é solicitado pela **BPO de contratação** (mediante notas/comprovantes). Se o cliente **não usar** essa sobra, ela amortiza saldo devedor em **ordem inversa do plano** (reduz prazo). Fonte: Manual do Parceiro Bradesco Out/2024 — item 1.N.",
+      "tags": "sobra crédito, 10%, despesas, ipva, licenciamento, seguro, reembolso, ordem inversa",
+      "ordem": 152
+    },
+    {
+      "categoria_key": "credito_auto",
+      "categoria_label": "Crédito e compra — Automóvel",
+      "categoria_ordem": 8,
+      "titulo": "Veículo recuperado — Bradesco desvaloriza 30% do valor de tabela",
+      "conteudo": "Veículos classificados como **'Recuperados'** (já tiveram avaria/baixa e voltaram à circulação) são aceitos pelo Bradesco, mas com **depreciação de 30% sobre o valor da tabela FIPE/MOLICAR**.\n\nExemplo: carro com FIPE de R$ 50.000 e classificação 'Recuperado' = garantia avaliada em **R$ 35.000** (50.000 × 0,70).\n\n**Não aceitos em nenhuma hipótese:**\n• Veículos de **leilão**;\n• Veículos de **sinistro**;\n• **Chassi remarcado** ou recuperado por solda;\n• Veículos **alienados** a outra instituição (gravame ativo) — exigir baixa antes da indicação.\n\nLimite geral de idade: **até 10 anos de fabricação** para carros, utilitários, caminhonetes, caminhões e ônibus. Fonte: Manual do Parceiro Bradesco Out/2024 — item 1.O.",
+      "tags": "veículo recuperado, depreciação 30%, leilão, sinistro, chassi remarcado, gravame",
+      "ordem": 153
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 9,
+      "titulo": "Construção com Garantia Evolutiva — só acima de R$ 500 mil",
+      "conteudo": "Modalidade especial para **construção do zero ou término de obra** em que o terreno NÃO supre o saldo devedor.\n\n**Requisitos:**\n• Operação acima de **R$ 500.000**;\n• Valor do **terreno + construção existente** deve ser avaliado em no mínimo **50% do saldo devedor**;\n• A **primeira parcela liberada é 40% do crédito** (para iniciar a obra);\n• O imóvel objeto da operação será a garantia (evoluindo com a construção);\n• 90% liberado após contrato registrado, **10% retido até averbação** da obra concluída.\n\nÉ a alternativa quando o cliente só tem o terreno e quer construir uma casa de alto padrão sem precisar dar outro imóvel em garantia. Fonte: Manual do Parceiro Bradesco Out/2024 — item 1.P.",
+      "tags": "garantia evolutiva, construção, 500 mil, 40% primeira parcela, terreno, 50% saldo",
+      "ordem": 154
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 9,
+      "titulo": "Constituição de Garantia Simples (Reembolso) — comprou à vista após contemplar",
+      "conteudo": "Modalidade para quem **já comprou o imóvel com recursos próprios após a contemplação** e quer reembolso do valor:\n\n**Requisitos:**\n• O imóvel deve estar **transferido ao consorciado** no Cartório de Registro de Imóveis;\n• A **data do registro** deve ser **posterior à data da contemplação** da cota;\n• Será liberado o **menor valor entre registro e avaliação**.\n\n**Variação — Constituição para Aquisição à Vista de Terceiros:** o cliente compra à vista e indica **outro imóvel próprio livre de ônus** para ficar alienado à Bradesco.\n\n**Variação — Aquisição Imóvel na Planta:** o cliente compra na planta (sem matrícula/Habite-se) e indica outro imóvel próprio como garantia. Fonte: Manual do Parceiro — item 1.P.",
+      "tags": "constituição garantia, reembolso, à vista, terceiros, planta, contemplação",
+      "ordem": 155
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 9,
+      "titulo": "Terreno + Construção numa única operação — terreno mín. 50% do saldo",
+      "conteudo": "**Aquisição de Terreno/Imóvel com Construção e Reforma:** o cliente usa a carta para comprar terreno **E** construir/reformar **na mesma operação**.\n\n**Regra do terreno:**\n• O valor do terreno avaliado deve ser **no mínimo 50% do saldo devedor** da cota;\n• Exemplo: carta de R$ 400 mil → terreno avaliado em **R$ 200 mil ou mais**;\n• Os 50% restantes vão para a obra.\n\n**Liberação:** segue o padrão de construção — 90% após contrato registrado e averbação, **10% retido até conclusão**.\n\nSilo Agrícola usa essa mesma modalidade (Construção): o projeto deve ter **no mínimo 30% de obra civil**, senão é descaracterizado. Fonte: Manual do Parceiro Bradesco Out/2024 — item 1.P.",
+      "tags": "terreno, construção, 50% saldo, silo, obra civil, 30%, aquisição combinada",
+      "ordem": 156
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 9,
+      "titulo": "O que NÃO é permitido comprar com a carta de imóvel Bradesco?",
+      "conteudo": "Vedações da carta de imóvel Bradesco:\n• **Terrenos em fração ideal** (loteamentos/empreendimentos para incorporação);\n• **Box de garagem isolado** (precisa indicar outro imóvel como garantia);\n• **Imóveis registrados sob regime de ocupação** (sem matrícula plena);\n• **Imóveis unificados fisicamente com matrículas separadas** — fazer a unificação antes;\n• **Imóveis de leilão** (exceção: pode usar **Constituição de Garantia Simples** se já comprou e tem registro);\n• **Cota quitada** não pode ser usada para **construção, reforma com ampliação, reforma sem ampliação**;\n• Em **Construção/Reforma**, só o **custo aprovado pelo Patrimônio** (laudo de avaliação) é liberado — **não há reembolso retroativo** de gastos feitos antes da vistoria. Fonte: Manual do Parceiro Bradesco Out/2024 — item 1.P.",
+      "tags": "vedações imóvel, fração ideal, box garagem, leilão, ocupação, cota quitada, reembolso retroativo",
+      "ordem": 157
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 9,
+      "titulo": "FGTS no consórcio Bradesco — quando o saque pode ser indeferido pela Caixa",
+      "conteudo": "A utilização do FGTS no consórcio de imóvel Bradesco está **condicionada às regras do Conselho Curador do FGTS e da Caixa Econômica Federal** (não da Bradesco):\n• O cliente pode usar FGTS como **lance** ou como **complemento de crédito**;\n• Permitido também o **FGTS do cônjuge**;\n• Após aquisição: FGTS pode **liquidar/amortizar** o consórcio ou pagar parcelas vincendas;\n• O **valor do saque para efeito do lance não pode ultrapassar o valor de avaliação** do imóvel.\n\n**Atenção:** se a Caixa **indeferir** a liberação dos recursos do FGTS, o consorciado deve **complementar com recursos próprios**, senão a operação é cancelada. Antes de prometer FGTS ao cliente, oriente a consultar o **Manual da Caixa**. Fonte: Regulamento BCB 285 Bradesco Imóveis — Cláusula 8.",
+      "tags": "fgts, caixa, indeferido, cônjuge, lance, complemento, recursos próprios, manual caixa",
+      "ordem": 158
+    },
+    {
+      "categoria_key": "saida",
+      "categoria_label": "Transferência e saída do grupo",
+      "categoria_ordem": 12,
+      "titulo": "Transferência de cota — 8 etapas oficiais e onde tudo acontece",
+      "conteudo": "O processo passa por **8 etapas** e roda no **Portal de Transferências** (link via WhatsApp/SMS/e-mail):\n• **1.** Preenchimento da solicitação pelo **cedente** no Canal do Consorciado > Serviços > Transferir Cota — a cota deve estar **ativa, em dia, grupo em andamento**;\n• **2.** Análise cadastral do **cessionário** (política interna de crédito);\n• **3.** Pagamento da **Taxa de Transferência** (boleto disponibilizado no Canal — vencido = cancela);\n• **4.** Cadastro e autenticação de **Biometria Facial** em até 48h após pagamento;\n• **5.** Upload da documentação (cedente PF faz só biometria; PJ envia contrato social + docs sócios);\n• **6.** Análise da documentação em até **3 dias úteis**;\n• **7.** Emissão e **assinatura eletrônica** do contrato no portal;\n• **8.** Conclusão em **24h úteis** (sem bem) ou **48h úteis** (com bem entregue).\n\n**Prazo geral:** após 30 dias do pagamento da taxa sem documentação, o processo é cancelado. Central exclusiva: **(11) 4040-3685** / **0800 5913 585**. Fonte: Instruções de Transferência Bradesco Dez/2024.",
+      "tags": "transferência cota, 8 etapas, biometria, portal transferências, 4040-3685, cessionário",
+      "ordem": 159
+    },
+    {
+      "categoria_key": "saida",
+      "categoria_label": "Transferência e saída do grupo",
+      "categoria_ordem": 12,
+      "titulo": "Tarifas de transferência e cessão Bradesco — valores mínimos",
+      "conteudo": "Valores oficiais (Folheto de Tarifas vigência a partir de 10.06.2026):\n\n**Bens Móveis:**\n• Transferência: **1% sobre Bem de Referência Atualizado** — mín. **R$ 800,00**;\n• Cessão: **1% do saldo devedor** — mín. **R$ 750,00**;\n• Substituição de garantia: **1% sobre Bem Referência** — mín. **R$ 800,00**;\n• 2ª via de documentos: **R$ 50,00**.\n\n**Bens Imóveis:**\n• Transferência: **1% do saldo devedor** — mín. **R$ 750,00**;\n• Cessão: **1% do saldo devedor** — mín. **R$ 750,00**;\n• Substituição de garantia: **1% do saldo devedor** — mín. **R$ 1.145,00**.\n\n**Processos com bem entregue** têm cobrança adicional de **registro de contrato + gravame Detran**. Fonte: Folheto de Tarifas Consórcio PF Bradesco — 10.06.2026.",
+      "tags": "tarifa transferência, cessão, substituição garantia, 1%, mín 800, mín 750, mín 1145",
+      "ordem": 160
+    },
+    {
+      "categoria_key": "saida",
+      "categoria_label": "Transferência e saída do grupo",
+      "categoria_ordem": 12,
+      "titulo": "Cancelamento — multa de 10% sobre o que foi pago no Fundo Comum",
+      "conteudo": "Quando o consorciado **cancela** (ou é excluído por inadimplência), a Bradesco aplica uma **penalidade de 10% sobre o valor do percentual amortizado** ao Fundo Comum.\n\nExemplo do regulamento:\n• Crédito de R$ 30.000, percentual amortizado de **10%** (R$ 3.000 do Fundo Comum);\n• Penalidade de **10%** = **R$ 300 descontados**;\n• Restituição: contemplado **ATÉ o encerramento do grupo** (não na hora);\n• Cota cancelada **pode ser sorteada** em assembleia para devolução antecipada.\n\nO valor a devolver é o **crédito parcial** (proporcional ao Fundo Comum pago), atualizado, **menos a multa de 10%**, **menos** Taxa de Administração, Fundo de Reserva e Seguro. Fonte: Regulamento BCB 285 Bradesco — Cláusula 20.5.",
+      "tags": "cancelamento, multa 10%, fundo comum, encerramento grupo, devolução, sorteio cota cancelada",
+      "ordem": 161
+    },
+    {
+      "categoria_key": "canais",
+      "categoria_label": "Canais e contatos",
+      "categoria_ordem": 13,
+      "titulo": "Canal do Consorciado — 1º acesso e personalização de senha (6 dígitos)",
+      "conteudo": "Jornada do **1º acesso** ao Canal do Consorciado:\n• Na tela de login, clicar em **Primeiro Acesso**;\n• Informar **Grupo + Cota + CPF/CNPJ** (válido para cota ativa ou cancelada);\n• Escolher receber código por **SMS ou e-mail** (telefone/e-mail mascarado para confirmar);\n• Digitar o **código de 6 dígitos** recebido;\n• Criar **senha de 6 dígitos numéricos** (Senha + Confirme a Senha) — não precisa mais de senha provisória;\n• Pronto: a **mesma senha** vale para Canal do Consorciado, Central de Atendimento e cotas canceladas.\n\n**Captcha:** aparece em caso de erro de digitação. **Esqueci minha senha:** mesmo fluxo. Fonte: Guia 1º Acesso Canal do Consorciado Bradesco.",
+      "tags": "canal consorciado, primeiro acesso, senha 6 dígitos, sms, e-mail, captcha",
+      "ordem": 162
+    },
+    {
+      "categoria_key": "plataforma_corretor",
+      "categoria_label": "Plataforma do corretor",
+      "categoria_ordem": 14,
+      "titulo": "Penalidades ao corretor — bloqueio de acesso e desconto de comissão",
+      "conteudo": "A Bradesco bloqueia/penaliza corretores em duas situações:\n\n**1) Bloqueio de acesso ao NewConWeb:**\n• **Cancelamento de cota:** se o cliente cancelar após a comissão ser paga, fica monitorado e pode bloquear;\n• **Não envio da proposta:** é **obrigatório digitalizar a proposta assinada** e inserir no sistema — não cumprir = bloqueio.\n\n**2) Responsabilidade financeira:**\n• **Reclamações procedentes** em canais internos/órgãos externos (Procon, Ouvidoria) podem gerar **desconto direto na comissão** do corretor responsável pela irregularidade;\n• Manutenção de usuários: ao desligar funcionário com login, **comunicar imediatamente** `acesso.p.consorcio@bradesco.com.br`. Fonte: Manual do Parceiro Bradesco Out/2024 — item 14.",
+      "tags": "penalidades, bloqueio acesso, cancelamento, reclamação procedente, comissão, newconweb",
+      "ordem": 163
+    },
+    {
+      "categoria_key": "plataforma_corretor",
+      "categoria_label": "Plataforma do corretor",
+      "categoria_ordem": 14,
+      "titulo": "Códigos de serviço aceitos na NF de comissão Bradesco (10.01 a 10.09)",
+      "conteudo": "A comissão Bradesco só é paga mediante **Nota Fiscal de Serviço** com um destes códigos:\n• **10.01** — Agenciamento, corretagem ou intermediação de câmbio, seguros, cartões de crédito, planos de saúde, planos de previdência;\n• **10.02** — Agenciamento, corretagem ou intermediação de **títulos em geral, valores mobiliários e contratos** quaisquer;\n• **10.05** — Agenciamento, corretagem ou intermediação de **bens móveis ou imóveis** (este é o mais comum para consórcio);\n• **10.09** — Representação de qualquer natureza, inclusive comercial.\n\n**A comissão é um percentual sobre o valor do bem e prazo definido em contrato.** Dúvidas: `consorcio.parcerias@bradesco.com.br`. Fonte: Manual do Parceiro Bradesco Out/2024 — item 17.",
+      "tags": "nf serviço, código 10.05, comissão, faturamento, parcerias",
+      "ordem": 164
+    },
+    {
+      "categoria_key": "seguro",
+      "categoria_label": "Seguro prestamista",
+      "categoria_ordem": 10,
+      "titulo": "Tetos de indenização do Seguro Prestamista Bradesco (R$ 6 mi + 3x R$ 5k)",
+      "conteudo": "Limites máximos por sinistro no Seguro Prestamista Bradesco:\n\n**Morte ou Invalidez Total por Acidente:**\n• Beneficiários/herdeiros recebem o **valor do bem descontando as taxas**;\n• **Limite: R$ 6.000.000,00** por **CPF/CNPJ** (não por cota — somam-se as cotas do mesmo titular).\n\n**Desemprego Involuntário:**\n• Pagamento de **até 3 parcelas** do consórcio;\n• **Limite: R$ 5.000,00 por parcela**.\n\n**Incapacidade Física Total e Temporária:**\n• Pagamento de **até 3 parcelas**;\n• **Limite: R$ 5.000,00 por parcela**.\n\n**Quem não entra no seguro:** cliente cuja **idade na adesão + prazo do consórcio ultrapasse 80 anos** (PJ: idade do sócio majoritário). Fonte: Manual do Parceiro Bradesco Out/2024 — item 1.E.",
+      "tags": "seguro prestamista, tetos, 6 milhões, desemprego, incapacidade, 5 mil por parcela",
+      "ordem": 165
     }
   ],
   "downloads": [
