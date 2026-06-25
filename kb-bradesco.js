@@ -458,15 +458,7 @@ window.KB_ADMIN["bradesco"] = {
       "tags": "lance livre, embutido, fixo, diferença",
       "ordem": 2
     },
-    {
-      "categoria_key": "lance",
-      "categoria_label": "Lance",
-      "categoria_ordem": 7,
-      "titulo": "Qual é o valor mínimo do lance?",
-      "conteudo": "O valor ofertado não pode ser inferior a:\n\n• 10% do saldo devedor — para veículos leves e pesados (automóveis, caminhões, tratores);\n• 20% do saldo devedor — para imóveis.\n\nExceção: nos últimos 12 meses do prazo do grupo, o valor mínimo pode ser equivalente a uma parcela.",
-      "tags": "lance mínimo, percentual, 10%, 20%",
-      "ordem": 3
-    },
+    
     {
       "categoria_key": "lance",
       "categoria_label": "Lance",
@@ -494,15 +486,7 @@ window.KB_ADMIN["bradesco"] = {
       "tags": "diluir, antecipar, amortização, parcelas",
       "ordem": 6
     },
-    {
-      "categoria_key": "lance",
-      "categoria_label": "Lance",
-      "categoria_ordem": 7,
-      "titulo": "Qual o prazo para pagar o lance vencedor?",
-      "conteudo": "Quando o lance é vencedor, o pagamento deve ser feito dentro de 2 dias corridos.\n\nSe o lance vencedor não for pago no prazo, a contemplação é cancelada — e, havendo saldo no grupo, a próxima cota que ofertou o maior percentual é contemplada como suplente.",
-      "tags": "prazo do lance, pagamento, 2 dias, cancelamento",
-      "ordem": 7
-    },
+    
     {
       "categoria_key": "lance",
       "categoria_label": "Lance",
@@ -557,15 +541,7 @@ window.KB_ADMIN["bradesco"] = {
       "tags": "prazo, pagamento, tempo, documentação",
       "ordem": 5
     },
-    {
-      "categoria_key": "credito_auto",
-      "categoria_label": "Crédito e compra — Automóvel",
-      "categoria_ordem": 8,
-      "titulo": "O cliente pode usar a sobra de crédito para despesas?",
-      "conteudo": "Sim. Havendo sobra de crédito, o cliente pode usar até 10% do valor do crédito liberado para reembolso de despesas — IPVA, licenciamento, transferência de propriedade, registros de cartório, acessórios e também a contratação do Seguro Bradesco.\n\nComo funciona o reembolso:\n• O pagamento é feito por reembolso pela BPO de contratação, mediante apresentação da documentação dos custos.\n• Prazo para solicitar: até 30 dias após o faturamento do veículo.\n• Se o cliente não usar a sobra para essas despesas (ou se sobrar algum valor depois), o saldo é automaticamente abatido do saldo devedor — amortizando as parcelas na ordem inversa.",
-      "tags": "10%, sobra de crédito, despesas, seguro, ipva, 30 dias, reembolso, bpo",
-      "ordem": 6
-    },
+    
     {
       "categoria_key": "credito_auto",
       "categoria_label": "Crédito e compra — Automóvel",
@@ -1173,7 +1149,7 @@ window.KB_ADMIN["bradesco"] = {
       "categoria_key": "credito_imovel",
       "categoria_label": "Crédito e compra — Imóvel",
       "categoria_ordem": 7,
-      "titulo": "O que NÃO é permitido comprar com a carta Bradesco?",
+      "titulo": "Restrições gerais da carta Bradesco (cônjuge, sócios, parcelas em dia)",
       "conteudo": "Restrições gerais válidas para imóveis e veículos:\n\n• NÃO é permitido comprar de cônjuge nem de sócios da mesma empresa.\n• Parcelas precisam estar em dia no momento da compra.\n• Nota fiscal e DUT precisam estar em nome da loja/concessionária/vendedor particular conforme propriedade no Detran — se o veículo já foi transferido pra alguém antes, não dá pra faturar.\n• Pagamento sempre vai pra quem consta como dono na matrícula (no caso de imóvel). Em construção ou reforma, o pagamento é feito ao próprio consorciado.\n• Se a carta foi pra imóvel, NÃO dá pra comprar terreno isolado — terreno só faz sentido dentro da modalidade 'compra com construção'.\n• Bens não alienáveis (embarcações usadas, aeronaves) têm exigências adicionais: laudo de vistoria, apólice de seguro com cláusula beneficiária ao Bradesco, registro na capitania dos portos ou ANAC.",
       "tags": "restrições, vedações, não permitido, cônjuge, sócios, terreno isolado, em dia, beneficiária bradesco",
       "ordem": 13

@@ -1169,15 +1169,7 @@ window.KB_ADMIN["porto"] = {
       "tags": "cotitular, dois titulares, múltiplos titulares, casal, sócios, newcon, juntar cotas, mesma cota, aquisição imóvel juntos",
       "ordem": 12
     },
-    {
-      "categoria_key": "transferencia",
-      "categoria_label": "Transferência, cancelamento e devoluções",
-      "categoria_ordem": 9,
-      "titulo": "Quais critérios o cessionário precisa cumprir?",
-      "conteudo": "O cessionário (quem recebe a cota) precisa atender:\n\n• Idade: MÍNIMO 18 anos na adesão e MÁXIMO 80 anos no encerramento do grupo. A partir de 76 anos no encerramento, não há cobertura de Seguro de Vida.\n• Limite de saldo devedor: o CPF/CNPJ do cessionário NÃO pode ultrapassar R$ 2,5 milhões somando todas as cotas já cadastradas + as que estão na jornada de transferência.\n• Empresa filial: se for PJ adquirindo, o CNPJ tem que ser da MATRIZ — filiais não podem.\n• Empresas individuais: NÃO podem adquirir cotas de IMÓVEL.\n\nSe o saldo devedor ultrapassar o limite, o caso é encaminhado pra uma pré-análise de crédito antes de seguir.",
-      "tags": "cessionário, idade, 18 anos, 80 anos, 2,5 milhões, saldo devedor, CNPJ matriz, empresa individual, seguro vida",
-      "ordem": 9
-    },
+    
     {
       "categoria_key": "transferencia",
       "categoria_label": "Transferência, cancelamento e devoluções",
@@ -1218,20 +1210,21 @@ window.KB_ADMIN["porto"] = {
       "categoria_key": "credito_imovel",
       "categoria_label": "Crédito e compra — Imóvel",
       "categoria_ordem": 7,
+      "titulo": "Tarifas do consórcio Auto / Bens Móveis (com valores)",
+      "conteudo": "Tabela oficial Porto — tarifas vigentes para Auto, motos, pesados leves, bike e placa solar:\n\nFaturamento / Operação\n• Gravame e Sicrof — variam por estado (definidos pelo Detran). Descontados direto do crédito.\n\nSubstituição de garantia\n• 0,5% do saldo devedor da cota (mais Gravame/Sicrof do estado).\n\nTroca de Crédito\n• 1% sobre a diferença entre o crédito original e o novo crédito.\n\nTransferência de cota\n• Não contemplada: sem tarifa.\n• Contemplada: 1% do valor atual do bem.\n• Cancelada (a partir de 26/08/2024): 10% do valor pago ao fundo comum.\n\nJuros e multas por atraso\n• Juros de 1% ao mês + multa de 2% sobre o valor atualizado da parcela paga fora da data.\n\nTarifa sobre recursos não procurados (por data de inauguração do grupo)\n• Grupos inaugurados até 2006: 10% ao mês sobre o valor não procurado.\n• Grupos inaugurados entre 2007 e 2018: 0,50% ao mês.\n• Grupos inaugurados entre 2018 e 21/04/2023: 0,070% ao mês.\n• Grupos inaugurados a partir de 21/04/2023: 10,00% ao mês.\n\nCancelamento da aquisição (Outros Bens Móveis e Automóvel)\n• As tarifas de operação pagas são estornadas em caso de desistência da aquisição.\n\nNão há um \"pacote único\" como no Imóvel — as tarifas são cobradas conforme o evento (substituição, troca, transferência, etc.).",
+      "tags": "tarifa, auto, bens móveis, valores, 0,5%, 1%, 10%, substituição, troca, transferência, juros mora, recursos não procurados, gravame, sicrof",
+      "ordem": 22
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
       "titulo": "Tarifas do consórcio de Imóvel (pacote + vistoria + cancelamento)",
       "conteudo": "Tarifas do consórcio de Imóvel Porto, conforme a Tabela de Tarifas vigente:\n\n• Pacote Consórcio Imóvel (inclui 1ª vistoria de construção/reforma): R$ 3.800,00.\n• Vistoria adicional (após a 1ª): R$ 597,00 cada.\n• Substituição de garantia: 0,5% do saldo devedor.\n• Troca de crédito: 0,5% sobre o novo crédito (regulamentos 2025/2026; em grupos antigos a regra pode ser 2% sobre a diferença — conferir).\n• Transferência de cota não contemplada: sem taxa.\n• Transferência de cota contemplada: 1% sobre o valor atual do bem.\n• Transferência de cota cancelada: 10% do valor pago ao fundo comum (regra a partir de 26/08/2024).\n• Juros de mora: 1% ao mês + multa de 2% sobre a parcela atualizada.\n\nCancelamento da aquisição (escalonado por estágio do processo):\n• Sem análise jurídica: gratuito.\n• Após análise jurídica, sem vistoria: R$ 2.000,00.\n• Após análise jurídica + vistoria: R$ 2.500,00.\n• Após emissão do contrato: R$ 3.800,00.\n• Cancelamento de cota quitada: desconto de R$ 1.800,00 sobre a tabela acima.",
       "tags": "tarifa, imóvel, pacote, R$ 3.800, vistoria, R$ 597, cancelamento, escalonado, transferência, juros mora, substituição garantia, troca crédito",
       "ordem": 21
     },
-    {
-      "categoria_key": "pagamentos",
-      "categoria_label": "Pagamentos e parcelas",
-      "categoria_ordem": 6,
-      "titulo": "Taxa de permanência (recursos não procurados): atenção à data do grupo",
-      "conteudo": "Quando um consorciado tem crédito a receber (cota cancelada, encerramento do grupo, sobra de carta) e não vai buscar, a Porto cobra uma taxa de permanência mensal sobre esse saldo. A alíquota depende da data de inauguração do grupo:\n\n• Grupos inaugurados até 2006: 10% ao mês.\n• Grupos inaugurados de 2007 até 2018: 0,50% ao mês.\n• Grupos inaugurados de 2018 até 21/04/2023: 0,070% ao mês.\n• Grupos inaugurados a partir de 21/04/2023: 10% ao mês.\n\nAtenção: para grupos novos (pós 21/04/2023) a alíquota voltou a ser 10%/mês — um valor muito mais alto. Isso pesa muito se o cliente não buscar o valor logo. Vale orientar o cliente a sacar assim que a Porto avisar.\n\nValor mínimo de recursos não procurados (após dedução da taxa): se ficar abaixo de R$ 100,00 (grupos pós 01/07/2024) ou R$ 5,00 (grupos antigos), o crédito é extinto.",
-      "tags": "taxa permanência, recursos não procurados, 10% ao mês, 0,070%, 21/04/2023, encerramento grupo, devolução, sobra, extinção R$ 100",
-      "ordem": 11
-    },
+    
     {
       "categoria_key": "lance",
       "categoria_label": "Lance",

@@ -513,9 +513,9 @@ button.kbc-src-link:focus-visible {
 
 </div>
 
-<script src="kb-bradesco.js?v=20260625b"></script>
-<script src="kb-porto.js?v=20260625f"></script>
-<script src="kb-itau.js?v=20260625d"></script>
+<script src="kb-bradesco.js?v=20260625c"></script>
+<script src="kb-porto.js?v=20260625h"></script>
+<script src="kb-itau.js?v=20260625e"></script>
 <script src="kb-fgts.js?v=20260625b"></script>
 <script src="kb-comissoes.js?v=20260612d"></script>
 <script src="kb-chat-config.js?v=20260619d"></script>
@@ -684,42 +684,56 @@ button.kbc-src-link:focus-visible {
   // renderiza o conteudo (paragrafos, listas com • e listas numeradas)
   function renderConteudo(txt) {
     var lines = String(txt).split('\n');
-    var html = '', listTag = null, listBuf = [], para = [];
-    function flushList() {
-      if (listBuf.length) {
-        html += '<' + listTag + '>' + listBuf.map(function (li) { return '<li>' + li + '</li>'; }).join('') + '</' + listTag + '>';
-        listBuf = []; listTag = null;
+    var html = '', stack = [], para = [];
+    // stack = [{tag:'ol'|'ul', buf:['li1','li2',...]}, ...] do nível 1 até o mais profundo.
+    // Sublistas indentadas viram <ul>/<ol> aninhadas dentro do último <li> do nível anterior,
+    // preservando a sequência da numeração ao voltar ao nível externo (sem reiniciar em 1).
+    function closeOne() {
+      var top = stack.pop();
+      var inner = '<' + top.tag + '>' +
+        top.buf.map(function (li) { return '<li>' + li + '</li>'; }).join('') +
+        '</' + top.tag + '>';
+      if (stack.length) {
+        var parent = stack[stack.length - 1];
+        if (parent.buf.length) parent.buf[parent.buf.length - 1] += inner;
+        else parent.buf.push(inner);
+      } else {
+        html += inner;
       }
     }
+    function closeAll() { while (stack.length) closeOne(); }
     function flushPara() {
       if (para.length) { html += '<p>' + para.join(' ') + '</p>'; para = []; }
     }
     // Converte **texto** em <strong>texto</strong> — markdown simples de negrito.
     // Aplica DEPOIS de esc() (que já escapou < > & " '), então é seguro injetar tags.
-    // Non-greedy, ignora ** vazio (** **) e não atravessa quebra de linha.
-    function bold(s) {
-      return String(s).replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>');
-    }
+    function bold(s) { return String(s).replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>'); }
     function fmt(s) { return bold(linkify(esc(s))); }
     for (var i = 0; i < lines.length; i++) {
-      var line = lines[i].trim();
-      if (line === '') { flushList(); flushPara(); continue; }
-      if (line.charAt(0) === '•') {
+      var raw = lines[i].replace(/\s+$/, '');
+      if (raw.trim() === '') { closeAll(); flushPara(); continue; }
+      var indent = (raw.match(/^(\s*)/) || ['', ''])[1].length;
+      var stripped = raw.trim();
+      var isBullet = stripped.charAt(0) === '•';
+      var olMatch = stripped.match(/^(\d+)\.\s+(.*)$/);
+      if (isBullet || olMatch) {
         flushPara();
-        if (listTag && listTag !== 'ul') flushList();
-        listTag = 'ul'; listBuf.push(fmt(line.replace(/^•\s*/, '')));
+        var tag = isBullet ? 'ul' : 'ol';
+        var content = isBullet ? stripped.replace(/^•\s*/, '') : olMatch[2];
+        var wantDepth = indent === 0 ? 1 : 2;
+        while (stack.length > wantDepth) closeOne();
+        if (stack.length === wantDepth) {
+          if (stack[stack.length - 1].tag !== tag) { closeOne(); stack.push({ tag: tag, buf: [] }); }
+        } else {
+          while (stack.length < wantDepth) stack.push({ tag: tag, buf: [] });
+        }
+        stack[stack.length - 1].buf.push(fmt(content));
         continue;
       }
-      var m = line.match(/^(\d+)\.\s+(.*)$/);
-      if (m) {
-        flushPara();
-        if (listTag && listTag !== 'ol') flushList();
-        listTag = 'ol'; listBuf.push(fmt(m[2]));
-        continue;
-      }
-      flushList(); para.push(fmt(line));
+      closeAll();
+      para.push(fmt(stripped));
     }
-    flushList(); flushPara();
+    closeAll(); flushPara();
     return html;
   }
 

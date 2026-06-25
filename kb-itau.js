@@ -692,15 +692,7 @@ window.KB_ADMIN["itau"] = {
       "tags": "veículo, pode, carta de crédito, carro, moto, caminhão, ônibus, van, máquina, trator, quitação, cdc, finame, leasing",
       "ordem": 1
     },
-    {
-      "categoria_key": "pode_veiculos",
-      "categoria_label": "Carta de crédito — Veículos (pode e não pode)",
-      "categoria_ordem": 7,
-      "titulo": "Veículos e outros — o que NÃO dá para comprar com a carta",
-      "conteudo": "A carta de Veículos não aceita:\n\n• Implementos agrícolas (semeadeira, plantadeira, cabine de trator).\n• Aeronaves, drones, pivô de irrigação, trem, metrô, locomotivas.\n• Ônibus 0Km com faturamento em Y, máquinas usadas.\n• Jetski e embarcações.\n• Refrigerador para implemento rodoviário, gerador de energia, compactador de lixo.\n• Carroceria de caminhão não articulada.\n• Quitação de CDC, FINAME e Leasing para máquinas (só vale para veículos).\n• Veículo sem chassi (com exceção de máquinas agrícolas).\n• Veículos sem cadastro na Base de Índice Nacional (BIN).",
-      "tags": "veículo, não pode, restrição, aeronave, drone, jetski, embarcação, máquina usada, sem chassi",
-      "ordem": 2
-    },
+    
     {
       "categoria_key": "canais",
       "categoria_label": "Canais e contatos",
