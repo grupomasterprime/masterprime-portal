@@ -694,23 +694,30 @@ button.kbc-src-link:focus-visible {
     function flushPara() {
       if (para.length) { html += '<p>' + para.join(' ') + '</p>'; para = []; }
     }
+    // Converte **texto** em <strong>texto</strong> — markdown simples de negrito.
+    // Aplica DEPOIS de esc() (que já escapou < > & " '), então é seguro injetar tags.
+    // Non-greedy, ignora ** vazio (** **) e não atravessa quebra de linha.
+    function bold(s) {
+      return String(s).replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>');
+    }
+    function fmt(s) { return bold(linkify(esc(s))); }
     for (var i = 0; i < lines.length; i++) {
       var line = lines[i].trim();
       if (line === '') { flushList(); flushPara(); continue; }
       if (line.charAt(0) === '•') {
         flushPara();
         if (listTag && listTag !== 'ul') flushList();
-        listTag = 'ul'; listBuf.push(linkify(esc(line.replace(/^•\s*/, ''))));
+        listTag = 'ul'; listBuf.push(fmt(line.replace(/^•\s*/, '')));
         continue;
       }
       var m = line.match(/^(\d+)\.\s+(.*)$/);
       if (m) {
         flushPara();
         if (listTag && listTag !== 'ol') flushList();
-        listTag = 'ol'; listBuf.push(linkify(esc(m[2])));
+        listTag = 'ol'; listBuf.push(fmt(m[2]));
         continue;
       }
-      flushList(); para.push(linkify(esc(line)));
+      flushList(); para.push(fmt(line));
     }
     flushList(); flushPara();
     return html;
