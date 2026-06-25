@@ -1395,9 +1395,13 @@ async function enterPortal() {
   // Admin-nav: mostra pra admin/master (todos os itens) e também pra sócio (só vai ver Feedbacks dentro)
   const _showAdminNav = _isAdminLike || currentUser.tipo === 'socio';
   document.getElementById('admin-nav').classList.toggle('hidden', !_showAdminNav);
-  // Visão Geral: acesso restrito aos donos da corretora
-  const _OVERVIEW_ALLOWED = ['ALLAN ALMEIDA', 'ADMINISTRADOR'];
-  const _isOverviewAllowed = _OVERVIEW_ALLOWED.includes((currentUser.nome||'').trim().toUpperCase());
+  // Visão Geral: acesso restrito aos donos da corretora (sócios Master).
+  // Regra: QUALQUER usuário com tipo='master' OU nome na whitelist abaixo.
+  // A verificação por tipo cobre o caso de um sócio novo Master sem precisar
+  // editar código; a whitelist por nome é backup defensivo.
+  const _OVERVIEW_ALLOWED = ['ALLAN ALMEIDA', 'CARLOS EDUARDO', 'ADMINISTRADOR'];
+  const _isOverviewAllowed = (currentUser.tipo === 'master') ||
+    _OVERVIEW_ALLOWED.includes((currentUser.nome||'').trim().toUpperCase());
   const _ovItem = document.getElementById('ni-admin-overview');
   if (_ovItem) _ovItem.style.display = _isOverviewAllowed ? '' : 'none';
   // Gerenciar Usuários: somente Master (admin comum não vê)
@@ -1456,9 +1460,12 @@ async function enterPortal() {
 // ═══ NAV ═══
 let _ultimaTelaLogada = null;
 function nav(id) {
-  // Visão Geral: só para os donos. Outros admins/usuários redirecionados.
-  if (id === 'admin-overview' && currentUser && !['ALLAN ALMEIDA', 'ADMINISTRADOR'].includes((currentUser.nome||'').trim().toUpperCase())) {
-    id = 'dashboard-vendas';
+  // Visão Geral: só para os donos (Master + whitelist). Outros redirecionados.
+  if (id === 'admin-overview' && currentUser) {
+    const _nomeUp = (currentUser.nome||'').trim().toUpperCase();
+    const _ok = (currentUser.tipo === 'master') ||
+      ['ALLAN ALMEIDA', 'CARLOS EDUARDO', 'ADMINISTRADOR'].includes(_nomeUp);
+    if (!_ok) id = 'dashboard-vendas';
   }
   // Gerenciar Usuários: só Master
   if (id === 'admin-users' && currentUser && currentUser.tipo !== 'master') {
