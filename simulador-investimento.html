@@ -89,6 +89,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="pdf-master-prime.js?v=20260624f"></script>
+<script src="simulador-autosave.js?v=20260625b"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="simulacao-store.js"></script>
 </head>
@@ -303,6 +304,13 @@ function fmtMoney(n){if(!isFinite(n)||isNaN(n))n=0;return'R$ '+n.toLocaleString(
 function fmtPct(n,dec=2){if(!isFinite(n)||isNaN(n))n=0;return n.toFixed(dec).replace('.',',')+' %';}
 
 let operacoes=[]; let editingId=null; let nextId=1;
+
+// ─── Autosave hooks (lidos pelo simulador-autosave.js) ───
+window._mpGetOps = () => operacoes;
+window._mpRestoreOps = (saved) => {
+  operacoes = Array.isArray(saved) ? saved.slice() : [];
+  nextId = operacoes.reduce((m, o) => Math.max(m, o.id || 0), 0) + 1;
+};
 
 function wireMasks(root){
   root.querySelectorAll('input[data-mask]').forEach(inp=>{
