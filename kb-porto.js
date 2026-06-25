@@ -1146,10 +1146,19 @@ window.KB_ADMIN["porto"] = {
       "categoria_key": "transferencia",
       "categoria_label": "Transferência, cancelamento e devoluções",
       "categoria_ordem": 9,
-      "titulo": "O que é transferência de cota? (3 situações)",
-      "conteudo": "Transferência de cota é a cessão total ou parcial da propriedade de uma cota Porto. Existem 3 situações que entram no processo:\n\n1. TRANSFERIR a cota inteira para um cessionário (sai do nome do cedente, entra no nome do cessionário);\n2. INCLUSÃO de um novo participante na cota (entra um cotitular junto ao titular existente);\n3. EXCLUSÃO de um participante da cota (sai um cotitular, fica o outro).\n\nVale para cota CONTEMPLADA e NÃO CONTEMPLADA, mas o fluxo e as taxas são diferentes em cada caso (ver o guia de Próximos Passos).",
-      "tags": "transferência, cota, cessão, cessionário, cotitular, inclusão, exclusão",
+      "titulo": "O que é transferência de cota? (situações no Newcon)",
+      "conteudo": "Transferência de cota é a cessão da propriedade de uma cota Porto pra outra pessoa. **No sistema novo (Newcon), só existe 1 fluxo: TRANSFERÊNCIA — sai o cedente, entra o cessionário no lugar.**\n\nO que mudou:\n• ❌ **Não dá mais pra incluir cotitular** — o Newcon não permite vincular múltiplos titulares à mesma cota.\n• ❌ **Não dá mais pra excluir cotitular** — pelo mesmo motivo (essa situação só ocorre em cotas ANTIGAS, pré-Newcon, em transição).\n• ✅ **Transferência completa** (substituição do titular) continua existindo normalmente.\n\nVale pra cota CONTEMPLADA e NÃO CONTEMPLADA, mas o fluxo e as taxas são diferentes em cada caso (ver o guia de Próximos Passos).\n\n💡 Pra casal/sócios comprarem JUNTOS: usar 2 cotas (uma em cada CPF) na aquisição do imóvel — ver card específico sobre isso.",
+      "tags": "transferência, cota, cessão, cessionário, cotitular, inclusão, exclusão, newcon, sistema novo",
       "ordem": 8
+    },
+    {
+      "categoria_key": "transferencia",
+      "categoria_label": "Transferência, cancelamento e devoluções",
+      "categoria_ordem": 9,
+      "titulo": "Posso incluir mais de um titular numa mesma cota Porto?",
+      "conteudo": "**Resposta direta: NÃO no sistema novo (Newcon).**\n\nNo Newcon, NÃO é possível vincular múltiplos titulares a uma mesma cota — a cota é sempre de UM CPF (ou UM CNPJ).\n\n**Alternativa que A PORTO OFERECE pra casal/sócios:**\n✅ É possível usar **DUAS cotas de titulares DIFERENTES** para a **aquisição do mesmo imóvel**.\n\nNa prática:\n• Cada um dos compradores faz a SUA cota no nome dele.\n• Quando ambos forem contemplados, juntam as 2 cartas de crédito pra comprar 1 imóvel maior.\n• O imóvel pode ficar em nome dos 2 (escritura conjunta).\n\nObservações importantes:\n• A escritura precisa contemplar os 2 CPFs como compradores.\n• Cada cota segue suas próprias regras de pagamento, lance e contemplação (independentes entre si).\n• Não há \"sincronia\" automática de contemplação — cada cota é sorteada/contemplada de forma independente.\n\nFonte: FAQ oficial Newcon (Porto). Esse era um recurso disponível no sistema antigo (\"unificação de cotas\") que NÃO existe mais.",
+      "tags": "cotitular, dois titulares, múltiplos titulares, casal, sócios, newcon, juntar cotas, mesma cota, aquisição imóvel juntos",
+      "ordem": 12
     },
     {
       "categoria_key": "transferencia",
