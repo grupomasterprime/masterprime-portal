@@ -513,9 +513,9 @@ button.kbc-src-link:focus-visible {
 
 </div>
 
-<script src="kb-bradesco.js?v=20260624e"></script>
+<script src="kb-bradesco.js?v=20260625a"></script>
 <script src="kb-porto.js?v=20260624c"></script>
-<script src="kb-itau.js?v=20260624b"></script>
+<script src="kb-itau.js?v=20260625a"></script>
 <script src="kb-fgts.js?v=20260622c"></script>
 <script src="kb-comissoes.js?v=20260612d"></script>
 <script src="kb-chat-config.js?v=20260619d"></script>
@@ -837,17 +837,32 @@ button.kbc-src-link:focus-visible {
             return t && t.length >= 3 && !STOPWORDS[t];
           });
         }
+        // Detecta polaridade NEGATIVA do título (menção a NÃO/PROIBIDO/VEDADO etc.).
+        // Sem isso o fuzzy match pode abrir o card "O que NÃO é permitido" quando a
+        // Maia citou "O que DÁ pra comprar" — são opostos semânticos com palavras-base
+        // em comum. A negação DOMINA: card com "NÃO é permitido" conta como negativo
+        // mesmo tendo "permitido" no título.
+        function polNeg(s) {
+          return /(^|[^a-z0-9])(nao|não|nunca|proibido|vedado|impedido|restrito|recusado|impeditivo)([^a-z0-9]|$)/.test(s || '');
+        }
         var qTokens = tokens(targetSlug);
+        var qNeg = polNeg(targetSlug);
         if (qTokens.length) {
           var all = content.querySelectorAll('.kb-item[data-titulo-slug]');
-          var best = null, bestScore = 0;
+          var best = null, bestScore = -Infinity;
           for (var i = 0; i < all.length; i++) {
-            var cTokens = tokens(all[i].getAttribute('data-titulo-slug') || '');
-            // Score = nº de palavras em comum
+            var slugC = all[i].getAttribute('data-titulo-slug') || '';
+            var cTokens = tokens(slugC);
+            // Score base = nº de palavras em comum
             var overlap = 0;
             for (var j = 0; j < qTokens.length; j++) {
               if (cTokens.indexOf(qTokens[j]) >= 0) overlap++;
             }
+            // Penaliza polaridade DIFERENTE: query positiva (sem NÃO) abrindo card negativo
+            // ou vice-versa. Penalidade de 5 pontos é suficiente pra descartar mesmo com
+            // várias palavras coincidindo.
+            var cNeg = polNeg(slugC);
+            if (qNeg !== cNeg) overlap -= 5;
             if (overlap > bestScore) { bestScore = overlap; best = all[i]; }
           }
           // Só usa se pelo menos 2 palavras em comum (ou metade do query, o que for menor)

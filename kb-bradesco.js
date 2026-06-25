@@ -525,9 +525,9 @@ window.KB_ADMIN["bradesco"] = {
       "categoria_key": "credito_auto",
       "categoria_label": "Crédito e compra — Automóvel",
       "categoria_ordem": 8,
-      "titulo": "O que dá para comprar — enquadramento dos veículos?",
+      "titulo": "O que dá para comprar com a carta de bens móveis?",
       "conteudo": "• Motos: qualquer marca/modelo com chassi alienável — a partir de 300 cc só 0 km; 400 cc até 3 anos; 600 cc até 5 anos.\n• Carros, utilitários e caminhonetes: qualquer marca/modelo, até 10 anos de uso, sem alienação e sem chassi remarcado.\n• Caminhões e ônibus: até 10 anos de uso, sem alienação e sem chassi remarcado.\n• Semirreboques, tratores, máquinas, implementos agrícolas, aeronaves e embarcações: regras específicas (alguns só 0 km, alguns mediante aprovação em comitê).\n\nPara embarcações, aeronaves, máquinas agrícolas e equipamentos, consulte o promotor.",
-      "tags": "enquadramento, veículo, moto, idade, regras",
+      "tags": "enquadramento, veículo, moto, carro, caminhonete, bens móveis, carta, idade, regras, comprar",
       "ordem": 2
     },
     {

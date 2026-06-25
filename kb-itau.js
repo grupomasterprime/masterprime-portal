@@ -909,9 +909,9 @@ window.KB_ADMIN["itau"] = {
       "ordem": 12
     },
     {
-      "categoria_key": "exclusao",
+      "categoria_key": "saida",
       "categoria_label": "Exclusão, devolução e cessão",
-      "categoria_ordem": 10,
+      "categoria_ordem": 9,
       "titulo": "Como cancelar o consórcio Itaú e quanto o cliente recebe?",
       "conteudo": "**Direito de arrependimento (até 7 dias da contratação):**\n• Restituição **integral** do valor pago.\n• Cancela pelo site, internet banking, app ou Central de Atendimento.\n\n**Após 7 dias:**\n• Cliente recebe o valor pago ao **fundo comum** (referente ao crédito que estipulou), descontada a **multa contratual**.\n• Devolução acontece via **sorteios mensais exclusivos para cotas canceladas** ou no **encerramento do grupo**.\n• Não é imediata — cliente pode esperar meses ou anos.\n\n**Alternativas ao cancelamento (vale conversar antes!):**\n• **Reduzir o valor da carta** — Central de Atendimento Consórcio Itaú: 4004 4828 (capitais) ou 0800 970 4828 (demais).\n• **Cessão da cota** — vender pra outra pessoa interessada.\n• **Revender para parceiro Itaú CONSORCIEI** — telefone: **(11) 4040-2057**.\n\n**Reativação:**\n• É possível reativar uma cota cancelada **após 3 meses**, se o grupo ainda tiver vagas.\n• Sujeito a nova análise de crédito.\n• Os valores do período não pago são recalculados nas parcelas restantes.\n\nCanais pra cancelar:\n• App: Produtos → Consórcio → Soluções → Saiba mais sobre cancelamento.\n• Site/Bankline: menu Consórcio → Cancelar consórcio.\n• Central de Atendimento.",
       "tags": "cancelamento, devolução, 7 dias, arrependimento, fundo comum, multa, consorciei, 4040-2057, reativação, 3 meses, cessão",
@@ -961,9 +961,316 @@ window.KB_ADMIN["itau"] = {
       "conteudo": "Canais oficiais Itaú Consórcios pra o consultor e o cliente:\n\n**Central de Atendimento Consórcio:**\n• 4004 4828 — capitais e regiões metropolitanas.\n• 0800 970 4828 — demais localidades.\n• Horário: segunda a sexta das 8h às 20h, sábados das 9h às 15h (horário de Brasília).\n\n**WhatsApp Itaú Consórcios:**\n• **(11) 3003-8880** — adicionar nos contatos e iniciar conversa.\n• Atendimento via assistente virtual + humano.\n\n**Portal do Consorciado:**\n• itau.com.br/consorcios/portal-do-consorciado\n• Para cliente correntista E não correntista (com Código de Acesso recebido na Carta da Primeira Assembleia).\n\n**Parceiro CONSORCIEI** (revenda de cotas):\n• (11) 4040-2057\n\n**Outros canais Itaú:**\n• SAC Itaú: 0800 728 0728 (24h).\n• Ouvidoria Itaú: 0800 570 0011.\n• Denúncia: itau.com.br/atendimento-itau/para-voce/denuncia.",
       "tags": "whatsapp, 3003-8880, 4004 4828, 0800 970 4828, consorciei, 4040-2057, sac, ouvidoria, portal consorciado, central",
       "ordem": 3
+    },
+    {
+      "categoria_key": "saida",
+      "categoria_label": "Exclusão, devolução e cessão",
+      "categoria_ordem": 9,
+      "titulo": "Como é dividida a multa de 15% (cláusula penal)?",
+      "conteudo": "A multa de 15% sobre o Fundo Comum aplicada em desistência e exclusão por inadimplência NÃO vai toda pro grupo:\n\n• **10% volta pro Fundo Comum** — beneficia os consorciados ativos.\n• **5% fica com a Itaú Administradora** como ressarcimento.\n\nImportante explicar pro cliente que o valor não é totalmente \"perdido\" — uma parte é redistribuída entre os ativos. Aplica-se igualmente a quem desiste (após o prazo de arrependimento) e a quem é excluído por inadimplência.\n\nReferência: Cláusula 22.5 (a/b) do Regulamento Itaú V1 07/24.",
+      "tags": "multa 15%, clausula penal, desistencia, exclusao, fundo comum, divisao, 10%, 5%",
+      "ordem": 6
+    },
+    {
+      "categoria_key": "saida",
+      "categoria_label": "Exclusão, devolução e cessão",
+      "categoria_ordem": 9,
+      "titulo": "Quantas parcelas em atraso geram exclusão do grupo?",
+      "conteudo": "Critérios de exclusão por inadimplência:\n\n• **3 parcelas consecutivas em aberto** = exclusão automática do grupo, sem necessidade de aviso prévio.\n• **2 parcelas consecutivas** = na última AGO do grupo (encerramento), o critério é mais rígido.\n• **Contemplado que já usou o crédito + 60 dias de atraso** = a Itaú pode acionar execução das garantias do imóvel/veículo.\n\nO cliente pode evitar a exclusão pagando tudo antes da substituição da cota no grupo. Se pagar depois, perde a vaga.\n\nReferência: Cláusulas 22.2 e 10.5 do Regulamento Itaú V1 07/24.",
+      "tags": "exclusao, 3 parcelas, atraso, inadimplencia, execucao garantia, 60 dias",
+      "ordem": 7
+    },
+    {
+      "categoria_key": "saida",
+      "categoria_label": "Exclusão, devolução e cessão",
+      "categoria_ordem": 9,
+      "titulo": "Qual a diferença entre Desistente e Excluído no recebimento?",
+      "conteudo": "Faz diferença importante no que o cliente recebe de volta:\n\n**Desistente em até 7 dias da contratação** ou em grupo não formado (90 dias):\n• Devolução **integral** do que pagou + rendimentos.\n• Sem multa, sem desconto.\n\n**Excluído por inadimplência** ou desistente depois do prazo de arrependimento:\n• Recebe o Fundo Comum com **desconto de 15%** (a cláusula penal explicada acima).\n• Recebe apenas **por sorteio mensal** entre os excluídos ou no encerramento do grupo.\n\n**Contemplado excluído ANTES de usar o crédito:**\n• Recebe o crédito parcial em **3 dias úteis** após acionar a Central de Atendimento.\n\nReferência: Cláusulas 22.1 a 22.4 do Regulamento Itaú V1 07/24.",
+      "tags": "desistente, excluido, devolucao, integral, fundo comum, sorteio, contemplado excluido",
+      "ordem": 8
+    },
+    {
+      "categoria_key": "saida",
+      "categoria_label": "Exclusão, devolução e cessão",
+      "categoria_ordem": 9,
+      "titulo": "Cessão de cota: o que é cancelado automaticamente na transferência?",
+      "conteudo": "Na cessão (transferência) de uma cota NÃO contemplada, alguns dados do cedente são **automaticamente desconsiderados** pelo novo titular:\n\n• **Lance ofertado** com data anterior à efetivação da cessão.\n• **Solicitação prévia de exclusão de sorteio** (o novo titular volta a concorrer).\n\nOutras regras:\n• O **cedente continua responsável pelas parcelas** até a efetivação oficial da transferência (não basta acordo verbal).\n• Exige **análise de crédito** do novo titular pela Itaú.\n• Cobrança de **tarifa de cessão** (consultar tabela vigente).\n\nReferência: Cláusulas 21.3 e 21.4 do Regulamento Itaú V1 07/24.",
+      "tags": "cessao, transferencia cota, lance cancelado, analise credito, tarifa cessao",
+      "ordem": 9
+    },
+    {
+      "categoria_key": "pagamentos",
+      "categoria_label": "Pagamentos e parcelas",
+      "categoria_ordem": 8,
+      "titulo": "Quais juros e multa por atraso da parcela?",
+      "conteudo": "Quando o cliente atrasa o pagamento da parcela:\n\n• **Juros moratórios:** 1% ao mês.\n• **Multa:** 2% sobre o valor da parcela vigente.\n• Base de cálculo: valor da parcela na data do pagamento (já atualizado se houve reajuste).\n\nConsequências além dos juros/multa:\n• **Perde o direito de concorrer na AGO** (sorteio + lance) do mês até regularizar.\n• Pode ser **inscrito em SPC/Serasa** após o vencimento.\n• A AGO é o corte de prazo — pagar depois da AGO não habilita o cliente a participar.\n\nReferência: Cláusula 10.2 do Regulamento Itaú V1 07/24.",
+      "tags": "juros, multa atraso, 1%, 2%, mora, spc, serasa, ago, sorteio",
+      "ordem": 12
+    },
+    {
+      "categoria_key": "pagamentos",
+      "categoria_label": "Pagamentos e parcelas",
+      "categoria_ordem": 8,
+      "titulo": "Cliente pode parcelar (ratear) as parcelas em atraso?",
+      "conteudo": "Sim, antes da exclusão e da contemplação o cliente pode pedir **rateio das parcelas em atraso**, com regras:\n\n• **Frequência:** 1 vez a cada 9 meses.\n• **Não altera o prazo** total do plano.\n• **Não participa da AGO no mês do rateio** (perde sorteio/lance daquele mês).\n• Solicitação pela Central de Atendimento ou Portal do Consorciado.\n\nOutra alternativa pra reduzir o impacto:\n• **1 vez na vida do plano**, o cliente pode trocar o valor do bem de referência por outro do grupo (pra parcela diminuir).\n\nReferência: Cláusula 10.3 do Regulamento Itaú V1 07/24.",
+      "tags": "rateio, parcelar atraso, 9 meses, trocar bem referencia, central",
+      "ordem": 13
+    },
+    {
+      "categoria_key": "fundamentos",
+      "categoria_label": "Entendendo o consórcio",
+      "categoria_ordem": 2,
+      "titulo": "O que é a Antecipação da Taxa de Administração?",
+      "conteudo": "A Itaú pode cobrar **parte da Taxa de Administração de forma antecipada**, no início do plano, pra cobrir despesas imediatas com a venda da cota (comissão do consultor, divulgação, sistema, etc.).\n\nComo funciona na prática:\n• O valor antecipado é **descontado do total devido ao longo do plano** (não é cobrança extra).\n• Em caso de **desistência ou exclusão**, o saldo proporcional que ainda não foi \"consumido\" é devolvido junto com o Fundo Comum.\n• O percentual exato vem na Proposta de Adesão (varia por grupo).\n\nEssa antecipação é o motivo pela qual a primeira parcela costuma ser maior que as seguintes em alguns grupos.\n\nReferência: Cláusulas 4.3 e 22.3 do Regulamento Itaú V1 07/24.",
+      "tags": "antecipacao taxa adm, primeira parcela maior, devolucao, saldo proporcional",
+      "ordem": 14
+    },
+    {
+      "categoria_key": "fundamentos",
+      "categoria_label": "Entendendo o consórcio",
+      "categoria_ordem": 2,
+      "titulo": "A Itaú recebe parte dos juros e multas de atraso?",
+      "conteudo": "Sim — além da Taxa de Administração normal, **a Itaú fica com 50% dos juros moratórios e multas** pagas por consorciados em atraso. Os outros 50% vão pro Fundo Comum.\n\nIsso é uma receita acessória da administradora, prevista em contrato:\n• 50% → Itaú (compensação por gerir o atraso e cobrança).\n• 50% → Fundo Comum (beneficia o grupo ativo).\n\nNão é uma cobrança extra ao cliente — é só a divisão do valor que ele já paga quando atrasa.\n\nReferência: Cláusulas 4.4 e 5.1(d) do Regulamento Itaú V1 07/24.",
+      "tags": "50% juros, 50% multas, receita itau, fundo comum, atraso",
+      "ordem": 15
+    },
+    {
+      "categoria_key": "fundamentos",
+      "categoria_label": "Entendendo o consórcio",
+      "categoria_ordem": 2,
+      "titulo": "Dissolução do grupo: quando o grupo pode acabar antes do prazo?",
+      "conteudo": "Diferente do encerramento normal (após a última AGO), a Assembleia Geral Extraordinária (AGE) pode **dissolver o grupo antes do prazo** em 3 situações:\n\n• **(a) Irregularidades na administração** — fraude ou má-fé comprovada da Itaú.\n• **(b) Excesso de excluídos** comprometendo o pool de contemplações.\n• **(c) Descontinuidade da produção do bem** — ex: modelo de carro sai de linha.\n\nNo caso (c) específico:\n• Os já contemplados **continuam pagando** normalmente.\n• Os não contemplados **recebem rateio mensal proporcional** ao que foi pago, até o fim.\n\nA AGE de dissolução pode ser convocada por **30% dos consorciados ativos** (cl. 12.5).\n\nReferência: Cláusulas 24.1 a 24.3 do Regulamento Itaú V1 07/24.",
+      "tags": "dissolucao, age, encerramento antecipado, irregularidade, descontinuidade, 30%",
+      "ordem": 16
+    },
+    {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Contemplação",
+      "categoria_ordem": 4,
+      "titulo": "Falecimento do consorciado: o seguro vira lance automático?",
+      "conteudo": "Sim. Se o titular **falecer** e tiver Seguro Prestamista contratado:\n\n• A indenização paga pela seguradora **conta como lance vencedor** na 1ª AGO seguinte ao pagamento.\n• Condição: o valor da indenização precisa ser **≥ ao saldo devedor** e tem que haver recursos suficientes no Fundo Comum.\n• A família/herdeiros precisam **acionar a Central de Atendimento** pra ativar o processo.\n• Após a contemplação automática, a carta de crédito é liberada pra família usar (compra do bem em nome do espólio/herdeiro).\n\nÉ o principal benefício do seguro prestamista — garante que o bem seja conquistado mesmo com a morte do titular, sem deixar dívida pra família.\n\nReferência: Cláusulas 14.8 e 14.8.1 do Regulamento Itaú V1 07/24.",
+      "tags": "falecimento, morte, seguro prestamista, lance automatico, indenizacao, herdeiros, familia",
+      "ordem": 7
+    },
+    {
+      "categoria_key": "lance",
+      "categoria_label": "Lance",
+      "categoria_ordem": 5,
+      "titulo": "Lance Embutido: qual o limite e onde NÃO pode usar?",
+      "conteudo": "O Lance Embutido permite usar **parte da própria carta de crédito como lance**, sem precisar de recurso próprio. Regras Itaú:\n\n• **Limite:** até 30% do valor da carta.\n• **Não pode** ser usado no plano **Consórcio Planejado** (parcela reduzida pré-contemplação).\n• O valor embutido é **descontado da carta** entregue (cliente recebe carta menor).\n• Incide **taxa de administração + fundo de reserva** sobre o valor embutido (paga junto com as parcelas).\n\nQuando usar:\n• Cliente tem pouco recurso próprio mas quer aumentar chance de contemplação.\n• Crédito sobra confortavelmente — dá pra comprar o bem mesmo descontando 30%.\n\nReferência: Cláusula 14.6 do Regulamento Itaú V1 07/24.",
+      "tags": "lance embutido, 30%, carta, consorcio planejado, recurso proprio, desconto carta",
+      "ordem": 13
+    },
+    {
+      "categoria_key": "lance",
+      "categoria_label": "Lance",
+      "categoria_ordem": 5,
+      "titulo": "Lance Fixo vs Lance Livre (consórcio de veículos)",
+      "conteudo": "No consórcio de **bens móveis (veículos)**, a Itaú oferece 2 modalidades de lance:\n\n**Lance Livre:**\n• Cliente escolhe o percentual que quer ofertar.\n• Vence o maior lance da AGO (entre os que ofertaram livre).\n\n**Lance Fixo:**\n• Percentual **pré-definido pela Itaú** (ex: 30% do bem).\n• Quem oferta o fixo concorre num sorteio separado entre os que escolheram fixo.\n• Útil pra cliente que prefere não \"competir no leilão\".\n\n**Regras gerais:**\n• Cliente só pode concorrer em **UMA modalidade por AGO** — vale a última oferta registrada.\n• **Lance máximo:** 95% do valor do bem.\n\n**Lance Suplente:**\n• Se o vencedor não pagar em **5 dias úteis**, o 2º maior lance é convocado.\n\nReferência: Cláusulas 14.5.1, 14.5.3.1 e 14.7.1 do Regulamento Itaú V1 07/24.",
+      "tags": "lance fixo, lance livre, lance suplente, veiculos, 95%, 5 dias, ago",
+      "ordem": 14
+    },
+    {
+      "categoria_key": "pode_imoveis",
+      "categoria_label": "Carta de crédito — Imóveis (pode e não pode)",
+      "categoria_ordem": 6,
+      "titulo": "Imóveis recusados como garantia (mesmo aceitos como bem)",
+      "conteudo": "Atenção: o Itaú pode aceitar o imóvel como bem (categoria) mas **recusar como garantia** do contrato. Casos típicos de recusa:\n\n• Imóvel **com ônus** (penhora, hipoteca anterior, alienação fiduciária).\n• Imóvel **em regime de ocupação** (sem matrícula regular).\n• Em **área de solo contaminado**.\n• **Divergência de área** maior que 5% entre matrícula e medição.\n• Imóveis **tombados** pelo patrimônio histórico.\n• **Construção de madeira ou pré-fabricados**.\n• Imóveis **industriais ou de difícil comercialização**.\n\nA análise de garantia é **independente** da escolha do cliente — pode acontecer de o imóvel ser aceito como crédito mas exigir garantia adicional (fiador, outro imóvel) ou ser recusado em definitivo.\n\nReferência: Cláusula 19.2 do Regulamento Itaú V1 07/24.",
+      "tags": "imovel recusado garantia, onus, hipoteca, tombado, madeira, contaminado, area divergente",
+      "ordem": 3
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Construção e Reforma: vistorias e multa por desvio",
+      "conteudo": "Quando a carta é usada pra **construção ou reforma**, a Itaú acompanha a obra com vistorias periódicas. Regras:\n\n**Vistorias:**\n• A Itaú pode vistoriar o andamento da obra a qualquer momento.\n• **Despesas das vistorias são do consorciado** (não da administradora).\n\n**Multa por desvio:**\n• Se houver **atraso superior a 20%** no cronograma, **desvio do projeto** aprovado ou **uso indevido dos recursos liberados** → multa de **0,5% sobre o valor liberado + IPCA**.\n• A Itaú pode exigir **complementação de garantia** (fiador, outro imóvel).\n• Em casos graves: **vencimento antecipado do contrato** — toda a dívida vira exigível.\n\nDicas pra evitar:\n• Manter cronograma de obra documentado.\n• Não desviar verba pra outras finalidades.\n• Comunicar mudanças no projeto antes de executar.\n\nReferência: Cláusulas 18.5.2 e 18.5.2.3 do Regulamento Itaú V1 07/24.",
+      "tags": "construcao, reforma, vistoria, multa 0,5%, atraso 20%, desvio projeto, vencimento antecipado, garantia",
+      "ordem": 15
+    },
+    {
+      "categoria_key": "saida",
+      "categoria_label": "Exclusão, devolução e cessão",
+      "categoria_ordem": 9,
+      "titulo": "Cessão de cota Itaú — 4 cenários possíveis (veículos)",
+      "conteudo": "Antes de iniciar a cessão de uma cota de veículos Itaú, identifique o cenário: cada um tem passo a passo próprio.\n\n• Cenário 1 — Cota faturada (já usei meu crédito): 8 passos, com transferência do gravame no DETRAN no final.\n• Cenário 2 — Cota contemplada, mas ainda NÃO comprei: 6 passos, sem mexer em veículo.\n• Cenário 3 — Cota NÃO contemplada: 6 passos, transferência só do contrato.\n• Cenário 4 — Cota contemplada e está transferindo JUNTO da compra do veículo: 6 passos, kit de faturamento por e-mail e inclusão de gravame no comprador.\n\nEm todos: o valor da transferência é livre acordo entre cedente e cessionário; o Itaú só analisa crédito do comprador e cobra a tarifa de cessão.\n\nReferência: Cartilha Cessão Veículos Itaú.",
+      "tags": "cessao, transferencia, veiculos, cenarios, cota faturada, cota contemplada, cota nao contemplada",
+      "ordem": 10
+    },
+    {
+      "categoria_key": "saida",
+      "categoria_label": "Exclusão, devolução e cessão",
+      "categoria_ordem": 9,
+      "titulo": "Cessão de cota faturada (já comprei o veículo): passo a passo",
+      "conteudo": "Quando o cliente JÁ usou o crédito e comprou o veículo, a cessão tem 8 passos:\n\n• 1. Encontrar comprador (cessionário). Valor é acordo entre as partes.\n• 2. Ligar para a Central, informar que é consórcio de veículos e ter checklist em mãos.\n• 3. Itaú faz análise de crédito do comprador. Aprovado, envia boleto da tarifa de cessão em até 2 dias, com 5 dias úteis para pagar.\n• 4. Itaú envia kit de aditamento. Cedente e cessionário assinam e reconhecem firma em cartório.\n• 5. Enviar documentação por SEDEX (Caixa Postal 79643, CEP 03064-970, SP).\n• 6. Itaú analisa e finaliza em até 4 dias úteis após receber.\n• 7. Cliente recebe kit final por carta simples para transferir o veículo no DETRAN.\n• 8. Apresentar kit no DETRAN para emitir o novo documento.\n\nCrédito aprovado vale 45 dias corridos; se não finalizar nesse prazo, nova análise.\n\nReferência: Cartilha Cessão Veículos Itaú.",
+      "tags": "cessao, cota faturada, veiculos, ja comprei, detran, 8 passos",
+      "ordem": 11
+    },
+    {
+      "categoria_key": "saida",
+      "categoria_label": "Exclusão, devolução e cessão",
+      "categoria_ordem": 9,
+      "titulo": "Cessão de cota contemplada (sem comprar) ou não contemplada — veículos",
+      "conteudo": "Para cota de veículos contemplada mas ainda sem compra, OU para cota ainda não contemplada, o processo é o mesmo: 6 passos.\n\n• 1. Achar comprador (cessionário). Valor é acordo entre as partes.\n• 2. Ligar para a Central, dizer que é veículos, e ter o checklist em mãos.\n• 3. Itaú faz análise de crédito e responde por e-mail em até 2 dias.\n• 4. Itaú envia kit de aditamento. Cedente e cessionário assinam, com firma reconhecida em cartório.\n• 5. Enviar documentação por SEDEX (Caixa Postal 79643, CEP 03064-970, SP).\n• 6. Itaú conclui em até 4 dias úteis após receber.\n\nNão há transferência de veículo no DETRAN porque ainda não houve compra. Crédito aprovado vale 45 dias corridos.\n\nReferência: Cartilha Cessão Veículos Itaú.",
+      "tags": "cessao, contemplada sem compra, nao contemplada, veiculos, 6 passos",
+      "ordem": 12
+    },
+    {
+      "categoria_key": "saida",
+      "categoria_label": "Exclusão, devolução e cessão",
+      "categoria_ordem": 9,
+      "titulo": "Cessão de cota contemplada — transferindo JUNTO com a compra do veículo",
+      "conteudo": "Cenário 4: a cota está contemplada e a cessão acontece junto da compra do veículo pelo novo cessionário. Em 6 passos:\n\n• 1. Achar o comprador. Valor é livre acordo.\n• 2. Ligar para a Central com o checklist em mãos.\n• 3. Análise de crédito do comprador. Aprovado, solicitar boleto da tarifa (prazo 5 dias úteis).\n• 4. Receber por e-mail o kit de faturamento com o contrato de cessão. Assinar com firma reconhecida e devolver por e-mail junto com: contrato de alienação; carta de autorização; documentos pessoais cedente+cessionário; cópia da frente do CRV/DUT ou Nota Fiscal de saída com alienação ao Itaú.\n• 5. Itaú analisa a documentação e avisa pendências, se houver.\n• 6. Itaú inclui gravame no veículo no nome do comprador, transfere titularidade da cota e libera o pagamento.\n\nObservações: CRV-e/CRLV-e digital valem em substituição ao CRV/DUT para veículos emplacados a partir de 01/01/2021. Documento do veículo deve ser emitido em até 30 dias após a Nota Fiscal/DUT para não multar. Veículo não pode ter ônus/restrição/alienação. Saldo devedor < R$ 1.000 ou cota quitada = não constar alienação.\n\nReferência: Cartilha Cessão Veículos Itaú.",
+      "tags": "cessao, contemplada, transferencia junto da compra, veiculos, gravame, cessionario",
+      "ordem": 13
+    },
+    {
+      "categoria_key": "saida",
+      "categoria_label": "Exclusão, devolução e cessão",
+      "categoria_ordem": 9,
+      "titulo": "Cessão de cota Itaú — Imóveis: 3 cenários e passo a passo",
+      "conteudo": "A cessão de cota de imóvel Itaú tem 3 cenários — todos em 6 passos:\n\n• Cota faturada (já comprei o imóvel)\n• Cota contemplada, mas ainda sem compra\n• Cota não contemplada\n\nPassos comuns:\n• 1. Achar comprador (valor é livre acordo).\n• 2. Ligar para a Central, dizer que é imóveis, ter checklist em mãos.\n• 3. Itaú envia formulário de cessão por e-mail; preencher e mandar por SEDEX junto com documentos.\n• 4. Análise de crédito do comprador. Aprovado, envia boleto da tarifa de cessão (5 dias úteis).\n• 5. Após pagamento, Itaú envia documento que formaliza a transferência. Cliente registra em cartório.\n• 6. Mandar de volta por SEDEX. Conclusão em até 4 dias úteis após receber.\n\nEndereço SEDEX: Caixa Postal 79643, CEP 03064-970, SP. Crédito aprovado vale 45 dias corridos. Diferença em relação a veículos: imóveis NÃO têm transferência no DETRAN, e o registro em cartório é parte obrigatória do fluxo.\n\nReferência: Cartilha Cessão Imóveis Itaú.",
+      "tags": "cessao, imoveis, 3 cenarios, cartorio, sedex, cota faturada, contemplada, nao contemplada",
+      "ordem": 14
+    },
+    {
+      "categoria_key": "saida",
+      "categoria_label": "Exclusão, devolução e cessão",
+      "categoria_ordem": 9,
+      "titulo": "Cessão Itaú — Documentos exigidos do cessionário PF",
+      "conteudo": "Antes de ligar para a Central pedindo cessão (veículos ou imóveis), tenha em mãos sobre o cessionário (comprador) Pessoa Física:\n\n• Dados pessoais: nome completo, CPF, RG (número, órgão expedidor, data de emissão, UF), nacionalidade, naturalidade, data de nascimento, filiação (pai e mãe), sexo.\n• Residenciais: endereço completo, telefones (residencial+celular) com DDD, e-mail, tipo de contrato (próprio/alugado), tempo de residência.\n• Profissionais: nome da empresa, endereço comercial, ramo/atividade, profissão, patrimônio, renda mensal e outras rendas (R$).\n\nDo cedente (que vende a cota): nome completo, grupo e cota.\n\nSe a cota já foi faturada (cessão de cota faturada): incluir Modelo, Marca, Placa e UF de licenciamento do cessionário (veículos) OU dados do cônjuge do cessionário (imóveis: nome, RG, empresa, tempo de atividade, salário, telefones).\n\nReferência: Checklists de Cessão Veículos e Imóveis Itaú.",
+      "tags": "cessao, documentos, cessionario, pessoa fisica, cedente, checklist",
+      "ordem": 15
+    },
+    {
+      "categoria_key": "saida",
+      "categoria_label": "Exclusão, devolução e cessão",
+      "categoria_ordem": 9,
+      "titulo": "Cessão Itaú — Documentos exigidos do cessionário PJ",
+      "conteudo": "Quando o cessionário (comprador da cota) for Pessoa Jurídica, a Central pede:\n\n• Da empresa: razão social, CNPJ, data de constituição/abertura, faturamento mensal (R$), ramo/atividade, endereço comercial, telefones (comercial e fixo) com DDD, e-mail.\n• Dos sócios (os 2 com maior participação — ou o proprietário no caso de ME): nome completo, CPF, naturalidade, endereço residencial, telefones (fixo e celular).\n• Dos cônjuges dos sócios: nome completo, CPF, data de nascimento, empresa, tempo de atividade, salário, telefones.\n\nDo cedente: nome completo, grupo e cota.\n\nSe cota faturada (veículos): modelo, marca, placa e UF de licenciamento. Se cota faturada (imóveis): mesma lista de cônjuge dos sócios já cobre essa parte.\n\nReferência: Checklists de Cessão Veículos e Imóveis Itaú.",
+      "tags": "cessao, documentos, pj, pessoa juridica, socios, conjuge socio",
+      "ordem": 16
+    },
+    {
+      "categoria_key": "saida",
+      "categoria_label": "Exclusão, devolução e cessão",
+      "categoria_ordem": 9,
+      "titulo": "Cessão Itaú — Tarifa, prazos e endereço SEDEX",
+      "conteudo": "Pontos práticos para tirar dúvidas rápidas sobre cessão Itaú:\n\n• Tarifa de cessão: consultar na Tabela Geral de Tarifas (Itaú na Internet > Serviços > Tarifas > Tabela Geral de Tarifas). Pagamento em até 5 dias úteis após boleto.\n• Validade da análise de crédito do cessionário: 45 dias corridos. Se passar, refaz análise.\n• Resposta da análise de crédito: até 2 dias úteis, por e-mail.\n• Conclusão da cessão após Itaú receber kit registrado em cartório: até 4 dias úteis.\n• Endereço para SEDEX: Caixa Postal 79643 — CEP 03064-970 — São Paulo/SP.\n• Reconhecimento de firma em cartório: obrigatório no kit de aditamento (cedente e cessionário).\n\nReferência: Cartilhas de Cessão Veículos e Imóveis Itaú.",
+      "tags": "cessao, tarifa, prazo, sedex, caixa postal, validade credito, cartorio",
+      "ordem": 17
+    },
+    {
+      "categoria_key": "seguro",
+      "categoria_label": "Seguro consórcio",
+      "categoria_ordem": 10,
+      "titulo": "Seguro Itaú — Carência: MQC e IPTA",
+      "conteudo": "Carência do Seguro Consórcio Itaú (prestamista):\n\n• Cobertura Morte por Qualquer Causa (MQC): NÃO há carência, exceto suicídio ou tentativa nos primeiros 2 anos de vigência (ou recondução após suspensão).\n• Cobertura Invalidez Permanente Total por Acidente (IPTA): NÃO há carência, exceto suicídio/tentativa nos primeiros 2 anos.\n• Prazo máximo de carência admitido: 2 anos e nunca pode exceder metade do prazo de vigência do certificado individual.\n\nVigência começa às 24h da data de aceite da proposta (ou da recepção, se houve pagamento de prêmio). Cobertura termina às 24h da data indicada no Certificado Individual.\n\nReferência: Condições Gerais Seguro Consórcio Itaú (Processo SUSEP 15414.626496/2019-70).",
+      "tags": "seguro, carencia, mqc, ipta, suicidio, vigencia, 2 anos",
+      "ordem": 10
+    },
+    {
+      "categoria_key": "seguro",
+      "categoria_label": "Seguro consórcio",
+      "categoria_ordem": 10,
+      "titulo": "Seguro Itaú — O que NÃO está coberto (riscos excluídos)",
+      "conteudo": "O Seguro Consórcio Itaú NÃO cobre eventos decorrentes de:\n\n• Material nuclear ou radiação ionizante.\n• Guerra, guerrilha, revolução, motim, perturbação da ordem pública.\n• Doença preexistente de conhecimento do segurado e não informada na proposta.\n• Suicídio ou tentativa nos primeiros 2 anos de vigência (ou recondução pós-suspensão).\n• Atos ilícitos dolosos do segurado, beneficiário ou representante.\n• Epidemias ou pandemias declaradas por órgão competente.\n• Ato reconhecidamente perigoso sem necessidade justificada.\n• Para IPTA especificamente: competições ilegais em veículos automotores e lesão auto infligida intencionalmente.\n\nA invalidez total por acidente NÃO é caracterizada pela mera aposentadoria por invalidez do INSS — exige laudo médico com perda total e definitiva.\n\nReferência: Condições Gerais Seguro Consórcio Itaú, cláusulas 8 e Cláusulas Especiais MQC/IPTA.",
+      "tags": "seguro, exclusoes, nao cobre, doenca preexistente, suicidio, pandemia, ato ilicito",
+      "ordem": 11
+    },
+    {
+      "categoria_key": "seguro",
+      "categoria_label": "Seguro consórcio",
+      "categoria_ordem": 10,
+      "titulo": "Seguro Itaú — Como acionar sinistro (passo a passo)",
+      "conteudo": "Ao identificar um sinistro do Seguro Consórcio Itaú:\n\n• 1. Comunicar IMEDIATAMENTE à Seguradora — pode ser pelo Estipulante (Itaú), segurado, beneficiário ou representante.\n• 2. Canal principal: Central de Atendimento (4004 4828 / 0800 970 4828) ou itau.com.br/atendimento.\n• 3. Reunir os documentos obrigatórios (variam por cobertura — ver card específico).\n• 4. Em caso de aviso de agravação de risco, há 15 dias para a seguradora responder.\n\nO beneficiário do seguro é SEMPRE o Estipulante (Itaú) — a indenização vai para quitar/amortizar o saldo devedor do consórcio. Se sobrar valor (indenização > saldo devedor), o excedente vai para o segurado ou para o 2º beneficiário indicado, conforme condições gerais.\n\nSe houver inadimplência (parcelas em atraso, juros, multas), esses valores são incorporados ao saldo segurado e cobertos, respeitado o limite máximo.\n\nReferência: Condições Gerais Seguro Consórcio Itaú, cláusulas 27 e 29.",
+      "tags": "seguro, sinistro, como acionar, aviso, beneficiario, estipulante, sobra indenizacao",
+      "ordem": 12
+    },
+    {
+      "categoria_key": "seguro",
+      "categoria_label": "Seguro consórcio",
+      "categoria_ordem": 10,
+      "titulo": "Seguro Itaú — Documentos para sinistro (MQC e IPTA)",
+      "conteudo": "Documentos obrigatórios para acionar o Seguro Consórcio Itaú:\n\nMorte por Qualquer Causa (MQC):\n• Formulário de aviso de sinistro com autorização para crédito em conta.\n• Cópia do RG, CPF (ou CNH) e comprovante de endereço do segurado.\n• Cópia da Certidão de Óbito.\n• Cópia da Certidão de Casamento atualizada.\n• Cópia do Boletim de Ocorrência (se morte for por acidente).\n\nInvalidez Total e Permanente por Acidente (IPTA):\n• Formulário de aviso de sinistro com autorização para crédito.\n• Cópia do RG, CPF (ou CNH) e comprovante de endereço.\n• Cópia do Boletim de Ocorrência (em caso de acidente).\n• Declaração médica com diagnóstico, data da caracterização, percentual de invalidez e alta definitiva.\n• Cópia dos laudos dos exames que comprovem o diagnóstico.\n• Cópia do CAT (Comunicação de Acidente do Trabalho), se for o caso.\n\nReferência: Condições Gerais Seguro Consórcio Itaú, cláusula 29.",
+      "tags": "seguro, sinistro, documentos, mqc, ipta, certidao obito, laudo medico, cat",
+      "ordem": 13
+    },
+    {
+      "categoria_key": "seguro",
+      "categoria_label": "Seguro consórcio",
+      "categoria_ordem": 10,
+      "titulo": "Seguro Itaú — Quando o cliente PERDE o direito à indenização",
+      "conteudo": "O segurado perde o direito à indenização do Seguro Consórcio Itaú nestes casos:\n\n• Declarações inexatas ou omissões pelo segurado/corretor/representante que possam influir na aceitação ou no prêmio. Se for de boa-fé, a seguradora pode cancelar o seguro ou cobrar diferença de prêmio.\n• Descumprimento das obrigações do contrato.\n• Agravamento intencional do risco com silêncio de má-fé.\n• Tentativa de obter benefício por meio ilícito, fraude ou simulação.\n• Sinistro decorrente de dolo, má-fé, fraude ou simulação do segurado.\n• Não comunicar a seguradora sobre fatos que agravem o risco coberto.\n\nO cancelamento por irregularidade só é eficaz 30 dias após a notificação. Comprovada fraude, a seguradora anula o Certificado e pode pedir ressarcimento + medidas penais.\n\nReferência: Condições Gerais Seguro Consórcio Itaú, cláusula 26.",
+      "tags": "seguro, perda de direitos, fraude, ma fe, declaracao inexata, agravamento, cancelamento",
+      "ordem": 14
+    },
+    {
+      "categoria_key": "seguro",
+      "categoria_label": "Seguro consórcio",
+      "categoria_ordem": 10,
+      "titulo": "Seguro Itaú — Como cancelar e devolução do prêmio",
+      "conteudo": "O Seguro Consórcio Itaú é OPCIONAL — o segurado pode cancelar a qualquer tempo, com devolução do prêmio pago referente ao período a decorrer (se houver). Pontos importantes:\n\n• Pedido de cancelamento deve ser feito até 30 dias antes da próxima data de vencimento para suspender as próximas cobranças.\n• Se a proposta for recusada pela Seguradora, a devolução do valor pago é em até 10 dias corridos, atualizado pelo IPCA-IBGE.\n• Em caso de recusa ou cancelamento, a Seguradora comunica por correspondência.\n• Não há renovação automática do certificado individual — é seguro por prazo determinado, atrelado ao prazo do consórcio.\n• Se o cliente repactua o prazo do consórcio para um prazo menor, o seguro vigora até o término do novo prazo com devolução do prêmio remanescente.\n\nReferência: Condições Gerais Seguro Consórcio Itaú, cláusulas 14, 15 e 16.",
+      "tags": "seguro, cancelamento, devolucao premio, opcional, recusa, repactuacao prazo",
+      "ordem": 15
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "FGTS no Consórcio Itaú — 4 modalidades de uso (amortização)",
+      "conteudo": "Ao usar FGTS para AMORTIZAR/QUITAR o consórcio Itaú, o cliente escolhe APENAS UMA das 4 modalidades no formulário:\n\n• 1. Liquidar/quitar o saldo devedor — paga todo o saldo. Preencher 'TOTAL' no valor.\n• 2. Abater/pagar parte do valor (até 80%) de 12 parcelas — usa FGTS para pagar 80% de até 12 parcelas seguidas. Única modalidade SEM precisar respeitar o interstício de 2 anos.\n• 3. Amortizar saldo devedor e REDUZIR O PRAZO — antecipa o fim do consórcio mantendo a parcela.\n• 4. Amortizar saldo devedor e REDUZIR O VALOR DA PARCELA — alivia a mensalidade mantendo o prazo.\n\nObservação crítica: se o cliente tem FGTS em Fundos Mútuos de Privatização (FMP), precisa resgatar primeiro, esperar o dinheiro voltar para a conta FGTS, e SÓ DEPOIS autorizar o uso no consórcio.\n\nReferência: FGTS Itaú Amortização (V.01/25).",
+      "tags": "fgts, amortizacao, liquidacao, 12 parcelas, reduzir prazo, reduzir parcela, fmp",
+      "ordem": 16
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "FGTS no Consórcio Itaú — Documentos aceitos e RECUSADOS pela CEF",
+      "conteudo": "Lista prática do que a Caixa aceita e recusa em extrato do FGTS para usar no consórcio Itaú:\n\nACEITOS:\n• Extrato emitido em agência da Caixa Econômica Federal.\n• Extrato do site oficial www.fgts.gov.br.\n• Extrato detalhado do app FGTS da Caixa.\n\nNÃO ACEITOS pela CEF (vão gerar pendência):\n• Extrato periódico recebido via Correios.\n• Extrato emitido em autoatendimento (caixa eletrônico).\n• Documentos rasurados ou ilegíveis.\n• Extratos incompletos.\n\nDocumentos OBRIGATÓRIOS que precisam estar no extrato: nome da empresa e CNPJ; nº do código do empregador/estabelecimento; nº do PIS/PASEP; nº da conta do FGTS; situação (ativa/inativa).\n\nDica útil: se o cliente autorizar o Itaú a consultar os dados diretamente pelo app FGTS da Caixa, NÃO precisa enviar cópia do extrato — agiliza o saque.\n\nSe o extrato não comprovar os 36 meses mínimos: pode complementar com cópia de páginas da Carteira de Trabalho (CTPS).\n\nReferência: FGTS Itaú Aquisição de Moradia (cartilha 2024).",
+      "tags": "fgts, extrato, caixa, cef, documentos aceitos, recusados, autoatendimento, correios, app fgts",
+      "ordem": 17
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "FGTS no Consórcio Itaú — Elegibilidade SFH e impeditivos",
+      "conteudo": "Para usar FGTS no consórcio Itaú, o cliente NÃO pode ter (impeditivos SFH):\n\n• Financiamento residencial ativo no Sistema Financeiro da Habitação (SFH) em qualquer parte do país.\n• Outro imóvel residencial concluído ou em construção no MESMO município da residência.\n• Outro imóvel no município onde EXERCE a ocupação laboral principal.\n• Outro imóvel em município LIMÍTROFE ao da residência/trabalho.\n• Outro imóvel em município da MESMA região metropolitana da residência/trabalho.\n\nRequisitos mínimos:\n• 36 meses (3 anos) de trabalho sob regime do FGTS — consecutivos ou não, mesma empresa ou diferentes.\n• Imóvel destinado EXCLUSIVAMENTE a moradia (residencial).\n• Não ter usado FGTS em outro contrato habitacional nos últimos 2 anos para liquidação/amortização (exceto se for modalidade '80% de 12 parcelas').\n\nObservação para casados/união estável: a comunicabilidade dos bens com cônjuge/companheiro CONTA — verifica regime de bens.\n\nReferência: FGTS Itaú Aquisição/Amortização + Manual Moradia Própria CAIXA V.035.",
+      "tags": "fgts, sfh, elegibilidade, 36 meses, impeditivo, ocupacao laboral, regiao metropolitana, conjuge",
+      "ordem": 18
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "FGTS — Interstício mínimo entre usos (2 e 3 anos)",
+      "conteudo": "Regra de tempo mínimo entre usos do FGTS na moradia (Manual Moradia CAIXA V.035):\n\n• AQUISIÇÃO: imóvel comprado com FGTS só pode ser objeto de NOVA aquisição com FGTS após 3 anos do registro do contrato em cartório.\n• AMORTIZAÇÃO ou LIQUIDAÇÃO: intervalo de 2 anos entre cada utilização pelo MESMO trabalhador. Coobrigado do mesmo financiamento pode usar dentro do prazo, atendidos outros requisitos.\n• PAGAMENTO DE PARTE DA PRESTAÇÃO (80% de 12 parcelas): ao término do prazo de utilização, pode INICIAR nova utilização — sem espera de 2 anos.\n• CAUÇÃO DE CRÉDITOS FUTUROS (FGTS): movimentação pode ocorrer mensalmente.\n\nNa prática: se o cliente amortizou consórcio/financiamento com FGTS há menos de 2 anos, NÃO pode amortizar de novo (a menos que seja outro financiamento e ele seja coobrigado, não titular).\n\nReferência: Manual da Moradia Própria — FGTS Caixa V.035 (Dez/25), item 3.5.",
+      "tags": "fgts, intersticio, 2 anos, 3 anos, novo uso, amortizacao, aquisicao, coobrigado",
+      "ordem": 19
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "FGTS — Uso por cônjuges e regime de bens",
+      "conteudo": "Quando o cliente é casado ou em união estável, a possibilidade de usar FGTS depende do REGIME DE BENS:\n\n• Comunhão Universal: TODOS os bens se comunicam (antes e depois do casamento). Se um cônjuge tem imóvel impeditivo ou financiamento ativo no SFH, AMBOS ficam impedidos.\n• Comunhão Parcial (regime padrão): bens adquiridos APÓS o casamento se comunicam. Se um adquiriu imóvel impeditivo após o casamento, ambos ficam impedidos. Se a propriedade é anterior, só o titular fica impedido.\n• Separação de Bens: NÃO há comunicação. Só fica impedido o cônjuge que tem imóvel/financiamento impeditivo.\n• União Estável (sem registro): regime presumido é Comunhão Parcial. Bens adquiridos antes da união são pessoais.\n\nAlteração de estado civil após contratação do consórcio: enviar documento que comprove (Certidão de Casamento, Escritura de União Estável, Certidão com averbação de Divórcio + formal de partilha).\n\nReferência: FGTS Itaú Amortização (2025) e Manual Moradia Própria item 3.10.",
+      "tags": "fgts, conjuge, uniao estavel, comunhao universal, parcial, separacao bens, impeditivo, regime",
+      "ordem": 20
     }
   ],
   "downloads": [
+    {
+      "titulo": "Regulamento Itaú — Bens Imóveis (V1 07/24)",
+      "descricao": "Regulamento oficial vigente do consórcio Itaú de imóveis (Resolução BCB 285): 29 capítulos cobrindo grupo, parcela, taxas, contemplação, lance, crédito, aquisição, construção/reforma, garantias, cessão, exclusão e seguro prestamista.",
+      "arquivo": "kb-itau-regulamento-imoveis.pdf"
+    },
+    {
+      "titulo": "Regulamento Itaú — Bens Móveis (V1 07/24)",
+      "descricao": "Regulamento oficial vigente do consórcio Itaú de bens móveis - veículos (Resolução BCB 285): 29 capítulos cobrindo grupo, parcela, taxas, contemplação, lance, crédito, aquisição do bem, garantias, cessão, exclusão e seguro prestamista.",
+      "arquivo": "kb-itau-regulamento-moveis.pdf"
+    },
     {
       "titulo": "Cartilha de Contemplação — Veículos",
       "descricao": "O que o cliente pode fazer com a carta de crédito de veículos: faturar um bem ou resgatar em espécie, com o passo a passo.",
@@ -1013,6 +1320,51 @@ window.KB_ADMIN["itau"] = {
       "titulo": "Kit FGTS para Consórcio (Itaú · Imóveis)",
       "descricao": "Material oficial do Itaú com as regras de uso do FGTS no consórcio de imóveis: lance, amortização, liquidação, requisitos e formulários. Essencial pra quem vai usar FGTS na cota.",
       "arquivo": "kb-itau-kit-fgts-consorcio.pdf"
+    },
+    {
+      "titulo": "Cartilha de Cessão de Cotas — Veículos",
+      "descricao": "Passo a passo da cessão (transferência) de cota de consórcio de veículos: como funciona, requisitos do cessionário, prazos, análise de crédito e taxa de cessão.",
+      "arquivo": "kb-itau-cartilha-cessao-veiculos.pdf"
+    },
+    {
+      "titulo": "Checklist de Cessão de Cotas — Veículos",
+      "descricao": "Lista de documentos necessários para efetivar a cessão de uma cota de veículos: PF e PJ, do cedente e do cessionário.",
+      "arquivo": "kb-itau-checklist-cessao-veiculos.pdf"
+    },
+    {
+      "titulo": "Cartilha de Cessão de Cotas — Imóveis",
+      "descricao": "Passo a passo da cessão (transferência) de cota de consórcio de imóveis: como funciona, requisitos do cessionário, prazos, análise de crédito e taxa de cessão.",
+      "arquivo": "kb-itau-cartilha-cessao-imoveis.pdf"
+    },
+    {
+      "titulo": "Checklist de Cessão de Cotas — Imóveis",
+      "descricao": "Lista de documentos necessários para efetivar a cessão de uma cota de imóveis: PF e PJ, do cedente e do cessionário.",
+      "arquivo": "kb-itau-checklist-cessao-imoveis.pdf"
+    },
+    {
+      "titulo": "Condições Gerais — Seguro Consórcio Itaú",
+      "descricao": "Documento oficial completo (37 páginas) das condições gerais do Seguro Prestamista do Consórcio Itaú: coberturas, exclusões, carências, sinistro e indenização. Material denso, base legal do seguro.",
+      "arquivo": "kb-itau-condicoes-seguro-consorcio.pdf"
+    },
+    {
+      "titulo": "Manual da Moradia Própria — FGTS Caixa (V.035 Dez/25)",
+      "descricao": "Manual oficial da Caixa Econômica Federal (70 páginas, versão Dez/25 V.035) sobre uso do FGTS na moradia própria: amortização, liquidação, aquisição, regras de elegibilidade e operacionalização.",
+      "arquivo": "kb-itau-manual-moradia-propria.pdf"
+    },
+    {
+      "titulo": "FGTS no Itaú Imóveis — Amortização e Quitação",
+      "descricao": "Guia específico do Itaú sobre uso do FGTS para amortizar ou quitar o saldo devedor do consórcio de imóveis. Inclui requisitos, documentação e fluxo operacional.",
+      "arquivo": "kb-itau-imovel-fgts-amortizacao.pdf"
+    },
+    {
+      "titulo": "FGTS no Itaú Imóveis — Aquisição de Moradia",
+      "descricao": "Guia do Itaú sobre como usar o FGTS na aquisição da moradia própria via consórcio: complemento de carta, elegibilidade SFH, documentação e fluxo de liberação.",
+      "arquivo": "kb-itau-imovel-fgts-aquisicao.pdf"
+    },
+    {
+      "titulo": "Consórcio Itaú — Folder Institucional",
+      "descricao": "Folder geral do Consórcio Itaú: visão de produto, modalidades (imóvel, veículo, serviços), diferenciais e canais. Material de apoio comercial.",
+      "arquivo": "kb-itau-consorcio-geral.pdf"
     }
   ]
 };
