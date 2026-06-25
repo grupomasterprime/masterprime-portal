@@ -9,7 +9,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="pdf-master-prime.js?v=20260615f"></script>
+<script src="pdf-master-prime.js?v=20260625a"></script>
+<script src="pdf-config-personalizado.js?v=20260625e"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="simulacao-store.js"></script>
 <script src="simulador-autosave.js?v=20260616a"></script>
@@ -704,7 +705,9 @@ document.getElementById('baixarPdfBradesco').addEventListener('click', async () 
   btn.textContent = 'Gerando PDF...';
   btn.disabled = true;
   try {
-    await PdfMasterPrime.gerarComercial(_montarPdfComercialBradesco());
+    let payload = _montarPdfComercialBradesco();
+    if (window.PdfConfigPersonalizado) payload = window.PdfConfigPersonalizado.filtrar(payload);
+    await PdfMasterPrime.gerarComercial(payload);
   } catch (err) {
     console.error(err);
     alert('Erro ao gerar PDF: ' + err.message);
@@ -713,6 +716,29 @@ document.getElementById('baixarPdfBradesco').addEventListener('click', async () 
     btn.disabled = false;
   }
 });
+
+if (window.PdfConfigPersonalizado) {
+  window.PdfConfigPersonalizado.registrar({
+    simulador: 'bradesco-auto',
+    botaoPdfId: 'baixarPdfBradesco',
+    secoes: [
+      { secao: 'inputs', label: 'Dados do plano (topo do PDF)', linhas: [
+        { key: 'bra-input-taxaAdm', label: 'Taxa Administrativa' },
+        { key: 'bra-input-fundo',   label: 'Fundo de Reserva' },
+        { key: 'bra-input-seguro',  label: 'Seguro Prestamista' },
+        { key: 'bra-input-credito', label: 'Valor do crédito' },
+        { key: 'bra-input-prazo',   label: 'Prazo do Grupo' }
+      ]},
+      { secao: 'outputs', label: 'Resultados do simulador', linhas: [
+        { key: 'bra-out-credLiq',    label: 'Crédito Líquido' },
+        { key: 'bra-out-parcInicial', label: 'Parcela Inicial' },
+        { key: 'bra-out-parc1pos',   label: '1ª parcela pós-contemplação' },
+        { key: 'bra-out-demaisPos',  label: 'Demais parcelas pós-contemplação' },
+        { key: 'bra-out-prazoRest',  label: 'Prazo Restante' }
+      ]}
+    ]
+  });
+}
 
 // ═══════════════════════════════════════════════════════
 // SYNC % LANCE ↔ VALOR DO LANCE (R$)

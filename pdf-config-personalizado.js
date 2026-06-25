@@ -19,9 +19,11 @@
 (function () {
   'use strict';
 
-  // Allowlist: usuários que podem configurar
-  // Para adicionar Douglas no futuro, só incluir aqui.
-  const ALLOWLIST = ['ERIK GONCALVES', 'ALLAN ALMEIDA'];
+  // Allowlist: usuários que podem configurar.
+  // Vazio (= []) significa "liberado para todos os usuários logados".
+  // Cada usuário só configura o PDF DELE; preferência salva em localStorage por (user × simulador).
+  // Quem NÃO mexer, PDF sai exatamente como antes (todos os blocos visíveis).
+  const ALLOWLIST = [];
 
   // Estado interno (preenchido via registrar())
   let _config = null;
@@ -52,6 +54,8 @@
 
   function _isAllowed() {
     const u = _getUserName();
+    if (!u) return false;                  // ninguém anônimo
+    if (ALLOWLIST.length === 0) return true; // vazio = todos liberados
     return ALLOWLIST.some(a => a.toUpperCase() === u);
   }
 

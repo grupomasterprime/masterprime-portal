@@ -9,7 +9,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="pdf-master-prime.js?v=20260615f"></script>
+<script src="pdf-master-prime.js?v=20260625a"></script>
+<script src="pdf-config-personalizado.js?v=20260625e"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="simulacao-store.js"></script>
 <script src="simulador-autosave.js?v=20260616a"></script>
@@ -1017,7 +1018,9 @@ document.getElementById('baixarPdfPorto').addEventListener('click', async () => 
   btn.textContent = 'Gerando PDF...';
   btn.disabled = true;
   try {
-    await PdfMasterPrime.gerarComercial(_montarPdfComercialPortoImovel());
+    let payload = _montarPdfComercialPortoImovel();
+    if (window.PdfConfigPersonalizado) payload = window.PdfConfigPersonalizado.filtrar(payload);
+    await PdfMasterPrime.gerarComercial(payload);
   } catch (err) {
     console.error(err);
     alert('Erro ao gerar PDF: ' + err.message);
@@ -1026,6 +1029,35 @@ document.getElementById('baixarPdfPorto').addEventListener('click', async () => 
     btn.disabled = false;
   }
 });
+
+// Registra config personalizado de PDF (cada usuário escolhe o que mostrar no PDF dele)
+if (window.PdfConfigPersonalizado) {
+  window.PdfConfigPersonalizado.registrar({
+    simulador: 'porto-imovel',
+    botaoPdfId: 'baixarPdfPorto',
+    secoes: [
+      { secao: 'inputs', label: 'Dados do plano (topo do PDF)', linhas: [
+        { key: 'imovel-input-taxaAdm', label: 'Taxa Administrativa' },
+        { key: 'imovel-input-fundo',   label: 'Fundo Reserva' },
+        { key: 'imovel-input-seguro',  label: 'Seguro Prestamista' },
+        { key: 'imovel-input-credito', label: 'Valor do crédito' },
+        { key: 'imovel-input-prazo',   label: 'Prazo do Grupo' }
+      ]},
+      { secao: 'lance', label: 'Oferta de lance', linhas: [
+        { key: 'imovel-lance-embutido', label: 'Lance Embutido',          objectKey: 'embutido' },
+        { key: 'imovel-lance-apagar',   label: 'Lance a Pagar (próprio)', objectKey: 'apagar'   },
+        { key: 'imovel-lance-total',    label: 'Lance Total',             objectKey: 'total'    }
+      ]},
+      { secao: 'outputs', label: 'Resultados do simulador', linhas: [
+        { key: 'imovel-out-credLiq',    label: 'Crédito Líquido' },
+        { key: 'imovel-out-primeiras',  label: 'Primeiras parcelas (Adesão)' },
+        { key: 'imovel-out-demais',     label: 'Demais Parcelas (antes contemplação)' },
+        { key: 'imovel-out-parcPos',    label: 'Valor parcela (pós-contemplado)' },
+        { key: 'imovel-out-prazoRest',  label: 'Prazo Restante' }
+      ]}
+    ]
+  });
+}
 
 // ═══════════════════════════════════════════════════════
 // SIMULAÇÕES SALVAS (48h) — SimulacaoStore

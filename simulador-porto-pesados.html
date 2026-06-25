@@ -9,7 +9,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="pdf-master-prime.js?v=20260615f"></script>
+<script src="pdf-master-prime.js?v=20260625a"></script>
+<script src="pdf-config-personalizado.js?v=20260625e"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="simulacao-store.js"></script>
 <script src="simulador-autosave.js?v=20260616a"></script>
@@ -944,7 +945,9 @@ document.getElementById('baixarPdfPorto').addEventListener('click', async () => 
   btn.textContent = 'Gerando PDF...';
   btn.disabled = true;
   try {
-    await PdfMasterPrime.gerarComercial(_montarPdfComercialPortoPesados());
+    let payload = _montarPdfComercialPortoPesados();
+    if (window.PdfConfigPersonalizado) payload = window.PdfConfigPersonalizado.filtrar(payload);
+    await PdfMasterPrime.gerarComercial(payload);
   } catch (err) {
     console.error(err);
     alert('Erro ao gerar PDF: ' + err.message);
@@ -953,6 +956,33 @@ document.getElementById('baixarPdfPorto').addEventListener('click', async () => 
     btn.disabled = false;
   }
 });
+
+if (window.PdfConfigPersonalizado) {
+  window.PdfConfigPersonalizado.registrar({
+    simulador: 'porto-pesados',
+    botaoPdfId: 'baixarPdfPorto',
+    secoes: [
+      { secao: 'inputs', label: 'Dados do plano (topo do PDF)', linhas: [
+        { key: 'pesados-input-taxaAdm', label: 'Taxa Administrativa' },
+        { key: 'pesados-input-fundo',   label: 'Fundo Reserva' },
+        { key: 'pesados-input-seguro',  label: 'Seguro Prestamista' },
+        { key: 'pesados-input-credito', label: 'Valor do crédito' },
+        { key: 'pesados-input-prazo',   label: 'Prazo do Grupo' }
+      ]},
+      { secao: 'lance', label: 'Oferta de lance', linhas: [
+        { key: 'pesados-lance-embutido', label: 'Lance Embutido',          objectKey: 'embutido' },
+        { key: 'pesados-lance-apagar',   label: 'Lance a Pagar (próprio)', objectKey: 'apagar'   },
+        { key: 'pesados-lance-total',    label: 'Lance Total',             objectKey: 'total'    }
+      ]},
+      { secao: 'outputs', label: 'Resultados do simulador', linhas: [
+        { key: 'pesados-out-parcAntes', label: 'Valor parcela (antes contemplação)' },
+        { key: 'pesados-out-parcPos',   label: 'Valor parcela (pós-contemplado)' },
+        { key: 'pesados-out-credLiq',   label: 'Crédito Líquido' },
+        { key: 'pesados-out-prazoRest', label: 'Prazo Restante' }
+      ]}
+    ]
+  });
+}
 
 (function initSimStore() {
   if (!window.SimulacaoStore) return;
