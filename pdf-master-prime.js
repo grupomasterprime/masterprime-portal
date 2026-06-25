@@ -711,6 +711,8 @@
     // Modo simples: 1 linha só (% Lance + Valor Lance). Útil para Bradesco que
     // não tem o conceito de "embutido" vs "a pagar".
     if (lance.modo === 'simples') {
+      // Se TODAS as keys de lance foram removidas pelo filtro, omite o bloco
+      if (!lance.total && !lance.embutido && !lance.apagar) return '';
       return `
       <div style="margin-top:26px; padding-top:22px; border-top:1px solid #E2E8F0;">
         <div style="display:flex; align-items:center; gap:10px; margin-bottom:18px;">
@@ -722,6 +724,8 @@
         </div>
       </div>`;
     }
+    // Se TODAS as keys foram removidas pelo filtro, omite o bloco inteiro
+    if (!lance.embutido && !lance.apagar && !lance.total) return '';
     return `
       <div style="margin-top:26px; padding-top:22px; border-top:1px solid #E2E8F0;">
         <div style="display:flex; align-items:center; gap:10px; margin-bottom:18px;">
@@ -729,9 +733,9 @@
           <div style="font-size:12.5px; color:#0F172A; letter-spacing:1.8px; text-transform:uppercase; font-weight:700;">Oferta de Lance</div>
         </div>
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:18px 28px;">
-          ${linha('% Lance embutido', lance.embutido?.pct || '0,00', 'Valor embutido', lance.embutido?.rs || '0,00')}
-          ${linha('% Lance a pagar',  lance.apagar?.pct  || '0,00', 'Valor lance',     lance.apagar?.rs  || '0,00')}
-          ${linha('% Lance total',    lance.total?.pct   || '0,00', 'Valor total',     lance.total?.rs   || '0,00')}
+          ${lance.embutido ? linha('% Lance embutido', lance.embutido.pct || '0,00', 'Valor embutido', lance.embutido.rs || '0,00') : ''}
+          ${lance.apagar   ? linha('% Lance a pagar',  lance.apagar.pct   || '0,00', 'Valor lance',     lance.apagar.rs   || '0,00') : ''}
+          ${lance.total    ? linha('% Lance total',    lance.total.pct    || '0,00', 'Valor total',     lance.total.rs    || '0,00') : ''}
         </div>
       </div>`;
   }
