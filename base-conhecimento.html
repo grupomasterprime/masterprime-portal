@@ -514,7 +514,7 @@ button.kbc-src-link:focus-visible {
 </div>
 
 <script src="kb-bradesco.js?v=20260625a"></script>
-<script src="kb-porto.js?v=20260624c"></script>
+<script src="kb-porto.js?v=20260625a"></script>
 <script src="kb-itau.js?v=20260625b"></script>
 <script src="kb-fgts.js?v=20260625a"></script>
 <script src="kb-comissoes.js?v=20260612d"></script>
@@ -785,7 +785,9 @@ button.kbc-src-link:focus-visible {
   function itemHTML(e, showBadge) {
     var badge = showBadge ? '<span class="badge">' + esc(e.categoria_label) + '</span>' : '';
     var slug = norm(e.titulo);
-    return '<div class="kb-item" data-titulo-slug="' + esc(slug) + '">' +
+    return '<div class="kb-item" data-titulo-slug="' + esc(slug) + '"' +
+      ' data-categoria-key="' + esc(e.categoria_key || '') + '"' +
+      ' data-categoria-label="' + esc(e.categoria_label || '') + '">' +
       '<button class="kb-q">' + badge +
         '<span class="q-text">' + esc(e.titulo) + '</span>' +
         '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>' +
@@ -868,6 +870,22 @@ button.kbc-src-link:focus-visible {
           // Só usa se pelo menos 2 palavras em comum (ou metade do query, o que for menor)
           var minScore = Math.min(2, qTokens.length);
           if (best && bestScore >= minScore) item = best;
+        }
+      }
+      // Último fallback: se ainda não achou card, talvez a Maia tenha citado o
+      // NOME DA CATEGORIA em vez de um título de card (ex.: "Canais e contatos").
+      // Nesse caso abrimos o PRIMEIRO card da categoria que casa com o slug.
+      if (!item && targetSlug) {
+        var allItems = content.querySelectorAll('.kb-item[data-categoria-key]');
+        for (var k = 0; k < allItems.length; k++) {
+          var catKey = allItems[k].getAttribute('data-categoria-key') || '';
+          var catLabel = allItems[k].getAttribute('data-categoria-label') || '';
+          var catSlug = norm(catLabel);
+          // Match exato ou substring forte do nome da categoria
+          if (catSlug === targetSlug || (catSlug && targetSlug.indexOf(catSlug) >= 0) || (catSlug && catSlug.indexOf(targetSlug) >= 0)) {
+            item = allItems[k];
+            break;
+          }
         }
       }
       if (!item) return;

@@ -1258,6 +1258,15 @@ window.KB_ADMIN["porto"] = {
       "conteudo": "Fluxo oficial da pós-contemplação Porto para Imóvel (do contemplado ao registro do contrato):\n\n1. Envio de documentos — cliente envia documentação inicial.\n2. Análise da documentação + vistoria do imóvel — Porto analisa e faz a vistoria do bem.\n3. Emissão do contrato — depois da aprovação.\n4. Emissão dos certificados digitais — necessário para a assinatura.\n5. Assinatura digital do contrato — cliente, vendedor (e fiador, se houver) assinam.\n6. Pagamento do ITBI e taxas do Cartório — responsabilidade do cliente.\n7. Contrato registrado — em cartório.\n8. Pagamento do valor negociado ao vendedor do imóvel — Porto libera o crédito após o registro.\n\nDicas práticas:\n• ITBI varia de 2% a 4% sobre o valor do imóvel (depende do município).\n• Custas cartoriais podem chegar a 3-5% do valor — o cliente precisa estar preparado.\n• O processo todo (do envio à liberação do pagamento) costuma levar 30 a 60 dias dependendo da regularidade da documentação e da agilidade do cartório local.",
       "tags": "pós-contemplação, imóvel, 8 passos, itbi, cartório, registro, vistoria, certificado digital, alienação, prazo",
       "ordem": 22
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Contrato de Novação Porto — usar o mesmo imóvel em mais de uma cota?",
+      "conteudo": "**Regra geral (Artigo 48 do Regulamento):** O CONSORCIADO CONTEMPLADO precisa dar alienação fiduciária do imóvel em favor da Porto. Enquanto o saldo devedor não for quitado, o imóvel NÃO pode ser liberado nem receber novo gravame.\n\n**O que é o Contrato de Novação:** Documento usado no registro de propriedades que altera a dívida original, cancela a anterior e cria uma nova obrigação que **soma os saldos devedores de duas ou mais cotas**. Permitiria usar o mesmo imóvel como garantia de várias cotas.\n\n**⚠️ Atenção:** Cartórios frequentemente **RECUSAM registrar a novação** por complicações em auditorias e questões legais com o Banco Central — eles entendem que o bem já está vinculado como garantia do grupo de consorciados.\n\n**Orientação Porto:** As cotas devem ser vinculadas **EM CONJUNTO** no ato da compra ou construção. Depois da alienação, o bem NÃO pode ser alienado novamente para outras cotas sem análise específica.\n\n**Análise por exceção** — critérios obrigatórios:\n• Existência de **Contrato Principal** + no mínimo **2 Contratos de Novação**.\n• **Consulta prévia ao cartório de registro** — responsabilidade do consorciado, ANTES de prosseguir.\n• Valor da garantia ≥ saldo devedor das cotas envolvidas.\n\nRegra de exceção incluída no artigo por Débora Hippolito e validada por Mariana Cancelli em 09/04/2024.",
+      "tags": "novação, contrato de novação, alienação fiduciária, mesmo imóvel, várias cotas, garantia, cartório, exceção, artigo 48, débora hippolito, mariana cancelli",
+      "ordem": 23
     }
   ],
   "downloads": [
