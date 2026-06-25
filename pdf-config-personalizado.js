@@ -27,14 +27,24 @@
   let _config = null;
 
   function _getUserName() {
+    // O portal declara `let currentUser` no index.html, o que NÃO cria window.currentUser.
+    // Então a forma confiável é ler do DOM (o portal seta #sb-user-name na sidebar).
+    // Mantemos os outros caminhos como fallback caso o portal mude.
     try {
-      // Tenta window.parent.currentUser (caso esteja em iframe)
-      if (window.parent && window.parent !== window && window.parent.currentUser) {
-        return String(window.parent.currentUser.nome || '').toUpperCase().trim();
+      // 1) Lê do DOM do top window (mais confiável — o portal sempre seta isso após login)
+      if (window.top && window.top.document) {
+        const el = window.top.document.getElementById('sb-user-name');
+        if (el && el.textContent && el.textContent.trim() && el.textContent.trim() !== '--') {
+          return el.textContent.toUpperCase().trim();
+        }
       }
-      // Fallback: top window (caso de iframes aninhados)
-      if (window.top && window.top.currentUser) {
-        return String(window.top.currentUser.nome || '').toUpperCase().trim();
+      // 2) Fallback: window.top.currentUser (caso o portal exponha no futuro)
+      if (window.top && window.top.currentUser && window.top.currentUser.nome) {
+        return String(window.top.currentUser.nome).toUpperCase().trim();
+      }
+      // 3) Fallback: parent imediato (caso simulador rode em iframe direto)
+      if (window.parent && window.parent !== window && window.parent.currentUser && window.parent.currentUser.nome) {
+        return String(window.parent.currentUser.nome).toUpperCase().trim();
       }
     } catch (e) { /* cross-origin */ }
     return '';
