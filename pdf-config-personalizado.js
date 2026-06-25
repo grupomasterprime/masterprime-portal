@@ -21,7 +21,7 @@
 
   // Allowlist: usuários que podem configurar
   // Para adicionar Douglas no futuro, só incluir aqui.
-  const ALLOWLIST = ['ERIK GONCALVES'];
+  const ALLOWLIST = ['ERIK GONCALVES', 'ALLAN ALMEIDA'];
 
   // Estado interno (preenchido via registrar())
   let _config = null;
@@ -83,6 +83,13 @@
     _config = cfg;
     if (!_isAllowed()) return;
     _renderBotao();
+    // Defesa: se o usuário sair (currentUser zerado/trocado) o botão some.
+    // Verifica a cada 3s — leve e à prova de simulações de teste/troca de sessão.
+    setInterval(() => {
+      const btn = document.getElementById('btnConfigPdfMP');
+      if (!btn) return;
+      btn.style.display = _isAllowed() ? '' : 'none';
+    }, 3000);
   }
 
   /**
@@ -135,6 +142,12 @@
   }
 
   function _abrirModal() {
+    // Re-verificação de segurança: só abre o modal se o usuário ainda é permitido
+    if (!_isAllowed()) {
+      const btn = document.getElementById('btnConfigPdfMP');
+      if (btn) btn.style.display = 'none';
+      return;
+    }
     const hidden = new Set(_getHidden());
 
     const overlay = document.createElement('div');
