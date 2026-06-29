@@ -674,9 +674,7 @@ function recalc() {
   const prazoRestante = Math.max(0, prazo - expectativa);
 
   const parcReducaoParcela = prazoRestante > 0 ? saldoApoLance / prazoRestante : 0;
-  // Após contemplação, o redutor expira (campanhas tipo "redutor até a
-  // contemplação"). A Redução de Prazo usa a parcela CHEIA — sem o redutor.
-  const parcReducaoPrazo = redutor > 0 ? (parcelaAtualNoMomento / (1 - redutor)) : parcelaAtualNoMomento;
+  const parcReducaoPrazo = parcelaAtualNoMomento;
   const novoPrazoReducao = parcReducaoPrazo > 0 ? Math.ceil(saldoApoLance / parcReducaoPrazo) : 0;
 
   // Custo efetivo — fórmula Conkey (engenharia reversa v2, com reajuste cumulativo):
