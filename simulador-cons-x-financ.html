@@ -516,10 +516,11 @@ function recalc(){
   const saldoApoLance = Math.max(0, saldoNoMomentoCont - valorTotalLance);
   const prazoRestante = Math.max(0, prazo - expectativa);
   const parcReducaoParcela = prazoRestante > 0 ? saldoApoLance / prazoRestante : 0;
-  // Redução de prazo: parcela continua a mesma após contemplação. Como adesão expira
-  // em prazoAdesao, e expectativa>=prazoAdesao na maioria dos casos, usamos parcelaDemais
-  // (= cota + seguro, sem adesão) reajustada até expectativa.
-  const parcReducaoPrazo = parcelaDemaisAtual;
+  // Redução de prazo: após a contemplação, o redutor expira (campanhas tipo "redutor
+  // até a contemplação"). Por isso a parcela aqui é a CHEIA (sem redutor) — reajustada
+  // até expectativa. Sem isso, o card "Redução de Prazo" mostrava o mesmo valor da
+  // "Redução de Parcela" (informação redundante).
+  const parcReducaoPrazo = redutor > 0 ? (parcelaDemaisAtual / (1 - redutor)) : parcelaDemaisAtual;
   const novoPrazoReducao = parcReducaoPrazo > 0 ? Math.ceil(saldoApoLance / parcReducaoPrazo) : 0;
 
   // === Helpers ===
