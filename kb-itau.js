@@ -1520,6 +1520,69 @@ window.KB_ADMIN["itau"] = {
       "conteudo": "Lista do que NÃO pode ser comprado com a carta de veículos Itaú (qualquer segmento):\n• **Implementos agrícolas** (semeadeira, plantadeira, cabine de trator)\n• **Aeronaves** e **drones**\n• **Pivô de irrigação**\n• **Ônibus 0km com faturamento em Y**\n• **Máquinas usadas** (qualquer linha)\n• **Jetski e embarcações**\n• Refrigerador para implemento rodoviário\n• Gerador de energia, compactador de lixo\n• **Trem, metrô, locomotivas**\n• **Carroceria de caminhão não articulada**\n• **Quitação de CDC/FINAME/Leasing de MÁQUINAS** (só veículos)\n• Veículo sem chassi (exceto máquinas agrícolas com placa)\n• Veículos **sem cadastro na BIN** (Base de Índice Nacional)\nFonte: Pode/Não Pode Completo Itaú.",
       "tags": "não pode, vedações, aeronave, jetski, implemento, bin",
       "ordem": 5
+    },
+    {
+      "categoria_key": "guarda_chuva",
+      "categoria_label": "Contrato Guarda-Chuva (Faturamento por Tranches)",
+      "categoria_ordem": 12,
+      "titulo": "O que é o Contrato Guarda-Chuva?",
+      "conteudo": "É um modelo de **liberação faseada de recursos** de uma operação estruturada de consórcio, usando **uma única garantia central** (a garantia guarda-chuva) que cobre o saldo devedor ao longo dos ciclos.\n\n**Objetivo:**\n• Permitir liberação por **tranches** (faturamentos em ciclos diferentes)\n• Manter **uma única garantia central** (sem precisar dar nova garantia a cada cota)\n• **Reduzir retrabalho contratual**\n\n**Como funciona:** o faturamento começa a partir da **primeira cota contemplada** e segue conforme as próximas contemplações, respeitando a data de contemplação para liberação dos tranches.\n\nVigência da modalidade: a partir de **12/03/2026**.\nFonte: Kit Contrato Guarda-Chuva · Consórcio Itaú · GP Faturamento 2026.",
+      "tags": "guarda-chuva, tranches, faturamento faseado, operação estruturada, garantia central",
+      "ordem": 1
+    },
+    {
+      "categoria_key": "guarda_chuva",
+      "categoria_label": "Contrato Guarda-Chuva (Faturamento por Tranches)",
+      "categoria_ordem": 12,
+      "titulo": "Quem pode usar o Contrato Guarda-Chuva? (público elegível)",
+      "conteudo": "Necessária **deliberação no Comitê Tailor Made** (a partir de 12/03/2026).\n\n**Clientes PJ aceitos:**\n• CIB, Large, Agro, Middle, Private\n• Operações estruturadas de BUPJ\n\n**Clientes PF aceitos:**\n• **Todos os segmentos** — exceto Private (que tem regras específicas)\n\n**Requisitos da operação:**\n• Valor mínimo por contrato: **R$ 1,2 milhões**\n• Limite máximo: **100 cotas** por contrato\n• Disponível **exclusivamente para cartas de Imóveis**\nFonte: Kit Contrato Guarda-Chuva · Consórcio Itaú.",
+      "tags": "guarda-chuva, público, elegibilidade, requisitos, valor mínimo, 1,2 milhões, 100 cotas, tailor made",
+      "ordem": 2
+    },
+    {
+      "categoria_key": "guarda_chuva",
+      "categoria_label": "Contrato Guarda-Chuva (Faturamento por Tranches)",
+      "categoria_ordem": 12,
+      "titulo": "Modalidades aceitas e não aceitas no Guarda-Chuva",
+      "conteudo": "**Modalidades de faturamento aceitas:**\n• Aquisição de Imóvel\n• Reforma estrutural\n• Construção\n• Interveniente quitante\n• Reembolso de aquisição\n\n**O que NÃO é aceito:**\n• **Modalidades que envolvam FGTS** (não cabem no guarda-chuva)\n\n**Bens e garantias — regra fundamental:** o bem a ser adquirido ou construído **NÃO pode ser utilizado como garantia da operação**. É obrigatória a apresentação de uma **garantia substitutiva já finalizada e regularizada**, com matrícula individualizada, apta à alienação e sem qualquer vínculo com o projeto.\nFonte: Kit Contrato Guarda-Chuva · Consórcio Itaú.",
+      "tags": "guarda-chuva, modalidades, aquisição, reforma, construção, interveniente, fgts, garantia substitutiva",
+      "ordem": 3
+    },
+    {
+      "categoria_key": "guarda_chuva",
+      "categoria_label": "Contrato Guarda-Chuva (Faturamento por Tranches)",
+      "categoria_ordem": 12,
+      "titulo": "Garantias no Guarda-Chuva: PJ vs PF",
+      "conteudo": "**Para Clientes PJ — a garantia deve cobrir:**\n• No mínimo, o saldo do **primeiro faturamento**\n• Nos ciclos seguintes: **saldo atualizado** (saldo liberado + nova liberação)\n• Pode ser solicitada **garantia complementar** ao longo do contrato\n\n**Para Clientes PF — a garantia deve cobrir:**\n• **Saldo total da operação**, considerando todas as cotas (já no início)\n\n**Importante para PF:** o imóvel oferecido como garantia precisa estar **em nome do consorciado** para ser aceito.\nFonte: Kit Contrato Guarda-Chuva · Consórcio Itaú.",
+      "tags": "guarda-chuva, garantia, pj, pf, saldo, garantia complementar, imóvel em nome do consorciado",
+      "ordem": 4
+    },
+    {
+      "categoria_key": "guarda_chuva",
+      "categoria_label": "Contrato Guarda-Chuva (Faturamento por Tranches)",
+      "categoria_ordem": 12,
+      "titulo": "Regra de aquisição: transferência de titularidade",
+      "conteudo": "Na modalidade de **Aquisição de Imóvel** dentro do Guarda-Chuva, a transferência de titularidade pode ocorrer de duas formas:\n\n**Cenário 1 — Transferência no início:**\n• **Dispensa** contrato de compra e venda\n• Pagamento direto ao vendedor\n• Matrícula solicitada **no início**\n\n**Cenário 2 — Transferência no final:**\n• Contrato de compra e venda em nome do **consorciado**\n• Pagamento direto ao vendedor\n• Matrícula solicitada **ao final**\n\n**Em ambos os cenários, a garantia substitutiva é obrigatória** — o imóvel adquirido não pode ser usado como garantia da operação.\nFonte: Kit Contrato Guarda-Chuva · Consórcio Itaú.",
+      "tags": "guarda-chuva, aquisição, transferência titularidade, matrícula, contrato compra e venda, garantia substitutiva",
+      "ordem": 5
+    },
+    {
+      "categoria_key": "guarda_chuva",
+      "categoria_label": "Contrato Guarda-Chuva (Faturamento por Tranches)",
+      "categoria_ordem": 12,
+      "titulo": "Imóveis NÃO aceitos como garantia guarda-chuva",
+      "conteudo": "A análise da garantia segue as regras vigentes do faturamento imobiliário. **É vedada a aceitação de:**\n\n**Imóveis de fins sociais:**\n• Descrição: imóveis onde se desenvolve alguma atividade pública ou de interesse social\n• Exemplos: instituições de ensino, hospitais, entidades filantrópicas, igrejas, ONGs\n• Motivo: difícil execução e risco de imagem ao banco\n\n**Imóveis operacionais, essenciais e industriais:**\n• Descrição: essencial à atividade empresarial do devedor\n• Exemplos: plantas industriais fabris produtivas, concessionária, supermercado\n• Motivo: difícil execução e baixa liquidez\nFonte: Kit Contrato Guarda-Chuva · Consórcio Itaú.",
+      "tags": "guarda-chuva, garantia, imóveis não aceitos, fins sociais, escolas, hospitais, igrejas, fábrica, supermercado",
+      "ordem": 6
+    },
+    {
+      "categoria_key": "guarda_chuva",
+      "categoria_label": "Contrato Guarda-Chuva (Faturamento por Tranches)",
+      "categoria_ordem": 12,
+      "titulo": "Análises, tarifas, vistorias e fluxo do Guarda-Chuva",
+      "conteudo": "**Análises (feitas UMA ÚNICA VEZ no início):**\n• **Análise documental:** segue as regras do faturamento imobiliário (sem reuso de garantia). Para Reforma e Construção, documentação mínima: matrícula, IPTU, orçamento e cronograma atualizados, projeto, alvará e memorial descritivo.\n• **Análise de crédito:** uma única vez para PF e PJ.\n\n**Tarifas e custos:**\n• Tarifa de faturamento cobrada **somente no primeiro ciclo** (referente à vistoria da garantia)\n• Nova cobrança apenas se houver garantia complementar ou substituição\n• Custas cartorárias de cada ciclo são do cliente (com possibilidade de reembolso em sobra de crédito)\n\n**Vistorias:**\n• Aquisição: apenas na **garantia** da operação\n• Reforma/Construção: vistoria inicial + **mínimo 3 vistorias PJ** ou **2 vistorias PF** no imóvel da obra (cronograma)\n• Limite PF para reforma/construção: **até 5 casos por mês**, via Comitê Tailor Made\n\n**Contrato e ciclos:**\n• Todas as cotas (contempladas e não contempladas) precisam ser indicadas **no início** — não pode incluir novas cotas no meio do projeto, nem fazer cessão\n• A cada ciclo: assinatura de aditivo contratual + averbação na matrícula\n• Periodicidade mínima entre ciclos: **mensal**\n• Para iniciar novo ciclo, o anterior precisa estar finalizado (recurso liberado após averbação em cartório)\n• Ao final do projeto, cotas não faturadas podem ser desvinculadas para outra finalidade\n\n**Comitê Tailor Made:** parceiros entram em contato por e-mail com o responsável pelo canal. O Comitê se reúne **semanalmente** para análise e deliberação.\nFonte: Kit Contrato Guarda-Chuva · Consórcio Itaú.",
+      "tags": "guarda-chuva, análise documental, análise crédito, tarifas, vistorias, ciclos, aditivo, averbação, comitê tailor made, periodicidade mensal",
+      "ordem": 7
     }
   ],
   "downloads": [
@@ -1622,6 +1685,11 @@ window.KB_ADMIN["itau"] = {
       "titulo": "Consórcio Itaú — Folder Institucional",
       "descricao": "Folder geral do Consórcio Itaú: visão de produto, modalidades (imóvel, veículo, serviços), diferenciais e canais. Material de apoio comercial.",
       "arquivo": "kb-itau-consorcio-geral.pdf"
+    },
+    {
+      "titulo": "Kit Contrato Guarda-Chuva (Faturamento 2026)",
+      "descricao": "Material oficial do Consórcio Itaú sobre o Contrato Guarda-Chuva: modalidade de faturamento faseado com garantia central única, vigência a partir de 12/03/2026. Inclui público elegível, modalidades aceitas, regras de garantia para PJ e PF, análises, tarifas, vistorias e fluxo do Comitê Tailor Made.",
+      "arquivo": "kb-itau-contrato-guarda-chuva.pdf"
     }
   ]
 };
