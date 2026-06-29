@@ -681,8 +681,7 @@ function recalc() {
   const saldoAposLance = Math.max(0, saldo - valorTotalLance);
   const prazoRestante = Math.max(0, prazo - expectativa);
   const parcReducaoParcela = prazoRestante > 0 ? saldoAposLance/prazoRestante : 0;
-  // Após contemplação, o redutor expira → parcela CHEIA na Redução de Prazo.
-  const parcReducaoPrazo = redutor > 0 ? (parcelaAtual / (1 - redutor)) : parcelaAtual;
+  const parcReducaoPrazo = parcelaAtual;
   const novoPrazoReducao = parcReducaoPrazo > 0 ? Math.ceil(saldoAposLance/parcReducaoPrazo) : 0;
 
   document.getElementById('reducaoParcela_parc').textContent = formatMoney(parcReducaoParcela);
