@@ -295,11 +295,15 @@ function render(g){
   } else {
     ndm.style.display="none"; cgrid.style.display="";
     const [livre,fixo,menor,maior,qtde,bids]=e;
+    // Fallback: quando ainda não há contemplação registrada (menor/maior null),
+    // derivar min/max diretamente das ofertas (mostra a faixa atual de lances).
+    const menorEx = (menor != null) ? menor : (bids && bids.length ? Math.min(...bids) : null);
+    const maiorEx = (maior != null) ? maior : (bids && bids.length ? Math.max(...bids) : null);
     sCard("sL",livre,null,"gn");
     sCard("sF",fixo,null,fixo>0?"or":"na");
     sCard("sQ",qtde,null,"bl");
-    sCard("sMn",menor,"%","gn");
-    sCard("sMx",maior,"%","rd");
+    sCard("sMn",menorEx,"%","gn");
+    sCard("sMx",maiorEx,"%","rd");
 
     const bb=document.getElementById("bBg");
     bb.textContent=bids.length+" lances livres";
@@ -375,7 +379,10 @@ function render(g){
       tr.appendChild(tdM);
       ["—","—","—","—","—"].forEach(v=>{const td=document.createElement("td");td.className="hna";td.textContent=v;tr.appendChild(td);});
     } else {
-      const[l,f,mn,mx,q]=d;
+      const[l,f,mn0,mx0,q,bidsH]=d;
+      // Fallback: deriva min/max dos lances ofertados quando não houver contemplação registrada
+      const mn = (mn0 != null) ? mn0 : (bidsH && bidsH.length ? Math.min(...bidsH) : null);
+      const mx = (mx0 != null) ? mx0 : (bidsH && bidsH.length ? Math.max(...bidsH) : null);
       tr.appendChild(tdM);
       const mk=(v,cls,fmt)=>{const td=document.createElement("td");td.className=v!=null?cls:"hna";td.textContent=v!=null?(fmt?fmt(v):v):"—";return td;};
       tr.appendChild(mk(l,"hl"));
