@@ -1548,6 +1548,384 @@ window.KB_ADMIN["porto"] = {
       "conteudo": "Na pós-contemplação de Imóvel, a Porto exige **Pacto Antenupcial** (documento dos noivos com acordos pré-casamento) nos seguintes regimes:\n\n• **Comunhão total de bens após 26/12/1977**\n• **Comunhão parcial de bens antes de 26/12/1977**\n• **Separação total de bens** (todos os casos, sem exceção)\n• **Participação final nos aquestos** (todos os casos)\n\nNão é obrigatório no regime de **comunhão parcial de bens após 26/12/1977** (regime legal padrão atual).\n\nOutros documentos pessoais essenciais:\n• RG/CPF (ou CNH, OAB, CRM, CRO) de todos os titulares **e cônjuges/conviventes**\n• Comprovante de estado civil (certidão de nascimento ou casamento atualizada)\n• Comprovante de endereço com **menos de 60 dias**\n• Para estrangeiros: certidão consularizada ou traduzida + registro em cartório\n\nFonte: Lista de Documentos Consórcio Imóvel · Porto Bank.",
       "tags": "pacto antenupcial, regime bens, comunhao, separacao, aquestos, 1977, conjuge",
       "ordem": 33
+    },
+    {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Da contemplação à entrega do crédito",
+      "categoria_ordem": 4,
+      "titulo": "Junção de cotas: somar 2+ cartas para 1 bem",
+      "conteudo": "A **junção de cotas** permite ao cliente **somar o crédito de 2 ou mais cotas** ativas, já contempladas e com crédito aprovado, para comprar um bem de valor **menor, igual ou superior** à soma das cartas.\n\nDisponível para **todos os produtos** comercializados (Automóvel, Pesados, Imóvel, Sustentável, Bens Móveis).\n\nÉ uma alternativa quando o cliente tem várias cotas pequenas e quer juntar para um único bem maior.\n\nFonte: ClickPlay Porto Bank · Pós Contemplação.",
+      "tags": "juncao cotas, juntar cartas, somar credito, multiple cotas, todos produtos",
+      "ordem": 50
+    },
+    {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Da contemplação à entrega do crédito",
+      "categoria_ordem": 4,
+      "titulo": "Resgate de crédito em espécie: regras dos 180 dias",
+      "conteudo": "Se o cliente **não quer adquirir o bem** com a carta contemplada, pode resgatar o crédito em espécie. Condições obrigatórias:\n\n• Carta deve estar **contemplada**\n• Período mínimo de **180 dias** após a contemplação\n• **Quitar integralmente o saldo devedor**\n• **NÃO** ter sido contemplado por lance com FGTS\n\nFormas de pagamento do saldo devedor:\n• **Recursos próprios**: cliente paga e retira 100% da carta\n• **Recursos do próprio crédito**: amortiza o saldo com a carta e retira o restante\n\nEnquanto não resgata (até 180 dias), o cliente continua pagando as parcelas mensais normalmente.\n\nClientes **não contemplados** NÃO podem resgatar em espécie, mesmo com quitação.\n\nBase: **cláusula 40.5** do Regulamento de Imóvel e **cláusula 39.4** dos demais produtos.\n\nFonte: ClickPlay Porto Bank · Pós Contemplação.",
+      "tags": "resgate especie, dinheiro, 180 dias, clausula 40.5, 39.4, quitar saldo devedor, nao quer bem",
+      "ordem": 51
+    },
+    {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Da contemplação à entrega do crédito",
+      "categoria_ordem": 4,
+      "titulo": "Análise de crédito pós-contemplação: como funciona",
+      "conteudo": "Após a contemplação, a Porto Bank faz **análise de crédito automática** do consorciado. Objetivos:\n\n• Avaliar o **perfil socioeconômico** do contemplado\n• Liberar crédito de forma justa para grupo e consorciado\n• Reduzir inadimplência (saúde financeira do grupo)\n\nA análise é **proativa e automática** — agiliza a liberação.\n\nO objetivo é verificar a **capacidade de pagamento das parcelas**.\n\nNormalmente NÃO é exigido documentação comprobatória. Mas se houver **ponto de atenção** durante a análise, o setor de Liberação de Crédito pode solicitar documentos conforme o **Anexo I do Regulamento** (\"Relação de Documentos Necessários para Análise de Crédito\").\n\nFonte: ClickPlay Porto Bank · Pós Contemplação.",
+      "tags": "analise credito, capacidade pagamento, anexo I regulamento, automatica, proativa, ponto atencao, documentos",
+      "ordem": 52
+    },
+    {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Da contemplação à entrega do crédito",
+      "categoria_ordem": 4,
+      "titulo": "Pendência ou não aprovação do crédito: o que fazer",
+      "conteudo": "Quando o crédito **não é aprovado** ou aparecem **pendências** na análise:\n\n1. Confirmar no **SAC do Pleno** se houve análise com parecer dentro de **90 dias**\n2. Se sim e o resultado for Não Aprovação ou Pendências → abrir agenda para **Cibele Silva** reavaliar e dar continuidade (apurando necessidade de documentação e acionando o consorciado)\n3. Se o parecer tiver **mais de 90 dias** → orientar o cliente a enviar **novo formulário** (\"Formulário Nova Análise de Crédito\") disponível no site, em **Formulários do Contemplado**\n\nFonte: ClickPlay Porto Bank · Pós Contemplação.",
+      "tags": "credito reprovado, pendencia, nao aprovacao, cibele silva, formulario nova analise, 90 dias, sac pleno",
+      "ordem": 53
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "FGTS: as 4 formas de uso no consórcio de imóvel",
+      "conteudo": "O uso do FGTS no consórcio respeita as regras do imóvel e do trabalhador definidas pela **Caixa Econômica Federal**. Existem 4 formas:\n\n**ANTES da contemplação:**\n\n1. **Ofertar lance**: usar até **100% do saldo do FGTS** para ofertar lance (apresenta extrato à administradora)\n\n**APÓS a contemplação:**\n\n2. **Complementar o crédito**: usar FGTS para completar a carta de crédito e adquirir o imóvel\n3. **Amortizar ou liquidar saldo devedor**: pagar parte ou tudo do saldo devedor — exige que o consorciado **já tenha sido contemplado E adquirido o imóvel**\n4. **Pagar parte das prestações**: FGTS pode abater até **80% do valor da parcela** (mais penalidades de inadimplência), **máximo 12 prestações**. Só é possível APÓS o uso do crédito\n\nFonte: ClickPlay Porto Bank · Pós Contemplação.",
+      "tags": "fgts, 4 formas, lance, complementar credito, amortizar saldo devedor, pagar parcelas, 80%, 12 prestacoes, caixa, antes apos contemplacao",
+      "ordem": 34
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Registro Digital: jornada de cartório 100% online",
+      "conteudo": "Desde **03/10/2022** a Porto Bank usa o **Registro Digital** na esteira de imóvel — todo o processo de cartório vira digital.\n\nVantagens para o cliente:\n• Acompanha tudo na esteira do início ao fim + notificações por e-mail\n• **Tarifa única de R$ 3.000,00** pela formalização do contrato, **descontada direto do crédito** (sem usar recursos próprios)\n• Prazo médio de **27 dias** para conclusão (se não houver pendências)\n• Garante a alienação do bem ao grupo no final do processo\n\nAlém da tarifa de R$ 3 mil, o consorciado ainda paga **IBTI** e demais taxas do registro.\n\nAntes do Registro Digital, a parte burocrática junto aos cartórios tinha custo alto e prazo longo. Agora é tudo eletrônico.\n\nFonte: ClickPlay Porto Bank · Pós Contemplação.",
+      "tags": "registro digital, cartorio, escritura, R$ 3 mil, 27 dias, ibti, alienacao, esteira imovel, formalizacao contrato",
+      "ordem": 35
+    },
+    {
+      "categoria_key": "credito_movel",
+      "categoria_label": "Crédito e compra — Bens Móveis",
+      "categoria_ordem": 6,
+      "titulo": "Placas solares: planos disponíveis (BM, AF, BS)",
+      "conteudo": "Para comprar **placas solares** com consórcio Porto Bank, há 3 planos disponíveis:\n\n• **BM (Bens Móveis)** — continua disponível para essa finalidade\n• **AF (Automóvel Flex)** — disponível desde **07/02/2022**, apenas em **novas cotas** (não permite em cotas já adquiridas)\n• **BS (Bens Sustentáveis)** — plano **exclusivo** para compra e instalação de placas solares, com características diferentes\n\nQuando se usa **cota de automóvel** para placa solar seminova: limitado a bens com até **6 anos de fabricação** (considerando o ano vigente).\n\nO consorciado pode usar a carta de crédito até o encerramento do grupo, em bem novo ou seminovo de valor **igual, maior ou menor** ao contratado.\n\nFonte: ClickPlay Porto Bank · Pós Contemplação · Sustentável.",
+      "tags": "placas solares, BM bens moveis, AF automovel flex, BS bens sustentaveis, plano sustentavel, energia solar, 6 anos fabricacao, 07/02/2022",
+      "ordem": 30
+    },
+    {
+      "categoria_key": "pagamentos",
+      "categoria_label": "Pagamentos, parcelas e custos",
+      "categoria_ordem": 8,
+      "titulo": "Devolução de valores para conta de Banco Digital",
+      "conteudo": "**Contas de Banco Digital NÃO aceitam DOC.**\n\nPara **cotas canceladas** com valor para devolução de **até R$ 4.999,99**, o sistema está parametrizado para usar **DOC** — então não é possível programar crédito em conta digital (haverá devolução, sem reprogramação possível).\n\nNesses casos, a devolução deve ser feita por outra forma:\n• Outra conta do mesmo titular (banco tradicional)\n• Cheque simples (com autorização da supervisão)\n\nPara **cotas na base ativa**, pode-se programar normalmente para qualquer valor — sistema usa **TED**.\n\nFonte: ClickPlay Porto Bank · Pós Contemplação.",
+      "tags": "devolucao banco digital, doc, ted, R$ 4.999,99, cota cancelada, cota ativa, banco tradicional, cheque",
+      "ordem": 20
+    },
+    {
+      "categoria_key": "pagamentos",
+      "categoria_label": "Pagamentos, parcelas e custos",
+      "categoria_ordem": 8,
+      "titulo": "2ª via de boleto: quem pode emitir e quando",
+      "conteudo": "Na adesão da cota o cliente pode escolher **débito automático** das parcelas — o consultor cadastra a opção na proposta.\n\nQuando o débito automático **não acontece** (por qualquer motivo), o cliente pode pedir a **2ª via do boleto** para pagar parcelas em aberto.\n\nApenas alguns profissionais do consórcio têm autorização para gerar a 2ª via — e é necessário seguir o **procedimento correto** de geração (não é qualquer pessoa que consegue).\n\nFonte: ClickPlay Porto Bank · Pós Contemplação.",
+      "tags": "2 via boleto, segunda via, debito automatico falhou, parcela em aberto, autorizacao gerar boleto",
+      "ordem": 21
+    },
+    {
+      "categoria_key": "canais",
+      "categoria_label": "Canais de atendimento",
+      "categoria_ordem": 12,
+      "titulo": "Caixas de e-mail Porto Bank Consórcio (uso interno)",
+      "conteudo": "Cada caixa de e-mail tem **finalidade específica** — usar a correta acelera o atendimento:\n\n• **faturamento.consorcio@portoseguro.com.br**\nEnvio de documentação do **BEM** (toda documentação para autorização de faturamento)\n\n• **meu.consorcio@portoseguro.com.br**\n**Exclusivo para ativar o RPA** (Robotic Process Automation) — usado quando é necessário enviar o formulário para análise no novo modelo (após comunicação por e-mail aos contemplados aprovados)\n\n• **comprovantedepagamento.consorcio@portoseguro.com.br**\n— Envio de comprovante de pagamento (parcelas não liquidadas)\n— Baixa de parcelas em aberto\n— Inconsistência de conciliação\n\n• **devolução.consorcio@portoseguro.com.br**\n— Devolução de valores (parcelas em duplicidade)\n— Devolução de valores por cancelamentos\n\nFonte: ClickPlay Porto Bank · Pós Contemplação.",
+      "tags": "caixa email, faturamento.consorcio, meu.consorcio, rpa, comprovantedepagamento.consorcio, devolucao.consorcio, contatos porto, atendimento",
+      "ordem": 10
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Compra de terreno: matrícula individualizada obrigatória",
+      "conteudo": "A carta de crédito do consórcio de imóvel **pode ser usada para comprar terreno**, incluindo as variações:\n\n• **Terreno** (lote urbano)\n• **Gleba** (porção maior de terra, geralmente rural ou em loteamento)\n• **Lote** (subdivisão de gleba)\n\n**REQUISITO OBRIGATÓRIO:** o terreno deve estar **regularizado** e possuir **matrícula individualizada** (não pode ser parte de uma matrícula-mãe sem desmembramento concluído).\n\nFonte: ClickPlay Porto Bank · Produtos · Possibilidades de Uso do Crédito.",
+      "tags": "terreno, gleba, lote, matricula individualizada, regularizado, desmembramento, compra terreno",
+      "ordem": 36
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Quitação de financiamento imobiliário: requisitos",
+      "conteudo": "O crédito de consórcio pode ser usado para **quitar financiamentos próprios ou de terceiros**, desde que a instituição financeira credora **autorize e participe da formalização** (o financiamento deve constar na matrícula do imóvel).\n\n**Requisitos obrigatórios:**\n\n• Só vale para **financiamentos imobiliários** (não quita outros tipos de dívida)\n• Valor da **carta de crédito ≥ saldo devedor** do financiamento\n• Grupo de consórcio deve ser **posterior ao 0195**\n• Instituição financeira do financiamento deve **aceitar a quitação** pela Porto Bank Consórcio\n\nSe o consorciado é o próprio devedor do financiamento, é \"quitação própria\"; se é financiamento de terceiro (ex.: comprando imóvel financiado de outra pessoa), é \"quitação de terceiros\".\n\nFonte: ClickPlay Porto Bank · Produtos · Possibilidades de Uso do Crédito.",
+      "tags": "quitacao financiamento, financiamento imobiliario, grupo posterior 0195, instituicao financeira, saldo devedor, terceiros, propria",
+      "ordem": 37
+    },
+    {
+      "categoria_key": "fundamentos",
+      "categoria_label": "Entendendo o consórcio",
+      "categoria_ordem": 2,
+      "titulo": "Imóvel Porto: taxa de administração reajustada em 05/01/2026",
+      "conteudo": "Os planos de Imóvel da Porto Bank passaram por **reajuste da taxa de administração**, em vigor desde **05/01/2026**.\n\nDistinção importante:\n\n• **Planos comercializados** — grupos em formação e em andamento que aceitam novas adesões (com a taxa nova)\n• **Planos NÃO comercializados (LEGADO)** — grupos antigos em andamento que NÃO aceitam novos grupos com as configurações antigas\n\n**Atenção sobre cotas legadas:** ainda é possível **adquirir cotas em grupos legados** quando outras cotas são canceladas, mesmo sem abertura de novos grupos com aquela configuração antiga. Isso disponibiliza essas cotas pra venda novamente — mantendo a configuração antiga (taxa antiga, prazo antigo, regras antigas do regulamento original do grupo).\n\nFonte: ClickPlay Porto Bank · Produtos · Características dos Grupos.",
+      "tags": "taxa administracao imovel, reajuste 05/01/2026, planos legado, grupos andamento, cotas canceladas, comercializados",
+      "ordem": 25
+    },
+    {
+      "categoria_key": "credito_movel",
+      "categoria_label": "Crédito e compra — Bens Móveis",
+      "categoria_ordem": 6,
+      "titulo": "Pesados Porto: bens alienáveis vs não alienáveis",
+      "conteudo": "**ALIENÁVEIS** (próprio bem serve de garantia, sem precisar de substituta):\n• Caminhões, ônibus, vans, implementos rodoviários\n• Devem ter emplacamento se transitam em via pública (cadastro na BIN)\n• Compra de novos/seminovos: até **6 anos** de fabricação até o grupo **VP10**; até **10 anos** a partir do grupo **VP11** (ano vigente incluso)\n• Usados entre 7 e 10 anos: análise caso a caso pela Porto Bank\n• Desde **09/05/2022**: carros de luxo (categoria leve) com cota de Pesados → até **8 anos** de fabricação\n\n**NÃO ALIENÁVEIS** (precisam de garantia substitutiva):\n• Máquinas agrícolas, implementos agrícolas, linha amarela, tratores\n• Compra limitada a **até 2 anos** de fabricação (revenda ou distribuidor autorizado)\n• Garantia substitutiva: automóvel, caminhão, implemento ou ônibus com até **6 anos** de fabricação, valor maior ou igual ao saldo devedor da cota\n\n**Regra de classificação cotas Auto vs Pesados:**\n• Veículo conduzido com **habilitação comum (A/B)** → cota Automóvel\n• Veículo com habilitação **C/D/E** → cota Pesados (exceção: vans aceitam Auto também)\n\nFonte: ClickPlay Porto Bank · Produtos · Possibilidades de uso do crédito - Veículos Pesados.",
+      "tags": "pesados, alienavel, nao alienavel, garantia substitutiva, VP10, VP11, 6 anos, 10 anos, maquina agricola, linha amarela, trator, categoria leve, habilitacao",
+      "ordem": 31
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Construção e reforma: glossário e tipos",
+      "conteudo": "O crédito de Imóvel pode ser usado para **construção e/ou reforma**, com documentação específica por tipo.\n\n**Construção** = projeto de obra elaborado por engenheiro/arquiteto. Inclui:\n• **Fundação**: alicerces, colunas, estacas, baldrames\n• **Alvenaria/estrutura**: paredes, colunas, lajes\n• **Acabamento**: pisos, revestimentos, pinturas, instalações\n\n**FGTS pode ser usado para construção, desde que a obra NÃO esteja em andamento.**\n\n**Obra** = criação de algo do zero, sem estrutura anterior.\n\n**Reforma** = renovação ou reparo de estrutura existente. Categorias:\n• **Repaginação**: mudanças estéticas pequenas\n• **Reforma pequena**: reparos em área específica, ampliação\n• **Reforma estrutural**: demolição ou ampliação\n• **Reforma com demolição**: reduz área construída\n• **Reforma com ampliação**: aumenta área existente\n\nFonte: ClickPlay Porto Bank · Produtos · Possibilidades de Uso do Crédito - Construção e Reforma.",
+      "tags": "construcao, reforma, fundacao, alvenaria, acabamento, repaginacao, reforma estrutural, ampliacao, demolicao, fgts construcao obra nao iniciada",
+      "ordem": 38
+    },
+    {
+      "categoria_key": "credito_movel",
+      "categoria_label": "Crédito e compra — Bens Móveis",
+      "categoria_ordem": 6,
+      "titulo": "Plano BS (Bens Sustentáveis): regra dos 20% amortizado",
+      "conteudo": "O plano **BS (Bens Sustentáveis)** é exclusivo para compra e instalação de **placas solares**.\n\n**Diferencial-chave do BS:** o cliente NÃO precisa apresentar garantia substitutiva. Basta, no momento da análise, **ter 20% do saldo devedor já amortizado**.\n\nNos planos BM (Bens Móveis) e AF (Automóvel Flex), a garantia substitutiva (automóvel) **continua sendo obrigatória**.\n\nPara escolher o sistema de geração solar, oriente o cliente a consultar um **engenheiro elétrico** de confiança — o sistema ideal depende de consumo, potência do painel, localidade, orientação, inclinação e temperatura.\n\nFonte: ClickPlay Porto Bank · Produtos · Possibilidades de uso do crédito - Sustentável.",
+      "tags": "plano BS, bens sustentaveis, placas solares, sem garantia substitutiva, 20% saldo devedor amortizado, BM, AF, engenheiro eletrico, sistema solar",
+      "ordem": 32
+    },
+    {
+      "categoria_key": "sistema",
+      "categoria_label": "Sistema de Consórcio (mercado)",
+      "categoria_ordem": 11,
+      "titulo": "Lei do Consórcio e Resolução BCB 285/23",
+      "conteudo": "O Sistema de Consórcios é regulado pela **Lei nº 11.795/2008** (Lei dos Consórcios), criada em 08/10/2008 e em vigor desde 09/02/2009. Estabelece os princípios e conceitos da modalidade no Brasil.\n\nEm 19/01/2023, o BCB emitiu a **Resolução BCB nº 285** (em vigor desde 01/07/2024), que:\n• **Revoga a Circular nº 3.432/2009** (regras antigas de constituição/funcionamento)\n• Consolida e atualiza as regras dos grupos de consórcio\n• Melhora verificação da capacidade de pagamento dos consorciados\n• Define claramente processos em caso de sinistro\n• Redistribui rendimentos financeiros aos grupos de forma justa\n• Reforça transparência ao final do ciclo do consórcio\n\n**Regra de transição:** grupos constituídos ANTES de 01/07/2024 continuam regidos pelas regras antigas até encerramento. MAS os artigos **14, 25, 36, 44, 49, 51 e 53 a 55** da nova resolução se aplicam a TODOS os grupos em andamento, independente da data de constituição.\n\nFonte: ClickPlay Porto Bank · Sistema de Consórcio.",
+      "tags": "lei 11.795, resolucao BCB 285, circular 3432 revogada, sistema consorcios, bacen, 01/07/2024, regras transicao",
+      "ordem": 10
+    },
+    {
+      "categoria_key": "visao_geral",
+      "categoria_label": "Visão geral da Porto",
+      "categoria_ordem": 1,
+      "titulo": "Linha do tempo do Consórcio Porto Bank",
+      "conteudo": "Marcos históricos do Consórcio Porto Bank:\n\n• **1976** — Início das atividades com venda de automóvel\n• **1991** — Início das vendas de imóvel (impulsionou Porto frente ao mercado)\n• **2003** — Criação do Plano Aluguel (PA) — 1º grupo com redutor, para público que pagava aluguel\n• **2016** — Assume 2º lugar no ranking de imóveis do BACEN, ultrapassando CEF\n• **2017** — Criação do Crédito Alto com Redutor (CA) — novo produto com redutor\n• **2018** — Lançamento da Proposta Eletrônica (cliente assina no ato) + APP Consórcio + produto de Pesados\n\nFonte: ClickPlay Porto Bank · Consórcio Porto Bank.",
+      "tags": "historia porto, linha do tempo, 1976, 1991, 2003, 2016, 2017, 2018, plano aluguel, redutor, app, pesados, ranking bacen",
+      "ordem": 10
+    },
+    {
+      "categoria_key": "canais",
+      "categoria_label": "Canais de atendimento",
+      "categoria_ordem": 12,
+      "titulo": "WhatsApp Consórcio Porto: serviços disponíveis",
+      "conteudo": "O **WhatsApp do Consórcio** é um canal digital de atendimento ao cliente que oferece:\n\n• **Token de autenticação** — segurança nas operações\n• **Atualização cadastral** — endereço, telefones, e-mail, débito automático\n• **Cotas contempladas** — orientações + link pra análise de crédito/garantia, crédito em espécie, info sobre pagamento de lance\n• **Abordagem preditiva** — primeiro mostra a solução que mais se enquadra à situação atual da cota (cobrança, contemplação, encerramento)\n• **Resumo de assembleia** — resultado da assembleia vigente e das 12 últimas\n• **Lance** — média de oferta do grupo, simulação e oferta de lance\n• **Boletos e pagamentos** — boletos a vencer e vencidos, código de barras visual, 2ª via por e-mail\n\nFonte: ClickPlay Porto Bank · Procedimentos · WhatsApp do Consórcio.",
+      "tags": "whatsapp porto consorcio, canal digital, token, atualizacao cadastral, abordagem preditiva, resumo assembleia, 12 ultimas, lance simulacao, 2 via boleto email",
+      "ordem": 11
+    },
+    {
+      "categoria_key": "transferencia",
+      "categoria_label": "Transferência, cancelamento e devoluções",
+      "categoria_ordem": 9,
+      "titulo": "Reativação de cota: voltar ao grupo após cancelamento",
+      "conteudo": "Depois de cancelada, a cota pode ser **reativada** (voltar ao grupo). Processo:\n\n1. Cliente contata a **Central de Relacionamento**\n2. **Quita todas as parcelas em aberto** desde o cancelamento até a possível reativação\n3. A reativação **depende de vaga no grupo** — só rola se há cotas vagas pra resgatar o contrato\n4. Porto envia solicitação ao responsável pra **checar viabilidade** (prazo de **5 dias úteis** pra resposta por e-mail com as condições)\n5. Cliente responde a **cobranca.consorcio@portoseguro.com.br** escolhendo opção pra quitar pendências e reativar\n6. Porto providencia **termo de reativação + formulário de cadastro** pra efetivar em sistema\n\nFonte: ClickPlay Porto Bank · Retenção · Reativação de Cotas.",
+      "tags": "reativacao cota, cancelamento, voltar grupo, vaga, quitar parcelas atraso, central relacionamento, 5 dias uteis, cobranca.consorcio, termo reativacao",
+      "ordem": 25
+    },
+    {
+      "categoria_key": "sistema",
+      "categoria_label": "Sistema de Consórcio (mercado)",
+      "categoria_ordem": 11,
+      "titulo": "Newcon: novidades pro consorciado e corretor",
+      "conteudo": "O **Newcon** substituiu o sistema Plano da Porto. Razão: a Porto dobrou de tamanho e o Plano não suportava o crescimento.\n\nVantagens do Newcon:\n• Suporta o crescimento do negócio\n• Mais segurança e atualizações\n• Mais agilidade e flexibilidade\n• É o sistema usado pelos principais players do mercado\n\n**Novidades comerciais:**\n• **Novos tipos de lance** — flexibilidade pra perfis diferentes de cliente\n• **Grupos COM e SEM redutor** — diferenciação e personalização, adapta às estratégias comerciais\n• **Campanhas e ofertas mais agressivas** — possibilidade de campanhas com condições especiais e ofertas criativas\n\nResultado: amplia o leque de atuação do corretor e aumenta chances de conversão.\n\nFonte: ClickPlay Porto Bank · Consórcio Porto Bank · Newcon Atualizações.",
+      "tags": "newcon, sistema plano, antigo, novidades, novos lances, grupos sem redutor, campanhas agressivas, flexibilidade, players mercado",
+      "ordem": 15
+    },
+    {
+      "categoria_key": "sistema",
+      "categoria_label": "Sistema de Consórcio (mercado)",
+      "categoria_ordem": 11,
+      "titulo": "CNPJ e Razão Social: validação obrigatória",
+      "conteudo": "Desde **17/02 (vigente)**, é **obrigatório o preenchimento correto** do CNPJ e Razão Social dos clientes PJ nos canais de venda do consórcio.\n\nRegras:\n• A **Razão Social NÃO PODE ser abreviada**\n• CNPJ e Razão Social devem **corresponder exatamente** aos dados cadastrais do cliente (Receita Federal)\n\nMotivos da obrigatoriedade:\n• Evitar **retrabalho** (correção manual de contratos consome tempo e recursos)\n• Atender **fiscalização do BACEN** (Banco Central fez recentemente uma fiscalização sobre o tema)\n• Garantir **conformidade regulatória**\n\nFonte: ClickPlay Porto Bank · Publicações · Validação de CNPJ e Razão Social.",
+      "tags": "cnpj, razao social, validacao, pj pessoa juridica, sem abreviar, fiscalizacao bacen, receita federal, dados cadastrais, conformidade",
+      "ordem": 16
+    },
+    {
+      "categoria_key": "lance",
+      "categoria_label": "Lance",
+      "categoria_ordem": 5,
+      "titulo": "Planos com Redutor: como funciona o redutor",
+      "conteudo": "Alguns planos Porto têm **REDUTOR de parcela** — uma dedução de % na parcela mensal que o consorciado deixa de pagar até a contemplação, deixando a parcela mais acessível.\n\n**Mecânica do redutor:**\n• O % de redução é **determinado pelo plano contratado** (ex.: PA, CA)\n• O valor reduzido NÃO é perdido — fica como **saldo devedor**\n• Após a contemplação, esse saldo devedor reduzido é **dividido nas parcelas restantes** (parcelas pós ficam maiores)\n\n**Campanhas especiais:** algumas campanhas oferecem **50% de redutor** nas parcelas. Atenção às configurações do grupo em específico, porque o redutor varia de campanha pra campanha.\n\nFonte: ClickPlay Porto Bank · Produtos · Características dos Planos com Redutores.",
+      "tags": "redutor parcela, plano PA aluguel, CA credito alto, 50% campanha, saldo devedor diferido, parcela reduzida, parcela cheia pos contemplacao",
+      "ordem": 12
+    },
+    {
+      "categoria_key": "pagamentos",
+      "categoria_label": "Pagamentos, parcelas e custos",
+      "categoria_ordem": 8,
+      "titulo": "Recursos Não Procurados (RNP): direito do consorciado",
+      "conteudo": "**Recursos Não Procurados (RNP)** são valores que ficam disponíveis na Porto Bank e **não foram procurados** pelos consorciados ativos ou excluídos após o **encerramento do grupo**.\n\nTipos de valores que entram em RNP:\n• Créditos não utilizados\n• Rateio do saldo do fundo de reserva\n• Saldo remanescente do fundo (rendimentos, juros, multa, etc.)\n\n**Regras de pagamento:**\n• Prazo máximo da Porto: **30 dias corridos** a contar da solicitação do consorciado\n• Não há devolução para valores **inferiores a R$ 5,00** (consorciado não pode reclamar)\n\nFonte: ClickPlay Porto Bank · Consórcio Porto Bank · Recursos Não Procurados.",
+      "tags": "RNP recursos nao procurados, encerramento grupo, fundo reserva, rendimentos, 30 dias corridos, R$ 5,00, devolucao, grupo encerrado",
+      "ordem": 22
+    },
+    {
+      "categoria_key": "canais",
+      "categoria_label": "Canais de atendimento",
+      "categoria_ordem": 12,
+      "titulo": "APP Consórcio Porto Bank: funcionalidades",
+      "conteudo": "O **APP \"Consórcio do Porto Bank\"** é o app oficial do cliente pra gerir a cota direto do celular.\n\nFunções disponíveis:\n• Oferta de **lance**\n• Emissão de **boleto** (mensal)\n• Programação de **débito em conta**\n• **Boleto de quitação** (encerrar antecipadamente)\n• **Resultado de assembleia**\n• **Histórico do grupo**\n• **Atualização cadastral**\n• Atendimento via **Chat**\n\nDisponível pra todos consorciados do Porto Bank.\n\nFonte: ClickPlay Porto Bank · Ferramentas Digitais · APP Consórcio.",
+      "tags": "app consorcio porto bank, aplicativo, lance, boleto, debito conta, boleto quitacao, assembleia, historico grupo, atualizacao cadastral, chat",
+      "ordem": 12
+    },
+    {
+      "categoria_key": "pagamentos",
+      "categoria_label": "Pagamentos, parcelas e custos",
+      "categoria_ordem": 8,
+      "titulo": "Cartão de Crédito Porto Bank pra pagar parcelas",
+      "conteudo": "Clientes que adquirem cota de **qualquer produto do Consórcio Porto Bank** (grupo em formação ou em andamento) podem optar pelo **pagamento das parcelas usando Cartão de Crédito Porto Bank**.\n\nPara quem ainda **não tem o cartão**, é uma oportunidade comercial de oferecer mais esse benefício na hora da venda da cota.\n\nFonte: ClickPlay Porto Bank · Consórcio Porto Bank · Cartão de Crédito.",
+      "tags": "cartao credito porto bank, pagamento parcela cartao, opcao pagamento, beneficio venda, grupo formacao andamento",
+      "ordem": 23
+    },
+    {
+      "categoria_key": "fundamentos",
+      "categoria_label": "Entendendo o consórcio",
+      "categoria_ordem": 2,
+      "titulo": "Pesados Porto: VP10 e novos índices de reajuste",
+      "conteudo": "**Todos os grupos a partir do VP10 (Veículos Pesados nº 10)** tiveram o **índice de reajuste alterado**.\n\nAdemais, a regra de **idade do bem** também muda:\n• Até grupo **VP10**: bens alienáveis até **6 anos** de fabricação\n• A partir do grupo **VP11**: bens alienáveis até **10 anos** de fabricação\n\nIsso permite mais flexibilidade pra cliente comprar caminhões, ônibus e veículos pesados usados mais antigos a partir do VP11.\n\nFonte: ClickPlay Porto Bank · Produtos · Características dos Grupos: Veículos Pesados.",
+      "tags": "VP10, VP11, pesados, indice reajuste alterado, 6 anos, 10 anos, fabricacao, caminhao usado, novo grupo",
+      "ordem": 26
+    },
+    {
+      "categoria_key": "fundamentos",
+      "categoria_label": "Entendendo o consórcio",
+      "categoria_ordem": 2,
+      "titulo": "Composição da parcela: fórmula com exemplo prático",
+      "conteudo": "A parcela mensal é a soma de **4 componentes**:\n\n• **Fundo Comum** = crédito ÷ prazo do grupo\n• **Taxa Administrativa** (% sobre crédito, varia por plano — ex.: 18%)\n• **Fundo de Reserva** (% sobre crédito, ex.: 2%) — devolvido no fim do grupo se não for usado\n• **Seguro de Vida** (apenas PF): **0,038% sobre saldo devedor** (mesmo % pra imóvel e demais categorias)\n\n**Exemplo real (Mariana, auto R$ 50 mil, 72 meses):**\n• Crédito R$ 50.000 + Taxa 18% + Reserva 2% = saldo devedor R$ 60.000\n• Parcela PJ: R$ 60.000 ÷ 72 = **R$ 833,33**\n• Seguro PF: R$ 60.000 × 0,038% = R$ 22,80\n• Parcela PF: R$ 833,33 + R$ 22,80 = **R$ 856,14**\n\nFonte: ClickPlay Porto Bank · Cartilha de Boas-Vindas (Ed. 4 - 2025).",
+      "tags": "parcela calculo, formula parcela, fundo comum, taxa admin 18%, fundo reserva 2%, seguro vida 0,038%, exemplo mariana, 60.000, 833,33",
+      "ordem": 27
+    },
+    {
+      "categoria_key": "lance",
+      "categoria_label": "Lance",
+      "categoria_ordem": 5,
+      "titulo": "Parcela reduzida: cálculo completo com exemplo",
+      "conteudo": "Em planos COM redutor, a parcela é reduzida até a contemplação. **A partir da 3ª assembleia após contemplação**, recalcula: saldo do redutor é dividido pelo prazo restante e somado à parcela cheia.\n\n**Exemplo real (Ramon, imóvel R$ 300 mil, 200 meses, redutor 25%, contemplado na 30ª assembleia):**\n\n1. Parcela original: R$ 1.815 — reduzida em 25% = **R$ 1.361,25** (paga até contemplação)\n2. Valor mensal do redutor: R$ 1.815 − R$ 1.361,25 = R$ 453,75\n3. Saldo acumulado do redutor (30 meses × R$ 453,75) = **R$ 13.612,50**\n4. Prazo restante: 200 − 30 = 170 meses\n5. Redutor mensal pós-contemp: R$ 13.612,50 ÷ 170 = R$ 80,07\n6. **Parcela pós-contemplação: R$ 1.815 + R$ 80,07 = R$ 1.895,07**\n\nFonte: ClickPlay Porto Bank · Cartilha de Boas-Vindas (Ed. 4 - 2025).",
+      "tags": "parcela reduzida calculo, redutor 25%, exemplo ramon, 1.815, 1.361,25, saldo redutor, 13.612,50, parcela pos contemplacao, 1.895,07",
+      "ordem": 13
+    },
+    {
+      "categoria_key": "fundamentos",
+      "categoria_label": "Entendendo o consórcio",
+      "categoria_ordem": 2,
+      "titulo": "Reajuste anual: quando ocorre o primeiro",
+      "conteudo": "O reajuste do crédito ocorre **anualmente** pra manter o poder de compra do bem.\n\n• **1º reajuste:** sempre na **14ª parcela** (não na 13ª)\n• Reajustes seguintes: **mesmo mês em que o grupo foi inaugurado**, todo ano\n• Calculado pelo **índice de inflação indicado no regulamento** (IPCA, INCC, etc — varia por produto)\n• As parcelas também são reajustadas pelo mesmo índice\n\n**Pra quem ainda NÃO foi contemplado:** o reajuste incide sobre o **crédito contratado**.\n**Pra contemplados:** o reajuste incide sobre o **saldo devedor**.\n\nFonte: ClickPlay Porto Bank · Cartilha de Boas-Vindas.",
+      "tags": "reajuste anual, 14 parcela, aniversario grupo, IPCA INCC, indice inflacao, credito contratado, saldo devedor, contemplado nao contemplado",
+      "ordem": 28
+    },
+    {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Da contemplação à entrega do crédito",
+      "categoria_ordem": 4,
+      "titulo": "Ordem de contemplação na assembleia",
+      "conteudo": "A cada assembleia ordinária, as contemplações Porto seguem **esta ordem fixa**:\n\n1. **Sorteio entre cotas ATIVAS** (consorciados em dia)\n2. **Sorteio entre cotas CANCELADAS** (mantêm direito a sorteio até o encerramento do grupo)\n3. **Lance FIXO** (quem ofertou o % predeterminado pelo regulamento — entra num 2º sorteio só entre quem ofertou o mesmo %)\n4. **Lance LIVRE** (vence o maior % ofertado, sem limite de contemplados além do que o fundo comum permitir)\n\nFonte: ClickPlay Porto Bank · Cartilha de Boas-Vindas.",
+      "tags": "ordem contemplacao, assembleia, sorteio ativas, sorteio canceladas, lance fixo, lance livre, sequencia, prioridade",
+      "ordem": 54
+    },
+    {
+      "categoria_key": "lance",
+      "categoria_label": "Lance",
+      "categoria_ordem": 5,
+      "titulo": "Lance fixo: 2º sorteio entre quem ofertou o mesmo %",
+      "conteudo": "O **lance fixo** funciona diferente do lance livre:\n\n• O consorciado oferta um **percentual fixo predeterminado no regulamento** (ex.: 25%, 30%)\n• Quem ofertou o mesmo % vai pra um **2º sorteio**, exclusivo entre eles\n• Como o grupo de concorrentes é menor, as **chances de contemplação são maiores** que no sorteio geral\n\nJá no **lance livre**: você oferta o valor que quiser (de 1 parcela até a quitação), e **vence o maior %**, como leilão.\n\nNão há limite de contemplados em lance livre — depende exclusivamente do saldo do fundo comum daquela assembleia.\n\nFonte: ClickPlay Porto Bank · Cartilha de Boas-Vindas.",
+      "tags": "lance fixo, segundo sorteio, mesmo percentual, lance livre, leilao, maior %, regulamento percentual fixo",
+      "ordem": 14
+    },
+    {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Da contemplação à entrega do crédito",
+      "categoria_ordem": 4,
+      "titulo": "Validade da aprovação de crédito após contemplação",
+      "conteudo": "Após a contemplação, a Porto analisa o crédito (automático em até **24h** após sorteio ou após confirmação de pagamento do lance).\n\n**Prazo de validade da aprovação:**\n• **180 dias** para grupos de **IMÓVEL**\n• **90 dias** para os demais grupos (Auto, Pesados, Sustentável, Bike)\n\nSe o cliente NÃO adquirir o bem dentro desse prazo, é necessário **fazer NOVA análise** mediante solicitação.\n\nFonte: ClickPlay Porto Bank · Cartilha de Boas-Vindas.",
+      "tags": "validade aprovacao credito, 180 dias imovel, 90 dias auto pesados, nova analise, prazo contemplacao, 24h analise automatica",
+      "ordem": 55
+    },
+    {
+      "categoria_key": "lance",
+      "categoria_label": "Lance",
+      "categoria_ordem": 5,
+      "titulo": "Pagamento do lance vencedor: prazo de 2 dias úteis",
+      "conteudo": "**Você só paga o lance se for o vencedor.**\n\nSe contemplado por lance, o prazo pra pagar é de **2 dias úteis** após a contemplação.\n\nFormas de pagar o lance:\n• **Recursos próprios**\n• **FGTS** (exclusivo grupos de Imóvel — regras CEF)\n• **Lance embutido** (desconto na carta de crédito que vai receber — o % embutido é abatido do crédito final)\n\nFonte: ClickPlay Porto Bank · Cartilha de Boas-Vindas.",
+      "tags": "pagamento lance, 2 dias uteis, recursos proprios, fgts, lance embutido, vencedor, prazo lance vencedor",
+      "ordem": 15
+    },
+    {
+      "categoria_key": "pagamentos",
+      "categoria_label": "Pagamentos, parcelas e custos",
+      "categoria_ordem": 8,
+      "titulo": "Pagamento até 4 dias antes da assembleia",
+      "conteudo": "Devido ao **fluxo contábil do consórcio**, os pagamentos das parcelas devem ser realizados **até 4 dias antes da assembleia** pra serem reconhecidos a tempo.\n\nDatas de vencimento são fixas e **não são alteradas** mesmo se cair em feriado. Se for feriado na cidade do cliente, oriente a antecipar pagamento pelo App.\n\nPagar em dia é pré-requisito pra participar do sorteio E pra ofertar lance.\n\nFonte: ClickPlay Porto Bank · Cartilha de Boas-Vindas.",
+      "tags": "pagamento 4 dias antes assembleia, fluxo contabil, vencimento fixo, feriado, antecipar, pre-requisito sorteio lance",
+      "ordem": 24
+    },
+    {
+      "categoria_key": "transferencia",
+      "categoria_label": "Transferência, cancelamento e devoluções",
+      "categoria_ordem": 9,
+      "titulo": "Cancelamento por inadimplência: 3 ou mais parcelas",
+      "conteudo": "Pra **cotas NÃO contempladas**, o cancelamento ocorre se o consorciado deixar de pagar **3 ou mais parcelas** (conforme regulamento).\n\nCotas canceladas:\n• Continuam participando dos **sorteios mensais exclusivos pra cotas canceladas** em cada grupo\n• Se não forem sorteadas, têm os valores devolvidos no **encerramento do grupo**\n• Valores corrigidos monetariamente, **deduzidos o fundo de reserva e a taxa de administração**\n• Também há cobrança de **multa por quebra contratual**, conforme o percentual pago\n\nPra **cotas JÁ contempladas** que ainda não adquiriram o bem: parcela em atraso é descontada do crédito. Se já adquiriu o bem: cobrança amigável e depois judicial (retomada do bem).\n\nFonte: ClickPlay Porto Bank · Cartilha de Boas-Vindas.",
+      "tags": "inadimplencia, 3 parcelas, cancelamento por falta pagamento, multa quebra contratual, sorteio cotas canceladas, devolucao encerramento grupo, retomada bem",
+      "ordem": 26
+    },
+    {
+      "categoria_key": "canais",
+      "categoria_label": "Canais de atendimento",
+      "categoria_ordem": 12,
+      "titulo": "Central de Relacionamento Porto Consórcio (telefones)",
+      "conteudo": "Telefones da Central de Relacionamento do Consórcio Porto Bank:\n\n• **Grande São Paulo:** 11 3366 3006\n• **Demais localidades:** 0800 721 3006\n\nUse para solicitar resgate de crédito em espécie, reativação de cota, transferência, alteração de crédito, troca de forma de pagamento, e demais procedimentos.\n\nAtendimento alternativo: Chat da Porto, WhatsApp do Consórcio, Área do Cliente, App.\n\nFonte: ClickPlay Porto Bank · Cartilha de Boas-Vindas.",
+      "tags": "central relacionamento, telefone consorcio porto, 11 3366 3006, 0800 721 3006, atendimento, sao paulo, demais localidades",
+      "ordem": 13
+    },
+    {
+      "categoria_key": "plataforma_corretor",
+      "categoria_label": "Plataforma do Corretor (COL e Gestão de Carteira)",
+      "categoria_ordem": 13,
+      "titulo": "Programa de níveis do corretor: GOLD, BLACK, BLUE",
+      "conteudo": "Programa exclusivo da Porto Bank pra corretores com vendas pra mais de **3 CPFs/CNPJs** e **R$ 1 milhão em crédito no trimestre**.\n\n**Níveis e benefícios:**\n\n• **GOLD** — comissão de **3,3%** + **R$ 1,5 mil para marketing**\n• **BLACK** — comissão de **3,7%** + **R$ 2 mil para marketing**\n• **BLUE** — comissão de **4,0%** + **R$ 3,5 mil para marketing**\n\nComparativo: comissão padrão é **2,5% PJ / 2,0% PF**. Nos níveis especiais, sobe pra até **4%** — atendimento personalizado e bônus de marketing.\n\nFonte: ClickPlay Porto Bank · Guia da Primeira Venda.",
+      "tags": "programa corretor, GOLD BLACK BLUE, comissao 3,3% 3,7% 4%, marketing R$ 1,5 mil 2 mil 3,5 mil, 3 cpf cnpj, 1 milhao trimestre, beneficios elite",
+      "ordem": 10
+    },
+    {
+      "categoria_key": "pagamentos",
+      "categoria_label": "Pagamentos, parcelas e custos",
+      "categoria_ordem": 8,
+      "titulo": "Comissão de venda Porto: distribuição em 6 parcelas",
+      "conteudo": "Comissão pelo crédito vendido Porto Bank:\n\n**PJ — total 2,5% sobre o crédito**\n\n**PF — total 2,0% sobre o crédito**\n\n**Distribuição (Imóvel adesão à vista ou 3x):**\n• Auto (PJ): 4 parcelas iguais de 0,625% / (PF): 4× 0,5%\n• Imóvel (PJ): 1ª 0,50% / 2ª 0,25% / 3ª 0,25% / 4ª 0,38% / 5ª 0,50% / 6ª 0,62%\n• Imóvel (PF): 1ª 0,40% / 2ª 0,20% / 3ª 0,20% / 4ª 0,30% / 5ª 0,40% / 6ª 0,50%\n• Pesados/Bike/Sustentável: igual ao Imóvel\n\n**Imóvel com adesão em 5x ou 12x:** comissão paga em partes iguais no mesmo número de parcelas da adesão.\n\nCritérios podem mudar conforme campanha vigente — sempre confirmar.\n\nFonte: ClickPlay Porto Bank · Guia da Primeira Venda.",
+      "tags": "comissao venda porto, 2,5% PJ, 2,0% PF, distribuicao parcelas, auto 4x, imovel 6 parcelas, pesados bike sustentavel, adesao 5x 12x",
+      "ordem": 25
+    },
+    {
+      "categoria_key": "plataforma_corretor",
+      "categoria_label": "Plataforma do Corretor (COL e Gestão de Carteira)",
+      "categoria_ordem": 13,
+      "titulo": "Nota Fiscal de comissão: regras de envio",
+      "conteudo": "Pra receber a comissão da Porto Bank Consórcio:\n\n• **Prazo de envio da NF:** até o **5º dia útil do próximo mês**\n• **Valor:** o mesmo do extrato no COL em \"comissionamento\"\n• **E-mail para envio:** **nfconsorcio@portoseguro.com.br**\n• **Liberação do pagamento:** em até **3 dias úteis** após o envio e lançamento em sistema\n\n**Código de serviço na NF:**\n• Agenciamento, corretagem ou intermediação de bens móveis ou imóveis\n• **Município de São Paulo: código 6297**\n\n**Detalhamento dos serviços:** preencher com código de intermediação de vendas (obtido junto à prefeitura local) + código de comissionamento + período de fechamento.\n\n**Importante:** se o código de serviço estiver errado, a NF tem que ser **cancelada e retransmitida** (questão de tributos). Se a NF não chegar até a data limite, a comissão fica retida para o próximo comissionamento.\n\nFonte: ClickPlay Porto Bank · Guia da Primeira Venda.",
+      "tags": "nota fiscal comissao porto, nfconsorcio@portoseguro.com.br, 5 dia util, codigo 6297 sao paulo, agenciamento corretagem, 3 dias uteis liberacao, prazo NF",
+      "ordem": 11
+    },
+    {
+      "categoria_key": "plataforma_corretor",
+      "categoria_label": "Plataforma do Corretor (COL e Gestão de Carteira)",
+      "categoria_ordem": 13,
+      "titulo": "Cadastro de corretor pra vender Porto Consórcio",
+      "conteudo": "Pra vender Consórcio Porto Bank é preciso ter código de comercialização.\n\n**Quem pode comercializar:**\n• Corretores com **SUSEP** (Superintendência de Seguros Privados, cadastrado na companhia)\n• Corretores com **CRECI** (Conselho Regional de Corretores de Imóveis)\n\n**Como cadastrar:**\n1. Acessar a página do consórcio no **COL > Ferramentas de Apoio > Documentos e Formulários > Ficha Cadastral de Corretores**\n2. Preencher o formulário\n3. Enviar para **cadastro.consorcio@portoseguro.com.br**\n4. Aguardar o código pra comercialização — chega por e-mail em até **1 dia útil**\n\nFonte: ClickPlay Porto Bank · Guia da Primeira Venda.",
+      "tags": "cadastro corretor, susep, creci, codigo comercializacao, cadastro.consorcio@portoseguro.com.br, ficha cadastral, COL ferramentas apoio, 1 dia util",
+      "ordem": 12
+    },
+    {
+      "categoria_key": "plataforma_corretor",
+      "categoria_label": "Plataforma do Corretor (COL e Gestão de Carteira)",
+      "categoria_ordem": 13,
+      "titulo": "Proposta Consórcio 2.0: onde acessar + prazo assinatura",
+      "conteudo": "Pra montar proposta no Porto:\n\n**Acesso:** **COL > Cálculos > Bank > Serviços Financeiros > Proposta Consórcio 2.0**\n\nFiltros disponíveis pra achar a cota ideal:\n• PF ou PJ\n• Produto de interesse (Auto, Imóvel, Pesados, Sustentável, Bike)\n• Valor aproximado do crédito\n• Tipo de grupo (novo ou em andamento)\n\nDados a preencher: cota escolhida, dados do titular, dados complementares, info de pagamento, seguro de vida, termo de aceite.\n\n**Prazo de assinatura digital pelo cliente: 2 dias corridos** a partir da transmissão. Após esse prazo, a cota reservada é perdida e é preciso emitir nova proposta.\n\n**ATENÇÃO ao preenchimento:** a base integrada da Porto verifica os dados quando o cliente faz primeiro acesso aos canais digitais. Se incorretos, o cliente não consegue acessar App nem Área do Cliente.\n\nFonte: ClickPlay Porto Bank · Guia da Primeira Venda.",
+      "tags": "proposta consorcio 2.0, COL calculos bank servicos financeiros, 2 dias corridos assinatura, base integrada, app area cliente, perde cota",
+      "ordem": 13
     }
   ],
   "downloads": [
@@ -1630,6 +2008,16 @@ window.KB_ADMIN["porto"] = {
       "titulo": "Tabela de Tarifas — Imóvel",
       "descricao": "Tarifas vigentes do consórcio Porto de Imóveis: pacote R$ 3.800,00, vistoria adicional R$ 597,00, cancelamento escalonado por estágio, transferência e taxa de permanência.",
       "arquivo": "kb-porto-tarifas-imovel.pdf"
+    },
+    {
+      "titulo": "Guia da Primeira Venda — Porto Bank",
+      "descricao": "Material oficial da Porto Bank com dicas pra sair do zero e conquistar a primeira venda. Discurso, primeiro contato, fechamento. Direto do ClickPlay.",
+      "arquivo": "kb-porto-guia-primeira-venda.pdf"
+    },
+    {
+      "titulo": "Cartilha de Boas-Vindas ao Consórcio — Porto Bank",
+      "descricao": "Cartilha oficial pra entregar ao cliente: explica o consórcio, contratação, parcelas, contemplação, sorteio, lance, faturamento. Excelente material de apoio pós-venda.",
+      "arquivo": "kb-porto-cartilha-boas-vindas.pdf"
     }
   ]
 };
