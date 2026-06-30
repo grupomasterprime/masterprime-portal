@@ -1886,42 +1886,6 @@ window.KB_ADMIN["porto"] = {
       "categoria_key": "plataforma_corretor",
       "categoria_label": "Plataforma do Corretor (COL e Gestão de Carteira)",
       "categoria_ordem": 13,
-      "titulo": "Programa de níveis do corretor: GOLD, BLACK, BLUE",
-      "conteudo": "Programa exclusivo da Porto Bank pra corretores com vendas pra mais de **3 CPFs/CNPJs** e **R$ 1 milhão em crédito no trimestre**.\n\n**Níveis e benefícios:**\n\n• **GOLD** — comissão de **3,3%** + **R$ 1,5 mil para marketing**\n• **BLACK** — comissão de **3,7%** + **R$ 2 mil para marketing**\n• **BLUE** — comissão de **4,0%** + **R$ 3,5 mil para marketing**\n\nComparativo: comissão padrão é **2,5% PJ / 2,0% PF**. Nos níveis especiais, sobe pra até **4%** — atendimento personalizado e bônus de marketing.\n\nFonte: ClickPlay Porto Bank · Guia da Primeira Venda.",
-      "tags": "programa corretor, GOLD BLACK BLUE, comissao 3,3% 3,7% 4%, marketing R$ 1,5 mil 2 mil 3,5 mil, 3 cpf cnpj, 1 milhao trimestre, beneficios elite",
-      "ordem": 10
-    },
-    {
-      "categoria_key": "pagamentos",
-      "categoria_label": "Pagamentos, parcelas e custos",
-      "categoria_ordem": 8,
-      "titulo": "Comissão de venda Porto: distribuição em 6 parcelas",
-      "conteudo": "Comissão pelo crédito vendido Porto Bank:\n\n**PJ — total 2,5% sobre o crédito**\n\n**PF — total 2,0% sobre o crédito**\n\n**Distribuição (Imóvel adesão à vista ou 3x):**\n• Auto (PJ): 4 parcelas iguais de 0,625% / (PF): 4× 0,5%\n• Imóvel (PJ): 1ª 0,50% / 2ª 0,25% / 3ª 0,25% / 4ª 0,38% / 5ª 0,50% / 6ª 0,62%\n• Imóvel (PF): 1ª 0,40% / 2ª 0,20% / 3ª 0,20% / 4ª 0,30% / 5ª 0,40% / 6ª 0,50%\n• Pesados/Bike/Sustentável: igual ao Imóvel\n\n**Imóvel com adesão em 5x ou 12x:** comissão paga em partes iguais no mesmo número de parcelas da adesão.\n\nCritérios podem mudar conforme campanha vigente — sempre confirmar.\n\nFonte: ClickPlay Porto Bank · Guia da Primeira Venda.",
-      "tags": "comissao venda porto, 2,5% PJ, 2,0% PF, distribuicao parcelas, auto 4x, imovel 6 parcelas, pesados bike sustentavel, adesao 5x 12x",
-      "ordem": 25
-    },
-    {
-      "categoria_key": "plataforma_corretor",
-      "categoria_label": "Plataforma do Corretor (COL e Gestão de Carteira)",
-      "categoria_ordem": 13,
-      "titulo": "Nota Fiscal de comissão: regras de envio",
-      "conteudo": "Pra receber a comissão da Porto Bank Consórcio:\n\n• **Prazo de envio da NF:** até o **5º dia útil do próximo mês**\n• **Valor:** o mesmo do extrato no COL em \"comissionamento\"\n• **E-mail para envio:** **nfconsorcio@portoseguro.com.br**\n• **Liberação do pagamento:** em até **3 dias úteis** após o envio e lançamento em sistema\n\n**Código de serviço na NF:**\n• Agenciamento, corretagem ou intermediação de bens móveis ou imóveis\n• **Município de São Paulo: código 6297**\n\n**Detalhamento dos serviços:** preencher com código de intermediação de vendas (obtido junto à prefeitura local) + código de comissionamento + período de fechamento.\n\n**Importante:** se o código de serviço estiver errado, a NF tem que ser **cancelada e retransmitida** (questão de tributos). Se a NF não chegar até a data limite, a comissão fica retida para o próximo comissionamento.\n\nFonte: ClickPlay Porto Bank · Guia da Primeira Venda.",
-      "tags": "nota fiscal comissao porto, nfconsorcio@portoseguro.com.br, 5 dia util, codigo 6297 sao paulo, agenciamento corretagem, 3 dias uteis liberacao, prazo NF",
-      "ordem": 11
-    },
-    {
-      "categoria_key": "plataforma_corretor",
-      "categoria_label": "Plataforma do Corretor (COL e Gestão de Carteira)",
-      "categoria_ordem": 13,
-      "titulo": "Cadastro de corretor pra vender Porto Consórcio",
-      "conteudo": "Pra vender Consórcio Porto Bank é preciso ter código de comercialização.\n\n**Quem pode comercializar:**\n• Corretores com **SUSEP** (Superintendência de Seguros Privados, cadastrado na companhia)\n• Corretores com **CRECI** (Conselho Regional de Corretores de Imóveis)\n\n**Como cadastrar:**\n1. Acessar a página do consórcio no **COL > Ferramentas de Apoio > Documentos e Formulários > Ficha Cadastral de Corretores**\n2. Preencher o formulário\n3. Enviar para **cadastro.consorcio@portoseguro.com.br**\n4. Aguardar o código pra comercialização — chega por e-mail em até **1 dia útil**\n\nFonte: ClickPlay Porto Bank · Guia da Primeira Venda.",
-      "tags": "cadastro corretor, susep, creci, codigo comercializacao, cadastro.consorcio@portoseguro.com.br, ficha cadastral, COL ferramentas apoio, 1 dia util",
-      "ordem": 12
-    },
-    {
-      "categoria_key": "plataforma_corretor",
-      "categoria_label": "Plataforma do Corretor (COL e Gestão de Carteira)",
-      "categoria_ordem": 13,
       "titulo": "Proposta Consórcio 2.0: onde acessar + prazo assinatura",
       "conteudo": "Pra montar proposta no Porto:\n\n**Acesso:** **COL > Cálculos > Bank > Serviços Financeiros > Proposta Consórcio 2.0**\n\nFiltros disponíveis pra achar a cota ideal:\n• PF ou PJ\n• Produto de interesse (Auto, Imóvel, Pesados, Sustentável, Bike)\n• Valor aproximado do crédito\n• Tipo de grupo (novo ou em andamento)\n\nDados a preencher: cota escolhida, dados do titular, dados complementares, info de pagamento, seguro de vida, termo de aceite.\n\n**Prazo de assinatura digital pelo cliente: 2 dias corridos** a partir da transmissão. Após esse prazo, a cota reservada é perdida e é preciso emitir nova proposta.\n\n**ATENÇÃO ao preenchimento:** a base integrada da Porto verifica os dados quando o cliente faz primeiro acesso aos canais digitais. Se incorretos, o cliente não consegue acessar App nem Área do Cliente.\n\nFonte: ClickPlay Porto Bank · Guia da Primeira Venda.",
       "tags": "proposta consorcio 2.0, COL calculos bank servicos financeiros, 2 dias corridos assinatura, base integrada, app area cliente, perde cota",
