@@ -348,13 +348,15 @@ function renderList(filter = '') {
     if (!byConsultor[f.consultor_auth_id]) byConsultor[f.consultor_auth_id] = [];
     byConsultor[f.consultor_auth_id].push(f);
   });
-  // Enriquecer
+  // Enriquecer e filtrar: só aparece na lista quem já teve ao menos 1 feedback.
+  // Pra registrar o 1º feedback de alguém, usa o botão "+ Novo Feedback" no topo
+  // (dropdown lá tem TODOS os consultores).
   const enriched = users.map(u => {
     const fbs = byConsultor[u.auth_id] || [];
     const last = fbs[0] || null;
     const dias = last ? diasDesde(last.data_feedback) : null;
     return { ...u, fbs, last, dias, status: statusFeedback(dias) };
-  });
+  }).filter(u => u.fbs.length > 0);
   // Ordenação por coluna
   const dir = _fbSortDir === 'asc' ? 1 : -1;
   const statusRank = s => ({never: 4, crit: 3, warn: 2, ok: 1})[s] || 0;
@@ -415,7 +417,8 @@ function renderList(filter = '') {
       ${enriched.length === 0 ? `
         <div class="empty">
           <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-          <h3>Nenhum consultor encontrado</h3>
+          <h3>${q ? 'Nenhum consultor com esse nome tem feedback ainda' : 'Nenhum feedback registrado ainda'}</h3>
+          <p style="margin-top:6px;font-size:12px;color:var(--text2)">Clique em <strong>+ Novo Feedback</strong> pra registrar o primeiro.</p>
         </div>
       ` : enriched.map(u => `
         <div class="fb-row">
