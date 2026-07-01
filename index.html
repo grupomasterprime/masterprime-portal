@@ -2736,8 +2736,16 @@ async function abrirThread(chamadoId) {
       .select('*').eq('chamado_id', chamadoId).order('criado_em', { ascending: true });
     if (error) throw error;
     _renderThread(chamado, msgs || []);
-    await sb.rpc('marcar_chamado_lido', { p_chamado_id: chamadoId });
-    await carregarChamados();
+    // Só marca como lido se o badge NÃO estaria ativo pra esse user
+    // (não some o alerta enquanto ele ainda não respondeu / não fechou)
+    const ehMaster = _chamEhMaster();
+    const badgeAtivo = ehMaster
+      ? chamado.status === 'aberto'
+      : chamado.status !== 'fechado' && chamado.ultima_resposta_em;
+    if (!badgeAtivo) {
+      await sb.rpc('marcar_chamado_lido', { p_chamado_id: chamadoId });
+      await carregarChamados();
+    }
   } catch (e) {
     document.getElementById('cham-modal-body').innerHTML = '<div style="color:#DC2626;padding:14px">Erro: ' + (e.message || e) + '</div>';
   }
