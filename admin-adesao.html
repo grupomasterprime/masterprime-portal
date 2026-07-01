@@ -111,8 +111,9 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
   object-fit: contain;
   display: block;
 }
-.link-mini.mp .link-mini-badge { background: #2D3F5E; border-color: #2D3F5E; }
+.link-mini.mp .link-mini-badge { background: #2D3F5E; border-color: #2D3F5E; padding: 0; }
 .link-mini.mp .link-mini-badge img { filter: brightness(0) invert(1); }
+.link-mini.mp .link-mini-badge svg { width: 100%; height: 100%; display: block; }
 .link-mini.po .link-mini-badge { background: #fff; }
 .link-mini.it .link-mini-badge { background: #fff; }
 .link-mini.br .link-mini-badge { background: #fff; }
@@ -429,15 +430,17 @@ function renderLinks() {
   const base = 'https://grupomasterprime.github.io/masterprime-portal/formulario.html';
   const c = currentUserCodigo ? '?c=' + currentUserCodigo : '';
   const sep = c ? '&' : '?';
+  // SVG inline pro logo MP — um "M" branco em fundo mp-navy, mesmo tamanho dos outros badges.
+  const svgM = `<svg viewBox="0 0 56 44" xmlns="http://www.w3.org/2000/svg"><text x="28" y="30" text-anchor="middle" fill="#fff" font-family="'Inter','Segoe UI',sans-serif" font-weight="900" font-size="28" letter-spacing="-0.05em">M</text></svg>`;
   const links = [
-    { key: 'mp', label: 'Master Prime',          sub: 'Geral · todos os consórcios',  url: base + c,                            logo: 'logo.png' },
+    { key: 'mp', label: 'Master Prime',          sub: 'Geral · todos os consórcios',  url: base + c,                            logo: svgM, isSvg: true },
     { key: 'po', label: 'Consórcio Porto Seguro', sub: 'Apenas Porto',                 url: base + c + sep + 'admin=porto',     logo: 'logo-porto.png' },
     { key: 'it', label: 'Consórcio Itaú',         sub: 'Apenas Itaú',                  url: base + c + sep + 'admin=itau',      logo: 'logo-itau.png' },
     { key: 'br', label: 'Consórcio Bradesco',     sub: 'Apenas Bradesco',              url: base + c + sep + 'admin=bradesco',  logo: 'logo-bradesco.png' }
   ];
   grid.innerHTML = links.map(l => `
     <div class="link-mini ${l.key}">
-      <div class="link-mini-badge"><img src="${l.logo}" alt="${l.label}"></div>
+      <div class="link-mini-badge">${l.isSvg ? l.logo : `<img src="${l.logo}" alt="${l.label}">`}</div>
       <div class="link-mini-info">
         <div class="link-mini-label" title="${l.url}">${l.label}</div>
         <div class="link-mini-sub">${l.sub}</div>
