@@ -1042,7 +1042,7 @@ async function doLogin() {
     if (!USE_SUPABASE) {
       const user = await DB.getUser(identificador);
       if (!user || user.senha !== senha) throw new Error('Usuario ou senha incorretos.');
-      currentUser = user; sessionStorage.setItem('mp_session', identificador);
+      currentUser = user; window.portalCurrentUser = currentUser; window.sb = sb; sessionStorage.setItem('mp_session', identificador);
       err.style.display='none'; await enterPortal();
       btn.disabled=false; btn.textContent='Entrar'; return;
     }
@@ -1077,7 +1077,7 @@ async function doLogin() {
     const authUser = (await sb.auth.getUser()).data.user;
     const r = await sb.from('portal_users').select('*').eq('auth_id', authUser.id).maybeSingle();
     if (!r.data) throw new Error('Conta criada mas perfil nao encontrado. Contate o administrador.');
-    currentUser = r.data;
+    currentUser = r.data; window.portalCurrentUser = currentUser; window.sb = sb;
     err.style.display='none';
     await enterPortal();
   } catch(e) {
@@ -1347,7 +1347,7 @@ async function checkSession() {
       const authId = data.session.user.id;
       const r = await sb.from('portal_users').select('*').eq('auth_id', authId).maybeSingle();
       if (r.data) {
-        currentUser = r.data;
+        currentUser = r.data; window.portalCurrentUser = currentUser; window.sb = sb;
         await enterPortal();
         return;
       }

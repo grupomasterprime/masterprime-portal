@@ -108,7 +108,7 @@ class AnaliseCarteiraController {
       // ── Filtro por perfil (mesma regra do Dashboard de Vendas): vendedor/consultor
       //    só vê a própria carteira; admin/master/sócio/backoffice veem tudo. ──
       let __pUser = null;
-      try { __pUser = (window.parent && window.parent !== window) ? window.parent.currentUser : null; } catch(e) {}
+      try { if (window.parent && window.parent !== window) __pUser = window.parent.portalCurrentUser || window.parent.currentUser || null; } catch(e) {}
       const __canSeeAll = u => u && ['admin','master','socio','backoffice'].includes(u.tipo);
       if (!__pUser) {
         // acesso direto (fora do portal): não exibe nada sem sessão
