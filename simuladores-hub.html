@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master Prime — Simuladores</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --mp-navy:    #2D3F5E;
+  --mp-navy-d:  #1E2D45;
+  --mp-yellow:  #C8C84A;
+  --mp-teal:    #4DBCC8;
+  --mp-blue:    #7A9BC8;
+  --bg:         #F4F6FA;
+  --card:       #FFFFFF;
+  --border:     #E2E8F0;
+  --border2:    #CBD5E1;
+  --text:       #1E293B;
+  --text2:      #64748B;
+  --text3:      #94A3B8;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, system-ui, sans-serif; font-size: 13px; min-height: 100vh; }
+
+#hub-screen { padding: 32px 40px 40px; }
+#hub-screen.hidden { display: none; }
+.hub-header { margin-bottom: 28px; }
+.hub-title { font-size: 24px; font-weight: 700; color: var(--mp-navy); letter-spacing: -0.4px; }
+.hub-sub { font-size: 13px; color: var(--text2); margin-top: 6px; }
+
+.cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 18px; }
+
+.sim-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  display: flex; flex-direction: column; gap: 12px;
+  min-height: 168px;
+  position: relative;
+  overflow: hidden;
+}
+.sim-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 28px rgba(45,63,94,.12), 0 4px 8px rgba(45,63,94,.06);
+  border-color: var(--mp-teal);
+}
+.sim-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: var(--mp-navy);
+  transition: background 0.15s ease;
+}
+.sim-card:hover::before { background: var(--mp-teal); }
+
+.sim-icon {
+  width: 44px; height: 44px;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #F4F6FA, #E2E8F0);
+  color: var(--mp-navy);
+}
+.sim-icon svg { width: 24px; height: 24px; }
+.sim-card.cat-investimento .sim-icon { background: linear-gradient(135deg, #ECFDF8, #CCFBF1); color: var(--mp-teal); }
+.sim-card.cat-comparativo .sim-icon { background: linear-gradient(135deg, #FEFCE8, #FEF3C7); color: #A16207; }
+.sim-card .name {
+  font-size: 15px; font-weight: 700; color: var(--mp-navy); letter-spacing: -0.2px;
+}
+.sim-card .desc { font-size: 12px; color: var(--text2); line-height: 1.5; flex-grow: 1; }
+.sim-card .arrow {
+  font-size: 11px; color: var(--mp-teal); font-weight: 600; letter-spacing: 0.5px;
+  text-transform: uppercase; display: flex; align-items: center; gap: 4px;
+}
+
+/* Cores temáticas por categoria */
+.sim-card.cat-base::before { background: var(--mp-navy); }
+.sim-card.cat-investimento::before { background: var(--mp-teal); }
+.sim-card.cat-comparativo::before { background: var(--mp-yellow); }
+.sim-card.cat-porto::before { background: var(--mp-navy); }
+.sim-card.cat-porto .sim-icon { background: linear-gradient(135deg, #FEF2F2, #FEE2E2); color: #B91C1C; }
+.sim-card.cat-itau::before { background: #EC7000; }
+.sim-card.cat-itau .sim-icon { background: linear-gradient(135deg, #FFF4E8, #FFE6CB); color: #EC7000; }
+.sim-card.cat-itau:hover { border-color: #EC7000; }
+.sim-card.cat-bradesco::before { background: #CC092F; }
+.sim-card.cat-bradesco .sim-icon { background: linear-gradient(135deg, #FFE9EC, #FFD0D5); color: #CC092F; }
+.sim-card.cat-bradesco:hover { border-color: #CC092F; }
+.sim-card.cat-santander::before { background: #EC0000; }
+.sim-card.cat-santander .sim-icon { background: linear-gradient(135deg, #FFECEC, #FFD0D0); color: #EC0000; }
+.sim-card.cat-santander:hover { border-color: #EC0000; }
+.sim-card .badge-em-breve {
+  position: absolute; top: 12px; right: 12px;
+  background: #F59E0B; color: #fff;
+  padding: 3px 10px; border-radius: 12px;
+  font-size: 10px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.5px;
+  z-index: 2;
+}
+.sim-card.em-breve { opacity: 0.75; cursor: default; }
+.sim-card.em-breve:hover { transform: none; box-shadow: 0 1px 3px rgba(45,63,94,.04); border-color: var(--border); }
+.sim-card.em-breve:hover::before { background: var(--mp-navy); }
+.sim-icon-img { background: transparent !important; padding: 0 !important; overflow: hidden; }
+.sim-icon-img img { width: 100%; height: 100%; object-fit: contain; display: block; }
+
+.sim-card.cat-base:hover::before,
+.sim-card.cat-investimento:hover::before,
+.sim-card.cat-comparativo:hover::before,
+.sim-card.cat-porto:hover::before { background: var(--mp-blue); }
+
+.sim-card.cat-porto:hover { border-color: #B91C1C; }
+
+/* Sub-categoria Porto */
+#porto-screen { padding: 32px 40px 40px; display: none; }
+#porto-screen.active { display: block; }
+#itau-screen { padding: 32px 40px 40px; display: none; }
+#itau-screen.active { display: block; }
+#bradesco-screen { padding: 32px 40px 40px; display: none; }
+#bradesco-screen.active { display: block; }
+.porto-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-bottom: 18px;
+  padding: 8px 14px; border-radius: 8px;
+  background: var(--card); border: 1px solid var(--border);
+  color: var(--text2); font-size: 12px; font-weight: 600; cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  font-family: inherit;
+}
+.porto-back:hover { background: var(--mp-navy); color: #fff; border-color: var(--mp-navy); }
+.porto-soon-tag {
+  display: inline-block; margin-top: 6px;
+  padding: 3px 8px; border-radius: 6px;
+  background: #FEF3C7; color: #A16207;
+  font-size: 10px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase;
+}
+.sim-card.disabled { opacity: 0.55; cursor: not-allowed; }
+.sim-card.disabled:hover { transform: none; box-shadow: none; border-color: var(--border); }
+.sim-card.disabled:hover::before { background: var(--mp-navy); }
+
+/* === Iframe view === */
+#sim-view { display: none; flex-direction: column; height: 100vh; }
+#sim-view.active { display: flex; }
+.sim-toolbar {
+  background: var(--mp-navy); color: #fff;
+  padding: 12px 20px; display: flex; align-items: center; justify-content: space-between;
+  flex-shrink: 0;
+}
+.sim-toolbar .back-btn {
+  background: rgba(255,255,255,.1); color: #fff; border: 1px solid rgba(255,255,255,.2);
+  padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600;
+  transition: background 0.15s ease;
+  display: flex; align-items: center; gap: 6px;
+  font-family: inherit;
+}
+.sim-toolbar .back-btn:hover { background: rgba(255,255,255,.2); }
+.sim-toolbar .sim-title-bar { font-size: 14px; font-weight: 600; letter-spacing: 0.3px; }
+.sim-toolbar .toolbar-right { font-size: 11px; color: rgba(255,255,255,.6); letter-spacing: 1.5px; text-transform: uppercase; }
+
+#sim-iframe { flex-grow: 1; border: 0; width: 100%; }
+
+@media (max-width: 768px) {
+  #hub-screen { padding: 20px 16px 24px; }
+  .hub-title { font-size: 20px; }
+  .cards-grid { gap: 12px; }
+  .sim-toolbar { padding: 10px 14px; }
+  .sim-toolbar .toolbar-right { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- Hub View -->
+<div id="hub-screen">
+  <div class="hub-header">
+    <div class="hub-title">Simuladores</div>
+    <div class="hub-sub">Escolha o tipo de simulação que deseja realizar</div>
+  </div>
+
+  <div class="cards-grid">
+    <div class="sim-card cat-porto" onclick="openPorto()">
+      <div class="sim-icon sim-icon-img"><img src="logo-porto.png" alt="Porto" onerror="this.style.display='none'"></div>
+      <div class="name">Porto Consórcio</div>
+      <div class="desc">Simuladores específicos da Porto: Imóvel, Auto e Pesados.</div>
+      <div class="arrow">Abrir &rarr;</div>
+    </div>
+
+    <div class="sim-card cat-itau" onclick="openItau()">
+      <div class="sim-icon sim-icon-img"><img src="logo-itau.png" alt="Itaú" onerror="this.style.display='none'"></div>
+      <div class="name">Itaú Consórcio</div>
+      <div class="desc">Simuladores Itaú: Parcela Integral e Parcela Reduzida (até a contemplação).</div>
+      <div class="arrow">Abrir &rarr;</div>
+    </div>
+
+    <div class="sim-card cat-bradesco" onclick="openBradesco()">
+      <div class="sim-icon sim-icon-img"><img src="logo-bradesco.png" alt="Bradesco" onerror="this.style.display='none'"></div>
+      <div class="name">Bradesco Consórcio</div>
+      <div class="desc">Simuladores Bradesco: Imóvel e Auto. Lance com Diluir ou Antecipar Parcelas.</div>
+      <div class="arrow">Abrir &rarr;</div>
+    </div>
+
+    <div class="sim-card cat-santander em-breve" onclick="return false">
+      <div class="badge-em-breve">Em breve</div>
+      <div class="sim-icon sim-icon-img"><img src="logo-santander.png" alt="Santander" onerror="this.style.display='none'; this.parentElement.innerHTML='<svg viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\' stroke-linecap=\'round\' stroke-linejoin=\'round\'><path d=\'M3 21h18\'/><path d=\'M3 10h18\'/><path d=\'M5 6l7-3 7 3\'/><path d=\'M4 10v11\'/><path d=\'M20 10v11\'/><path d=\'M8 14v3\'/><path d=\'M12 14v3\'/><path d=\'M16 14v3\'/></svg>';"></div>
+      <div class="name">Santander Consórcio</div>
+      <div class="desc">Simulador Santander — em breve disponível.</div>
+    </div>
+
+    <div class="sim-card cat-base" onclick="openSim('op-simples', 'Simulação Rápida', 'simulador-master-prime-teste.html')">
+      <div class="sim-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="13" y2="14"/></svg></div>
+      <div class="name">Simulação Rápida</div>
+      <div class="desc">Cálculo de uma única operação de consórcio com CET, parcelas e custo da operação.</div>
+      <div class="arrow">Abrir &rarr;</div>
+    </div>
+
+    <div class="sim-card cat-base" onclick="openSim('op-estruturada', 'Proposta Estruturada', 'simulador-estruturada-master-prime-teste.html')">
+      <div class="sim-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/><line x1="2" y1="8.5" x2="12" y2="15"/><line x1="12" y1="15" x2="22" y2="8.5"/><line x1="12" y1="15" x2="12" y2="22"/></svg></div>
+      <div class="name">Proposta Estruturada</div>
+      <div class="desc">Operação completa com múltiplos lances, FGTS, redutor e adesão. Cálculo detalhado.</div>
+      <div class="arrow">Abrir &rarr;</div>
+    </div>
+
+    <div class="sim-card cat-investimento" onclick="openSim('cons-investimento', 'Modo Investidor', 'simulador-investimento.html')">
+      <div class="sim-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+      <div class="name">Modo Investidor</div>
+      <div class="desc">Análise do consórcio como veículo de investimento, com aportes e rentabilidade.</div>
+      <div class="arrow">Abrir &rarr;</div>
+    </div>
+
+    <div class="sim-card cat-investimento" onclick="openSim('alavancagem', 'Construindo Patrimônio', 'simulador-alavancagem.html')">
+      <div class="sim-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg></div>
+      <div class="name">Construindo Patrimônio</div>
+      <div class="desc">Estratégias de alavancagem com diferença de aluguel, imóveis alugados, previdência e renda fixa.</div>
+      <div class="arrow">Abrir &rarr;</div>
+    </div>
+
+    <div class="sim-card cat-comparativo" onclick="openSim('cons-x-financ', 'Consórcio e Financiamento', 'simulador-cons-x-financ.html')">
+      <div class="sim-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><line x1="6" y1="9" x2="6" y2="21"/></svg></div>
+      <div class="name">Consórcio e Financiamento</div>
+      <div class="desc">Comparação entre consórcio e financiamento (SAC, PRICE ou CDC) com cálculo de economia.</div>
+      <div class="arrow">Abrir &rarr;</div>
+    </div>
+
+    <div class="sim-card cat-comparativo" onclick="openSim('cons-x-vista', 'Consórcio e À Vista', 'simulador-cons-x-vista.html')">
+      <div class="sim-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg></div>
+      <div class="name">Consórcio e À Vista</div>
+      <div class="desc">Compra à vista vs consórcio com investimento da diferença e valorização do bem.</div>
+      <div class="arrow">Abrir &rarr;</div>
+    </div>
+
+    <div class="sim-card cat-comparativo" onclick="openSim('cons-x-cons', 'Comparação de Consórcios', 'simulador-cons-x-cons.html')">
+      <div class="sim-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M8 3H3v5"/><path d="M16 21h5v-5"/><path d="M8 21H3v-5"/><path d="M21 8v8"/><path d="M3 8v8"/><line x1="12" y1="3" x2="12" y2="21"/></svg></div>
+      <div class="name">Comparação de Consórcios</div>
+      <div class="desc">Comparação entre duas propostas de consórcio lado a lado para escolher a melhor.</div>
+      <div class="arrow">Abrir &rarr;</div>
+    </div>
+  </div>
+</div>
+
+<!-- Sub-hub Porto -->
+<div id="porto-screen">
+  <button class="porto-back" onclick="closePorto()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Voltar aos Simuladores
+  </button>
+  <div class="hub-header">
+    <div class="hub-title">Porto Consórcio</div>
+    <div class="hub-sub">Simuladores específicos da administradora Porto, baseados nas regras dos grupos atuais.</div>
+  </div>
+
+  <div class="cards-grid">
+    <div class="sim-card cat-porto" onclick="openSim('porto-imovel', 'Porto · Imóvel', 'simulador-porto-imovel.html')">
+      <div class="sim-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+      <div class="name">Imóvel</div>
+      <div class="desc">Consórcio Porto Imóvel: cálculo completo com lance livre, fixo e embutido. Inclui FGTS.</div>
+      <div class="arrow">Abrir &rarr;</div>
+    </div>
+
+    <div class="sim-card cat-porto" onclick="openSim('porto-auto', 'Porto · Auto', 'simulador-porto-auto.html')">
+      <div class="sim-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/><circle cx="6.5" cy="16.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg></div>
+      <div class="name">Auto</div>
+      <div class="desc">Consórcio Porto Auto: lance livre e fixo configurável.</div>
+      <div class="arrow">Abrir &rarr;</div>
+    </div>
+
+    <div class="sim-card cat-porto" onclick="openSim('porto-pesados', 'Porto · Pesados', 'simulador-porto-pesados.html')">
+      <div class="sim-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h2v2H5zm12 0h2v2h-2z"/><rect x="3" y="7" width="18" height="10" rx="1"/><path d="M5 11h14"/></svg></div>
+      <div class="name">Pesados</div>
+      <div class="desc">Consórcio Porto Pesados: 2 modalidades de Lance Fixo (30 % e 40 %).</div>
+      <div class="arrow">Abrir &rarr;</div>
+    </div>
+  </div>
+</div>
+
+<!-- Sub-hub Itaú -->
+<div id="itau-screen">
+  <button class="porto-back" onclick="closeItau()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Voltar aos Simuladores
+  </button>
+  <div class="hub-header">
+    <div class="hub-title">Itaú Consórcio</div>
+    <div class="hub-sub">Simuladores específicos da administradora Itaú, baseados na plataforma vigente.</div>
+  </div>
+
+  <div class="cards-grid">
+    <div class="sim-card cat-itau" onclick="openSim('itau-integral', 'Itaú · Parcela Integral', 'simulador-itau-integral.html')">
+      <div class="sim-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="9" y1="16" x2="15" y2="16"/></svg></div>
+      <div class="name">Parcela Integral</div>
+      <div class="desc">Consórcio Itaú com parcela cheia desde a primeira parcela. Sem redução pré-contemplação.</div>
+      <div class="arrow">Abrir &rarr;</div>
+    </div>
+
+    <div class="sim-card cat-itau" onclick="openSim('itau-reduzida', 'Itaú · Parcela Reduzida', 'simulador-itau-reduzida.html')">
+      <div class="sim-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg></div>
+      <div class="name">Parcela Reduzida</div>
+      <div class="desc">Consórcio Itaú com redução de 30 % ou 50 % até a contemplação. Após, volta à integral.</div>
+      <div class="arrow">Abrir &rarr;</div>
+    </div>
+  </div>
+</div>
+
+<!-- Sub-hub Bradesco -->
+<div id="bradesco-screen">
+  <button class="porto-back" onclick="closeBradesco()">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    Voltar aos Simuladores
+  </button>
+  <div class="hub-header">
+    <div class="hub-title">Bradesco Consórcio</div>
+    <div class="hub-sub">Simuladores específicos da administradora Bradesco, com taxa de antecipação configurada por modalidade.</div>
+  </div>
+
+  <div class="cards-grid">
+    <div class="sim-card cat-bradesco" onclick="openSim('bradesco-imovel', 'Bradesco · Imóvel', 'simulador-bradesco.html')">
+      <div class="sim-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+      <div class="name">Imóvel</div>
+      <div class="desc">Bradesco Imóvel: antecipação 4,25% em 8 parcelas. Lance com Diluir ou Antecipar Parcelas.</div>
+      <div class="arrow">Abrir &rarr;</div>
+    </div>
+
+    <div class="sim-card cat-bradesco" onclick="openSim('bradesco-auto', 'Bradesco · Auto', 'simulador-bradesco-auto.html')">
+      <div class="sim-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 16H9m10 0h3v-3.15a1 1 0 0 0-.84-.99L16 11l-2.7-3.6a1 1 0 0 0-.8-.4H5.24a2 2 0 0 0-1.8 1.1l-.8 1.63A6 6 0 0 0 2 12.42V16h2"/><circle cx="6.5" cy="16.5" r="2.5"/><circle cx="16.5" cy="16.5" r="2.5"/></svg></div>
+      <div class="name">Auto</div>
+      <div class="desc">Bradesco Auto: antecipação 5,25% em 6 parcelas. Lance com Diluir ou Antecipar Parcelas.</div>
+      <div class="arrow">Abrir &rarr;</div>
+    </div>
+  </div>
+</div>
+
+<!-- Iframe View -->
+<div id="sim-view">
+  <div class="sim-toolbar">
+    <button class="back-btn" onclick="closeSim()">&larr; Voltar aos Simuladores</button>
+    <div class="sim-title-bar" id="sim-title-bar">Simulador</div>
+    <div class="toolbar-right">Master Prime</div>
+  </div>
+  <iframe id="sim-iframe" src="about:blank" title="Simulador" allow="fullscreen"></iframe>
+</div>
+
+<script>
+function openSim(slug, title, file) {
+  document.getElementById('hub-screen').classList.add('hidden');
+  document.getElementById('porto-screen').classList.remove('active');
+  document.getElementById('itau-screen').classList.remove('active');
+  document.getElementById('bradesco-screen')?.classList.remove('active');
+  const view = document.getElementById('sim-view');
+  view.classList.add('active');
+  document.getElementById('sim-title-bar').textContent = title;
+  document.getElementById('sim-iframe').src = file + '?embed=1';
+  // atualiza URL pro deep-link
+  try { history.replaceState({slug}, '', '?sim=' + slug); } catch(e) {}
+}
+
+function closeSim() {
+  document.getElementById('sim-view').classList.remove('active');
+  document.getElementById('sim-iframe').src = 'about:blank';
+  // Se veio de um Porto, volta pro sub-hub Porto; se Itaú pro sub-hub Itaú; se Bradesco pro sub-hub Bradesco; senão pro hub principal
+  const slug = (new URLSearchParams(location.search).get('sim') || '');
+  if (slug.startsWith('porto-')) {
+    document.getElementById('porto-screen').classList.add('active');
+  } else if (slug.startsWith('itau-')) {
+    document.getElementById('itau-screen').classList.add('active');
+  } else if (slug.startsWith('bradesco-')) {
+    document.getElementById('bradesco-screen').classList.add('active');
+  } else {
+    document.getElementById('hub-screen').classList.remove('hidden');
+  }
+  try { history.replaceState({}, '', location.pathname); } catch(e) {}
+}
+
+function openPorto() {
+  document.getElementById('hub-screen').classList.add('hidden');
+  document.getElementById('itau-screen').classList.remove('active');
+  document.getElementById('bradesco-screen')?.classList.remove('active');
+  document.getElementById('porto-screen').classList.add('active');
+  try { history.replaceState({}, '', '?sim=porto'); } catch(e) {}
+}
+
+function closePorto() {
+  document.getElementById('porto-screen').classList.remove('active');
+  document.getElementById('hub-screen').classList.remove('hidden');
+  try { history.replaceState({}, '', location.pathname); } catch(e) {}
+}
+
+function openItau() {
+  document.getElementById('hub-screen').classList.add('hidden');
+  document.getElementById('porto-screen').classList.remove('active');
+  document.getElementById('bradesco-screen')?.classList.remove('active');
+  document.getElementById('itau-screen').classList.add('active');
+  try { history.replaceState({}, '', '?sim=itau'); } catch(e) {}
+}
+
+function closeItau() {
+  document.getElementById('itau-screen').classList.remove('active');
+  document.getElementById('hub-screen').classList.remove('hidden');
+  try { history.replaceState({}, '', location.pathname); } catch(e) {}
+}
+
+function openBradesco() {
+  document.getElementById('hub-screen').classList.add('hidden');
+  document.getElementById('porto-screen').classList.remove('active');
+  document.getElementById('itau-screen').classList.remove('active');
+  document.getElementById('bradesco-screen').classList.add('active');
+  try { history.replaceState({}, '', '?sim=bradesco'); } catch(e) {}
+}
+
+function closeBradesco() {
+  document.getElementById('bradesco-screen').classList.remove('active');
+  document.getElementById('hub-screen').classList.remove('hidden');
+  try { history.replaceState({}, '', location.pathname); } catch(e) {}
+}
+
+// Deep-link: abre direto se ?sim=slug estiver na URL
+(function () {
+  const params = new URLSearchParams(location.search);
+  const slug = params.get('sim');
+  if (!slug) return;
+  if (slug === 'porto')    { openPorto();    return; }
+  if (slug === 'itau')     { openItau();     return; }
+  if (slug === 'bradesco') { openBradesco(); return; }
+  const cards = document.querySelectorAll('.sim-card');
+  for (const c of cards) {
+    const onclick = c.getAttribute('onclick') || '';
+    if (onclick.includes(`'${slug}'`)) {
+      c.click();
+      break;
+    }
+  }
+})();
+</script>
+</body>
+</html>

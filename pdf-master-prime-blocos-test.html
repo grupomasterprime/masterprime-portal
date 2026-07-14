@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Validação dos novos blocos · pdf-master-prime.js</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="pdf-master-prime.js"></script>
+  <style>
+    body { background:#E5E7EB; margin:0; font-family:Inter,sans-serif; padding:40px 0; }
+    .scenario-list { display:flex; flex-direction:column; align-items:center; gap:30px; }
+    .scenario-label { color:#1E2D45; font-size:13px; letter-spacing:1.5px; text-transform:uppercase; font-weight:700; text-align:center; }
+    .scenario-card { box-shadow:0 12px 40px rgba(0,0,0,0.10); border-radius:6px; overflow:hidden; }
+    .toolbar { position:fixed; top:14px; right:14px; background:#fff; padding:10px 14px; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); display:flex; gap:8px; z-index:9999; }
+    .toolbar button { background:#2D3F5E; color:#fff; border:none; padding:8px 14px; font-size:13px; font-weight:600; border-radius:5px; cursor:pointer; }
+    .toolbar button:hover { background:#1E2D45; }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <button onclick="baixarTodos()">Baixar PDFs dos 7 cenários</button>
+  </div>
+  <div class="scenario-list" id="lista"></div>
+
+  <script>
+  // ──────────────────────────────────────────────────────────────────────
+  //  CENÁRIOS (1 por simulador, dados reais dos PDFs Conkey)
+  // ──────────────────────────────────────────────────────────────────────
+  const CENARIOS = [];
+
+  // ───── 1. OPERAÇÃO SIMPLES (já existente) ─────
+  CENARIOS.push({
+    tituloEstrategia: 'Operação Simples',
+    filename: 'master-prime-op-simples',
+    blocos: [
+      { tipo: 'card', titulo: 'DADOS DA COTA', linhas: [
+        { campos: [
+            { label:'Crédito',              value:'R$ 100.000,00' },
+            { label:'Prazo',                value:'100 meses' },
+            { label:'Taxa de administração', value:'18 %' },
+            { label:'Fundo de reserva',     value:'2 %' }
+          ],
+          destaque: { label:'Parcela inicial', value:'R$ 1.200,00' }
+        }
+      ]},
+      { tipo: 'tabela', titulo:'COMPARATIVO APÓS CONTEMPLAÇÃO',
+        colunas: ['REDUÇÃO DE PARCELA','REDUÇÃO DE PRAZO'],
+        linhas: [
+          { label:'Parcela',    valores:['R$ 795,96','R$ 1.200,00'] },
+          { label:'Prazo restante', valores:['99 meses','66 meses'] },
+          { label:'CET (Custo Efetivo Total)', valores:['0,29 % ao mês | 3,54 % ao ano','0,43 % ao mês | 5,28 % ao ano'] }
+        ]
+      }
+    ]
+  });
+
+  // ───── 2. OPERAÇÃO ESTRUTURADA (tabela-ampla + resultado-secao) ─────
+  CENARIOS.push({
+    tituloEstrategia: 'Operação Estruturada',
+    filename: 'master-prime-op-estruturada',
+    blocos: [
+      { tipo: 'tabela-ampla',
+        colunas: ['GRUPO','ADM.','FR','PRAZO','COTA UNITÁRIA','QTD','CRÉDITO TOTAL','PARCELA INICIAL','LANCE','CRÉDITO DISPONÍVEL','PARCELA APÓS'],
+        compact: true,
+        linhas: [
+          { celulas: ['1','18 %','2 %','100 meses','R$ 6.300.000,00','1','R$ 6.300.000,00','R$ 75.600,00','R$ 1.890.000,00','R$ 6.300.000,00','R$ 54.122,73'] },
+          { celulas: ['Total','18 %','2 %','100 meses','R$ 6.300.000,00','1','R$ 6.300.000,00','R$ 75.600,00','R$ 1.890.000,00','R$ 6.300.000,00','R$ 54.122,73'], total: true }
+        ]
+      },
+      { tipo: 'resultado-secao', titulo:'RESULTADO',
+        linhas: [
+          { label:'Crédito total contratado', valor:'R$ 6.300.000,00' },
+          { label:'Parcela inicial', valor:'R$ 75.600,00' },
+          { label:'Lance total', valor:'(30%) R$ 1.890.000,00' },
+          { label:'Lance Recurso próprio', valor:'(30%) R$ 1.890.000,00' },
+          { label:'Crédito disponível após contemplação', valor:'R$ 6.300.000,00' },
+          { label:'Parcela pós-contemplação', valor:'R$ 54.122,73' },
+          { label:'Prazo médio restante', valor:'88 meses' },
+          { label:'CET (Custo Efetivo Total)', valor:'0,25 % ao mês | 3,04 % ao ano' }
+        ]
+      }
+    ]
+  });
+
+  // ───── 3. CONSÓRCIO X À VISTA (card + tabela + lista-pontilhada) ─────
+  CENARIOS.push({
+    tituloEstrategia: 'Consórcio X À Vista',
+    filename: 'master-prime-cons-vista',
+    blocos: [
+      { tipo:'card', titulo:'DADOS DA COTA', linhas:[
+        { campos:[
+          { label:'Crédito', value:'R$ 600.000,00' },
+          { label:'Prazo', value:'100 meses' },
+          { label:'Taxa de administração', value:'18 %' },
+          { label:'Fundo de reserva', value:'2 %' }
+        ], destaque:{ label:'Parcela inicial', value:'R$ 7.200,00' } },
+        { campos:[
+          { label:'Tipo de reajuste', value:'Cota - anual' },
+          { label:'Reajuste', value:'4 %' }
+        ] }
+      ]},
+      { tipo:'card', titulo:'DETALHES DA CONTEMPLAÇÃO', linhas:[
+        { campos:[
+          { label:'Modalidade', value:'Lance' },
+          { label:'Expectativa', value:'12 meses' },
+          { label:'Crédito atualizado', value:'R$ 624.000,00' },
+          { label:'Base de cálculo', value:'Carta de crédito' }
+        ], destaque:{ label:'Crédito disponível', value:'R$ 624.000,00' } },
+        { campos:[
+          { label:'Valor de referência', value:'R$ 624.000,00' },
+          { label:'Recursos próprios', value:'50 % | R$ 312.000,00' },
+          { label:'Total de lance', value:'50 % | R$ 312.000,00' }
+        ] }
+      ]},
+      { tipo:'tabela', titulo:'COMPARATIVO APÓS CONTEMPLAÇÃO',
+        colunas:['REDUÇÃO DE PARCELA','REDUÇÃO DE PRAZO'],
+        linhas:[
+          { label:'Parcela', valores:['R$ 3.942,55','R$ 7.488,00'] },
+          { label:'Prazo restante', valores:['88 meses','47 meses'] },
+          { label:'CET (Custo Efetivo Total)', valores:['0,44 % ao mês | 5,41 % ao ano','0,64 % ao mês | 7,96 % ao ano'] }
+        ]
+      },
+      { tipo:'lista-pontilhada', titulo:'RESULTADO',
+        linhas:[
+          { label:'Fazendo à vista', icone:'pessoa', sufixo:'(Somente bem valorizado)', valor:'R$ 982.781,99', destaque:true },
+          { label:'Fazendo com consórcio', valor:'R$ 1.102.391,19', bold:true },
+          { label:'Bem valorizado', valor:'R$ 982.781,99', sub:true },
+          { label:'Valor líquido acumulado', valor:'R$ 119.609,20', sub:true },
+          { label:'Custo do lance de recursos próprios', valor:'SACADO DO INVESTIMENTO', sub:true },
+          { label:'Custo parcelas do consórcio', valor:'SACADO DO INVESTIMENTO', sub:true }
+        ]
+      }
+    ]
+  });
+
+  // ───── 4. CONSÓRCIO X FINANCIAMENTO (card multi + tabela + cards-comparativos) ─────
+  CENARIOS.push({
+    tituloEstrategia: 'Consórcio X Financiamento',
+    filename: 'master-prime-cons-financ',
+    blocos: [
+      { tipo:'card', titulo:'CONSÓRCIO', linhas:[
+        { campos:[
+          { label:'Crédito', value:'R$ 600.000,00' },
+          { label:'Prazo', value:'120 meses' },
+          { label:'Taxa de administração', value:'18 %' },
+          { label:'Fundo de reserva', value:'2 %' }
+        ],
+          destaque:{ multi:[
+            { label:'12 parcelas iniciais', value:'R$ 6.750,00' },
+            { label:'Demais parcelas', value:'R$ 6.000,00' }
+          ]}
+        },
+        { campos:[
+          { label:'Tipo de reajuste', value:'Cota - anual' },
+          { label:'Reajuste', value:'4 %' },
+          { label:'Taxa de adesão', value:'1,50 %' },
+          { label:'Prazo adesão', value:'12 meses' }
+        ]}
+      ]},
+      { tipo:'tabela', titulo:'COMPARATIVO APÓS CONTEMPLAÇÃO',
+        colunas:['REDUÇÃO DE PARCELA','REDUÇÃO DE PRAZO'],
+        linhas:[
+          { label:'Parcela', valores:['R$ 3.351,11','R$ 6.240,00'] },
+          { label:'Prazo restante', valores:['108 meses','59 meses'] },
+          { label:'CET (Custo Efetivo Total)', valores:['0,41 % ao mês | 5,03 % ao ano','0,59 % ao mês | 7,31 % ao ano'] }
+        ]
+      },
+      { tipo:'card', titulo:'FINANCIAMENTO IMOBILIÁRIO', linhas:[
+        { campos:[
+          { label:'Tipo de amortização', value:'SAC' },
+          { label:'Valor do imóvel', value:'R$ 624.000,00' },
+          { label:'Entrada', value:'R$ 312.000,00' },
+          { label:'Prazo', value:'420 meses' }
+        ], destaque:{ label:'Parcela inicial', value:'R$ 4.478,39' } },
+        { campos:[
+          { label:'Juros (ao ano)', value:'12,99 %' },
+          { label:'Correção anual (TR)', value:'1,88 %' },
+          { label:'DFI', value:'0,00550 %' },
+          { label:'Tarifa mensal', value:'R$ 25,00' }
+        ]}
+      ]},
+      { tipo:'cards-comparativos', titulo:'RESULTADO DO COMPARATIVO: CONSÓRCIO X FINANCIAMENTO',
+        cards:[
+          { titulo:'Consórcio', cor:'verde', icone:'pessoa', linhas:[
+            { label:'Custo da operação', valor:'R$ 508.228,04' },
+            { label:'Parcela pós-contemplação', valor:'R$ 3.351,11' }
+          ]},
+          { titulo:'Financiamento', cor:'cinza', linhas:[
+            { label:'Custo da operação', valor:'R$ 1.110.756,38' },
+            { label:'Parcela final', valor:'R$ 810,93' }
+          ]}
+        ],
+        separador:'X',
+        fechamento:{ label:'Economia fazendo por consórcio:', valor:'R$ 602.528,34' }
+      }
+    ]
+  });
+
+  // ───── 5. CONSÓRCIO X CONSÓRCIO (tabela-secao × 3) ─────
+  CENARIOS.push({
+    tituloEstrategia: 'Consórcio X Consórcio',
+    filename: 'master-prime-cons-cons',
+    blocos: [
+      { tipo:'tabela-secao', titulo:'DETALHES DA PROPOSTA',
+        linhas:[
+          { label:'Crédito', valores:['R$ 100.000,00','R$ 0,00'] },
+          { label:'Prazo', valores:['100 meses','0 meses'] },
+          { label:'Taxa de administração', valores:['18 %','0 %'] },
+          { label:'Fundo de reserva', valores:['2 %','0 %'] },
+          { label:'Tipo de seguro', valores:['Categoria','Categoria'] },
+          { label:'Parcela', valores:['R$ 1.200,00','-'] }
+        ]
+      },
+      { tipo:'tabela-secao', titulo:'DETALHES DA CONTEMPLAÇÃO',
+        linhas:[
+          { label:'Modalidade', valores:['Lance','Selecione'] },
+          { label:'Expectativa', valores:['1 mês','0 meses'] },
+          { label:'Base de cálculo', valores:['Carta de crédito','Selecione'] },
+          { label:'Lance recursos próprios', valores:['40% | R$ 40.000,00','-'] },
+          { label:'Lance total', valores:['40% | R$ 40.000,00','-'] },
+          { label:'Crédito disponível', valores:['R$ 100.000,00','R$ 0,00'] }
+        ]
+      },
+      { tipo:'tabela-secao', titulo:'PÓS CONTEMPLAÇÃO - REDUÇÃO DE PARCELA',
+        linhas:[
+          { label:'Parcelas', valores:['R$ 795,96','R$ 0,00'] },
+          { label:'Prazo pós contemplação', valores:['99 meses','-'] },
+          { label:'Custo da operação', valores:['R$ 80.000,00','R$ 0,00'] },
+          { label:'Custo efetivo mensal e anual', valores:['0,29 % ao mês | 3,54 % ao ano','0 % ao mês | 0 % ao ano'], destaque:true },
+          { label:'Custo Efetivo Total (CET)', valores:['20 %','0 %'], destaque:true }
+        ]
+      }
+    ]
+  });
+
+  // ───── 6. ALAVANCAGEM PATRIMONIAL (cards múltiplos + tabela) ─────
+  CENARIOS.push({
+    tituloEstrategia: 'Alavancagem Patrimonial',
+    filename: 'master-prime-alavanc',
+    blocos: [
+      { tipo:'card', titulo:'DADOS DA COTA', linhas:[
+        { campos:[
+          { label:'Crédito', value:'R$ 6.300.000,00' },
+          { label:'Prazo', value:'100 meses' },
+          { label:'Taxa de administração', value:'18 %' },
+          { label:'Fundo de reserva', value:'2 %' }
+        ], destaque:{ label:'Parcela inicial', value:'R$ 75.600,00' } },
+        { campos:[
+          { label:'Tipo de reajuste', value:'Aniversário da cota' },
+          { label:'Reajuste', value:'4 %' }
+        ]}
+      ]},
+      { tipo:'card', titulo:'DETALHES DA CONTEMPLAÇÃO', linhas:[
+        { campos:[
+          { label:'Modalidade', value:'Lance' },
+          { label:'Expectativa', value:'12 meses' },
+          { label:'Crédito atualizado', value:'R$ 6.300.000,00' },
+          { label:'Base de cálculo', value:'Carta de crédito' }
+        ], destaque:{ label:'Crédito disponível', value:'R$ 6.300.000,00' } },
+        { campos:[
+          { label:'Valor de referência', value:'R$ 6.300.000,00' },
+          { label:'Recursos próprios', value:'50 % | R$ 3.150.000,00' },
+          { label:'Total de lance', value:'50 % | R$ 3.150.000,00' }
+        ]}
+      ]},
+      { tipo:'tabela', titulo:'COMPARATIVO APÓS CONTEMPLAÇÃO',
+        colunas:['REDUÇÃO DE PARCELA','REDUÇÃO DE PRAZO'],
+        linhas:[
+          { label:'Parcela', valores:['R$ 39.804,55','R$ 75.600,00'] },
+          { label:'Prazo restante', valores:['88 meses','47 meses'] },
+          { label:'CET (Custo Efetivo Total)', valores:['0,34 % ao mês | 4,16 % ao ano','0,57 % ao mês | 7,06 % ao ano'] }
+        ]
+      },
+      { tipo:'card', titulo:'OPERAÇÃO: IMÓVEL', linhas:[
+        { campos:[
+          { label:'Valor de mercado', value:'R$ 6.300.000,00' },
+          { label:'Valor de compra', value:'R$ 6.300.000,00' },
+          { label:'Índice de valorização anual', value:'6,39 %' }
+        ]}
+      ]},
+      { tipo:'card', titulo:'OPERAÇÃO: ALUGUEL', linhas:[
+        { campos:[
+          { label:'Prestação do aluguel', value:'R$ 49.770,00' },
+          { label:'% de aluguel', value:'0,79 %' },
+          { label:'Índice de correção anual', value:'5,32 %' },
+          { label:'Aluguel X parcela - média mensal', value:'R$ 20.287,09' }
+        ]}
+      ]},
+      { tipo:'card', titulo:'RESULTADO DA ALAVANCAGEM', linhas:[
+        { campos:[
+          { label:'Valorização do imóvel', value:'R$ 10.556.354,28' },
+          { label:'Aluguel X parcela - período', value:'R$ 1.947.560,90' }
+        ], destaque:{ label:'Patrimônio total', value:'R$ 12.503.915,18' } }
+      ]}
+    ]
+  });
+
+  // ───── 7. CONSÓRCIO COMO INVESTIMENTO (tabela-ampla + cards-icone + tabela-ampla) ─────
+  CENARIOS.push({
+    tituloEstrategia: 'Consórcio como Investimento',
+    filename: 'master-prime-cons-invest',
+    blocos: [
+      { tipo:'tabela-ampla',
+        colunas:['#','CRÉDITO CONTRATADO','1ª PARCELA','EXPECTATIVA','TIPO','CRÉDITO DISPONÍVEL','VALOR INVESTIDO','VENDA / PREVIDÊNCIA','LUCRO BRUTO','% RETORNO','ESTRATÉGIA'],
+        compact: true,
+        linhas:[
+          { celulas:['1','R$ 6.300.000,00','R$ 75.600,00','12/100','Lance','R$ 6.552.000,00','R$ 4.186.224,00','R$ 0,00','R$ 25.657.624,39','16,02 %','Aluguel'] },
+          { celulas:['Total','R$ 6.300.000,00','R$ 75.600,00','-','-','R$ 6.552.000,00','R$ 4.186.224,00','R$ 0,00','R$ 25.657.624,39','16,02 %','-'], total:true }
+        ]
+      },
+      { tipo:'cards-icone',
+        items:[
+          { icone:'venda',  label:'Venda da cota',                     valor:'R$ 0,00' },
+          { icone:'predio', label:'Imóveis alugados',                  valor:'R$ 9.922.318,15' },
+          { icone:'cifrao', label:'Aluguel X parcela do consórcio',    valor:'R$ 25.657.624,39' },
+          { icone:'piggy',  label:'Previdência exponencial',           valor:'R$ 0,00' },
+          { icone:'banco',  label:'Patrimônio Total',                  valor:'R$ 35.579.942,53', destaque:true }
+        ]
+      },
+      { tipo:'tabela-ampla', titulo:'INVESTIMENTO EM RENDA FIXA',
+        colunas:['#','% DO CDI','VALOR INVESTIDO','PRAZO','VALOR BRUTO ACUMULADO','IMPOSTO DE RENDA','RENTABILIDADE LÍQUIDA','% DE RETORNO'],
+        linhas:[
+          { celulas:['1','100 %','R$ 4.186.224,00','12','R$ 4.189.960,15','-R$ 747,23','R$ 2.988,92','0,07 %'] },
+          { celulas:['Total','-','R$ 4.186.224,00','-','R$ 4.189.960,15','-R$ 747,23','R$ 2.988,92','0,07 %'], total:true }
+        ]
+      }
+    ]
+  });
+
+  // ──────────────────────────────────────────────────────────────────────
+  //  RENDERIZA CADA CENÁRIO INLINE (preview)
+  // ──────────────────────────────────────────────────────────────────────
+  const lista = document.getElementById('lista');
+  CENARIOS.forEach((c, i) => {
+    const wrap = document.createElement('div');
+    wrap.style.cssText = 'display:flex; flex-direction:column; align-items:center; gap:12px;';
+    wrap.innerHTML = `
+      <div class="scenario-label">Cenário ${i+1}/7 · ${c.tituloEstrategia}</div>
+      <div class="scenario-card">${PdfMasterPrime.buildTemplate(c)}</div>`;
+    lista.appendChild(wrap);
+  });
+
+  // ──────────────────────────────────────────────────────────────────────
+  //  GERA OS 7 PDFs SEQUENCIALMENTE
+  // ──────────────────────────────────────────────────────────────────────
+  async function baixarTodos() {
+    for (const c of CENARIOS) {
+      await PdfMasterPrime.gerar(c);
+      await new Promise(r => setTimeout(r, 600));
+    }
+  }
+  </script>
+</body>
+</html>

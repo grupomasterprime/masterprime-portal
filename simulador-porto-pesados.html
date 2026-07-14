@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master Prime - Porto Consórcio Pesados</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="pdf-master-prime.js?v=20260625a"></script>
+<script src="pdf-config-personalizado.js?v=20260625e"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="simulacao-store.js"></script>
+<script src="simulador-autosave.js?v=20260616a"></script>
+<style>
+  :root {
+    --mp-navy: #2D3F5E;
+    --mp-navy-dark: #1E2D45;
+    --mp-navy-soft: #3A4F73;
+    --mp-teal: #4DBCC8;
+    --mp-teal-dark: #2EA0AD;
+    --gold: #E8B86D;
+    --bg: #F4F5F7;
+    --card: #FFFFFF;
+    --border: #E5E7EB;
+    --text: #1F2937;
+    --text-muted: #6B7280;
+    --text-light: #9CA3AF;
+    --soft-blue: #F1F5F9;
+    --soft-teal: #E8F6F8;
+    --warning-bg: #FFF8E8;
+    --warning-border: #F0D9A0;
+    --warning-text: #8B6A2A;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+  header { background: var(--mp-navy); color: #fff; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .brand-mark { width: 36px; height: 36px; background: var(--mp-navy-dark); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 14px; }
+  .brand-text h1 { font-size: 16px; font-weight: 600; letter-spacing: 0.3px; }
+  .brand-text p { font-size: 11px; color: rgba(255,255,255,0.7); letter-spacing: 1.2px; text-transform: uppercase; margin-top: 2px; }
+  .tag-admin { background: var(--mp-teal); color: var(--mp-navy-dark); padding: 6px 14px; border-radius: 4px; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; }
+
+  main { max-width: 1440px; margin: 0 auto; padding: 18px 24px 12px; }
+  h2.section-title { font-size: 19px; font-weight: 600; color: var(--mp-navy); margin-bottom: 0; text-align: center; letter-spacing: 0.3px; }
+  h2.section-title .tag-bank { color: var(--mp-teal-dark); }
+  body.neutral-mode h2.section-title .tag-bank { color: var(--mp-navy); }
+  .subtitle { font-size: 11px; color: var(--text-muted); text-align: center; margin-bottom: 14px; letter-spacing: 0.8px; text-transform: uppercase; }
+  .neutral-row { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin: 6px 0 10px; padding-right: 4px; }
+  .neutral-row .neutral-label { font-size: 13px; color: var(--text); user-select: none; }
+  .neutral-row .neutral-label .muted { color: var(--text-muted); font-weight: 400; }
+  .neutral-row .neutral-switch { position: relative; width: 42px; height: 22px; background: #CBD5E1; border-radius: 999px; transition: 0.2s; flex-shrink: 0; cursor: pointer; border: 0; padding: 0; }
+  .neutral-row .neutral-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,.20); }
+  .neutral-row .neutral-switch.on { background: var(--mp-navy); }
+  .neutral-row .neutral-switch.on::after { left: 23px; }
+  body.neutral-mode .tag-admin { display: none; }
+
+  .layout-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+  @media (max-width: 1024px) { .layout-grid { grid-template-columns: 1fr; } }
+  .col-inputs { display: flex; flex-direction: column; gap: 12px; }
+  .col-outputs { display: flex; flex-direction: column; gap: 10px; position: sticky; top: 12px; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 0; }
+  .card-compact { padding: 12px 14px; }
+  .card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .card-header h3 { font-size: 11.5px; font-weight: 700; color: var(--mp-navy); letter-spacing: 1.2px; text-transform: uppercase; }
+  .card-header .badge-teal { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--mp-teal); }
+  .card-header .reset-btn { margin-left: auto; background: none; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; padding: 3px 9px; border-radius: 4px; font-size: 10.5px; font-family: inherit; }
+  .card-header .reset-btn:hover { background: var(--bg); }
+
+  .grid { display: grid; gap: 10px; }
+  .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  @media (max-width: 1024px) { .grid-3, .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 768px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
+
+  .field { position: relative; }
+  .field label { position: absolute; top: -6px; left: 10px; background: var(--card); padding: 0 5px; font-size: 10px; color: var(--text-muted); letter-spacing: 0.4px; text-transform: uppercase; font-weight: 500; z-index: 1; }
+  .field input, .field select { width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: 7px; font-size: 13px; font-family: inherit; background: #fff; color: var(--text); transition: border-color 0.15s; }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,0.12); }
+  .field input:disabled, .field select:disabled { background: var(--soft-blue); color: var(--text-light); cursor: not-allowed; }
+  .field select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+  .field-suffix { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 10px; color: var(--text-light); letter-spacing: 0.4px; pointer-events: none; }
+
+  .out-box { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; }
+  .out-box .lbl { font-size: 10px; color: var(--text-muted); letter-spacing: 0.7px; text-transform: uppercase; font-weight: 600; margin-bottom: 3px; display: block; }
+  .out-box .lbl small { text-transform: none; font-weight: 500; color: var(--text-light); letter-spacing: 0.2px; }
+  .out-box .val { font-size: 16px; font-weight: 700; color: var(--mp-navy); font-family: 'Inter', -apple-system, system-ui, sans-serif; }
+  .out-box.primary { background: linear-gradient(135deg, var(--mp-navy) 0%, var(--mp-navy-soft) 100%); border-color: var(--mp-navy); }
+  .out-box.primary .lbl { color: rgba(255,255,255,0.7); }
+  .out-box.primary .val { color: #fff; }
+  .out-box.teal { background: var(--soft-teal); border-color: #C2E5EA; }
+  .out-box.teal .val { color: var(--mp-teal-dark); }
+  .result-teal { background: var(--soft-teal); border: 1px solid #C2E5EA; border-radius: 6px; padding: 9px 13px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .result-teal strong { font-size: 10.5px; color: var(--mp-teal-dark); letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; }
+  .result-teal .value { font-size: 15px; font-weight: 700; color: var(--mp-navy); font-family: 'Inter', -apple-system, system-ui, sans-serif; }
+
+  /* Pesados — 6 estratégias em grid 3×2 */
+  .lance-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 8px; }
+  @media (max-width: 768px) { .lance-buttons { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .lance-buttons { grid-template-columns: 1fr; } }
+  .lance-max-hint { font-size: 10.5px; color: var(--text-muted); margin-top: 4px; padding-left: 2px; letter-spacing: 0.2px; font-style: italic; }
+  .lance-max-hint strong { color: var(--mp-teal-dark); font-weight: 600; font-style: normal; }
+  .lance-btn { padding: 7px 9px; background: #fff; border: 1px solid var(--mp-teal); color: var(--mp-teal-dark); border-radius: 7px; font-size: 10.5px; font-weight: 600; cursor: pointer; font-family: inherit; transition: 0.15s; letter-spacing: 0.2px; line-height: 1.2; }
+  .lance-btn:hover { background: var(--mp-teal); color: #fff; }
+  .lance-btn.fixo30 { border-color: var(--gold); color: #8B6A2A; }
+  .lance-btn.fixo30:hover { background: var(--gold); color: #fff; }
+  .lance-btn.fixo40 { border-color: var(--mp-navy); color: var(--mp-navy); }
+  .lance-btn.fixo40:hover { background: var(--mp-navy); color: #fff; }
+  .clear-btn-row { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+  .clear-btn-row .clear-btn { background: #fff; border: 1px solid var(--border); color: var(--text-muted); padding: 6px 12px; border-radius: 6px; font-size: 10.5px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .clear-btn-row .clear-btn:hover { background: var(--bg); border-color: var(--text-muted); }
+
+  .lance-bloco { background: #E8EEF8; border-radius: 8px; padding: 12px; margin-top: 4px; }
+  .lance-bloco .grid { gap: 8px; }
+  .lance-bloco .field input { background: #fff; }
+
+  .aviso { background: var(--warning-bg); border: 1px solid var(--warning-border); border-radius: 7px; padding: 9px 13px; color: var(--warning-text); font-size: 11.5px; line-height: 1.45; margin-top: 6px; }
+  .aviso strong { color: var(--warning-text); }
+  .info-pesados { background: #FFF8E8; border: 1px solid var(--warning-border); border-radius: 6px; padding: 8px 11px; font-size: 11px; color: var(--warning-text); margin-bottom: 8px; line-height: 1.35; }
+
+  .obs-area { width: 100%; min-height: 64px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 7px; font-size: 12px; font-family: inherit; resize: vertical; color: var(--text); background: #fff; }
+  .obs-area:focus { outline: none; border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,0.12); }
+
+  .redmode-toggle { padding: 8px 11px; background: var(--soft-blue); border-radius: 7px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .redmode-toggle .lbl { font-size: 11.5px; color: #475569; font-weight: 600; }
+  .redmode-toggle .group { display: flex; gap: 3px; background: #fff; padding: 2px; border-radius: 5px; border: 1px solid #e2e8f0; }
+  .redmode-btn { padding: 5px 11px; border: 0; background: transparent; color: #475569; border-radius: 4px; font-size: 11.5px; font-weight: 600; cursor: pointer; }
+  .redmode-btn.active { background: var(--mp-navy); color: #fff; }
+  .redmode-toggle .hint { font-size: 10.5px; color: #64748b; font-style: italic; }
+
+  .actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; padding-bottom: 16px; }
+  button.primary, button.secondary { padding: 11px 22px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.15s; border: 1px solid transparent; font-family: inherit; }
+  button.primary { background: var(--mp-navy); color: #fff; border-color: var(--mp-navy); }
+  button.primary:hover { background: var(--mp-navy-dark); }
+  button.secondary { background: transparent; color: var(--text-muted); border-color: var(--border); }
+  button.secondary:hover { background: var(--bg); border-color: var(--text-muted); }
+
+  html.embedded header { display: none; }
+  html.embedded main { padding-top: 18px; }
+
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,.55); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+  .modal-overlay.aberto { display: flex; }
+  .modal-box { background: #fff; border-radius: 14px; width: 100%; max-width: 420px; box-shadow: 0 25px 60px rgba(0,0,0,.30); }
+  .modal-head { padding: 18px 22px 14px; border-bottom: 1px solid var(--border); }
+  .modal-title { font-size: 15px; font-weight: 700; color: var(--mp-navy); }
+  .modal-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .modal-body { padding: 18px 22px; }
+  .modal-foot { padding: 14px 22px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 10px; }
+</style>
+<script>if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('embedded');</script>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-mark">M</div>
+    <div class="brand-text">
+      <h1>Master Prime</h1>
+      <p>Simulador de Consórcio</p>
+    </div>
+  </div>
+  <span class="tag-admin">Porto</span>
+</header>
+
+<main>
+  <div id="simStoreMount" style="max-width:1440px; margin:0 auto 8px; padding:0;"></div>
+
+  <div class="neutral-row">
+    <label class="neutral-label" for="btnModoNeutro">Modo neutro <span class="muted">(sem identificação da administradora)</span></label>
+    <button type="button" class="neutral-switch" id="btnModoNeutro" role="switch" aria-checked="false" title="Gera PDF sem identificação da administradora — usa identidade Master Prime padrão"></button>
+  </div>
+
+  <h2 class="section-title">Simulador de Crédito · <span class="tag-bank" id="sim-titulo-banco">Porto · Pesados</span></h2>
+  <p class="subtitle">Cálculo de proposta, contemplação e estratégias de lance</p>
+
+  <div class="layout-grid">
+
+    <!-- ═════════════ COLUNA INPUTS (esquerda) ═════════════ -->
+    <div class="col-inputs">
+
+      <!-- ───── Proposta + Taxas (compacto) ───── -->
+      <section class="card card-compact">
+        <div class="card-header">
+          <span class="badge-teal"></span>
+          <h3>Dados da proposta</h3>
+          <button type="button" class="reset-btn" id="btnTaxasDefault">Taxas padrão</button>
+          <button type="button" class="reset-btn" id="btnLimparProposta" style="margin-left:6px">Limpar</button>
+        </div>
+
+        <div class="grid grid-4">
+          <div class="field">
+            <label>Taxa adm.</label>
+            <input type="text" id="pp-taxaAdm" data-mask="pct2" placeholder="0,00 %">
+          </div>
+          <div class="field">
+            <label>Fundo Reserva</label>
+            <input type="text" id="pp-fundo" data-mask="pct2" placeholder="0,00 %">
+          </div>
+          <div class="field">
+            <label>Seguro (PF)</label>
+            <input type="text" id="pp-seguro" data-mask="pct4" placeholder="0,0000 %">
+          </div>
+          <div class="field">
+            <label>Valor do crédito</label>
+            <input type="text" id="pp-credito" placeholder="R$ 0,00" data-mask="money">
+          </div>
+          <div class="field">
+            <label>Prazo (meses)</label>
+            <input type="text" id="pp-prazo" placeholder="0" data-mask="int">
+          </div>
+          <div class="field">
+            <label>Contempla mês</label>
+            <input type="text" id="pp-contempla" placeholder="0" data-mask="int">
+          </div>
+          <div class="field" title="% máximo de embutido permitido pelo grupo (Porto Pesados: 30% ou 40%)">
+            <label>% Embutido máx</label>
+            <input type="text" id="pp-pctEmbMax" data-mask="pct2" placeholder="30,00 %">
+          </div>
+          <div class="field">
+            <label>Redutor grupo</label>
+            <select id="pp-redutor">
+              <option value="" selected>Selecione…</option>
+              <option value="0">0% (sem redutor)</option>
+              <option value="0.20">20%</option>
+              <option value="0.25">25%</option>
+              <option value="0.30">30%</option>
+              <option value="0.35">35%</option>
+              <option value="0.40">40%</option>
+              <option value="0.45">45%</option>
+              <option value="0.50">50%</option>
+              <option value="campanha">Campanha Parcela Original</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="redmode-toggle" style="margin-top: 10px;">
+          <span class="lbl">Reduzir após contemplação:</span>
+          <div class="group">
+            <button type="button" class="redmode-btn active" data-redmode="parcela">Parcela</button>
+            <button type="button" class="redmode-btn" data-redmode="prazo">Prazo</button>
+          </div>
+          <span class="hint">— cenário que vai pro PDF</span>
+        </div>
+      </section>
+
+      <!-- ───── Oferta de Lance (6 estratégias) ───── -->
+      <section class="card card-compact">
+        <div class="card-header">
+          <span class="badge-teal"></span>
+          <h3>Oferta de Lance</h3>
+          <button type="button" class="reset-btn" id="btnLimparLance">Limpar</button>
+        </div>
+
+        <div class="info-pesados">
+          <strong>Atenção:</strong> Grupos de Pesados podem ter Lance Fixo de 30% ou 40%. Verifique a característica do grupo.
+        </div>
+
+        <div class="lance-buttons">
+          <button type="button" class="lance-btn" data-strat="livre-bolso">Livre · Bolso</button>
+          <button type="button" class="lance-btn fixo30" data-strat="fixo30-bolso">Fixo 30% · Bolso</button>
+          <button type="button" class="lance-btn fixo40" data-strat="fixo40-bolso">Fixo 40% · Bolso</button>
+          <button type="button" class="lance-btn" data-strat="livre-embutido">Livre + Embutido</button>
+          <button type="button" class="lance-btn fixo30" data-strat="fixo30-embutido">Fixo 30% + Emb.</button>
+          <button type="button" class="lance-btn fixo40" data-strat="fixo40-embutido">Fixo 40% + Emb.</button>
+        </div>
+        <div class="clear-btn-row">
+          <button type="button" class="clear-btn" data-strat="limpar">Limpar</button>
+        </div>
+
+        <div class="lance-bloco">
+          <div class="grid grid-2">
+            <div class="field" title="% sobre crédito (digite % ou R$, o outro preenche)">
+              <label>% Lance Embutido</label>
+              <input type="text" id="pp-pctEmbutido" data-mask="pct2" placeholder="0,00 %">
+              <span class="field-suffix">%</span>
+            </div>
+            <div class="field">
+              <label>Valor Embutido (R$)</label>
+              <input type="text" id="pp-embutido" placeholder="R$ 0,00" data-mask="money">
+              <div class="lance-max-hint" id="pp-embutidoMaxHint">Máx. R$ 0,00</div>
+            </div>
+            <div class="field" title="% sobre crédito (digite % ou R$, o outro preenche)">
+              <label>% Lance a Pagar</label>
+              <input type="text" id="pp-pctRecProp" data-mask="pct2" placeholder="0,00 %">
+              <span class="field-suffix">%</span>
+            </div>
+            <div class="field">
+              <label>Recurso próprio (R$)</label>
+              <input type="text" id="pp-recProp" placeholder="R$ 0,00" data-mask="money">
+            </div>
+          </div>
+          <div style="margin-top: 8px;">
+            <div class="result-teal" style="padding: 7px 11px;">
+              <strong>Lance Total</strong>
+              <span style="display:inline-flex; align-items:center; gap:10px;">
+                <span class="value" id="pp-representatividade" style="font-size:13px; opacity:.85;">—</span>
+                <span class="value" id="pp-lanceTotalRs" style="font-size:14px;">—</span>
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card card-compact">
+        <div class="card-header">
+          <span class="badge-teal"></span>
+          <h3>Observações (opcional)</h3>
+          <button type="button" class="reset-btn" id="btnLimparObs">Limpar</button>
+        </div>
+        <textarea id="pp-observacoes" class="obs-area" placeholder="Anotações que devem aparecer no PDF…"></textarea>
+      </section>
+
+      <div class="aviso">
+        <strong>Atenção:</strong> Os valores da simulação são mera referência. Variáveis específicas do grupo podem alterar o resultado final.
+      </div>
+
+    </div>
+
+    <!-- ═════════════ COLUNA OUTPUTS (direita) ═════════════ -->
+    <div class="col-outputs">
+
+      <div class="out-box primary">
+        <span class="lbl">Crédito Líquido</span>
+        <div class="val" id="pp-creditoLiberado">—</div>
+      </div>
+
+      <div class="out-box">
+        <span class="lbl" id="pp-parcelaInicialLbl">Parcela inicial</span>
+        <div class="val" id="pp-parcelaInicialDestaqueAtual">—</div>
+      </div>
+
+      <span id="pp-parcelaInicialPFDestaque" style="display:none">—</span>
+      <span id="pp-parcelaInicialPJDestaque" style="display:none">—</span>
+      <span id="pp-parcelaReduzPF" style="display:none">—</span>
+      <span id="pp-parcelaReduzPJ" style="display:none">—</span>
+
+      <div class="out-box teal" id="pp-card-parcela">
+        <span class="lbl">Valor Parcela <small>(pós-contemplado)</small></span>
+        <div class="val" id="pp-novaParcela">—</div>
+      </div>
+
+      <div class="out-box" id="pp-card-prazo">
+        <span class="lbl">Prazo Restante</span>
+        <div class="val" id="pp-novoPrazo">—</div>
+      </div>
+
+      <details style="background:#fff; border:1px solid var(--border); border-radius:7px; padding:8px 11px; font-size:11.5px;">
+        <summary style="cursor:pointer; color:var(--text-muted); font-weight:600; letter-spacing:0.4px; text-transform:uppercase; font-size:10.5px;">Detalhes ▾</summary>
+        <div style="margin-top:8px; display:grid; gap:6px;">
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Categoria</span><strong id="pp-categoria">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Saldo devedor</span><strong id="pp-saldoDevedor">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Parcela int. PF</span><strong id="pp-parcelaPF">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Parcela int. PJ</span><strong id="pp-parcelaPJ">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Saldo pós-contempla</span><strong id="pp-saldoPos">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Novo seguro (PF)</span><strong id="pp-novoSeguro">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Taxa/mês</span><strong id="pp-taxaMes">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Taxa/ano</span><strong id="pp-taxaAno">—</strong></div>
+          <div style="display:flex; justify-content:space-between; padding-top:4px; border-top:1px dashed var(--border)"><span style="color:var(--text-muted)">Se reduz só prazo:</span><strong id="pp-prazoReduzido">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Parcela mantém em</span><strong id="pp-parcelaSeReduzPrazo">—</strong></div>
+        </div>
+      </details>
+
+      <div class="actions" style="margin-top:4px;">
+        <button class="secondary" id="btnLimparTudo">Limpar tudo</button>
+        <button type="button" id="baixarPdfPorto" class="primary">Gerar PDF</button>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<div id="modalLanceLivre" class="modal-overlay" onclick="if(event.target===this)fecharModalLance()">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div class="modal-title">% de Lance Livre</div>
+      <div class="modal-sub">Informe o percentual desejado sobre a categoria</div>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Percentual (%)</label>
+        <input type="text" id="pp-modal-pctLivre" placeholder="0,00 %" data-mask="pct2" autofocus>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="secondary" onclick="fecharModalLance()">Cancelar</button>
+      <button type="button" class="primary" id="pp-modal-confirmar">Aplicar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function maskMoney(value) {
+  const digits = String(value).replace(/\D/g, '');
+  if (!digits) return '';
+  const cents = parseInt(digits, 10);
+  const reais = Math.floor(cents / 100);
+  const cs = cents % 100;
+  return 'R$ ' + reais.toLocaleString('pt-BR') + ',' + String(cs).padStart(2, '0');
+}
+function unmaskMoney(value) {
+  const digits = String(value).replace(/\D/g, '');
+  return parseInt(digits || '0', 10) / 100;
+}
+function maskPct(value, decimals = 2) {
+  const cleaned = String(value).replace('%', '').replace(',', '.').replace(/[^\d.\-]/g, '').trim();
+  if (cleaned === '') return '';
+  const num = parseFloat(cleaned);
+  if (isNaN(num)) return '';
+  return num.toFixed(decimals).replace('.', ',') + ' %';
+}
+function unmaskPct(value) {
+  const cleaned = String(value).replace('%', '').replace(',', '.').replace(/[^\d.\-]/g, '').trim();
+  return parseFloat(cleaned || '0');
+}
+function maskInt(value) {
+  return String(value).replace(/\D/g, '');
+}
+
+document.querySelectorAll('input[data-mask]').forEach(inp => {
+  const type = inp.dataset.mask;
+  inp.addEventListener('input', e => {
+    const v = e.target.value;
+    if (type === 'money') e.target.value = maskMoney(v);
+    else if (type === 'int') e.target.value = maskInt(v);
+    recalc();
+  });
+  inp.addEventListener('blur', e => {
+    const v = e.target.value;
+    if (type === 'pct2') e.target.value = maskPct(v, 2);
+    else if (type === 'pct4') e.target.value = maskPct(v, 4);
+    recalc();
+  });
+  inp.addEventListener('focus', e => {
+    if (type === 'pct2' || type === 'pct4') {
+      const n = unmaskPct(e.target.value);
+      if (n) e.target.value = String(n).replace('.', ',');
+    }
+  });
+});
+
+document.querySelectorAll('select').forEach(el => {
+  el.addEventListener('change', recalc);
+});
+
+function formatMoney(num) {
+  if (!Number.isFinite(num) || isNaN(num)) return '—';
+  return 'R$ ' + num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function formatPct(num, decimals = 2) {
+  if (!Number.isFinite(num) || isNaN(num)) return '—';
+  return num.toFixed(decimals).replace('.', ',') + ' %';
+}
+function formatInt(num) {
+  if (!Number.isFinite(num) || isNaN(num)) return '—';
+  return Math.round(num).toString();
+}
+function get(id) { return document.getElementById(id); }
+function setOut(id, value) {
+  const el = get(id);
+  if (el) el.textContent = value;
+}
+
+function readInputs() {
+  // Sem dropdown PF/PJ — seguro decide
+  const seguro = unmaskPct(get('pp-seguro').value) / 100;
+  return {
+    credito: unmaskMoney(get('pp-credito').value),
+    tipo: seguro > 0 ? 'PF' : 'PJ',
+    prazo: parseInt(get('pp-prazo').value || '0', 10),
+    redutor: get('pp-redutor').value,
+    contempla: parseInt(get('pp-contempla').value || '0', 10),
+    recProp: unmaskMoney(get('pp-recProp').value),
+    embutido: unmaskMoney(get('pp-embutido').value),
+    // % digitado no lance (espelhamento com R$)
+    pctEmbutido: unmaskPct(get('pp-pctEmbutido').value) / 100,
+    pctRecProp: unmaskPct(get('pp-pctRecProp').value) / 100,
+    // % Embutido máx do grupo (em Dados da Proposta). Default 30% se vazio.
+    pctEmbMax: (unmaskPct(get('pp-pctEmbMax').value) / 100) || 0.30,
+    taxaAdm: unmaskPct(get('pp-taxaAdm').value) / 100,
+    fundo: unmaskPct(get('pp-fundo').value) / 100,
+    seguro,
+  };
+}
+
+// FÓRMULAS — PESADOS (Categoria == Saldo Devedor; sem adesão)
+function calc(i) {
+  const r = {};
+  const isPF = i.tipo === 'PF';
+  const seguroPF = isPF ? i.seguro : 0;
+
+  r.categoria    = i.credito * (1 + i.taxaAdm + i.fundo);
+  r.saldoDevedor = r.categoria;
+  r.valorSeguro  = r.categoria * seguroPF;
+  // Embutido máximo do grupo (configurável em "Dados da Proposta") — default 30%
+  r.maxEmbutido  = i.credito * i.pctEmbMax;
+
+  r.parcelaPJ = (i.prazo > 0) ? r.categoria / i.prazo : NaN;
+  r.parcelaPF = r.parcelaPJ + r.valorSeguro;
+
+  let redutorPct = parseFloat(i.redutor);
+  if (!Number.isFinite(redutorPct)) redutorPct = 0;
+  if (i.redutor === 'campanha') {
+    r.parcelaReduzidaPJ = (i.credito * (1 + i.taxaAdm + i.fundo)) / 200;
+  } else {
+    r.parcelaReduzidaPJ = (i.prazo > 0) ? (r.categoria / i.prazo) * (1 - redutorPct) : NaN;
+  }
+  r.parcelaReduzidaPF = r.parcelaReduzidaPJ + r.valorSeguro;
+
+  const totalLance = i.recProp + i.embutido;
+  r.totalLance = totalLance;
+  r.representatividade = (r.categoria > 0) ? (totalLance / r.categoria) : NaN;
+
+  r.creditoLiberado = i.credito - i.embutido;
+
+  r.saldoAposParcNormal   = r.categoria - (r.parcelaPJ * i.contempla) - totalLance;
+  r.saldoAposParcReduzida = r.categoria - (r.parcelaReduzidaPJ * i.contempla) - totalLance;
+
+  const saldoUsadoPos = (redutorPct !== 0 || i.redutor === 'campanha')
+    ? r.saldoAposParcReduzida
+    : r.saldoAposParcNormal;
+  r.novoSeguro = saldoUsadoPos * seguroPF;
+
+  // 2026: lance abate TUDO na parcela (sem piso 50%)
+  const prazoRestante = i.prazo - i.contempla;
+  r.parcelaTeoricaPJ = (prazoRestante > 0) ? saldoUsadoPos / prazoRestante : NaN;
+  r.parcelaRealPJ = r.parcelaTeoricaPJ;
+  r.parcelaRealPF = r.parcelaRealPJ + r.novoSeguro;
+  r.novaParcela = isPF ? r.parcelaRealPF : r.parcelaRealPJ;
+  r.novoPrazo = prazoRestante;
+
+  r.prazoReduzidoNormal   = (r.parcelaPJ > 0) ? r.saldoAposParcNormal / r.parcelaPJ : NaN;
+  r.prazoReduzidoReduzida = (r.parcelaPJ > 0) ? r.saldoAposParcReduzida / r.parcelaPJ : NaN;
+  if (redutorPct !== 0 || i.redutor === 'campanha') {
+    if (isPF) {
+      r.parcelaSeReduzPrazo = (r.prazoReduzidoReduzida > 0)
+        ? (r.saldoAposParcReduzida / r.prazoReduzidoReduzida) + r.novoSeguro
+        : NaN;
+    } else {
+      r.parcelaSeReduzPrazo = (r.prazoReduzidoNormal > 0)
+        ? r.saldoAposParcNormal / r.prazoReduzidoNormal
+        : NaN;
+    }
+    r.prazoReduzidoFinal = isPF ? r.prazoReduzidoReduzida : r.prazoReduzidoNormal;
+  } else {
+    if (i.tipo === 'PJ') {
+      r.parcelaSeReduzPrazo = (r.prazoReduzidoNormal > 0)
+        ? r.saldoAposParcNormal / r.prazoReduzidoNormal
+        : NaN;
+    } else {
+      r.parcelaSeReduzPrazo = (r.prazoReduzidoNormal > 0)
+        ? (r.saldoAposParcNormal / r.prazoReduzidoNormal) + r.novoSeguro
+        : NaN;
+    }
+    r.prazoReduzidoFinal = r.prazoReduzidoNormal;
+  }
+
+  r.taxaMes = (i.prazo > 0) ? i.taxaAdm / i.prazo : NaN;
+  r.taxaAno = r.taxaMes * 12;
+
+  return r;
+}
+
+function recalc() {
+  const i = readInputs();
+
+  if (!(i.credito > 0) || !(i.prazo > 0)) {
+    const ids = ['pp-categoria','pp-saldoDevedor','pp-parcelaPF','pp-parcelaPJ','pp-parcelaInicialPFDestaque','pp-parcelaInicialPJDestaque','pp-parcelaInicialDestaqueAtual','pp-parcelaReduzPF','pp-parcelaReduzPJ','pp-representatividade','pp-lanceTotalRs','pp-creditoLiberado','pp-novaParcela','pp-novoPrazo','pp-saldoPos','pp-novoSeguro','pp-prazoReduzido','pp-parcelaSeReduzPrazo','pp-taxaMes','pp-taxaAno'];
+    ids.forEach(id => setOut(id, '—'));
+    return;
+  }
+
+  const r = calc(i);
+  const isPF = i.tipo === 'PF';
+
+  setOut('pp-categoria', formatMoney(r.categoria));
+  setOut('pp-saldoDevedor', formatMoney(r.saldoDevedor));
+  var hintEl = document.getElementById('pp-embutidoMaxHint');
+  if (hintEl) {
+    var pctTxt = (i.pctEmbMax * 100).toFixed(2).replace('.', ',') + '%';
+    hintEl.innerHTML = 'Máx. <strong>' + formatMoney(r.maxEmbutido) + '</strong> (' + pctTxt + ' do crédito)';
+  }
+  setOut('pp-parcelaPF', formatMoney(r.parcelaPF));
+  setOut('pp-parcelaPJ', formatMoney(r.parcelaPJ));
+  var redAtivoPp = (parseFloat(i.redutor) > 0) || (i.redutor === 'campanha');
+  setOut('pp-parcelaInicialPFDestaque', formatMoney(redAtivoPp ? r.parcelaReduzidaPF : r.parcelaPF));
+  setOut('pp-parcelaInicialPJDestaque', formatMoney(redAtivoPp ? r.parcelaReduzidaPJ : r.parcelaPJ));
+  // Display único — escolhe PF ou PJ baseado no tipo selecionado
+  var pTipo = i.tipo || 'PF';
+  var valorAtual = pTipo === 'PJ'
+    ? (redAtivoPp ? r.parcelaReduzidaPJ : r.parcelaPJ)
+    : (redAtivoPp ? r.parcelaReduzidaPF : r.parcelaPF);
+  setOut('pp-parcelaInicialDestaqueAtual', formatMoney(valorAtual));
+  // Label dinâmico
+  var lblBase = 'Parcela inicial · ' + (pTipo === 'PJ' ? 'PJ' : 'PF');
+  if (redAtivoPp) {
+    var redTxt = i.redutor === 'campanha' ? 'Campanha' : (parseFloat(i.redutor) * 100).toFixed(0) + '%';
+    lblBase += ' <small>(com redutor ' + redTxt + ')</small>';
+  }
+  var lblEl = document.getElementById('pp-parcelaInicialLbl');
+  if (lblEl) lblEl.innerHTML = lblBase;
+  setOut('pp-parcelaReduzPF', formatMoney(r.parcelaReduzidaPF));
+  setOut('pp-parcelaReduzPJ', formatMoney(r.parcelaReduzidaPJ));
+
+  setOut('pp-representatividade', Number.isFinite(r.representatividade) ? formatPct(r.representatividade * 100, 2) : '—');
+  setOut('pp-lanceTotalRs', r.totalLance > 0 ? formatMoney(r.totalLance) : '—');
+
+  setOut('pp-creditoLiberado', formatMoney(r.creditoLiberado));
+  setOut('pp-novaParcela', formatMoney(r.novaParcela));
+  setOut('pp-novoPrazo', Number.isFinite(r.novoPrazo) ? formatInt(r.novoPrazo) + ' meses' : '—');
+  const saldoUsado = (i.redutor !== '0') ? r.saldoAposParcReduzida : r.saldoAposParcNormal;
+  setOut('pp-saldoPos', formatMoney(saldoUsado));
+  setOut('pp-novoSeguro', isPF ? formatMoney(r.novoSeguro) : '—');
+  setOut('pp-prazoReduzido', Number.isFinite(r.prazoReduzidoFinal) ? formatInt(r.prazoReduzidoFinal) + ' meses' : '—');
+  setOut('pp-parcelaSeReduzPrazo', formatMoney(r.parcelaSeReduzPrazo));
+
+  setOut('pp-taxaMes', Number.isFinite(r.taxaMes) ? formatPct(r.taxaMes * 100, 4) : '—');
+  setOut('pp-taxaAno', Number.isFinite(r.taxaAno) ? formatPct(r.taxaAno * 100, 2) : '—');
+}
+
+// ═══════════════════════════════════════════════════════
+// ESTRATÉGIAS DE LANCE — 6 (Livre/Fixo30/Fixo40 × Bolso/Embutido)
+// ═══════════════════════════════════════════════════════
+let estrategiaPendente = null;
+
+function aplicaEstrategia(strat, pctLivre = null) {
+  const i = readInputs();
+  if (!(i.credito > 0)) {
+    alert('Informe o crédito contratado antes de calcular a estratégia.');
+    return;
+  }
+  const r = calc(i);
+  const categoria = r.categoria;
+  const maxEmb = r.maxEmbutido;
+
+  let recProp = 0, embutido = 0;
+
+  switch (strat) {
+    case 'livre-bolso': {
+      const lance = categoria * pctLivre;
+      recProp = lance; embutido = 0;
+      break;
+    }
+    case 'livre-embutido': {
+      const lance = categoria * pctLivre;
+      embutido = maxEmb;
+      recProp = lance - maxEmb;
+      if (recProp < 0) recProp = 0;
+      break;
+    }
+    case 'fixo30-bolso': {
+      const fixo = categoria * 0.30;
+      recProp = fixo; embutido = 0;
+      break;
+    }
+    case 'fixo30-embutido': {
+      const fixo = categoria * 0.30;
+      embutido = maxEmb;
+      recProp = fixo - maxEmb;
+      if (recProp < 0) recProp = 0;
+      break;
+    }
+    case 'fixo40-bolso': {
+      const fixo = categoria * 0.40;
+      recProp = fixo; embutido = 0;
+      break;
+    }
+    case 'fixo40-embutido': {
+      const fixo = categoria * 0.40;
+      embutido = maxEmb;
+      recProp = fixo - maxEmb;
+      if (recProp < 0) recProp = 0;
+      break;
+    }
+  }
+
+  if (recProp < 0) recProp = 0;
+  get('pp-recProp').value = recProp > 0 ? maskMoney(String(Math.round(recProp * 100))) : '';
+  get('pp-embutido').value = embutido > 0 ? maskMoney(String(Math.round(embutido * 100))) : '';
+  // Preenche também os % correspondentes (espelhamento sobre crédito)
+  if (i.credito > 0) {
+    get('pp-pctEmbutido').value = embutido > 0 ? ((embutido / i.credito) * 100).toFixed(2).replace('.', ',') + ' %' : '';
+    get('pp-pctRecProp').value = recProp > 0 ? ((recProp / i.credito) * 100).toFixed(2).replace('.', ',') + ' %' : '';
+  }
+  recalc();
+}
+
+document.querySelectorAll('.lance-btn, .clear-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const strat = btn.dataset.strat;
+    if (strat === 'limpar') { limparTudo(); return; }
+    if (strat === 'livre-bolso' || strat === 'livre-embutido') {
+      estrategiaPendente = strat;
+      get('modalLanceLivre').classList.add('aberto');
+      setTimeout(() => get('pp-modal-pctLivre').focus(), 50);
+    } else {
+      aplicaEstrategia(strat);
+    }
+  });
+});
+
+get('pp-modal-confirmar').addEventListener('click', () => {
+  const pct = unmaskPct(get('pp-modal-pctLivre').value) / 100;
+  if (!(pct > 0)) { alert('Informe um percentual válido.'); return; }
+  fecharModalLance();
+  if (estrategiaPendente) {
+    aplicaEstrategia(estrategiaPendente, pct);
+    estrategiaPendente = null;
+  }
+});
+
+function fecharModalLance() {
+  get('modalLanceLivre').classList.remove('aberto');
+}
+
+function limparTudo() {
+  ['pp-credito','pp-prazo','pp-contempla','pp-recProp','pp-embutido','pp-pctEmbutido','pp-pctRecProp','pp-pctEmbMax','pp-taxaAdm','pp-fundo','pp-seguro'].forEach(id => { const el = get(id); if (el) el.value = ''; });
+  get('pp-redutor').value = '';
+  const obsEl = get('pp-observacoes'); if (obsEl) obsEl.value = '';
+  recalc();
+}
+
+document.getElementById('btnLimparObs').addEventListener('click', () => {
+  const obsEl = get('pp-observacoes'); if (obsEl) obsEl.value = '';
+});
+
+document.getElementById('btnLimparProposta').addEventListener('click', () => {
+  ['pp-taxaAdm','pp-fundo','pp-seguro','pp-credito','pp-prazo','pp-contempla','pp-pctEmbMax'].forEach(id => get(id).value = '');
+  get('pp-redutor').value = '';
+  recalc();
+});
+
+document.getElementById('btnLimparLance').addEventListener('click', () => {
+  ['pp-recProp','pp-embutido','pp-pctEmbutido','pp-pctRecProp'].forEach(id => get(id).value = '');
+  recalc();
+});
+
+document.getElementById('btnTaxasDefault').addEventListener('click', () => {
+  get('pp-taxaAdm').value = '14,00 %';
+  get('pp-fundo').value = '2,00 %';
+  get('pp-seguro').value = '0,0380 %';
+  get('pp-pctEmbMax').value = '30,00 %';
+  recalc();
+});
+
+// ═══════════════════════════════════════════════════════
+// SINCRONIZAÇÃO ESPELHADA % ↔ R$ (estilo Ololu)
+// AMBAS as % sobre CATEGORIA (somam diretamente).
+// R$ Embutido tem limite físico = pctEmbMax × CRÉDITO.
+// ═══════════════════════════════════════════════════════
+let _ppSyncing = false;
+function _ppCategoria() {
+  const credito = unmaskMoney(get('pp-credito').value);
+  const adm = unmaskPct(get('pp-taxaAdm').value) / 100;
+  const fundo = unmaskPct(get('pp-fundo').value) / 100;
+  return credito * (1 + adm + fundo);
+}
+function _ppMaxEmbutidoRs() {
+  const credito = unmaskMoney(get('pp-credito').value);
+  const pctMax = (unmaskPct(get('pp-pctEmbMax').value) / 100) || 0.30;
+  return credito * pctMax;
+}
+function ppSyncPctToRs(idPct, idRs) {
+  if (_ppSyncing) return;
+  const cat = _ppCategoria();
+  const pct = unmaskPct(get(idPct).value) / 100;
+  if (!(cat > 0) || !(pct >= 0)) return;
+  _ppSyncing = true;
+  let v = cat * pct;
+  if (idPct === 'pp-pctEmbutido') {
+    const maxRs = _ppMaxEmbutidoRs();
+    if (v > maxRs) {
+      v = maxRs;
+      get(idPct).value = ((v / cat) * 100).toFixed(2).replace('.', ',') + ' %';
+    }
+  }
+  get(idRs).value = v > 0 ? maskMoney(String(Math.round(v * 100))) : '';
+  _ppSyncing = false;
+  recalc();
+}
+function ppSyncRsToPct(idRs, idPct) {
+  if (_ppSyncing) return;
+  const cat = _ppCategoria();
+  let v = unmaskMoney(get(idRs).value);
+  if (!(cat > 0)) return;
+  _ppSyncing = true;
+  if (idRs === 'pp-embutido') {
+    const maxRs = _ppMaxEmbutidoRs();
+    if (v > maxRs) {
+      v = maxRs;
+      get(idRs).value = maskMoney(String(Math.round(v * 100)));
+    }
+  }
+  if (v > 0) {
+    get(idPct).value = ((v / cat) * 100).toFixed(2).replace('.', ',') + ' %';
+  } else {
+    get(idPct).value = '';
+  }
+  _ppSyncing = false;
+  recalc();
+}
+get('pp-pctEmbutido').addEventListener('input', () => { ppSyncPctToRs('pp-pctEmbutido', 'pp-embutido'); recalc(); });
+get('pp-embutido').addEventListener('input', () => { ppSyncRsToPct('pp-embutido', 'pp-pctEmbutido'); recalc(); });
+get('pp-pctRecProp').addEventListener('input', () => ppSyncPctToRs('pp-pctRecProp', 'pp-recProp'));
+get('pp-recProp').addEventListener('input', () => ppSyncRsToPct('pp-recProp', 'pp-pctRecProp'));
+
+// Recalcula % do lance dinamicamente quando taxas/crédito/limite mudam
+function _ppRefreshPcts() {
+  if (_ppSyncing) return;
+  const cat = _ppCategoria();
+  if (!(cat > 0)) return;
+  _ppSyncing = true;
+  let vEmb = unmaskMoney(get('pp-embutido').value);
+  const maxRs = _ppMaxEmbutidoRs();
+  if (vEmb > maxRs) {
+    vEmb = maxRs;
+    get('pp-embutido').value = maskMoney(String(Math.round(vEmb * 100)));
+  }
+  get('pp-pctEmbutido').value = vEmb > 0 ? ((vEmb / cat) * 100).toFixed(2).replace('.', ',') + ' %' : '';
+  const vPag = unmaskMoney(get('pp-recProp').value);
+  get('pp-pctRecProp').value = vPag > 0 ? ((vPag / cat) * 100).toFixed(2).replace('.', ',') + ' %' : '';
+  _ppSyncing = false;
+  recalc();
+}
+['pp-taxaAdm','pp-fundo','pp-credito','pp-pctEmbMax'].forEach(id => {
+  const el = get(id); if (el) el.addEventListener('blur', _ppRefreshPcts);
+});
+
+
+document.getElementById('btnLimparTudo').addEventListener('click', limparTudo);
+
+get('pp-modal-pctLivre').addEventListener('keydown', e => {
+  if (e.key === 'Enter') get('pp-modal-confirmar').click();
+});
+
+// ─── Toggle Modo Neutro ───────
+window._ppNeutro = false;
+function aplicaModoNeutro(on) {
+  window._ppNeutro = !!on;
+  document.body.classList.toggle('neutral-mode', !!on);
+  const btn = document.getElementById('btnModoNeutro');
+  if (btn) { btn.classList.toggle('on', !!on); btn.setAttribute('aria-checked', !!on); }
+  const tit = document.getElementById('sim-titulo-banco');
+  if (tit) tit.textContent = on ? 'Consórcio · Pesados' : 'Porto · Pesados';
+}
+(function() {
+  const btn = document.getElementById('btnModoNeutro');
+  if (btn) btn.addEventListener('click', () => aplicaModoNeutro(!window._ppNeutro));
+  const lbl = document.querySelector('.neutral-label');
+  if (lbl) lbl.addEventListener('click', () => aplicaModoNeutro(!window._ppNeutro));
+})();
+
+window._ppRedmode = 'parcela';
+function aplicaRedmodePesados(modo) {
+  window._ppRedmode = modo;
+  document.querySelectorAll('.redmode-btn').forEach(b => {
+    const isActive = b.dataset.redmode === modo;
+    b.classList.toggle('active', isActive);
+    b.style.background = isActive ? '#2d3f5e' : 'transparent';
+    b.style.color = isActive ? '#fff' : '#475569';
+  });
+  const cardP = document.getElementById('pp-card-parcela');
+  const cardT = document.getElementById('pp-card-prazo');
+  if (cardP) cardP.style.opacity = (modo === 'parcela') ? '1' : '0.55';
+  if (cardT) cardT.style.opacity = (modo === 'prazo') ? '1' : '0.55';
+  if (cardP) cardP.style.boxShadow = (modo === 'parcela') ? '0 0 0 2px #2d3f5e' : 'none';
+  if (cardT) cardT.style.boxShadow = (modo === 'prazo') ? '0 0 0 2px #2d3f5e' : 'none';
+}
+document.querySelectorAll('.redmode-btn').forEach(b => {
+  b.addEventListener('click', () => aplicaRedmodePesados(b.dataset.redmode));
+});
+aplicaRedmodePesados('parcela');
+
+recalc();
+
+// PDF
+function _montarPdfComercialPortoPesados() {
+  const _v = (id) => { const el = document.getElementById(id); return (el?.value || '').trim(); };
+  const _t = (id) => { const el = document.getElementById(id); return (el?.textContent || '').trim(); };
+  const _selTxt = (id) => { const el = document.getElementById(id); return (el?.selectedOptions?.[0]?.textContent || '').trim(); };
+
+  // Tipo deduzido pelo seguro
+  const _seguroPP = parseFloat((_v('pp-seguro') || '0').replace('%','').replace(',','.').trim()) || 0;
+  const tipoTxt = _seguroPP > 0 ? 'Física' : 'Jurídica';
+  const isPF = (tipoTxt === 'Física' || tipoTxt.includes('PF'));
+  const parcelaAntes = isPF ? _t('pp-parcelaReduzPF') : _t('pp-parcelaReduzPJ');
+  const redutorTxt = _selTxt('pp-redutor') || '';
+  const redutorPct = redutorTxt.replace(/[^\d%]/g, '');
+
+  const _parseRS = (s) => parseFloat(String(s||'').replace(/[R$\s.]/g,'').replace(',','.')) || 0;
+  const _fmtRS = (n) => 'R$ ' + n.toLocaleString('pt-BR', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  const _categoria = _parseRS(_t('pp-categoria'));
+  const _embRS = _parseRS(_v('pp-embutido'));
+  const _apgRS = _parseRS(_v('pp-recProp'));
+  const _totRS = _embRS + _apgRS;
+  const _fmtPct = (n) => n.toFixed(2).replace('.', ',');
+  const _pctEmb = _categoria > 0 ? _fmtPct((_embRS / _categoria) * 100) : '0,00';
+  const _pctApg = _categoria > 0 ? _fmtPct((_apgRS / _categoria) * 100) : '0,00';
+  const _pctTot = _categoria > 0 ? _fmtPct((_totRS / _categoria) * 100) : '0,00';
+
+  const _neutro = !!window._ppNeutro;
+  return {
+    filename: _neutro ? 'simulacao-consorcio-pesados' : 'porto-consorcio-pesados',
+    logoAdmin: 'porto',
+    hideAdminLogo: _neutro,
+    titulo: 'Simulador de Crédito',
+    subtitulo: _neutro ? 'Consórcio · Pesados' : 'Porto · Pesados',
+    subtituloSecundario: redutorPct && redutorPct !== '0%'
+      ? `(Redução de ${redutorPct} até a Contemplação)`
+      : '(Sem redutor de parcela)',
+    representanteTexto: _neutro ? 'Master Prime' : 'Consórcio Porto',
+    inputs: [
+      { label: 'Taxa Administrativa', value: _v('pp-taxaAdm') || '0,00 %' },
+      { label: 'Fundo Reserva', value: _v('pp-fundo') || '0,00 %' },
+      { label: 'Seguro Prestamista', value: _v('pp-seguro') || '0,0000 %', highlight: 'Somente PF' },
+      { label: 'Valor do crédito', value: _v('pp-credito') || 'R$ 0,00' },
+      { label: 'Prazo do Grupo', value: (_v('pp-prazo') || '0') + ' Meses' },
+    ],
+    lance: {
+      embutido: { pct: _pctEmb, rs: _fmtRS(_embRS).replace('R$ ','') },
+      apagar:   { pct: _pctApg, rs: _fmtRS(_apgRS).replace('R$ ','') },
+      total:    { pct: _pctTot, rs: _fmtRS(_totRS).replace('R$ ','') }
+    },
+    outputs: (function() {
+      const modo = (window._ppRedmode === 'prazo') ? 'prazo' : 'parcela';
+      const novaParc = (modo === 'prazo') ? _t('pp-parcelaSeReduzPrazo') : _t('pp-novaParcela');
+      const prazoFinal = (modo === 'prazo') ? _t('pp-prazoReduzido') : _t('pp-novoPrazo');
+      return [
+        { label: 'Valor parcela (antes contemplação)', value: parcelaAntes || '—' },
+        { label: 'Valor parcela (pós-contemplado)',    value: novaParc || '—' },
+        { label: 'Crédito Líquido',                    value: _t('pp-creditoLiberado') || '—' },
+        { label: 'Prazo Restante',                     value: prazoFinal || '—' },
+      ];
+    })(),
+    observacoes: _v('pp-observacoes')
+  };
+}
+
+document.getElementById('baixarPdfPorto').addEventListener('click', async () => {
+  const btn = document.getElementById('baixarPdfPorto');
+  const txt = btn.textContent;
+  btn.textContent = 'Gerando PDF...';
+  btn.disabled = true;
+  try {
+    let payload = _montarPdfComercialPortoPesados();
+    if (window.PdfConfigPersonalizado) payload = window.PdfConfigPersonalizado.filtrar(payload);
+    await PdfMasterPrime.gerarComercial(payload);
+  } catch (err) {
+    console.error(err);
+    alert('Erro ao gerar PDF: ' + err.message);
+  } finally {
+    btn.textContent = txt;
+    btn.disabled = false;
+  }
+});
+
+if (window.PdfConfigPersonalizado) {
+  window.PdfConfigPersonalizado.registrar({
+    simulador: 'porto-pesados',
+    botaoPdfId: 'baixarPdfPorto',
+    secoes: [
+      { secao: 'inputs', label: 'Dados do plano (topo do PDF)', linhas: [
+        { key: 'pesados-input-taxaAdm', label: 'Taxa Administrativa' },
+        { key: 'pesados-input-fundo',   label: 'Fundo Reserva' },
+        { key: 'pesados-input-seguro',  label: 'Seguro Prestamista' },
+        { key: 'pesados-input-credito', label: 'Valor do crédito' },
+        { key: 'pesados-input-prazo',   label: 'Prazo do Grupo' }
+      ]},
+      { secao: 'lance', label: 'Oferta de lance', linhas: [
+        { key: 'pesados-lance-embutido', label: 'Lance Embutido',          objectKey: 'embutido' },
+        { key: 'pesados-lance-apagar',   label: 'Lance a Pagar (próprio)', objectKey: 'apagar'   },
+        { key: 'pesados-lance-total',    label: 'Lance Total',             objectKey: 'total'    }
+      ]},
+      { secao: 'outputs', label: 'Resultados do simulador', linhas: [
+        { key: 'pesados-out-parcAntes', label: 'Valor parcela (antes contemplação)' },
+        { key: 'pesados-out-parcPos',   label: 'Valor parcela (pós-contemplado)' },
+        { key: 'pesados-out-credLiq',   label: 'Crédito Líquido' },
+        { key: 'pesados-out-prazoRest', label: 'Prazo Restante' }
+      ]}
+    ]
+  });
+}
+
+(function initSimStore() {
+  if (!window.SimulacaoStore) return;
+  window.SimulacaoStore.init({
+    supabaseUrl: 'https://jhwciwvgagnuxakukyob.supabase.co',
+    supabaseKey: 'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx',
+    simulador:   'porto-pesados',
+    mountPoint:  document.getElementById('simStoreMount'),
+    serialize:   () => window.SimulacaoStore.snapshotForm(),
+    restore:     (dados) => window.SimulacaoStore.restoreForm(dados, { recalc: recalc })
+  });
+})();
+</script>
+
+</body>
+</html>

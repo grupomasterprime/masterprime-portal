@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master Prime - Construindo Patrimônio</title>
+<style>
+  :root { --navy:#2D3F5E; --navy-dark:#1E2D45; --bg:#F4F5F7; --card:#FFFFFF; --border:#E5E7EB; --text:#1F2937; --text-muted:#6B7280; --soft-blue:#F1F5F9; --green:#10B981; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+  header { background: var(--navy); color: #fff; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .brand-mark { width: 36px; height: 36px; background: var(--navy-dark); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 14px; }
+  .brand-text h1 { font-size: 16px; font-weight: 600; }
+  .brand-text p { font-size: 11px; color: rgba(255,255,255,0.7); letter-spacing: 1.2px; text-transform: uppercase; margin-top: 2px; }
+  main { max-width: 1280px; margin: 0 auto; padding: 32px; }
+  h2.section-title { font-size: 22px; font-weight: 600; color: var(--navy); margin-bottom: 24px; text-align: center; letter-spacing: 0.5px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+  .card-section-title { font-size: 13px; font-weight: 700; color: var(--navy); letter-spacing: 1.5px; text-transform: uppercase; padding-bottom: 14px; border-bottom: 1px solid var(--border); margin-bottom: 18px; display: flex; align-items: center; gap: 10px; }
+  .card-section-title .reset-btn { margin-left: auto; background: none; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; padding: 4px 10px; border-radius: 4px; font-size: 11px; }
+  .group-card { background: var(--soft-blue); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+  .group-card .gc-title { font-size: 12px; font-weight: 600; color: var(--navy); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; }
+  .grid { display: grid; gap: 14px; }
+  .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  @media (max-width: 1024px) { .grid-3, .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 768px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
+  .field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .field label { font-size: 11px; color: var(--text-muted); letter-spacing: 0.4px; text-transform: uppercase; font-weight: 600; line-height: 1.3; }
+  .field label input[type="checkbox"] { vertical-align: middle; margin-left: 6px; }
+  .field input, .field select { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; background: #fff; color: var(--text); }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--navy); }
+  .field input:disabled, .field select:disabled { background: var(--soft-blue); color: var(--text-muted); }
+  .field select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+  .toggle-input { position: relative; display: inline-block; width: 32px; height: 18px; }
+  .toggle-input input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #D1D5DB; border-radius: 18px; }
+  .toggle-slider::before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; top: 2px; background: white; border-radius: 50%; transition: 0.2s; }
+  .toggle-input input:checked + .toggle-slider { background: var(--navy); }
+  .toggle-input input:checked + .toggle-slider::before { transform: translateX(14px); }
+  .result-row { background: var(--soft-blue); border-radius: 8px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; }
+  .result-row strong { font-size: 12px; color: var(--navy); letter-spacing: 1px; text-transform: uppercase; font-weight: 500; }
+  .result-row .value { font-size: 18px; font-weight: 600; color: var(--navy); }
+  .result-primary { background: var(--navy); color: white; padding: 16px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .result-primary strong { color: rgba(255,255,255,0.7); font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 500; }
+  .result-primary .value { font-size: 22px; font-weight: 700; color: #fff; }
+  .pos-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 768px) { .pos-grid { grid-template-columns: 1fr; } }
+  .pos-card { background: var(--soft-blue); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .pos-card h4 { font-size: 12px; font-weight: 700; color: var(--navy); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 12px; }
+  .pos-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; }
+  .pos-row span:last-child { font-weight: 600; color: var(--navy); }
+  .actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-bottom: 32px; }
+  button.primary, button.secondary { padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; border: 1px solid transparent; }
+  button.primary { background: var(--navy); color: #fff; border-color: var(--navy); }
+  button.primary:hover { background: var(--navy-dark); }
+  button.secondary { background: transparent; color: var(--text-muted); border-color: var(--border); }
+  button.secondary:hover { background: var(--bg); }
+  .obs-area { width: 100%; min-height: 90px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: inherit; resize: vertical; color: var(--text); background: #fff; }
+  .obs-area:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(45,63,94,0.10); }
+</style>
+<script>if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('embedded');</script>
+<style>html.embedded header { display: none; } html.embedded main { padding-top: 16px; }</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="pdf-master-prime.js?v=20260526e"></script>
+<script src="simulador-autosave.js?v=20260625b"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="simulacao-store.js"></script>
+<script src="analitico-cet.js"></script>
+</head>
+<body>
+<header><div class="brand"><div class="brand-mark">M</div><div class="brand-text"><h1>Master Prime</h1><p>Simulador de Consórcio</p></div></div></header>
+<main>
+  <div id="simStoreMount" style="max-width:1400px; margin:16px auto 0; padding:0 32px;"></div>
+  <h2 class="section-title">Construindo Patrimônio</h2>
+
+  <!-- ════ CONSÓRCIO ════ -->
+  <section class="card">
+    <div class="card-section-title">Consórcio<button type="button" class="reset-btn" id="resetConsorcio">Limpar</button></div>
+
+    <div class="group-card" style="margin-bottom:14px;">
+      <div class="gc-title">Proposta</div>
+      <div class="grid grid-3">
+        <div class="field"><label>Crédito</label><input type="text" id="credito" placeholder="R$ 0,00" data-mask="money"></div>
+        <div class="field"><label>Prazo (meses)</label><input type="text" id="prazo" placeholder="0" data-mask="int"></div>
+        <div class="field"><label>% Taxa de administração</label><input type="text" id="taxaAdm" placeholder="0,00 %" data-mask="pct2"></div>
+        <div class="field"><label>% Fundo de reserva</label><input type="text" id="fundo" placeholder="0,00 %" data-mask="pct2"></div>
+        <div class="field"><label>Tipo de reajuste</label>
+          <select id="tipoReajuste">
+            <option value="">Selecione</option>
+            <option value="aniv-cota">Aniversário da cota</option>
+            <option value="aniv-grupo">Aniversário do grupo</option>
+          </select>
+        </div>
+        <div class="field"><label>% Reajuste</label><input type="text" id="reajuste" placeholder="0,00 %" data-mask="pct2"></div>
+        <div class="field">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><span class="toggle-input"><input type="checkbox" id="seguroOn"><span class="toggle-slider"></span></span>% Seguro</label>
+          <input type="text" id="seguro" placeholder="0,0000 %" data-mask="pct4" disabled>
+        </div>
+        <div class="field">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><span class="toggle-input"><input type="checkbox" id="redutorOn"><span class="toggle-slider"></span></span>Redutor de parcela</label>
+          <input type="text" id="redutor" placeholder="0,00 %" data-mask="pct2" disabled>
+        </div>
+        <div class="field">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><span class="toggle-input"><input type="checkbox" id="adesaoOn"><span class="toggle-slider"></span></span>% Taxa de adesão</label>
+          <input type="text" id="adesao" placeholder="0,00 %" data-mask="pct2" disabled>
+        </div>
+      </div>
+      <div style="margin-top:14px;"><div class="result-primary"><strong>Parcela inicial</strong><span class="value" id="parcelaInicial">R$ 0,00</span></div></div>
+    </div>
+
+    <div class="group-card" style="margin-bottom:14px;">
+      <div class="gc-title">Contemplação</div>
+      <div class="grid grid-4">
+        <div class="field"><label>Tipo de contemplação</label>
+          <select id="tipoCont"><option value="sorteio">Sorteio</option><option value="lance">Lance</option></select>
+        </div>
+        <div class="field"><label>Expectativa (meses)</label><input type="text" id="expectativa" value="1" data-mask="int"></div>
+        <div class="field"><label>Tipo de lance</label>
+          <select id="tipoLance" disabled>
+            <option value="carta">Carta de crédito</option>
+            <option value="categoria">Categoria</option>
+            <option value="saldo">Saldo devedor</option>
+            <option value="cat-carta">Categoria (Total) e Carta (Emb.)</option>
+            <option value="bradesco-imovel">Bradesco Imóvel</option>
+            <option value="bradesco-auto">Bradesco Auto</option>
+          </select>
+        </div>
+        <div class="field"><label>Valor de referência</label><input type="text" id="valorRef" disabled></div>
+        <div class="field"><label>Crédito atualizado</label><input type="text" id="creditoAtualizado" disabled></div>
+        <div class="field"><label>% Lance recursos próprios</label><input type="text" id="lanceP" placeholder="0,0000 %" data-mask="pct4" disabled></div>
+        <div class="field"><label>% Lance embutido</label><input type="text" id="lanceE" placeholder="0,0000 %" data-mask="pct4" disabled></div>
+        <div class="field">
+          <label style="display:flex; align-items:center; gap:8px; cursor:pointer;"><span class="toggle-input"><input type="checkbox" id="fgtsOn"><span class="toggle-slider"></span></span>% Lance FGTS</label>
+          <input type="text" id="lanceFGTS" placeholder="0,0000 %" data-mask="pct4" disabled>
+        </div>
+        <div class="field"><label>% Lance total</label><input type="text" id="lanceTotalCalc" placeholder="0,0000 %" disabled></div>
+        <div class="field"><label>Lance recursos próprios</label><input type="text" id="lanceP_v" placeholder="R$ 0,00" data-mask="money" disabled></div>
+        <div class="field"><label>Lance embutido</label><input type="text" id="lanceE_v" placeholder="R$ 0,00" data-mask="money" disabled></div>
+        <div class="field"><label>Lance FGTS</label><input type="text" id="lanceFGTS_v" placeholder="R$ 0,00" data-mask="money" disabled></div>
+        <div class="field"><label>Valor total do lance</label><input type="text" id="valorTotalLance" disabled></div>
+      </div>
+      <div style="margin-top:14px;"><div class="result-primary"><strong>Crédito disponível</strong><span class="value" id="creditoDisponivel">R$ 0,00</span></div></div>
+    </div>
+
+    <div class="pos-grid">
+      <div class="pos-card">
+        <h4>Pós contemplação - Redução de parcela</h4>
+        <div class="pos-row"><span>Parcela</span><span id="reducaoParcela_parc">R$ 0,00</span></div>
+        <div class="pos-row"><span>Prazo restante</span><span id="reducaoParcela_prazo">0</span></div>
+        <div class="pos-row"><span>Custo efetivo mensal</span><span id="reducaoParcela_cm">0,00 %</span></div>
+        <div class="pos-row"><span>Custo efetivo anual</span><span style="display:inline-flex;align-items:center;gap:8px;"><span id="reducaoParcela_ca">0,00 %</span><button type="button" class="ace-eye" onclick="AnaliticoCet.abrir('parcela')" title="Ver memória de cálculo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></div>
+      </div>
+      <div class="pos-card">
+        <h4>Pós contemplação - Redução de prazo</h4>
+        <div class="pos-row"><span>Parcela</span><span id="reducaoPrazo_parc">R$ 0,00</span></div>
+        <div class="pos-row"><span>Prazo restante</span><span id="reducaoPrazo_prazo">0</span></div>
+        <div class="pos-row"><span>Custo efetivo mensal</span><span id="reducaoPrazo_cm">0,00 %</span></div>
+        <div class="pos-row"><span>Custo efetivo anual</span><span style="display:inline-flex;align-items:center;gap:8px;"><span id="reducaoPrazo_ca">0,00 %</span><button type="button" class="ace-eye" onclick="AnaliticoCet.abrir('prazo')" title="Ver memória de cálculo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ IMÓVEL ════ -->
+  <section class="card">
+    <div class="card-section-title">Imóvel<button type="button" class="reset-btn" id="resetImovel">Limpar</button></div>
+    <div class="grid grid-2">
+      <div class="group-card">
+        <div class="gc-title">Operação</div>
+        <div class="grid grid-2">
+          <div class="field"><label>Valor de mercado</label><input type="text" id="imValor" placeholder="R$ 0,00" data-mask="money"></div>
+          <div class="field"><label>Valor de compra</label><input type="text" id="imCompra" placeholder="R$ 0,00" data-mask="money"></div>
+          <div class="field"><label>% Desconto compra</label><input type="text" id="imDesconto" disabled></div>
+          <div class="field"><label>% Valorização anual</label><input type="text" id="imValorizacao" value="6,39 %" data-mask="pct2"></div>
+        </div>
+      </div>
+      <div class="group-card">
+        <div class="gc-title">Forma de pagamento</div>
+        <div class="grid grid-2">
+          <div class="field"><label>Tipo</label>
+            <select id="fpTipo"><option value="avista">À vista</option><option value="financiamento">Financiamento</option></select>
+          </div>
+          <div class="field"><label>Entrada</label><input type="text" id="fpEntrada" placeholder="R$ 0,00" data-mask="money" disabled></div>
+          <div class="field"><label>% Entrada</label><input type="text" id="fpEntradaPct" disabled></div>
+          <div class="field"><label>Total parcelas pagas</label><input type="text" id="fpTotalParc" disabled></div>
+          <div class="field"><label>Saldo devedor</label><input type="text" id="fpSaldo" disabled></div>
+          <div class="field"><label>Total pago</label><input type="text" id="fpTotal" disabled></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ ALUGUEL ════ -->
+  <section class="card">
+    <div class="card-section-title">Aluguel</div>
+    <div class="grid grid-2">
+      <div class="group-card">
+        <div class="gc-title">Configuração</div>
+        <div class="grid grid-2">
+          <div class="field"><label>Prestação do aluguel</label><input type="text" id="alPrestacao" placeholder="R$ 0,00" data-mask="money"></div>
+          <div class="field"><label>% Aluguel sobre imóvel</label><input type="text" id="alPct" disabled></div>
+          <div class="field"><label>% Correção anual</label><input type="text" id="alCorrecao" value="5,32 %" data-mask="pct2"></div>
+          <div class="field"><label>Diferença aluguel × parcela (média)</label><input type="text" id="alDiferenca" disabled></div>
+        </div>
+      </div>
+      <div class="group-card">
+        <div class="gc-title">Investimento da diferença</div>
+        <label style="display:flex; align-items:center; gap:10px; margin-bottom:14px; cursor:pointer;">
+          <span class="toggle-input"><input type="checkbox" id="invOn"><span class="toggle-slider"></span></span>
+          <span style="font-size:13px; color:var(--text-muted);">Investir a diferença mensal a CDI</span>
+        </label>
+        <div class="grid grid-3">
+          <div class="field"><label>CDI (a.a.)</label><input type="text" id="invCDI" value="14,90 %" data-mask="pct2" disabled></div>
+          <div class="field"><label>Rentabilidade do CDI</label><input type="text" id="invRent" value="100,00 %" data-mask="pct2" disabled></div>
+          <div class="field"><label>Prazo (meses)</label><input type="text" id="invPrazo" data-mask="int" disabled></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ RESULTADO ════ -->
+  <section class="card">
+    <div class="card-section-title">Resultado da Alavancagem</div>
+    <div class="grid grid-2">
+      <div class="result-row"><strong>Valor alavancado do imóvel</strong><span class="value" id="resAlavancado">R$ 0,00</span></div>
+      <div class="result-row"><strong>Valorização do imóvel</strong><span class="value" id="resValorizacao">R$ 0,00</span></div>
+      <div class="result-row"><strong>Diferença aluguel × parcela (período)</strong><span class="value" id="resDiferenca">R$ 0,00</span></div>
+      <div class="result-row" id="rowInvestimento" style="display:none;"><strong>Investimento + Rentabilidade</strong><span class="value" id="resInvest">R$ 0,00</span></div>
+    </div>
+    <div style="margin-top:14px;"><div class="result-primary"><strong>Patrimônio total</strong><span class="value" id="resPatrimonio">R$ 0,00</span></div></div>
+  </section>
+
+  <!-- ════ OBSERVAÇÕES ════ -->
+  <section class="card">
+    <div class="card-section-title">Observações (opcional)
+      <button type="button" class="reset-btn" id="btnLimparObs">Limpar</button>
+    </div>
+    <textarea id="alav-observacoes" class="obs-area" placeholder="Adicione anotações que devem aparecer no PDF…"></textarea>
+  </section>
+
+  <div class="actions">
+    <button class="secondary" id="btnLimpar">Limpar tudo</button>
+    <button class="primary" id="btnPdf">Baixar PDF</button>
+  </div>
+</main>
+
+<script>
+function maskMoney(v){const d=String(v).replace(/\D/g,'');if(!d)return'';const c=parseInt(d,10);return'R$ '+Math.floor(c/100).toLocaleString('pt-BR')+','+String(c%100).padStart(2,'0');}
+function unmaskMoney(v){const d=String(v).replace(/\D/g,'');return parseInt(d||'0',10)/100;}
+function maskPct(v,dec=2){const c=String(v).replace(',','.').replace(/[^\d.]/g,'');if(!c)return'';const n=parseFloat(c);return isNaN(n)?'':n.toFixed(dec).replace('.',',')+' %';}
+function unmaskPct(v){return parseFloat(String(v).replace('%','').replace(',','.').replace(/[^\d.\-]/g,'').trim()||'0');}
+function maskInt(v){return String(v).replace(/\D/g,'');}
+function fmtMoney(n){if(!isFinite(n)||isNaN(n))n=0;return'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtPct(n,dec=2){if(!isFinite(n)||isNaN(n))n=0;return n.toFixed(dec).replace('.',',')+' %';}
+
+// Wire masks
+document.querySelectorAll('input[data-mask]').forEach(inp=>{
+  const t=inp.dataset.mask;
+  inp.addEventListener('input',e=>{if(t==='money')e.target.value=maskMoney(e.target.value);else if(t==='int')e.target.value=maskInt(e.target.value);recalc();});
+  inp.addEventListener('blur',e=>{if(t==='pct2')e.target.value=maskPct(e.target.value,2);else if(t==='pct4')e.target.value=maskPct(e.target.value,4);recalc();});
+  inp.addEventListener('focus',e=>{if(t==='pct2'||t==='pct4'){const n=unmaskPct(e.target.value);if(n)e.target.value=String(n).replace('.',',');}});
+});
+document.querySelectorAll('select, input[type="checkbox"]').forEach(el=>el.addEventListener('change',recalc));
+
+// Toggles
+function syncToggle(chkId, inputId) {
+  const c = document.getElementById(chkId), i = document.getElementById(inputId);
+  c.addEventListener('change', () => { i.disabled = !c.checked; if(!c.checked) i.value=''; recalc(); });
+}
+syncToggle('seguroOn','seguro');
+syncToggle('redutorOn','redutor');
+syncToggle('adesaoOn','adesao');
+
+// Tipo Contemplação habilita/desabilita Lance
+document.getElementById('tipoCont').addEventListener('change',e=>{
+  const isLance=e.target.value==='lance';
+  ['tipoLance','lanceP','lanceE','fgtsOn','lanceP_v','lanceE_v'].forEach(id=>{
+    document.getElementById(id).disabled = !isLance;
+    if(!isLance && document.getElementById(id).type !== 'checkbox') document.getElementById(id).value='';
+    if(!isLance && document.getElementById(id).type === 'checkbox') document.getElementById(id).checked=false;
+  });
+  document.getElementById('lanceFGTS').disabled = !isLance || !document.getElementById('fgtsOn').checked;
+  document.getElementById('lanceFGTS_v').disabled = !isLance || !document.getElementById('fgtsOn').checked;
+  recalc();
+});
+
+// FGTS toggle (habilita % E R$ juntos)
+document.getElementById('fgtsOn').addEventListener('change',e=>{
+  document.getElementById('lanceFGTS').disabled = !e.target.checked;
+  document.getElementById('lanceFGTS_v').disabled = !e.target.checked;
+  if(!e.target.checked) {
+    document.getElementById('lanceFGTS').value='';
+    document.getElementById('lanceFGTS_v').value='';
+  }
+  recalc();
+});
+
+// Forma pagamento
+document.getElementById('fpTipo').addEventListener('change',e=>{
+  document.getElementById('fpEntrada').disabled = e.target.value !== 'financiamento';
+  if(e.target.value !== 'financiamento') document.getElementById('fpEntrada').value='';
+  recalc();
+});
+
+// Investimento toggle (3 caixas: CDI, Rentab, Prazo)
+document.getElementById('invOn').addEventListener('change',e=>{
+  document.getElementById('invCDI').disabled = !e.target.checked;
+  document.getElementById('invRent').disabled = !e.target.checked;
+  document.getElementById('invPrazo').disabled = !e.target.checked;
+  recalc();
+});
+
+// Auto-calcular % Lance Total
+['lanceP','lanceE','lanceFGTS'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', () => {
+    const p = unmaskPct(document.getElementById('lanceP').value);
+    const e = unmaskPct(document.getElementById('lanceE').value);
+    const f = unmaskPct(document.getElementById('lanceFGTS').value);
+    document.getElementById('lanceTotalCalc').value = (p+e+f).toFixed(4).replace('.',',') + ' %';
+  });
+});
+
+// Bidirecional R$ → % (editar valor do lance atualiza o percentual)
+let _lanceReverseSync = false;
+function setupLanceReverse(rsId, pctId) {
+  const rsEl = document.getElementById(rsId);
+  const pctEl = document.getElementById(pctId);
+  rsEl.addEventListener('input', e => {
+    e.target.value = maskMoney(e.target.value);
+    _lanceReverseSync = true;
+    // Calcular valorRef no momento (igual recalc)
+    const credito = unmaskMoney(document.getElementById('credito').value);
+    const reajuste = unmaskPct(document.getElementById('reajuste').value)/100;
+    const tipoReajuste = document.getElementById('tipoReajuste').value;
+    const expectativa = parseInt(document.getElementById('expectativa').value)||0;
+    let creditoAtualizado = credito;
+    if(reajuste>0 && tipoReajuste && expectativa > 0) {
+      creditoAtualizado = credito * Math.pow(1+reajuste, Math.max(0, Math.floor((expectativa-1)/12)));
+    }
+    const tipoLance = document.getElementById('tipoLance').value;
+    let valorRef = creditoAtualizado;
+    if(tipoLance === 'categoria') valorRef = creditoAtualizado * (1 + 0.20);
+    const valorRs = unmaskMoney(rsEl.value);
+    if(valorRef > 0) {
+      const novoPct = (valorRs / valorRef) * 100;
+      pctEl.value = novoPct.toFixed(4).replace('.',',') + ' %';
+    }
+    _lanceReverseSync = false;
+    recalc();
+  });
+}
+setupLanceReverse('lanceP_v', 'lanceP');
+setupLanceReverse('lanceE_v', 'lanceE');
+
+function recalc(){
+  const credito = unmaskMoney(document.getElementById('credito').value);
+  const prazo = parseInt(document.getElementById('prazo').value||'0',10);
+  const taxaAdm = unmaskPct(document.getElementById('taxaAdm').value)/100;
+  const fundo = unmaskPct(document.getElementById('fundo').value)/100;
+  const reajuste = unmaskPct(document.getElementById('reajuste').value)/100;
+  const tipoReajuste = document.getElementById('tipoReajuste').value;
+  const expectativa = parseInt(document.getElementById('expectativa').value||'1',10);
+  const tipoCont = document.getElementById('tipoCont').value;
+  const tipoLance = document.getElementById('tipoLance').value;
+  const _isBrad = (tipoLance === 'bradesco-imovel' || tipoLance === 'bradesco-auto');
+  const _fatorBrad = (tipoLance === 'bradesco-imovel') ? 1.0425 : (tipoLance === 'bradesco-auto') ? 1.0525 : 1;
+  const pP = tipoCont==='lance' ? unmaskPct(document.getElementById('lanceP').value)/100 : 0;
+  // Bradesco (Imóvel/Auto): só % sobre Categoria, não tem embutido nem FGTS
+  const pE = (tipoCont==='lance' && !_isBrad) ? unmaskPct(document.getElementById('lanceE').value)/100 : 0;
+  const pFGTS = (tipoCont==='lance' && !_isBrad && document.getElementById('fgtsOn').checked) ? unmaskPct(document.getElementById('lanceFGTS').value)/100 : 0;
+
+  // Parcela inicial
+  const totalDevido = credito*(1+taxaAdm+fundo);
+  const parcelaBase = prazo>0 ? totalDevido/prazo : 0;
+  document.getElementById('parcelaInicial').textContent = fmtMoney(parcelaBase);
+
+  // Crédito atualizado (com reajuste anual)
+  // Crédito atualizado: reajuste aplica nos aniversários ANTES da contemplação
+  // (no aniversário exato da contemp, reajuste ainda não foi aplicado — bate com referencial Conkey)
+  let creditoAtualizado = credito;
+  if(reajuste>0 && tipoReajuste && expectativa > 0) {
+    const aniversariosCompletos = Math.max(0, Math.floor((expectativa - 1) / 12));
+    creditoAtualizado = credito * Math.pow(1+reajuste, aniversariosCompletos);
+  }
+  document.getElementById('creditoAtualizado').value = fmtMoney(creditoAtualizado);
+
+  // Saldo devedor no momento da contemplação (iterativo, com reajuste anual)
+  let saldoNoMomentoCont = totalDevido;
+  let parcelaAtualNoMomento = parcelaBase;
+  for(let m = 1; m <= expectativa; m++) {
+    saldoNoMomentoCont -= parcelaAtualNoMomento;
+    // Reajuste aplica no aniversário ANTES da contemplação (não no mês exato da contemp)
+    if(reajuste>0 && tipoReajuste && m % 12 === 0 && m < expectativa) {
+      saldoNoMomentoCont *= (1+reajuste);
+      parcelaAtualNoMomento *= (1+reajuste);
+    }
+  }
+  saldoNoMomentoCont = Math.max(0, saldoNoMomentoCont);
+
+  // Valor de referência (depende do tipo de lance)
+  let valorRef = creditoAtualizado;
+  if(tipoLance === 'categoria' || tipoLance === 'cat-carta' || _isBrad) valorRef = creditoAtualizado * (1 + taxaAdm + fundo);
+  else if(tipoLance === 'saldo') valorRef = saldoNoMomentoCont;
+  document.getElementById('valorRef').value = fmtMoney(valorRef);
+
+  // Lances — Bradesco divide o lance R$ pelo Fator (1,0425 imóvel · 1,0525 auto)
+  const categoriaTotal = creditoAtualizado * (1 + 2 * (taxaAdm + fundo));
+  const lanceProprios_v = (tipoLance === 'cat-carta')
+    ? categoriaTotal * pP
+    : (valorRef * pP) / _fatorBrad;
+  const lanceEmbutido_v = (tipoLance === 'cat-carta') ? creditoAtualizado * pE : valorRef * pE;
+  const lanceFGTS_v = valorRef * pFGTS;
+  const valorTotalLance = lanceProprios_v + lanceEmbutido_v + lanceFGTS_v;
+  // Atualiza R$ a partir de %, exceto quando o usuário acabou de editar o R$
+  if(!_lanceReverseSync) {
+    if(document.activeElement?.id !== 'lanceP_v') document.getElementById('lanceP_v').value = fmtMoney(lanceProprios_v);
+    if(document.activeElement?.id !== 'lanceE_v') document.getElementById('lanceE_v').value = fmtMoney(lanceEmbutido_v);
+    document.getElementById('lanceFGTS_v').value = fmtMoney(lanceFGTS_v);
+  }
+  document.getElementById('valorTotalLance').value = fmtMoney(valorTotalLance);
+
+  // Crédito disponível (destaque visual igual referencial Conkey)
+  const creditoDisp = creditoAtualizado - lanceEmbutido_v - lanceFGTS_v;
+  document.getElementById('creditoDisponivel').textContent = fmtMoney(creditoDisp);
+
+  // Pós-contemplação (mesma lógica do Op. Simples)
+  const saldoApoLance = Math.max(0, saldoNoMomentoCont - valorTotalLance);
+  const prazoRestante = Math.max(0, prazo - expectativa);
+  const parcReducaoParcela = prazoRestante > 0 ? saldoApoLance / prazoRestante : 0;
+  const parcReducaoPrazo = parcelaAtualNoMomento;
+  const novoPrazoReducao = parcReducaoPrazo > 0 ? Math.ceil(saldoApoLance / parcReducaoPrazo) : 0;
+
+  // CET — fórmula Conkey v2 (engenharia reversa, com reajuste cumulativo):
+  //   total_pagas = Σ parcelas pagas com reajuste (pré + pós contemplação)
+  //   custo       = total_pagas + lance total − crédito (custo financeiro real)
+  //   disp        = crédito × (1 − lance total %)       (capital líquido — convenção Alavancagem)
+  //   prazoEf Reduç Parcela = prazo total
+  //   prazoEf Reduç Prazo   = expectativa + novo prazo (efetivo de pagamento)
+  //   mensal_real = (1 + custo / disp)^(1 / prazoEf) − 1
+  //   mensal_arred = arredondado p/ 4 casas (= 2 casas no %)
+  //   anual = (1 + mensal_arred)^12 − 1
+  // A v1 usava custo = (adm+fr) × crédito (nominal), o que ignorava o
+  // reajuste cumulativo nas parcelas. CET ficava ~33% menor que Conkey.
+  function totalParcelasComReajuste(parcelaPosCont, prazoPosCont) {
+    let total = 0;
+    let pAtual = parcelaBase;
+    // Pré-contemplação (mesma convenção do saldo: reaj só se m < expectativa)
+    for (let m = 1; m <= expectativa; m++) {
+      total += pAtual;
+      if (reajuste > 0 && tipoReajuste && m % 12 === 0 && m < expectativa) pAtual *= (1 + reajuste);
+    }
+    // Pós-contemplação (reaj continua nos aniversários)
+    let pPos = parcelaPosCont;
+    for (let m = expectativa + 1; m <= expectativa + prazoPosCont; m++) {
+      total += pPos;
+      if (reajuste > 0 && tipoReajuste && m % 12 === 0) pPos *= (1 + reajuste);
+    }
+    return total;
+  }
+  function cet(prazoEf, parcelaPosCont, prazoPosCont) {
+    const lanceTotal_pct = pP + pE + pFGTS;
+    const disp = credito * (1 - lanceTotal_pct);
+    if(prazoEf <= 0 || disp <= 0) return {m:0, a:0};
+    const totalPagas = totalParcelasComReajuste(parcelaPosCont, prazoPosCont);
+    const custo = totalPagas + valorTotalLance - credito;
+    const ratio = custo / disp;
+    const m = Math.round((Math.pow(1+ratio, 1/prazoEf) - 1) * 10000) / 10000;
+    const a = Math.pow(1+m, 12) - 1;
+    return {m: m*100, a: a*100};
+  }
+  const cetA = cet(prazo,                            parcReducaoParcela, prazoRestante);
+  const cetB = cet(expectativa + novoPrazoReducao,   parcReducaoPrazo,   novoPrazoReducao);
+  document.getElementById('reducaoParcela_parc').textContent = fmtMoney(parcReducaoParcela);
+  document.getElementById('reducaoParcela_prazo').textContent = prazoRestante;
+  document.getElementById('reducaoParcela_cm').textContent = fmtPct(cetA.m, 2);
+  document.getElementById('reducaoParcela_ca').textContent = fmtPct(cetA.a, 2);
+  document.getElementById('reducaoPrazo_parc').textContent = fmtMoney(parcReducaoPrazo);
+  document.getElementById('reducaoPrazo_prazo').textContent = novoPrazoReducao;
+  document.getElementById('reducaoPrazo_cm').textContent = fmtPct(cetB.m, 2);
+  document.getElementById('reducaoPrazo_ca').textContent = fmtPct(cetB.a, 2);
+
+  // Salva estado para o modal Analítico (memória de cálculo)
+  if (window.AnaliticoCet) {
+    const lanceTotalValor = credito * (pP + pE + pFGTS);
+    const baseDados = {
+      credito: credito,
+      taxaAdm: taxaAdm,
+      fundo: fundo,
+      lanceProprios:   lanceTotalValor, // Alavancagem usa lance total no denominador
+      valorTotalLance: lanceTotalValor, // mesmo valor (custo financeiro)
+      parcelaInicial:  parcelaAtualNoMomento,
+      parcelaBase:     parcelaBase,
+      expectativa:     expectativa,
+      reajuste:        reajuste,
+      tipoReajuste:    tipoReajuste,
+      period:          12, // Alavancagem usa reaj anual fixo (m % 12 === 0)
+    };
+    AnaliticoCet.set('parcela', Object.assign({}, baseDados, {
+      titulo: 'Pós contemplação · Redução de parcela',
+      prazoEf: prazo,
+      parcelaPos: parcReducaoParcela,
+      prazoRestPos: prazoRestante,
+      cetMensal: cetA.m / 100,
+      cetAnual: cetA.a / 100,
+    }));
+    AnaliticoCet.set('prazo', Object.assign({}, baseDados, {
+      titulo: 'Pós contemplação · Redução de prazo',
+      prazoEf: expectativa + novoPrazoReducao,
+      parcelaPos: parcReducaoPrazo,
+      prazoRestPos: novoPrazoReducao,
+      cetMensal: cetB.m / 100,
+      cetAnual: cetB.a / 100,
+    }));
+  }
+
+  // === IMÓVEL ===
+  const imValor = unmaskMoney(document.getElementById('imValor').value);
+  const imCompra = unmaskMoney(document.getElementById('imCompra').value);
+  const imValorizacao = unmaskPct(document.getElementById('imValorizacao').value)/100;
+  const descontoPct = imValor>0 ? ((imValor - imCompra)/imValor)*100 : 0;
+  document.getElementById('imDesconto').value = fmtPct(descontoPct, 2);
+
+  // === FORMA DE PAGAMENTO ===
+  const fpTipo = document.getElementById('fpTipo').value;
+  const fpEntrada = unmaskMoney(document.getElementById('fpEntrada').value);
+  const fpEntradaPct = imCompra>0 ? (fpEntrada/imCompra)*100 : 0;
+  document.getElementById('fpEntradaPct').value = fmtPct(fpEntradaPct, 2);
+
+  let fpTotalParc = 0, fpSaldoFinal = 0, fpTotal = imCompra;
+  if(fpTipo === 'financiamento') {
+    const fpFinanciado = Math.max(0, imCompra - fpEntrada);
+    const finJuros = 0.1299;
+    const finPrazo = 420;
+    const iMensal = Math.pow(1+finJuros, 1/12) - 1;
+    if(fpFinanciado>0) {
+      const amort = fpFinanciado/finPrazo;
+      const meses = Math.min(prazo, finPrazo);
+      let saldo = fpFinanciado;
+      for(let m=1; m<=meses; m++) {
+        fpTotalParc += amort + saldo*iMensal;
+        saldo -= amort;
+      }
+      fpSaldoFinal = saldo;
+    }
+    fpTotal = fpEntrada + fpTotalParc + fpSaldoFinal;
+  }
+  document.getElementById('fpTotalParc').value = fmtMoney(fpTotalParc);
+  document.getElementById('fpSaldo').value = fmtMoney(fpSaldoFinal);
+  document.getElementById('fpTotal').value = fmtMoney(fpTotal);
+
+  // === ALUGUEL ===
+  const alPrestacao = unmaskMoney(document.getElementById('alPrestacao').value);
+  const alCorrecao = unmaskPct(document.getElementById('alCorrecao').value)/100;
+  const alPct = imCompra>0 ? (alPrestacao/imCompra)*100 : 0;
+  document.getElementById('alPct').value = fmtPct(alPct, 2);
+
+  // Auto-preencher prazo de investimento com prazo restante após contemplação
+  const invPrazoEl = document.getElementById('invPrazo');
+  const prazoRestanteParaInv = Math.max(0, prazo - expectativa);
+  if(document.activeElement?.id !== 'invPrazo' && !invPrazoEl.value) invPrazoEl.value = prazoRestanteParaInv;
+
+  // Diferença aluguel × parcela (fórmula descoberta por engenharia reversa do referencial)
+  // Período = sum_aluguel(reajustado anualmente N_anos) - parcela_red × N_meses
+  // N_anos = ceil((prazo - expectativa) / 12), N_meses = N_anos × 12
+  const N_anos = Math.max(0, Math.ceil((prazo - expectativa) / 12));
+  const N_meses = N_anos * 12;
+  let sum_aluguel = 0;
+  let alYr = alPrestacao;
+  for(let yr = 0; yr < N_anos; yr++) {
+    sum_aluguel += alYr * 12;
+    alYr *= (1 + alCorrecao);
+  }
+  const sum_parcela_red = parcReducaoParcela * N_meses;
+  const diferencaAcum = sum_aluguel - sum_parcela_red;
+  const diferencaMedia = N_meses > 0 ? diferencaAcum / N_meses : 0;
+
+  // Investimento da diferença mensal (só quando toggle ON)
+  let diferencaInvestida = 0;
+  const invOn = document.getElementById('invOn').checked;
+  const invCDI_aa = invOn ? unmaskPct(document.getElementById('invCDI').value)/100 : 0;
+  const invRent = invOn ? unmaskPct(document.getElementById('invRent').value)/100 : 0;
+  const invPrazoMeses = invOn ? (parseInt(invPrazoEl.value)||N_meses) : 0;
+  const invTaxa = invCDI_aa * invRent;
+  const invMensal = invTaxa>0 ? Math.pow(1+invTaxa, 1/12) - 1 : 0;
+  if(invOn && invMensal > 0 && diferencaMedia > 0) {
+    // Annuity future value: PMT × ((1+r)^n - 1) / r
+    diferencaInvestida = diferencaMedia * (Math.pow(1+invMensal, invPrazoMeses) - 1) / invMensal;
+  }
+  document.getElementById('alDiferenca').value = fmtMoney(diferencaMedia);
+
+  // === RESULTADO ===
+  const anos = prazo/12;
+  // Valor alavancado do imóvel = crédito disponível - valor do imóvel
+  // (positivo = sobra; negativo = lance embutido reduz o que se pode comprar)
+  const valorAlavancado = creditoDisp - imValor;
+
+  // Valorização do imóvel = valor futuro acumulado (igual referencial Conkey)
+  const imovelFinal = imValor * Math.pow(1+imValorizacao, anos);
+  const valorizacaoFinal = imovelFinal;
+
+  // Patrimônio total = Valor alavancado + Valorização imóvel + Diferença aluguel/parcela + Investimento
+  const patrimonio = valorAlavancado + valorizacaoFinal + diferencaAcum + diferencaInvestida;
+
+  document.getElementById('resAlavancado').textContent = fmtMoney(valorAlavancado);
+  document.getElementById('resValorizacao').textContent = fmtMoney(valorizacaoFinal);
+  document.getElementById('resDiferenca').textContent = fmtMoney(diferencaAcum);
+  document.getElementById('resInvest').textContent = fmtMoney(diferencaInvestida);
+  document.getElementById('rowInvestimento').style.display = invOn ? '' : 'none';
+  document.getElementById('resPatrimonio').textContent = fmtMoney(patrimonio);
+}
+
+document.getElementById('resetConsorcio').addEventListener('click',()=>{
+  ['credito','prazo','taxaAdm','fundo','reajuste','seguro','redutor','adesao','lanceP','lanceE','lanceFGTS','lanceP_v','lanceE_v','lanceFGTS_v'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('expectativa').value='1';
+  document.getElementById('tipoReajuste').value='';
+  document.getElementById('tipoCont').value='sorteio';
+  document.getElementById('tipoLance').value='carta';
+  ['seguroOn','redutorOn','adesaoOn','fgtsOn'].forEach(id=>document.getElementById(id).checked=false);
+  ['seguro','redutor','adesao','tipoLance','lanceP','lanceE','lanceFGTS'].forEach(id=>document.getElementById(id).disabled=true);
+  recalc();
+});
+document.getElementById('resetImovel').addEventListener('click',()=>{
+  ['imValor','imCompra','fpEntrada','alPrestacao'].forEach(id=>document.getElementById(id).value='');
+  recalc();
+});
+document.getElementById('btnLimpar').addEventListener('click',()=>{
+  document.getElementById('resetConsorcio').click();
+  document.getElementById('resetImovel').click();
+  const obsEl = document.getElementById('alav-observacoes'); if (obsEl) obsEl.value = '';
+});
+document.getElementById('btnLimparObs').addEventListener('click',()=>{
+  const obsEl = document.getElementById('alav-observacoes'); if (obsEl) obsEl.value = '';
+});
+// ─── COLETA DE BLOCOS PARA O PDF ───
+function _coletarBlocosAlavancagem() {
+  const _v = id => (document.getElementById(id)?.value || document.getElementById(id)?.textContent || '').trim() || '-';
+  const _sel = id => { const el = document.getElementById(id); return el?.options?.[el.selectedIndex]?.text || '-'; };
+
+  return [
+    { tipo:'card', titulo:'DADOS DA COTA', linhas:[
+      { campos:[
+        { label:'Crédito',                 value: _v('credito') },
+        { label:'Prazo',                   value: _v('prazo') + ' meses' },
+        { label:'Taxa de administração',   value: _v('taxaAdm') },
+        { label:'Fundo de reserva',        value: _v('fundo') }
+      ], destaque:{ label:'Parcela inicial', value: _v('parcelaInicial') }},
+      { campos:[
+        { label:'Tipo de reajuste',        value: _sel('tipoReajuste') },
+        { label:'Reajuste',                value: _v('reajuste') }
+      ]}
+    ]},
+    { tipo:'card', titulo:'DETALHES DA CONTEMPLAÇÃO', linhas:[
+      { campos:[
+        { label:'Modalidade',              value: _sel('tipoContemplacao') },
+        { label:'Expectativa',             value: _v('expectativa') + ' meses' },
+        { label:'Crédito atualizado',      value: _v('creditoAtualizado') },
+        { label:'Base de cálculo',         value: _sel('tipoLance') }
+      ], destaque:{ label:'Crédito disponível', value: _v('creditoDisponivel') }},
+      { campos:[
+        { label:'Valor de referência',     value: _v('valorRef') },
+        { label:'Recursos próprios',       value: _v('lanceP') + ' | ' + _v('lanceP_v') },
+        { label:'Total de lance',          value: _v('lanceTotalCalc') }
+      ]}
+    ]},
+    { tipo:'tabela', titulo:'COMPARATIVO APÓS CONTEMPLAÇÃO',
+      colunas:['REDUÇÃO DE PARCELA','REDUÇÃO DE PRAZO'],
+      linhas:[
+        { label:'Parcela',                 valores:[_v('reducaoParcela_parc'),  _v('reducaoPrazo_parc')] },
+        { label:'Prazo restante',          valores:[_v('reducaoParcela_prazo')+' meses', _v('reducaoPrazo_prazo')+' meses'] },
+        { label:'CET (Custo Efetivo Total)', valores:[_v('reducaoParcela_cm')+' ao mês | '+_v('reducaoParcela_ca')+' ao ano', _v('reducaoPrazo_cm')+' ao mês | '+_v('reducaoPrazo_ca')+' ao ano'] }
+      ]
+    },
+    { tipo:'card', titulo:'OPERAÇÃO: IMÓVEL', linhas:[
+      { campos:[
+        { label:'Valor de mercado',         value: _v('imValor') },
+        { label:'Valor de compra',          value: _v('imCompra') },
+        { label:'Índice de valorização anual', value: _v('imValorizacao') }
+      ]}
+    ]},
+    { tipo:'card', titulo:'OPERAÇÃO: ALUGUEL', linhas:[
+      { campos:[
+        { label:'Prestação do aluguel',     value: _v('alPrestacao') },
+        { label:'% de aluguel',             value: _v('alPct') },
+        { label:'Índice de correção anual', value: _v('alCorrecao') },
+        { label:'Aluguel × parcela (média)', value: _v('alDiferenca') }
+      ]}
+    ]},
+    { tipo:'card', titulo:'RESULTADO DA ALAVANCAGEM', linhas:[
+      { campos:[
+        { label:'Valor alavancado do imóvel', value: _v('resAlavancado') },
+        { label:'Valorização do imóvel',      value: _v('resValorizacao') },
+        { label:'Aluguel × parcela (período)', value: _v('resDiferenca') }
+      ], destaque:{ label:'Patrimônio total', value: _v('resPatrimonio') }}
+    ]}
+  ];
+}
+
+document.getElementById('btnPdf').addEventListener('click', async () => {
+  const btn = document.getElementById('btnPdf');
+  const t = btn.textContent;
+  btn.textContent = 'Gerando PDF...';
+  btn.disabled = true;
+  try {
+    await PdfMasterPrime.gerar({
+      tituloEstrategia: 'Construindo Patrimônio',
+      filename: 'master-prime-alavancagem-patrimonial',
+      blocos: _coletarBlocosAlavancagem(),
+      observacoes: (document.getElementById('alav-observacoes')?.value || '').trim()
+    });
+  } catch (err) {
+    console.error(err);
+    alert('Erro ao gerar PDF: ' + err.message);
+  } finally {
+    btn.textContent = t;
+    btn.disabled = false;
+  }
+});
+
+// Init
+['tipoLance','lanceP','lanceE','lanceFGTS','fpEntrada'].forEach(id=>document.getElementById(id).disabled=true);
+recalc();
+
+// ═══════════════════════════════════════════════════════
+// SIMULAÇÕES SALVAS (48h) — SimulacaoStore
+// ═══════════════════════════════════════════════════════
+(function initSimStore() {
+  if (!window.SimulacaoStore) return;
+  window.SimulacaoStore.init({
+    supabaseUrl: 'https://jhwciwvgagnuxakukyob.supabase.co',
+    supabaseKey: 'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx',
+    simulador:   'alavancagem',
+    mountPoint:  document.getElementById('simStoreMount'),
+    serialize:   () => window.SimulacaoStore.snapshotForm(),
+    restore:     (dados) => window.SimulacaoStore.restoreForm(dados, { recalc: recalc })
+  });
+})();
+</script>
+</body>
+</html>

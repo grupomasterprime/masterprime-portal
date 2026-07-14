@@ -1,0 +1,1271 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Adesões</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --mp-navy:   #2D3F5E;
+  --mp-yellow: #C8C84A;
+  --mp-teal:   #4DBCC8;
+  --bg:        #F4F6FA;
+  --card:      #FFFFFF;
+  --border:    #E2E8F0;
+  --border2:   #CBD5E1;
+  --text:      #1E293B;
+  --text2:     #64748B;
+  --text3:     #94A3B8;
+  --green:     #16A34A; --green-bg: #F0FDF4;
+  --red:       #DC2626; --red-bg:   #FEF2F2;
+  --amber:     #D97706; --amber-bg: #FFFBEB;
+  --blue:      #2563EB; --blue-bg:  #EFF6FF;
+  --r: 10px;
+  --shadow: 0 1px 3px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.08);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; min-height: 100vh; }
+.mono { font-family: 'DM Mono', monospace; }
+
+.page-header {
+  background: var(--mp-navy); color: #fff;
+  padding: 20px 24px; display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px; position: sticky; top: 0; z-index: 10;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+}
+.page-header .logo { display: flex; align-items: center; gap: 12px; }
+.page-header .logo img { height: 36px; }
+.page-header h1 { font-size: 20px; font-weight: 700; letter-spacing: -.3px; }
+.page-header .sub { font-size: 12px; color: rgba(255,255,255,.6); margin-top: 2px; }
+
+.container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+.link-card {
+  background: linear-gradient(135deg, var(--mp-navy) 0%, #1a2a42 100%);
+  color: #fff; border-radius: var(--r); padding: 16px 20px;
+  margin-bottom: 24px; display: flex; align-items: center; gap: 12px;
+  flex-wrap: wrap; box-shadow: var(--shadow-md);
+}
+.link-card .link-icon {
+  background: var(--mp-yellow); width: 42px; height: 42px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.link-card .link-info { flex: 1; min-width: 200px; }
+.link-card .link-label {
+  font-size: 10px; text-transform: uppercase; letter-spacing: 1px;
+  color: rgba(255,255,255,.6); margin-bottom: 4px;
+}
+.link-card .link-url {
+  font-size: 13px; font-family: 'DM Mono', monospace;
+  background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2);
+  padding: 8px 12px; border-radius: 6px; word-break: break-all;
+}
+.link-card .btn-copy-link {
+  background: var(--mp-teal); color: #fff; border: none;
+  padding: 10px 18px; border-radius: 6px; font-weight: 600;
+  font-size: 12px; cursor: pointer; display: flex; align-items: center; gap: 6px;
+  transition: background .2s, transform .1s; white-space: nowrap;
+}
+.link-card .btn-copy-link:hover { background: #3AABB8; transform: translateY(-1px); }
+
+/* Links Grid — 4 cards (Master Prime, Porto, Itaú, Bradesco) */
+.links-section { margin-bottom: 24px; }
+.links-title {
+  font-size: 11px; font-weight: 700; color: var(--text2);
+  text-transform: uppercase; letter-spacing: .8px;
+  margin-bottom: 10px; padding-left: 4px;
+}
+.links-grid {
+  display: grid; gap: 12px;
+  grid-template-columns: 1fr 1fr;
+}
+@media (max-width: 800px) { .links-grid { grid-template-columns: 1fr; } }
+.link-mini {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 14px 16px;
+  box-shadow: var(--shadow);
+  display: flex; align-items: center; gap: 14px;
+  transition: transform .12s, box-shadow .12s, border-color .12s;
+  border-left-width: 4px;
+}
+.link-mini.mp { border-left-color: #2D3F5E; }
+.link-mini.po { border-left-color: #003D7C; }
+.link-mini.it { border-left-color: #EC7000; }
+.link-mini.br { border-left-color: #CC092F; }
+.link-mini:hover { transform: translateY(-1px); box-shadow: var(--shadow-md); }
+.link-mini-badge {
+  width: 56px; height: 44px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  padding: 4px;
+  background: #fff;
+  border: 1px solid var(--border);
+}
+.link-mini-badge img {
+  max-width: 100%; max-height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.link-mini.mp .link-mini-badge { background: #fff; }
+.link-mini.po .link-mini-badge { background: #fff; }
+.link-mini.it .link-mini-badge { background: #fff; }
+.link-mini.br .link-mini-badge { background: #fff; }
+.link-mini-info { flex: 1; min-width: 0; overflow: hidden; }
+.link-mini-label {
+  font-size: 13px; font-weight: 700; color: var(--mp-navy);
+  letter-spacing: -.1px;
+  margin-bottom: 2px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.link-mini-sub {
+  font-size: 11px;
+  color: var(--text2);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.link-mini-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.link-mini-copy {
+  background: var(--mp-navy); color: #fff;
+  border: 0; padding: 8px 14px; border-radius: 7px;
+  font-weight: 600; font-size: 11.5px; cursor: pointer;
+  display: flex; align-items: center; gap: 5px;
+  transition: background .12s, transform .08s;
+}
+.link-mini-copy:hover { background: #1F2D45; transform: translateY(-1px); }
+.link-mini-copy.ok { background: var(--green); }
+/* botão de copiar com a cor da admin */
+.link-mini.po .link-mini-copy { background: #003D7C; }
+.link-mini.po .link-mini-copy:hover { background: #002B57; }
+.link-mini.it .link-mini-copy { background: #EC7000; }
+.link-mini.it .link-mini-copy:hover { background: #C45F00; }
+.link-mini.br .link-mini-copy { background: #CC092F; }
+.link-mini.br .link-mini-copy:hover { background: #A50723; }
+
+.search-box {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 16px 20px; margin-bottom: 20px;
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  box-shadow: var(--shadow);
+}
+.search-input {
+  flex: 1; min-width: 250px; padding: 10px 14px;
+  border: 1.5px solid var(--border2); border-radius: var(--r);
+  font-size: 13px; font-family: 'Inter', sans-serif; outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.search-input:focus { border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,.12); }
+.search-info { font-size: 11px; color: var(--text2); white-space: nowrap; }
+
+.ad-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r); box-shadow: var(--shadow); margin-bottom: 12px; overflow: hidden;
+}
+.ad-card-header {
+  padding: 14px 20px; display: flex; align-items: center; justify-content: space-between;
+  cursor: pointer; user-select: none; transition: background .1s;
+  border-left: 4px solid transparent;
+}
+.ad-card.open .ad-card-header { border-left-color: var(--mp-teal); background: #F8FDFE; }
+.ad-card-header:hover { background: #F8FAFC; }
+.ad-card-header-left { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.ad-card-header-right { display: flex; align-items: center; gap: 8px; }
+.ad-card-body { padding: 0 20px 20px; display: none; }
+.ad-card.open .ad-card-body { display: block; }
+
+.tag {
+  display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px;
+  font-size: 9.5px; font-weight: 600; font-family: 'DM Mono', monospace;
+}
+.tag-bradesco { background: #FEE2E2; color: #DC2626; }
+.tag-itau     { background: #FEF3C7; color: #D97706; }
+.tag-porto    { background: #EFF6FF; color: #2563EB; }
+.tag-master_prime { background: #2D3F5E; color: #C8C84A; font-weight: 700; }
+.tag-pf       { background: #F0F9FF; color: #0369A1; }
+.tag-pj       { background: #FDF4FF; color: #7E22CE; }
+.tag-status   { background: #F1F5F9; color: #475569; }
+
+.detail-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.detail-item {
+  background: var(--bg); border-radius: 6px; padding: 10px 14px;
+  position: relative; transition: box-shadow .15s;
+}
+.detail-item:hover { box-shadow: 0 0 0 2px var(--mp-teal); }
+.detail-item-label { font-size: 9.5px; color: var(--text3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; font-weight: 600; }
+.detail-item-value { font-size: 13px; font-weight: 500; color: var(--text); word-break: break-word; }
+.detail-item-input {
+  font-size: 13px; font-weight: 500; color: var(--text);
+  width: 100%; border: 0; padding: 0; background: transparent;
+  font-family: inherit; outline: 0;
+}
+.detail-item-input:focus { background: #FFF; outline: 1.5px solid var(--mp-teal); border-radius: 4px; padding: 2px 4px; margin: -2px -4px; }
+.detail-item.dirty { box-shadow: 0 0 0 2px var(--mp-yellow, #C8C84A); }
+.salvar-bar {
+  position: sticky; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(0deg, #fff 70%, transparent);
+  padding: 16px 0 8px; margin-top: 16px;
+  display: flex; gap: 10px; align-items: center; justify-content: flex-end;
+  border-top: 1px dashed var(--border, #e5e7eb);
+}
+.salvar-bar.hidden { display: none; }
+.salvar-bar .alteracoes-count {
+  font-size: 12px; color: var(--text2); font-weight: 600; margin-right: auto;
+}
+.salvar-btn {
+  background: #10B981; color: #fff; border: 0; padding: 8px 18px;
+  border-radius: 6px; font-size: 13px; font-weight: 700; cursor: pointer;
+}
+.salvar-btn:hover { background: #059669; }
+.salvar-btn:disabled { opacity: .5; cursor: not-allowed; }
+.cancelar-btn {
+  background: #fff; color: var(--text2); border: 1px solid var(--border, #e5e7eb);
+  padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer;
+}
+.copy-btn {
+  position: absolute; top: 6px; right: 8px; background: none; border: none; cursor: pointer;
+  color: var(--text3); padding: 4px; border-radius: 4px; display: flex; align-items: center; transition: all .15s;
+}
+.copy-btn:hover { background: #fff; color: var(--mp-navy); }
+.copy-all-btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+  background: var(--mp-navy); color: #fff; border: none; border-radius: 6px;
+  font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all .15s;
+}
+.copy-all-btn:hover { background: #1E2D45; }
+
+.section-label {
+  font-size: 10px; font-weight: 700; color: var(--text2);
+  text-transform: uppercase; letter-spacing: .7px;
+  margin: 20px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border);
+}
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+  border: none; border-radius: 6px; font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: 'Inter', sans-serif; transition: all .15s;
+}
+.btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border2); }
+.btn-outline:hover { background: var(--bg); }
+.btn-teal { background: var(--mp-teal); color: #fff; }
+.btn-teal:hover { background: #3AABB8; }
+
+.empty-state { text-align: center; padding: 60px 24px; color: var(--text2); }
+.spinner {
+  display: inline-block; width: 20px; height: 20px; border: 2px solid var(--border);
+  border-top-color: var(--mp-teal); border-radius: 50%; animation: spin .7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.unauth-box {
+  max-width: 400px; margin: 80px auto; text-align: center;
+  background: #fff; padding: 40px; border-radius: 12px; box-shadow: var(--shadow-md);
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translateY(10px); }
+  20% { opacity: 1; transform: translateY(0); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+.toast {
+  position: fixed; bottom: 30px; right: 30px;
+  background: var(--mp-navy); color: #fff; padding: 12px 24px;
+  border-radius: 8px; font-weight: 600; font-size: 13px;
+  z-index: 9999; animation: fadeInOut 2s ease forwards;
+  box-shadow: 0 4px 12px rgba(0,0,0,.2);
+}
+
+@media (max-width: 600px) {
+  .detail-grid { grid-template-columns: 1fr; }
+  .ad-card-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+  /* No celular: badge+nome em cima, botões Copiar/Abrir em linha cheia embaixo */
+  .link-mini { flex-wrap: wrap; row-gap: 12px; }
+  .link-mini-info { min-width: calc(100% - 70px); }
+  .link-mini-actions { width: 100%; }
+  .link-mini-actions .link-mini-copy { flex: 1; justify-content: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- Estado: carregando -->
+<div id="loading-state" style="display:flex; align-items:center; justify-content:center; min-height:100vh;">
+  <div class="spinner"></div>
+  <span style="margin-left:12px;color:var(--text2);">Verificando acesso...</span>
+</div>
+
+<!-- Estado: não autenticado -->
+<div id="unauth-state" style="display:none;">
+  <div class="unauth-box">
+    <div style="font-size:48px;margin-bottom:16px;">🔒</div>
+    <h2 style="color:var(--mp-navy);margin-bottom:8px;">Acesso Restrito</h2>
+    <p style="color:var(--text2);margin-bottom:24px;">Faça login no portal do consultor para acessar esta página.</p>
+    <button class="btn btn-outline" onclick="window.location.href='index.html'">Ir para o Portal</button>
+  </div>
+</div>
+
+<!-- Estado: conteúdo principal -->
+<div id="main-state" style="display:none;">
+  <div class="container">
+    <!-- LINKS DE ADESÃO — 4 cards (Master Prime / Porto / Itaú / Bradesco) -->
+    <div class="links-section">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:12px;flex-wrap:wrap">
+        <div class="links-title" style="margin-bottom:0">Links de Adesão · clique em "Copiar" e envie ao cliente</div>
+        <button class="btn btn-outline" onclick="loadAdesoes()" style="font-size:11px;padding:6px 12px;display:inline-flex;align-items:center;gap:5px;border:1px solid var(--border2);background:#fff;border-radius:7px;cursor:pointer;color:var(--mp-navy);font-weight:600">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          Atualizar
+        </button>
+      </div>
+      <div class="links-grid" id="links-grid">
+        <!-- gerado dinamicamente em renderLinks() com o código do consultor logado -->
+      </div>
+    </div>
+
+    <!-- BUSCA -->
+    <div class="search-box">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input class="search-input" id="search-input" placeholder="Buscar por nome, CPF/CNPJ, protocolo, e-mail, telefone..." oninput="scheduleFilter()">
+      <span class="search-info" id="search-info"></span>
+    </div>
+
+    <div id="adesoes-list"></div>
+  </div>
+
+  <!-- MODAL: ATRIBUIR VENDEDOR -->
+  <div id="modal-atribuir" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;padding:20px">
+    <div style="background:#fff;border-radius:12px;max-width:520px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+      <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:16px;font-weight:700;color:var(--mp-navy)">Atribuir Vendedor</div>
+          <div id="atrib-protocolo" style="font-size:11px;color:var(--text2);margin-top:2px;font-family:'DM Mono',monospace"></div>
+        </div>
+        <button onclick="fecharAtribuir()" style="background:none;border:0;padding:4px;cursor:pointer;color:var(--text2);font-size:22px;line-height:1">&times;</button>
+      </div>
+      <div style="padding:20px 24px">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:8px">Vendedor atual: <strong id="atrib-atual" style="color:var(--mp-navy)">—</strong></div>
+        <label style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.3px;display:block;margin:14px 0 5px">Selecionar novo vendedor</label>
+        <select id="atrib-select" style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:7px;font-size:13.5px;font-family:inherit">
+          <option value="">— Carregando...</option>
+        </select>
+        <button onclick="desatribuir()" style="margin-top:10px;background:#fff;color:var(--red);border:1px solid var(--red);padding:6px 12px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600">Remover vendedor (deixar sem atribuição)</button>
+      </div>
+      <div style="padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px">
+        <button onclick="fecharAtribuir()" style="background:#fff;border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:7px;cursor:pointer;font-weight:600;font-size:12.5px">Cancelar</button>
+        <button onclick="salvarAtribuicao()" style="background:var(--mp-navy);color:#fff;border:0;padding:8px 18px;border-radius:7px;cursor:pointer;font-weight:700;font-size:12.5px">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://jhwciwvgagnuxakukyob.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let allAdesoes = [];
+let filteredAdesoes = [];
+let currentUserCodigo = '';
+let currentUserTipo = '';
+let currentUserAuthId = '';
+
+// ═══ VERIFICA SESSÃO ═══
+async function checkSession() {
+  document.getElementById('loading-state').style.display = 'flex';
+  document.getElementById('unauth-state').style.display = 'none';
+  document.getElementById('main-state').style.display = 'none';
+
+  const { data: { session } } = await sb.auth.getSession();
+  if (session && session.user) {
+    const { data: profile } = await sb.from('portal_users').select('tipo, codigo_link').eq('auth_id', session.user.id).single();
+    // Admin, master, ou consultor (todos podem ver e enviar links)
+    if (profile && ['admin','master','consultor','socio','parceiro'].includes(profile.tipo)) {
+      currentUserCodigo = profile.codigo_link || '';
+      currentUserTipo = profile.tipo;
+      currentUserAuthId = session.user.id;
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('main-state').style.display = 'block';
+      renderLinks();
+      loadAdesoes();
+      return;
+    }
+  }
+  document.getElementById('loading-state').style.display = 'none';
+  // Se estamos rodando dentro do iframe do portal, recarrega o pai
+  // (deixa o index.html cuidar do redirect de login com o layout completo).
+  // Só mostra a tela interna "Faça login" se for acesso direto (fora do iframe).
+  if (window.top !== window.self) {
+    try { window.top.location.reload(); return; } catch(e) {}
+  }
+  document.getElementById('unauth-state').style.display = 'block';
+}
+
+// ═══ RENDERIZA OS 4 CARDS DE LINK ═══
+function renderLinks() {
+  const grid = document.getElementById('links-grid');
+  // Se o user logado NÃO tem código, links seriam gerados sem ?c= e a proposta
+  // chegaria sem vendedor atribuído. Bloqueia geração + mostra aviso pra pedir
+  // ao admin que rode o SQL de backfill (_supabase_codigo_link_autofill.sql).
+  if (!currentUserCodigo && currentUserTipo !== 'master' && currentUserTipo !== 'admin') {
+    grid.innerHTML = `
+      <div style="grid-column:1/-1;background:#FEF2F2;border:2px solid #DC2626;border-radius:10px;padding:18px 20px">
+        <div style="display:flex;gap:12px;align-items:flex-start">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.2" style="flex-shrink:0;margin-top:2px"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div>
+            <div style="font-weight:700;color:#991B1B;font-size:14px;margin-bottom:4px">Seu usuário está sem código de link</div>
+            <div style="font-size:12.5px;color:#7F1D1D;line-height:1.5">
+              Os links gerados aqui não conseguiriam te identificar como vendedor — propostas chegariam sem atribuição.
+              <br><strong>Peça ao admin pra rodar o SQL <code>_supabase_codigo_link_autofill.sql</code> no Supabase.</strong>
+              Depois disso, recarregue essa página.
+            </div>
+          </div>
+        </div>
+      </div>`;
+    return;
+  }
+  const base = 'https://grupomasterprime.github.io/masterprime-portal/formulario.html';
+  const c = currentUserCodigo ? '?c=' + currentUserCodigo : '';
+  const sep = c ? '&' : '?';
+  const links = [
+    { key: 'mp', label: 'Master Prime',          sub: 'Geral · todos os consórcios',  url: base + c,                            logo: 'logo-mp-icon.png' },
+    { key: 'po', label: 'Consórcio Porto Seguro', sub: 'Apenas Porto',                 url: base + c + sep + 'admin=porto',     logo: 'logo-porto.png' },
+    { key: 'it', label: 'Consórcio Itaú',         sub: 'Apenas Itaú',                  url: base + c + sep + 'admin=itau',      logo: 'logo-itau.png' },
+    { key: 'br', label: 'Consórcio Bradesco',     sub: 'Apenas Bradesco',              url: base + c + sep + 'admin=bradesco',  logo: 'logo-bradesco.png' }
+  ];
+  grid.innerHTML = links.map(l => `
+    <div class="link-mini ${l.key}">
+      <div class="link-mini-badge"><img src="${l.logo}" alt="${l.label}"></div>
+      <div class="link-mini-info">
+        <div class="link-mini-label" title="${l.url}">${l.label}</div>
+        <div class="link-mini-sub">${l.sub}</div>
+      </div>
+      <div class="link-mini-actions">
+        <button class="link-mini-copy" onclick="copyLinkMini(this, '${l.url}', '${l.label.replace(/'/g, "\\'")}')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copiar
+        </button>
+        <button class="link-mini-copy" style="background:transparent;border:1px solid currentColor;color:var(--mp-navy)" onclick="window.open('${l.url}', '_blank')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          Abrir
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// Abre o link de visualização da ficha numa nova aba (formulário preenchido e travado)
+function abrirLinkFicha(id) {
+  const url = 'https://grupomasterprime.github.io/masterprime-portal/formulario.html?view=' + id;
+  window.open(url, '_blank', 'noopener');
+}
+function copyLinkMini(btn, url, label) {
+  navigator.clipboard.writeText(url).then(() => {
+    const txt = btn.innerHTML;
+    btn.classList.add('ok');
+    btn.innerHTML = '✓ Copiado';
+    setTimeout(() => { btn.classList.remove('ok'); btn.innerHTML = txt; }, 1800);
+    showToast('Link "' + label + '" copiado!');
+  }).catch(() => alert('Erro ao copiar'));
+}
+
+// (link único antigo removido — agora usa 4 cards via renderLinks/copyLinkMini)
+
+// ═══ TOAST ═══
+function showToast(message, type = 'success') {
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  if (type === 'error') toast.style.background = '#DC2626';
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 2200);
+}
+
+// ═══ CARREGAR ADESÕES (das DUAS tabelas: portal_adesoes legacy + portal_propostas nova) ═══
+async function loadAdesoes() {
+  const listEl = document.getElementById('adesoes-list');
+  listEl.innerHTML = '<div style="text-align:center;padding:40px;"><div class="spinner"></div></div>';
+  try {
+    // 1) Tabela LEGACY (portal_adesoes — 6 fichas antigas dos meninos)
+    const { data: legacy, error: e1 } = await sb.from('portal_adesoes').select('*').order('criado_em', { ascending: false });
+    if (e1) throw e1;
+    // 2) Tabela NOVA (portal_propostas — formulário Master Prime v2)
+    //    Busca PAGINADA: o Supabase devolve no máx. 1000 linhas por request.
+    //    Percorremos em páginas de 1000 pra trazer TODAS as propostas (2.000+).
+    let novas = [];
+    try {
+      const PAGE = 1000;
+      for (let from = 0; ; from += PAGE) {
+        const { data, error } = await sb.from('portal_propostas')
+          .select('*')
+          .order('criado_em', { ascending: false })
+          .range(from, from + PAGE - 1);
+        if (error) { if (error.code === 'PGRST116') break; throw error; }
+        novas = novas.concat(data || []);
+        if (!data || data.length < PAGE) break;
+      }
+    } catch (e2) {
+      if (e2.code !== 'PGRST116') throw e2; // ignora se tabela não existe
+    }
+    // Normaliza ambas pra estrutura comum
+    const legacyNorm = (legacy || []).map(a => ({
+      id: a.id,
+      _source: 'legacy',
+      protocolo: a.protocolo,
+      nome_cliente: a.nome_cliente,
+      cpf_cnpj: a.cpf_cnpj,
+      administradora: a.administradora,
+      tipo_pessoa: a.tipo_pessoa,
+      status: a.status,
+      criado_em: a.criado_em,
+      consultor_nome: a.consultor_nome,
+      consultor_auth_id: a.consultor_auth_id,
+      dados: a.dados || {}
+    }));
+    const novasNorm = (novas || []).map(p => ({
+      id: p.id,
+      _source: 'nova',
+      protocolo: p.protocolo,
+      nome_cliente: p.nome,
+      cpf_cnpj: p.tipo === 'pf' ? p.cpf : p.cnpj,
+      administradora: p.administradora || 'pendente',
+      origem_link: p.origem_link || null,
+      tipo_pessoa: p.tipo,
+      status: p.status,
+      criado_em: p.criado_em,
+      consultor_nome: p.consultor_nome,
+      consultor_auth_id: p.consultor_auth_id,
+      dados: p  // toda a linha completa
+    }));
+    let merged = [...novasNorm, ...legacyNorm].sort((a,b) => new Date(b.criado_em) - new Date(a.criado_em));
+    // Filtro por visibilidade: admin/master veem TUDO; consultor/socio/parceiro vê só os seus
+    // (vinculados pelo auth_id do consultor atribuído à proposta)
+    if (currentUserTipo !== 'admin' && currentUserTipo !== 'master') {
+      merged = merged.filter(a => a.consultor_auth_id === currentUserAuthId);
+    }
+    // Pré-computa a string de busca de cada registro UMA vez. Antes isso era
+    // refeito (JSON.stringify) a cada tecla — principal causa da lentidão
+    // depois que a base passou de 2.000 registros.
+    merged.forEach(a => {
+      const topo = [a.nome_cliente, a.cpf_cnpj, a.protocolo, a.administradora, a.tipo_pessoa, a.status, a.consultor_nome].filter(Boolean).join(' ');
+      a._haystack = (topo + ' ' + JSON.stringify(a.dados || {})).toLowerCase();
+      a._haystackDigits = a._haystack.replace(/\D/g, '');
+    });
+    allAdesoes = merged;
+    applyFilter();
+  } catch(e) {
+    listEl.innerHTML = `<div class="empty-state"><p>Erro ao carregar: ${e.message}</p></div>`;
+  }
+}
+
+// ═══ FILTRO — busca em TODOS os campos (nome, CPF, e-mail, telefone, cidade, etc.) ═══
+// Debounce: espera o usuário parar de digitar antes de filtrar (evita travar
+// a tela a cada tecla quando há milhares de registros).
+let _filterTimer = null;
+let _pagAtual = 1;     // página atual da lista
+const PAG_TAM = 30;    // registros exibidos por página
+function scheduleFilter() {
+  clearTimeout(_filterTimer);
+  _filterTimer = setTimeout(applyFilter, 220);
+}
+function applyFilter() {
+  const queryRaw = (document.getElementById('search-input').value || '').trim();
+  const query = queryRaw.toLowerCase();
+  const qOnlyDigits = queryRaw.replace(/\D/g, '');
+  if (!query) {
+    filteredAdesoes = [...allAdesoes];
+  } else {
+    // Divide em "termos" por espaço — cada termo precisa estar no haystack (AND).
+    // Assim "Gabriel rodri" acha "Gabriel de Andrade Rodrigues" (cada palavra solta).
+    // Termos com >= 4 dígitos rodam contra _haystackDigits (CPF/telefone/protocolo).
+    const termos = query.split(/\s+/).filter(Boolean);
+    filteredAdesoes = allAdesoes.filter(a => {
+      const hs = a._haystack || '';
+      const hsDig = a._haystackDigits || '';
+      // Todo termo precisa bater (AND)
+      return termos.every(t => {
+        const tDig = t.replace(/\D/g, '');
+        if (tDig.length >= 4) return hsDig.includes(tDig);  // dígitos → CPF/tel
+        return hs.includes(t);                              // texto → nome/email/etc
+      });
+    });
+    // Fallback: se NÃO achou ninguém mas a query inteira (sem espaços) era um bloco
+    // de dígitos longo, ainda tenta o match direto (caso de digitar CPF com pontos).
+    if (filteredAdesoes.length === 0 && qOnlyDigits.length >= 4) {
+      filteredAdesoes = allAdesoes.filter(a => (a._haystackDigits || '').includes(qOnlyDigits));
+    }
+  }
+  document.getElementById('search-info').textContent = `${filteredAdesoes.length} de ${allAdesoes.length} adesões`;
+  _pagAtual = 1; // toda busca nova volta pra primeira página
+  renderList();
+}
+
+// Formata data/hora pt-BR
+function fmtDataHora(iso) {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  if (isNaN(d)) return iso;
+  const data = d.toLocaleDateString('pt-BR');
+  const hora = d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+  return data + ' · ' + hora;
+}
+
+// ═══ RENDERIZAR LISTA ═══
+function renderList() {
+  const listEl = document.getElementById('adesoes-list');
+  if (!filteredAdesoes.length) {
+    listEl.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><p>Nenhuma adesão encontrada.</p></div>';
+    return;
+  }
+
+  // Map de alterações pendentes por proposta_id (limpo a cada render)
+  if (!window._pendingChanges) window._pendingChanges = {};
+
+  // Paginação: exibe PAG_TAM registros por página. Evita o scroll gigante e
+  // o travamento de montar milhares de cards de uma vez.
+  const totalPag = Math.max(1, Math.ceil(filteredAdesoes.length / PAG_TAM));
+  if (_pagAtual > totalPag) _pagAtual = totalPag;
+  if (_pagAtual < 1) _pagAtual = 1;
+  const _ini = (_pagAtual - 1) * PAG_TAM;
+  const _toRender = filteredAdesoes.slice(_ini, _ini + PAG_TAM);
+
+  listEl.innerHTML = _toRender.map(a => {
+    const dados = a.dados || {};
+    const admTag = `tag-${a.administradora}`;
+    const tipoTag = a.tipo_pessoa === 'pf' ? 'tag-pf' : 'tag-pj';
+    const tipoLabel = a.tipo_pessoa === 'pf' ? 'PF' : 'PJ';
+
+    let detailHtml = '';
+    // Escolhe schema dependendo da origem: legacy (portal_adesoes) ou nova (portal_propostas)
+    const campos = a._source === 'nova'
+      ? getCamposNova(a.tipo_pessoa)
+      : getCamposPorAdmTipo(a.administradora, a.tipo_pessoa);
+    let currentSection = '';
+    campos.forEach(c => {
+      if (c.section) {
+        if (currentSection) detailHtml += '</div>';
+        detailHtml += `<div class="section-label">${c.section}</div><div class="detail-grid">`;
+        currentSection = c.section;
+        return;
+      }
+      if (!currentSection) {
+        detailHtml += '<div class="detail-grid">';
+        currentSection = 'default';
+      }
+      // pra nova: dados é a linha completa (vem direto da tabela)
+      // pra legacy: dados é a.dados (JSONB)
+      const rawVal = dados[c.id];
+      const displayVal = fmtFichaVal(rawVal, c);
+      const isEditable = a._source === 'nova'; // só edita propostas novas (portal_propostas)
+      const inputHtml = isEditable
+        ? renderEditableInput(a.id, c, rawVal)
+        : `<div class="detail-item-value">${displayVal}</div>`;
+      detailHtml += `
+        <div class="detail-item" data-prop="${a.id}" data-field="${c.id}">
+          <button class="copy-btn" title="Copiar ${c.label}" onclick="copyText('${displayVal.replace(/'/g, "\\'")}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+          <div class="detail-item-label">${c.label}</div>
+          ${inputHtml}
+        </div>`;
+    });
+    if (currentSection) detailHtml += '</div>';
+    // Sócios PJ — array JSONB (editável se for proposta nova)
+    if (a._source === 'nova' && a.tipo_pessoa === 'pj' && dados.socios?.length) {
+      detailHtml += renderSocios(dados.socios, a.id, true);
+    } else if (a.tipo_pessoa === 'pj' && dados.socios?.length) {
+      detailHtml += renderSocios(dados.socios, a.id, false);
+    }
+
+    const jsonStr = JSON.stringify(dados, null, 2);
+
+    return `
+    <div class="ad-card" id="card-${a.id}">
+      <div class="ad-card-header" onclick="toggleCard('${a.id}')">
+        <div class="ad-card-header-left">
+          <strong style="font-size:14px;color:var(--mp-navy);">${a.nome_cliente || 'Sem nome'}</strong>
+          <span class="tag ${admTag}">${a.administradora || 'pendente'}</span>
+          ${a.origem_link === 'master_prime' ? '<span class="tag tag-master_prime" title="Cliente preencheu via link geral Master Prime, não via link dedicado da admin">via Master Prime</span>' : ''}
+          <span class="tag ${tipoTag}">${tipoLabel}</span>
+          <span class="tag tag-status">${a.status || 'recebido'}</span>
+        </div>
+        <div class="ad-card-header-right">
+          <span class="mono" style="font-size:11px;color:var(--text2);">${a.protocolo || ''}</span>
+          <span style="color:var(--text3);font-size:11px;" title="Recebido em ${fmtDataHora(a.criado_em)}">${fmtDataHora(a.criado_em)}</span>
+          ${(currentUserTipo === 'master' || currentUserTipo === 'admin') && a._source === 'nova' ? `
+            <button onclick="event.stopPropagation();abrirAtribuir('${a.id}','${(a.consultor_nome||'').replace(/'/g,'\\\'')}')" style="background:var(--mp-teal);color:#fff;border:0;padding:4px 9px;border-radius:6px;font-size:10.5px;font-weight:600;cursor:pointer;margin-left:4px">${a.consultor_nome ? 'Reatribuir' : 'Atribuir'}</button>
+          ` : ''}
+          <span style="background:#F1F5F9;color:var(--text2);padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600">${a.consultor_nome || 'Sem vendedor'}</span>
+        </div>
+      </div>
+      <div class="ad-card-body">
+        ${detailHtml}
+        <div style="margin-top:16px; display:flex; gap:12px; flex-wrap:wrap;">
+          <button class="copy-all-btn" onclick="copyText(\`${jsonStr.replace(/`/g,'\\`')}\`)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copiar todos os dados (JSON)
+          </button>
+          <button class="copy-all-btn" style="background:var(--mp-teal);" onclick="copyTextAsPlain('${a.id}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copiar como texto (WhatsApp)
+          </button>
+          ${a._source === 'nova' ? `
+          <button class="copy-all-btn" style="background:var(--mp-navy);" onclick="abrirLinkFicha('${a.id}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Abrir link de visualização
+          </button>` : ''}
+        </div>
+        ${a._source === 'nova' ? `
+        <div class="salvar-bar hidden" id="salvar-bar-${a.id}">
+          <span class="alteracoes-count" id="alteracoes-count-${a.id}">0 alteração</span>
+          <button class="cancelar-btn" onclick="cancelarAlteracoes('${a.id}')">Cancelar</button>
+          <button class="salvar-btn" onclick="salvarAlteracoes('${a.id}')">Salvar alterações</button>
+        </div>` : ''}
+      </div>
+    </div>`;
+  }).join('') + renderPaginacao(totalPag);
+}
+
+// ═══ CONTROLES DE PAGINAÇÃO ═══
+function renderPaginacao(totalPag) {
+  if (filteredAdesoes.length <= PAG_TAM) return '';
+  const ini = (_pagAtual - 1) * PAG_TAM;
+  const fim = Math.min(ini + PAG_TAM, filteredAdesoes.length);
+  const base = 'padding:7px 15px;border:1px solid var(--border2);background:#fff;border-radius:8px;font-size:12px;font-weight:600;color:var(--mp-navy)';
+  const on = base + ';cursor:pointer';
+  const off = base + ';opacity:.38;cursor:not-allowed';
+  return `
+  <div style="display:flex;align-items:center;justify-content:center;gap:14px;padding:20px 12px;flex-wrap:wrap">
+    <button style="${_pagAtual<=1?off:on}" ${_pagAtual<=1?'disabled':''} onclick="irParaPagina(${_pagAtual-1})">◀ Anterior</button>
+    <span style="font-size:12px;color:var(--text2);font-weight:600">${ini+1}–${fim} de ${filteredAdesoes.length} · Página ${_pagAtual}/${totalPag}</span>
+    <button style="${_pagAtual>=totalPag?off:on}" ${_pagAtual>=totalPag?'disabled':''} onclick="irParaPagina(${_pagAtual+1})">Próxima ▶</button>
+  </div>`;
+}
+function irParaPagina(n) {
+  _pagAtual = n;
+  renderList();
+  const el = document.getElementById('adesoes-list');
+  if (el) el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+}
+
+// ═══ FORMATAÇÃO DE VALORES DA FICHA ═══
+function fmtFichaVal(value, campo) {
+  if (value === null || value === undefined || value === '') return '—';
+  // Boolean: Sim / Não
+  if (typeof value === 'boolean') return value ? 'Sim' : 'Não';
+  if (value === 'true') return 'Sim';
+  if (value === 'false') return 'Não';
+  const str = String(value);
+  const mask = campo?.mask;
+  switch (mask) {
+    case 'cpf': {
+      const d = str.replace(/\D/g, '');
+      return d.length === 11 ? d.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4') : str;
+    }
+    case 'cnpj': {
+      const d = str.replace(/\D/g, '');
+      return d.length === 14 ? d.replace(/^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/, '$1.$2.$3/$4-$5') : str;
+    }
+    case 'date': {
+      const m = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+      return m ? `${m[3]}/${m[2]}/${m[1]}` : str;
+    }
+    case 'money': {
+      const n = Number(str);
+      return isNaN(n) ? str : n.toLocaleString('pt-BR', {style:'currency', currency:'BRL'});
+    }
+    default: return str;
+  }
+}
+
+// ═══ RENDER DE INPUT EDITÁVEL ═══
+function renderEditableInput(propId, campo, rawVal) {
+  const displayVal = (rawVal === null || rawVal === undefined || rawVal === '') ? '' : fmtFichaVal(rawVal, campo);
+  // Boolean → select Sim/Não
+  if (typeof rawVal === 'boolean' || rawVal === 'true' || rawVal === 'false' || campo.id === 'aceita_seguro') {
+    const isYes = (rawVal === true || rawVal === 'true');
+    const isNo  = (rawVal === false || rawVal === 'false');
+    return `<select class="detail-item-input" onchange="markFichaDirty('${propId}','${campo.id}',this.value,'${campo.mask||''}')">
+      <option value="" ${!isYes && !isNo ? 'selected' : ''}>—</option>
+      <option value="true" ${isYes ? 'selected' : ''}>Sim</option>
+      <option value="false" ${isNo ? 'selected' : ''}>Não</option>
+    </select>`;
+  }
+  // Estado civil, sexo etc. → input texto livre (fica simples; depois dá pra virar select se quiser)
+  const escaped = displayVal.replace(/"/g,'&quot;');
+  return `<input type="text" class="detail-item-input" value="${escaped}" data-mask="${campo.mask||''}" onchange="markFichaDirty('${propId}','${campo.id}',this.value,'${campo.mask||''}')">`;
+}
+
+// ═══ DESFORMATA VALOR PRA SALVAR NO BANCO ═══
+function unmaskFichaVal(value, mask) {
+  if (value === '' || value === null || value === undefined) return null;
+  const str = String(value);
+  switch (mask) {
+    case 'cpf':
+    case 'cnpj': return str.replace(/\D/g, '');
+    case 'date': {
+      // dd/mm/aaaa → yyyy-mm-dd
+      const m = str.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+      return m ? `${m[3]}-${m[2]}-${m[1]}` : (str.match(/^\d{4}-\d{2}-\d{2}$/) ? str : null);
+    }
+    case 'money': {
+      const n = Number(str.replace(/[^\d,.-]/g,'').replace(/\./g,'').replace(',','.'));
+      return isNaN(n) ? null : n;
+    }
+    default: return str;
+  }
+}
+
+// ═══ MARCAR CAMPO COMO ALTERADO ═══
+function markFichaDirty(propId, fieldId, newValue, mask) {
+  if (!window._pendingChanges[propId]) window._pendingChanges[propId] = {};
+  const adesao = allAdesoes.find(a => a.id === propId);
+  const original = adesao?.dados?.[fieldId];
+  // Compara valor normalizado
+  let saveVal;
+  if (newValue === 'true') saveVal = true;
+  else if (newValue === 'false') saveVal = false;
+  else if (newValue === '') saveVal = null;
+  else saveVal = unmaskFichaVal(newValue, mask);
+  // Se voltou ao original, remove do dirty
+  const equalOriginal = (saveVal === original) ||
+    (saveVal === null && (original === '' || original === null || original === undefined));
+  const cell = document.querySelector(`.detail-item[data-prop="${propId}"][data-field="${fieldId}"]`);
+  if (equalOriginal) {
+    delete window._pendingChanges[propId][fieldId];
+    cell?.classList.remove('dirty');
+  } else {
+    window._pendingChanges[propId][fieldId] = saveVal;
+    cell?.classList.add('dirty');
+  }
+  // Atualiza barra de salvar
+  const changes = window._pendingChanges[propId];
+  const count = Object.keys(changes).length;
+  const bar = document.getElementById('salvar-bar-' + propId);
+  const counter = document.getElementById('alteracoes-count-' + propId);
+  if (bar) bar.classList.toggle('hidden', count === 0);
+  if (counter) counter.textContent = count === 1 ? '1 alteração' : `${count} alterações`;
+}
+
+// ═══ CANCELAR ALTERAÇÕES ═══
+function cancelarAlteracoes(propId) {
+  delete window._pendingChanges[propId];
+  loadAdesoes(); // re-renderiza tudo
+}
+
+// ═══ SALVAR ALTERAÇÕES ═══
+async function salvarAlteracoes(propId) {
+  const changes = window._pendingChanges[propId];
+  if (!changes || !Object.keys(changes).length) return;
+  const btn = document.querySelector(`#salvar-bar-${propId} .salvar-btn`);
+  if (btn) { btn.disabled = true; btn.textContent = 'Salvando...'; }
+  try {
+    // Separa: campos top-level vs sócios
+    const { _socios_dirty, ...topLevelChanges } = changes;
+    const payload = { ...topLevelChanges };
+    // Se houve mudança em sócios, reconstruir o array
+    if (_socios_dirty && Object.keys(_socios_dirty).length) {
+      const adesao = allAdesoes.find(a => a.id === propId);
+      const originalSocios = adesao?.dados?.socios || [];
+      const newSocios = originalSocios.map((s, i) => {
+        const patch = _socios_dirty[i] || {};
+        return { ...s, ...patch };
+      });
+      payload.socios = newSocios;
+    }
+    const { error } = await sb.from('portal_propostas').update(payload).eq('id', propId);
+    if (error) throw error;
+    // Log de atividade: ficha editada. sb.rpc(...) é "lazy" — precisa do .then().
+    try {
+      const _ficha = allAdesoes.find(a => a.id === propId);
+      sb.rpc('registrar_log', {
+        p_acao: 'ficha_editada',
+        p_detalhe: (_ficha && _ficha.nome_cliente) ? _ficha.nome_cliente : null
+      }).then(()=>{}, ()=>{});
+    } catch(e) {}
+    delete window._pendingChanges[propId];
+    showToast('Alterações salvas!');
+    await loadAdesoes();
+    // reabre o card que foi editado
+    setTimeout(() => {
+      const card = document.getElementById('card-' + propId);
+      if (card) card.classList.add('open');
+    }, 100);
+  } catch(e) {
+    alert('Erro ao salvar: ' + (e.message || e));
+    if (btn) { btn.disabled = false; btn.textContent = 'Salvar alterações'; }
+  }
+}
+
+// ═══ TOGGLE CARD ═══
+function toggleCard(id) {
+  const card = document.getElementById('card-' + id);
+  if (card) card.classList.toggle('open');
+}
+
+// ═══ COPIAR TEXTO ═══
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => {
+    showToast('Copiado!');
+  }).catch(() => {
+    alert('Erro ao copiar. Por favor, copie manualmente.');
+  });
+}
+
+function copyTextAsPlain(id) {
+  const adesao = allAdesoes.find(a => a.id === id);
+  if (!adesao) return;
+  const dados = adesao.dados || {};
+  const campos = getCamposPorAdmTipo(adesao.administradora, adesao.tipo_pessoa);
+  let text = `*Protocolo:* ${adesao.protocolo}\n`;
+  text += `*Nome:* ${adesao.nome_cliente}\n`;
+  text += `*CPF/CNPJ:* ${adesao.cpf_cnpj}\n`;
+  text += `*Administradora:* ${adesao.administradora}\n`;
+  text += `*Tipo:* ${adesao.tipo_pessoa}\n\n`;
+  campos.forEach(c => {
+    if (c.section) {
+      text += `\n--- ${c.section} ---\n`;
+      return;
+    }
+    text += `*${c.label}:* ${dados[c.id] || ''}\n`;
+  });
+  copyText(text);
+}
+
+// Campos pras propostas NOVAS (portal_propostas) — schema unificado Master Prime
+function getCamposNova(tipo) {
+  if (tipo === 'pf') {
+    return [
+      { section: 'Dados Pessoais' },
+      { id:'cpf', label:'CPF', mask:'cpf' }, { id:'nome', label:'Nome Completo' }, { id:'data_nascimento', label:'Data Nasc.', mask:'date' },
+      { id:'sexo', label:'Sexo' }, { id:'nacionalidade', label:'Nacionalidade' },
+      { id:'uf_naturalidade', label:'UF Naturalidade' }, { id:'cidade_nascimento', label:'Naturalidade (Cidade)' },
+      { id:'nome_mae', label:'Nome da Mãe' }, { id:'nome_pai', label:'Nome do Pai' },
+      { section: 'Documento' },
+      { id:'tipo_documento', label:'Tipo Documento' }, { id:'numero_documento', label:'Número' },
+      { id:'data_emissao', label:'Data Emissão', mask:'date' }, { id:'orgao_expedidor', label:'Órgão Expedidor' },
+      { section: 'Estado Civil' },
+      { id:'estado_civil', label:'Estado Civil' },
+      { id:'nome_conjuge', label:'Cônjuge' }, { id:'cpf_conjuge', label:'CPF Cônjuge', mask:'cpf' },
+      { id:'rg_conjuge', label:'RG Cônjuge' }, { id:'data_nascimento_conjuge', label:'Data Nasc. Cônjuge', mask:'date' },
+      { section: 'Endereço' },
+      { id:'cep', label:'CEP' }, { id:'logradouro', label:'Logradouro' },
+      { id:'numero', label:'Número' }, { id:'complemento', label:'Complemento' },
+      { id:'bairro', label:'Bairro' }, { id:'cidade', label:'Cidade' }, { id:'estado', label:'UF' },
+      { section: 'Profissão e Renda' },
+      { id:'nome_empresa', label:'Empresa' }, { id:'data_admissao', label:'Data Admissão', mask:'date' },
+      { id:'renda_mensal', label:'Renda Mensal', mask:'money' },
+      { section: 'Contato' },
+      { id:'email', label:'E-mail' }, { id:'celular', label:'Celular' },
+      { section: 'Pagamento' },
+      { id:'administradora', label:'Consórcio' },
+      { id:'forma_pagamento_1', label:'Forma de Pagamento' },
+      { section: 'Dados Bancários para Devolução (titular da cota)' },
+      { id:'banco_codigo', label:'Banco (código)' }, { id:'banco_nome', label:'Banco (nome)' },
+      { id:'agencia', label:'Agência' }, { id:'conta_corrente', label:'Conta' }, { id:'dac', label:'Dígito' },
+      { section: 'Seguro' },
+      { id:'aceita_seguro', label:'Aceita Seguro' },
+      { section: 'Observações' },
+      { id:'observacoes', label:'Observações' }
+    ];
+  }
+  // PJ
+  return [
+    { section: 'Dados da Empresa' },
+    { id:'cnpj', label:'CNPJ', mask:'cnpj' }, { id:'nome', label:'Razão Social' },
+    { id:'nome_fantasia', label:'Nome Fantasia' }, { id:'data_nascimento', label:'Data Constituição', mask:'date' },
+    { section: 'Atividade' },
+    { id:'ramo_atividade', label:'Ramo de Atividade' }, { id:'cnae_principal', label:'CNAE' },
+    { id:'natureza_juridica', label:'Natureza Jurídica' },
+    { id:'inscricao_estadual', label:'Inscrição Estadual' }, { id:'inscricao_municipal', label:'Inscrição Municipal' },
+    { id:'valor_capital', label:'Capital Social', mask:'money' },
+    { id:'faturamento', label:'Faturamento', mask:'money' }, { id:'faturamento_periodo', label:'Período' },
+    { id:'endereco_exterior', label:'Endereço Exterior?' }, { id:'divulgar_endereco', label:'Divulgar Endereço?' },
+    { section: 'Endereço' },
+    { id:'cep', label:'CEP' }, { id:'tipo_logradouro', label:'Tipo Logradouro' },
+    { id:'logradouro', label:'Logradouro' }, { id:'numero', label:'Número' },
+    { id:'complemento', label:'Complemento' }, { id:'bairro', label:'Bairro' },
+    { id:'cidade', label:'Cidade' }, { id:'estado', label:'UF' },
+    { section: 'Contato' },
+    { id:'email', label:'E-mail' }, { id:'celular', label:'Celular' },
+    { id:'tel_comercial', label:'Tel. Comercial' }, { id:'fax', label:'Fax' },
+    { section: 'Pagamento' },
+    { id:'administradora', label:'Consórcio' },
+    { id:'forma_pagamento_1', label:'Forma de Pagamento' },
+    { section: 'Dados Bancários para Devolução (CNPJ titular)' },
+    { id:'banco_codigo', label:'Banco (código)' }, { id:'banco_nome', label:'Banco (nome)' },
+    { id:'agencia', label:'Agência' }, { id:'conta_corrente', label:'Conta' }, { id:'dac', label:'Dígito' },
+    { section: 'Seguro' },
+    { id:'aceita_seguro', label:'Aceita Seguro' },
+    { section: 'Observações' },
+    { id:'observacoes', label:'Observações' }
+  ];
+}
+
+// Sócios PJ — render separado pq é JSONB array
+// Schema dos campos editáveis de sócios (com label + mask quando aplicável)
+const SOCIO_FIELDS = [
+  { id:'nome', label:'Nome' }, { id:'cpf', label:'CPF', mask:'cpf' }, { id:'rg', label:'RG' },
+  { id:'data_emissao_rg', label:'Data Emissão RG', mask:'date' }, { id:'orgao_expedidor', label:'Órgão Expedidor' },
+  { id:'data_nascimento', label:'Data Nascimento', mask:'date' },
+  { id:'nome_pai', label:'Nome do Pai' }, { id:'nome_mae', label:'Nome da Mãe' },
+  { id:'data_entrada', label:'Data Entrada', mask:'date' },
+  { id:'participacao', label:'Participação %' },
+  { id:'administrador', label:'Administrador', mask:'simnao' },
+  { id:'estado_civil', label:'Estado Civil' }, { id:'nome_conjuge', label:'Cônjuge' },
+  { id:'cpf_conjuge', label:'CPF Cônjuge', mask:'cpf' },
+  { id:'email', label:'E-mail' }, { id:'telefone', label:'Telefone' }
+];
+
+function renderSocios(socios, propId, isEditable) {
+  if (!socios || !socios.length) return '';
+  return socios.map((s, i) => {
+    const camposHtml = SOCIO_FIELDS.map(campo => {
+      const rawVal = s[campo.id];
+      const displayVal = fmtFichaVal(rawVal, campo);
+      const isAdminSelect = campo.mask === 'simnao';
+      let inputHtml;
+      if (!isEditable) {
+        inputHtml = `<div class="detail-item-value">${displayVal}</div>`;
+      } else if (isAdminSelect) {
+        const v = (rawVal || '').toString().toLowerCase();
+        inputHtml = `<select class="detail-item-input" onchange="markSocioDirty('${propId}',${i},'${campo.id}',this.value,'')">
+          <option value="" ${!v ? 'selected' : ''}>—</option>
+          <option value="Sim" ${v === 'sim' ? 'selected' : ''}>Sim</option>
+          <option value="Não" ${(v === 'não' || v === 'nao') ? 'selected' : ''}>Não</option>
+        </select>`;
+      } else {
+        const escaped = displayVal === '—' ? '' : displayVal.replace(/"/g,'&quot;');
+        inputHtml = `<input type="text" class="detail-item-input" value="${escaped}" onchange="markSocioDirty('${propId}',${i},'${campo.id}',this.value,'${campo.mask||''}')">`;
+      }
+      return `
+        <div class="detail-item" data-prop="${propId}" data-socio-idx="${i}" data-field="${campo.id}">
+          <button class="copy-btn" title="Copiar ${campo.label}" onclick="copyText('${displayVal.replace(/'/g, "\\'")}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+          <div class="detail-item-label">${campo.label}</div>
+          ${inputHtml}
+        </div>`;
+    }).join('');
+    return `
+      <div class="section-label" style="margin-top:12px">${i+1}º Sócio</div>
+      <div class="detail-grid">${camposHtml}</div>
+    `;
+  }).join('');
+}
+
+// ═══ MARCAR CAMPO DE SÓCIO COMO ALTERADO ═══
+function markSocioDirty(propId, socioIdx, fieldId, newValue, mask) {
+  if (!window._pendingChanges[propId]) window._pendingChanges[propId] = {};
+  if (!window._pendingChanges[propId]._socios_dirty) window._pendingChanges[propId]._socios_dirty = {};
+  const sociosDirty = window._pendingChanges[propId]._socios_dirty;
+  if (!sociosDirty[socioIdx]) sociosDirty[socioIdx] = {};
+  const adesao = allAdesoes.find(a => a.id === propId);
+  const originalSocio = adesao?.dados?.socios?.[socioIdx] || {};
+  const original = originalSocio[fieldId];
+  // Normaliza valor pra salvar
+  let saveVal;
+  if (newValue === '') saveVal = null;
+  else if (mask) saveVal = unmaskFichaVal(newValue, mask);
+  else saveVal = newValue;
+  const equalOriginal = (saveVal === original) ||
+    (saveVal === null && (original === '' || original === null || original === undefined));
+  const cell = document.querySelector(`.detail-item[data-prop="${propId}"][data-socio-idx="${socioIdx}"][data-field="${fieldId}"]`);
+  if (equalOriginal) {
+    delete sociosDirty[socioIdx][fieldId];
+    if (Object.keys(sociosDirty[socioIdx]).length === 0) delete sociosDirty[socioIdx];
+    cell?.classList.remove('dirty');
+  } else {
+    sociosDirty[socioIdx][fieldId] = saveVal;
+    cell?.classList.add('dirty');
+  }
+  // Limpa _socios_dirty se vazio
+  if (Object.keys(sociosDirty).length === 0) delete window._pendingChanges[propId]._socios_dirty;
+  // Atualiza barra
+  const changes = window._pendingChanges[propId];
+  const sociosCount = Object.keys(changes._socios_dirty || {}).reduce((acc, idx) => acc + Object.keys(changes._socios_dirty[idx]).length, 0);
+  const topCount = Object.keys(changes).filter(k => k !== '_socios_dirty').length;
+  const total = topCount + sociosCount;
+  const bar = document.getElementById('salvar-bar-' + propId);
+  const counter = document.getElementById('alteracoes-count-' + propId);
+  if (bar) bar.classList.toggle('hidden', total === 0);
+  if (counter) counter.textContent = total === 1 ? '1 alteração' : `${total} alterações`;
+}
+
+function getCamposPorAdmTipo(adm, tipo) {
+  const map = {
+    bradesco_pf: [
+      { section: 'Dados Pessoais' },
+      { id:'cpf', label:'CPF' }, { id:'nome_completo', label:'Nome Completo' }, { id:'data_nascimento', label:'Data Nasc.' },
+      { id:'nacionalidade', label:'Nacionalidade' }, { id:'nome_pai', label:'Nome do Pai' }, { id:'nome_mae', label:'Nome da Mãe' },
+      { section: 'Estado Civil' },
+      { id:'estado_civil', label:'Estado Civil' }, { id:'nome_conjuge', label:'Cônjuge' }, { id:'cpf_conjuge', label:'CPF Cônjuge' }, { id:'data_nascimento_conjuge', label:'Data Nasc. Cônjuge' },
+      { section: 'Profissão e Renda' },
+      { id:'nome_empresa', label:'Empresa' }, { id:'data_admissao', label:'Data Admissão' }, { id:'renda_mensal', label:'Renda Mensal' },
+      { section: 'Endereço' },
+      { id:'cep', label:'CEP' }, { id:'logradouro', label:'Logradouro' }, { id:'numero', label:'Número' }, { id:'complemento', label:'Complemento' },
+      { id:'bairro', label:'Bairro' }, { id:'cidade', label:'Cidade' }, { id:'estado', label:'Estado' }, { id:'tempo_residencia', label:'Tempo Residência' },
+      { section: 'Contato e Pagamento' },
+      { id:'email', label:'E-mail' }, { id:'celular', label:'Celular' }, { id:'forma_pagamento', label:'Forma Pagamento' }, { id:'deseja_seguro', label:'Deseja Seguro?' },
+    ],
+    bradesco_pj: [
+      { section: 'Dados da Empresa' },
+      { id:'cnpj', label:'CNPJ' }, { id:'razao_social', label:'Razão Social' }, { id:'nome_fantasia', label:'Nome Fantasia' }, { id:'ramo_atividade', label:'Ramo Atividade' },
+      { section: 'Sócio Administrador' },
+      { id:'socio_nome', label:'Nome do Sócio' }, { id:'socio_cpf', label:'CPF do Sócio' }, { id:'socio_data_nascimento', label:'Data Nasc. Sócio' },
+      { id:'socio_tipo_documento', label:'Tipo Documento' }, { id:'socio_numero_documento', label:'Nº Documento' }, { id:'socio_percentual_empresa', label:'% Empresa' },
+      { id:'socio_estado_civil', label:'Estado Civil' }, { id:'socio_nome_conjuge', label:'Cônjuge' }, { id:'socio_cpf_conjuge', label:'CPF Cônjuge' },
+      { section: 'Contato' },
+      { id:'email', label:'E-mail' }, { id:'celular', label:'Celular' },
+      { section: 'Endereço' },
+      { id:'cep', label:'CEP' }, { id:'logradouro', label:'Logradouro' }, { id:'numero', label:'Número' }, { id:'complemento', label:'Complemento' },
+      { id:'bairro', label:'Bairro' }, { id:'cidade', label:'Cidade' }, { id:'estado', label:'Estado' },
+      { section: 'Pagamento' },
+      { id:'forma_pagamento', label:'Forma Pagamento' }, { id:'deseja_seguro', label:'Deseja Seguro?' },
+    ],
+    itau_pf: [
+      { section: 'Dados Pessoais' },
+      { id:'cpf', label:'CPF' }, { id:'nome_completo', label:'Nome Completo' }, { id:'data_nascimento', label:'Data Nasc.' },
+      { id:'tipo_documento', label:'Tipo Documento' }, { id:'numero_documento', label:'Nº Documento' }, { id:'data_emissao', label:'Data Emissão' },
+      { id:'orgao_expedidor', label:'Órgão Expedidor' }, { id:'sexo', label:'Sexo' }, { id:'nacionalidade', label:'Nacionalidade' }, { id:'estado_civil', label:'Estado Civil' },
+      { section: 'Endereço Residencial' },
+      { id:'cep', label:'CEP' }, { id:'tipo_residencia', label:'Tipo Residência' }, { id:'logradouro', label:'Logradouro' }, { id:'numero', label:'Número' },
+      { id:'complemento', label:'Complemento' }, { id:'bairro', label:'Bairro' }, { id:'estado', label:'Estado' }, { id:'cidade', label:'Cidade' },
+      { section: 'Contato' },
+      { id:'ddd', label:'DDD' }, { id:'celular', label:'Celular' }, { id:'email', label:'E-mail' },
+      { section: 'Dados Comerciais' },
+      { id:'profissao', label:'Profissão' }, { id:'renda_mensal', label:'Renda Mensal' }, { id:'patrimonio', label:'Patrimônio' },
+      { section: 'Pagamento' },
+      { id:'forma_pagamento_1', label:'Forma Pagamento 1ª' }, { id:'forma_pagamento_plano', label:'Forma Pagamento Plano' },
+      { section: 'Resgate' },
+      { id:'banco_resgate', label:'Banco' }, { id:'agencia_resgate', label:'Agência' }, { id:'conta_resgate', label:'Conta' },
+      { section: 'Seguro' },
+      { id:'aceita_seguro', label:'Aceita Seguro?' },
+    ],
+    itau_pj: [
+      { section: 'Dados da Empresa' },
+      { id:'cnpj', label:'CNPJ' }, { id:'data_constituicao', label:'Data Constituição' }, { id:'ramo_atividade', label:'Ramo Atividade' },
+      { id:'razao_social', label:'Razão Social' }, { id:'faturamento_12m', label:'Faturamento 12m' }, { id:'inscricao_estadual', label:'Inscrição Estadual' },
+      { id:'inscricao_municipal', label:'Inscrição Municipal' }, { id:'valor_capital', label:'Valor Capital' }, { id:'cnae_principal', label:'CNAE' }, { id:'natureza_juridica', label:'Natureza Jurídica' },
+      { section: '1° Sócio' },
+      { id:'socio1_nome', label:'Nome' }, { id:'socio1_administrador', label:'Administrador' }, { id:'socio1_cpf_cnpj', label:'CPF/CNPJ' },
+      { id:'socio1_rg', label:'RG' }, { id:'socio1_data_emissao_rg', label:'Data Emissão RG' }, { id:'socio1_orgao_expedidor', label:'Órgão Expedidor' },
+      { id:'socio1_data_nascimento', label:'Data Nasc.' }, { id:'socio1_nome_pai', label:'Pai' }, { id:'socio1_nome_mae', label:'Mãe' },
+      { id:'socio1_data_entrada', label:'Data Entrada' }, { id:'socio1_participacao', label:'Participação %' },
+      { section: '2° Sócio' },
+      { id:'socio2_nome', label:'Nome' }, { id:'socio2_administrador', label:'Administrador' }, { id:'socio2_cpf_cnpj', label:'CPF/CNPJ' },
+      { id:'socio2_rg', label:'RG' }, { id:'socio2_data_emissao_rg', label:'Data Emissão RG' }, { id:'socio2_orgao_expedidor', label:'Órgão Expedidor' },
+      { id:'socio2_data_nascimento', label:'Data Nasc.' }, { id:'socio2_nome_pai', label:'Pai' }, { id:'socio2_nome_mae', label:'Mãe' },
+      { id:'socio2_data_entrada', label:'Data Entrada' }, { id:'socio2_participacao', label:'Participação %' },
+      { section: 'Endereço' },
+      { id:'cep', label:'CEP' }, { id:'endereco_exterior', label:'Endereço Exterior?' }, { id:'logradouro', label:'Logradouro' },
+      { id:'numero', label:'Número' }, { id:'complemento', label:'Complemento' }, { id:'bairro', label:'Bairro' }, { id:'estado', label:'Estado' }, { id:'cidade', label:'Cidade' },
+      { section: 'Contato' },
+      { id:'ddd_telefone', label:'DDD Tel' }, { id:'telefone', label:'Telefone' }, { id:'ramal', label:'Ramal' },
+      { id:'ddd_fax', label:'DDD Fax' }, { id:'fax', label:'Fax' }, { id:'ramal_fax', label:'Ramal Fax' },
+      { id:'ddd_celular', label:'DDD Cel' }, { id:'celular', label:'Celular' }, { id:'email', label:'E-mail' },
+      { section: 'Pagamento' },
+      { id:'forma_pagamento_1', label:'Forma Pagamento 1ª' }, { id:'forma_pagamento_plano', label:'Forma Pagamento Plano' },
+      { section: 'Resgate' },
+      { id:'banco_resgate', label:'Banco' }, { id:'agencia_resgate', label:'Agência' }, { id:'conta_resgate', label:'Conta' },
+    ],
+    porto_pf: [
+      { section: 'Ficha Cadastral' },
+      { id:'cpf', label:'CPF' }, { id:'nome_completo', label:'Nome Completo' }, { id:'data_nascimento', label:'Data Nasc.' }, { id:'estado_civil', label:'Estado Civil' },
+      { id:'email', label:'E-mail' }, { id:'confirme_email', label:'Confirme E-mail' },
+      { section: 'Contato' },
+      { id:'tel_residencial', label:'Tel Residencial' }, { id:'tel_comercial', label:'Tel Comercial' }, { id:'celular', label:'Celular' }, { id:'celular2', label:'Celular 2' },
+      { section: 'Documento' },
+      { id:'tipo_documento', label:'Tipo Documento' }, { id:'numero_documento', label:'Nº Documento' }, { id:'orgao_emissor_uf', label:'Órgão Emissor/UF' },
+      { id:'data_emissao', label:'Data Emissão' }, { id:'nacionalidade', label:'Nacionalidade' }, { id:'cidade_nascimento', label:'Cidade Nasc.' }, { id:'nome_mae', label:'Nome da Mãe' },
+      { section: 'Remuneração e Profissão' },
+      { id:'remuneracao', label:'Remuneração' }, { id:'profissao', label:'Profissão' },
+      { section: 'Endereço' },
+      { id:'cep', label:'CEP' }, { id:'tipo_logradouro', label:'Tipo Logradouro' }, { id:'endereco', label:'Endereço' }, { id:'numero', label:'Número' },
+      { id:'complemento', label:'Complemento' }, { id:'bairro', label:'Bairro' }, { id:'cidade', label:'Cidade' }, { id:'estado', label:'Estado' },
+      { section: 'Pagamento' },
+      { id:'forma_pagamento_1', label:'Forma Pagamento 1ª' }, { id:'forma_pagamento_2', label:'Forma Pagamento 2ª em diante' },
+      { section: 'Dados Bancários' },
+      { id:'nome_correntista', label:'Correntista' }, { id:'cpf_correntista', label:'CPF Correntista' }, { id:'banco', label:'Banco' }, { id:'agencia', label:'Agência' }, { id:'conta_corrente', label:'Conta Corrente' },
+      { section: 'Seguro' },
+      { id:'aceita_seguro', label:'Aceita Seguro?' },
+    ],
+    porto_pj: [
+      { section: 'Ficha Cadastral' },
+      { id:'cnpj', label:'CNPJ' }, { id:'razao_social', label:'Razão Social' }, { id:'inscricao_estadual', label:'Inscrição Estadual' },
+      { id:'data_constituicao', label:'Data Constituição' }, { id:'email', label:'E-mail' }, { id:'confirme_email', label:'Confirme E-mail' },
+      { section: 'Contato' },
+      { id:'tel_comercial', label:'Tel Comercial' }, { id:'celular', label:'Celular' }, { id:'celular2', label:'Celular 2' },
+      { section: 'Atividade' },
+      { id:'ramo_atividade', label:'Ramo Atividade' }, { id:'receita_mensal', label:'Receita Mensal' },
+      { section: 'Endereço' },
+      { id:'cep', label:'CEP' }, { id:'tipo_logradouro', label:'Tipo Logradouro' }, { id:'endereco', label:'Endereço' }, { id:'numero', label:'Número' },
+      { id:'complemento', label:'Complemento' }, { id:'bairro', label:'Bairro' }, { id:'cidade', label:'Cidade' }, { id:'estado', label:'Estado' },
+      { section: 'Sócio' },
+      { id:'socio_nome', label:'Nome do Sócio' }, { id:'socio_cpf', label:'CPF do Sócio' },
+      { section: 'Pagamento' },
+      { id:'forma_pagamento_1', label:'Forma Pagamento 1ª' }, { id:'forma_pagamento_2', label:'Forma Pagamento 2ª em diante' },
+      { section: 'Dados Bancários' },
+      { id:'nome_correntista', label:'Correntista' }, { id:'cnpj_correntista', label:'CNPJ Correntista' }, { id:'banco', label:'Banco' }, { id:'agencia', label:'Agência' }, { id:'conta_corrente', label:'Conta Corrente' },
+    ],
+  };
+  return map[`${adm}_${tipo}`] || [];
+}
+
+// ═══ ATRIBUIR VENDEDOR (Master/Admin only) ═══
+let _atribPropostaId = null;
+let _consultoresCache = null;
+
+async function abrirAtribuir(propostaId, consultorAtual) {
+  _atribPropostaId = propostaId;
+  document.getElementById('atrib-protocolo').textContent = 'Proposta ' + propostaId.substring(0,8);
+  document.getElementById('atrib-atual').textContent = consultorAtual || 'Sem vendedor';
+  // Carrega lista de consultores (cache)
+  if (!_consultoresCache) {
+    const { data, error } = await sb.from('portal_users')
+      .select('auth_id, nome, tipo')
+      .order('nome');
+    if (error) { alert('Erro carregando consultores: '+error.message); return; }
+    _consultoresCache = (data||[]).filter(u => u.auth_id);
+  }
+  const sel = document.getElementById('atrib-select');
+  sel.innerHTML = '<option value="">— Selecione um vendedor —</option>' +
+    _consultoresCache.map(u => `<option value="${u.auth_id}">${u.nome} (${u.tipo})</option>`).join('');
+  document.getElementById('modal-atribuir').style.display = 'flex';
+}
+
+function fecharAtribuir() {
+  document.getElementById('modal-atribuir').style.display = 'none';
+  _atribPropostaId = null;
+}
+
+async function salvarAtribuicao() {
+  const novoId = document.getElementById('atrib-select').value;
+  if (!novoId) { alert('Selecione um vendedor'); return; }
+  try {
+    const { error } = await sb.rpc('reatribuir_proposta', { proposta_id: _atribPropostaId, novo_consultor_id: novoId });
+    if (error) throw error;
+    showToast('Vendedor atribuído com sucesso');
+    fecharAtribuir();
+    loadAdesoes();
+  } catch(e) { alert('Erro: '+e.message); }
+}
+
+async function desatribuir() {
+  if (!confirm('Remover vendedor desta proposta? Ficará sem atribuição.')) return;
+  try {
+    const { error } = await sb.rpc('reatribuir_proposta', { proposta_id: _atribPropostaId, novo_consultor_id: null });
+    if (error) throw error;
+    showToast('Vendedor removido');
+    fecharAtribuir();
+    loadAdesoes();
+  } catch(e) { alert('Erro: '+e.message); }
+}
+
+// ═══ INICIAR ═══
+checkSession();
+</script>
+</body>
+</html>
+```

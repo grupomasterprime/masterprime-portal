@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master Prime - Simulação Rápida</title>
+<style>
+  :root {
+    --navy: #2D3F5E;
+    --navy-dark: #1E2D45;
+    --navy-soft: #3A4F73;
+    --gold: #E8B86D;
+    --gold-dark: #C99A4F;
+    --bg: #F4F5F7;
+    --card: #FFFFFF;
+    --border: #E5E7EB;
+    --text: #1F2937;
+    --text-muted: #6B7280;
+    --text-light: #9CA3AF;
+    --soft-blue: #F1F5F9;
+    --error: #DC2626;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+  header { background: var(--navy); color: #fff; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .brand-mark { width: 36px; height: 36px; background: var(--navy-dark); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 14px; }
+  .brand-text h1 { font-size: 16px; font-weight: 600; letter-spacing: 0.3px; }
+  .brand-text p { font-size: 11px; color: rgba(255,255,255,0.7); letter-spacing: 1.2px; text-transform: uppercase; margin-top: 2px; }
+  .tag-test { background: rgba(255,255,255,0.08); color: rgba(255,255,255,0.85); border: 1px solid rgba(255,255,255,0.25); padding: 4px 10px; border-radius: 4px; font-size: 11px; letter-spacing: 1px; text-transform: uppercase; font-weight: 500; }
+  main { max-width: 1280px; margin: 0 auto; padding: 32px; }
+  h2.section-title { font-size: 22px; font-weight: 600; color: var(--navy); margin-bottom: 4px; text-align: center; letter-spacing: 0.5px; }
+  .subtitle { font-size: 12px; color: var(--text-muted); text-align: center; margin-bottom: 24px; letter-spacing: 1px; text-transform: uppercase; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 16px; }
+  .card-header { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+  .card-header h3 { font-size: 13px; font-weight: 600; color: var(--navy); letter-spacing: 1.5px; text-transform: uppercase; }
+  .card-header .reset-btn { margin-left: auto; background: none; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; padding: 4px 10px; border-radius: 4px; font-size: 11px; }
+  .card-header .reset-btn:hover { background: var(--bg); }
+  .obs-area { width: 100%; min-height: 90px; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; font-family: inherit; resize: vertical; color: var(--text); background: #fff; }
+  .obs-area:focus { outline: none; border-color: var(--navy); box-shadow: 0 0 0 3px rgba(45,63,94,0.10); }
+  .grid { display: grid; gap: 16px; }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  .grid-2 { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 768px) { .grid-3, .grid-4, .grid-2 { grid-template-columns: 1fr; } }
+
+  /* Inputs */
+  .field { position: relative; }
+  .field label { position: absolute; top: -7px; left: 12px; background: var(--card); padding: 0 6px; font-size: 11px; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; font-weight: 500; z-index: 1; display: flex; align-items: center; gap: 6px; }
+  .field input, .field select { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; font-family: inherit; background: #fff; color: var(--text); transition: border-color 0.15s; }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--navy); }
+  .field input:disabled, .field input.disabled, .field select:disabled { background: var(--soft-blue); color: var(--text-light); cursor: not-allowed; }
+  .field select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px; }
+
+  /* Toggle */
+  .toggle-input { position: relative; display: inline-block; width: 32px; height: 18px; vertical-align: middle; }
+  .toggle-input input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #D1D5DB; border-radius: 18px; transition: 0.2s; }
+  .toggle-slider::before { position: absolute; content: ""; height: 14px; width: 14px; left: 2px; top: 2px; background: white; border-radius: 50%; transition: 0.2s; }
+  .toggle-input input:checked + .toggle-slider { background: var(--navy); }
+  .toggle-input input:checked + .toggle-slider::before { transform: translateX(14px); }
+
+  /* Output result rows */
+  .result { background: var(--soft-blue); border-radius: 8px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; }
+  .result strong { font-size: 12px; color: var(--navy); letter-spacing: 1px; text-transform: uppercase; font-weight: 500; }
+  .result .value { font-size: 18px; font-weight: 600; color: var(--navy); }
+
+  .result-primary { background: var(--navy); color: white; padding: 14px 20px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; margin-top: 4px; }
+  .result-primary strong { color: rgba(255,255,255,0.7); font-size: 12px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 500; }
+  .result-primary .value { font-size: 22px; font-weight: 700; color: #fff; }
+
+  /* Pós contemplação */
+  .pos-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: stretch; }
+  @media (max-width: 768px) { .pos-grid { grid-template-columns: 1fr; } .pos-or { display: none; } }
+  .pos-or { display: flex; align-items: center; justify-content: center; color: var(--text-muted); font-weight: 600; font-size: 13px; letter-spacing: 1px; }
+  .pos-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .pos-card h3 { font-size: 12px; font-weight: 600; color: var(--navy); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 14px; }
+  .pos-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .pos-row:last-child { border-bottom: none; }
+  .pos-row span:first-child { font-size: 12px; color: var(--text-muted); letter-spacing: 0.5px; text-transform: uppercase; }
+  .pos-row .pos-value { font-weight: 600; color: var(--navy); }
+  .pos-row.highlight { background: var(--soft-blue); margin: 0 -8px 4px; padding: 10px 12px; border-radius: 6px; border-bottom: none; }
+  .pos-row.highlight .pos-value { color: var(--navy); font-size: 16px; font-weight: 700; }
+
+  /* Footer actions */
+  .actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; padding-bottom: 32px; }
+  button.primary, button.secondary { padding: 12px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.15s; border: 1px solid transparent; }
+  button.primary { background: var(--navy); color: #fff; border-color: var(--navy); }
+  button.primary:hover { background: var(--navy-dark); border-color: var(--navy-dark); }
+  button.secondary { background: transparent; color: var(--text-muted); border-color: var(--border); }
+  button.secondary:hover { background: var(--bg); border-color: var(--text-muted); }
+
+  /* Helpers */
+  .hidden { display: none !important; }
+  .test-banner { background: var(--soft-blue); border: 1px solid #CBD5E1; color: var(--navy); padding: 10px 16px; border-radius: 8px; font-size: 12px; margin-bottom: 16px; text-align: center; }
+
+
+  /* Botão olho (analítico) */
+  .btn-eye { background: transparent; border: none; padding: 2px; cursor: pointer; color: var(--navy); display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; transition: background .15s; }
+  .btn-eye:hover { background: rgba(45,63,94,.10); }
+
+  /* Modal Analítico */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(15,23,42,.55); z-index: 1000; align-items: center; justify-content: center; padding: 20px; animation: fadeIn .15s ease; }
+  .modal-overlay.aberto { display: flex; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .modal-box { background: #fff; border-radius: 14px; width: 100%; max-width: 880px; max-height: 90vh; display: flex; flex-direction: column; box-shadow: 0 25px 60px rgba(0,0,0,.30); animation: slideUp .2s ease; overflow: hidden; }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal-head { padding: 20px 26px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+  .modal-title { font-size: 17px; font-weight: 700; color: var(--navy); letter-spacing: -.2px; }
+  .modal-sub { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .btn-close { background: transparent; border: 1px solid var(--border); width: 30px; height: 30px; border-radius: 8px; cursor: pointer; color: var(--text-muted); display: flex; align-items: center; justify-content: center; }
+  .btn-close:hover { background: var(--bg); border-color: var(--text-muted); }
+  .modal-body { flex: 1; overflow-y: auto; padding: 16px 26px; }
+  .modal-foot { padding: 14px 26px; border-top: 1px solid var(--border); display: flex; justify-content: center; }
+
+  /* Memória de cálculo do CET */
+  .memoria-cet { background: #FAFCFE; border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px; margin-bottom: 18px; }
+  .memoria-cet h4 { font-size: 12px; font-weight: 700; color: var(--navy); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px; }
+  .memoria-cet-step { display: grid; grid-template-columns: 1fr auto; gap: 8px 14px; padding: 7px 0; border-bottom: 1px solid var(--border); align-items: center; font-size: 12.5px; }
+  .memoria-cet-step:last-child { border-bottom: none; padding-bottom: 0; }
+  .memoria-cet-formula { color: var(--text-muted); font-family: 'DM Mono', ui-monospace, monospace; font-size: 11.5px; }
+  .memoria-cet-resultado { color: var(--navy); font-weight: 700; font-family: 'DM Mono', ui-monospace, monospace; }
+  .memoria-cet-step.destaque .memoria-cet-resultado { color: var(--navy); font-size: 14px; }
+  .memoria-cet-step.destaque { background: rgba(45,63,94,.04); margin: 0 -18px; padding-left: 18px; padding-right: 18px; }
+
+  /* Tabela analítica */
+  .tab-analitico { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+  .tab-analitico thead th { background: var(--navy); color: #fff; padding: 12px 14px; font-weight: 600; text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .6px; }
+  .tab-analitico thead th:first-child { border-top-left-radius: 10px; }
+  .tab-analitico thead th:last-child { border-top-right-radius: 10px; text-align: right; }
+  .tab-analitico thead th:not(:first-child):not(:last-child) { text-align: right; }
+  .tab-analitico tbody td { padding: 11px 14px; border-bottom: 1px solid var(--border); }
+  .tab-analitico tbody td:first-child { font-weight: 600; color: var(--navy); }
+  .tab-analitico tbody td:not(:first-child) { text-align: right; font-family: 'DM Mono', ui-monospace, monospace; }
+  .tab-analitico tbody tr:hover { background: var(--bg); }
+  .tab-analitico tfoot td { background: var(--navy); color: #fff; padding: 12px 14px; font-weight: 700; font-size: 12px; }
+  .tab-analitico tfoot td:first-child { text-align: left; border-bottom-left-radius: 10px; }
+  .tab-analitico tfoot td:last-child { text-align: right; border-bottom-right-radius: 10px; font-family: 'DM Mono', ui-monospace, monospace; }
+</style>
+</head>
+<body>
+<script>if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('embedded');</script>
+<style>html.embedded header { display: none; } html.embedded main { padding-top: 16px; }</style>
+
+<header>
+  <div class="brand">
+    <div class="brand-mark">M</div>
+    <div class="brand-text">
+      <h1>Master Prime</h1>
+      <p>Simulador de Consórcio</p>
+    </div>
+  </div>
+
+</header>
+
+<main>
+  <div id="simStoreMount" style="max-width:1400px; margin:16px auto 0; padding:0 32px;"></div>
+
+  <h2 class="section-title">Simulação Rápida</h2>
+  <p class="subtitle">Simulação de consórcio com proposta, contemplação e pós-contemplação</p>
+
+  <!-- ════ PROPOSTA ════ -->
+  <section class="card">
+    <div class="card-header">
+      <h3>Proposta</h3>
+      <button type="button" class="reset-btn" id="resetProposta">Limpar</button>
+    </div>
+    <div class="grid grid-3">
+      <div class="field"><label>Crédito</label><input type="text" id="credito" placeholder="R$ 0,00" data-mask="money"></div>
+      <div class="field"><label>Prazo (meses)</label><input type="text" id="prazo" placeholder="0" data-mask="int"></div>
+      <div class="field"><label>% Taxa de administração</label><input type="text" id="taxaAdm" placeholder="0,00 %" data-mask="pct2"></div>
+
+      <div class="field"><label>% Fundo de reserva</label><input type="text" id="fundo" placeholder="0,00 %" data-mask="pct2"></div>
+      <div class="field"><label>Tipo de reajuste</label>
+        <select id="tipoReajuste">
+          <option value="">Selecione</option>
+          <optgroup label="Aniversário da cota">
+            <option value="cota-anual">Cota - anual</option>
+            <option value="cota-semestral">Cota - semestral</option>
+            <option value="cota-mensal">Cota - mensal</option>
+          </optgroup>
+          <optgroup label="Aniversário do grupo">
+            <option value="grupo-anual">Grupo - anual</option>
+            <option value="grupo-semestral">Grupo - semestral</option>
+            <option value="grupo-mensal">Grupo - mensal</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="field"><label>% Reajuste</label><input type="text" id="reajuste" placeholder="0,00 %" data-mask="pct2"></div>
+
+      <div class="field">
+        <label>
+          % Seguro
+          <span class="toggle-input"><input type="checkbox" id="seguroOn"><span class="toggle-slider"></span></span>
+        </label>
+        <input type="text" id="seguro" placeholder="0,0000 %" data-mask="pct4" disabled>
+      </div>
+      <div class="field">
+        <label>Tipo seguro</label>
+        <select id="tipoSeguro" disabled>
+          <option value="categoria">Categoria</option>
+          <option value="saldo">Saldo devedor</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>
+          Redutor de parcela
+          <span class="toggle-input"><input type="checkbox" id="redutorOn"><span class="toggle-slider"></span></span>
+        </label>
+        <input type="text" id="redutor" placeholder="0,00 %" data-mask="pct2" disabled>
+      </div>
+
+      <div class="field">
+        <label>Redução sobre</label>
+        <select id="reducaoSobre" disabled>
+          <option value="parcela">Parcela total</option>
+          <option value="fundo">Fundo comum</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>
+          % Taxa de adesão
+          <span class="toggle-input"><input type="checkbox" id="adesaoOn"><span class="toggle-slider"></span></span>
+        </label>
+        <input type="text" id="adesao" placeholder="0,00 %" data-mask="pct2" disabled>
+      </div>
+      <div class="field">
+        <label>Prazo adesão</label>
+        <input type="text" id="prazoAdesao" placeholder="0" data-mask="int" disabled>
+      </div>
+    </div>
+
+    <div style="margin-top: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+      <div class="result-primary">
+        <strong id="lblParcelaInicial">Parcela inicial</strong>
+        <span class="value" id="parcelaInicial">R$ 0,00</span>
+      </div>
+      <div class="result-primary hidden" id="boxDemaisParcelas">
+        <strong>Demais parcelas</strong>
+        <span class="value" id="demaisParcelas">R$ 0,00</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ CONTEMPLAÇÃO ════ -->
+  <section class="card">
+    <div class="card-header">
+      <h3>Contemplação</h3>
+      <button type="button" class="reset-btn" id="resetContemplacao">Limpar</button>
+    </div>
+    <div class="grid grid-4">
+      <div class="field"><label>Tipo de contemplação</label>
+        <select id="tipoContemplacao">
+          <option value="">Selecione</option>
+          <option value="sorteio">Sorteio</option>
+          <option value="lance">Lance</option>
+        </select>
+      </div>
+      <div class="field"><label>Expectativa (meses)</label><input type="text" id="expectativa" placeholder="1" value="1" data-mask="int"></div>
+      <div class="field"><label>Tipo de lance</label>
+        <select id="tipoLance" disabled>
+          <option value="">Selecione</option>
+          <option value="carta">Carta de crédito</option>
+          <option value="categoria">Categoria</option>
+          <option value="saldo">Saldo devedor</option>
+          <option value="cat-carta">Categoria (total) e carta (emb.)</option>
+          <option value="bradesco-imovel">Bradesco Imóvel</option>
+          <option value="bradesco-auto">Bradesco Auto</option>
+        </select>
+      </div>
+      <div class="field"><label>Valor de referência</label><input type="text" id="valorRef" placeholder="R$ 0,00" disabled class="disabled"></div>
+
+      <div class="field"><label>Crédito atualizado</label><input type="text" id="creditoAtualizado" placeholder="R$ 0,00" disabled class="disabled"></div>
+      <div class="field"><label>% Lance rec. próprios</label><input type="text" id="lanceProprios" placeholder="0,0000 %" data-mask="pct4" disabled></div>
+      <div class="field"><label>% Lance embutido</label><input type="text" id="lanceEmbutido" placeholder="0,0000 %" data-mask="pct4" disabled></div>
+      <div class="field">
+        <label>
+          % Lance com FGTS
+          <span class="toggle-input"><input type="checkbox" id="fgtsOn" disabled><span class="toggle-slider"></span></span>
+        </label>
+        <input type="text" id="lanceFGTS" placeholder="0,0000 %" data-mask="pct4" disabled>
+      </div>
+
+      <div class="field"><label>% Total de lance</label><input type="text" id="totalLance" placeholder="0,0000 %" disabled class="disabled"></div>
+      <div class="field"><label>Lance rec. próprios</label><input type="text" id="lanceProprios_v" placeholder="R$ 0,00" disabled class="disabled"></div>
+      <div class="field"><label>Lance embutido</label><input type="text" id="lanceEmbutido_v" placeholder="R$ 0,00" disabled class="disabled"></div>
+      <div class="field"><label>Lance com FGTS</label><input type="text" id="lanceFGTS_v" placeholder="R$ 0,00" disabled class="disabled"></div>
+
+      <div class="field"><label>Valor total do lance</label><input type="text" id="valorTotalLance" placeholder="R$ 0,00" disabled class="disabled"></div>
+    </div>
+
+    <div style="margin-top: 16px;">
+      <div class="result-primary">
+        <strong>Crédito disponível</strong>
+        <span class="value" id="creditoDisponivel">R$ 0,00</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ EVOLUÇÃO DA COTA ════ -->
+  <section class="card">
+    <div class="card-header">
+      <label for="evolucaoOn" style="display: flex; align-items: center; gap: 12px; cursor: pointer; font-size: 13px; font-weight: 600; color: var(--navy); letter-spacing: 1.5px; text-transform: uppercase;">
+        Evolução da cota após contemplação
+        <span class="toggle-input"><input type="checkbox" id="evolucaoOn"><span class="toggle-slider"></span></span>
+      </label>
+    </div>
+    <div id="evolucaoBody" class="hidden">
+      <div class="grid grid-3">
+        <div class="field"><label>Selic</label><input type="text" id="selic" value="15,0 %" data-mask="pct2"></div>
+        <div class="field"><label>% De rentabilidade</label><input type="text" id="rentab" value="100,00 %" data-mask="pct2"></div>
+        <div class="result"><strong>Rentabilidade</strong><span class="value" id="rentabilidade">R$ 0,00</span></div>
+
+        <div class="field"><label>% Do CDI</label><input type="text" id="cdi" placeholder="0,00 %" disabled class="disabled"></div>
+        <div class="field"><label>Meses após contemplação</label><input type="text" id="mesesPosCont" placeholder="0" data-mask="int"></div>
+        <div class="result"><strong>Crédito + rentabilidade</strong><span class="value" id="creditoMaisRentab">R$ 0,00</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════ PÓS CONTEMPLAÇÃO ════ -->
+  <div class="pos-grid">
+    <div class="pos-card">
+      <h3>Pós contemplação · Redução de parcela</h3>
+      <div class="pos-row highlight"><span>Parcela</span><span class="pos-value" id="reducaoParcela_parc">R$ 0,00</span></div>
+      <div class="pos-row"><span>Prazo restante</span><span class="pos-value" id="reducaoParcela_prazo">0</span></div>
+      <div class="pos-row"><span>Custo efetivo mensal</span><span class="pos-value" id="reducaoParcela_cm">0,00 %</span></div>
+      <div class="pos-row"><span>Custo efetivo anual</span><span style="display:inline-flex;align-items:center;gap:8px;"><span class="pos-value" id="reducaoParcela_ca">0,00 %</span><button type="button" class="btn-eye" onclick="abrirAnalitico('parcela')" title="Ver memória de cálculo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></div>
+    </div>
+    <div class="pos-or">OU</div>
+    <div class="pos-card">
+      <h3>Pós contemplação · Redução de prazo</h3>
+      <div class="pos-row highlight"><span>Parcela</span><span class="pos-value" id="reducaoPrazo_parc">R$ 0,00</span></div>
+      <div class="pos-row"><span>Prazo restante</span><span class="pos-value" id="reducaoPrazo_prazo">0</span></div>
+      <div class="pos-row"><span>Custo efetivo mensal</span><span class="pos-value" id="reducaoPrazo_cm">0,00 %</span></div>
+      <div class="pos-row"><span>Custo efetivo anual</span><span style="display:inline-flex;align-items:center;gap:8px;"><span class="pos-value" id="reducaoPrazo_ca">0,00 %</span><button type="button" class="btn-eye" onclick="abrirAnalitico('prazo')" title="Ver memória de cálculo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></div>
+    </div>
+  </div>
+
+  <!-- ════ MODAL ANALÍTICO (memória de cálculo) ════ -->
+  <div id="modalAnalitico" class="modal-overlay" onclick="if(event.target===this)fecharAnalitico()">
+    <div class="modal-box">
+      <div class="modal-head">
+        <div>
+          <div class="modal-title">Analítico</div>
+          <div class="modal-sub" id="analiticoSub">Memória de cálculo ano a ano</div>
+        </div>
+        <button type="button" class="btn-close" onclick="fecharAnalitico()" title="Fechar">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="modal-body">
+        <!-- Memória de cálculo do CET -->
+        <div class="memoria-cet" id="memoriaCet"></div>
+
+        <!-- Tabela ano a ano -->
+        <table class="tab-analitico">
+          <thead>
+            <tr>
+              <th>Ano</th>
+              <th>Carta de crédito</th>
+              <th>Saldo devedor</th>
+              <th>Parcela</th>
+              <th>Total pago</th>
+            </tr>
+          </thead>
+          <tbody id="analiticoBody"></tbody>
+          <tfoot>
+            <tr>
+              <td colspan="4">TOTAL</td>
+              <td id="analiticoTotal">R$ 0,00</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+      <div class="modal-foot">
+        <button type="button" class="primary" onclick="fecharAnalitico()">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════ OBSERVAÇÕES ════ -->
+  <section class="card">
+    <div class="card-header">
+      <h3>Observações (opcional)</h3>
+      <button type="button" class="reset-btn" id="btnLimparObs">Limpar</button>
+    </div>
+    <textarea id="mp-observacoes" class="obs-area" placeholder="Adicione anotações que devem aparecer no PDF…"></textarea>
+  </section>
+
+  <div class="actions">
+    <button class="secondary" id="limparTudo">Limpar tudo</button>
+    <button class="primary" id="baixarPdf">Baixar PDF</button>
+  </div>
+</main>
+
+<!-- Bibliotecas para geração do PDF (módulo compartilhado pdf-master-prime.js cuida do template) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="pdf-master-prime.js?v=20260526e"></script>
+<script src="simulador-autosave.js?v=20260625b"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="simulacao-store.js"></script>
+
+<script>
+// ═════════════════════════════════════════════════════
+// MÁSCARAS DE INPUT
+// ═════════════════════════════════════════════════════
+function maskMoney(value) {
+  const digits = String(value).replace(/\D/g, '');
+  if (!digits) return '';
+  // dígitos = centavos; últimos 2 = centavos, resto = reais
+  const cents = parseInt(digits, 10);
+  const reais = Math.floor(cents / 100);
+  const cs = cents % 100;
+  return 'R$ ' + reais.toLocaleString('pt-BR') + ',' + String(cs).padStart(2, '0');
+}
+function unmaskMoney(value) {
+  const digits = String(value).replace(/\D/g, '');
+  return parseInt(digits || '0', 10) / 100;
+}
+function maskPct(value, decimals = 2) {
+  const cleaned = String(value).replace(',', '.').replace(/[^\d.]/g, '');
+  if (cleaned === '') return '';
+  const num = parseFloat(cleaned);
+  if (isNaN(num)) return '';
+  return num.toFixed(decimals).replace('.', ',') + ' %';
+}
+function unmaskPct(value) {
+  const cleaned = String(value).replace('%', '').replace(',', '.').replace(/[^\d.\-]/g, '').trim();
+  return parseFloat(cleaned || '0');
+}
+function maskInt(value) {
+  return String(value).replace(/\D/g, '');
+}
+
+document.querySelectorAll('input[data-mask]').forEach(inp => {
+  const type = inp.dataset.mask;
+  inp.addEventListener('input', e => {
+    const v = e.target.value;
+    if (type === 'money') e.target.value = maskMoney(v);
+    else if (type === 'int') e.target.value = maskInt(v);
+    recalc();
+  });
+  inp.addEventListener('blur', e => {
+    const v = e.target.value;
+    if (type === 'pct2') e.target.value = maskPct(v, 2);
+    else if (type === 'pct4') e.target.value = maskPct(v, 4);
+  });
+  inp.addEventListener('focus', e => {
+    if (type === 'pct2' || type === 'pct4') {
+      const n = unmaskPct(e.target.value);
+      if (n) e.target.value = String(n).replace('.', ',');
+    }
+  });
+});
+
+document.querySelectorAll('select, input[type="checkbox"]').forEach(el => {
+  el.addEventListener('change', recalc);
+});
+
+// ═════════════════════════════════════════════════════
+// HELPERS DE FORMATAÇÃO
+// ═════════════════════════════════════════════════════
+function formatMoney(num) {
+  if (!isFinite(num) || isNaN(num)) num = 0;
+  return 'R$ ' + num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function formatPct(num, decimals = 4) {
+  if (!isFinite(num) || isNaN(num)) num = 0;
+  return num.toFixed(decimals).replace('.', ',') + ' %';
+}
+
+// ═════════════════════════════════════════════════════
+// TOGGLES
+// ═════════════════════════════════════════════════════
+function setupToggle(toggleId, ...fieldIds) {
+  const toggle = document.getElementById(toggleId);
+  toggle.addEventListener('change', () => {
+    fieldIds.forEach(id => {
+      const el = document.getElementById(id);
+      el.disabled = !toggle.checked;
+      el.classList.toggle('disabled', !toggle.checked);
+      if (!toggle.checked) {
+        if (el.tagName === 'INPUT') el.value = '';
+        else el.selectedIndex = 0;
+      }
+    });
+    recalc();
+  });
+}
+setupToggle('seguroOn', 'seguro', 'tipoSeguro');
+setupToggle('redutorOn', 'redutor', 'reducaoSobre');
+setupToggle('adesaoOn', 'adesao', 'prazoAdesao');
+setupToggle('fgtsOn', 'lanceFGTS');
+
+document.getElementById('evolucaoOn').addEventListener('change', e => {
+  document.getElementById('evolucaoBody').classList.toggle('hidden', !e.target.checked);
+  recalc();
+});
+
+document.getElementById('tipoContemplacao').addEventListener('change', e => {
+  const isLance = e.target.value === 'lance';
+  const isAlgo = e.target.value !== '';
+  document.getElementById('tipoLance').disabled = !isAlgo;
+  document.getElementById('lanceProprios').disabled = !isLance;
+  document.getElementById('lanceProprios').classList.toggle('disabled', !isLance);
+  document.getElementById('lanceEmbutido').disabled = !isLance;
+  document.getElementById('lanceEmbutido').classList.toggle('disabled', !isLance);
+  document.getElementById('fgtsOn').disabled = !isLance;
+  if (isAlgo && !document.getElementById('tipoLance').value) document.getElementById('tipoLance').value = 'carta';
+  recalc();
+});
+
+// ═════════════════════════════════════════════════════
+// FÓRMULAS (validadas: 27/27 casos batem com o Conkey)
+// ═════════════════════════════════════════════════════
+
+function calcularTIR(fluxos, palpite = 0.005) {
+  const npv = (taxa) => fluxos.reduce((acc, fc, t) => acc + fc / Math.pow(1 + taxa, t), 0);
+  const dnpv = (taxa) => fluxos.reduce((acc, fc, t) => acc - t * fc / Math.pow(1 + taxa, t + 1), 0);
+  let taxa = palpite;
+  for (let i = 0; i < 80; i++) {
+    const f = npv(taxa);
+    const d = dnpv(taxa);
+    if (Math.abs(d) < 1e-12) break;
+    const nova = taxa - f / d;
+    if (!isFinite(nova)) break;
+    if (Math.abs(nova - taxa) < 1e-9) return nova;
+    taxa = nova;
+  }
+  return taxa;
+}
+
+function recalc() {
+  const credito = unmaskMoney(document.getElementById('credito').value);
+  const prazo = parseInt(document.getElementById('prazo').value || '0', 10);
+  const taxaAdm = unmaskPct(document.getElementById('taxaAdm').value) / 100;
+  const fundo = unmaskPct(document.getElementById('fundo').value) / 100;
+  const tipoReajuste = document.getElementById('tipoReajuste').value;
+  const reajuste = unmaskPct(document.getElementById('reajuste').value) / 100;
+  const seguroOn = document.getElementById('seguroOn').checked;
+  const seguro = seguroOn ? unmaskPct(document.getElementById('seguro').value) / 100 : 0;
+  const redutorOn = document.getElementById('redutorOn').checked;
+  const redutor = redutorOn ? unmaskPct(document.getElementById('redutor').value) / 100 : 0;
+  const reducaoSobre = document.getElementById('reducaoSobre').value;
+  const adesaoOn = document.getElementById('adesaoOn').checked;
+  const adesao = adesaoOn ? unmaskPct(document.getElementById('adesao').value) / 100 : 0;
+  const prazoAdesao = parseInt(document.getElementById('prazoAdesao').value || '0', 10);
+
+  const tipoCont = document.getElementById('tipoContemplacao').value;
+  const expectativa = parseInt(document.getElementById('expectativa').value || '1', 10);
+  const tipoLance = document.getElementById('tipoLance').value;
+  const _isBrad = (tipoLance === 'bradesco-imovel' || tipoLance === 'bradesco-auto');
+  const _fatorBrad = (tipoLance === 'bradesco-imovel') ? 1.0425 : (tipoLance === 'bradesco-auto') ? 1.0525 : 1;
+  const pProprios = unmaskPct(document.getElementById('lanceProprios').value) / 100;
+  // Bradesco (Imóvel/Auto): só % sobre Categoria, não tem embutido nem FGTS
+  const pEmbutido = _isBrad ? 0 : unmaskPct(document.getElementById('lanceEmbutido').value) / 100;
+  const fgtsOn = document.getElementById('fgtsOn').checked;
+  const pFGTS = (fgtsOn && !_isBrad) ? unmaskPct(document.getElementById('lanceFGTS').value) / 100 : 0;
+
+  const evolucaoOn = document.getElementById('evolucaoOn').checked;
+  const selic = unmaskPct(document.getElementById('selic').value) / 100;
+  const rentabPerc = unmaskPct(document.getElementById('rentab').value) / 100;
+  const mesesPos = parseInt(document.getElementById('mesesPosCont').value || '0', 10);
+
+  const period = tipoReajuste ? (tipoReajuste.endsWith('-anual') ? 12 : tipoReajuste.endsWith('-semestral') ? 6 : 1) : 12;
+
+  // === PROPOSTA ===
+  const totalDevido = credito * (1 + taxaAdm + fundo);
+  const parcelaBase = prazo > 0 ? totalDevido / prazo : 0;
+
+  let parcelaComRedutor = parcelaBase;
+  if (redutorOn && redutor > 0) {
+    if (reducaoSobre === 'parcela') {
+      parcelaComRedutor = parcelaBase * (1 - redutor);
+    } else {
+      const fundoComum = prazo > 0 ? credito / prazo : 0;
+      const admMensal = prazo > 0 ? credito * taxaAdm / prazo : 0;
+      const fundoMensal = prazo > 0 ? credito * fundo / prazo : 0;
+      parcelaComRedutor = fundoComum * (1 - redutor) + admMensal + fundoMensal;
+    }
+  }
+
+  const seguroMensal = (seguroOn && seguro > 0) ? totalDevido * seguro : 0;
+  const adesaoMensal = (adesaoOn && adesao > 0 && prazoAdesao > 0) ? (credito * adesao) / prazoAdesao : 0;
+
+  const parcelaInicial = parcelaComRedutor + seguroMensal + adesaoMensal;
+  const demaisParcelas = parcelaComRedutor + seguroMensal;
+
+  document.getElementById('parcelaInicial').textContent = formatMoney(parcelaInicial);
+  if (adesaoOn && adesao > 0 && prazoAdesao > 0) {
+    document.getElementById('boxDemaisParcelas').classList.remove('hidden');
+    document.getElementById('demaisParcelas').textContent = formatMoney(demaisParcelas);
+    document.getElementById('lblParcelaInicial').textContent = `${prazoAdesao} parcela${prazoAdesao>1?'s':''} inicia${prazoAdesao>1?'is':'l'}`;
+  } else {
+    document.getElementById('boxDemaisParcelas').classList.add('hidden');
+    document.getElementById('lblParcelaInicial').textContent = 'Parcela inicial';
+  }
+
+  // === CRÉDITO ATUALIZADO ===
+  let creditoAtualizado = credito;
+  if (reajuste > 0 && tipoReajuste) {
+    const numReajustes = Math.floor(expectativa / period);
+    creditoAtualizado = credito * Math.pow(1 + reajuste, numReajustes);
+  }
+  document.getElementById('creditoAtualizado').value = formatMoney(creditoAtualizado);
+
+  // === SALDO DEVEDOR no momento da contemplação ===
+  // Algoritmo: saldo começa = totalDevido. Cada mês, paga parcela.
+  // No aniversário (mes % period === 0), reajusta saldo e parcela.
+  let saldoNoMomentoCont = totalDevido;
+  let parcelaAtualNoMomento = parcelaBase;
+  for (let m = 1; m <= expectativa; m++) {
+    saldoNoMomentoCont -= parcelaAtualNoMomento;
+    if (reajuste > 0 && tipoReajuste && m % period === 0) {
+      saldoNoMomentoCont *= (1 + reajuste);
+      parcelaAtualNoMomento *= (1 + reajuste);
+    }
+  }
+  saldoNoMomentoCont = Math.max(0, saldoNoMomentoCont);
+
+  // === VALOR DE REFERÊNCIA ===
+  let valorRef = creditoAtualizado;
+  if (tipoCont !== '') {
+    if (tipoLance === 'categoria' || tipoLance === 'cat-carta' || _isBrad) {
+      valorRef = creditoAtualizado * (1 + taxaAdm + fundo);
+    } else if (tipoLance === 'saldo') {
+      valorRef = saldoNoMomentoCont;
+    }
+  }
+  document.getElementById('valorRef').value = formatMoney(valorRef);
+
+  // === LANCES ===
+  // Conkey "Categoria (Total) e Carta (Emb.)":
+  //   - Lance Próprios = % × Categoria Total (= Crédito Atualizado × (1 + 2 × (adm + FR)))
+  //   - Lance Embutido = % × Carta (= Crédito Atualizado)
+  //   - Lance FGTS = % × Valor de Referência (sempre)
+  // Bradesco: Lance R$ = (Categoria × % Lance) / Fator (1,0425 imóvel · 1,0525 auto)
+  const categoriaTotal = creditoAtualizado * (1 + 2 * (taxaAdm + fundo));
+  const lanceProprios_v = (tipoLance === 'cat-carta')
+    ? categoriaTotal * pProprios
+    : (valorRef * pProprios) / _fatorBrad;
+  const lanceEmbutido_v = (tipoLance === 'cat-carta') ? creditoAtualizado * pEmbutido : valorRef * pEmbutido;
+  const lanceFGTS_v = valorRef * pFGTS;  // FGTS sempre sobre VR
+  const valorTotalLance = lanceProprios_v + lanceEmbutido_v + lanceFGTS_v;
+  const totalLancePct = pProprios + pEmbutido + pFGTS;
+
+  document.getElementById('lanceProprios_v').value = formatMoney(lanceProprios_v);
+  document.getElementById('lanceEmbutido_v').value = formatMoney(lanceEmbutido_v);
+  document.getElementById('lanceFGTS_v').value = formatMoney(lanceFGTS_v);
+  document.getElementById('valorTotalLance').value = formatMoney(valorTotalLance);
+  document.getElementById('totalLance').value = formatPct(totalLancePct * 100, 4);
+
+  const creditoDisp = creditoAtualizado - lanceEmbutido_v - lanceFGTS_v;
+  document.getElementById('creditoDisponivel').textContent = formatMoney(creditoDisp);
+
+  // === EVOLUÇÃO PÓS CONTEMPLAÇÃO ===
+  // Conkey: CDI = Selic - 0,10pp (não 0.993 × Selic, evita arred de 14,89 → 14,90)
+  const cdi = selic - 0.001;
+  document.getElementById('cdi').value = formatPct(cdi * 100, 2);
+  let rentabilidade = 0;
+  let creditoMaisRent = creditoDisp;
+  if (evolucaoOn && cdi > 0 && mesesPos > 0) {
+    const taxaEfetiva = cdi * rentabPerc;
+    rentabilidade = creditoDisp * (Math.pow(1 + taxaEfetiva, mesesPos / 12) - 1);
+    creditoMaisRent = creditoDisp + rentabilidade;
+  }
+  document.getElementById('rentabilidade').textContent = formatMoney(rentabilidade);
+  document.getElementById('creditoMaisRentab').textContent = formatMoney(creditoMaisRent);
+
+  // === PÓS CONTEMPLAÇÃO ===
+  const saldoApoLance = Math.max(0, saldoNoMomentoCont - valorTotalLance);
+  const prazoRestante = Math.max(0, prazo - expectativa);
+
+  const parcReducaoParcela = prazoRestante > 0 ? saldoApoLance / prazoRestante : 0;
+  const parcReducaoPrazo = parcelaAtualNoMomento;
+  const novoPrazoReducao = parcReducaoPrazo > 0 ? Math.ceil(saldoApoLance / parcReducaoPrazo) : 0;
+
+  // Custo efetivo — fórmula Conkey (engenharia reversa v2, com reajuste cumulativo):
+  //   total_pagas = Σ parcelas pagas com reajuste (pré + pós contemplação)
+  //   custo       = total_pagas + lance total − crédito  (custo financeiro real)
+  //   disponível  = crédito − lance próprios             (capital líquido do tomador)
+  //   prazoEf Reduç Parcela = prazo total
+  //   prazoEf Reduç Prazo   = expectativa + novo prazo (efetivo de pagamento)
+  //
+  //   CET mensal_real    = (1 + custo / disponível)^(1 / prazoEf) − 1
+  //   CET mensal_exibido = arredondado p/ 4 casas (= 2 casas no %)
+  //   CET anual          = (1 + mensal_exibido)^12 − 1
+  //
+  // Histórico: a v1 usava custo = (adm + fr) × crédito (nominal), o que
+  // ignorava o efeito do reajuste cumulativo nas parcelas e resultava em
+  // CET ~33% menor que Conkey. A v2 soma parcela a parcela com reajuste,
+  // bate Conkey em 100% no caso "redução de parcela" e dentro de 1bp no
+  // caso "redução de prazo".
+  function totalParcelasComReajuste(parcelaPosCont, prazoPosCont) {
+    let total = 0;
+    let parcelaAtual = parcelaBase;
+    // Pré-contemplação (1 ... expectativa, parcela cheia com reaj)
+    for (let m = 1; m <= expectativa; m++) {
+      total += parcelaAtual;
+      if (reajuste > 0 && tipoReajuste && m % period === 0) {
+        parcelaAtual *= (1 + reajuste);
+      }
+    }
+    // Pós-contemplação (expectativa+1 ... expectativa+prazoPos, parcela pós com reaj)
+    let parcelaPos = parcelaPosCont;
+    for (let m = expectativa + 1; m <= expectativa + prazoPosCont; m++) {
+      total += parcelaPos;
+      if (reajuste > 0 && tipoReajuste && m % period === 0) {
+        parcelaPos *= (1 + reajuste);
+      }
+    }
+    return total;
+  }
+
+  function calcCustoEfetivoConkey(prazoEf, parcelaPosCont, prazoPosCont) {
+    const disponivel = credito - lanceProprios_v;
+    if (prazoEf <= 0 || disponivel <= 0) return { mensal: 0, anual: 0 };
+    const totalPagas = totalParcelasComReajuste(parcelaPosCont, prazoPosCont);
+    const custo = totalPagas + valorTotalLance - credito;
+    const ratio = custo / disponivel;
+    const mensalReal = Math.pow(1 + ratio, 1 / prazoEf) - 1;
+    const mensalExibido = Math.round(mensalReal * 10000) / 10000;
+    const anual = Math.pow(1 + mensalExibido, 12) - 1;
+    return { mensal: mensalExibido, anual: anual };
+  }
+
+  const ceParcela = calcCustoEfetivoConkey(prazo,                          parcReducaoParcela, prazoRestante);    // Reduç Parc: prazo total
+  const cePrazo   = calcCustoEfetivoConkey(expectativa + novoPrazoReducao, parcReducaoPrazo,   novoPrazoReducao); // Reduç Prazo: efetivo
+
+  document.getElementById('reducaoParcela_parc').textContent = formatMoney(parcReducaoParcela);
+  document.getElementById('reducaoParcela_prazo').textContent = prazoRestante;
+  document.getElementById('reducaoParcela_cm').textContent = formatPct(ceParcela.mensal * 100, 2);
+  document.getElementById('reducaoParcela_ca').textContent = formatPct(ceParcela.anual * 100, 2);
+
+  document.getElementById('reducaoPrazo_parc').textContent = formatMoney(parcReducaoPrazo);
+  document.getElementById('reducaoPrazo_prazo').textContent = novoPrazoReducao;
+  document.getElementById('reducaoPrazo_cm').textContent = formatPct(cePrazo.mensal * 100, 2);
+  document.getElementById('reducaoPrazo_ca').textContent = formatPct(cePrazo.anual * 100, 2);
+
+  // Salva estado pra modal Analítico (memória de cálculo)
+  window._simState = {
+    credito: credito,
+    taxaAdm: taxaAdm,
+    fundo: fundo,
+    lanceProprios_v: lanceProprios_v,
+    prazoTotal: prazo,
+    parcelaBase: parcelaBase,
+    parcelaInicial: parcelaAtualNoMomento,
+    valorTotalLance: valorTotalLance,
+    expectativa: expectativa,
+    reajuste: reajuste,
+    tipoReajuste: tipoReajuste,
+    period: period,
+    parcReducaoParcela: parcReducaoParcela,
+    prazoRestParcela: prazoRestante,
+    parcReducaoPrazo: parcReducaoPrazo,
+    prazoRestPrazo: novoPrazoReducao,
+    totalPagasParcela: totalParcelasComReajuste(parcReducaoParcela, prazoRestante),
+    totalPagasPrazo:   totalParcelasComReajuste(parcReducaoPrazo,   novoPrazoReducao),
+    cetParcMensal: ceParcela.mensal,
+    cetParcAnual: ceParcela.anual,
+    cetPrazoMensal: cePrazo.mensal,
+    cetPrazoAnual: cePrazo.anual,
+  };
+}
+
+// ═════════════════════════════════════════════════════
+// MODAL ANALÍTICO (memória de cálculo ano a ano)
+// ═════════════════════════════════════════════════════
+function abrirAnalitico(modo) {
+  const s = window._simState;
+  if (!s || !s.credito) { alert('Preencha primeiro a simulação.'); return; }
+
+  // Modo 'parcela' = reducao de parcela | 'prazo' = reducao de prazo
+  const parcPos = modo === 'parcela' ? s.parcReducaoParcela : s.parcReducaoPrazo;
+  const prazoRest = modo === 'parcela' ? s.prazoRestParcela : s.prazoRestPrazo;
+  const titulo = modo === 'parcela' ? 'Pós contemplação · Redução de parcela' : 'Pós contemplação · Redução de prazo';
+
+  // Constroi array de parcelas mês a mês COM reajuste cumulativo
+  // Pré-contemplação: meses 1 até expectativa, parcela cheia com reaj nos aniversários
+  // Pós contemplação: meses (expectativa+1) até (expectativa+prazoRest), parcPos com reaj
+  const parcelas = [];
+  const period = s.period || 12;
+  let pAtual = s.parcelaBase || s.parcelaInicial;
+  for (let m = 1; m <= s.expectativa; m++) {
+    parcelas.push(pAtual);
+    if (s.reajuste > 0 && s.tipoReajuste && m % period === 0) pAtual *= (1 + s.reajuste);
+  }
+  let pPos = parcPos;
+  for (let m = s.expectativa + 1; m <= s.expectativa + prazoRest; m++) {
+    parcelas.push(pPos);
+    if (s.reajuste > 0 && s.tipoReajuste && m % period === 0) pPos *= (1 + s.reajuste);
+  }
+
+  const totalGeral = parcelas.reduce((a, b) => a + b, 0);
+
+  // Agrupa por ano (12 meses) e calcula saldo devedor decrescente
+  // Padrão Conkey: saldo devedor no INÍCIO do ano = total restante - parcela do mês 1 do ano
+  const anos = [];
+  let pagoAcumulado = 0;
+  for (let i = 0; i < parcelas.length; i += 12) {
+    const slice = parcelas.slice(i, i + 12);
+    const totalAno = slice.reduce((a, b) => a + b, 0);
+    const parcelaMes1 = parcelas[i] || 0;
+    const parcelaMensal = slice[slice.length - 1] || parcPos;
+    const saldoInicioAno = totalGeral - pagoAcumulado - parcelaMes1;
+    anos.push({
+      ano: anos.length + 1,
+      cartaCredito: s.credito,
+      saldoDevedor: saldoInicioAno,
+      parcela: parcelaMensal,
+      totalPago: totalAno,
+    });
+    pagoAcumulado += totalAno;
+  }
+
+  // Renderiza
+  const fmt = (v) => 'R$ ' + Number(v||0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmtPct = (v, casas) => Number(v*100||0).toLocaleString('pt-BR', { minimumFractionDigits: casas||2, maximumFractionDigits: casas||2 }) + ' %';
+
+  // Memória de cálculo do CET (formato narrativo, didático para apresentar ao cliente)
+  const lanceProprios_v = s.lanceProprios_v;
+  const totalPagas = (modo === 'parcela' ? s.totalPagasParcela : s.totalPagasPrazo) || totalGeral;
+  const totalDesembolso = totalPagas + s.valorTotalLance;
+  const custo = totalDesembolso - s.credito;
+  const disponivel = s.credito - lanceProprios_v;
+  const proporcao = disponivel > 0 ? custo / disponivel : 0;
+  const prazoEf = modo === 'parcela' ? s.prazoTotal : (s.expectativa + s.prazoRestPrazo);
+  const cetMensal = modo === 'parcela' ? s.cetParcMensal : s.cetPrazoMensal;
+  const cetAnual = modo === 'parcela' ? s.cetParcAnual : s.cetPrazoAnual;
+  const reajPct = (s.reajuste || 0) * 100;
+  const reajPer = s.tipoReajuste && s.tipoReajuste.includes('mensal') ? 'mensal'
+                 : s.tipoReajuste && s.tipoReajuste.includes('semestral') ? 'semestral'
+                 : 'anual';
+  const reajTxt = reajPct > 0 ? `, com reajuste ${reajPer} de ${reajPct.toLocaleString('pt-BR', {minimumFractionDigits:0, maximumFractionDigits:2})} %` : '';
+
+  document.getElementById('memoriaCet').innerHTML = `
+    <h4>Como chegamos no seu CET</h4>
+    <div class="memoria-cet-step">
+      <span><strong>1.</strong> Você vai pagar <strong>${prazoEf} parcelas</strong>${reajTxt}. Somando todas:</span>
+      <span class="memoria-cet-resultado">${fmt(totalPagas)}</span>
+    </div>
+    <div class="memoria-cet-step">
+      <span><strong>2.</strong> Lance que você vai dar:</span>
+      <span class="memoria-cet-resultado">${fmt(s.valorTotalLance)}</span>
+    </div>
+    <div class="memoria-cet-step">
+      <span><strong>3.</strong> Total que vai sair do seu bolso (1 + 2):</span>
+      <span class="memoria-cet-resultado">${fmt(totalDesembolso)}</span>
+    </div>
+    <div class="memoria-cet-step">
+      <span><strong>4.</strong> Crédito que você vai receber:</span>
+      <span class="memoria-cet-resultado">${fmt(s.credito)}</span>
+    </div>
+    <div class="memoria-cet-step">
+      <span><strong>5.</strong> Custo da operação para você (3 − 4):</span>
+      <span class="memoria-cet-resultado">${fmt(custo)}</span>
+    </div>
+    <div class="memoria-cet-step">
+      <span><strong>6.</strong> Capital líquido que efetivamente entrou pra você (crédito − seu lance próprio):</span>
+      <span class="memoria-cet-resultado">${fmt(disponivel)}</span>
+    </div>
+    <div class="memoria-cet-step">
+      <span><strong>7.</strong> O custo representa <strong>${(proporcao*100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})} %</strong> do capital líquido (${fmt(custo)} ÷ ${fmt(disponivel)}).</span>
+      <span class="memoria-cet-resultado">${(proporcao*100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})} %</span>
+    </div>
+    <div class="memoria-cet-step">
+      <span><strong>8.</strong> Distribuindo esse custo proporcionalmente ao longo de ${prazoEf} meses, chegamos à taxa <strong>mensal</strong>:</span>
+      <span class="memoria-cet-resultado">${fmtPct(cetMensal, 2)}</span>
+    </div>
+    <div class="memoria-cet-step destaque">
+      <span><strong>9.</strong> A mesma taxa, expressa em base <strong>anual</strong>:</span>
+      <span class="memoria-cet-resultado">${fmtPct(cetAnual, 2)}</span>
+    </div>
+    <div class="memoria-cet-step" style="border-bottom:none;font-size:11.5px;color:#6B7280;font-style:italic;padding-top:10px;">
+      <span>Esta é a taxa equivalente — comparável diretamente com a taxa de um financiamento bancário.</span>
+      <span></span>
+    </div>
+  `;
+
+  const tbody = document.getElementById('analiticoBody');
+  tbody.innerHTML = anos.map(a => `
+    <tr>
+      <td>${a.ano}</td>
+      <td>${fmt(a.cartaCredito)}</td>
+      <td>${fmt(a.saldoDevedor)}</td>
+      <td>${fmt(a.parcela)}</td>
+      <td>${fmt(a.totalPago)}</td>
+    </tr>
+  `).join('');
+  document.getElementById('analiticoTotal').textContent = fmt(totalGeral);
+  document.getElementById('analiticoSub').textContent = titulo + ' · memória de cálculo ano a ano';
+  document.getElementById('modalAnalitico').classList.add('aberto');
+}
+function fecharAnalitico() {
+  document.getElementById('modalAnalitico').classList.remove('aberto');
+}
+
+// ═════════════════════════════════════════════════════
+// LIMPAR
+// ═════════════════════════════════════════════════════
+document.getElementById('resetProposta').addEventListener('click', () => {
+  ['credito','prazo','taxaAdm','fundo','reajuste','seguro','redutor','adesao','prazoAdesao'].forEach(id => document.getElementById(id).value = '');
+  ['tipoReajuste','tipoSeguro','reducaoSobre'].forEach(id => document.getElementById(id).selectedIndex = 0);
+  ['seguroOn','redutorOn','adesaoOn'].forEach(id => { const t = document.getElementById(id); t.checked = false; t.dispatchEvent(new Event('change')); });
+  recalc();
+});
+document.getElementById('resetContemplacao').addEventListener('click', () => {
+  ['lanceProprios','lanceEmbutido','lanceFGTS'].forEach(id => document.getElementById(id).value = '');
+  ['tipoContemplacao','tipoLance'].forEach(id => document.getElementById(id).selectedIndex = 0);
+  document.getElementById('expectativa').value = '1';
+  const f = document.getElementById('fgtsOn');
+  f.checked = false;
+  f.dispatchEvent(new Event('change'));
+  document.getElementById('tipoContemplacao').dispatchEvent(new Event('change'));
+  recalc();
+});
+document.getElementById('limparTudo').addEventListener('click', () => {
+  document.getElementById('resetProposta').click();
+  document.getElementById('resetContemplacao').click();
+  const e = document.getElementById('evolucaoOn');
+  e.checked = false;
+  e.dispatchEvent(new Event('change'));
+  document.getElementById('mesesPosCont').value = '';
+  const obsEl = document.getElementById('mp-observacoes'); if (obsEl) obsEl.value = '';
+  recalc();
+});
+document.getElementById('btnLimparObs').addEventListener('click', () => {
+  const obsEl = document.getElementById('mp-observacoes'); if (obsEl) obsEl.value = '';
+});
+
+recalc();
+
+// ═════════════════════════════════════════════════════
+// EXPORTAR PDF
+// ═════════════════════════════════════════════════════
+// ═════════════════════════════════════════════════════════════
+// PDF — usa módulo compartilhado pdf-master-prime.js
+// ═════════════════════════════════════════════════════════════
+
+// Helpers
+const _txt = (id) => { const el = document.getElementById(id); return (el?.textContent || el?.value || '').trim() || '—'; };
+const _val = (id) => { const el = document.getElementById(id); return (el?.value || '').trim(); };
+const _numPct = (s) => { const m = String(s||'').replace(/\./g,'').replace(',','.').match(/-?\d+(?:\.\d+)?/); return m ? parseFloat(m[0]) : 0; };
+const _numMoney = (s) => { const m = String(s||'').replace(/\./g,'').replace(',','.').match(/-?\d+(?:\.\d+)?/); return m ? parseFloat(m[0]) : 0; };
+
+// Snapshot do estado atual do simulador → blocos pro módulo PDF
+function _coletarBlocos() {
+  const tipoReajusteSel = document.getElementById('tipoReajuste');
+  const tipoReajusteTxt = tipoReajusteSel?.options[tipoReajusteSel.selectedIndex]?.text || '—';
+  const tipoContSel = document.getElementById('tipoContemplacao');
+  const tipoContTxt = tipoContSel?.options[tipoContSel.selectedIndex]?.text || '—';
+  const tipoLanceSel = document.getElementById('tipoLance');
+  const tipoLanceTxt = tipoLanceSel?.options[tipoLanceSel.selectedIndex]?.text || '—';
+  const reducaoSobreSel = document.getElementById('reducaoSobre');
+  const reducaoSobreTxt = reducaoSobreSel?.options[reducaoSobreSel.selectedIndex]?.text || 'Parcela total';
+
+  // Estados
+  const reajusteN = _numPct(_val('reajuste'));
+  const seguroOn = !!document.getElementById('seguroOn')?.checked;
+  const seguroN = seguroOn ? _numPct(_val('seguro')) : 0;
+  const redutorOn = !!document.getElementById('redutorOn')?.checked;
+  const redutorN = redutorOn ? _numPct(_val('redutor')) : 0;
+  const adesaoOn = !!document.getElementById('adesaoOn')?.checked;
+  const adesaoN = adesaoOn ? _numPct(_val('adesao')) : 0;
+  const adesaoMeses = adesaoOn ? (parseInt(_val('prazoAdesao'),10) || 0) : 0;
+  const evoOn = !!document.getElementById('evolucaoOn')?.checked;
+  const lanceEmbN = _numPct(_val('lanceEmbutido')) + _numMoney(_val('lanceEmbutido_v'));
+  const lanceFgtsN = _numPct(_val('lanceFGTS')) + _numMoney(_val('lanceFGTS_v'));
+
+  // ─── DADOS DA COTA ───
+  const linhaCota1Campos = [
+    { label: 'Crédito', value: _val('credito') || 'R$ 0,00' },
+    { label: 'Prazo', value: (_val('prazo') || '0') + ' meses' },
+    { label: 'Taxa de administração', value: _val('taxaAdm') || '0,00 %' },
+    { label: 'Fundo de reserva', value: _val('fundo') || '0,00 %' }
+  ];
+
+  // Parcela inicial (com badge "Demais parcelas" se redutor ou adesão ativos com adesaoMeses > 0)
+  let parcelaInicial2 = window._simState?.parcelaInicial2 || null;
+  let destaque;
+  if (parcelaInicial2 && parcelaInicial2 !== _txt('parcelaInicial')) {
+    const nIniciais = adesaoMeses || 1;
+    destaque = {
+      multi: [
+        { label: `${nIniciais} ${nIniciais > 1 ? 'parcelas' : 'parcela'}`, value: _txt('parcelaInicial') },
+        { label: 'Demais parcelas', value: parcelaInicial2 }
+      ]
+    };
+  } else {
+    destaque = { label: 'Parcela inicial', value: _txt('parcelaInicial') };
+  }
+
+  // Linha 2 da Cota (dinâmica)
+  const linhaCota2Campos = [
+    { label: 'Tipo de reajuste', value: tipoReajusteTxt }
+  ];
+  if (reajusteN > 0) linhaCota2Campos.push({ label: 'Reajuste', value: _val('reajuste') });
+  if (redutorN > 0) {
+    linhaCota2Campos.push({ label: 'Redutor de parcela', value: `${redutorN.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})} %` });
+    linhaCota2Campos.push({ label: 'Redutor sobre', value: reducaoSobreTxt });
+  }
+  if (seguroN > 0) linhaCota2Campos.push({ label: '% Seguro', value: `${seguroN.toLocaleString('pt-BR',{minimumFractionDigits:4,maximumFractionDigits:4})} %` });
+  if (adesaoN > 0) {
+    linhaCota2Campos.push({ label: 'Taxa de adesão', value: `${adesaoN.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})} %` });
+    if (adesaoMeses > 0) linhaCota2Campos.push({ label: 'Prazo adesão', value: `${adesaoMeses} ${adesaoMeses === 1 ? 'mês' : 'meses'}` });
+  }
+
+  // ─── DETALHES DA CONTEMPLAÇÃO ───
+  const expectN = parseInt(_val('expectativa')||'1',10) || 1;
+  const linhaCont1Campos = [
+    { label: 'Modalidade', value: tipoContTxt },
+    { label: 'Expectativa', value: `${expectN} ${expectN === 1 ? 'mês' : 'meses'}` },
+    { label: 'Crédito atualizado', value: _val('creditoAtualizado') || 'R$ 0,00' },
+    { label: 'Base de cálculo', value: tipoLanceTxt }
+  ];
+  const linhaCont2Campos = [
+    { label: 'Valor de referência', value: _val('valorRef') || 'R$ 0,00' },
+    { label: 'Recursos próprios', value: `${_val('lanceProprios') || '0,00%'} | ${_val('lanceProprios_v') || 'R$ 0,00'}` }
+  ];
+  if (lanceEmbN > 0) linhaCont2Campos.push({ label: 'Embutido', value: `${_val('lanceEmbutido') || '0,00%'} | ${_val('lanceEmbutido_v') || 'R$ 0,00'}` });
+  if (lanceFgtsN > 0) linhaCont2Campos.push({ label: 'FGTS', value: `${_val('lanceFGTS') || '0,00%'} | ${_val('lanceFGTS_v') || 'R$ 0,00'}` });
+  linhaCont2Campos.push({ label: 'Total de lance', value: `${_val('totalLance') || '0,00%'} | ${_val('valorTotalLance') || 'R$ 0,00'}` });
+
+  // ─── BLOCOS ───
+  const blocos = [
+    {
+      tipo: 'card',
+      titulo: 'DADOS DA COTA',
+      linhas: [
+        { campos: linhaCota1Campos, destaque },
+        { campos: linhaCota2Campos }
+      ]
+    },
+    {
+      tipo: 'card',
+      titulo: 'DETALHES DA CONTEMPLAÇÃO',
+      linhas: [
+        { campos: linhaCont1Campos, destaque: { label: 'Crédito disponível', value: _txt('creditoDisponivel') } },
+        { campos: linhaCont2Campos }
+      ]
+    }
+  ];
+
+  // Card de Valorização (se ativo)
+  if (evoOn) {
+    blocos.push({
+      tipo: 'card',
+      titulo: 'VALORIZAÇÃO DA COTA APÓS CONTEMPLAÇÃO',
+      linhas: [{
+        campos: [
+          { label: 'CDI', value: _val('cdi') || '0,00 %' },
+          { label: 'Período da aplicação', value: `${_val('mesesPosCont') || '0'} meses` },
+          { label: 'Rentabilidade sobre o CDI', value: `${_val('rentab') || '100,00 %'} | ${_txt('rentabilidade')}` }
+        ],
+        destaque: { label: 'Crédito disponível + rentabilidade', value: _txt('creditoMaisRentab') }
+      }]
+    });
+  }
+
+  // Tabela comparativo
+  blocos.push({
+    tipo: 'tabela',
+    titulo: 'COMPARATIVO APÓS CONTEMPLAÇÃO',
+    colunas: ['REDUÇÃO DE PARCELA', 'REDUÇÃO DE PRAZO'],
+    separador: 'OU',
+    linhas: [
+      { label: 'Parcela', valores: [_txt('reducaoParcela_parc'), _txt('reducaoPrazo_parc')] },
+      { label: 'Prazo restante', valores: [`${_txt('reducaoParcela_prazo')} meses`, `${_txt('reducaoPrazo_prazo')} meses`] },
+      { label: 'CET (Custo Efetivo Total)', valores: [
+        `${_txt('reducaoParcela_cm')} ao mês <span style="color:#6B7280; margin:0 6px;">|</span> ${_txt('reducaoParcela_ca')} ao ano`,
+        `${_txt('reducaoPrazo_cm')} ao mês <span style="color:#6B7280; margin:0 6px;">|</span> ${_txt('reducaoPrazo_ca')} ao ano`
+      ]}
+    ]
+  });
+
+  return blocos;
+}
+
+// Cenário fictício "tudo ligado" pra modo preview
+function _blocosDemo() {
+  return [
+    {
+      tipo: 'card', titulo: 'DADOS DA COTA',
+      linhas: [
+        { campos: [
+            { label: 'Crédito', value: 'R$ 200.000,00' },
+            { label: 'Prazo', value: '144 meses' },
+            { label: 'Taxa de administração', value: '12,00 %' },
+            { label: 'Fundo de reserva', value: '1,50 %' }
+          ],
+          destaque: { multi: [
+            { label: '3 parcelas', value: 'R$ 1.860,00' },
+            { label: 'Demais parcelas', value: 'R$ 1.625,00' }
+          ]}
+        },
+        { campos: [
+            { label: 'Tipo de reajuste', value: 'Cota - anual' },
+            { label: 'Reajuste', value: '5,00 %' },
+            { label: 'Redutor de parcela', value: '25,00 %' },
+            { label: 'Redutor sobre', value: 'Parcela total' },
+            { label: '% Seguro', value: '0,0383 %' },
+            { label: 'Taxa de adesão', value: '1,50 %' },
+            { label: 'Prazo adesão', value: '3 meses' }
+          ]
+        }
+      ]
+    },
+    {
+      tipo: 'card', titulo: 'DETALHES DA CONTEMPLAÇÃO',
+      linhas: [
+        { campos: [
+            { label: 'Modalidade', value: 'Lance' },
+            { label: 'Expectativa', value: '1 mês' },
+            { label: 'Crédito atualizado', value: 'R$ 210.000,00' },
+            { label: 'Base de cálculo', value: 'Carta de crédito' }
+          ],
+          destaque: { label: 'Crédito disponível', value: 'R$ 350.000,00' }
+        },
+        { campos: [
+            { label: 'Valor de referência', value: 'R$ 210.000,00' },
+            { label: 'Recursos próprios', value: '20,00% | R$ 42.000,00' },
+            { label: 'Total de lance', value: '20,00% | R$ 42.000,00' }
+          ]
+        }
+      ]
+    },
+    {
+      tipo: 'card', titulo: 'VALORIZAÇÃO DA COTA APÓS CONTEMPLAÇÃO',
+      linhas: [{
+        campos: [
+          { label: 'CDI', value: '11,20 %' },
+          { label: 'Período da aplicação', value: '18 meses' },
+          { label: 'Rentabilidade sobre o CDI', value: '100,00 % | R$ 22.500,00' }
+        ],
+        destaque: { label: 'Crédito disponível + rentabilidade', value: 'R$ 372.500,00' }
+      }]
+    },
+    {
+      tipo: 'tabela', titulo: 'COMPARATIVO APÓS CONTEMPLAÇÃO',
+      colunas: ['REDUÇÃO DE PARCELA', 'REDUÇÃO DE PRAZO'], separador: 'OU',
+      linhas: [
+        { label: 'Parcela', valores: ['R$ 1.650,00', 'R$ 1.890,00'] },
+        { label: 'Prazo restante', valores: ['144 meses', '132 meses'] },
+        { label: 'CET (Custo Efetivo Total)', valores: [
+          '1,15% ao mês <span style="color:#6B7280; margin:0 6px;">|</span> 14,70% ao ano',
+          '1,02% ao mês <span style="color:#6B7280; margin:0 6px;">|</span> 13,60% ao ano'
+        ]}
+      ]
+    }
+  ];
+}
+
+// ─── BOTÃO BAIXAR PDF ───
+document.getElementById('baixarPdf').addEventListener('click', async () => {
+  const btn = document.getElementById('baixarPdf');
+  const txtOriginal = btn.textContent;
+  btn.textContent = 'Gerando PDF...';
+  btn.disabled = true;
+  try {
+    await PdfMasterPrime.gerar({
+      tituloEstrategia: 'Simulação Rápida',
+      filename: 'master-prime-operacao-simples',
+      blocos: _coletarBlocos(),
+      observacoes: (document.getElementById('mp-observacoes')?.value || '').trim()
+    });
+  } catch (err) {
+    console.error('Erro ao gerar PDF:', err);
+    alert('Erro ao gerar PDF: ' + err.message);
+  } finally {
+    btn.textContent = txtOriginal;
+    btn.disabled = false;
+  }
+});
+
+// ─── MODO PREVIEW (?preview=1) — renderiza inline com cenário demo ───
+(() => {
+  const params = new URLSearchParams(location.search);
+  if (params.get('preview') !== '1') return;
+  PdfMasterPrime.preview({
+    tituloEstrategia: 'Simulação Rápida',
+    blocos: _blocosDemo()
+  });
+})();
+
+
+// ═══════════════════════════════════════════════════════
+// SIMULAÇÕES SALVAS (48h) — SimulacaoStore
+// ═══════════════════════════════════════════════════════
+(function initSimStore() {
+  if (!window.SimulacaoStore) return;
+  window.SimulacaoStore.init({
+    supabaseUrl: 'https://jhwciwvgagnuxakukyob.supabase.co',
+    supabaseKey: 'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx',
+    simulador:   'op-simples',
+    mountPoint:  document.getElementById('simStoreMount'),
+    serialize:   () => window.SimulacaoStore.snapshotForm(),
+    restore:     (dados) => window.SimulacaoStore.restoreForm(dados, { recalc: recalc })
+  });
+})();
+</script>
+
+</body>
+</html>

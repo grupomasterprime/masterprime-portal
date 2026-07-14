@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Análise de carteira - Master Prime</title>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:#F4F6FA;color:#1E293B;font-family:'Inter','Segoe UI',system-ui,Arial,sans-serif;font-size:13px;min-height:100vh}
+.sidebar{width:220px;background:#2D3F5E;color:#fff;display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0}
+.brand{padding:24px;font-size:16px;font-weight:700;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.05)}
+.brand img{height:36px;width:auto}
+.menu{flex:1;padding:24px 0}
+.menu-section{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.4);padding:0 24px;margin-bottom:12px}
+.menu-item{display:flex;align-items:center;gap:12px;padding:12px 24px;color:rgba(255,255,255,.7);text-decoration:none;transition:background .2s,color .2s}
+.menu-item:hover,.menu-item.active{background:rgba(255,255,255,.08);color:#fff;border-left:3px solid #10B981}
+
+/* Multi-Select Styles */
+.ms-wrap{position:relative}
+.ms-btn{width:100%;height:38px;padding:0 12px;background:#fff;border:1px solid #CBD5E1;border-radius:6px;color:#1E293B;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left}
+.ms-btn:hover{border-color:#2D3F5E}
+.ms-btn .caret{opacity:.5;font-size:10px}
+.ms-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid #CBD5E1;border-radius:6px;max-height:280px;overflow:hidden;box-shadow:0 4px 16px rgba(45,63,94,.12);z-index:100;display:none;flex-direction:column}
+.ms-dropdown.open{display:flex}
+.ms-search{padding:8px;border-bottom:1px solid #E2E8F0}
+.ms-search input{width:100%;padding:6px 10px;border:1px solid #CBD5E1;border-radius:4px;font-size:12px;outline:none}
+.ms-search input:focus{border-color:#2D3F5E}
+.ms-list{overflow-y:auto;flex:1;padding:4px 0}
+.ms-item{padding:6px 12px;display:flex;gap:8px;align-items:center;cursor:pointer;font-size:12px;color:#1E293B;user-select:none}
+.ms-item:hover{background:#F4F6FA}
+.ms-item input{cursor:pointer;accent-color:#2D3F5E}
+.ms-item.all{border-bottom:1px solid #E2E8F0;font-weight:600}
+
+.hdr{background:#2D3F5E;padding:0 24px;height:64px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.hdr-left{display:flex;align-items:center;gap:14px}
+.hdr-logo{width:44px;height:44px;border-radius:6px;background:#fff;padding:4px;object-fit:contain}
+.hdr h1{font-size:16px;font-weight:800;color:#fff;letter-spacing:.3px}
+.hdr p{font-size:10px;color:#C8C84A;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.hdr-right{display:flex;align-items:center;gap:14px}
+.hdr-status{font-size:11px;color:#CBD5E1}
+/* Mobile: cabeçalho empilha em vez de espremer tudo numa linha de 64px */
+@media (max-width:640px){
+  .hdr{height:auto;flex-direction:column;align-items:flex-start;gap:10px;padding:12px 16px}
+  .hdr-right{flex-wrap:wrap;gap:8px;width:100%}
+  .hdr-status{font-size:10px}
+  .hdr h1{font-size:15px}
+}
+.btn{padding:8px 16px;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:.15s}
+.btn-refresh{background:#C8C84A;color:#2D3F5E}
+.btn-refresh:hover{background:#d8d85a}
+.btn-login{background:#C8C84A;color:#2D3F5E}
+.btn-login:hover{background:#d8d85a}
+.btn-logout{background:transparent;color:#CBD5E1;border:1px solid #475569}
+.btn-logout:hover{background:#1E2D45;color:#fff}
+.main{padding:20px 24px;max-width:1600px;margin:0 auto}
+.login-card{max-width:460px;margin:80px auto;background:#fff;border-radius:12px;padding:40px;text-align:center;box-shadow:0 4px 24px rgba(45,63,94,.08);border:1px solid #E2E8F0}
+.login-card h2{color:#2D3F5E;font-size:22px;margin-bottom:8px}
+.login-card p{color:#64748B;font-size:13px;margin-bottom:24px;line-height:1.6}
+.login-card p strong{color:#2D3F5E}
+.login-card .btn-login{padding:12px 32px;font-size:14px}
+.login-sub{color:#94A3B8;font-size:11px;margin-top:12px}
+.filters{display:flex;gap:14px;margin-bottom:20px;flex-wrap:wrap}
+.filter-group{flex:1;min-width:160px}
+.filter-label{font-size:10px;color:#64748B;letter-spacing:1.5px;text-transform:uppercase;font-weight:600;margin-bottom:6px;display:block}
+.filter-select{width:100%;padding:9px 12px;background:#fff;border:1px solid #CBD5E1;border-radius:6px;color:#1E293B;font-size:13px;cursor:pointer;transition:.15s}
+.filter-select:hover{border-color:#2D3F5E}
+.filter-select:focus{outline:none;border-color:#2D3F5E;box-shadow:0 0 0 3px rgba(45,63,94,.1)}
+.kpis{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:12px}
+.kpis-row2{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:20px}
+@media (max-width: 900px){ .kpis{grid-template-columns:repeat(2,1fr)} .kpis-row2{grid-template-columns:1fr} }
+.kpi{background:#fff;border-radius:10px;padding:18px 20px;border:1px solid #E2E8F0;border-left:4px solid #2D3F5E;box-shadow:0 1px 3px rgba(0,0,0,.04);min-height:110px;display:flex;flex-direction:column;justify-content:center}
+.kpi.green{border-left-color:#16A34A}
+.kpi.amber{border-left-color:#C8C84A}
+.kpi.purple{border-left-color:#7A9BC8}
+.kpi.rose{border-left-color:#DC2626}
+.kpi.teal{border-left-color:#4DBCC8}
+.kpi.orange{border-left-color:#EC7000}
+.kpi-multi{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.kpi-multi .mini{font-size:11px;color:#64748B;letter-spacing:.5px;text-transform:uppercase;font-weight:600}
+.kpi-multi .mini-val{font-size:14px;color:#2D3F5E;font-weight:700;font-family:'Inter','DM Mono',ui-monospace,monospace;margin-left:4px}
+.kpi-label{font-size:10px;color:#64748B;letter-spacing:1.5px;text-transform:uppercase;font-weight:700;margin-bottom:6px}
+.kpi-val{font-size:20px;font-weight:800;color:#2D3F5E;line-height:1.1;white-space:nowrap}
+.kpi-val.small{font-size:20px}
+.kpi-sub{font-size:11px;color:#94A3B8;margin-top:4px}
+.charts-row{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px}
+.chart-card{background:#fff;border-radius:10px;padding:18px;border:1px solid #E2E8F0;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.chart-title{font-size:12px;color:#2D3F5E;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
+.chart-wrap{position:relative;height:240px;width:100%}
+.tbl-card{background:#fff;border-radius:10px;padding:18px;border:1px solid #E2E8F0;box-shadow:0 1px 3px rgba(0,0,0,.04);margin-bottom:14px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{text-align:left;padding:10px 12px;background:#F4F6FA;color:#64748B;font-weight:700;letter-spacing:.5px;text-transform:uppercase;font-size:10px;border-bottom:1px solid #E2E8F0}
+tbody td{padding:10px 12px;border-bottom:1px solid #F1F5F9;color:#1E293B}
+tbody tr:hover{background:#F4F6FA}
+tbody td:nth-child(1){font-weight:700;color:#2D3F5E}
+tbody td:nth-child(2){color:#1E293B;font-weight:500}
+tbody td:nth-child(3){font-weight:600;color:#2D3F5E}
+tbody td:nth-child(4){font-weight:700;color:#16A34A}
+.bar-wrap{display:flex;align-items:center;gap:8px}
+.bar-bg{flex:1;height:6px;background:#F1F5F9;border-radius:3px;overflow:hidden;max-width:180px}
+.bar-fill{height:100%;background:linear-gradient(90deg,#2D3F5E,#C8C84A);border-radius:3px}
+.bar-pct{font-size:11px;color:#64748B;min-width:38px;text-align:right}
+.footer{text-align:center;padding:20px;color:#94A3B8;font-size:10px;letter-spacing:1px;text-transform:uppercase}
+.ms-wrap{position:relative}
+.ms-btn{width:100%;padding:9px 12px;background:#fff;border:1px solid #CBD5E1;border-radius:6px;color:#1E293B;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;text-align:left}
+.ms-btn:hover{border-color:#2D3F5E}
+.ms-btn .caret{opacity:.5;font-size:10px}
+.ms-dropdown{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:1px solid #CBD5E1;border-radius:6px;max-height:280px;overflow:hidden;box-shadow:0 4px 16px rgba(45,63,94,.12);z-index:100;display:none;flex-direction:column}
+.ms-dropdown.open{display:flex}
+.ms-search{padding:8px;border-bottom:1px solid #E2E8F0}
+.ms-search input{width:100%;padding:6px 10px;border:1px solid #CBD5E1;border-radius:4px;font-size:12px;outline:none}
+.ms-search input:focus{border-color:#2D3F5E}
+.ms-list{overflow-y:auto;flex:1;padding:4px 0}
+.ms-item{padding:6px 12px;display:flex;gap:8px;align-items:center;cursor:pointer;font-size:12px;color:#1E293B;user-select:none}
+.ms-item:hover{background:#F4F6FA}
+.ms-item input{cursor:pointer;accent-color:#2D3F5E}
+.ms-item.all{border-bottom:1px solid #E2E8F0;font-weight:600}
+.adm-badge{padding:2px 8px;border-radius:4px;font-size:10px;font-weight:700;white-space:nowrap;display:inline-block}
+.tbl-filter-row th{padding:4px 8px !important;background:#F4F6FA}
+.tbl-filter-row input,.tbl-filter-row select{width:100%;padding:4px 6px;border:1px solid #E2E8F0;border-radius:4px;font-size:11px;background:#fff;color:#1E293B}
+.tbl-filter-row input::placeholder{color:#94A3B8;font-size:10px}
+@media (max-width:1100px){.kpis{grid-template-columns:repeat(2,1fr)}.charts-row{grid-template-columns:1fr}}
+.col-msw .ms-dropdown{right:auto !important;min-width:260px;width:max-content;max-width:480px;}.col-msw .ms-list{text-align:left;}.col-msw .ms-item{white-space:nowrap;justify-content:flex-start !important;text-align:left !important;}.col-msw .ms-item span{text-align:left !important;flex-grow:0;}.tbl-filter-row .col-msw .ms-item input[type="checkbox"]{width:auto !important;height:auto;flex:0 0 auto;}.tbl-filter-row .col-msw .ms-search input{width:100%;}.col-msw .ms-item span{flex-grow:0;flex-shrink:0;}.col-msw .ms-dropdown{z-index:9999 !important;}.col-msw{position:relative;}#vendasTable, #vendasTable thead, #vendasTable tbody, #vendasTable tr, #vendasTable td, #vendasTable th{overflow:visible !important;}.tbl-filter-row, .tbl-filter-row td{overflow:visible !important;position:relative;}
+.tabs{display:flex;gap:14px;padding:0 24px;margin-top:20px}
+.tab{background:#fff;border:1px solid #E2E8F0;padding:12px 24px;border-radius:10px;font-size:13px;font-weight:600;color:#64748B;cursor:pointer;display:flex;align-items:center;gap:8px;box-shadow:0 1px 3px rgba(0,0,0,.04);transition:.15s}
+.tab:hover{border-color:#CBD5E1;color:#1E293B}
+.tab.active{border-color:#2D3F5E;color:#2D3F5E;background:#F8FAFC}
+.tab i{width:18px;height:18px}
+.interval-inputs{display:flex;align-items:center;gap:8px}
+.interval-inputs input{width:100%;padding:9px 12px;background:#fff;border:1px solid #CBD5E1;border-radius:6px;color:#1E293B;font-size:13px}
+.input-with-icon{position:relative}
+.input-with-icon i{position:absolute;left:12px;top:10px;width:16px;height:16px;color:#94A3B8}
+.input-with-icon input{width:100%;padding:9px 12px 9px 36px;background:#fff;border:1px solid #CBD5E1;border-radius:6px;color:#1E293B;font-size:13px}
+.lottery-card{background:#fff;border-radius:10px;padding:30px;border:1px solid #E2E8F0;box-shadow:0 1px 3px rgba(0,0,0,.04);max-width:800px;margin:20px auto}
+.lottery-header{display:flex;align-items:center;margin-bottom:30px}
+.lottery-header h2{font-size:20px;color:#2D3F5E;font-weight:800}
+.lottery-header p{font-size:12px;color:#64748B;margin-top:4px}
+.lottery-prize{display:flex;justify-content:space-between;padding:16px 0;border-bottom:1px solid #F1F5F9}
+.lottery-prize:last-child{border-bottom:none}
+.lottery-prize-pos{font-weight:700;color:#64748B;font-size:14px;width:40px}
+.lottery-prize-ticket{font-weight:800;color:#2D3F5E;font-size:20px;font-family:'DM Mono',monospace}
+.lottery-prize-val{font-weight:600;color:#16A34A;font-size:14px}
+.file-info{font-size:11px;color:#CBD5E1;display:flex;align-items:center;gap:6px}
+.filter-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px}
+.filter-header h2{font-size:14px;color:#2D3F5E;font-weight:700;display:flex;align-items:center;gap:8px}
+.filter-header p{font-size:11px;color:#64748B;margin-top:4px}
+</style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="hdr">
+    <div class="hdr-left">
+      <div>
+        <h1>Análise de carteira</h1>
+        <p>Encontre os clientes ideais para ofertar lances</p>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <div class="file-info" id="file-info" style="display: none;">
+        <i data-lucide="file-spreadsheet" style="width:14px;height:14px"></i>
+        <span id="file-name">Sem Título.xlsx</span> · <span id="file-count" style="color:#fff;font-weight:bold">0 clientes</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Tabs -->
+  <nav class="tabs">
+    <button class="tab ac-tab active" data-tab="analise" onclick="AnaliseCarteiraApp.switchTab('analise')">
+      <i data-lucide="layout-dashboard"></i> Análise de carteira
+    </button>
+    <button class="tab ac-tab" data-tab="extracao" onclick="AnaliseCarteiraApp.switchTab('extracao')">
+      <i data-lucide="dices"></i> Extração Loteria Federal
+    </button>
+  </nav>
+
+  <!-- TAB: Análise de Carteira -->
+  <main id="tab-analise" class="main ac-tab-content" style="display: block;">
+    
+    <div class="filter-header">
+      <div>
+        <h2><i data-lucide="sliders-horizontal" style="color:#DC2626;width:18px;height:18px"></i> Definir intervalo de lance</h2>
+        <p>Priorize clientes com maior proximidade da cota sorteada.</p>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-logout" onclick="AnaliseCarteiraApp.limparFiltro()" style="color:#64748B; border-color:#CBD5E1;">
+          <i data-lucide="x" style="width:14px;height:14px"></i> Limpar filtro
+        </button>
+        <button class="btn btn-refresh" onclick="AnaliseCarteiraApp.aplicarFiltro()">
+          <i data-lucide="filter" style="width:14px;height:14px"></i> Aplicar filtro
+        </button>
+      </div>
+    </div>
+
+    <div class="filters">
+      <div class="filter-group">
+        <label class="filter-label">Cota sorteada</label>
+        <input type="number" id="f-cota" value="0" min="0" class="filter-select">
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-label">Intervalo proximidade</label>
+        <div class="interval-inputs">
+          <input type="number" id="f-int-min" value="-20">
+          <span style="color:#64748B;font-weight:bold">-</span>
+          <input type="number" id="f-int-max" value="20">
+        </div>
+      </div>
+
+      <div class="filter-group" style="min-width: 200px;">
+        <label class="filter-label">Consultor</label>
+        <div id="wrapConsultor" class="ms-wrap col-msw"></div>
+      </div>
+
+      <div class="filter-group" style="min-width: 200px;">
+        <label class="filter-label">Administradora</label>
+        <div id="wrapAdmin" class="ms-wrap col-msw"></div>
+      </div>
+
+      <div class="filter-group" style="flex: 1.5;">
+        <label class="filter-label">Buscar cliente</label>
+        <input type="text" id="f-busca" placeholder="Nome, CPF, contrato..." class="filter-select">
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="kpis">
+      <div class="kpi amber">
+        <div class="kpi-label">Base filtrada</div>
+        <div class="kpi-val" id="stat-base">0</div>
+      </div>
+      <div class="kpi teal">
+        <div class="kpi-label">Dentro do intervalo</div>
+        <div class="kpi-val" id="stat-intervalo">0</div>
+      </div>
+      <div class="kpi green">
+        <div class="kpi-label">Crédito no intervalo</div>
+        <div class="kpi-val" id="stat-credito">R$ 0,00</div>
+      </div>
+      <div class="kpi blue">
+        <div class="kpi-label">Menor proximidade</div>
+        <div class="kpi-val" id="stat-menor">0</div>
+      </div>
+      <div class="kpi purple">
+        <div class="kpi-label">Administradoras</div>
+        <div class="kpi-val" id="stat-adms">0</div>
+      </div>
+    </div>
+
+    <!-- Gráfico -->
+    <div class="chart-card" style="margin-bottom: 20px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+        <h3 class="card-title" style="margin:0; font-size:12px; font-weight:800; color:#475569; letter-spacing:0.5px;">CONCENTRAÇÃO POR PROXIMIDADE <span style="font-weight:400; color:#94A3B8">(0 = cota sorteada)</span></h3>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="proximidadeChart"></canvas>
+      </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="tbl-card" style="display: none;" id="table-section">
+      <div class="chart-title">Clientes no Intervalo</div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th style="cursor:pointer" onclick="AnaliseCarteiraApp.sortBy('nome')">Cliente ⇅</th>
+              <th style="cursor:pointer" onclick="AnaliseCarteiraApp.sortBy('grupo')">Grupo ⇅</th>
+              <th style="cursor:pointer" onclick="AnaliseCarteiraApp.sortBy('cota')">Cota ⇅</th>
+              <th style="cursor:pointer" onclick="AnaliseCarteiraApp.sortBy('proximidade')">Proximidade ⇅</th>
+              <th style="cursor:pointer" onclick="AnaliseCarteiraApp.sortBy('credito')">Crédito ⇅</th>
+              <th style="cursor:pointer" onclick="AnaliseCarteiraApp.sortBy('consultor')">Consultor ⇅</th>
+              <th style="cursor:pointer" onclick="AnaliseCarteiraApp.sortBy('admin')">Admin ⇅</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <!-- Render via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- TAB: Extração Loteria Federal -->
+  <main id="tab-extracao" class="main ac-tab-content" style="display: none;">
+    <div class="lottery-card">
+      <div class="lottery-header">
+        <i data-lucide="dices" style="width: 44px; height: 44px; color: #2D3F5E; margin-right: 18px;"></i>
+        <div style="flex:1">
+          <h2 id="lf-concurso">Buscando resultado...</h2>
+          <p id="lf-data">Aguarde</p>
+        </div>
+        
+        <div style="display:flex; gap:12px; align-items:flex-end;">
+          <div class="filter-group" style="margin-bottom:0;">
+            <label class="filter-label" style="font-size:9px;">Buscar por data (opcional)</label>
+            <input type="date" id="lf-search-date" class="filter-select" style="padding: 7px 10px; font-size:12px;">
+          </div>
+          <button class="btn btn-login" onclick="AnaliseCarteiraApp.fetchLoteriaFederal()">
+            <i data-lucide="search" style="width:14px;height:14px"></i> Buscar
+          </button>
+        </div>
+      </div>
+      
+      <div id="lf-prizes">
+        <div style="text-align:center;padding:40px;color:#94A3B8">
+          <i data-lucide="loader" class="spinner-dark" style="animation: spin 1s linear infinite"></i> Carregando...
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    window.msState = {};
+    function initMS(wrapId, items, allLabel, opts) {
+      opts = opts || {};
+      const wrap = document.getElementById(wrapId);
+      if (!wrap) return;
+      window.msState[wrapId] = { items: items, allLabel: allLabel, selected: [], labels: opts.labels || {}, onChange: opts.onChange || null };
+      const display = v => opts.labels && opts.labels[v] ? opts.labels[v] : v;
+      wrap.innerHTML = '<button type="button" class="ms-btn" onclick="toggleMS(\'' + wrapId + '\', event)"><span class="ms-label">' + allLabel + '</span><span class="caret">▾</span></button>' +
+        '<div class="ms-dropdown" id="' + wrapId + '_dd">' +
+        '<div class="ms-search"><input type="text" placeholder="Buscar..." oninput="filterMS(\'' + wrapId + '\', this.value)" onclick="event.stopPropagation()"></div>' +
+        '<div class="ms-list" id="' + wrapId + '_list">' +
+        '<div class="ms-item all"><input type="checkbox" onchange="selectAllMS(\'' + wrapId + '\', this.checked)"> <span>Selecionar todos</span></div>' +
+        items.map(it => '<div class="ms-item" data-val="' + String(it).replace(/"/g,'&quot;') + '"><input type="checkbox" onchange="toggleMSItem(\'' + wrapId + '\', this.closest(\'.ms-item\').dataset.val, this.checked)"> <span>' + display(it) + '</span></div>').join('') +
+        '</div></div>';
+    }
+    function toggleMS(wrapId, event) {
+      event && event.stopPropagation();
+      document.querySelectorAll('.ms-dropdown.open').forEach(d => { if (d.id !== wrapId + '_dd') d.classList.remove('open'); });
+      const dd = document.getElementById(wrapId + '_dd'); if (dd) dd.classList.toggle('open');
+    }
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.ms-wrap')) document.querySelectorAll('.ms-dropdown.open').forEach(d => d.classList.remove('open'));
+    });
+    function filterMS(wrapId, q) {
+      const list = document.getElementById(wrapId + '_list'); if (!list) return;
+      const ql = q.toLowerCase();
+      list.querySelectorAll('.ms-item:not(.all)').forEach(it => { it.style.display = it.dataset.val.toLowerCase().includes(ql) ? '' : 'none'; });
+    }
+    function toggleMSItem(wrapId, value, checked) {
+      const s = window.msState[wrapId]; if (!s) return;
+      if (checked) { if (!s.selected.includes(value)) s.selected.push(value); }
+      else s.selected = s.selected.filter(x => x !== value);
+      updateMSLabel(wrapId); (s.onChange ? s.onChange() : null);
+    }
+    function selectAllMS(wrapId, checked) {
+      const s = window.msState[wrapId]; if (!s) return;
+      s.selected = checked ? s.items.slice() : [];
+      document.querySelectorAll('#' + wrapId + '_list .ms-item:not(.all) input').forEach(cb => cb.checked = checked);
+      updateMSLabel(wrapId); (s.onChange ? s.onChange() : null);
+    }
+    function getMSValues(wrapId) { return window.msState[wrapId] ? window.msState[wrapId].selected.slice() : []; }
+    function updateMSLabel(wrapId) {
+      const s = window.msState[wrapId]; if (!s) return;
+      const wrap = document.getElementById(wrapId); if (!wrap) return;
+      const lbl = wrap.querySelector('.ms-label'); if (!lbl) return;
+      if (s.selected.length === 0 || s.selected.length === s.items.length) { lbl.textContent = s.allLabel; lbl.style.fontWeight = 'normal'; lbl.style.color = '#64748B'; }
+      else { lbl.textContent = s.selected.length + ' selecionados'; lbl.style.fontWeight = '700'; lbl.style.color = '#1E293B'; }
+    }
+  </script>
+  <script type="module" src="src/presentation/pages/analise-carteira/AnaliseCarteiraController.js?v=3"></script>
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>

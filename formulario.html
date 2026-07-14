@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Formulário de Adesão · Master Prime</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=DM+Mono&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --mp-navy:   #2D3F5E;
+  --mp-yellow: #C8C84A;
+  --mp-teal:   #4DBCC8;
+  --bg:        #F4F6FA;
+  --card:      #FFFFFF;
+  --border:    #E2E8F0;
+  --border2:   #CBD5E1;
+  --text:      #1E293B;
+  --text2:     #64748B;
+  --text3:     #94A3B8;
+  --green:     #16A34A;  --green-bg: #F0FDF4;
+  --red:       #DC2626;  --red-bg:   #FEF2F2;
+  --r: 10px;
+  --shadow:    0 1px 3px rgba(0,0,0,.06);
+  --shadow-md: 0 4px 12px rgba(0,0,0,.08);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  min-height: 100vh;
+}
+.mono { font-family: 'DM Mono', monospace; }
+
+/* HEADER */
+.header {
+  background: linear-gradient(135deg, var(--mp-navy) 0%, #1A2A42 100%);
+  color: #fff;
+  padding: 14px 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.12);
+}
+.header-inner {
+  max-width: 900px; margin: 0 auto;
+  display: flex; align-items: center; gap: 14px;
+  flex-wrap: wrap;
+}
+.header-logo {
+  height: 36px;
+  width: auto;
+  display: block;
+  filter: brightness(0) invert(1);
+  flex-shrink: 0;
+}
+.header-text h1 { font-size: 16px; font-weight: 700; letter-spacing: -.2px; margin-bottom: 1px; }
+.header-text p { font-size: 11px; color: rgba(255,255,255,.6); }
+@media (max-width: 540px) {
+  .header { padding: 12px 14px; }
+  .header-logo { height: 28px; }
+  .header-text h1 { font-size: 14px; }
+  .header-text p { font-size: 10px; }
+  .header-admin-badge { padding: 4px 8px; margin-left: 0; }
+  .header-admin-badge img { height: 18px; }
+  .header-admin-badge .label { font-size: 8px; }
+  .container { padding: 0 12px 30px; margin-top: 14px; }
+  .card { padding: 16px 16px; }
+  .card h3 { font-size: 12px; }
+}
+.header-consultor {
+  margin-left: auto;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.15);
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-size: 12px;
+  color: rgba(255,255,255,.85);
+}
+.header-consultor strong { color: #fff; }
+
+/* Badge com logo da administradora dedicada (Porto/Itaú/Bradesco) */
+.header-admin-badge {
+  display: none;
+  background: #fff;
+  border-radius: 7px;
+  padding: 5px 10px;
+  align-items: center; gap: 6px;
+  margin-left: auto;
+  box-shadow: 0 2px 6px rgba(0,0,0,.1);
+}
+.header-admin-badge.show { display: inline-flex; }
+.header-admin-badge img {
+  height: 22px; width: auto;
+  display: block;
+}
+.header-admin-badge .label {
+  font-size: 8.5px; font-weight: 700;
+  color: var(--text2);
+  text-transform: uppercase; letter-spacing: .4px;
+}
+
+/* CONTAINER */
+.container { max-width: 900px; margin: 24px auto; padding: 0 16px 40px; }
+
+/* CARD */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 22px 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+}
+.card h3 {
+  font-size: 13px; font-weight: 700; color: var(--mp-navy);
+  text-transform: uppercase; letter-spacing: .6px;
+  margin-bottom: 16px;
+  display: flex; align-items: center; gap: 10px;
+  padding-bottom: 10px; border-bottom: 1px solid var(--border);
+}
+.card h3::before {
+  content: ''; width: 4px; height: 18px;
+  background: var(--mp-teal); border-radius: 2px;
+}
+
+/* GRID — auto-fill responsivo: campos se reorganizam pra preencher o espaço */
+.grid-2, .grid-3, .grid-4 {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+/* Campos largos (nome, logradouro) ocupam linha inteira */
+.field-full { grid-column: 1 / -1; }
+@media (max-width: 480px) {
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+}
+
+/* FIELD */
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label {
+  font-size: 10.5px; font-weight: 600; color: var(--text2);
+  text-transform: uppercase; letter-spacing: .4px;
+}
+.field label .req { color: var(--red); margin-left: 2px; }
+.field input, .field select, .field textarea {
+  font-family: inherit; font-size: 13.5px; color: var(--text);
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  background: #fff;
+  transition: border-color .12s, box-shadow .12s;
+  text-transform: uppercase;
+}
+/* Email e bancário tem chars que precisam case-sensitive — mantém */
+.field input[type="email"] { text-transform: lowercase; }
+.field input[data-no-upper] { text-transform: none; }
+.field input:focus, .field select:focus, .field textarea:focus {
+  outline: none; border-color: var(--mp-teal);
+  box-shadow: 0 0 0 3px rgba(77,188,200,.18);
+}
+.field input::placeholder { color: var(--text3); }
+.field .help { font-size: 11px; color: var(--text3); }
+.field.invalid input, .field.invalid select { border-color: var(--red); }
+.field.invalid label { color: var(--red); }
+
+/* BUTTONS */
+.btn {
+  font-family: inherit; font-weight: 600; font-size: 13px;
+  border: 0; border-radius: 8px; cursor: pointer;
+  padding: 11px 22px;
+  transition: transform .08s, background .12s;
+}
+.btn:hover { transform: translateY(-1px); }
+.btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.btn-navy   { background: var(--mp-navy);   color: #fff; }
+.btn-navy:hover   { background: #1F2D45; }
+.btn-yellow { background: var(--mp-navy); color: #fff; font-weight: 700; }
+.btn-yellow:hover { background: #1F2D45; }
+.btn-teal   { background: var(--mp-teal);   color: #fff; }
+.btn-outline {
+  background: #fff; color: var(--mp-navy);
+  border: 1px solid var(--border2);
+}
+.btn-outline:hover { border-color: var(--mp-teal); color: var(--mp-teal); }
+.btn-danger {
+  background: #fff; color: var(--red);
+  border: 1px solid var(--border);
+  font-size: 11px; padding: 5px 10px;
+}
+.btn-block { width: 100%; padding: 16px 24px; font-size: 14.5px; }
+.btn-lg    { padding: 14px 28px; font-size: 14px; }
+
+/* TIPO SELECTOR */
+.tipo-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  padding: 8px 0 4px;
+}
+@media (max-width: 540px) { .tipo-grid { grid-template-columns: 1fr; } }
+.tipo-btn {
+  background: #fff; border: 2px solid var(--border);
+  border-radius: 12px; padding: 28px 22px;
+  cursor: pointer; transition: all .15s;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  text-align: center;
+}
+.tipo-btn:hover {
+  border-color: var(--mp-teal);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.tipo-btn .ico {
+  width: 64px; height: 64px;
+  background: var(--mp-navy); color: #fff;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 6px;
+}
+.tipo-btn .ico svg { width: 32px; height: 32px; }
+.tipo-btn .ttl { font-size: 16px; font-weight: 700; color: var(--mp-navy); }
+.tipo-btn .sub { font-size: 12px; color: var(--text2); }
+
+/* CÔNJUGE BLOCK */
+.bloc-conjuge {
+  background: #F8FAFC;
+  border-left: 3px solid var(--mp-teal);
+  padding: 14px 16px;
+  border-radius: 6px;
+  margin-top: 4px;
+  display: none;
+}
+.bloc-conjuge.show { display: block; }
+.bloc-conjuge-title {
+  font-size: 11px; font-weight: 700; color: var(--mp-teal);
+  text-transform: uppercase; letter-spacing: .4px;
+  margin-bottom: 12px;
+}
+
+/* SÓCIO BLOCK */
+.socio-block {
+  background: #FAFBFD;
+  border: 1px dashed var(--border2);
+  border-radius: 8px;
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  position: relative;
+}
+.socio-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.socio-titulo {
+  font-size: 12px; font-weight: 700; color: var(--mp-navy);
+  text-transform: uppercase; letter-spacing: .4px;
+}
+
+/* SUCCESS */
+.success-card {
+  text-align: center;
+  padding: 50px 24px;
+}
+.success-icon {
+  width: 72px; height: 72px;
+  background: var(--green-bg); color: var(--green);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  margin: 0 auto 18px;
+}
+.success-card h2 {
+  color: var(--mp-navy);
+  font-size: 22px;
+  margin-bottom: 10px;
+}
+.success-card p { color: var(--text2); font-size: 14px; margin-bottom: 4px; }
+.success-protocolo {
+  display: inline-block;
+  background: var(--mp-navy); color: #fff;
+  padding: 14px 24px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 18px;
+  font-family: 'DM Mono', monospace;
+  margin: 18px 0;
+  letter-spacing: 1px;
+}
+
+/* LGPD */
+.lgpd {
+  background: #F0FBFC;
+  border-left: 3px solid var(--mp-teal);
+  padding: 14px 18px;
+  border-radius: 6px;
+}
+.lgpd label {
+  display: flex; align-items: flex-start; gap: 10px;
+  cursor: pointer;
+  font-size: 12px; color: var(--text2);
+  line-height: 1.5;
+}
+.lgpd input[type=checkbox] {
+  margin-top: 3px; flex-shrink: 0;
+  width: 16px; height: 16px;
+  cursor: pointer;
+}
+
+/* FOOTER */
+.footer {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text3);
+  padding: 20px;
+  letter-spacing: .8px;
+}
+
+/* MSG ERRO */
+.alert {
+  background: var(--red-bg); color: var(--red);
+  border: 1px solid #FCA5A5;
+  padding: 12px 16px; border-radius: 8px;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+.alert.warn {
+  background: #FFFBEB; color: #92400E;
+  border-color: #FDE68A;
+}
+
+.hidden { display: none !important; }
+
+.actions {
+  display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
+  margin-top: 8px;
+}
+.actions .spacer { flex: 1; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <img src="logo.png" alt="Master Prime" class="header-logo">
+    <div class="header-text">
+      <h1>Formulário de Adesão</h1>
+      <p>Master Prime · Corretora de Consórcios e Seguros</p>
+    </div>
+    <div class="header-admin-badge" id="header-admin-badge">
+      <span class="label">Em parceria com</span>
+      <img id="header-admin-logo" src="" alt="">
+    </div>
+    <div class="header-consultor hidden" id="header-consultor">
+      Indicado por <strong id="consultor-nome">—</strong>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ════════ TELA: ESCOLHA TIPO ════════ -->
+<div id="tela-tipo">
+  <div class="card">
+    <h3>Vamos começar — você é Pessoa Física ou Jurídica?</h3>
+    <p style="color:var(--text2);margin-bottom:18px;font-size:13px">Selecione o tipo de cadastro para iniciar o preenchimento.</p>
+    <div class="tipo-grid">
+      <button class="tipo-btn" onclick="iniciarForm('pf')">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div>
+        <div class="ttl">Pessoa Física</div>
+        <div class="sub">Cadastro com CPF, para você mesmo</div>
+      </button>
+      <button class="tipo-btn" onclick="iniciarForm('pj')">
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/><path d="M9 9v.01"/><path d="M9 12v.01"/><path d="M9 15v.01"/><path d="M9 18v.01"/></svg></div>
+        <div class="ttl">Pessoa Jurídica</div>
+        <div class="sub">Cadastro com CNPJ, para sua empresa</div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ TELA: FORM PF — populado dinamicamente em buildFormPF() ════════ -->
+<div id="form-pf" class="hidden"></div>
+
+<!-- ════════ TELA: FORM PJ — populado dinamicamente em buildFormPJ() ════════ -->
+<div id="form-pj" class="hidden"></div>
+
+<!-- ════════ TELA: SUCESSO ════════ -->
+<div id="tela-sucesso" class="hidden">
+  <div class="card success-card">
+    <div class="success-icon">✓</div>
+    <h2>Recebemos sua proposta!</h2>
+    <p>Em breve a Master Prime entrará em contato para os próximos passos.</p>
+    <div class="success-protocolo" id="protocolo-display">—</div>
+    <p style="font-size:12px">Guarde este protocolo para consultas futuras.</p>
+  </div>
+</div>
+
+</div>
+
+<!-- Lista de bancos do BACEN (top 50 mais usados) -->
+<datalist id="bancos-list">
+  <option value="001 - Banco do Brasil">
+  <option value="033 - Santander">
+  <option value="041 - Banrisul (Banco do Estado RS)">
+  <option value="070 - BRB - Banco de Brasília">
+  <option value="077 - Banco Inter">
+  <option value="082 - Banco Topázio">
+  <option value="084 - Uniprime Norte do Paraná">
+  <option value="085 - Cooperativa Central Ailos">
+  <option value="097 - Cooperativa Central Cresol">
+  <option value="104 - Caixa Econômica Federal">
+  <option value="121 - Banco Agibank">
+  <option value="125 - Plural Banco">
+  <option value="136 - Unicred">
+  <option value="151 - Banco Nossa Caixa">
+  <option value="197 - Stone Pagamentos">
+  <option value="208 - Banco BTG Pactual">
+  <option value="212 - Banco Original">
+  <option value="218 - Banco BS2">
+  <option value="237 - Bradesco">
+  <option value="246 - Banco ABC Brasil">
+  <option value="260 - Nu Pagamentos (Nubank)">
+  <option value="265 - Banco Fator">
+  <option value="269 - HSBC Bank Brasil">
+  <option value="290 - PagSeguro / PagBank">
+  <option value="318 - Banco BMG">
+  <option value="323 - Mercado Pago">
+  <option value="332 - Acesso Soluções de Pagamento">
+  <option value="335 - Banco Digio">
+  <option value="336 - Banco C6 (C6 Bank)">
+  <option value="341 - Itaú Unibanco">
+  <option value="342 - Creditas">
+  <option value="348 - Banco XP">
+  <option value="349 - Amaggi Bank">
+  <option value="364 - Gerencianet Pagamentos">
+  <option value="376 - J.P. Morgan">
+  <option value="380 - PicPay">
+  <option value="389 - Mercantil do Brasil">
+  <option value="394 - Bradesco Financiamentos">
+  <option value="399 - Kirton Bank">
+  <option value="403 - Cora Sociedade de Crédito Direto">
+  <option value="412 - Banco Capital">
+  <option value="422 - Banco Safra">
+  <option value="450 - Fitbank">
+  <option value="473 - Banco Caixa Geral - Brasil">
+  <option value="479 - Banco ItauBank">
+  <option value="487 - Deutsche Bank">
+  <option value="488 - JPMorgan Chase">
+  <option value="492 - ING Bank">
+  <option value="505 - Banco Credit Suisse">
+  <option value="600 - Banco Luso Brasileiro">
+  <option value="604 - Banco Industrial">
+  <option value="611 - Banco Paulista">
+  <option value="612 - Banco Guanabara">
+  <option value="623 - Banco Pan">
+  <option value="630 - Smartbank">
+  <option value="633 - Banco Rendimento">
+  <option value="637 - Banco Sofisa">
+  <option value="643 - Banco Pine">
+  <option value="652 - Itaú Unibanco Holding">
+  <option value="653 - Banco Indusval">
+  <option value="654 - Banco A.J. Renner">
+  <option value="655 - Banco Votorantim / BV">
+  <option value="707 - Banco Daycoval">
+  <option value="712 - Banco Ourinvest">
+  <option value="720 - Banco RNX">
+  <option value="735 - Neon Pagamentos">
+  <option value="739 - Banco Cetelem">
+  <option value="741 - Banco Ribeirão Preto">
+  <option value="743 - Banco Semear">
+  <option value="745 - Citibank">
+  <option value="746 - Banco Modal">
+  <option value="747 - Rabobank International">
+  <option value="748 - Sicredi">
+  <option value="751 - Scotiabank Brasil">
+  <option value="752 - BNP Paribas Brasil">
+  <option value="753 - Banco Rendimento (NBC)">
+  <option value="755 - Bank of America Merrill Lynch">
+  <option value="756 - Sicoob (Banco Cooperativo)">
+  <option value="757 - Banco KEB Hana do Brasil">
+</datalist>
+
+<div class="footer">
+  MASTER PRIME · CORRETORA DE CONSÓRCIOS E SEGUROS
+</div>
+
+<script>
+// ════════ CONFIG ════════
+const SUPABASE_URL = 'https://jhwciwvgagnuxakukyob.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { persistSession: false }
+});
+
+// Estado civil que ativa cônjuge
+const ESTADOS_CONJUGE = ['Casado(a)','União Estável'];
+
+// Labels dos admins (definido cedo pra ficar disponível no init)
+const ADMINS_LABEL = { porto: 'Porto', bradesco: 'Bradesco', itau: 'Itaú' };
+
+// Campos que NÃO entram em cada admin específico (escondidos quando ?admin=X está travado)
+const SKIP_FIELDS = {
+  porto: {
+    // Porto não pede: sexo, pai, empresa, data_admissao, emancipado, uf_naturalidade
+    pf: ['pf-sexo','pf-nome_pai','pf-nome_empresa','pf-data_admissao','pf-uf_naturalidade'],
+    pj: []
+  },
+  itau: {
+    // Itaú não pede: naturalidade(cidade+UF), pai, empresa, data_admissao, tipo_logradouro, celular2, tel residencial/comercial, emancipado
+    pf: ['pf-cidade_nascimento','pf-uf_naturalidade','pf-nome_pai','pf-nome_empresa','pf-data_admissao','pf-tipo_logradouro','pf-celular2','pf-tel_residencial','pf-tel_comercial'],
+    pj: []
+  },
+  bradesco: {
+    // Bradesco pede TUDO. Só esconde tipo_logradouro (não tem) e celular2/tel_extras (não tem)
+    pf: ['pf-tipo_logradouro','pf-celular2','pf-tel_residencial','pf-tel_comercial'],
+    pj: []
+  }
+};
+
+// ════════ HELPERS ════════
+function $(id) { return document.getElementById(id); }
+function $$(sel, root = document) { return [...root.querySelectorAll(sel)]; }
+function getCodigoConsultor() {
+  return new URLSearchParams(location.search).get('c') || '';
+}
+function getAdminLocked() {
+  const a = (new URLSearchParams(location.search).get('admin') || '').toLowerCase();
+  return ['porto','itau','bradesco'].includes(a) ? a : '';
+}
+
+// MÁSCARAS
+function maskCPF(v) { v=v.replace(/\D/g,'').slice(0,11); return v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2'); }
+function maskCNPJ(v) { v=v.replace(/\D/g,'').slice(0,14); return v.replace(/^(\d{2})(\d)/,'$1.$2').replace(/^(\d{2})\.(\d{3})(\d)/,'$1.$2.$3').replace(/\.(\d{3})(\d)/,'.$1/$2').replace(/(\d{4})(\d)/,'$1-$2'); }
+function maskCEP(v) { v=v.replace(/\D/g,'').slice(0,8); return v.replace(/(\d{5})(\d)/,'$1-$2'); }
+function maskPhone(v) {
+  v = v.replace(/\D/g,'').slice(0,11);
+  if (v.length <= 10) return v.replace(/(\d{2})(\d)/,'($1) $2').replace(/(\d{4})(\d)/,'$1-$2');
+  return v.replace(/(\d{2})(\d)/,'($1) $2').replace(/(\d{5})(\d)/,'$1-$2');
+}
+function maskMoney(v) {
+  v = v.replace(/\D/g,'');
+  if (!v) return '';
+  return 'R$ ' + (parseInt(v,10)/100).toLocaleString('pt-BR',{minimumFractionDigits:2});
+}
+function maskDate(v) {
+  v = v.replace(/\D/g,'').slice(0,8);
+  return v.replace(/^(\d{2})(\d)/,'$1/$2').replace(/^(\d{2}\/\d{2})(\d)/,'$1/$2');
+}
+function parseMoney(s) {
+  if (!s) return '';
+  return s.replace(/[R$\s.]/g,'').replace(',','.');
+}
+function unmaskNum(s) { return (s||'').replace(/\D/g,''); }
+// Converte dd/mm/aaaa -> aaaa-mm-dd (ISO pro Postgres)
+function brDateToISO(s) {
+  if (!s) return '';
+  const m = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  return m ? `${m[3]}-${m[2]}-${m[1]}` : '';
+}
+// Remove acentos e converte pra maiúscula
+function upperNoAccent(s) {
+  return (s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase();
+}
+// Separa "341 - Itaú Unibanco" em { codigo: '341', nome: 'Itaú Unibanco' }
+function parseBanco(s) {
+  if (!s) return { codigo: '', nome: '' };
+  const m = String(s).match(/^(\d+)\s*[-–]\s*(.+)$/);
+  if (m) return { codigo: m[1], nome: m[2].trim() };
+  // Se digitou apenas o código ou só o nome
+  if (/^\d+$/.test(s.trim())) return { codigo: s.trim(), nome: '' };
+  return { codigo: '', nome: s.trim() };
+}
+
+function bindMasks(root = document) {
+  // Define teclado numérico em mobile para campos com máscara numérica
+  $$('[data-mask="cpf"], [data-mask="cnpj"], [data-mask="cep"], [data-mask="phone"], [data-mask="money"], [data-mask="date"]', root).forEach(el => {
+    el.setAttribute('inputmode', 'numeric');
+    el.setAttribute('autocomplete', 'off');
+  });
+  // Campos numéricos sem máscara: número do endereço, agência, conta, dígito, banco, número doc
+  const numericIds = [
+    'pf-numero','pj-numero',
+    'pf-agencia','pj-agencia',
+    'pf-conta_corrente','pj-conta_corrente',
+    'pf-dac','pj-dac',
+    'pf-debito_agencia','pf-debito_conta','pf-debito_dac',
+    'pj-debito_agencia','pj-debito_conta','pj-debito_dac',
+    'pf-numero_documento'
+  ];
+  numericIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.getAttribute('inputmode')) el.setAttribute('inputmode', 'numeric');
+  });
+  $$('[data-mask="cpf"]', root).forEach(el => el.addEventListener('input', e => e.target.value = maskCPF(e.target.value)));
+  $$('[data-mask="cnpj"]', root).forEach(el => el.addEventListener('input', e => e.target.value = maskCNPJ(e.target.value)));
+  $$('[data-mask="cep"]', root).forEach(el => {
+    el.addEventListener('input', e => e.target.value = maskCEP(e.target.value));
+    el.addEventListener('blur', () => lookupCEP(el));
+  });
+  $$('[data-mask="phone"]', root).forEach(el => el.addEventListener('input', e => e.target.value = maskPhone(e.target.value)));
+  $$('[data-mask="money"]', root).forEach(el => el.addEventListener('input', e => e.target.value = maskMoney(e.target.value)));
+  $$('[data-mask="date"]', root).forEach(el => el.addEventListener('input', e => e.target.value = maskDate(e.target.value)));
+  // Uppercase sem acentos pra inputs de texto comum (exclui email, money, e que tenham data-no-upper)
+  $$('input[type="text"]:not([data-mask="money"]):not([data-no-upper]), input:not([type])', root).forEach(el => {
+    el.addEventListener('input', e => {
+      const pos = e.target.selectionStart;
+      const novoValor = upperNoAccent(e.target.value);
+      if (novoValor !== e.target.value) {
+        e.target.value = novoValor;
+        try { e.target.setSelectionRange(pos, pos); } catch(_) {}
+      }
+    });
+  });
+}
+
+// ViaCEP
+async function lookupCEP(input) {
+  const cep = unmaskNum(input.value);
+  if (cep.length !== 8) return;
+  // Se o CEP não mudou desde a última busca, não refaz nada (preserva edições manuais
+  // de endereço). Mas se o cliente DIGITAR um CEP diferente, atualiza o endereço.
+  if (input.dataset.lastCep === cep) return;
+  try {
+    const r = await fetch('https://viacep.com.br/ws/'+cep+'/json/');
+    const d = await r.json();
+    if (d.erro) return;
+    input.dataset.lastCep = cep;
+    const pf = input.dataset.cepPrefix || '';
+    // Sobrescreve o endereço com o resultado do novo CEP (mesmo se já estava preenchido).
+    const set = (sufix, val) => { const el = $(pf+sufix); if (el && val) el.value = upperNoAccent(String(val)); };
+    set('logradouro', d.logradouro);
+    set('bairro', d.bairro);
+    set('cidade', d.localidade);
+    set('estado', d.uf);
+  } catch(e) { /* silencioso */ }
+}
+
+// ════════ INIT ════════
+async function init() {
+  const codigo = getCodigoConsultor();
+  const admin = getAdminLocked();
+  // Se admin travado, atualiza título no header + mostra logo da admin
+  if (admin) {
+    const h1 = document.querySelector('.header-text h1');
+    if (h1) h1.textContent = 'Formulário de Adesão · Consórcio ' + ADMINS_LABEL[admin];
+    const badge = $('header-admin-badge');
+    const img = $('header-admin-logo');
+    if (badge && img) {
+      img.src = 'logo-' + admin + '.png';
+      img.alt = 'Consórcio ' + ADMINS_LABEL[admin];
+      badge.classList.add('show');
+    }
+  }
+  if (codigo) {
+    try {
+      const r = await fetch(SUPABASE_URL + '/rest/v1/portal_users?select=nome&codigo_link=eq.' + encodeURIComponent(codigo.toUpperCase()), {
+        headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer '+SUPABASE_KEY }
+      });
+      const data = await r.json();
+      if (Array.isArray(data) && data[0]?.nome) {
+        $('consultor-nome').textContent = data[0].nome;
+        $('header-consultor').classList.remove('hidden');
+      }
+    } catch(e) {}
+  }
+}
+init();
+
+// ════════ MODO VISUALIZAÇÃO (?view=<id>) ════════
+// Abre o MESMO formulário, preenchido e TRAVADO: quem recebe o link vê tudo,
+// pode selecionar/copiar os campos, mas não consegue editar nem enviar.
+(function(){
+  const vid = new URLSearchParams(location.search).get('view');
+  if (vid) modoVisualizacao(vid);
+})();
+
+async function modoVisualizacao(id) {
+  let dados;
+  try {
+    const { data, error } = await sb.rpc('obter_ficha_publica', { p_id: id });
+    if (error || !data) throw error || new Error('nao encontrada');
+    dados = data;
+  } catch(e) {
+    document.body.innerHTML = '<div style="max-width:480px;margin:80px auto;text-align:center;'
+      + 'font-family:Inter,sans-serif;color:#64748B;padding:24px">'
+      + '<div style="font-size:18px;font-weight:700;color:#2D3F5E;margin-bottom:8px">Ficha não encontrada</div>'
+      + 'O link pode estar incorreto ou a ficha foi removida.</div>';
+    return;
+  }
+  const tipo = (dados.tipo || 'pf').toLowerCase();
+  iniciarForm(tipo);                  // monta e exibe o form do tipo certo
+  preencherForm(tipo, dados);         // preenche os campos principais
+  if (tipo === 'pj' && Array.isArray(dados.socios)) preencherSocios(dados.socios);
+  travarFormulario(tipo);             // trava tudo (readonly — copiável, não editável)
+  // Banner discreto de modo visualização
+  const banner = document.createElement('div');
+  banner.style.cssText = 'background:#2D3F5E;color:#fff;text-align:center;padding:9px 14px;'
+    + 'font:600 12px Inter,sans-serif;letter-spacing:.3px';
+  banner.textContent = 'Modo visualização · ficha somente leitura';
+  document.body.insertBefore(banner, document.body.firstChild);
+  window.scrollTo({ top: 0 });
+}
+
+function preencherSocios(socios) {
+  while (document.querySelectorAll('.socio-block').length < socios.length
+         && typeof socioCount !== 'undefined' && socioCount < 3) {
+    addSocio();
+  }
+  const blocks = document.querySelectorAll('.socio-block');
+  socios.forEach((s, i) => {
+    const b = blocks[i];
+    if (!b || !s) return;
+    Object.keys(s).forEach(k => {
+      const el = b.querySelector('[data-socio="'+k+'"]');
+      let v = s[k];
+      if (!el || v == null || v === '') return;
+      v = String(v);
+      if (/^\d{4}-\d{2}-\d{2}$/.test(v)) { const p = v.split('-'); v = p[2]+'/'+p[1]+'/'+p[0]; }
+      else if ((k === 'cpf' || k === 'cpf_conjuge') && /^\d{11}$/.test(v)) {
+        v = v.replace(/^(\d{3})(\d{3})(\d{3})(\d{2})$/, '$1.$2.$3-$4');
+      }
+      el.value = v;
+      el.dispatchEvent(new Event('input', { bubbles:true }));
+    });
+  });
+}
+
+function travarFormulario(tipo) {
+  const form = document.getElementById('form-' + tipo);
+  if (!form) return;
+  form.querySelectorAll('input').forEach(el => {
+    if (el.type === 'checkbox' || el.type === 'radio') el.disabled = true;
+    else el.readOnly = true;            // readonly: dá pra selecionar/copiar, não editar
+  });
+  form.querySelectorAll('textarea').forEach(el => { el.readOnly = true; });
+  form.querySelectorAll('select').forEach(el => {
+    el.style.pointerEvents = 'none'; el.tabIndex = -1; el.setAttribute('aria-disabled','true');
+  });
+  form.querySelectorAll('button').forEach(el => { el.style.display = 'none'; });
+}
+
+// Aplica lock do admin no select de Consórcio depois que o form é renderizado
+function aplicarAdminLock(prefix) {
+  const admin = getAdminLocked();
+  // Sem ?admin= (link Master Prime geral): cliente escolhe o consórcio normalmente.
+  // origem_link é setada no submit pra registrar que veio do link Master Prime.
+  if (!admin) return;
+  // Esconde campos não-pedidos por aquele admin
+  const skipList = (SKIP_FIELDS[admin] && SKIP_FIELDS[admin][prefix]) || [];
+  skipList.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const field = el.closest('.field');
+    if (field) field.style.display = 'none';
+    el.removeAttribute('required');
+    el.value = '';
+  });
+  // Esconde cards que ficaram com TODOS os campos escondidos
+  // E reagrupa grids que ficaram com campos escondidos (evita buracos visuais)
+  document.querySelectorAll('#form-'+prefix+' .card').forEach(card => {
+    const fields = card.querySelectorAll('.field');
+    if (fields.length === 0) return;
+    const visibles = [...fields].filter(f => f.style.display !== 'none');
+    if (visibles.length === 0) {
+      card.style.display = 'none';
+      return;
+    }
+    // Reorganiza grids: troca grid-2/3/4 por auto-fit se algum field interno foi escondido
+    card.querySelectorAll('.grid-2, .grid-3, .grid-4').forEach(grid => {
+      const gridFields = grid.querySelectorAll('.field');
+      const hiddenCount = [...gridFields].filter(f => f.style.display === 'none').length;
+      if (hiddenCount > 0) {
+        grid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(220px, 1fr))';
+        // Remove spans manuais dos visíveis pra evitar gaps
+        [...gridFields].forEach(f => {
+          if (f.style.display !== 'none') f.style.gridColumn = '';
+        });
+      }
+    });
+  });
+  // Lock no select de Consórcio
+  const sel = $(prefix+'-administradora');
+  if (!sel) return;
+  sel.value = admin;
+  sel.disabled = true;
+  onAdminChange(prefix);
+  sel.style.background = '#F1F5F9';
+  sel.style.color = 'var(--text2)';
+  sel.style.cursor = 'not-allowed';
+  const helpEl = sel.closest('.field').querySelector('.help-lock');
+  if (!helpEl) {
+    const help = document.createElement('span');
+    help.className = 'help help-lock';
+    help.style.color = 'var(--mp-teal)';
+    help.style.fontWeight = '600';
+    help.textContent = 'Pré-selecionado pelo link do vendedor';
+    sel.closest('.field').appendChild(help);
+  }
+}
+
+// ════════ FORM BUILDERS (PF e PJ injetados via JS pra reduzir tamanho do HTML) ════════
+// será expandido no próximo chunk
+function iniciarForm(tipo) {
+  $('tela-tipo').classList.add('hidden');
+  if (tipo === 'pf') {
+    if (!$('form-pf').innerHTML.trim()) buildFormPF();
+    $('form-pf').classList.remove('hidden');
+  } else {
+    if (!$('form-pj').innerHTML.trim()) buildFormPJ();
+    $('form-pj').classList.remove('hidden');
+  }
+  bindMasks();
+  aplicarAdminLock(tipo);
+  bindAutoPreencher(tipo);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ════════ AUTO-PREENCHER POR CPF+DATA (PF) ou CNPJ+DATA (PJ) ════════
+function bindAutoPreencher(tipo) {
+  const docId = tipo === 'pf' ? 'pf-cpf' : 'pj-cnpj';
+  const dataId = tipo === 'pf' ? 'pf-data_nascimento' : 'pj-data_constituicao';
+  const trigger = async () => {
+    const doc = unmaskNum($(docId)?.value || '');
+    const dataBr = $(dataId)?.value || '';
+    const dataIso = brDateToISO(dataBr);
+    const minDigits = tipo === 'pf' ? 11 : 14;
+    if (doc.length !== minDigits || !dataIso) return;
+    try {
+      const { data, error } = await sb.rpc('buscar_proposta_anterior', { p_doc: doc, p_data: dataIso, p_tipo: tipo });
+      if (error || !data) return;
+      preencherForm(tipo, data);
+      mostrarAvisoAutoPreenchido(tipo);
+    } catch(e) { /* silencioso */ }
+  };
+  $(docId)?.addEventListener('blur', trigger);
+  $(dataId)?.addEventListener('blur', trigger);
+}
+
+function preencherForm(tipo, dados) {
+  const prefix = tipo + '-';
+  const set = (id, val) => {
+    const el = $(prefix + id);
+    if (!el || val == null || val === '') return;
+    // Datas vêm como ISO (YYYY-MM-DD), converter pra dd/mm/aaaa
+    if (typeof val === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(val)) {
+      const [a,m,d] = val.split('-'); val = `${d}/${m}/${a}`;
+    }
+    // Campos money: o banco guarda em reais, mas a máscara trata os dígitos
+    // digitados como CENTAVOS. Formata como "R$ X.XXX,YY" antes de setar —
+    // aí a máscara, ao re-rodar no evento 'input', mantém estável.
+    if (el.dataset && el.dataset.mask === 'money') {
+      const n = parseFloat(typeof val === 'string' ? val.replace(',', '.') : val);
+      if (Number.isFinite(n)) {
+        val = 'R$ ' + n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+    }
+    // Mantém valor atual se já preenchido (cliente pode estar atualizando)
+    if (el.value && el.value !== '—') return;
+    el.value = val;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  };
+  // Itera todas as chaves de `dados` e tenta achar o campo correspondente
+  Object.keys(dados).forEach(k => {
+    if (k === 'id' || k === 'criado_em' || k === 'atualizado_em' || k === 'protocolo' || k.startsWith('consultor')) return;
+    set(k, dados[k]);
+  });
+  // O banco é salvo partido em banco_codigo + banco_nome. O campo "Banco" é
+  // único ("código - nome"), então recombina aqui senão aparece vazio.
+  if (dados.banco_codigo || dados.banco_nome) {
+    const cod = String(dados.banco_codigo || '').trim();
+    const nom = String(dados.banco_nome || '').trim();
+    set('banco', (cod && nom) ? `${cod} - ${nom}` : (nom || cod));
+  }
+  // Débito Automático: o banco hoje só guarda UMA conta (em agencia/conta_corrente/dac).
+  // No formulário existem 2 seções — "Débito Automático" e "Devolução de Valores".
+  // Quando a forma é Débito Automático, espelha a mesma conta nos dois lados pra
+  // visualização não ficar vazia (na prática é a mesma conta na maioria dos casos).
+  if (dados.forma_pagamento_1 === 'Débito Automático') {
+    set('debito_agencia', dados.agencia);
+    set('debito_conta', dados.conta_corrente);
+    set('debito_dac', dados.dac);
+  }
+  // LGPD: o checkbox é pf-lgpd / pj-lgpd, mas no banco é lgpd_aceito
+  const lgpdEl = $(prefix + 'lgpd');
+  if (lgpdEl && (dados.lgpd_aceito === true || dados.lgpd_aceito === 'true')) {
+    lgpdEl.checked = true;
+  }
+  // PJ tem nomes de coluna que NÃO batem com o id do campo no form:
+  //   DB nome              → form pj-razao_social
+  //   DB data_nascimento   → form pj-data_constituicao (data de constituição da empresa)
+  // Pra PF os dois batem direto e o loop acima já preenche.
+  if (tipo === 'pj') {
+    if (dados.nome) set('razao_social', dados.nome);
+    if (dados.data_nascimento) set('data_constituicao', dados.data_nascimento);
+  }
+  // Marca o CEP auto-preenchido como "já buscado" pra não sobrescrever o endereço
+  // à toa — mas se o cliente DIGITAR um CEP diferente, a busca atualiza normalmente.
+  const cepEl = $(prefix + 'cep');
+  if (cepEl && cepEl.value) cepEl.dataset.lastCep = unmaskNum(cepEl.value);
+  // Trata bloco cônjuge se houver
+  if (dados.estado_civil && tipo === 'pf') toggleConjuge(prefix);
+}
+
+function mostrarAvisoAutoPreenchido(tipo) {
+  const card = $('form-'+tipo)?.querySelector('.card');
+  if (!card) return;
+  // Evita duplicar
+  if (card.querySelector('.aviso-auto')) return;
+  const aviso = document.createElement('div');
+  aviso.className = 'aviso-auto';
+  aviso.style.cssText = 'background:#F0FDF4;border-left:3px solid var(--green);padding:12px 16px;border-radius:6px;margin-bottom:14px;font-size:13px;color:#166534';
+  aviso.innerHTML = '✓ <strong>Encontramos um cadastro anterior seu!</strong> Os dados foram pré-preenchidos. Confira e ajuste o que precisar antes de enviar.';
+  card.insertBefore(aviso, card.firstChild.nextSibling);
+}
+
+function voltarTipo() {
+  $('form-pf').classList.add('hidden');
+  $('form-pj').classList.add('hidden');
+  $('tela-tipo').classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function toggleConjuge(prefix) {
+  const sel = $(prefix+'estado_civil');
+  const bloco = $(prefix+'bloc-conjuge');
+  if (!sel || !bloco) return;
+  const ativo = ESTADOS_CONJUGE.includes(sel.value);
+  bloco.classList.toggle('show', ativo);
+  // Casado(a)/União Estável → dados do cônjuge obrigatórios.
+  // Solteiro etc. → bloco escondido, sem required (não atrapalha o envio).
+  ['nome_conjuge','cpf_conjuge','rg_conjuge','data_nascimento_conjuge'].forEach(id => {
+    const el = $(prefix+id);
+    if (!el) return;
+    if (ativo) el.setAttribute('required','required');
+    else el.removeAttribute('required');
+  });
+}
+
+// Opções de pagamento por administradora
+const PAGAMENTO_OPCOES = {
+  porto:    ['Boleto', 'Cartão de Crédito', 'Cartão Porto'],
+  bradesco: ['Boleto', 'Débito Automático'],
+  itau:     ['Boleto', 'Débito Automático']
+};
+// ADMINS_LABEL já definida no topo do script (linha ~400). Não redeclarar.
+
+// Quando muda administradora, atualiza opções de pagamento
+function onAdminChange(prefix) {
+  const admin = $(prefix+'-administradora').value;
+  const select = $(prefix+'-forma_pagamento_1');
+  if (!admin) {
+    select.innerHTML = '<option value="">Selecione o consórcio primeiro</option>';
+    select.disabled = true;
+    $(prefix+'-bloc-debito').classList.remove('show');
+    return;
+  }
+  const opts = PAGAMENTO_OPCOES[admin] || [];
+  select.innerHTML = '<option value="">—</option>' + opts.map(o => `<option value="${o}">${o}</option>`).join('');
+  select.disabled = false;
+  // Esconde bloco débito ao trocar admin
+  $(prefix+'-bloc-debito').classList.remove('show');
+  // Atualiza texto explicativo do débito
+  const aviso = $(prefix+'-debito-aviso');
+  if (aviso && (admin === 'bradesco' || admin === 'itau')) {
+    aviso.innerHTML = `Para débito automático no Consórcio ${ADMINS_LABEL[admin]}, é obrigatório informar uma conta corrente <strong>do próprio ${ADMINS_LABEL[admin]}</strong>.`;
+    $(prefix+'-debito-titulo').textContent = `Conta ${ADMINS_LABEL[admin]} para Débito Automático`;
+  }
+}
+
+// Quando muda forma de pagamento, mostra/esconde bloco débito
+function onPagamentoChange(prefix) {
+  const forma = $(prefix+'-forma_pagamento_1').value;
+  const admin = $(prefix+'-administradora').value;
+  const showDebito = (forma === 'Débito Automático') && (admin === 'bradesco' || admin === 'itau');
+  $(prefix+'-bloc-debito').classList.toggle('show', showDebito);
+  // Toggle required nos campos do débito
+  ['debito_agencia','debito_conta','debito_dac'].forEach(id => {
+    const el = $(prefix+'-'+id);
+    if (el) { if (showDebito) el.setAttribute('required','required'); else el.removeAttribute('required'); }
+  });
+}
+
+// ════════ COLETA, VALIDAÇÃO E SUBMIT — também populado no próximo chunk ════════
+function buildFormPF() {
+  $('form-pf').innerHTML = `
+    <div class="card">
+      <h3>Dados Pessoais</h3>
+      <div class="grid-3">
+        <div class="field"><label>CPF<span class="req">*</span></label><input id="pf-cpf" data-mask="cpf" placeholder="000.000.000-00" required></div>
+        <div class="field"><label>Data de Nascimento<span class="req">*</span></label><input id="pf-data_nascimento" type="text" data-mask="date" placeholder="dd/mm/aaaa" maxlength="10" required></div>
+        <div class="field"><label>Sexo<span class="req">*</span></label><select id="pf-sexo" required><option value="">—</option><option>Masculino</option><option>Feminino</option><option>Outro</option></select></div>
+      </div>
+      <div class="grid-2" style="margin-top:14px">
+        <div class="field field-full"><label>Nome Completo<span class="req">*</span></label><input id="pf-nome" placeholder="Como está no documento" required></div>
+      </div>
+      <div class="grid-3" style="margin-top:14px">
+        <div class="field"><label>Nacionalidade<span class="req">*</span></label><select id="pf-nacionalidade" required><option value="">—</option><option>Brasileira</option><option>Estrangeira</option><option>Naturalizada</option></select></div>
+        <div class="field"><label>UF Naturalidade<span class="req">*</span></label><select id="pf-uf_naturalidade" required><option value="">—</option><option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option><option>SE</option><option>TO</option></select></div>
+        <div class="field"><label>Naturalidade (Cidade)<span class="req">*</span></label><input id="pf-cidade_nascimento" placeholder="Ex: São Paulo" required></div>
+      </div>
+      <div class="grid-2" style="margin-top:14px">
+        <div class="field"><label>Nome da Mãe<span class="req">*</span></label><input id="pf-nome_mae" placeholder="Nome completo" required></div>
+        <div class="field"><label>Nome do Pai</label><input id="pf-nome_pai" placeholder="Se ausente, escreva Ausente"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Documento de Identificação</h3>
+      <div class="grid-4">
+        <div class="field"><label>Tipo de Documento<span class="req">*</span></label><select id="pf-tipo_documento" required><option value="">—</option><option>RG</option><option>CNH</option><option>Outros</option></select></div>
+        <div class="field"><label>Número do Documento<span class="req">*</span></label><input id="pf-numero_documento" placeholder="Ex: 12.345.678-9" required></div>
+        <div class="field"><label>Data de Emissão<span class="req">*</span></label><input id="pf-data_emissao" type="text" data-mask="date" placeholder="dd/mm/aaaa" maxlength="10" required></div>
+      </div>
+      <div class="grid-2" style="margin-top:14px">
+        <div class="field"><label>Órgão Expedidor<span class="req">*</span></label><input id="pf-orgao_expedidor" placeholder="Ex: SSP/SP" required></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Estado Civil</h3>
+      <div class="grid-2">
+        <div class="field"><label>Estado Civil<span class="req">*</span></label><select id="pf-estado_civil" onchange="toggleConjuge('pf-')" required>
+          <option value="">—</option><option>Solteiro(a)</option><option>Casado(a)</option><option>Divorciado(a)</option><option>Viúvo(a)</option><option>União Estável</option><option>Separado(a) Judicialmente</option>
+        </select></div>
+      </div>
+      <div id="pf-bloc-conjuge" class="bloc-conjuge">
+        <div class="bloc-conjuge-title">Dados do Cônjuge</div>
+        <div class="grid-2">
+          <div class="field"><label>Nome do Cônjuge<span class="req">*</span></label><input id="pf-nome_conjuge" placeholder="Nome completo"></div>
+          <div class="field"><label>CPF do Cônjuge<span class="req">*</span></label><input id="pf-cpf_conjuge" data-mask="cpf" placeholder="000.000.000-00"></div>
+        </div>
+        <div class="grid-2" style="margin-top:12px">
+          <div class="field"><label>RG do Cônjuge<span class="req">*</span></label><input id="pf-rg_conjuge" placeholder="Número do RG"></div>
+          <div class="field"><label>Data de Nascimento do Cônjuge<span class="req">*</span></label><input id="pf-data_nascimento_conjuge" type="text" data-mask="date" placeholder="dd/mm/aaaa" maxlength="10"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Endereço Residencial</h3>
+      <div class="grid-2">
+        <div class="field"><label>CEP<span class="req">*</span></label><input id="pf-cep" data-mask="cep" data-cep-prefix="pf-" placeholder="00000-000" required></div>
+      </div>
+      <div class="grid-4" style="margin-top:14px">
+        <div class="field field-full"><label>Logradouro<span class="req">*</span></label><input id="pf-logradouro" placeholder="Rua, Avenida..." required></div>
+        <div class="field"><label>Número<span class="req">*</span></label><input id="pf-numero" placeholder="123" required></div>
+        <div class="field"><label>Complemento</label><input id="pf-complemento" placeholder="Apto, Bloco..."></div>
+      </div>
+      <div class="grid-3" style="margin-top:14px">
+        <div class="field"><label>Bairro<span class="req">*</span></label><input id="pf-bairro" required></div>
+        <div class="field"><label>Cidade<span class="req">*</span></label><input id="pf-cidade" required></div>
+        <div class="field"><label>UF<span class="req">*</span></label><select id="pf-estado" required><option value="">—</option><option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option><option>SE</option><option>TO</option></select></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Profissão e Renda</h3>
+      <div class="grid-3">
+        <div class="field"><label>Empresa onde Trabalha<span class="req">*</span></label><input id="pf-nome_empresa" required></div>
+        <div class="field"><label>Data de Admissão<span class="req">*</span></label><input id="pf-data_admissao" type="text" data-mask="date" placeholder="dd/mm/aaaa" maxlength="10" required></div>
+        <div class="field"><label>Renda Mensal<span class="req">*</span></label><input id="pf-renda_mensal" data-mask="money" placeholder="R$ 0,00" required></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Contato</h3>
+      <div class="grid-2">
+        <div class="field"><label>E-mail<span class="req">*</span></label><input id="pf-email" type="email" placeholder="email@exemplo.com" required></div>
+        <div class="field"><label>Celular<span class="req">*</span></label><input id="pf-celular" data-mask="phone" placeholder="(11) 99999-9999" required></div>
+      </div>
+      <div class="grid-3" style="margin-top:14px">
+        <div class="field"><label>Celular 2</label><input id="pf-celular2" data-mask="phone" placeholder="(11) 99999-9999"></div>
+        <div class="field"><label>Telefone Residencial</label><input id="pf-tel_residencial" data-mask="phone" placeholder="(11) 3333-4444"></div>
+        <div class="field"><label>Telefone Comercial</label><input id="pf-tel_comercial" data-mask="phone" placeholder="(11) 3333-4444"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Forma de Pagamento</h3>
+      <div class="grid-2">
+        <div class="field"><label>Consórcio<span class="req">*</span></label><select id="pf-administradora" onchange="onAdminChange('pf')" required>
+          <option value="">—</option>
+          <option value="porto">Consórcio Porto</option>
+          <option value="bradesco">Consórcio Bradesco</option>
+          <option value="itau">Consórcio Itaú</option>
+        </select></div>
+        <div class="field"><label>Forma de Pagamento<span class="req">*</span></label><select id="pf-forma_pagamento_1" onchange="onPagamentoChange('pf')" required disabled>
+          <option value="">Selecione o consórcio primeiro</option>
+        </select></div>
+      </div>
+      <div id="pf-bloc-debito" class="bloc-conjuge" style="margin-top:14px">
+        <div class="bloc-conjuge-title" id="pf-debito-titulo">Dados da Conta para Débito Automático</div>
+        <p style="font-size:12px;color:var(--text2);margin-bottom:12px" id="pf-debito-aviso">Informe os dados da sua conta.</p>
+        <div class="grid-3">
+          <div class="field"><label>Agência (sem dígito)<span class="req">*</span></label><input id="pf-debito_agencia" placeholder="0000"></div>
+          <div class="field"><label>Conta Corrente<span class="req">*</span></label><input id="pf-debito_conta" placeholder="00000"></div>
+          <div class="field"><label>Dígito<span class="req">*</span></label><input id="pf-debito_dac" placeholder="0"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Dados Bancários para Devolução de Valores</h3>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:14px">Conta para receber devoluções (encerramento de grupo, cancelamento, etc.). <strong>A conta deve estar obrigatoriamente no nome e CPF do titular da cota.</strong></p>
+      <div class="grid-3">
+        <div class="field field-full"><label>Banco<span class="req">*</span></label>
+          <input id="pf-banco" list="bancos-list" placeholder="Digite ou selecione (ex: Itaú)" data-no-upper required>
+        </div>
+      </div>
+      <div class="grid-3" style="margin-top:14px">
+        <div class="field"><label>Agência (sem dígito)<span class="req">*</span></label><input id="pf-agencia" placeholder="0000" data-no-upper required></div>
+        <div class="field"><label>Conta Corrente<span class="req">*</span></label><input id="pf-conta_corrente" placeholder="00000" data-no-upper required></div>
+        <div class="field"><label>Dígito<span class="req">*</span></label><input id="pf-dac" placeholder="0" data-no-upper required></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Seguro do Consórcio</h3>
+      <div class="grid-2">
+        <div class="field"><label>Aceita contratar o seguro do consórcio?<span class="req">*</span></label><select id="pf-aceita_seguro" required>
+          <option value="">—</option><option value="true">Sim</option><option value="false">Não</option>
+        </select></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="lgpd">
+        <label>
+          <input type="checkbox" id="pf-lgpd">
+          <span>Autorizo o compartilhamento e tratamento dos meus dados pessoais pela Master Prime Corretora e pela administradora selecionada, para fins de análise, andamento e conclusão do processo de consórcio, conforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018).</span>
+        </label>
+      </div>
+    </div>
+
+    <div id="pf-msg"></div>
+    <div class="actions">
+      <button class="btn btn-outline" onclick="voltarTipo()">← Voltar</button>
+      <div class="spacer"></div>
+      <button class="btn btn-yellow btn-lg" id="pf-submit" onclick="submitPF()">Enviar Proposta</button>
+    </div>
+  `;
+}
+function buildFormPJ() {
+  $('form-pj').innerHTML = `
+    <div class="card">
+      <h3>Dados da Empresa</h3>
+      <div class="grid-2">
+        <div class="field"><label>CNPJ<span class="req">*</span></label><input id="pj-cnpj" data-mask="cnpj" placeholder="00.000.000/0001-00" required></div>
+        <div class="field"><label>Data de Constituição<span class="req">*</span></label><input id="pj-data_constituicao" type="text" data-mask="date" placeholder="dd/mm/aaaa" maxlength="10" required></div>
+      </div>
+      <div class="grid-2" style="margin-top:14px">
+        <div class="field"><label>Razão Social<span class="req">*</span></label><input id="pj-razao_social" required></div>
+        <div class="field"><label>Nome Fantasia</label><input id="pj-nome_fantasia"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Atividade & Faturamento</h3>
+      <div class="grid-2">
+        <div class="field"><label>Ramo de Atividade<span class="req">*</span></label><select id="pj-ramo_atividade" required>
+          <option value="">—</option>
+          <option>Administração Pública</option>
+          <option>Agricultura e Pecuária</option>
+          <option>Alojamento e Alimentação</option>
+          <option>Atividades Imobiliárias</option>
+          <option>Comércio</option>
+          <option>Comunicações</option>
+          <option>Construção Civil</option>
+          <option>Defesa e Seguridade Social</option>
+          <option>Educação</option>
+          <option>Eletricidade, Gás e Água</option>
+          <option>Indústrias de Transformação</option>
+          <option>Indústrias Extrativas</option>
+          <option>Intermediação Financeira</option>
+          <option>Outros Serviços</option>
+          <option>Pesca</option>
+          <option>Reparação de Objetos</option>
+          <option>Reparação de Veículos</option>
+          <option>Saúde e Serviços Sociais</option>
+          <option>Serviços Domésticos</option>
+          <option>Serviços Prestados às Empresas</option>
+          <option>Silvicultura e Exploração Florestal</option>
+          <option>Transporte e Armazenagem</option>
+          <option>Outras</option>
+        </select></div>
+        <div class="field"><label>Atividade Principal (CNAE)<span class="req">*</span></label>
+          <input id="pj-cnae_principal" list="cnae-list" placeholder="Digite ou selecione" data-no-upper required>
+          <datalist id="cnae-list">
+            <option value="4711-3/02">Comércio varejista de mercadorias - minimercados</option>
+            <option value="4712-1/00">Comércio varejista - mercearias</option>
+            <option value="4721-1/02">Padarias e confeitarias</option>
+            <option value="4744-0/05">Materiais de construção</option>
+            <option value="4751-2/01">Computadores</option>
+            <option value="4781-4/00">Vestuário</option>
+            <option value="4782-2/01">Calçados</option>
+            <option value="5611-2/01">Restaurantes e similares</option>
+            <option value="6201-5/01">Desenvolvimento de software</option>
+            <option value="6203-1/00">Licenciamento de software</option>
+            <option value="6209-1/00">Suporte técnico em TI</option>
+            <option value="6810-2/01">Compra e venda de imóveis</option>
+            <option value="6911-7/01">Serviços advocatícios</option>
+            <option value="7020-4/00">Consultoria em gestão empresarial</option>
+            <option value="7410-2/02">Design</option>
+            <option value="8211-3/00">Escritório e apoio administrativo</option>
+            <option value="8512-1/00">Educação infantil</option>
+            <option value="8610-1/01">Atendimento hospitalar</option>
+            <option value="8650-0/01">Profissionais da saúde</option>
+            <option value="9602-5/01">Cabeleireiros, manicure</option>
+          </datalist>
+        </div>
+      </div>
+      <div class="grid-2" style="margin-top:14px">
+        <div class="field"><label>Natureza Jurídica<span class="req">*</span></label><select id="pj-natureza_juridica" required>
+          <option value="">—</option>
+          <option>Sociedade Empresária Limitada</option>
+          <option>Sociedade Limitada Unipessoal (SLU)</option>
+          <option>EIRELI</option>
+          <option>Empresário (Individual)</option>
+          <option>MEI - Microempreendedor Individual</option>
+          <option>Sociedade Anônima Aberta</option>
+          <option>Sociedade Anônima Fechada</option>
+          <option>Sociedade Simples Pura</option>
+          <option>Sociedade Empresária em Nome Coletivo</option>
+          <option>Sociedade Empresária em Comandita Simples</option>
+          <option>Sociedade Empresária em Comandita por Ações</option>
+          <option>Sociedade em Conta de Participação</option>
+          <option>Cooperativa</option>
+          <option>Consórcio de Sociedades</option>
+          <option>Grupo de Sociedades</option>
+          <option>Empresa Pública</option>
+          <option>Sociedade de Economia Mista</option>
+          <option>Associação</option>
+          <option>Fundação</option>
+          <option>Empresa Domiciliada no Exterior</option>
+          <option>Estabelecimento, no Brasil, de Sociedade Estrangeira</option>
+          <option>Outras</option>
+        </select></div>
+        <div class="field"><label>Descreva a Atividade (o que faz)</label><input id="pj-descricao_atividade" placeholder="Em poucas palavras"></div>
+      </div>
+      <div class="grid-3" style="margin-top:14px">
+        <div class="field"><label>Faturamento<span class="req">*</span></label><input id="pj-faturamento" data-mask="money" placeholder="R$ 0,00" required></div>
+        <div class="field"><label>Período do Faturamento<span class="req">*</span></label><select id="pj-faturamento_periodo" required><option value="">—</option><option value="mensal">Mensal</option><option value="12_meses">Últimos 12 meses</option></select></div>
+        <div class="field"><label>Valor do Capital Social</label><input id="pj-valor_capital" data-mask="money" placeholder="R$ 0,00"></div>
+      </div>
+      <div class="grid-2" style="margin-top:14px">
+        <div class="field"><label>Inscrição Estadual</label><input id="pj-inscricao_estadual" data-no-upper></div>
+        <div class="field"><label>Inscrição Municipal</label><input id="pj-inscricao_municipal" data-no-upper></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Endereço da Empresa</h3>
+      <div class="grid-3">
+        <div class="field"><label>CEP<span class="req">*</span></label><input id="pj-cep" data-mask="cep" data-cep-prefix="pj-" placeholder="00000-000" required></div>
+        <div class="field"><label>Endereço Fiscal no Exterior?<span class="req">*</span></label><select id="pj-endereco_exterior" required><option value="false">Não</option><option value="true">Sim</option></select></div>
+        <div class="field"><label>Divulgar Endereço?<span class="req">*</span></label><select id="pj-divulgar_endereco" required><option value="false">Não</option><option value="true">Sim</option></select></div>
+      </div>
+      <div class="grid-4" style="margin-top:14px">
+        <div class="field"><label>Tipo Logradouro<span class="req">*</span></label><input id="pj-tipo_logradouro" placeholder="Rua, Av, Trav..." required></div>
+        <div class="field field-full"><label>Logradouro<span class="req">*</span></label><input id="pj-logradouro" required></div>
+        <div class="field"><label>Número<span class="req">*</span></label><input id="pj-numero" required></div>
+      </div>
+      <div class="grid-4" style="margin-top:14px">
+        <div class="field"><label>Complemento</label><input id="pj-complemento"></div>
+        <div class="field"><label>Bairro<span class="req">*</span></label><input id="pj-bairro" required></div>
+        <div class="field"><label>Cidade<span class="req">*</span></label><input id="pj-cidade" required></div>
+        <div class="field"><label>UF<span class="req">*</span></label><select id="pj-estado" required><option value="">—</option><option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option><option>SE</option><option>TO</option></select></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Contato</h3>
+      <div class="grid-2">
+        <div class="field"><label>E-mail<span class="req">*</span></label><input id="pj-email" type="email" placeholder="email@empresa.com" required></div>
+        <div class="field"><label>Celular<span class="req">*</span></label><input id="pj-celular" data-mask="phone" placeholder="(11) 99999-9999" required></div>
+      </div>
+      <div class="grid-3" style="margin-top:14px">
+        <div class="field"><label>Telefone Comercial</label><input id="pj-tel_comercial" data-mask="phone" placeholder="(11) 3333-4444"></div>
+        <div class="field"><label>Celular 2</label><input id="pj-celular2" data-mask="phone"></div>
+        <div class="field"><label>FAX</label><input id="pj-fax" data-mask="phone"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Sócios</h3>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:14px">Cadastre os sócios da empresa. Pelo menos 1 é obrigatório (o sócio administrador).</p>
+      <div id="socios-container"></div>
+      <button class="btn btn-outline" id="btn-add-socio" onclick="addSocio()">+ Adicionar Sócio</button>
+    </div>
+
+    <div class="card">
+      <h3>Forma de Pagamento</h3>
+      <div class="grid-2">
+        <div class="field"><label>Consórcio<span class="req">*</span></label><select id="pj-administradora" onchange="onAdminChange('pj')" required>
+          <option value="">—</option>
+          <option value="porto">Consórcio Porto</option>
+          <option value="bradesco">Consórcio Bradesco</option>
+          <option value="itau">Consórcio Itaú</option>
+        </select></div>
+        <div class="field"><label>Forma de Pagamento<span class="req">*</span></label><select id="pj-forma_pagamento_1" onchange="onPagamentoChange('pj')" required disabled>
+          <option value="">Selecione o consórcio primeiro</option>
+        </select></div>
+      </div>
+      <div id="pj-bloc-debito" class="bloc-conjuge" style="margin-top:14px">
+        <div class="bloc-conjuge-title" id="pj-debito-titulo">Dados da Conta para Débito Automático</div>
+        <p style="font-size:12px;color:var(--text2);margin-bottom:12px" id="pj-debito-aviso">Informe os dados da conta.</p>
+        <div class="grid-3">
+          <div class="field"><label>Agência (sem dígito)<span class="req">*</span></label><input id="pj-debito_agencia" placeholder="0000" data-no-upper></div>
+          <div class="field"><label>Conta Corrente<span class="req">*</span></label><input id="pj-debito_conta" placeholder="00000" data-no-upper></div>
+          <div class="field"><label>Dígito<span class="req">*</span></label><input id="pj-debito_dac" placeholder="0" data-no-upper></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Dados Bancários para Devolução de Valores</h3>
+      <p style="font-size:12px;color:var(--text2);margin-bottom:14px">Conta para receber devoluções (encerramento de grupo, cancelamento, etc.). <strong>A conta deve estar obrigatoriamente no CNPJ da empresa titular.</strong></p>
+      <div class="grid-3">
+        <div class="field field-full"><label>Banco<span class="req">*</span></label>
+          <input id="pj-banco" list="bancos-list" placeholder="Digite ou selecione (ex: Itaú)" data-no-upper required>
+        </div>
+      </div>
+      <div class="grid-3" style="margin-top:14px">
+        <div class="field"><label>Agência (sem dígito)<span class="req">*</span></label><input id="pj-agencia" data-no-upper required></div>
+        <div class="field"><label>Conta Corrente<span class="req">*</span></label><input id="pj-conta_corrente" data-no-upper required></div>
+        <div class="field"><label>Dígito<span class="req">*</span></label><input id="pj-dac" data-no-upper required></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="lgpd">
+        <label>
+          <input type="checkbox" id="pj-lgpd">
+          <span>Autorizo o compartilhamento e tratamento dos dados pessoais e empresariais pela Master Prime Corretora e pela administradora selecionada, para fins de análise, andamento e conclusão do processo de consórcio, conforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018).</span>
+        </label>
+      </div>
+    </div>
+
+    <div id="pj-msg"></div>
+    <div class="actions">
+      <button class="btn btn-outline" onclick="voltarTipo()">← Voltar</button>
+      <div class="spacer"></div>
+      <button class="btn btn-yellow btn-lg" id="pj-submit" onclick="submitPJ()">Enviar Proposta</button>
+    </div>
+  `;
+  // Adiciona o primeiro sócio
+  addSocio();
+}
+
+// ════════ SÓCIOS ════════
+let socioCount = 0;
+function addSocio() {
+  if (socioCount >= 3) { alert('Máximo de 3 sócios.'); return; }
+  socioCount++;
+  const idx = socioCount;
+  const container = $('socios-container');
+  const block = document.createElement('div');
+  block.className = 'socio-block';
+  block.dataset.index = idx;
+  const r = idx === 1 ? '<span class="req">*</span>' : '';
+  block.innerHTML = `
+    <div class="socio-header">
+      <div class="socio-titulo">${idx}º Sócio${idx === 1 ? ' (obrigatório)' : ' (opcional)'}</div>
+      ${idx > 1 ? `<button class="btn btn-danger" onclick="removeSocio(this)">Remover</button>` : ''}
+    </div>
+    <div class="grid-2">
+      <div class="field"><label>Nome Completo${r}</label><input data-socio="nome"></div>
+      <div class="field"><label>CPF${r}</label><input data-socio="cpf" data-mask="cpf" placeholder="000.000.000-00"></div>
+    </div>
+    <div class="grid-3" style="margin-top:12px">
+      <div class="field"><label>RG${r}</label><input data-socio="rg"></div>
+      <div class="field"><label>Data de Emissão RG${r}</label><input data-socio="data_emissao_rg" type="text" data-mask="date" placeholder="dd/mm/aaaa" maxlength="10"></div>
+      <div class="field"><label>Órgão Expedidor${r}</label><input data-socio="orgao_expedidor" placeholder="SSP/SP"></div>
+    </div>
+    <div class="grid-3" style="margin-top:12px">
+      <div class="field"><label>Data de Nascimento${r}</label><input data-socio="data_nascimento" type="text" data-mask="date" placeholder="dd/mm/aaaa" maxlength="10"></div>
+      <div class="field"><label>Nome do Pai${r}</label><input data-socio="nome_pai"></div>
+      <div class="field"><label>Nome da Mãe${r}</label><input data-socio="nome_mae"></div>
+    </div>
+    <div class="grid-3" style="margin-top:12px">
+      <div class="field"><label>Data de Entrada${r}</label><input data-socio="data_entrada" type="text" data-mask="date" placeholder="dd/mm/aaaa" maxlength="10"></div>
+      <div class="field"><label>Participação (%)${r}</label><input data-socio="participacao" placeholder="Ex: 50" data-no-upper></div>
+      <div class="field"><label>É Administrador?${r}</label><select data-socio="administrador"><option value="">—</option><option value="Sim">Sim</option><option value="Não">Não</option></select></div>
+    </div>
+    <div class="grid-3" style="margin-top:12px">
+      <div class="field"><label>Estado Civil</label><select data-socio="estado_civil"><option value="">—</option><option>Solteiro(a)</option><option>Casado(a)</option><option>Divorciado(a)</option><option>Viúvo(a)</option><option>União Estável</option><option>Outros</option></select></div>
+      <div class="field"><label>Nome do Cônjuge</label><input data-socio="nome_conjuge" placeholder="Se aplicável"></div>
+      <div class="field"><label>CPF do Cônjuge</label><input data-socio="cpf_conjuge" data-mask="cpf"></div>
+    </div>
+    <div class="grid-2" style="margin-top:12px">
+      <div class="field"><label>E-mail do Sócio${r}</label><input data-socio="email" type="email" placeholder="email@exemplo.com" onblur="checkSocioEmail(this)"><span class="help" data-socio-msg="email" style="color:var(--red);display:none">E-mail deve ser diferente do e-mail da empresa</span></div>
+      <div class="field"><label>Telefone do Sócio</label><input data-socio="telefone" data-mask="phone" placeholder="(11) 99999-9999"></div>
+    </div>
+  `;
+  container.appendChild(block);
+  bindMasks(block);
+  // Atualiza visibilidade do botão se chegou no limite
+  if (socioCount >= 3) $('btn-add-socio').style.display = 'none';
+}
+
+function checkSocioEmail(input) {
+  const empresaEmail = ($('pj-email')?.value || '').toLowerCase().trim();
+  const socioEmail   = (input.value || '').toLowerCase().trim();
+  const msg = input.closest('.field').querySelector('[data-socio-msg="email"]');
+  if (empresaEmail && socioEmail && empresaEmail === socioEmail) {
+    if (msg) msg.style.display = 'block';
+    input.closest('.field').classList.add('invalid');
+  } else {
+    if (msg) msg.style.display = 'none';
+    input.closest('.field').classList.remove('invalid');
+  }
+}
+
+function removeSocio(btn) {
+  btn.closest('.socio-block').remove();
+  socioCount--;
+  $('btn-add-socio').style.display = '';
+  // Renumera
+  $$('.socio-block').forEach((b, i) => {
+    b.dataset.index = i+1;
+    const t = b.querySelector('.socio-titulo');
+    if (t) t.textContent = (i+1) + 'º Sócio' + (i === 0 ? ' (obrigatório)' : ' (opcional)');
+  });
+}
+// ════════ COLETA ════════
+function coletarPF() {
+  const get = id => $('pf-'+id)?.value || '';
+  const debitoConta = (get('forma_pagamento_1') === 'Débito Automático')
+    ? { agencia: get('debito_agencia'), conta: get('debito_conta'), dac: get('debito_dac') } : null;
+  // Observações geradas automaticamente pra incluir conta de débito
+  const obs = debitoConta
+    ? `Débito Automático ${ADMINS_LABEL[get('administradora')] || ''} — Ag: ${debitoConta.agencia} CC: ${debitoConta.conta}-${debitoConta.dac}`
+    : '';
+  return {
+    tipo: 'pf',
+    administradora: get('administradora'),
+    origem_link: getAdminLocked() || 'master_prime',
+    cpf: unmaskNum(get('cpf')),
+    nome: get('nome').trim(),
+    data_nascimento: brDateToISO(get('data_nascimento')),
+    sexo: get('sexo'),
+    nacionalidade: get('nacionalidade'),
+    cidade_nascimento: get('cidade_nascimento'),
+    uf_naturalidade: get('uf_naturalidade'),
+    tipo_documento: get('tipo_documento'),
+    numero_documento: get('numero_documento'),
+    data_emissao: brDateToISO(get('data_emissao')),
+    orgao_expedidor: get('orgao_expedidor'),
+    nome_pai: get('nome_pai'),
+    nome_mae: get('nome_mae'),
+    estado_civil: get('estado_civil'),
+    nome_conjuge: get('nome_conjuge'),
+    cpf_conjuge: unmaskNum(get('cpf_conjuge')),
+    rg_conjuge: get('rg_conjuge'),
+    data_nascimento_conjuge: brDateToISO(get('data_nascimento_conjuge')),
+    profissao: get('profissao'),
+    nome_empresa: get('nome_empresa'),
+    data_admissao: brDateToISO(get('data_admissao')),
+    renda_mensal: parseMoney(get('renda_mensal')),
+    email: get('email').trim(),
+    celular: get('celular'),
+    celular2: get('celular2'),
+    tel_residencial: get('tel_residencial'),
+    tel_comercial: get('tel_comercial'),
+    cep: unmaskNum(get('cep')),
+    logradouro: get('logradouro'),
+    numero: get('numero'),
+    complemento: get('complemento'),
+    bairro: get('bairro'),
+    cidade: get('cidade'),
+    estado: get('estado').toUpperCase(),
+    tipo_residencia: get('tipo_residencia'),
+    tempo_residencia: get('tempo_residencia'),
+    forma_pagamento_1: get('forma_pagamento_1'),
+    forma_pagamento_demais: get('forma_pagamento_1'), // mesma forma p/ todas as parcelas
+    banco_codigo: parseBanco(get('banco')).codigo,
+    banco_nome: parseBanco(get('banco')).nome,
+    agencia: get('agencia'),
+    conta_corrente: get('conta_corrente'),
+    dac: get('dac'),
+    nome_correntista: get('nome').trim(),
+    cpf_correntista: unmaskNum(get('cpf')),
+    aceita_seguro: get('aceita_seguro'),
+    observacoes: obs,
+    lgpd_aceito: $('pf-lgpd').checked ? 'true' : 'false'
+  };
+}
+
+function coletarPJ() {
+  const get = id => $('pj-'+id)?.value || '';
+  const socios = $$('.socio-block').map(block => {
+    const s = nome => block.querySelector(`[data-socio="${nome}"]`)?.value || '';
+    return {
+      nome: s('nome'),
+      cpf: unmaskNum(s('cpf')),
+      rg: s('rg'),
+      data_emissao_rg: brDateToISO(s('data_emissao_rg')),
+      orgao_expedidor: s('orgao_expedidor'),
+      data_nascimento: brDateToISO(s('data_nascimento')),
+      nome_pai: s('nome_pai'),
+      nome_mae: s('nome_mae'),
+      data_entrada: brDateToISO(s('data_entrada')),
+      participacao: s('participacao'),
+      administrador: s('administrador'),
+      estado_civil: s('estado_civil'),
+      nome_conjuge: s('nome_conjuge'),
+      cpf_conjuge: unmaskNum(s('cpf_conjuge')),
+      email: s('email').toLowerCase().trim(),
+      telefone: s('telefone')
+    };
+  }).filter(s => s.nome);
+  const obs = (get('forma_pagamento_1') === 'Débito Automático')
+    ? `Débito Automático ${ADMINS_LABEL[get('administradora')]||''} — Ag: ${get('debito_agencia')} CC: ${get('debito_conta')}-${get('debito_dac')}`
+    : '';
+  return {
+    tipo: 'pj',
+    administradora: get('administradora'),
+    origem_link: getAdminLocked() || 'master_prime',
+    cnpj: unmaskNum(get('cnpj')),
+    nome: get('razao_social').trim(),
+    nome_fantasia: get('nome_fantasia'),
+    data_nascimento: brDateToISO(get('data_constituicao')),
+    ramo_atividade: get('ramo_atividade'),
+    cnae_principal: get('cnae_principal'),
+    natureza_juridica: get('natureza_juridica'),
+    inscricao_estadual: get('inscricao_estadual'),
+    inscricao_municipal: get('inscricao_municipal'),
+    valor_capital: parseMoney(get('valor_capital')),
+    faturamento: parseMoney(get('faturamento')),
+    faturamento_periodo: get('faturamento_periodo'),
+    endereco_exterior: get('endereco_exterior'),
+    divulgar_endereco: get('divulgar_endereco'),
+    socios,
+    email: get('email').toLowerCase().trim(),
+    celular: get('celular'),
+    celular2: get('celular2'),
+    tel_comercial: get('tel_comercial'),
+    fax: get('fax'),
+    cep: unmaskNum(get('cep')),
+    tipo_logradouro: get('tipo_logradouro'),
+    logradouro: get('logradouro'),
+    numero: get('numero'),
+    complemento: get('complemento'),
+    bairro: get('bairro'),
+    cidade: get('cidade'),
+    estado: get('estado').toUpperCase(),
+    forma_pagamento_1: get('forma_pagamento_1'),
+    forma_pagamento_demais: get('forma_pagamento_1'),
+    banco_codigo: parseBanco(get('banco')).codigo,
+    banco_nome: parseBanco(get('banco')).nome,
+    agencia: get('agencia'),
+    conta_corrente: get('conta_corrente'),
+    dac: get('dac'),
+    nome_correntista: get('razao_social').trim(),
+    cnpj_correntista: unmaskNum(get('cnpj')),
+    // PJ não tem seguro de vida — empresa não tem vida. Mandado como false fixo.
+    // (coluna aceita_seguro é BOOLEAN no Supabase — a RPC converte 'true'/'false' pra bool;
+    //  string 'Não' quebra com "invalid input syntax for type boolean")
+    aceita_seguro: 'false',
+    observacoes: obs,
+    lgpd_aceito: $('pj-lgpd').checked ? 'true' : 'false'
+  };
+}
+
+// ════════ VALIDAÇÃO ════════
+// Retorna true se o campo está sendo ocultado pelo SKIP_FIELDS da admin atual
+function _isSkipped(prefix, fieldKey) {
+  const admin = getAdminLocked();
+  if (!admin) return false;
+  const list = (SKIP_FIELDS[admin] && SKIP_FIELDS[admin][prefix]) || [];
+  return list.includes(`${prefix}-${fieldKey}`);
+}
+
+function validarPF(d) {
+  const skip = (k) => _isSkipped('pf', k);
+  if (d.cpf.length !== 11) return 'CPF inválido (precisa ter 11 dígitos)';
+  if (!d.nome || d.nome.length < 3) return 'Nome completo é obrigatório';
+  if (!d.data_nascimento) return 'Data de nascimento é obrigatória (dd/mm/aaaa)';
+  if (!skip('sexo') && !d.sexo) return 'Sexo é obrigatório';
+  if (!skip('nacionalidade') && !d.nacionalidade) return 'Nacionalidade é obrigatória';
+  if (!skip('cidade_nascimento') && !d.cidade_nascimento) return 'Cidade de nascimento é obrigatória';
+  if (!d.nome_mae) return 'Nome da mãe é obrigatório';
+  if (!d.tipo_documento) return 'Tipo de documento é obrigatório';
+  if (!d.numero_documento) return 'Número do documento é obrigatório';
+  if (!d.data_emissao) return 'Data de emissão do documento é obrigatória';
+  if (!d.orgao_expedidor) return 'Órgão expedidor é obrigatório';
+  if (!d.estado_civil) return 'Estado civil é obrigatório';
+  // Casado(a) / União Estável → todos os dados do cônjuge são obrigatórios
+  if (ESTADOS_CONJUGE.includes(d.estado_civil)) {
+    if (!d.nome_conjuge || d.nome_conjuge.length < 3) return 'Nome do cônjuge é obrigatório';
+    if ((d.cpf_conjuge || '').length !== 11) return 'CPF do cônjuge é obrigatório (11 dígitos)';
+    if (!d.rg_conjuge) return 'RG do cônjuge é obrigatório';
+    if (!d.data_nascimento_conjuge) return 'Data de nascimento do cônjuge é obrigatória';
+  }
+  if (!d.email || !/.+@.+\..+/.test(d.email)) return 'E-mail inválido';
+  if (unmaskNum(d.celular).length < 10) return 'Celular inválido';
+  if (d.cep.length !== 8) return 'CEP inválido';
+  if (!d.logradouro || !d.numero || !d.bairro || !d.cidade || !d.estado) return 'Preencha o endereço completo';
+  // Empresa + Data Admissão: obrigatórios em Bradesco e link Master Prime geral.
+  // Porto e Itaú estão no SKIP_FIELDS, então skip() devolve true e pula a regra.
+  if (!skip('nome_empresa') && (!d.nome_empresa || d.nome_empresa.trim().length < 2)) return 'Empresa onde trabalha é obrigatória';
+  if (!skip('data_admissao') && !d.data_admissao) return 'Data de admissão é obrigatória';
+  if (!d.renda_mensal) return 'Renda mensal é obrigatória';
+  if (!d.administradora) return 'Selecione o consórcio (Porto, Bradesco ou Itaú)';
+  if (!d.forma_pagamento_1) return 'Selecione a forma de pagamento';
+  // Se Débito Automático, exige conta do banco da admin
+  if (d.forma_pagamento_1 === 'Débito Automático') {
+    const ag = $('pf-debito_agencia')?.value || '';
+    const cc = $('pf-debito_conta')?.value || '';
+    if (!ag || !cc) return `Para Débito Automático ${ADMINS_LABEL[d.administradora]||''}, preencha a conta corrente`;
+  }
+  // Bancário pra devolução = sempre obrigatório (TITULAR DA COTA)
+  if (!d.banco_codigo || !d.agencia || !d.conta_corrente || !d.dac) return 'Preencha os dados bancários para devolução (selecione o banco da lista, agência, conta e dígito)';
+  if (!d.aceita_seguro) return 'Informe se aceita o seguro';
+  if (d.lgpd_aceito !== 'true') return 'É necessário aceitar a autorização LGPD para prosseguir';
+  return null;
+}
+
+function validarPJ(d) {
+  if (d.cnpj.length !== 14) return 'CNPJ inválido (precisa ter 14 dígitos)';
+  if (!d.nome) return 'Razão social é obrigatória';
+  if (!d.data_nascimento) return 'Data de constituição é obrigatória (dd/mm/aaaa)';
+  if (!d.ramo_atividade) return 'Selecione o ramo de atividade';
+  if (!d.cnae_principal) return 'Informe o CNAE (Atividade Principal)';
+  if (!d.natureza_juridica) return 'Selecione a natureza jurídica';
+  if (!d.faturamento || !d.faturamento_periodo) return 'Informe o faturamento e o período';
+  if (!d.email || !/.+@.+\..+/.test(d.email)) return 'E-mail da empresa inválido';
+  if (unmaskNum(d.celular).length < 10) return 'Celular inválido';
+  if (d.cep.length !== 8) return 'CEP inválido';
+  if (!d.tipo_logradouro || !d.logradouro || !d.numero || !d.bairro || !d.cidade || !d.estado) return 'Preencha o endereço completo da empresa';
+  if (!d.socios || d.socios.length === 0) return 'Cadastre pelo menos 1 sócio';
+  const s1 = d.socios[0];
+  if (!s1.nome || s1.cpf.length !== 11) return 'O 1º sócio precisa ter Nome e CPF válido';
+  if (!s1.rg || !s1.data_emissao_rg || !s1.orgao_expedidor) return 'Preencha RG, Data de Emissão RG e Órgão Expedidor do 1º sócio';
+  if (!s1.data_nascimento || !s1.nome_pai || !s1.nome_mae) return 'Preencha Data de Nascimento, Nome do Pai e Nome da Mãe do 1º sócio';
+  if (!s1.data_entrada || !s1.participacao || !s1.administrador) return 'Preencha Data de Entrada, Participação % e se é Administrador do 1º sócio';
+  // Email do sócio deve ser DIFERENTE do email da empresa
+  for (let i = 0; i < d.socios.length; i++) {
+    const s = d.socios[i];
+    if (s.email && d.email && s.email === d.email) {
+      return `E-mail do ${i+1}º sócio (${s.nome}) precisa ser diferente do e-mail da empresa`;
+    }
+  }
+  if (!d.administradora) return 'Selecione o consórcio (Porto, Bradesco ou Itaú)';
+  if (!d.forma_pagamento_1) return 'Selecione a forma de pagamento';
+  if (d.forma_pagamento_1 === 'Débito Automático') {
+    const ag = $('pj-debito_agencia')?.value || '';
+    const cc = $('pj-debito_conta')?.value || '';
+    if (!ag || !cc) return `Para Débito Automático ${ADMINS_LABEL[d.administradora]||''}, preencha a conta corrente`;
+  }
+  if (!d.banco_codigo || !d.agencia || !d.conta_corrente || !d.dac) return 'Preencha os dados bancários da empresa (selecione o banco da lista, agência, conta e dígito)';
+  // PJ não tem seguro de vida — empresa não tem vida. Validação removida.
+  if (d.lgpd_aceito !== 'true') return 'É necessário aceitar a autorização LGPD para prosseguir';
+  return null;
+}
+
+// ════════ SUBMIT ════════
+function showMsg(prefix, text, type='warn') {
+  $(prefix+'-msg').innerHTML = text ? `<div class="alert ${type==='warn'?'warn':''}">${text}</div>` : '';
+}
+
+async function submitPF() {
+  const dados = coletarPF();
+  const erro = validarPF(dados);
+  if (erro) { showMsg('pf', erro); window.scrollTo({top: $('pf-msg').offsetTop - 100, behavior: 'smooth'}); return; }
+  showMsg('pf', '');
+  await enviarProposta('pf', dados);
+}
+
+async function submitPJ() {
+  const dados = coletarPJ();
+  const erro = validarPJ(dados);
+  if (erro) { showMsg('pj', erro); window.scrollTo({top: $('pj-msg').offsetTop - 100, behavior: 'smooth'}); return; }
+  showMsg('pj', '');
+  await enviarProposta('pj', dados);
+}
+
+async function enviarProposta(prefix, dados) {
+  const btn = $(prefix+'-submit');
+  btn.disabled = true;
+  const lblOriginal = btn.textContent;
+  btn.textContent = 'Enviando...';
+  try {
+    const { data, error } = await sb.rpc('inserir_proposta', {
+      codigo: getCodigoConsultor(),
+      dados
+    });
+    if (error) throw error;
+    // UF de naturalidade não entra no inserir_proposta — completa logo após o insert.
+    const novaId = data?.[0]?.id;
+    if (novaId && dados.uf_naturalidade) {
+      try { await sb.rpc('completar_uf_naturalidade', { p_id: novaId, p_uf: dados.uf_naturalidade }); }
+      catch(e) { console.warn('uf_naturalidade não salva:', e); }
+    }
+    const protocolo = data?.[0]?.protocolo || 'sem protocolo';
+    $('protocolo-display').textContent = protocolo;
+    // Log de atividade: ficha criada. Contexto pode ser anônimo (form público) —
+    // por isso passamos p_usuario com o nome do consultor quando conhecido.
+    // sb.rpc(...) é "lazy": precisa do .then() pra disparar a requisição.
+    try {
+      const _consultorNome = ($('consultor-nome') && $('consultor-nome').textContent || '').trim();
+      sb.rpc('registrar_log', {
+        p_acao: 'ficha_criada',
+        p_detalhe: (dados && dados.nome) ? dados.nome : null,
+        p_usuario: (_consultorNome && _consultorNome !== '—') ? _consultorNome : null
+      }).then(()=>{}, ()=>{});
+    } catch(e) {}
+    $('form-pf').classList.add('hidden');
+    $('form-pj').classList.add('hidden');
+    $('tela-sucesso').classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch(e) {
+    showMsg(prefix, 'Erro ao enviar: ' + (e.message || e.code || 'erro desconhecido'));
+    btn.disabled = false;
+    btn.textContent = lblOriginal;
+  }
+}
+
+</script>
+</body>
+</html>

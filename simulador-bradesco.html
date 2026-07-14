@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master Prime - Bradesco Imóvel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="pdf-master-prime.js?v=20260625a"></script>
+<script src="pdf-config-personalizado.js?v=20260625e"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="simulacao-store.js"></script>
+<script src="simulador-autosave.js?v=20260616a"></script>
+<style>
+  :root {
+    --mp-navy: #2D3F5E;
+    --mp-navy-dark: #1E2D45;
+    --mp-navy-soft: #3A4F73;
+    --mp-teal: #4DBCC8;
+    --mp-teal-dark: #2EA0AD;
+    --bradesco-red: #CC092F;
+    --bradesco-red-dark: #A50723;
+    --gold: #E8B86D;
+    --bg: #F4F5F7;
+    --card: #FFFFFF;
+    --border: #E5E7EB;
+    --text: #1F2937;
+    --text-muted: #6B7280;
+    --text-light: #9CA3AF;
+    --soft-blue: #F1F5F9;
+    --soft-teal: #E8F6F8;
+    --soft-red: #FFE9EC;
+    --warning-bg: #FFF8E8;
+    --warning-border: #F0D9A0;
+    --warning-text: #8B6A2A;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Inter', -apple-system, system-ui, sans-serif; background: var(--bg); color: var(--text); font-size: 14px; line-height: 1.5; }
+  header { background: var(--mp-navy); color: #fff; padding: 16px 32px; display: flex; align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .brand-mark { width: 36px; height: 36px; background: var(--mp-navy-dark); border: 1px solid rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; font-size: 14px; }
+  .brand-text h1 { font-size: 16px; font-weight: 600; letter-spacing: 0.3px; }
+  .brand-text p { font-size: 11px; color: rgba(255,255,255,0.7); letter-spacing: 1.2px; text-transform: uppercase; margin-top: 2px; }
+  .tag-admin { background: var(--bradesco-red); color: #fff; padding: 6px 14px; border-radius: 4px; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; }
+
+  main { max-width: 1440px; margin: 0 auto; padding: 18px 24px 12px; }
+  h2.section-title { font-size: 19px; font-weight: 600; color: var(--mp-navy); margin-bottom: 0; text-align: center; letter-spacing: 0.3px; }
+  h2.section-title .tag-bank { color: var(--bradesco-red); }
+  body.neutral-mode h2.section-title .tag-bank { color: var(--mp-navy); }
+  .subtitle { font-size: 11px; color: var(--text-muted); text-align: center; margin-bottom: 14px; letter-spacing: 0.8px; text-transform: uppercase; }
+  .neutral-row { display: flex; justify-content: flex-end; align-items: center; gap: 12px; margin: 6px 0 10px; padding-right: 4px; }
+  .neutral-row .neutral-label { font-size: 13px; color: var(--text); user-select: none; }
+  .neutral-row .neutral-label .muted { color: var(--text-muted); font-weight: 400; }
+  .neutral-row .neutral-switch { position: relative; width: 42px; height: 22px; background: #CBD5E1; border-radius: 999px; transition: 0.2s; flex-shrink: 0; cursor: pointer; border: 0; padding: 0; }
+  .neutral-row .neutral-switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; background: #fff; border-radius: 50%; transition: 0.2s; box-shadow: 0 1px 3px rgba(0,0,0,.20); }
+  .neutral-row .neutral-switch.on { background: var(--mp-navy); }
+  .neutral-row .neutral-switch.on::after { left: 23px; }
+  body.neutral-mode .tag-admin { display: none; }
+
+  .layout-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+  @media (max-width: 1024px) { .layout-grid { grid-template-columns: 1fr; } }
+  .col-inputs { display: flex; flex-direction: column; gap: 12px; }
+  .col-outputs { display: flex; flex-direction: column; gap: 10px; position: sticky; top: 12px; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 0; }
+  .card-compact { padding: 12px 14px; }
+  .card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .card-header h3 { font-size: 11.5px; font-weight: 700; color: var(--mp-navy); letter-spacing: 1.2px; text-transform: uppercase; }
+  .card-header .badge-red { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--bradesco-red); }
+  body.neutral-mode .card-header .badge-red { background: var(--mp-teal); }
+  .card-header .reset-btn { margin-left: auto; background: none; border: 1px solid var(--border); color: var(--text-muted); cursor: pointer; padding: 3px 9px; border-radius: 4px; font-size: 10.5px; font-family: inherit; }
+  .card-header .reset-btn:hover { background: var(--bg); }
+
+  .grid { display: grid; gap: 10px; }
+  .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  @media (max-width: 1024px) { .grid-3, .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 768px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
+
+  .field { position: relative; }
+  .field label { position: absolute; top: -6px; left: 10px; background: var(--card); padding: 0 5px; font-size: 10px; color: var(--text-muted); letter-spacing: 0.4px; text-transform: uppercase; font-weight: 500; z-index: 1; }
+  .field input, .field select { width: 100%; padding: 9px 11px; border: 1px solid var(--border); border-radius: 7px; font-size: 13px; font-family: inherit; background: #fff; color: var(--text); transition: border-color 0.15s; }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--bradesco-red); box-shadow: 0 0 0 3px rgba(204,9,47,0.10); }
+  body.neutral-mode .field input:focus, body.neutral-mode .field select:focus { border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,0.12); }
+  .field input:disabled, .field select:disabled { background: var(--soft-blue); color: var(--text-light); cursor: not-allowed; }
+  .field select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236B7280' d='M2 4l4 4 4-4z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; }
+  .field-suffix { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 10px; color: var(--text-light); letter-spacing: 0.4px; pointer-events: none; }
+
+  .out-box { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; }
+  .out-box .lbl { font-size: 10px; color: var(--text-muted); letter-spacing: 0.7px; text-transform: uppercase; font-weight: 600; margin-bottom: 3px; display: block; }
+  .out-box .lbl small { text-transform: none; font-weight: 500; color: var(--text-light); letter-spacing: 0.2px; }
+  .out-box .val { font-size: 16px; font-weight: 700; color: var(--mp-navy); font-family: 'Inter', -apple-system, system-ui, sans-serif; }
+  .out-box.primary { background: linear-gradient(135deg, var(--bradesco-red) 0%, var(--bradesco-red-dark) 100%); border-color: var(--bradesco-red); }
+  body.neutral-mode .out-box.primary { background: linear-gradient(135deg, var(--mp-navy) 0%, var(--mp-navy-soft) 100%); border-color: var(--mp-navy); }
+  .out-box.primary .lbl { color: rgba(255,255,255,0.85); }
+  .out-box.primary .val { color: #fff; }
+  .out-box.red { background: var(--soft-red); border-color: #F5BCC4; }
+  .out-box.red .val { color: var(--bradesco-red-dark); }
+  body.neutral-mode .out-box.red { background: var(--soft-teal); border-color: #C2E5EA; }
+  body.neutral-mode .out-box.red .val { color: var(--mp-teal-dark); }
+  .result-red { background: var(--soft-red); border: 1px solid #F5BCC4; border-radius: 6px; padding: 9px 13px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  body.neutral-mode .result-red { background: var(--soft-teal); border-color: #C2E5EA; }
+  .result-red strong { font-size: 10.5px; color: var(--bradesco-red-dark); letter-spacing: 0.8px; text-transform: uppercase; font-weight: 600; }
+  body.neutral-mode .result-red strong { color: var(--mp-teal-dark); }
+  .result-red .value { font-size: 15px; font-weight: 700; color: var(--mp-navy); font-family: 'Inter', -apple-system, system-ui, sans-serif; }
+
+  .lance-bloco { background: #FFF7E6; border: 1px solid #FBE3B5; border-radius: 8px; padding: 12px; margin-top: 4px; }
+  body.neutral-mode .lance-bloco { background: var(--soft-blue); border-color: var(--border); }
+  .lance-bloco .grid { gap: 8px; }
+  .lance-bloco .field input { background: #fff; }
+
+  .redmode-toggle { padding: 8px 11px; background: var(--soft-blue); border-radius: 7px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .redmode-toggle .lbl { font-size: 11.5px; color: #475569; font-weight: 600; }
+  .redmode-toggle .group { display: flex; gap: 3px; background: #fff; padding: 2px; border-radius: 5px; border: 1px solid #e2e8f0; }
+  .redmode-btn { padding: 5px 11px; border: 0; background: transparent; color: #475569; border-radius: 4px; font-size: 11.5px; font-weight: 600; cursor: pointer; }
+  .redmode-btn.active { background: var(--bradesco-red); color: #fff; }
+  body.neutral-mode .redmode-btn.active { background: var(--mp-navy); }
+  .redmode-toggle .hint { font-size: 10.5px; color: #64748b; font-style: italic; }
+
+  /* Olho memória cálculo */
+  .btn-eye-lance { background: transparent; border: none; padding: 4px; cursor: pointer; color: var(--bradesco-red-dark); display: inline-flex; align-items: center; justify-content: center; border-radius: 6px; transition: all .15s; }
+  body.neutral-mode .btn-eye-lance { color: var(--mp-teal-dark); }
+  .btn-eye-lance:hover { background: rgba(204,9,47,0.12); color: var(--bradesco-red); }
+  body.neutral-mode .btn-eye-lance:hover { background: rgba(77,188,200,0.12); color: var(--mp-teal); }
+
+  /* Modal analítico */
+  .modal-lance-bg { display: none; position: fixed; inset: 0; background: rgba(15,23,42,.55); z-index: 1000; align-items: center; justify-content: center; padding: 20px; }
+  .modal-lance-bg.aberto { display: flex; }
+  .modal-lance-box { background: #fff; border-radius: 14px; max-width: 680px; width: 100%; max-height: 88vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(15,23,42,0.3); }
+  .modal-lance-head { display: flex; align-items: flex-start; justify-content: space-between; padding: 22px 26px; border-bottom: 1px solid var(--border); }
+  .modal-lance-title { font-size: 17px; font-weight: 700; color: var(--mp-navy); letter-spacing: .2px; }
+  .modal-lance-sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+  .modal-lance-body { padding: 22px 26px; }
+  .modal-lance-foot { padding: 14px 26px 20px; display: flex; justify-content: flex-end; gap: 8px; }
+  .modal-lance-close { background: transparent; border: none; cursor: pointer; padding: 4px; color: var(--text-muted); display: flex; align-items: center; border-radius: 50%; transition: background .15s; }
+  .modal-lance-close:hover { background: var(--bg); color: var(--text); }
+  .modal-lance-btn { background: var(--mp-navy); color: #fff; border: none; padding: 10px 22px; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; font-family: inherit; }
+  .modal-lance-btn:hover { background: var(--mp-navy-dark); }
+  .passo-row { display: grid; grid-template-columns: 26px 1fr auto; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 1px dashed var(--border); }
+  .passo-row:last-of-type { border-bottom: none; }
+  .passo-num { width: 26px; height: 26px; border-radius: 50%; background: var(--bradesco-red); color: #fff; font-size: 12px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; }
+  body.neutral-mode .passo-num { background: var(--mp-navy); }
+  .passo-text { color: var(--text); font-size: 13.5px; line-height: 1.45; }
+  .passo-sub { display: block; font-size: 11.5px; color: var(--text-muted); margin-top: 2px; font-weight: 400; }
+  .passo-val { font-weight: 700; color: var(--mp-navy); font-size: 14px; white-space: nowrap; }
+  .passo-row.final .passo-text { font-weight: 600; color: var(--mp-navy); }
+  .passo-row.final .passo-val { font-size: 16px; color: var(--bradesco-red-dark); }
+  body.neutral-mode .passo-row.final .passo-val { color: var(--mp-teal-dark); }
+  .formula-box { margin-top: 16px; padding: 12px 16px; background: var(--soft-red); border: 1px solid #F5BCC4; border-radius: 8px; font-size: 12.5px; color: var(--bradesco-red-dark); text-align: center; line-height: 1.5; }
+  body.neutral-mode .formula-box { background: var(--soft-teal); border-color: #C2E5EA; color: var(--mp-teal-dark); }
+
+  .aviso { background: var(--warning-bg); border: 1px solid var(--warning-border); border-radius: 7px; padding: 9px 13px; color: var(--warning-text); font-size: 11.5px; line-height: 1.45; margin-top: 6px; }
+  .aviso strong { color: var(--warning-text); }
+
+  .obs-area { width: 100%; min-height: 64px; padding: 9px 12px; border: 1px solid var(--border); border-radius: 7px; font-size: 12px; font-family: inherit; resize: vertical; color: var(--text); background: #fff; }
+  .obs-area:focus { outline: none; border-color: var(--bradesco-red); box-shadow: 0 0 0 3px rgba(204,9,47,0.10); }
+  body.neutral-mode .obs-area:focus { border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,0.12); }
+
+  .actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; padding-bottom: 16px; }
+  button.primary, button.secondary { padding: 11px 22px; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; transition: 0.15s; border: 1px solid transparent; font-family: inherit; }
+  button.primary { background: var(--bradesco-red); color: #fff; border-color: var(--bradesco-red); }
+  button.primary:hover { background: var(--bradesco-red-dark); }
+  body.neutral-mode button.primary { background: var(--mp-navy); border-color: var(--mp-navy); }
+  body.neutral-mode button.primary:hover { background: var(--mp-navy-dark); }
+  button.secondary { background: transparent; color: var(--text-muted); border-color: var(--border); }
+  button.secondary:hover { background: var(--bg); border-color: var(--text-muted); }
+
+  html.embedded header { display: none; }
+  html.embedded main { padding-top: 18px; }
+</style>
+<script>if (new URLSearchParams(location.search).get('embed') === '1') document.documentElement.classList.add('embedded');</script>
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <div class="brand-mark">M</div>
+    <div class="brand-text">
+      <h1>Master Prime</h1>
+      <p>Simulador de Consórcio</p>
+    </div>
+  </div>
+  <span class="tag-admin">Bradesco</span>
+</header>
+
+<main>
+  <div id="simStoreMount" style="max-width:1440px; margin:0 auto 8px; padding:0;"></div>
+
+  <div class="neutral-row">
+    <label class="neutral-label" for="btnModoNeutro">Modo neutro <span class="muted">(sem identificação da administradora)</span></label>
+    <button type="button" class="neutral-switch" id="btnModoNeutro" role="switch" aria-checked="false" title="Gera PDF sem identificação da administradora — usa identidade Master Prime padrão"></button>
+  </div>
+
+  <h2 class="section-title">Simulador de Crédito · <span class="tag-bank" id="sim-titulo-banco">Bradesco · Imóvel</span></h2>
+  <p class="subtitle">Cálculo de proposta, contemplação e estratégias de lance</p>
+
+  <div class="layout-grid">
+
+    <div class="col-inputs">
+
+      <section class="card card-compact">
+        <div class="card-header">
+          <span class="badge-red"></span>
+          <h3>Dados da proposta</h3>
+          <button type="button" class="reset-btn" id="btnTaxasDefault">Taxas padrão</button>
+          <button type="button" class="reset-btn" id="btnLimparProposta" style="margin-left:6px">Limpar</button>
+        </div>
+
+        <div class="grid grid-4">
+          <div class="field">
+            <label>Taxa adm.</label>
+            <input type="text" id="br-taxaAdm" data-mask="pct2" placeholder="0,00 %">
+          </div>
+          <div class="field">
+            <label>Fundo Reserva</label>
+            <input type="text" id="br-fundo" data-mask="pct2" placeholder="0,00 %">
+          </div>
+          <div class="field">
+            <label>Seguro</label>
+            <input type="text" id="br-seguro" data-mask="pct4" placeholder="0,0000 %">
+          </div>
+          <div class="field">
+            <label>Tx antecipação</label>
+            <input type="text" id="br-taxaAntecipacao" data-mask="pct2" value="4,25 %" disabled title="Valor padrão do grupo (uso interno do cálculo)">
+          </div>
+          <div class="field">
+            <label>Valor do crédito</label>
+            <input type="text" id="br-credito" placeholder="R$ 0,00" data-mask="money">
+          </div>
+          <div class="field">
+            <label>Prazo (meses)</label>
+            <input type="text" id="br-prazo" placeholder="0" data-mask="int">
+          </div>
+          <div class="field">
+            <label>Redutor</label>
+            <select id="br-redutor">
+              <option value="" selected>Selecione…</option>
+              <option value="0">0% (sem redutor)</option>
+              <option value="0.30">30%</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Contempla mês</label>
+            <input type="text" id="br-contempla" placeholder="0" data-mask="int">
+          </div>
+          <div class="field">
+            <label>Antecipação em</label>
+            <input type="text" id="br-qtdAntecipacao" value="8" data-mask="int" disabled title="Valor padrão do grupo (uso interno do cálculo)">
+            <span class="field-suffix">parc.</span>
+          </div>
+          <div class="field">
+            <label>Tipo Reajuste</label>
+            <select id="br-tipoReajuste">
+              <option value="Mensal" selected>Mensal</option>
+              <option value="Anual">Anual</option>
+              <option value="Sem">Sem reajuste</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>% Anual médio</label>
+            <input type="text" id="br-anualMedio" data-mask="pct2" placeholder="0,00 %" value="0,00 %">
+          </div>
+        </div>
+
+        <div class="redmode-toggle" style="margin-top: 10px;">
+          <span class="lbl">Pós-contemplação:</span>
+          <div class="group">
+            <button type="button" class="redmode-btn active" data-redmode="diluir">Diluir nas parcelas</button>
+            <button type="button" class="redmode-btn" data-redmode="antecipar">Antecipar parcelas</button>
+          </div>
+          <span class="hint">— cenário que vai pro PDF</span>
+        </div>
+      </section>
+
+      <section class="card card-compact">
+        <div class="card-header">
+          <span class="badge-red"></span>
+          <h3>Oferta de Lance</h3>
+          <button type="button" class="reset-btn" id="btnLimparLance">Limpar</button>
+        </div>
+
+        <div class="lance-bloco">
+          <div class="grid grid-2">
+            <div class="field">
+              <label>% Lance (sobre crédito)</label>
+              <input type="text" id="br-pctLance" data-mask="pct2" placeholder="0,00 %">
+              <span class="field-suffix">%</span>
+            </div>
+            <div class="field">
+              <label>Valor do lance (R$)</label>
+              <input type="text" id="br-lanceManual" placeholder="R$ 0,00" data-mask="money">
+            </div>
+          </div>
+          <div style="margin-top: 8px;">
+            <div class="result-red" style="padding: 7px 11px;">
+              <strong>Valor lance total</strong>
+              <span style="display:inline-flex; align-items:center; gap:10px;">
+                <span class="value" id="br-lanceTotalPct" style="font-size:13px; opacity:.85;">—</span>
+                <span class="value" id="br-lanceTotal" style="font-size:14px;">—</span>
+                <button type="button" class="btn-eye-lance" onclick="abrirAnaliticoLance()" title="Ver memória de cálculo do lance">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card card-compact">
+        <div class="card-header">
+          <span class="badge-red"></span>
+          <h3>Observações (opcional)</h3>
+          <button type="button" class="reset-btn" id="btnLimparObs">Limpar</button>
+        </div>
+        <textarea id="br-observacoes" class="obs-area" placeholder="Anotações que devem aparecer no PDF…"></textarea>
+      </section>
+
+      <div class="aviso">
+        <strong>Atenção:</strong> Os valores da simulação são mera referência. Variáveis do grupo, reajustes anuais e amortização podem alterar o resultado final.
+      </div>
+
+    </div>
+
+    <div class="col-outputs">
+
+      <div class="out-box primary">
+        <span class="lbl">Crédito Líquido</span>
+        <div class="val" id="br-creditoLiquidoOut">—</div>
+      </div>
+
+      <div class="out-box">
+        <span class="lbl">Parcela Inicial</span>
+        <div class="val" id="br-parcelaInicialDestaque">—</div>
+      </div>
+
+      <div class="out-box">
+        <span class="lbl">1ª Parcela pós-contemplação <small>(mantém o valor)</small></span>
+        <div class="val" id="br-parcelaPos1" style="font-size:14px;">—</div>
+      </div>
+
+      <div class="out-box red" id="br-card-diluir">
+        <span class="lbl">Demais parcelas pós-contempla <small>(reduz a partir da 2ª)</small></span>
+        <div class="val" id="br-parcDiluir">—</div>
+      </div>
+
+      <div class="out-box" id="br-card-antecipar">
+        <span class="lbl">Prazo Restante</span>
+        <div class="val" id="br-prazoOut">—</div>
+      </div>
+      <span id="br-parcelaDemaisDestaque" style="display:none">—</span>
+
+      <details style="background:#fff; border:1px solid var(--border); border-radius:7px; padding:8px 11px; font-size:11.5px;">
+        <summary style="cursor:pointer; color:var(--text-muted); font-weight:600; letter-spacing:0.4px; text-transform:uppercase; font-size:10.5px;">Detalhes ▾</summary>
+        <div style="margin-top:8px; display:grid; gap:6px;">
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Saldo devedor</span><strong id="br-saldoDevedor">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Seguro mensal</span><strong id="br-seguroMensal">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Parcela inicial</span><strong id="br-parcelaInicial">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Parcela pós-antecip.</span><strong id="br-parcelaPosAnt">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Saldo pós-contempla</span><strong id="br-saldoPos">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Taxa/mês</span><strong id="br-taxaMes">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Taxa/ano</span><strong id="br-taxaAno">—</strong></div>
+          <div style="display:flex; justify-content:space-between; padding-top:4px; border-top:1px dashed var(--border)"><span style="color:var(--text-muted)">Diluir: prazo restante</span><strong id="br-prazoDiluir">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Antecipar: novo prazo</span><strong id="br-prazoAntecipar">—</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span style="color:var(--text-muted)">Antecipar: parcela</span><strong id="br-parcAntecipar">—</strong></div>
+          <span id="br-lblParcelaInicial" style="display:none">—</span>
+          <span id="br-lblParcelaDemais" style="display:none">—</span>
+        </div>
+      </details>
+
+      <div class="actions" style="margin-top:4px;">
+        <button class="secondary" id="btnLimparTudo">Limpar tudo</button>
+        <button type="button" id="baixarPdfBradesco" class="primary">Gerar PDF</button>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script>
+function maskMoney(value) {
+  const digits = String(value).replace(/\D/g, '');
+  if (!digits) return '';
+  const cents = parseInt(digits, 10);
+  const reais = Math.floor(cents / 100);
+  const cs = cents % 100;
+  return 'R$ ' + reais.toLocaleString('pt-BR') + ',' + String(cs).padStart(2, '0');
+}
+function unmaskMoney(value) {
+  const digits = String(value).replace(/\D/g, '');
+  return parseInt(digits || '0', 10) / 100;
+}
+function maskPct(value, decimals = 2) {
+  const cleaned = String(value).replace('%', '').replace(',', '.').replace(/[^\d.\-]/g, '').trim();
+  if (cleaned === '') return '';
+  const num = parseFloat(cleaned);
+  if (isNaN(num)) return '';
+  return num.toFixed(decimals).replace('.', ',') + ' %';
+}
+function unmaskPct(value) {
+  const cleaned = String(value).replace('%', '').replace(',', '.').replace(/[^\d.\-]/g, '').trim();
+  return parseFloat(cleaned || '0');
+}
+function maskInt(value) {
+  return String(value).replace(/\D/g, '');
+}
+
+document.querySelectorAll('input[data-mask]').forEach(inp => {
+  const type = inp.dataset.mask;
+  inp.addEventListener('input', e => {
+    const v = e.target.value;
+    if (type === 'money') e.target.value = maskMoney(v);
+    else if (type === 'int') e.target.value = maskInt(v);
+    recalc();
+  });
+  inp.addEventListener('blur', e => {
+    const v = e.target.value;
+    if (type === 'pct2') e.target.value = maskPct(v, 2);
+    else if (type === 'pct4') e.target.value = maskPct(v, 4);
+    recalc();
+  });
+  inp.addEventListener('focus', e => {
+    if (type === 'pct2' || type === 'pct4') {
+      const n = unmaskPct(e.target.value);
+      if (n) e.target.value = String(n).replace('.', ',');
+    }
+  });
+});
+
+document.querySelectorAll('select').forEach(el => {
+  el.addEventListener('change', recalc);
+});
+
+function formatMoney(num) {
+  if (!Number.isFinite(num) || isNaN(num)) return '—';
+  return 'R$ ' + num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function formatPct(num, decimals = 2) {
+  if (!Number.isFinite(num) || isNaN(num)) return '—';
+  return num.toFixed(decimals).replace('.', ',') + ' %';
+}
+function formatInt(num) {
+  if (!Number.isFinite(num) || isNaN(num)) return '—';
+  return Math.round(num).toString();
+}
+function get(id) { return document.getElementById(id); }
+function setOut(id, value) {
+  const el = get(id);
+  if (el) el.textContent = value;
+}
+
+function readInputs() {
+  return {
+    credito: unmaskMoney(get('br-credito').value),
+    prazo: parseInt(get('br-prazo').value || '0', 10),
+    redutor: get('br-redutor').value,
+    contempla: parseInt(get('br-contempla').value || '0', 10),
+    qtdAntecipacao: parseInt(get('br-qtdAntecipacao').value || '0', 10),
+    taxaAntecipacao: unmaskPct(get('br-taxaAntecipacao').value) / 100,
+    taxaAdm: unmaskPct(get('br-taxaAdm').value) / 100,
+    fundo: unmaskPct(get('br-fundo').value) / 100,
+    seguro: unmaskPct(get('br-seguro').value) / 100,
+    pctLance: unmaskPct(get('br-pctLance').value) / 100,
+    lanceManual: unmaskMoney(get('br-lanceManual').value)
+  };
+}
+
+function calc(i) {
+  const r = {};
+  const bem = i.credito;
+  const prazo = i.prazo;
+  let red = parseFloat(i.redutor);
+  if (!Number.isFinite(red)) red = 0;
+  const txAnt = i.taxaAntecipacao || 0;
+  const prazoAnt = i.qtdAntecipacao || 0;
+
+  r.saldoDevedor = bem * (1 + i.taxaAdm + i.fundo);
+  r.seguroMensal = r.saldoDevedor * i.seguro;
+  const parcInicialSemSeg = (prazo > 0) ? bem * (1 - red + i.taxaAdm + i.fundo) / prazo : NaN;
+  const parcPosAntSemSeg  = (prazo > 0) ? bem * (1 - red + i.taxaAdm - txAnt + i.fundo) / prazo : NaN;
+  r.parcelaInicial = parcInicialSemSeg + r.seguroMensal;
+  r.parcelaPosAnt  = parcPosAntSemSeg  + r.seguroMensal;
+
+  if (i.lanceManual > 0) {
+    r.lanceTotal = i.lanceManual;
+    r.lanceB21 = 0;
+    r.lanceC21 = (parcInicialSemSeg > 0) ? i.lanceManual / parcInicialSemSeg : 0;
+  } else {
+    const pctLance = i.pctLance;
+    const D7 = (prazo > 0) ? (1 - red + txAnt) / prazo : 0;
+    const B7 = (prazo > 0 && prazoAnt > 0)
+      ? ((1 - red) / prazo) - (txAnt * (prazo - prazoAnt) / (prazo * prazoAnt))
+      : ((prazo > 0) ? (1 - red) / prazo : 0);
+    const lhs = D7 * (prazo - prazoAnt);
+    let B21 = 0, C21 = 0;
+    if (lhs <= pctLance) {
+      C21 = prazo - prazoAnt;
+      B21 = (B7 !== 0) ? (pctLance - lhs) / B7 : 0;
+    } else {
+      C21 = (D7 !== 0) ? pctLance / D7 : 0;
+      B21 = 0;
+    }
+    r.lanceB21 = B21;
+    r.lanceC21 = C21;
+    r.lanceTotal = (B21 + C21) * parcInicialSemSeg;
+  }
+
+  const cont = Math.max(1, i.contempla || 1);
+  const parcsAteCont = Math.min(cont + 1, prazo);
+  const parcsInicialPagas = Math.min(parcsAteCont, prazoAnt);
+  const parcsPosAntPagas  = Math.max(0, parcsAteCont - parcsInicialPagas);
+  const totalParcsPagas = parcsInicialPagas * r.parcelaInicial + parcsPosAntPagas * r.parcelaPosAnt;
+  r.saldoPos = r.saldoDevedor - totalParcsPagas - r.lanceTotal;
+
+  const prazoNovaParcela = Math.max(0, prazo - parcsAteCont);
+  r.parcDiluir = (prazoNovaParcela > 0) ? (r.saldoPos / prazoNovaParcela) : NaN;
+  r.prazoDiluir = Math.max(0, prazo - cont);
+
+  r.parcAntecipar = r.parcelaInicial;
+  const nParcelasAmort = (parcInicialSemSeg > 0) ? r.lanceTotal / parcInicialSemSeg : 0;
+  r.prazoAntecipar = Math.max(0, (prazo - cont) - nParcelasAmort);
+
+  r.taxaMes = (prazo > 0) ? i.taxaAdm / prazo : NaN;
+  r.taxaAno = r.taxaMes * 12;
+
+  return r;
+}
+
+function recalc() {
+  const i = readInputs();
+
+  if (!(i.credito > 0) || !(i.prazo > 0)) {
+    const ids = ['br-saldoDevedor','br-seguroMensal','br-parcelaInicial','br-parcelaInicialDestaque','br-parcelaPosAnt','br-parcelaDemaisDestaque','br-lanceTotal','br-lanceTotalPct','br-saldoPos','br-parcDiluir','br-prazoDiluir','br-parcAntecipar','br-prazoAntecipar','br-taxaMes','br-taxaAno','br-prazoOut','br-creditoLiquidoOut','br-parcelaPos1'];
+    ids.forEach(id => setOut(id, '—'));
+    atualizaLabelsParcela(i);
+    return;
+  }
+
+  const r = calc(i);
+
+  setOut('br-saldoDevedor', formatMoney(r.saldoDevedor));
+  setOut('br-seguroMensal', i.seguro > 0 ? formatMoney(r.seguroMensal) : '—');
+  setOut('br-parcelaInicial', formatMoney(r.parcelaInicial));
+  setOut('br-parcelaInicialDestaque', formatMoney(r.parcelaInicial));
+  // 1ª parcela pós-contemplação MANTÉM o valor da inicial (a redução só vem na 2ª)
+  setOut('br-parcelaPos1', formatMoney(r.parcelaInicial));
+  setOut('br-parcelaPosAnt', formatMoney(r.parcelaPosAnt));
+  setOut('br-parcelaDemaisDestaque', formatMoney(r.parcelaPosAnt));
+  setOut('br-lanceTotal', formatMoney(r.lanceTotal));
+  // % total do lance — pega do input pctLance (já sincronizado com o valor R$)
+  const _pctLanceTxt = get('br-pctLance').value || '';
+  const _pctLanceNum = unmaskPct(_pctLanceTxt);
+  setOut('br-lanceTotalPct', _pctLanceNum > 0 ? formatPct(_pctLanceNum, 2) : '—');
+  setOut('br-saldoPos', formatMoney(r.saldoPos));
+  setOut('br-parcDiluir', formatMoney(r.parcDiluir));
+  setOut('br-prazoDiluir', Number.isFinite(r.prazoDiluir) ? formatInt(r.prazoDiluir) + ' meses' : '—');
+  setOut('br-parcAntecipar', formatMoney(r.parcAntecipar));
+  setOut('br-prazoAntecipar', Number.isFinite(r.prazoAntecipar) ? formatInt(r.prazoAntecipar) + ' meses' : '—');
+  setOut('br-taxaMes', Number.isFinite(r.taxaMes) ? formatPct(r.taxaMes * 100, 4) : '—');
+  setOut('br-taxaAno', Number.isFinite(r.taxaAno) ? formatPct(r.taxaAno * 100, 2) : '—');
+
+  // Crédito Líquido = crédito (Bradesco: lance abate saldo, não crédito)
+  setOut('br-creditoLiquidoOut', formatMoney(i.credito));
+
+  // Modo: diluir mostra parcela diluída, antecipar mostra parcela mantida + prazo encurtado
+  const modo = window._brRedmode || 'diluir';
+  if (modo === 'antecipar') {
+    setOut('br-prazoOut', Number.isFinite(r.prazoAntecipar) ? formatInt(r.prazoAntecipar) + ' meses' : '—');
+  } else {
+    setOut('br-prazoOut', Number.isFinite(r.prazoDiluir) ? formatInt(r.prazoDiluir) + ' meses' : '—');
+  }
+
+  atualizaLabelsParcela(i);
+}
+
+function atualizaLabelsParcela(i) {
+  // Labels internos preservados pra compat com PDF/store (não aparecem mais na UI principal)
+  setOut('br-lblParcelaInicial', 'Parcela inicial');
+  setOut('br-lblParcelaDemais', 'Parcela após antecipação');
+}
+
+function limparTudo() {
+  ['br-credito','br-prazo','br-contempla','br-qtdAntecipacao','br-taxaAntecipacao','br-taxaAdm','br-fundo','br-seguro','br-pctLance','br-lanceManual'].forEach(id => get(id).value = '');
+  get('br-redutor').value = '';
+  const obsEl = get('br-observacoes'); if (obsEl) obsEl.value = '';
+  recalc();
+}
+
+document.getElementById('btnLimparObs').addEventListener('click', () => {
+  const obsEl = get('br-observacoes'); if (obsEl) obsEl.value = '';
+});
+
+document.getElementById('btnLimparProposta').addEventListener('click', () => {
+  ['br-credito','br-prazo','br-contempla','br-qtdAntecipacao'].forEach(id => get(id).value = '');
+  get('br-redutor').value = '';
+  recalc();
+});
+
+document.getElementById('btnLimparLance').addEventListener('click', () => {
+  ['br-pctLance','br-lanceManual'].forEach(id => get(id).value = '');
+  recalc();
+});
+
+document.getElementById('btnTaxasDefault').addEventListener('click', () => {
+  get('br-taxaAntecipacao').value = '4,25 %';
+  get('br-qtdAntecipacao').value = '8';
+  get('br-taxaAdm').value = '20,00 %';
+  get('br-fundo').value = '3,00 %';
+  get('br-seguro').value = '0,0000 %';
+  recalc();
+});
+
+document.getElementById('btnLimparTudo').addEventListener('click', limparTudo);
+
+// Modo Neutro
+window._brNeutro = false;
+function aplicaModoNeutro(on) {
+  window._brNeutro = !!on;
+  document.body.classList.toggle('neutral-mode', !!on);
+  const btn = document.getElementById('btnModoNeutro');
+  if (btn) { btn.classList.toggle('on', !!on); btn.setAttribute('aria-checked', !!on); }
+  const tit = document.getElementById('sim-titulo-banco');
+  if (tit) tit.textContent = on ? 'Consórcio · Imóvel' : 'Bradesco · Imóvel';
+}
+(function() {
+  const btn = document.getElementById('btnModoNeutro');
+  if (btn) btn.addEventListener('click', () => aplicaModoNeutro(!window._brNeutro));
+  const lbl = document.querySelector('.neutral-label');
+  if (lbl) lbl.addEventListener('click', () => aplicaModoNeutro(!window._brNeutro));
+})();
+
+// Toggle Redmode (Diluir / Antecipar)
+window._brRedmode = 'diluir';
+function aplicaRedmode(modo) {
+  window._brRedmode = modo;
+  document.querySelectorAll('.redmode-btn').forEach(b => {
+    const isActive = b.dataset.redmode === modo;
+    b.classList.toggle('active', isActive);
+  });
+  const cardP = document.getElementById('br-card-diluir');
+  const cardT = document.getElementById('br-card-antecipar');
+  if (cardP) cardP.style.opacity = (modo === 'diluir') ? '1' : '0.55';
+  if (cardT) cardT.style.opacity = (modo === 'antecipar') ? '1' : '0.55';
+  if (cardP) cardP.style.boxShadow = (modo === 'diluir') ? '0 0 0 2px var(--bradesco-red)' : 'none';
+  if (cardT) cardT.style.boxShadow = (modo === 'antecipar') ? '0 0 0 2px var(--mp-navy)' : 'none';
+  recalc();
+}
+document.querySelectorAll('.redmode-btn').forEach(b => {
+  b.addEventListener('click', () => aplicaRedmode(b.dataset.redmode));
+});
+aplicaRedmode('diluir');
+
+recalc();
+
+// PDF
+function _montarPdfComercialBradesco() {
+  const _v = (id) => { const el = document.getElementById(id); return (el?.value || '').trim(); };
+  const _t = (id) => { const el = document.getElementById(id); return (el?.textContent || '').trim(); };
+  const _selTxt = (id) => { const el = document.getElementById(id); return (el?.selectedOptions?.[0]?.textContent || '').trim(); };
+
+  const redutorTxt = _selTxt('br-redutor') || 'Sem redutor';
+  const redutorPct = redutorTxt.replace(/[^\d%]/g, '');
+  const _neutro = !!window._brNeutro;
+
+  const creditoLiquido = _v('br-credito') || 'R$ 0,00';
+
+  return {
+    filename: _neutro ? 'simulacao-consorcio-imovel' : 'bradesco-imovel',
+    logoAdmin: _neutro ? 'porto' : 'bradesco',
+    hideAdminLogo: _neutro,
+    titulo: 'Simulador de Crédito',
+    subtitulo: _neutro ? 'Consórcio · Imóvel' : 'Bradesco · Imóvel',
+    subtituloSecundario: redutorPct && redutorPct !== '0%'
+      ? `(Redução de ${redutorPct} até a Contemplação)`
+      : '(Sem redutor de parcela)',
+    representanteTexto: _neutro ? 'Master Prime' : 'Consórcio Bradesco',
+    inputs: [
+      { label: 'Taxa Administrativa', value: _v('br-taxaAdm') || '0,00 %' },
+      { label: 'Fundo de Reserva', value: _v('br-fundo') || '0,00 %' },
+      { label: 'Seguro Prestamista', value: _v('br-seguro') || '0,0000 %', highlight: 'Somente PF' },
+      { label: 'Valor do crédito', value: _v('br-credito') || 'R$ 0,00' },
+      { label: 'Prazo do Grupo', value: (_v('br-prazo') || '0') + ' Meses' },
+    ],
+    lance: {
+      modo: 'simples',
+      total: { pct: _v('br-pctLance').replace(' %','') || '0,00', rs: (_t('br-lanceTotal') || 'R$ 0,00').replace('R$ ','') }
+    },
+    outputs: [
+      { label: 'Crédito Líquido',                                                                          value: creditoLiquido },
+      { label: 'Parcela Inicial',                                                                          value: _t('br-parcelaInicial') || '—' },
+      { label: '1ª parcela pós-contemplação',     subAcima: '(Mantém o valor da parcela inicial)',         value: _t('br-parcelaInicial') || '—' },
+      { label: 'Demais parcelas pós-contemplação', subAcima: '(A partir da 2ª pós contemplação)',          value: _t('br-parcDiluir') || '—' },
+      { label: 'Prazo Restante',                                                                           value: _t('br-prazoDiluir') || '—' },
+    ],
+    observacoes: _v('br-observacoes')
+  };
+}
+
+document.getElementById('baixarPdfBradesco').addEventListener('click', async () => {
+  const btn = document.getElementById('baixarPdfBradesco');
+  const txt = btn.textContent;
+  btn.textContent = 'Gerando PDF...';
+  btn.disabled = true;
+  try {
+    let payload = _montarPdfComercialBradesco();
+    if (window.PdfConfigPersonalizado) payload = window.PdfConfigPersonalizado.filtrar(payload);
+    await PdfMasterPrime.gerarComercial(payload);
+  } catch (err) {
+    console.error(err);
+    alert('Erro ao gerar PDF: ' + err.message);
+  } finally {
+    btn.textContent = txt;
+    btn.disabled = false;
+  }
+});
+
+if (window.PdfConfigPersonalizado) {
+  window.PdfConfigPersonalizado.registrar({
+    simulador: 'bradesco-imovel',
+    botaoPdfId: 'baixarPdfBradesco',
+    secoes: [
+      { secao: 'inputs', label: 'Dados do plano (topo do PDF)', linhas: [
+        { key: 'bri-input-taxaAdm', label: 'Taxa Administrativa' },
+        { key: 'bri-input-fundo',   label: 'Fundo de Reserva' },
+        { key: 'bri-input-seguro',  label: 'Seguro Prestamista' },
+        { key: 'bri-input-credito', label: 'Valor do crédito' },
+        { key: 'bri-input-prazo',   label: 'Prazo do Grupo' }
+      ]},
+      { secao: 'outputs', label: 'Resultados do simulador', linhas: [
+        { key: 'bri-out-credLiq',    label: 'Crédito Líquido' },
+        { key: 'bri-out-parcInicial', label: 'Parcela Inicial' },
+        { key: 'bri-out-parc1pos',   label: '1ª parcela pós-contemplação' },
+        { key: 'bri-out-demaisPos',  label: 'Demais parcelas pós-contemplação' },
+        { key: 'bri-out-prazoRest',  label: 'Prazo Restante' }
+      ]}
+    ]
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// SYNC % LANCE ↔ VALOR DO LANCE (R$)
+// ═══════════════════════════════════════════════════════
+let _syncingLance = false;
+function _baseCatEFator() {
+  const credito = unmaskMoney(get('br-credito').value || '');
+  const adm = unmaskPct(get('br-taxaAdm').value || '') / 100;
+  const fundo = unmaskPct(get('br-fundo').value || '') / 100;
+  const txAnt = unmaskPct(get('br-taxaAntecipacao').value || '') / 100;
+  const categoria = credito * (1 + adm + fundo);
+  const fator = 1 + txAnt;
+  return { credito, categoria, fator };
+}
+function syncPctParaValor() {
+  if (_syncingLance) return;
+  const pct = unmaskPct(get('br-pctLance').value || '') / 100;
+  const { categoria, fator } = _baseCatEFator();
+  _syncingLance = true;
+  if (categoria > 0 && fator > 0 && pct > 0) {
+    const lance = (categoria * pct) / fator;
+    get('br-lanceManual').value = maskMoney(String(Math.round(lance * 100)));
+  } else if (pct === 0) {
+    get('br-lanceManual').value = '';
+  }
+  _syncingLance = false;
+}
+function syncValorParaPct() {
+  if (_syncingLance) return;
+  const valor = unmaskMoney(get('br-lanceManual').value || '');
+  const { categoria, fator } = _baseCatEFator();
+  _syncingLance = true;
+  if (categoria > 0 && fator > 0 && valor > 0) {
+    const pct = (valor * fator) / categoria * 100;
+    get('br-pctLance').value = pct.toFixed(2).replace('.', ',') + ' %';
+  } else if (valor === 0) {
+    get('br-pctLance').value = '';
+  }
+  _syncingLance = false;
+}
+get('br-pctLance').addEventListener('input', syncPctParaValor);
+get('br-lanceManual').addEventListener('input', syncValorParaPct);
+['br-credito','br-taxaAdm','br-fundo','br-taxaAntecipacao'].forEach(id => {
+  const el = get(id);
+  if (el) el.addEventListener('input', () => { if (!_syncingLance) setTimeout(syncPctParaValor, 0); });
+});
+
+function abrirAnaliticoLance() {
+  const i = readInputs();
+  if (!(i.credito > 0) || !(i.prazo > 0)) {
+    alert('Preencha crédito e prazo para ver a memória de cálculo.');
+    return;
+  }
+  const r = calc(i);
+  const categoria = r.saldoDevedor;
+  const fator = 1 + (i.taxaAntecipacao || 0);
+  const pctLanceNum = i.pctLance || 0;
+  const passo3 = categoria * pctLanceNum;
+  const lance = r.lanceTotal;
+
+  const pctStr = (n, d=2) => isFinite(n) ? (n*100).toFixed(d).replace('.', ',') + ' %' : '—';
+  const fatorStr = isFinite(fator) ? fator.toFixed(4).replace('.', ',') : '—';
+
+  const body = document.getElementById('lanceMemoriaBody');
+  body.innerHTML = `
+    <div class="passo-row">
+      <span class="passo-num">1</span>
+      <span class="passo-text">Categoria (Crédito + Taxas)<span class="passo-sub">${formatMoney(i.credito)} × (1 + ${pctStr(i.taxaAdm)} + ${pctStr(i.fundo)})</span></span>
+      <span class="passo-val">${formatMoney(categoria)}</span>
+    </div>
+    <div class="passo-row">
+      <span class="passo-num">2</span>
+      <span class="passo-text">% Lance escolhido</span>
+      <span class="passo-val">${pctStr(pctLanceNum)}</span>
+    </div>
+    <div class="passo-row">
+      <span class="passo-num">3</span>
+      <span class="passo-text">Categoria × % Lance<span class="passo-sub">${formatMoney(categoria)} × ${pctStr(pctLanceNum)}</span></span>
+      <span class="passo-val">${formatMoney(passo3)}</span>
+    </div>
+    <div class="passo-row">
+      <span class="passo-num">4</span>
+      <span class="passo-text">Fator (1 + Taxa Antecipação)<span class="passo-sub">Imóvel = 1,0425 (4,25%) · Auto = 1,0525 (5,25%)</span></span>
+      <span class="passo-val">${fatorStr}</span>
+    </div>
+    <div class="passo-row final">
+      <span class="passo-num">5</span>
+      <span class="passo-text">Valor do Lance Total = passo 3 ÷ passo 4</span>
+      <span class="passo-val">${formatMoney(lance)}</span>
+    </div>
+    <div class="formula-box">Lance (R$) = (Categoria × % Lance) ÷ Fator</div>
+  `;
+  document.getElementById('modalLance').classList.add('aberto');
+}
+function fecharAnaliticoLance() {
+  document.getElementById('modalLance').classList.remove('aberto');
+}
+
+(function initSimStore() {
+  if (!window.SimulacaoStore) return;
+  window.SimulacaoStore.init({
+    supabaseUrl: 'https://jhwciwvgagnuxakukyob.supabase.co',
+    supabaseKey: 'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx',
+    simulador:   'bradesco-imovel',
+    mountPoint:  document.getElementById('simStoreMount'),
+    serialize:   () => window.SimulacaoStore.snapshotForm(),
+    restore:     (dados) => window.SimulacaoStore.restoreForm(dados, { recalc: recalc })
+  });
+})();
+</script>
+
+<div id="modalLance" class="modal-lance-bg" onclick="if(event.target===this)fecharAnaliticoLance()">
+  <div class="modal-lance-box">
+    <div class="modal-lance-head">
+      <div>
+        <div class="modal-lance-title">Como chegamos no valor do lance</div>
+        <div class="modal-lance-sub">Memória de cálculo passo a passo</div>
+      </div>
+      <button type="button" class="modal-lance-close" onclick="fecharAnaliticoLance()" title="Fechar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-lance-body" id="lanceMemoriaBody"></div>
+    <div class="modal-lance-foot">
+      <button type="button" class="modal-lance-btn" onclick="fecharAnaliticoLance()">Fechar</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

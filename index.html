@@ -1,0 +1,2887 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master Prime — Portal do Consultor</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════
+   MASTER PRIME — PORTAL DO CONSULTOR
+   ══════════════════════════════════════════════════════ */
+:root {
+  --mp-navy:    #2D3F5E;
+  --mp-yellow:  #C8C84A;
+  --mp-teal:    #4DBCC8;
+  --mp-blue:    #7A9BC8;
+  --mp-white:   #FFFFFF;
+  --bg:         #F4F6FA;
+  --card:       #FFFFFF;
+  --sidebar-bg: #2D3F5E;
+  --border:     #E2E8F0;
+  --border2:    #CBD5E1;
+  --text:       #1E293B;
+  --text2:      #64748B;
+  --text3:      #94A3B8;
+  --green:  #16A34A;  --green-bg: #F0FDF4;
+  --red:    #DC2626;  --red-bg: #FEF2F2;
+  --amber:  #D97706;  --amber-bg: #FFFBEB;
+  --blue:   #2563EB;  --blue-bg:#EFF6FF;
+  --r: 10px;
+  --shadow: 0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+  --shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.05);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; font-size: 13px; min-height: 100vh; }
+.mono { font-family: 'DM Mono', monospace; }
+.hidden { display: none !important; }
+.fw6 { font-weight: 600; }
+.fw7 { font-weight: 700; }
+.pos { color: var(--green); }
+.neg { color: var(--red); }
+
+/* ═══ LOGIN ═══ */
+#login-screen {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #2D3F5E 0%, #1a2a42 50%, #2D3F5E 100%);
+  position: relative; overflow: hidden;
+}
+#login-screen::before {
+  content:''; position:absolute; top:-50%; left:-50%; width:200%; height:200%;
+  background: radial-gradient(circle at 30% 40%, rgba(77,188,200,.08) 0%, transparent 50%),
+              radial-gradient(circle at 70% 60%, rgba(200,200,74,.06) 0%, transparent 50%);
+  animation: loginBg 20s ease-in-out infinite alternate;
+}
+@keyframes loginBg { 0%{transform:translate(0,0)} 100%{transform:translate(-5%,5%) rotate(3deg)} }
+.login-card {
+  position:relative; background:rgba(255,255,255,.97); border-radius:16px;
+  padding:48px 40px 40px; width:400px; max-width:92vw;
+  box-shadow: 0 25px 50px rgba(0,0,0,.25);
+}
+.login-logo { text-align:center; margin-bottom:32px; }
+.login-logo-text { font-size:22px; font-weight:800; color:var(--mp-navy); letter-spacing:-.5px; margin-top:12px; }
+.login-logo-sub { font-size:11px; color:var(--text2); margin-top:4px; text-transform:uppercase; letter-spacing:2px; font-weight:600; }
+.login-field { margin-bottom:20px; }
+.login-label { display:block; font-size:11px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
+.login-input {
+  width:100%; padding:12px 16px; border:1.5px solid var(--border2); border-radius:10px;
+  font-size:14px; color:var(--text); font-family:'Inter',sans-serif; outline:none;
+  transition: border-color .2s, box-shadow .2s; background:var(--bg);
+}
+.login-input:focus { border-color:var(--mp-teal); box-shadow:0 0 0 3px rgba(77,188,200,.15); background:#fff; }
+.login-input::placeholder { color:var(--text3); }
+.login-btn {
+  width:100%; padding:14px; border:none; border-radius:10px; background:var(--mp-navy);
+  color:#fff; font-size:14px; font-weight:700; cursor:pointer; transition:all .2s;
+  font-family:'Inter',sans-serif; margin-top:8px;
+}
+.login-btn:hover { background:#1E2D45; transform:translateY(-1px); box-shadow:0 4px 12px rgba(45,63,94,.3); }
+.login-btn:disabled { opacity:.6; cursor:not-allowed; transform:none; }
+.login-error { background:var(--red-bg); color:var(--red); padding:10px 14px; border-radius:8px; font-size:12px; margin-bottom:16px; border:1px solid #FECACA; display:none; }
+.login-footer { text-align:center; margin-top:24px; font-size:11px; color:var(--text3); }
+.login-link { color:var(--mp-teal); cursor:pointer; font-weight:600; text-decoration:none; }
+.login-link:hover { text-decoration:underline; }
+.pw-field { position:relative; }
+.pw-toggle { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--text3); font-size:16px; padding:4px; }
+
+/* ═══ LOADING ═══ */
+#loading-screen {
+  min-height:100vh; display:flex; align-items:center; justify-content:center;
+  background:var(--bg); flex-direction:column; gap:16px;
+}
+.spinner { width:40px; height:40px; border:3px solid var(--border); border-top-color:var(--mp-teal); border-radius:50%; animation:spin .8s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+
+/* ═══ LAYOUT ═══ */
+#portal-screen { display:none; min-height:100vh; }
+.app { display:grid; grid-template-columns:240px 1fr; min-height:100vh; transition:grid-template-columns .25s ease; }
+.app.embedded { grid-template-columns:0 1fr; }
+.app.embedded .sidebar { transform:translateX(-260px); pointer-events:none; }
+.sidebar {
+  background:var(--sidebar-bg); display:flex; flex-direction:column;
+  position:sticky; top:0; height:100vh; overflow-y:auto;
+  transition:transform .25s ease, width .25s ease;
+}
+/* ═══ SIDEBAR COLAPSADA (modo "mais espaço" — inspirado no Conkey/Simulakey) ═══
+   Reduz sidebar pra 64px com só ícones. Estado persiste em localStorage. */
+.app.sb-collapsed { grid-template-columns:64px 1fr; }
+.app.sb-collapsed .sidebar { overflow:visible; }
+.app.sb-collapsed .sb-logo { padding:18px 8px 14px; }
+.app.sb-collapsed .sb-logo img { max-width:40px !important; }
+.app.sb-collapsed .sb-ver { display:none; }
+.app.sb-collapsed .sb-section { display:none; }
+.app.sb-collapsed .sb-item { padding:11px 0; justify-content:center; font-size:0; position:relative; border-left:none; border-right:2px solid transparent; }
+.app.sb-collapsed .sb-item .ic { font-size:14px; }
+.app.sb-collapsed .sb-item.active { border-right-color:var(--mp-yellow); }
+.app.sb-collapsed .sb-item:hover::after {
+  content: attr(data-tip); position:absolute; left:calc(100% + 6px); top:50%; transform:translateY(-50%);
+  background:#1a2942; color:#fff; padding:5px 9px; border-radius:6px; font-size:11px; font-weight:500;
+  white-space:nowrap; z-index:200; box-shadow:0 4px 10px rgba(0,0,0,.3); pointer-events:none;
+}
+.app.sb-collapsed .sb-user-card { padding:12px 8px; }
+.app.sb-collapsed .sb-user-info { justify-content:center; margin-bottom:8px; }
+.app.sb-collapsed .sb-user-name, .app.sb-collapsed .sb-user-role { display:none; }
+.app.sb-collapsed .sb-logout { font-size:0; padding:6px 4px; }
+.app.sb-collapsed .sb-logout::before { content:"↩"; font-size:14px; }
+/* Botão flutuante de toggle — POSITION FIXED pra não ser cortado pela
+   sidebar (que tem overflow-y:auto). Aparece encavalado na borda direita
+   da sidebar; muda de posição quando recolhe. */
+.sb-collapse-btn {
+  position:fixed; top:14px; left:228px; z-index:120;
+  width:24px; height:24px; border-radius:50%; background:var(--mp-yellow);
+  color:var(--mp-navy); border:2px solid var(--sidebar-bg); cursor:pointer;
+  display:flex; align-items:center; justify-content:center; font-weight:700;
+  box-shadow:0 2px 6px rgba(0,0,0,.25); transition:left .25s ease, transform .15s ease;
+  font-family:'Inter',sans-serif; font-size:11px; line-height:1;
+}
+.sb-collapse-btn:hover { transform:scale(1.1); }
+.app.sb-collapsed ~ .sb-collapse-btn,
+.app.sb-collapsed .sb-collapse-btn { left:52px; transform:rotate(180deg); }
+.app.sb-collapsed .sb-collapse-btn:hover { transform:rotate(180deg) scale(1.1); }
+/* Quando recolhida, o conteúdo principal expande pra usar o espaço extra
+   (em vez de só deslocar pra esquerda). Cap em 1500px pra não ficar absurdo. */
+.app.sb-collapsed .screen { max-width:1500px; }
+.app.embedded .sb-collapse-btn { display:none; }
+@media (max-width:768px) { .sb-collapse-btn { display:none; } .app.sb-collapsed { grid-template-columns:1fr; } }
+/* Botão flutuante para reabrir o menu do portal quando em tela cheia */
+.portal-menu-fab {
+  display:none; position:fixed; top:12px; left:12px; z-index:500;
+  width:40px; height:40px; border-radius:10px; background:var(--sidebar-bg);
+  color:#fff; border:1px solid rgba(255,255,255,.15); cursor:pointer;
+  font-size:18px; align-items:center; justify-content:center;
+  box-shadow:0 4px 12px rgba(0,0,0,.25); transition:all .15s;
+}
+.portal-menu-fab:hover { background:#1a2942; transform:scale(1.05); }
+.app.embedded ~ .portal-menu-fab,
+.app.embedded .portal-menu-fab { display:flex; }
+body.embedded-mode .portal-menu-fab { display:flex; }
+.sb-logo { padding:24px 20px 20px; border-bottom:1px solid rgba(255,255,255,.1); }
+.sb-ver { font-size:9px; color:rgba(255,255,255,.35); font-family:'DM Mono',monospace; margin-top:8px; letter-spacing:.5px; }
+.sb-section { padding:16px 20px 4px; font-size:9px; color:rgba(255,255,255,.35); text-transform:uppercase; letter-spacing:1.2px; font-weight:600; }
+.sb-item {
+  display:flex; align-items:center; gap:10px; padding:9px 20px; cursor:pointer;
+  color:rgba(255,255,255,.55); font-size:12.5px; font-weight:500;
+  border-left:2px solid transparent; transition:all .15s; user-select:none;
+}
+.sb-item:hover { color:rgba(255,255,255,.85); background:rgba(255,255,255,.05); }
+.sb-item.active { color:#fff; border-left-color:var(--mp-yellow); background:rgba(255,255,255,.08); }
+.sb-item .ic { width:18px; height:18px; flex-shrink:0; display:inline-flex; align-items:center; justify-content:center; }
+.sb-item .ic svg { width:18px; height:18px; stroke-width:2; }
+.sb-user-card { margin-top:auto; padding:16px 20px; border-top:1px solid rgba(255,255,255,.1); }
+.sb-user-info { display:flex; align-items:center; gap:10px; margin-bottom:12px; }
+.sb-avatar { width:36px; height:36px; border-radius:50%; background:var(--mp-teal); color:#fff; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0; }
+.sb-user-name { color:#fff; font-size:12px; font-weight:600; }
+.sb-user-role { color:rgba(255,255,255,.4); font-size:10px; margin-top:2px; }
+.sb-logout { width:100%; padding:8px; border:1px solid rgba(255,255,255,.15); border-radius:7px; background:rgba(255,255,255,.05); color:rgba(255,255,255,.6); font-size:11px; font-family:'Inter',sans-serif; cursor:pointer; transition:all .15s; font-weight:500; }
+.sb-logout:hover { background:rgba(255,255,255,.1); color:#fff; }
+
+/* ═══ MAIN ═══ */
+.main { overflow-y:auto; max-height:100vh; }
+.screen { display:none; padding:32px; max-width:1200px; }
+.screen.active { display:block; }
+.page-title { font-size:22px; font-weight:700; color:var(--mp-navy); margin-bottom:4px; }
+.page-sub { font-size:12px; color:var(--text2); margin-bottom:28px; }
+
+/* ═══ CARDS, STATS ═══ */
+.card { background:var(--card); border:1px solid var(--border); border-radius:var(--r); box-shadow:var(--shadow); overflow:hidden; margin-bottom:20px; }
+.card-head { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.card-title { font-size:13px; font-weight:600; color:var(--text); }
+.card-sub { font-size:11px; color:var(--text2); margin-top:2px; }
+.card-body { padding:20px; }
+.stats { display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:16px; margin-bottom:24px; }
+.stat { background:var(--card); border:1px solid var(--border); border-radius:var(--r); padding:20px; box-shadow:var(--shadow); }
+.stat-label { font-size:10px; color:var(--text2); text-transform:uppercase; letter-spacing:.5px; font-weight:600; margin-bottom:8px; }
+.stat-value { font-size:24px; font-weight:700; color:var(--mp-navy); font-family:'DM Mono',monospace; }
+.stat-sub { font-size:10px; color:var(--text2); margin-top:4px; }
+.stat-accent { border-top:3px solid var(--mp-yellow); }
+.stat-teal { border-top:3px solid var(--mp-teal); }
+.stat-green { border-top:3px solid var(--green); }
+
+/* ═══ DET HEADER ═══ */
+.det-header { background:var(--mp-navy); color:#fff; border-radius:var(--r); padding:24px; margin-bottom:20px; }
+.det-name { font-size:20px; font-weight:700; margin-bottom:4px; }
+.det-meta { font-size:11px; color:rgba(255,255,255,.6); }
+.det-stats { display:flex; gap:32px; margin-top:18px; flex-wrap:wrap; }
+.det-stat-label { font-size:9px; color:rgba(255,255,255,.5); text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
+.det-stat-value { font-size:18px; font-weight:700; font-family:'DM Mono',monospace; }
+
+/* ═══ TABLES ═══ */
+.tbl { width:100%; border-collapse:collapse; font-size:11.5px; }
+.tbl th { text-align:left; padding:10px 12px; background:#F8FAFC; color:var(--text2); font-size:9.5px; text-transform:uppercase; letter-spacing:.5px; font-weight:600; border-bottom:1px solid var(--border); white-space:nowrap; }
+.tbl td { padding:9px 12px; border-bottom:1px solid #F1F5F9; vertical-align:middle; }
+.tbl tr:last-child td { border-bottom:none; }
+.tbl tr:hover td { background:#F8FAFC; }
+.tbl tfoot td { padding:10px 12px; border-top:2px solid var(--border); font-weight:700; background:#F8FAFC; }
+.tbl .num { text-align:right; font-family:'DM Mono',monospace; }
+.tbl-wrap { overflow-x:auto; }
+
+/* ═══ TAGS ═══ */
+.tag { display:inline-flex; align-items:center; padding:2px 8px; border-radius:20px; font-size:9.5px; font-weight:600; font-family:'DM Mono',monospace; }
+.tag-navy { background:rgba(45,63,94,.1); color:var(--mp-navy); }
+.tag-teal { background:rgba(77,188,200,.15); color:#1A7A84; }
+.tag-green { background:var(--green-bg); color:var(--green); }
+.tag-red { background:var(--red-bg); color:var(--red); }
+.tag-amber { background:var(--amber-bg); color:var(--amber); }
+.tag-blue { background:var(--blue-bg); color:var(--blue); }
+.tag-gray { background:#F1F5F9; color:var(--text2); }
+.tag-yellow { background:rgba(200,200,74,.15); color:#6B6B00; }
+.tag-black { background:#1E293B; color:#fff; }
+.tag-blue-cat { background:#EFF6FF; color:#1D4ED8; }
+
+/* ═══ HISTORY ═══ */
+.hist-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(240px, 1fr)); gap:16px; }
+.hist-card { background:var(--card); border:1px solid var(--border); border-radius:var(--r); padding:20px; box-shadow:var(--shadow); cursor:pointer; transition:all .2s; }
+.hist-card:hover { border-color:var(--mp-teal); box-shadow:var(--shadow-md); transform:translateY(-2px); }
+.hist-card.current { border-color:var(--mp-yellow); border-width:2px; }
+.hist-mes { font-size:16px; font-weight:700; color:var(--mp-navy); margin-bottom:4px; }
+.hist-lanctos { font-size:11px; color:var(--text2); margin-bottom:12px; }
+.hist-valor { font-size:20px; font-weight:700; font-family:'DM Mono',monospace; color:var(--green); }
+
+/* ═══ ALERTS, BUTTONS ═══ */
+.alert { display:flex; align-items:flex-start; gap:10px; padding:12px 16px; border-radius:8px; font-size:12px; line-height:1.5; margin-bottom:12px; }
+.alert-info { background:var(--blue-bg); color:#1E40AF; border:1px solid #BFDBFE; }
+.alert-ok { background:var(--green-bg); color:#166534; border:1px solid #BBF7D0; }
+.alert-warn { background:var(--amber-bg); color:#92400E; border:1px solid #FDE68A; }
+.alert-err { background:var(--red-bg); color:#991B1B; border:1px solid #FECACA; }
+.btn { display:inline-flex; align-items:center; gap:6px; padding:9px 16px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; border:none; font-family:'Inter',sans-serif; transition:all .15s; }
+.btn-primary { background:var(--mp-navy); color:#fff; }
+.btn-primary:hover { background:#1E2D45; }
+.btn-accent { background:var(--mp-yellow); color:var(--mp-navy); }
+.btn-accent:hover { background:#B5B540; }
+.btn-outline { background:transparent; color:var(--text); border:1px solid var(--border2); }
+.btn-outline:hover { background:var(--bg); }
+.btn-sm { padding:6px 12px; font-size:11px; }
+.btn-danger { background:var(--red-bg); color:var(--red); border:1px solid #FECACA; }
+.btn-danger:hover { background:#FEE2E2; }
+
+/* ═══ ADMIN ═══ */
+.upload-zone { border:2px dashed var(--border2); border-radius:var(--r); padding:40px 24px; text-align:center; cursor:pointer; transition:all .2s; background:var(--bg); position:relative; }
+.upload-zone:hover { border-color:var(--mp-teal); background:#F0FBFC; }
+.upload-zone input[type=file] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+.user-mgmt-row { display:flex; align-items:center; gap:12px; padding:12px 16px; border-bottom:1px solid #F1F5F9; transition:background .15s; }
+.user-mgmt-row:hover { background:#F8FAFC; }
+.user-mgmt-row:last-child { border-bottom:none; }
+
+/* ═══ EMPTY STATE ═══ */
+.empty-state { text-align:center; padding:60px 24px; color:var(--text2); }
+.empty-state-icon { font-size:48px; margin-bottom:16px; opacity:.5; }
+.empty-state-title { font-size:16px; font-weight:600; color:var(--text); margin-bottom:8px; }
+.empty-state-desc { font-size:13px; max-width:400px; margin:0 auto; line-height:1.6; }
+
+/* ═══ CONFIG BANNER ═══ */
+.config-banner { background:#FEF3C7; border:1px solid #FDE68A; border-radius:8px; padding:16px 20px; margin-bottom:20px; font-size:12px; color:#92400E; }
+.config-banner strong { color:#78350F; }
+.config-banner code { background:rgba(0,0,0,.06); padding:2px 6px; border-radius:4px; font-family:'DM Mono',monospace; font-size:11px; }
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width:768px) {
+  .app { grid-template-columns:1fr; }
+  .sidebar { position:fixed; left:-280px; z-index:110; width:260px; transition:left .3s; }
+  .sidebar.open { left:0; }
+  /* Barra de topo fixa no mobile — contém o menu hambúrguer. Evita que o
+     botão flutuante fique por cima do título de cada página. */
+  .mobile-toggle { display:flex; align-items:center; gap:10px; position:fixed; top:0; left:0; right:0; width:100%; height:52px; z-index:101; background:var(--mp-navy); color:#fff; border:none; border-radius:0; padding:0 16px; font-size:14px; font-weight:700; letter-spacing:.3px; cursor:pointer; box-shadow:0 2px 10px rgba(0,0,0,.18); }
+  .screen { padding:16px; padding-top:64px; }
+  /* Telas em iframe (padding:0 inline) — abre espaço pra barra de topo */
+  .screen[style*="100vh"] { padding-top:52px !important; box-sizing:border-box; }
+  .stats { grid-template-columns:1fr 1fr; }
+  .hist-grid { grid-template-columns:1fr; }
+  .login-card { padding:32px 24px; }
+}
+@media (min-width:769px) { .mobile-toggle { display:none; } }
+@media print {
+  * { -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }
+  .sidebar,.sb-logout,.btn,.mobile-toggle { display:none !important; }
+  .screen { display:block !important; padding:0; }
+  .app { grid-template-columns:1fr !important; display:block !important; }
+  .det-header { background:#2D3F5E !important; }
+  .card { break-inside:avoid; box-shadow:none !important; }
+}
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border2); border-radius:10px; }
+.sidebar-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:100; }
+@media (max-width:768px) { .sidebar-backdrop.open { display:block; } }
+
+/* ═══ CHAMADOS DE COMISSÃO ═══ */
+.cham-filtro-btn { background:#fff; border:1px solid var(--border); color:var(--text2); font-size:11px; font-weight:600; padding:6px 11px; border-radius:6px; cursor:pointer; transition:all .15s; }
+.cham-filtro-btn:hover { border-color:var(--mp-navy); color:var(--mp-navy); }
+.cham-filtro-btn.cham-filtro-ativo { background:var(--mp-navy); color:#fff; border-color:var(--mp-navy); }
+.cham-card { background:#fff; border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-bottom:10px; cursor:pointer; transition:all .15s; display:flex; align-items:center; gap:14px; }
+.cham-card:hover { border-color:var(--mp-navy); transform:translateX(2px); box-shadow:0 2px 8px rgba(0,0,0,.06); }
+.cham-card.tem-resposta-nova { border-left:3px solid #DC2626; background:#FEFCE8; }
+.cham-st { font-size:10px; font-weight:700; padding:3px 9px; border-radius:999px; text-transform:uppercase; letter-spacing:.4px; }
+.cham-st-aberto { background:#FEF3C7; color:#92400E; }
+.cham-st-respondido { background:#DBEAFE; color:#1E40AF; }
+.cham-st-fechado { background:#E5E7EB; color:#374151; }
+.cham-novo-dot { width:8px; height:8px; background:#DC2626; border-radius:50%; flex-shrink:0; }
+
+/* Modal de chamado / thread */
+.cham-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px; }
+.cham-overlay.hidden { display:none; }
+.cham-modal { background:#fff; border-radius:14px; box-shadow:0 20px 60px rgba(0,0,0,.3); width:100%; max-width:680px; max-height:90vh; display:flex; flex-direction:column; }
+.cham-modal-head { padding:18px 22px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+.cham-modal-body { padding:18px 22px; overflow-y:auto; flex:1; }
+.cham-modal-foot { padding:14px 22px; border-top:1px solid var(--border); display:flex; gap:10px; justify-content:flex-end; }
+.cham-input { width:100%; padding:9px 12px; border:1px solid var(--border); border-radius:7px; font-size:13px; font-family:inherit; outline:none; box-sizing:border-box; }
+.cham-input:focus { border-color:var(--mp-navy); }
+.cham-textarea { min-height:110px; resize:vertical; }
+.cham-msg { padding:11px 14px; border-radius:10px; margin-bottom:10px; max-width:85%; font-size:12.5px; line-height:1.45; }
+.cham-msg-consultor { background:#F1F5F9; color:var(--text); align-self:flex-start; border-bottom-left-radius:3px; }
+.cham-msg-master { background:var(--mp-navy); color:#fff; align-self:flex-end; border-bottom-right-radius:3px; margin-left:auto; }
+.cham-msg-meta { font-size:10px; opacity:.7; margin-bottom:4px; font-weight:600; }
+.cham-anexo-pill { display:inline-flex; align-items:center; gap:6px; background:rgba(255,255,255,.15); border:1px solid rgba(255,255,255,.25); padding:4px 9px; border-radius:6px; font-size:10.5px; margin:4px 4px 0 0; cursor:pointer; }
+.cham-msg-consultor .cham-anexo-pill { background:#fff; border-color:var(--border); color:var(--mp-navy); }
+.cham-thread { display:flex; flex-direction:column; gap:6px; }
+/* Badge no item Histórico da sidebar */
+.sb-item .ni-badge { display:none; background:#DC2626; color:#fff; font-size:9.5px; padding:2px 6px; border-radius:999px; font-weight:700; margin-left:auto; }
+.sb-item .ni-badge.visible { display:inline-block; }
+</style>
+</head>
+<body>
+
+<!-- ═══ LOADING ═══ -->
+<div id="loading-screen">
+  <div class="spinner"></div>
+  <div style="font-size:13px;color:var(--text2)">Conectando...</div>
+</div>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="login-screen" style="display:none">
+  <div class="login-card">
+    <div class="login-logo">
+      <img src="logo.png" alt="Master Prime" style="max-width:240px;width:100%;height:auto;display:block;margin:0 auto">
+      <div class="login-logo-sub">Portal do Consultor</div>
+    </div>
+    <div id="config-warn" class="config-banner hidden">
+      <strong>Modo Demo:</strong> Supabase nao configurado. Usando dados de exemplo locais. Para configurar, edite as variaveis <code>SUPABASE_URL</code> e <code>SUPABASE_KEY</code> no inicio do arquivo.
+    </div>
+    <div id="login-error" class="login-error"></div>
+    <div class="login-field">
+      <label class="login-label">Usuário</label>
+      <input type="text" class="login-input" id="login-cpf" placeholder="nome.sobrenome" autocomplete="username" style="text-transform:lowercase">
+    </div>
+    <div class="login-field">
+      <label class="login-label">Senha</label>
+      <div class="pw-field">
+        <input type="password" class="login-input" id="login-senha" placeholder="Digite sua senha" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()">
+        <button class="pw-toggle" onclick="togglePw('login-senha',this)" type="button" tabindex="-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+      </div>
+    </div>
+    <button class="login-btn" id="login-btn" onclick="doLogin()">Entrar</button>
+    <div class="login-footer">Sem acesso? Solicite ao administrador.</div>
+  </div>
+</div>
+
+<!-- ═══ PORTAL ═══ -->
+<div id="portal-screen" style="display:none">
+
+  <!-- BANNER GLOBAL DA SALA DE REUNIÃO (visível em qualquer tela) -->
+  <div id="sala-banner" style="display:none;position:fixed;top:0;left:0;right:0;z-index:9998;padding:10px 18px;font-size:13px;font-weight:600;display:none;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.08);cursor:pointer" onclick="navSalaBanner()">
+    <span id="sala-banner-icon" style="font-size:18px"></span>
+    <div style="flex:1;line-height:1.4">
+      <div id="sala-banner-title" style="font-weight:700"></div>
+      <div id="sala-banner-sub" style="font-size:11.5px;opacity:.85;margin-top:1px"></div>
+    </div>
+    <button id="btn-estou-aguardando" onclick="event.stopPropagation();mandarAvisoAguardando()" style="display:none;background:rgba(0,0,0,.18);border:0;color:inherit;padding:6px 12px;border-radius:6px;font-size:11.5px;cursor:pointer;font-weight:700">🔔 Estou aguardando</button>
+    <button onclick="event.stopPropagation();fecharSalaBanner()" style="background:rgba(0,0,0,.12);border:0;color:inherit;padding:4px 8px;border-radius:6px;font-size:11px;cursor:pointer;font-weight:600">Fechar ×</button>
+  </div>
+
+  <button class="mobile-toggle" onclick="toggleSidebar()"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg><span>Master Prime</span></button>
+  <div class="sidebar-backdrop" onclick="toggleSidebar()"></div>
+  <button class="portal-menu-fab" id="portal-menu-fab" onclick="exitEmbedded()" title="Voltar ao menu do portal"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
+  <div class="app" id="portal-app">
+    <!-- Botão recolher/expandir sidebar (modo "mais espaço" — inspirado no Conkey).
+         Fica FORA da sidebar pra não ser cortado pelo overflow nem deslocado pelo transform. -->
+    <button class="sb-collapse-btn" onclick="toggleSidebarCollapse()" title="Recolher menu lateral" aria-label="Recolher menu">‹</button>
+    <aside class="sidebar" id="sidebar">
+      <div class="sb-logo">
+        <img src="logo.png" alt="Master Prime" style="width:100%;max-width:200px;height:auto;display:block;margin:0 auto;filter:brightness(0) invert(1)">
+      </div>
+      <div class="sb-section">Menu</div>
+      <div class="sb-item active" onclick="nav('dashboard-vendas')" id="ni-dashboard-vendas"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg></span> Dashboard Vendas</div>
+      <div class="sb-item" onclick="nav('assembleia')" id="ni-assembleia"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg></span> Resultado Assembleia</div>
+      <div class="sb-item" onclick="nav('lances')" id="ni-lances"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span> Consulta de Lances</div>
+      <div class="sb-item" onclick="nav('analise-carteira')" id="ni-analise-carteira"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M8 13h2"/><path d="M8 17h2"/><path d="M14 13h2"/><path d="M14 17h2"/></svg></span> Análise de Carteira</div>
+      <div class="sb-item" onclick="nav('simuladores')" id="ni-simuladores"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="16" y1="14" x2="16" y2="18"/><line x1="16" y1="10" x2="16.01" y2="10"/><line x1="12" y1="10" x2="12.01" y2="10"/><line x1="8" y1="10" x2="8.01" y2="10"/><line x1="12" y1="14" x2="12.01" y2="14"/><line x1="8" y1="14" x2="8.01" y2="14"/><line x1="12" y1="18" x2="12.01" y2="18"/><line x1="8" y1="18" x2="8.01" y2="18"/></svg></span> Simuladores</div>
+      <!-- Tabelas (consulta de grupos por administradora) -->
+      <div class="sb-item" onclick="nav('tabelas')" id="ni-tabelas"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/></svg></span> Tabelas</div>
+      <!-- Formulário de Adesão (visível para todos os tipos) -->
+      <div class="sb-item" onclick="nav('admin-adesao')" id="ni-admin-adesao"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15l2 2 4-4"/></svg></span> Formulário de Adesão</div>
+      <div class="sb-item" onclick="nav('admin-faturamento')" id="ni-admin-faturamento"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span> <span id="ni-admin-faturamento-label">Faturamento</span></div>
+      <!-- Reserva de Sala (liberada pra todos os tipos) -->
+      <div class="sb-item" onclick="nav('sala')" id="ni-sala"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span> Reserva de Sala</div>
+      <!-- Material de Apoio (liberado pra todos — base de conhecimento das administradoras) -->
+      <div class="sb-item" onclick="nav('base-conhecimento')" id="ni-base-conhecimento"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></span> Material de Apoio</div>
+      <!-- Formulários (Adesão Bradesco): em stand-by até refinamento. Tela e backend continuam funcionais via /adesao.html — basta remover a classe `hidden` para reativar. -->
+      <div class="sb-item hidden" onclick="nav('adesao')" id="ni-adesao"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></span> Formulários</div>
+      <div class="sb-item" onclick="nav('dashboard')" id="ni-dashboard"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></span> Demonstrativo</div>
+      <div class="sb-item" onclick="nav('historico')" id="ni-historico"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg></span> Historico <span class="ni-badge" id="ni-historico-badge">0</span></div>
+      <div id="admin-nav" class="hidden">
+        <div class="sb-section">Administracao</div>
+        <!-- Feedbacks (master e sócio) — dentro da Administração -->
+        <div class="sb-item hidden" onclick="nav('feedbacks')" id="ni-feedbacks"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></span> Feedbacks</div>
+        <div class="sb-item" onclick="nav('admin-overview')" id="ni-admin-overview"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg></span> Visao Geral</div>
+        <div class="sb-item" onclick="nav('admin-upload')" id="ni-admin-upload"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span> Upload Demonstrativos</div>
+        <div class="sb-item" onclick="nav('admin-users')" id="ni-admin-users"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span> Gerenciar Usuarios</div>
+        <div class="sb-item" onclick="nav('painel')" id="ni-painel"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span> Painel Split</div>
+        <!-- Logs de Atividade (master / admin / sócio) — dentro da Administração -->
+        <div class="sb-item hidden" onclick="nav('logs')" id="ni-logs"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span> Logs de Atividade</div>
+      </div>
+      <div class="sb-user-card">
+        <div class="sb-user-info" onclick="nav('perfil')" title="Abrir Meu Perfil" style="cursor:pointer;border-radius:8px;padding:6px;margin:-6px -6px 6px;transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.07)'" onmouseout="this.style.background='transparent'">
+          <div class="sb-avatar" id="sb-avatar">--</div>
+          <div style="min-width:0"><div class="sb-user-name" id="sb-user-name">--</div><div class="sb-user-role" id="sb-user-role">Consultor</div></div>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="color:rgba(255,255,255,.45);margin-left:auto;flex-shrink:0"><polyline points="9 18 15 12 9 6"/></svg>
+        </div>
+        <button class="sb-logout" onclick="doLogout()">Sair</button>
+      </div>
+    </aside>
+    <main class="main">
+
+      <!-- DASHBOARD -->
+      <div class="screen active" id="s-dashboard">
+        <div style="display:flex;align-items:start;justify-content:space-between;gap:16px;flex-wrap:wrap">
+          <div>
+            <div class="page-title">Demonstrativo</div>
+            <div class="page-sub" id="dash-sub">Seu demonstrativo de comissoes do mes atual</div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <a href="kb-cronograma-comissionamento.pdf" target="_blank" rel="noopener" style="background:#fff;color:var(--mp-navy);border:1px solid var(--border);padding:9px 14px;border-radius:8px;font-size:12.5px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:7px;white-space:nowrap" title="Cronograma de pagamento por administradora">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Cronograma de pagamento
+            </a>
+            <button id="btn-abrir-chamado-demo" onclick="abrirNovoChamado()" style="background:var(--mp-navy);color:#fff;border:0;padding:9px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;white-space:nowrap">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+              Tirar dúvida sobre comissão
+            </button>
+          </div>
+        </div>
+        <div id="dash-content"><div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="empty-state-title">Nenhum demonstrativo disponivel</div><div class="empty-state-desc">Seu demonstrativo do mes ainda nao foi publicado.</div></div></div>
+      </div>
+
+      <!-- HISTORICO -->
+      <div class="screen" id="s-historico">
+        <div style="display:flex;align-items:start;justify-content:space-between;gap:16px;flex-wrap:wrap">
+          <div>
+            <div class="page-title">Historico</div>
+            <div class="page-sub">Todos os seus demonstrativos anteriores</div>
+          </div>
+          <button onclick="abrirNovoChamado()" style="background:var(--mp-navy);color:#fff;border:0;padding:9px 16px;border-radius:8px;font-size:12.5px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;white-space:nowrap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            Abrir chamado de comissão
+          </button>
+        </div>
+        <div id="hist-content"><div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="empty-state-title">Nenhum historico</div><div class="empty-state-desc">Seus demonstrativos anteriores aparecerao aqui.</div></div></div>
+
+        <!-- ═══ CHAMADOS DE COMISSÃO ═══ -->
+        <div style="margin-top:30px;border-top:1px solid var(--border);padding-top:24px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px">
+            <div>
+              <div style="font-size:15px;font-weight:700;color:var(--mp-navy);display:flex;align-items:center;gap:8px">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                Chamados de Comissão
+                <span id="cham-badge-titulo" style="display:none;background:#DC2626;color:#fff;font-size:10px;padding:2px 7px;border-radius:999px;font-weight:700">0</span>
+              </div>
+              <div style="font-size:11.5px;color:var(--text2);margin-top:2px" id="cham-sub-titulo">Suas dúvidas de comissão registradas. Veja respostas, abra novos chamados.</div>
+            </div>
+            <div style="display:flex;gap:6px">
+              <button class="cham-filtro-btn cham-filtro-ativo" data-filtro="todos">Todos</button>
+              <button class="cham-filtro-btn" data-filtro="aberto">Abertos</button>
+              <button class="cham-filtro-btn" data-filtro="respondido">Respondidos</button>
+              <button class="cham-filtro-btn" data-filtro="fechado">Fechados</button>
+            </div>
+          </div>
+          <div id="cham-lista"></div>
+        </div>
+      </div>
+
+      <!-- ASSEMBLEIA (iframe carregado sob demanda) -->
+      <div class="screen" id="s-assembleia" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
+        <iframe id="iframe-assembleia" src="about:blank" data-target="assembleia.html" style="width:100%;height:100%;border:0;display:block" title="Resultado de Assembleia"></iframe>
+      </div>
+
+      <!-- LANCES (iframe carregado sob demanda) -->
+      <div class="screen" id="s-lances" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
+        <iframe id="iframe-lances" src="about:blank" data-target="lances.html" style="width:100%;height:100%;border:0;display:block" title="Consulta de Lances"></iframe>
+      </div>
+
+      <!-- ANÁLISE DE CARTEIRA (página do Vini — iframe carregado sob demanda) -->
+      <div class="screen" id="s-analise-carteira" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
+        <iframe id="iframe-analise-carteira" src="about:blank" data-target="analise-carteira.html" style="width:100%;height:100%;border:0;display:block" title="Análise de Carteira"></iframe>
+      </div>
+
+      <!-- DASHBOARD VENDAS (iframe carregado sob demanda) -->
+      <div class="screen" id="s-dashboard-vendas" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
+        <iframe id="iframe-dashboard-vendas" src="about:blank" data-target="dashboard_vendas.html" style="width:100%;height:100%;border:0;display:block" title="Dashboard de Vendas"></iframe>
+      </div>
+
+      <!-- SIMULADORES (iframe carregado sob demanda) -->
+      <div class="screen" id="s-simuladores" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
+        <iframe id="iframe-simuladores" src="about:blank" data-target="simuladores-hub.html" style="width:100%;height:100%;border:0;display:block" title="Simuladores"></iframe>
+      </div>
+
+      <!-- TABELAS (consulta de grupos por administradora — iframe lazy) -->
+      <div class="screen" id="s-tabelas" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
+        <iframe id="iframe-tabelas" src="about:blank" data-target="consulta-grupos-itau.html" style="width:100%;height:100%;border:0;display:block" title="Tabelas de Vendas"></iframe>
+      </div>
+
+      <!-- BASE DE CONHECIMENTO (iframe carregado sob demanda) -->
+      <div class="screen" id="s-base-conhecimento" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
+        <iframe id="iframe-base-conhecimento" src="about:blank" data-target="base-conhecimento.html" style="width:100%;height:100%;border:0;display:block" title="Material de Apoio"></iframe>
+      </div>
+
+      <!-- ADESÃO BRADESCO (iframe carregado sob demanda) -->
+      <div class="screen" id="s-adesao" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
+        <iframe id="iframe-adesao" src="about:blank" data-target="adesao.html" style="width:100%;height:100%;border:0;display:block" title="Adesão Bradesco"></iframe>
+      </div>
+
+      <!-- ADESÃO ADMIN (iframe carregado sob demanda) — NOVA TELA -->
+      <div class="screen" id="s-admin-adesao" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
+        <iframe id="iframe-admin-adesao" src="about:blank" data-target="admin-adesao.html" style="width:100%;height:100%;border:0;display:block" title="Adesão Admin"></iframe>
+      </div>
+      <!-- FEEDBACKS (iframe carregado sob demanda) -->
+      <div class="screen" id="s-feedbacks" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
+        <iframe id="iframe-feedbacks" src="about:blank" data-target="feedbacks.html" style="width:100%;height:100%;border:0;display:block" title="Feedbacks"></iframe>
+      </div>
+      <!-- LOGS DE ATIVIDADE (iframe carregado sob demanda) -->
+      <div class="screen" id="s-logs" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
+        <iframe id="iframe-logs" src="about:blank" data-target="logs.html" style="width:100%;height:100%;border:0;display:block" title="Logs de Atividade"></iframe>
+      </div>
+      <!-- SALA DE REUNIÃO (iframe carregado sob demanda) -->
+      <div class="screen" id="s-sala" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
+        <iframe id="iframe-sala" src="about:blank" data-target="sala.html" style="width:100%;height:100%;border:0;display:block" title="Reserva de Sala"></iframe>
+      </div>
+
+      <!-- PAINEL SPLIT (iframe carregado sob demanda) -->
+      <div class="screen" id="s-painel" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
+        <iframe id="iframe-painel" src="about:blank" data-target="painel.html" style="width:100%;height:100%;border:0;display:block" title="Painel Split"></iframe>
+      </div>
+
+      <!-- PERFIL -->
+      <div class="screen" id="s-perfil">
+        <div class="page-title">Meu Perfil</div>
+        <div class="page-sub">Seus dados e configuracoes</div>
+        <div class="card"><div class="card-head"><div class="card-title">Foto de perfil</div></div>
+          <div class="card-body">
+            <div style="display:flex;align-items:center;gap:20px;flex-wrap:wrap">
+              <div id="perfil-avatar" style="width:96px;height:96px;border-radius:50%;background:var(--mp-teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;flex-shrink:0;overflow:hidden">--</div>
+              <div>
+                <input type="file" id="foto-input" accept="image/*" style="display:none" onchange="onFotoEscolhida(this)">
+                <div style="display:flex;gap:8px;flex-wrap:wrap">
+                  <button class="btn btn-primary btn-sm" onclick="document.getElementById('foto-input').click()">Escolher foto</button>
+                  <button class="btn btn-outline btn-sm" id="btn-remover-foto" onclick="removerFoto()" style="display:none">Remover</button>
+                </div>
+                <div style="font-size:11px;color:var(--text2);margin-top:8px">JPG ou PNG. A imagem é recortada em círculo automaticamente.</div>
+                <div id="foto-msg" style="margin-top:8px"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><div class="card-title">Dados pessoais</div></div>
+          <div class="card-body"><div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+            <div><div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:6px">Nome</div><div style="font-size:14px;font-weight:600" id="perfil-nome">--</div></div>
+            <div><div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:6px">Usu&aacute;rio</div><div style="font-size:14px;font-family:'DM Mono',monospace" id="perfil-cpf">--</div></div>
+            <div><div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:6px">Tipo</div><div id="perfil-tipo">--</div></div>
+          </div></div>
+        </div>
+        <div class="card"><div class="card-head"><div class="card-title">Alterar senha</div></div>
+          <div class="card-body"><div id="pw-msg"></div>
+            <div style="display:grid;gap:16px;max-width:400px">
+              <div><label class="login-label">Senha atual</label><input type="password" class="login-input" id="pw-cur" style="font-size:13px;padding:10px 14px"></div>
+              <div><label class="login-label">Nova senha</label><input type="password" class="login-input" id="pw-new" style="font-size:13px;padding:10px 14px"></div>
+              <div><label class="login-label">Confirmar</label><input type="password" class="login-input" id="pw-conf" style="font-size:13px;padding:10px 14px"></div>
+              <button class="btn btn-primary" onclick="changePw()" style="width:fit-content">Alterar senha</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN: FATURAMENTO (iframe carregado sob demanda) -->
+      <div class="screen" id="s-admin-faturamento" style="padding:0;height:calc(100vh - 0px);overflow:hidden">
+        <iframe id="iframe-admin-faturamento" src="about:blank" data-target="faturamento.html" style="width:100%;height:100%;border:0;display:block" title="Faturamento"></iframe>
+      </div>
+
+      <!-- ADMIN: VISAO GERAL -->
+      <div class="screen" id="s-admin-overview">
+        <div class="page-title">Visao Geral</div>
+        <div class="page-sub" id="overview-sub">Dashboard administrativa - todos os demonstrativos do mes</div>
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px">
+          <label style="font-size:12px;color:var(--text2);font-weight:600">Mes:</label>
+          <select id="overview-mes" class="form-select" style="padding:8px 12px;font-size:12px;border-radius:6px;border:1px solid var(--border2)" onchange="renderAdminOverview()"></select>
+        </div>
+        <div id="overview-content"><div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></div><div class="empty-state-title">Carregando...</div></div></div>
+      </div>
+
+      <!-- ADMIN: UPLOAD -->
+      <div class="screen" id="s-admin-upload">
+        <div class="page-title">Upload de Demonstrativos</div>
+        <div class="page-sub">Envie os demonstrativos processados para os consultores</div>
+        <div class="alert alert-info"><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></span><span>No <strong>Painel Split</strong>, clique <strong>"Publicar no Portal"</strong> para gerar o JSON. Depois faca o upload aqui. Ou clique em <strong>"Abrir Painel Split"</strong> na sidebar para fazer tudo online.</span></div>
+        <div class="card"><div class="card-head"><div><div class="card-title">Enviar demonstrativos do mes</div><div class="card-sub">Arquivo JSON gerado pelo Painel Split</div></div></div>
+          <div class="card-body">
+            <div class="upload-zone" id="upload-zone"><input type="file" accept=".json" onchange="adminUpload(event)">
+              <div style="font-size:36px;margin-bottom:8px"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+              <div style="font-size:13px;font-weight:600">Arraste o JSON aqui ou clique para selecionar</div>
+              <div style="font-size:11px;color:var(--text2)">demonstrativos_YYYY-MM.json</div>
+            </div>
+            <div id="upload-result" style="margin-top:16px"></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><div><div class="card-title">Meses publicados</div></div></div>
+          <div class="card-body" id="admin-meses-list"><div style="color:var(--text2);font-size:12px">Nenhum demonstrativo publicado.</div></div>
+        </div>
+      </div>
+
+      <!-- ADMIN: USERS -->
+      <div class="screen" id="s-admin-users">
+        <div class="page-title">Gerenciar Usuarios</div>
+        <div class="page-sub">Cadastre e gerencie o acesso dos consultores</div>
+        <div class="card"><div class="card-head"><div class="card-title">Novo consultor</div><button class="btn btn-primary btn-sm" onclick="document.getElementById('add-form').classList.toggle('hidden')">+ Adicionar</button></div>
+          <div class="card-body hidden" id="add-form">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:10px">
+              <div><label class="login-label">Nome completo</label><input type="text" class="login-input" id="nu-nome" placeholder="NOME SOBRENOME" style="font-size:12px;padding:9px 12px;text-transform:uppercase"></div>
+              <div><label class="login-label">Tipo</label><select class="login-input" id="nu-tipo" style="font-size:12px;padding:9px 12px"><option value="consultor">Consultor</option><option value="parceiro">Parceiro</option><option value="socio">Socio</option><option value="admin">Administrador</option></select></div>
+              <div><label class="login-label">Senha inicial (opcional)</label><input type="text" class="login-input" id="nu-senha" placeholder="Vazio = usa o próprio login" style="font-size:12px;padding:9px 12px"></div>
+            </div>
+            <div style="font-size:11px;color:var(--text2);margin-bottom:14px">O login é gerado automaticamente a partir do nome (ex.: <strong>jose.batista</strong>). Não é necessário CPF.</div>
+            <div style="display:flex;gap:8px"><button class="btn btn-primary btn-sm" onclick="addUser()">Salvar</button><button class="btn btn-outline btn-sm" onclick="document.getElementById('add-form').classList.add('hidden')">Cancelar</button></div>
+            <div id="add-msg" style="margin-top:12px"></div>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><div class="card-title">Usuarios cadastrados</div><div class="card-sub" id="user-count">0</div></div>
+          <div class="card-body" style="padding:0" id="users-list"></div>
+        </div>
+      </div>
+
+      <!-- MODAL: PERMISSÕES POR USUÁRIO -->
+      <div id="modal-permissoes" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;padding:20px">
+        <div style="background:var(--bg,#fff);border-radius:12px;max-width:520px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+          <div style="padding:20px 24px;border-bottom:1px solid var(--border,#e5e7eb);display:flex;align-items:center;justify-content:space-between;gap:12px">
+            <div>
+              <div style="font-size:16px;font-weight:700;color:var(--text,#111)">Permissões de acesso</div>
+              <div id="perm-user-nome" style="font-size:12px;color:var(--text3,#6b7280);margin-top:2px"></div>
+            </div>
+            <button onclick="fecharPermissoes()" style="background:none;border:0;padding:4px;cursor:pointer;color:var(--text3,#6b7280);font-size:24px;line-height:1">&times;</button>
+          </div>
+          <div style="padding:20px 24px">
+            <div style="font-size:12px;color:var(--text3,#6b7280);margin-bottom:14px">Marque os módulos do menu lateral que este usuário pode acessar. Itens de <strong>Menu</strong> ficam visíveis por padrão; itens de <strong>Administração</strong> ficam escondidos por padrão (libera explicitamente).</div>
+            <div id="perm-checklist" style="display:flex;flex-direction:column;gap:10px"></div>
+            <div style="margin-top:14px;padding-top:14px;border-top:1px dashed var(--border,#e5e7eb);font-size:11px;color:var(--text3,#6b7280)">
+              <strong>Meu Perfil</strong> e <strong>Gerenciar Usuários</strong> não aparecem aqui — perfil é sempre visível e Gerenciar Usuários é exclusivo do Master. Itens de Administração só fazem efeito para usuários do tipo Admin.
+            </div>
+          </div>
+          <div style="padding:14px 24px;border-top:1px solid var(--border,#e5e7eb);display:flex;justify-content:space-between;gap:8px;align-items:center">
+            <button class="btn btn-outline btn-sm" onclick="marcarTodasPerm(true)">Marcar todas</button>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-outline btn-sm" onclick="fecharPermissoes()">Cancelar</button>
+              <button class="btn btn-primary btn-sm" onclick="salvarPermissoes()">Salvar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════════
+//  CONFIGURACAO SUPABASE — Preencha com seus dados
+//  (Instrucoes no arquivo SETUP.md)
+// ══════════════════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://jhwciwvgagnuxakukyob.supabase.co';  // Ex: 'https://xyzabc.supabase.co'
+const SUPABASE_KEY = 'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx';  // Publishable key (segura para frontend - respeita RLS)
+
+// ══════════════════════════════════════════════════════════════════════════
+//  MODO: SUPABASE ou DEMO (localStorage)
+// ══════════════════════════════════════════════════════════════════════════
+const USE_SUPABASE = !!(SUPABASE_URL && SUPABASE_KEY);
+let sb = null;
+// Cliente secundário usado só para signUp de novos usuários (não mexe na sessão do admin)
+let sbSignup = null;
+
+// ═══ DATA LAYER (abstrai Supabase vs localStorage) ═══
+const DB = {
+  async init() {
+    if (USE_SUPABASE) {
+      sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+      // Cliente separado sem persistência de sessão: signUp aqui não deslogga o admin
+      sbSignup = supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+        auth: { persistSession: false, autoRefreshToken: false, storageKey: 'mp-signup-only' }
+      });
+      console.log('Conectado ao Supabase');
+    } else {
+      console.log('Modo demo (localStorage)');
+      if (!localStorage.getItem('mp_portal')) {
+        localStorage.setItem('mp_portal', JSON.stringify(this._defaultData()));
+      }
+    }
+  },
+  _defaultData() {
+    return {
+      users: [
+        { nome:'ALLAN ALMEIDA', cpf:'00000000000', tipo:'admin', senha:'123456', criado:'2025-01-01' },
+        { nome:'ERIK GONCALVES', cpf:'11111111111', tipo:'consultor', senha:'11111111111', criado:'2025-01-01' },
+        { nome:'LARISSA SANT ANNA', cpf:'22222222222', tipo:'consultor', senha:'22222222222', criado:'2025-01-01' },
+        { nome:'CARLOS EDUARDO', cpf:'33333333333', tipo:'socio', senha:'33333333333', criado:'2025-01-01' },
+      ],
+      demonstrativos: {
+        '2025-03': {
+          'ALLAN ALMEIDA': { nome:'ALLAN ALMEIDA', totalFinal:18542.67,
+            linhas:[
+              {adm:'PORTO',tipo:'Auto',ref:'123456',cliente:'JOAO SILVA',dataVenda:'15/03/2025',parcela:'1/12',bruto:4200,nf:294,adm:420,liquido:3486},
+              {adm:'PORTO',tipo:'Vida',ref:'234567',cliente:'MARIA SANTOS',dataVenda:'18/03/2025',parcela:'1/1',bruto:1800,nf:126,adm:180,liquido:1494},
+              {adm:'PORTO',tipo:'RE',ref:'345678',cliente:'CARLOS OLIVEIRA',dataVenda:'20/03/2025',parcela:'3/12',bruto:6500,nf:455,adm:650,liquido:5395},
+              {adm:'ITAU',tipo:'Vida',ref:'456789',cliente:'ANA PEREIRA',dataVenda:'22/03/2025',parcela:'1/1',bruto:3200,nf:224,adm:320,liquido:2656},
+              {adm:'BRADESCO',tipo:'Auto',ref:'567890',cliente:'PEDRO COSTA',dataVenda:'25/03/2025',parcela:'2/12',bruto:2800,nf:196,adm:280,liquido:2324},
+              {adm:'PORTO',tipo:'Empresa',ref:'678901',cliente:'TECH SOLUTIONS',dataVenda:'10/03/2025',parcela:'1/12',bruto:5100,nf:357,adm:510,liquido:4233},
+            ],
+            avulsos:[{descricao:'Ajuda de custo estacionamento',valor:450},{descricao:'Bonus trimestral Elite Gold',valor:1200},{descricao:'Desconto adiantamento',valor:-2695.33}],
+            despesas:[]
+          },
+          'ERIK GONCALVES': { nome:'ERIK GONCALVES', totalFinal:7823.45,
+            linhas:[
+              {adm:'PORTO',tipo:'Auto',ref:'111222',cliente:'ROBERTO ALVES',dataVenda:'12/03/2025',parcela:'1/12',bruto:3100,nf:217,adm:310,liquido:2573},
+              {adm:'PORTO',tipo:'Vida',ref:'222333',cliente:'FERNANDA LIMA',dataVenda:'14/03/2025',parcela:'1/1',bruto:2400,nf:168,adm:240,liquido:1992},
+              {adm:'BRADESCO',tipo:'RE',ref:'333444',cliente:'MARCOS SOUZA',dataVenda:'19/03/2025',parcela:'2/12',bruto:4500,nf:315,adm:450,liquido:3735},
+            ],
+            avulsos:[{descricao:'Ajuda de custo',valor:350},{descricao:'Desconto VR',valor:-826.55}],
+            despesas:[]
+          },
+          'LARISSA SANT ANNA': { nome:'LARISSA SANT ANNA', totalFinal:5214.88,
+            linhas:[
+              {adm:'PORTO',tipo:'Auto',ref:'444555',cliente:'LUCIA FERREIRA',dataVenda:'10/03/2025',parcela:'1/12',bruto:2900,nf:203,adm:290,liquido:2407},
+              {adm:'ITAU',tipo:'Vida',ref:'555666',cliente:'RAFAEL MENDES',dataVenda:'21/03/2025',parcela:'1/1',bruto:1500,nf:105,adm:150,liquido:1245},
+              {adm:'PORTO',tipo:'RE',ref:'666777',cliente:'PATRICIA ROCHA',dataVenda:'28/03/2025',parcela:'1/12',bruto:2200,nf:154,adm:220,liquido:1826},
+            ],
+            avulsos:[{descricao:'Ajuda de custo',valor:300},{descricao:'Desconto adiantamento',valor:-563.12}],
+            despesas:[]
+          },
+        },
+        '2025-02': {
+          'ALLAN ALMEIDA': { nome:'ALLAN ALMEIDA', totalFinal:15243.20,
+            linhas:[
+              {adm:'PORTO',tipo:'Auto',ref:'901234',cliente:'JOSE MARTINS',dataVenda:'10/02/2025',parcela:'2/12',bruto:3800,nf:266,adm:380,liquido:3154},
+              {adm:'BRADESCO',tipo:'RE',ref:'012345',cliente:'CAMILA REIS',dataVenda:'15/02/2025',parcela:'1/12',bruto:5200,nf:364,adm:520,liquido:4316},
+              {adm:'ITAU',tipo:'Vida',ref:'123450',cliente:'ROBERTO NUNES',dataVenda:'20/02/2025',parcela:'1/1',bruto:2100,nf:147,adm:210,liquido:1743},
+              {adm:'PORTO',tipo:'Auto',ref:'234501',cliente:'MARIANA LOPES',dataVenda:'22/02/2025',parcela:'5/12',bruto:4600,nf:322,adm:460,liquido:3818},
+            ],
+            avulsos:[{descricao:'Ajuda de custo estacionamento',valor:450},{descricao:'Desconto adiantamento',valor:-2238}],
+            despesas:[]
+          },
+          'ERIK GONCALVES': { nome:'ERIK GONCALVES', totalFinal:6205.30,
+            linhas:[
+              {adm:'PORTO',tipo:'Auto',ref:'345012',cliente:'CLAUDIA MENDES',dataVenda:'08/02/2025',parcela:'1/12',bruto:2800,nf:196,adm:280,liquido:2324},
+              {adm:'BRADESCO',tipo:'Vida',ref:'450123',cliente:'MARCOS OLIVEIRA',dataVenda:'18/02/2025',parcela:'1/1',bruto:3600,nf:252,adm:360,liquido:2988},
+            ],
+            avulsos:[{descricao:'Ajuda de custo',valor:350},{descricao:'Desconto VR',valor:-826.55},{descricao:'Bonus indicacao',valor:1369.85}],
+            despesas:[]
+          },
+          'LARISSA SANT ANNA': { nome:'LARISSA SANT ANNA', totalFinal:4102.50,
+            linhas:[
+              {adm:'PORTO',tipo:'RE',ref:'501234',cliente:'ANDERSON SILVA',dataVenda:'12/02/2025',parcela:'2/12',bruto:3400,nf:238,adm:340,liquido:2822},
+              {adm:'ITAU',tipo:'Auto',ref:'612345',cliente:'BEATRIZ COSTA',dataVenda:'25/02/2025',parcela:'1/12',bruto:1900,nf:133,adm:190,liquido:1577},
+            ],
+            avulsos:[{descricao:'Ajuda de custo',valor:300},{descricao:'Desconto adiantamento',valor:-596.50}],
+            despesas:[]
+          },
+        },
+      },
+      meses: ['2025-02','2025-03'],
+    };
+  },
+  _local() { return JSON.parse(localStorage.getItem('mp_portal')); },
+  _saveLocal(d) { localStorage.setItem('mp_portal', JSON.stringify(d)); },
+
+  // ── Users ──
+  async getUser(cpf) {
+    if (USE_SUPABASE) {
+      const {data} = await sb.from('portal_users').select('*').eq('cpf', cpf).single();
+      return data;
+    }
+    return this._local().users.find(u => u.cpf === cpf) || null;
+  },
+  async getAllUsers() {
+    if (USE_SUPABASE) {
+      const {data} = await sb.from('portal_users').select('*').order('nome');
+      return data || [];
+    }
+    return this._local().users;
+  },
+  async createUser(user) {
+    if (USE_SUPABASE) {
+      const {data,error} = await sb.from('portal_users').insert(user).select().single();
+      if (error) throw error;
+      return data;
+    }
+    const d = this._local();
+    d.users.push(user);
+    this._saveLocal(d);
+    return user;
+  },
+  async updateUser(cpf, updates) {
+    if (USE_SUPABASE) {
+      const {data,error} = await sb.from('portal_users').update(updates).eq('cpf', cpf).select().single();
+      if (error) throw error;
+      return data;
+    }
+    const d = this._local();
+    const idx = d.users.findIndex(u => u.cpf === cpf);
+    if (idx >= 0) Object.assign(d.users[idx], updates);
+    this._saveLocal(d);
+    return d.users[idx];
+  },
+  async deleteUser(cpf) {
+    if (USE_SUPABASE) {
+      await sb.from('portal_users').delete().eq('cpf', cpf);
+    } else {
+      const d = this._local();
+      d.users = d.users.filter(u => u.cpf !== cpf);
+      this._saveLocal(d);
+    }
+  },
+
+  // ── Demonstrativos ──
+  async getMeses() {
+    if (USE_SUPABASE) {
+      const {data} = await sb.from('portal_demonstrativos').select('mes').order('mes', {ascending:false});
+      return [...new Set((data||[]).map(d => d.mes))];
+    }
+    return [...(this._local().meses||[])].sort().reverse();
+  },
+  async getDemo(mes, nome) {
+    if (USE_SUPABASE) {
+      const {data} = await sb.from('portal_demonstrativos').select('dados').eq('mes', mes).eq('nome', nome).single();
+      return data ? data.dados : null;
+    }
+    return this._local().demonstrativos?.[mes]?.[nome] || null;
+  },
+  async getDemosMes(mes) {
+    if (USE_SUPABASE) {
+      const {data} = await sb.from('portal_demonstrativos').select('nome,dados').eq('mes', mes);
+      const result = {};
+      (data||[]).forEach(d => result[d.nome] = d.dados);
+      return result;
+    }
+    return this._local().demonstrativos?.[mes] || {};
+  },
+  async publishDemos(mes, consultores) {
+    if (USE_SUPABASE) {
+      const rows = Object.entries(consultores).map(([nome, dados]) => ({mes, nome, dados}));
+      // Upsert (replace existing month data)
+      const {error} = await sb.from('portal_demonstrativos').upsert(rows, {onConflict:'mes,nome'});
+      if (error) throw error;
+    } else {
+      const d = this._local();
+      d.demonstrativos[mes] = consultores;
+      if (!d.meses.includes(mes)) d.meses.push(mes);
+      d.meses.sort();
+      this._saveLocal(d);
+    }
+  },
+  async deleteMes(mes) {
+    if (USE_SUPABASE) {
+      await sb.from('portal_demonstrativos').delete().eq('mes', mes);
+    } else {
+      const d = this._local();
+      delete d.demonstrativos[mes];
+      d.meses = d.meses.filter(m => m !== mes);
+      this._saveLocal(d);
+    }
+  },
+  // Move todos os demos de um mês para outro. Usado quando admin publica no
+  // mês errado por engano. Bloqueia se o destino já tem demos (admin deve
+  // remover/mesclar manualmente). Retorna número de linhas afetadas.
+  async renameMes(mesAntigo, mesNovo) {
+    if (mesAntigo === mesNovo) return 0;
+    if (USE_SUPABASE) {
+      // Garante que destino está vazio
+      const { data: existentes, error: errExist } = await sb
+        .from('portal_demonstrativos').select('nome').eq('mes', mesNovo).limit(1);
+      if (errExist) throw errExist;
+      if (existentes && existentes.length > 0) {
+        throw new Error('Já existe demonstrativo de ' + mesNovo + '. Remova antes de renomear.');
+      }
+      const { error, count } = await sb.from('portal_demonstrativos')
+        .update({ mes: mesNovo }, { count:'exact' })
+        .eq('mes', mesAntigo);
+      if (error) throw error;
+      return count || 0;
+    } else {
+      const d = this._local();
+      if (d.demonstrativos[mesNovo]) {
+        throw new Error('Já existe demonstrativo de ' + mesNovo + '. Remova antes de renomear.');
+      }
+      const dados = d.demonstrativos[mesAntigo];
+      if (!dados) throw new Error('Mês origem não existe: ' + mesAntigo);
+      d.demonstrativos[mesNovo] = dados;
+      delete d.demonstrativos[mesAntigo];
+      d.meses = d.meses.filter(m => m !== mesAntigo);
+      if (!d.meses.includes(mesNovo)) d.meses.push(mesNovo);
+      d.meses.sort();
+      this._saveLocal(d);
+      return Object.keys(dados).length;
+    }
+  },
+};
+
+// ═══ UTILIDADES ═══
+let currentUser = null;
+const MESES_NOME = {'01':'Janeiro','02':'Fevereiro','03':'Marco','04':'Abril','05':'Maio','06':'Junho','07':'Julho','08':'Agosto','09':'Setembro','10':'Outubro','11':'Novembro','12':'Dezembro'};
+function fmtBRL(v) { if (!v && v!==0) return 'R$ 0,00'; return 'R$ '+v.toFixed(2).replace('.',',').replace(/\B(?=(\d{3})+(?!\d))/g,'.'); }
+function fmtCPF(c) { c=c.replace(/\D/g,''); if(c.length!==11)return c; return c.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'); }
+function maskCPF(el) { let v=el.value.replace(/\D/g,''); if(v.length>11)v=v.slice(0,11); if(v.length>9)v=v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4'); else if(v.length>6)v=v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3'); else if(v.length>3)v=v.replace(/(\d{3})(\d{1,3})/,'$1.$2'); el.value=v; }
+function cleanCPF(v) { return (v||'').replace(/\D/g,''); }
+function togglePw(id,btn) { const i=document.getElementById(id); i.type=i.type==='password'?'text':'password'; }
+function getInitials(n) { const p=(n||'').split(' ').filter(Boolean); return p.length>=2?(p[0][0]+p[p.length-1][0]).toUpperCase():(p[0]||'--').slice(0,2).toUpperCase(); }
+
+// ════════ FOTO DE PERFIL ════════
+// Pinta um círculo de avatar: foto se houver, senão as iniciais.
+function pintarAvatar(el, user) {
+  if (!el) return;
+  if (user && user.foto_url) {
+    el.innerHTML = `<img src="${user.foto_url}" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:50%;display:block">`;
+  } else {
+    el.innerHTML = '';
+    el.textContent = getInitials(user ? user.nome : '');
+  }
+}
+// Atualiza todos os avatares do usuário logado (sidebar + Meu Perfil).
+function atualizarAvatares() {
+  pintarAvatar(document.getElementById('sb-avatar'), currentUser);
+  pintarAvatar(document.getElementById('perfil-avatar'), currentUser);
+  const btnRem = document.getElementById('btn-remover-foto');
+  if (btnRem) btnRem.style.display = (currentUser && currentUser.foto_url) ? '' : 'none';
+}
+// Redimensiona e recorta a imagem num quadrado (pra ficar redonda) e devolve um data URI JPEG.
+function resizeImagem(file, maxPx) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        const lado = Math.min(img.width, img.height);
+        const sx = (img.width - lado) / 2, sy = (img.height - lado) / 2;
+        const cv = document.createElement('canvas');
+        cv.width = maxPx; cv.height = maxPx;
+        cv.getContext('2d').drawImage(img, sx, sy, lado, lado, 0, 0, maxPx, maxPx);
+        resolve(cv.toDataURL('image/jpeg', 0.8));
+      };
+      img.onerror = () => reject(new Error('Imagem inválida'));
+      img.src = reader.result;
+    };
+    reader.onerror = () => reject(new Error('Erro ao ler o arquivo'));
+    reader.readAsDataURL(file);
+  });
+}
+async function onFotoEscolhida(input) {
+  const file = input.files && input.files[0];
+  input.value = '';
+  const msg = document.getElementById('foto-msg');
+  if (!file) return;
+  if (!/^image\//.test(file.type)) { msg.innerHTML = '<div class="alert alert-warn">Selecione um arquivo de imagem.</div>'; return; }
+  msg.innerHTML = '<div style="font-size:12px;color:var(--text2)">Processando imagem...</div>';
+  try {
+    const dataUri = await resizeImagem(file, 192);
+    await DB.updateUser(currentUser.cpf, { foto_url: dataUri });
+    currentUser.foto_url = dataUri;
+    atualizarAvatares();
+    msg.innerHTML = '<div class="alert alert-ok">Foto atualizada!</div>';
+  } catch(e) {
+    msg.innerHTML = '<div class="alert alert-err">Erro ao salvar a foto: ' + (e.message || e) + '</div>';
+  }
+}
+async function removerFoto() {
+  if (!confirm('Remover sua foto de perfil?')) return;
+  const msg = document.getElementById('foto-msg');
+  try {
+    await DB.updateUser(currentUser.cpf, { foto_url: null });
+    currentUser.foto_url = null;
+    atualizarAvatares();
+    msg.innerHTML = '<div class="alert alert-ok">Foto removida.</div>';
+  } catch(e) {
+    msg.innerHTML = '<div class="alert alert-err">Erro: ' + (e.message || e) + '</div>';
+  }
+}
+function fmtMes(k) { const [y,m]=k.split('-'); return `${MESES_NOME[m]||m} ${y}`; }
+
+// ═══ AUTH (Supabase Auth + migração automática) ═══
+// Login usa "email fantasma" {cpf}@masterprime.internal.
+// Aceita login por USERNAME (formato nome.sobrenome) ou CPF (admin legado).
+// Se usuário ainda não foi migrado ao Supabase Auth (auth_id IS NULL em
+// portal_users), valida senha via RPC, faz signUp e vincula.
+function cpfToFakeEmail(cpf) { return cpf + '@masterprime.internal'; }
+function usernameToFakeEmail(username) { return username + '@masterprime.internal'; }
+
+// Valida senha forte: >=8 chars, maiúscula, minúscula, número, símbolo
+function senhaForte(s) {
+  if (!s || s.length < 8) return false;
+  if (!/[A-Z]/.test(s)) return false;
+  if (!/[a-z]/.test(s)) return false;
+  if (!/\d/.test(s)) return false;
+  if (!/[^A-Za-z0-9]/.test(s)) return false;
+  return true;
+}
+
+async function doLogin() {
+  const loginInput = (document.getElementById('login-cpf').value||'').trim();
+  const senha = document.getElementById('login-senha').value;
+  const err = document.getElementById('login-error');
+  const btn = document.getElementById('login-btn');
+  if (!loginInput) { err.style.display='block'; err.textContent='Digite seu usuario.'; return; }
+  if (!senha) { err.style.display='block'; err.textContent='Digite sua senha.'; return; }
+  btn.disabled = true; btn.textContent = 'Entrando...';
+  try {
+    // Detecta se é CPF (só dígitos, 11 chars) ou username
+    const soDigitos = loginInput.replace(/\D/g,'');
+    const ehCpf = soDigitos.length === 11 && /^\d+$/.test(loginInput.replace(/[.\-]/g,''));
+    const identificador = ehCpf ? soDigitos : loginInput.toLowerCase();
+    if (!USE_SUPABASE) {
+      const user = await DB.getUser(identificador);
+      if (!user || user.senha !== senha) throw new Error('Usuario ou senha incorretos.');
+      currentUser = user; sessionStorage.setItem('mp_session', identificador);
+      err.style.display='none'; await enterPortal();
+      btn.disabled=false; btn.textContent='Entrar'; return;
+    }
+    const email = ehCpf ? cpfToFakeEmail(identificador) : usernameToFakeEmail(identificador);
+    // 1) Tenta signIn direto
+    let { data, error } = await sb.auth.signInWithPassword({ email, password: senha });
+    if (error) {
+      // 2) User ainda não migrado: validar senha antiga
+      const { data: ok, error: rpcErr } = await sb.rpc('validar_senha_portal', { cpf_param: identificador, senha_param: senha });
+      if (rpcErr) throw rpcErr;
+      if (!ok) {
+        err.style.display='block'; err.textContent='Usuario ou senha incorretos.';
+        sb.rpc('registrar_log', { p_acao:'login_negado', p_detalhe:identificador, p_usuario:identificador }).then(()=>{},()=>{});
+        btn.disabled=false; btn.textContent='Entrar'; return;
+      }
+      // 3) Cria conta no Supabase Auth
+      const su = await sb.auth.signUp({ email, password: senha });
+      if (su.error) throw su.error;
+      if (!su.data.session) {
+        const si = await sb.auth.signInWithPassword({ email, password: senha });
+        if (si.error) throw si.error;
+      }
+      // 4) Vincula auth_id (por username ou por CPF)
+      if (ehCpf) {
+        const linkRes = await sb.rpc('link_auth_to_portal', { cpf_param: identificador });
+        if (linkRes.error) throw linkRes.error;
+      } else {
+        const linkRes = await sb.rpc('link_auth_by_username', { username_param: identificador });
+        if (linkRes.error) throw linkRes.error;
+      }
+    }
+    const authUser = (await sb.auth.getUser()).data.user;
+    const r = await sb.from('portal_users').select('*').eq('auth_id', authUser.id).maybeSingle();
+    if (!r.data) throw new Error('Conta criada mas perfil nao encontrado. Contate o administrador.');
+    currentUser = r.data;
+    err.style.display='none';
+    await enterPortal();
+  } catch(e) {
+    err.style.display='block'; err.textContent = 'Erro: ' + (e.message||e);
+    try {
+      const ident = (document.getElementById('login-cpf').value||'').trim().toLowerCase();
+      if (ident && sb) sb.rpc('registrar_log', { p_acao:'login_negado', p_detalhe:ident, p_usuario:ident }).then(()=>{},()=>{});
+    } catch(_e) {}
+  }
+  btn.disabled = false; btn.textContent = 'Entrar';
+}
+
+async function doLogout() {
+  // Registra o logout ANTES de destruir a sessão (depois o RPC perde o auth.uid()).
+  registrarLog('logout', currentUser && currentUser.nome ? currentUser.nome : null);
+  try { if (USE_SUPABASE) await sb.auth.signOut(); } catch(e) {}
+  currentUser=null; sessionStorage.removeItem('mp_session');
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('portal-screen').style.display='none';
+  document.getElementById('login-cpf').value='';
+  document.getElementById('login-senha').value='';
+  _pararAutoLogout();
+}
+
+// ═══ AUTO-LOGOUT POR INATIVIDADE ═══
+// Política de segurança: 30 min sem interação → logout automático
+// (proteção pra demonstrativos sensíveis se notebook fica aberto)
+const AUTO_LOGOUT_MS = 30 * 60 * 1000;   // 30 minutos
+const AVISO_ANTES_MS = 60 * 1000;        // 1 minuto antes do logout, mostra modal
+let _timerInatividade = null;
+let _timerAviso = null;
+let _avisoEl = null;
+
+function _resetTimerInatividade() {
+  if (_timerInatividade) clearTimeout(_timerInatividade);
+  if (_timerAviso) clearTimeout(_timerAviso);
+  if (_avisoEl) { _avisoEl.remove(); _avisoEl = null; }
+  // Avisa 1 min antes
+  _timerAviso = setTimeout(_mostrarAvisoLogout, AUTO_LOGOUT_MS - AVISO_ANTES_MS);
+  // Logout efetivo
+  _timerInatividade = setTimeout(() => {
+    console.log('Auto-logout por inatividade (30 min)');
+    doLogout();
+    alert('Sessão expirada por inatividade (30 min sem uso). Faça login novamente.');
+  }, AUTO_LOGOUT_MS);
+}
+
+function _mostrarAvisoLogout() {
+  if (_avisoEl) return;
+  _avisoEl = document.createElement('div');
+  _avisoEl.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#FEF3C7;border:2px solid #F59E0B;border-radius:12px;padding:16px 20px;box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:99999;max-width:340px;font-size:13px;color:#92400E';
+  _avisoEl.innerHTML = `
+    <div style="font-weight:700;margin-bottom:6px">⏱ Você vai ser deslogado em 1 min</div>
+    <div style="margin-bottom:10px;font-size:12px">Por segurança, deslogamos quem fica 30 min sem mexer no portal.</div>
+    <button onclick="_resetTimerInatividade()" style="background:#F59E0B;color:#fff;border:0;padding:6px 14px;border-radius:6px;font-weight:600;cursor:pointer;font-size:12px">Continuar logado</button>
+  `;
+  document.body.appendChild(_avisoEl);
+}
+
+function _pararAutoLogout() {
+  if (_timerInatividade) clearTimeout(_timerInatividade);
+  if (_timerAviso) clearTimeout(_timerAviso);
+  if (_avisoEl) { _avisoEl.remove(); _avisoEl = null; }
+  _timerInatividade = null; _timerAviso = null;
+  ['click','keydown','mousemove','scroll','touchstart'].forEach(ev =>
+    document.removeEventListener(ev, _resetTimerInatividade, true)
+  );
+}
+
+function _iniciarAutoLogout() {
+  _pararAutoLogout();
+  // Throttle: só reseta se passou pelo menos 5s desde último reset
+  let _ultimoReset = 0;
+  const handler = () => {
+    const now = Date.now();
+    if (now - _ultimoReset < 5000) return;
+    _ultimoReset = now;
+    _resetTimerInatividade();
+  };
+  ['click','keydown','mousemove','scroll','touchstart'].forEach(ev =>
+    document.addEventListener(ev, handler, true)
+  );
+  _resetTimerInatividade();
+}
+
+// ═══ BANNER GLOBAL DA SALA DE REUNIÃO ═══
+// Aparece em QUALQUER tela quando há reserva sua próxima/ativa/atrasada
+let _salaBannerTimer = null;
+let _salaBannerDismissed = null;  // timestamp + tipo da última situação fechada
+
+function _iniciarSalaBanner() {
+  if (_salaBannerTimer) clearInterval(_salaBannerTimer);
+  if (!currentUser) return;
+  // Banner roda pra todos os tipos (todos podem ter reserva)
+  _checarSalaBanner();
+  _salaBannerTimer = setInterval(_checarSalaBanner, 60000); // a cada 1 min
+}
+
+async function _checarSalaBanner() {
+  try {
+    if (!sb || !currentUser) return;
+    const now = new Date();
+    const meuAuthId = currentUser.auth_id || (await sb.auth.getUser()).data?.user?.id;
+    const desde = new Date(now.getTime() - 60*60000); // 1h atrás
+    const ate   = new Date(now.getTime() + 60*60000); // 1h pra frente
+
+    // MINHAS reservas no entorno
+    const { data } = await sb.from('portal_sala_reservas')
+      .select('id, consultor_auth_id, consultor_nome, inicio, fim, cliente_nome, aviso_aguardando_por_nome, aviso_aguardando_em')
+      .eq('consultor_auth_id', meuAuthId)
+      .gte('inicio', desde.toISOString())
+      .lte('inicio', ate.toISOString())
+      .eq('cancelada', false)
+      .order('inicio');
+    const reservas = data || [];
+
+    // Reserva ATIVA agora (de qualquer um) — pra ver se preciso avisar
+    const { data: ativasGerais } = await sb.from('portal_sala_reservas')
+      .select('id, consultor_auth_id, consultor_nome, inicio, fim, cliente_nome, aviso_aguardando_por_nome, aviso_aguardando_em')
+      .lte('inicio', now.toISOString())
+      .gt('fim', now.toISOString())
+      .eq('cancelada', false)
+      .limit(1);
+    const ativaQualquer = (ativasGerais && ativasGerais[0]) || null;
+
+    // Próxima reserva geral (qualquer um)
+    const { data: prox } = await sb.from('portal_sala_reservas')
+      .select('consultor_nome, inicio')
+      .gt('inicio', now.toISOString())
+      .eq('cancelada', false)
+      .order('inicio').limit(1);
+    const proxOutra = (prox && prox[0]) || null;
+
+    // Estados
+    const minhaAtiva = reservas.find(r => new Date(r.inicio) <= now && new Date(r.fim) > now);
+    const minhaFutura = reservas.find(r => new Date(r.inicio) > now);
+    const minhaPassada = reservas.find(r => new Date(r.fim) < now && (now - new Date(r.fim)) < 10*60000);
+    // Outra ativa = sala em uso por OUTRO consultor
+    const outraAtiva = ativaQualquer && ativaQualquer.consultor_auth_id !== meuAuthId ? ativaQualquer : null;
+
+    let bannerInfo = null;
+    let mostrarBotaoAguardando = false;
+
+    // Caso 0 (PRIORIDADE): minha reserva ATIVA tem alguém esperando
+    if (minhaAtiva && minhaAtiva.aviso_aguardando_por_nome) {
+      const minDesdeAviso = Math.floor((now - new Date(minhaAtiva.aviso_aguardando_em)) / 60000);
+      bannerInfo = {
+        tipo: 'alguem-esperando',
+        bg: '#FEE2E2', fg: '#991B1B',
+        icon: '🚨',
+        title: `${minhaAtiva.aviso_aguardando_por_nome.toUpperCase()} está aguardando você`,
+        sub: `Avisou há ${minDesdeAviso < 1 ? 'menos de 1' : minDesdeAviso} min · sua reserva termina às ${new Date(minhaAtiva.fim).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`
+      };
+    }
+    // Caso 1: passei do tempo e tem alguém na fila
+    else if (minhaPassada && proxOutra && new Date(proxOutra.inicio) <= new Date(minhaPassada.fim).getTime() + 30*60000) {
+      const minPassados = Math.floor((now - new Date(minhaPassada.fim)) / 60000);
+      bannerInfo = {
+        tipo: 'atrasado',
+        bg: '#FEE2E2', fg: '#991B1B',
+        icon: '🔴',
+        title: `Você passou ${minPassados} min do horário`,
+        sub: `Próxima reserva: ${proxOutra.consultor_nome} às ${new Date(proxOutra.inicio).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`
+      };
+    }
+    // Caso 2: minha reserva está ativa
+    else if (minhaAtiva) {
+      const minRest = Math.floor((new Date(minhaAtiva.fim) - now) / 60000);
+      const fimStr = new Date(minhaAtiva.fim).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+      if (minRest <= 10 && proxOutra && new Date(proxOutra.inicio) <= new Date(minhaAtiva.fim).getTime() + 30*60000) {
+        bannerInfo = {
+          tipo: 'acaba-logo',
+          bg: '#FEF3C7', fg: '#92400E',
+          icon: '🟡',
+          title: `Sua reserva acaba em ${minRest} min (às ${fimStr})`,
+          sub: `Próxima: ${proxOutra.consultor_nome} às ${new Date(proxOutra.inicio).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`
+        };
+      } else {
+        bannerInfo = {
+          tipo: 'em-uso',
+          bg: '#DBEAFE', fg: '#1E40AF',
+          icon: '🔵',
+          title: `Sua reserva acaba às ${fimStr} (em ${minRest} min)`,
+          sub: minhaAtiva.cliente_nome ? `Cliente: ${minhaAtiva.cliente_nome}` : 'Reserva ativa'
+        };
+      }
+    }
+    // Caso 3: tenho reserva começando em ≤30min
+    else if (minhaFutura) {
+      const minAteInicio = Math.floor((new Date(minhaFutura.inicio) - now) / 60000);
+      if (minAteInicio <= 30) {
+        bannerInfo = {
+          tipo: 'comeca-em-breve',
+          bg: '#DCFCE7', fg: '#166534',
+          icon: '🟢',
+          title: `Sua reserva começa em ${minAteInicio} min`,
+          sub: `${new Date(minhaFutura.inicio).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})} – ${new Date(minhaFutura.fim).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}${minhaFutura.cliente_nome ? ' · ' + minhaFutura.cliente_nome : ''}`
+        };
+        // Se a sala está em uso por OUTRO E sobrepõe com minha futura, mostro botão "Estou aguardando"
+        // (mas só se ele ainda não foi avisado por mim)
+        if (outraAtiva && new Date(outraAtiva.fim) >= new Date(minhaFutura.inicio).getTime() - 5*60000) {
+          mostrarBotaoAguardando = !(outraAtiva.aviso_aguardando_por_nome && outraAtiva.aviso_aguardando_por_nome === currentUser.nome);
+          // Guarda id da reserva ativa pra clique do botão
+          window._reservaAtivaParaAvisar = outraAtiva.id;
+        }
+      }
+    }
+
+    const banner = document.getElementById('sala-banner');
+    if (!banner) return;
+    if (!bannerInfo) { banner.style.display = 'none'; return; }
+    // Dismiss respeitado por 5 min se for a MESMA situação
+    if (_salaBannerDismissed && _salaBannerDismissed.tipo === bannerInfo.tipo && (Date.now() - _salaBannerDismissed.ts) < 5*60000) {
+      banner.style.display = 'none';
+      return;
+    }
+    banner.style.display = 'flex';
+    banner.style.background = bannerInfo.bg;
+    banner.style.color = bannerInfo.fg;
+    document.getElementById('sala-banner-icon').textContent = bannerInfo.icon;
+    document.getElementById('sala-banner-title').textContent = bannerInfo.title;
+    document.getElementById('sala-banner-sub').textContent = bannerInfo.sub;
+    document.getElementById('btn-estou-aguardando').style.display = mostrarBotaoAguardando ? '' : 'none';
+    banner.dataset.tipo = bannerInfo.tipo;
+  } catch(e) { /* silent */ }
+}
+
+// Manda aviso "estou aguardando" pra reserva ativa
+async function mandarAvisoAguardando() {
+  const reservaId = window._reservaAtivaParaAvisar;
+  if (!reservaId) return;
+  try {
+    const { error } = await sb.from('portal_sala_reservas')
+      .update({
+        aviso_aguardando_por_nome: currentUser.nome,
+        aviso_aguardando_por_auth_id: currentUser.auth_id || (await sb.auth.getUser()).data?.user?.id,
+        aviso_aguardando_em: new Date().toISOString()
+      })
+      .eq('id', reservaId);
+    if (error) throw error;
+    const btn = document.getElementById('btn-estou-aguardando');
+    if (btn) {
+      btn.textContent = '✓ Avisado';
+      btn.disabled = true;
+      btn.style.opacity = '.6';
+      setTimeout(() => { btn.style.display = 'none'; }, 2500);
+    }
+  } catch(e) {
+    alert('Erro ao avisar: ' + (e.message || e));
+  }
+}
+
+function fecharSalaBanner() {
+  const banner = document.getElementById('sala-banner');
+  if (!banner) return;
+  _salaBannerDismissed = { ts: Date.now(), tipo: banner.dataset.tipo };
+  banner.style.display = 'none';
+}
+function navSalaBanner() {
+  if (typeof nav === 'function') nav('sala');
+}
+
+async function checkSession() {
+  if (USE_SUPABASE) {
+    const { data } = await sb.auth.getSession();
+    if (data && data.session && data.session.user) {
+      const authId = data.session.user.id;
+      const r = await sb.from('portal_users').select('*').eq('auth_id', authId).maybeSingle();
+      if (r.data) {
+        currentUser = r.data;
+        await enterPortal();
+        return;
+      }
+    }
+  } else {
+    const cpf = sessionStorage.getItem('mp_session');
+    if (cpf) { const u = await DB.getUser(cpf); if(u){currentUser=u; await enterPortal(); return;} }
+  }
+  document.getElementById('loading-screen').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  if (!USE_SUPABASE) document.getElementById('config-warn').classList.remove('hidden');
+}
+// Carimba o último acesso REAL ao portal (não depende de digitar senha).
+// Roda ao entrar e a cada 5 min enquanto a aba está visível.
+let _acessoHeartbeat = null;
+function registrarAcesso() {
+  if (!USE_SUPABASE) return;
+  // IMPORTANTE: sb.rpc(...) é "lazy" no supabase-js — a requisição só é
+  // enviada quando .then()/await é chamado. Sem isso o carimbo de acesso
+  // nunca era gravado e o "Último acesso" ficava preso no login antigo.
+  const _carimbar = () => { try { sb.rpc('registrar_acesso').then(()=>{}, ()=>{}); } catch(e) {} };
+  _carimbar();
+  if (_acessoHeartbeat) clearInterval(_acessoHeartbeat);
+  _acessoHeartbeat = setInterval(() => {
+    if (document.visibilityState === 'visible') _carimbar();
+  }, 5 * 60 * 1000);
+}
+// Registra uma ação no log de atividade do portal (portal_logs).
+// IMPORTANTE: sb.rpc(...) é "lazy" no supabase-js — precisa do .then() pra disparar.
+function registrarLog(acao, detalhe) {
+  if (!USE_SUPABASE || !sb) return;
+  try {
+    sb.rpc('registrar_log', { p_acao: acao, p_detalhe: detalhe || null }).then(()=>{}, ()=>{});
+  } catch(e) {}
+}
+
+async function enterPortal() {
+  document.getElementById('loading-screen').style.display='none';
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('portal-screen').style.display='block';
+  aplicarSidebarCollapseSalva();
+  _iniciarAutoLogout();
+  registrarAcesso();
+  registrarLog('login', currentUser && currentUser.nome ? currentUser.nome : null);
+  _iniciarSalaBanner();
+  atualizarAvatares();
+  document.getElementById('sb-user-name').textContent=currentUser.nome;
+  const role = currentUser.tipo==='master'?'Master':currentUser.tipo==='admin'?'Administrador':currentUser.tipo==='socio'?'Socio':currentUser.tipo==='parceiro'?'Parceiro':'Consultor';
+  document.getElementById('sb-user-role').textContent=role;
+  const _isAdminLike = (currentUser.tipo==='admin' || currentUser.tipo==='master');
+  // Admin-nav: mostra pra admin/master (todos os itens) e também pra sócio (só vai ver Feedbacks dentro)
+  const _showAdminNav = _isAdminLike || currentUser.tipo === 'socio';
+  document.getElementById('admin-nav').classList.toggle('hidden', !_showAdminNav);
+  // Visão Geral: acesso restrito aos donos da corretora (sócios Master).
+  // Regra: QUALQUER usuário com tipo='master' OU nome na whitelist abaixo.
+  // A verificação por tipo cobre o caso de um sócio novo Master sem precisar
+  // editar código; a whitelist por nome é backup defensivo.
+  const _OVERVIEW_ALLOWED = ['ALLAN ALMEIDA', 'CARLOS EDUARDO', 'ADMINISTRADOR'];
+  const _isOverviewAllowed = (currentUser.tipo === 'master') ||
+    _OVERVIEW_ALLOWED.includes((currentUser.nome||'').trim().toUpperCase());
+  const _ovItem = document.getElementById('ni-admin-overview');
+  if (_ovItem) _ovItem.style.display = _isOverviewAllowed ? '' : 'none';
+  // Gerenciar Usuários: somente Master (admin comum não vê)
+  const _usrItem = document.getElementById('ni-admin-users');
+  if (_usrItem) _usrItem.style.display = (currentUser.tipo === 'master') ? '' : 'none';
+  // Restrição: Claudia Barreto não vê Demonstrativo nem Histórico
+  const _restrictedDemo = ['CLAUDIA BARRETO'];
+  const _isDemoBlocked = _restrictedDemo.includes((currentUser.nome||'').trim().toUpperCase());
+  const _demoItem = document.getElementById('ni-dashboard');
+  const _histItem = document.getElementById('ni-historico');
+  if (_demoItem) _demoItem.style.display = _isDemoBlocked ? 'none' : '';
+  if (_histItem) _histItem.style.display = _isDemoBlocked ? 'none' : '';
+  // NOVA ABA: Formulário de Adesão — visível para TODOS os usuários
+  // (qualquer consultor/sócio/parceiro precisa do form pra mandar pros clientes)
+  const _adesaoAdminItem = document.getElementById('ni-admin-adesao');
+  if (_adesaoAdminItem) {
+    _adesaoAdminItem.style.display = '';
+  }
+  // NOVA ABA: Feedbacks — visível APENAS para master e sócio
+  const _feedbacksItem = document.getElementById('ni-feedbacks');
+  if (_feedbacksItem) {
+    const podeVerFeedbacks = (currentUser.tipo === 'master' || currentUser.tipo === 'socio');
+    _feedbacksItem.classList.toggle('hidden', !podeVerFeedbacks);
+  }
+  // NOVA ABA: Logs de Atividade — visível APENAS para o Master
+  const _logsItem = document.getElementById('ni-logs');
+  if (_logsItem) {
+    const podeVerLogs = (currentUser.tipo === 'master');
+    _logsItem.classList.toggle('hidden', !podeVerLogs);
+  }
+  // Sala de Reunião — liberada pra todos os tipos
+  const _salaItem = document.getElementById('ni-sala');
+  if (_salaItem) _salaItem.classList.remove('hidden');
+  // Aplica permissões granulares por módulo (per-user). Admin sempre vê tudo.
+  aplicarPermissoesUI();
+  document.getElementById('perfil-nome').textContent=currentUser.nome;
+  document.getElementById('perfil-cpf').textContent=currentUser.username || fmtCPF(currentUser.cpf);
+  const _tagCls = currentUser.tipo==='master'?'navy':currentUser.tipo==='admin'?'navy':currentUser.tipo==='socio'?'teal':'blue';
+  document.getElementById('perfil-tipo').innerHTML=`<span class="tag tag-${_tagCls}">${role}</span>`;
+  // Escolhe a primeira tela permitida (fallback pra perfil se nenhuma)
+  const _telaInicial = (function(){
+    const ordem = ['dashboard-vendas','assembleia','lances','simuladores','dashboard','historico','admin-faturamento'];
+    for (const t of ordem) { if (podeAcessarScreen(t)) return t; }
+    return 'perfil';
+  })();
+  nav(_telaInicial);
+  if (!_isDemoBlocked) { await renderDashboard(); await renderHistorico(); }
+  if (_isAdminLike) { await renderAdminMeses(); await renderUsers(); if (_isOverviewAllowed) { await renderAdminOverview(); } }
+  // Atualiza imediatamente o label do menu (Faturamento ou Meus Processos) sem esperar entrar na tela
+  try {
+    const _lblMenu = document.getElementById('ni-admin-faturamento-label');
+    if (_lblMenu) _lblMenu.textContent = (currentUser.tipo === 'admin' || currentUser.tipo === 'master') ? 'Faturamento' : 'Meus Processos';
+  } catch(e) {}
+}
+
+// ═══ NAV ═══
+let _ultimaTelaLogada = null;
+function nav(id) {
+  // Visão Geral: só para os donos (Master + whitelist). Outros redirecionados.
+  if (id === 'admin-overview' && currentUser) {
+    const _nomeUp = (currentUser.nome||'').trim().toUpperCase();
+    const _ok = (currentUser.tipo === 'master') ||
+      ['ALLAN ALMEIDA', 'CARLOS EDUARDO', 'ADMINISTRADOR'].includes(_nomeUp);
+    if (!_ok) id = 'dashboard-vendas';
+  }
+  // Gerenciar Usuários: só Master
+  if (id === 'admin-users' && currentUser && currentUser.tipo !== 'master') {
+    id = 'admin-overview';
+  }
+  // Restrição: Claudia Barreto não acessa Demonstrativo nem Histórico mesmo via URL
+  if ((id === 'dashboard' || id === 'historico') && currentUser && ['CLAUDIA BARRETO'].includes((currentUser.nome||'').trim().toUpperCase())) {
+    id = 'assembleia';
+  }
+  // NOVA ABA: Formulário de Adesão — liberado pra todos os tipos
+  // (qualquer consultor/sócio/parceiro precisa preencher pros clientes)
+  // FEEDBACKS — só master e sócio (privado dos avaliadores)
+  if (id === 'feedbacks' && currentUser && !(currentUser.tipo === 'master' || currentUser.tipo === 'socio')) {
+    id = 'perfil';
+  }
+  // LOGS DE ATIVIDADE — somente Master
+  if (id === 'logs' && currentUser && currentUser.tipo !== 'master') {
+    id = 'perfil';
+  }
+  // Sala de Reunião — liberada pra todos os tipos
+  // Bloqueio de acesso direto a módulo sem permissão (cai pra perfil)
+  if (currentUser && currentUser.tipo !== 'master' && !podeAcessarScreen(id)) {
+    id = 'perfil';
+  }
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  const s=document.getElementById('s-'+id), n=document.getElementById('ni-'+id);
+  if(s)s.classList.add('active'); if(n)n.classList.add('active');
+  document.getElementById('sidebar').classList.remove('open');
+  document.querySelector('.sidebar-backdrop')?.classList.remove('open');
+  // Lazy-load dos iframes: só carrega na primeira visita (evita 2.5 MB no login)
+  // Iframes com lazy-load (assembleia/lances/painel) — carrega só na primeira visita
+  const iframeScreens = ['assembleia','lances','analise-carteira','painel','simuladores','tabelas','base-conhecimento','dashboard-vendas','adesao','admin-faturamento','admin-adesao','feedbacks','logs','sala'];
+  if (iframeScreens.includes(id)) {
+    const ifr = document.getElementById('iframe-' + id);
+    if (ifr && ifr.dataset.target && ifr.getAttribute('src') === 'about:blank') {
+      // Cache-buster por sessão: garante que o iframe carrega a versão mais nova
+      // depois de cada deploy, sem precisar de Cmd+Shift+R.
+      let bust = sessionStorage.getItem('portal_iframe_bust');
+      if (!bust) {
+        bust = Date.now().toString(36);
+        try { sessionStorage.setItem('portal_iframe_bust', bust); } catch(e) {}
+      }
+      const sep = ifr.dataset.target.includes('?') ? '&' : '?';
+      ifr.src = ifr.dataset.target + sep + 'v=' + bust;
+    }
+  }
+  // Apenas o Painel Split abre em tela cheia (esconde sidebar do portal)
+  const app = document.getElementById('portal-app');
+  const fab = document.getElementById('portal-menu-fab');
+  if (id === 'painel') {
+    if (app) app.classList.add('embedded');
+    if (fab) fab.style.display = 'flex';
+    document.body.classList.add('embedded-mode');
+  } else {
+    if (app) app.classList.remove('embedded');
+    if (fab) fab.style.display = 'none';
+    document.body.classList.remove('embedded-mode');
+  }
+  // Log de atividade: registra a abertura de cada tela do portal
+  // (evita repetir quando navega pra mesma tela em sequência).
+  if (n && currentUser && id !== _ultimaTelaLogada) {
+    _ultimaTelaLogada = id;
+    registrarLog('tela', (n.textContent || id).trim());
+  }
+}
+function exitEmbedded(){
+  const app = document.getElementById('portal-app');
+  if (app) app.classList.remove('embedded');
+  document.getElementById('portal-menu-fab').style.display = 'none';
+  document.body.classList.remove('embedded-mode');
+  nav('dashboard');
+}
+function toggleSidebar() {
+  const aberta = document.getElementById('sidebar').classList.toggle('open');
+  const bd = document.querySelector('.sidebar-backdrop');
+  if (bd) bd.classList.toggle('open', aberta);
+}
+// Modo "sidebar recolhida" (mais espaço pros simuladores) — inspirado Conkey.
+// Persiste em localStorage. Aplicado no boot pelo aplicarSidebarCollapseSalva().
+function toggleSidebarCollapse() {
+  const app = document.getElementById('portal-app');
+  if (!app) return;
+  const colapsado = app.classList.toggle('sb-collapsed');
+  try { localStorage.setItem('mp_sidebar_collapsed', colapsado ? '1' : '0'); } catch(e){}
+  // Atualiza tooltip do botão e símbolo
+  const btn = document.querySelector('.sb-collapse-btn');
+  if (btn) btn.title = colapsado ? 'Expandir menu lateral' : 'Recolher menu lateral';
+}
+function aplicarSidebarCollapseSalva() {
+  try {
+    if (localStorage.getItem('mp_sidebar_collapsed') === '1') {
+      document.getElementById('portal-app')?.classList.add('sb-collapsed');
+    }
+  } catch(e){}
+  // Popula data-tip nos sb-items pra mostrar tooltip ao hover no modo recolhido
+  document.querySelectorAll('.sb-item').forEach(it => {
+    if (!it.hasAttribute('data-tip')) {
+      const txt = it.textContent.trim().replace(/\s+/g,' ');
+      if (txt) it.setAttribute('data-tip', txt);
+    }
+  });
+}
+
+// ═══ DASHBOARD ═══
+async function renderDashboard() {
+  if(!currentUser)return;
+  const el=document.getElementById('dash-content'), sub=document.getElementById('dash-sub');
+  const meses = await DB.getMeses();
+  let demo=null, mesAtual=null;
+  for (const m of meses) { demo=await DB.getDemo(m, currentUser.nome); if(demo){mesAtual=m; break;} }
+  if (!demo) { sub.textContent='Seu demonstrativo de comissoes'; el.innerHTML='<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="empty-state-title">Nenhum demonstrativo disponivel</div><div class="empty-state-desc">Seu demonstrativo do mes ainda nao foi publicado.</div></div>'; return; }
+  sub.textContent='Demonstrativo de '+fmtMes(mesAtual);
+  el.innerHTML=renderDemo(demo, mesAtual);
+}
+function renderDemo(data, mes) {
+  // Formato novo (v2): o painel entrega o HTML já renderizado, com todas
+  // as seções (ADM 10%, Excedente, Avulsos Corretora/Consultoria, Despesas
+  // separadas, Cartas de Parceria etc.). Renderizamos direto.
+  if (data && data.html) {
+    const nome = data.nome || currentUser.nome;
+    const nomeSafe = nome.replace(/[^a-zA-Z0-9]/g,'_');
+    return `
+    <div class="card"><div class="card-head"><div><div class="card-title">Demonstrativo - ${nome}</div><div class="card-sub">${fmtMes(mes)}</div></div><div style="display:flex;gap:8px"><button class="btn btn-outline btn-sm" onclick="baixarDemoExcel('${nomeSafe}', '${nome.replace(/'/g,"\\'")}', '${mes}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg> Excel</button><button class="btn btn-outline btn-sm" onclick="imprimirDemo('${nomeSafe}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> PDF / Imprimir</button></div></div>
+      <div class="card-body" id="demo-body-${nomeSafe}" style="padding:20px">${data.html}</div>
+    </div>`;
+  }
+  const nome=data.nome||currentUser.nome, linhas=data.linhas||[], avulsos=data.avulsos||[], despesas=data.despesas||[];
+  const tB=linhas.reduce((s,l)=>s+(l.bruto||0),0), tN=linhas.reduce((s,l)=>s+(l.nf||0),0);
+  const tA=linhas.reduce((s,l)=>s+(l.admValor||0),0), tL=linhas.reduce((s,l)=>s+(l.liquido||0),0);
+  const tAv=avulsos.reduce((s,a)=>s+(a.valor||0),0), tD=despesas.reduce((s,d)=>s+(d.valor||0),0);
+  const totalFinal=data.totalFinal||(tL+tAv+tD);
+  const recP=tB+avulsos.filter(a=>a.valor>0).reduce((s,a)=>s+a.valor,0);
+  const ded=tN+tA+Math.abs(avulsos.filter(a=>a.valor<0).reduce((s,a)=>s+a.valor,0))+Math.abs(despesas.filter(d=>d.valor<0).reduce((s,d)=>s+d.valor,0));
+
+  let rows=linhas.map(l=>{
+    const neg=(l.liquido||0)<0;
+    return `<tr ${neg?'style="background:#FEF2F2;border-left:3px solid #EF4444"':''}>
+      <td>${l.adm||'-'}${neg?' <span class="tag tag-red" style="font-size:8px">estorno</span>':''}</td>
+      <td><span class="tag tag-gray" style="font-size:9px">${l.tipo||'-'}</span></td>
+      <td class="mono">${l.ref||'-'}</td>
+      <td style="font-size:10px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${l.cliente||''}">${l.cliente||'-'}</td>
+      <td class="mono" style="color:var(--text2)">${l.dataVenda||'-'}</td>
+      <td class="mono" style="color:var(--text2)">${l.parcela||'-'}</td>
+      <td class="mono num">${fmtBRL(l.bruto)}</td>
+      <td class="mono num neg">(${fmtBRL(l.nf)})</td>
+      <td class="mono num" style="color:var(--text2)">(${fmtBRL(l.admValor)})</td>
+      <td class="mono num ${(l.liquido||0)>=0?'pos':'neg'} fw6">${fmtBRL(l.liquido)}</td>
+    </tr>`;
+  }).join('');
+
+  if(avulsos.length){
+    rows+=`<tr><td colspan="10" style="padding:4px 12px;background:#F0FDF4;border-top:2px solid #22C55E;font-size:9px;color:#166534;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Lancamentos Avulsos</td></tr>`;
+    avulsos.forEach(a=>{const c=a.valor>=0?'pos':'neg';const bg=a.valor>=0?'rgba(34,197,94,.05)':'#FEF2F2';const bd=a.valor>=0?'#22C55E':'#EF4444';
+      rows+=`<tr style="background:${bg};border-left:3px solid ${bd}"><td colspan="6" style="font-size:11px;font-weight:500;padding:8px 12px"><span class="tag" style="font-size:9px;background:${bg};color:${bd};border:1px solid ${bd}">AVULSO</span> <span style="margin-left:8px">${a.descricao||'-'}</span></td><td class="mono num" style="color:var(--text3)">-</td><td class="mono num" style="color:var(--text3)">-</td><td class="mono num" style="color:var(--text3)">-</td><td class="mono num ${c} fw6">${fmtBRL(a.valor)}</td></tr>`;
+    });
+  }
+  if(despesas.length){
+    rows+=`<tr><td colspan="10" style="padding:4px 12px;background:#FEF2F2;border-top:2px solid #DC2626;font-size:9px;color:#991B1B;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Despesas da Sala</td></tr>`;
+    despesas.forEach(d=>{const c=d.valor>=0?'pos':'neg';const bg=d.valor>=0?'rgba(34,197,94,.05)':'#FEF2F2';const bd=d.valor>=0?'#22C55E':'#DC2626';
+      rows+=`<tr style="background:${bg};border-left:3px solid ${bd}"><td colspan="6" style="font-size:11px;font-weight:500;padding:8px 12px"><span class="tag" style="font-size:9px;background:${bg};color:${bd};border:1px solid ${bd}">DESP</span> <span style="margin-left:8px">${d.descricao||'-'}</span></td><td class="mono num" style="color:var(--text3)">-</td><td class="mono num" style="color:var(--text3)">-</td><td class="mono num" style="color:var(--text3)">-</td><td class="mono num ${c} fw6">${fmtBRL(d.valor)}</td></tr>`;
+    });
+  }
+
+  return `
+  <div class="det-header"><div class="det-name">${nome}</div><div class="det-meta">${linhas.length} lancamentos &middot; ${fmtMes(mes)}</div>
+    <div class="det-stats">
+      <div><div class="det-stat-label">Receita bruta</div><div class="det-stat-value">${fmtBRL(recP)}</div></div>
+      <div><div class="det-stat-label">(-) NF + ADM + Descontos</div><div class="det-stat-value" style="color:rgba(255,255,255,.6)">(${fmtBRL(ded)})</div></div>
+      <div><div class="det-stat-label">Liquido total</div><div class="det-stat-value" style="color:#C8C84A">${fmtBRL(totalFinal)}</div></div>
+    </div>
+  </div>
+  <div class="stats">
+    <div class="stat stat-accent"><div class="stat-label">Lancamentos</div><div class="stat-value">${linhas.length}</div><div class="stat-sub">${avulsos.length?`+ ${avulsos.length} avulsos`:'vendas/repasses'}</div></div>
+    <div class="stat stat-teal"><div class="stat-label">Bruto total</div><div class="stat-value">${fmtBRL(tB)}</div><div class="stat-sub">antes de deducoes</div></div>
+    <div class="stat stat-green"><div class="stat-label">Liquido a receber</div><div class="stat-value" style="color:var(--green)">${fmtBRL(totalFinal)}</div><div class="stat-sub">valor final</div></div>
+  </div>
+  <div class="card"><div class="card-head"><div><div class="card-title">Demonstrativo - ${nome}</div><div class="card-sub">${fmtMes(mes)}</div></div><button class="btn btn-outline btn-sm" onclick="window.print()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> Imprimir</button></div>
+    <div class="tbl-wrap" style="padding:0"><table class="tbl">
+      <thead><tr><th>Admin</th><th>Tipo</th><th>Ref</th><th>Cliente</th><th>Data</th><th>Parc</th><th class="num">Bruto</th><th class="num">NF</th><th class="num">ADM</th><th class="num">Liquido</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr><td colspan="6" class="fw7">TOTAL</td><td class="mono num fw7">${fmtBRL(tB)}</td><td class="mono num neg fw7">(${fmtBRL(tN)})</td><td class="mono num fw7" style="color:var(--text2)">(${fmtBRL(tA)})</td><td class="mono num pos fw7">${fmtBRL(totalFinal)}</td></tr></tfoot>
+    </table></div>
+  </div>`;
+}
+
+// ═══ HISTORICO ═══
+async function renderHistorico() {
+  if(!currentUser)return;
+  const el=document.getElementById('hist-content');
+  const meses=await DB.getMeses();
+  const meus=[];
+  for(const m of meses){const d=await DB.getDemo(m,currentUser.nome);if(d)meus.push({mes:m,data:d});}
+  if(!meus.length){el.innerHTML='<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div><div class="empty-state-title">Nenhum historico</div><div class="empty-state-desc">Seus demonstrativos aparecerao aqui.</div></div>';return;}
+  el.innerHTML='<div class="hist-grid">'+meus.map((item,i)=>{
+    const tf=item.data.totalFinal||0, nl=(item.data.linhas||[]).length;
+    return `<div class="hist-card ${i===0?'current':''}" onclick="viewHist('${item.mes}')"><div class="hist-mes">${fmtMes(item.mes)}</div><div class="hist-lanctos">${nl} lancamentos</div><div class="hist-valor">${fmtBRL(tf)}</div><div style="margin-top:8px"><span class="tag ${i===0?'tag-green':'tag-gray'}">${i===0?'Mais recente':'Historico'}</span></div></div>`;
+  }).join('')+'</div><div id="hist-detail" style="margin-top:24px"></div>';
+}
+async function viewHist(mes) {
+  const d=await DB.getDemo(mes,currentUser.nome);if(!d)return;
+  const el=document.getElementById('hist-detail');
+  if(el){el.innerHTML=renderDemo(d,mes);el.scrollIntoView({behavior:'smooth',block:'start'});}
+}
+
+// ═══ CHANGE PW ═══
+async function changePw() {
+  const cur=document.getElementById('pw-cur').value, nw=document.getElementById('pw-new').value, cf=document.getElementById('pw-conf').value, msg=document.getElementById('pw-msg');
+  if(cur!==currentUser.senha){msg.innerHTML='<div class="alert alert-err">Senha atual incorreta.</div>';return;}
+  if(!senhaForte(nw)){msg.innerHTML='<div class="alert alert-warn">Senha fraca. M&iacute;nimo 8 caracteres, com mai&uacute;scula, min&uacute;scula, n&uacute;mero e s&iacute;mbolo. Ex: Master26@</div>';return;}
+  if(nw!==cf){msg.innerHTML='<div class="alert alert-err">Senhas nao conferem.</div>';return;}
+  try {
+    if (USE_SUPABASE) {
+      // Atualiza em portal_users E em auth.users (via RPC) de uma vez
+      const { error } = await sb.rpc('trocar_senha_portal', { nova_senha: nw });
+      if (error) throw error;
+    } else {
+      await DB.updateUser(currentUser.cpf, {senha:nw});
+    }
+    currentUser.senha=nw;
+    msg.innerHTML='<div class="alert alert-ok">Senha alterada!</div>';
+    document.getElementById('pw-cur').value='';document.getElementById('pw-new').value='';document.getElementById('pw-conf').value='';
+  } catch(e) {
+    msg.innerHTML='<div class="alert alert-err">Erro ao alterar: '+(e.message||e)+'</div>';
+  }
+}
+
+// ═══ ADMIN: UPLOAD ═══
+// Cria conta no Supabase Auth + portal_users quando o consultor ainda não existe.
+// Usa cliente secundário (sbSignup) para não deslogar o admin.
+// Aceita username (preferido) ou faz fallback para cpf como identificador.
+async function criarUsuarioCompleto({ nome, cpf, username, senha, tipo }) {
+  // Email fantasma: se tem username, usa ele; senão, usa CPF (legado)
+  const id = username || cpf;
+  const email = id + '@masterprime.internal';
+  let authId = null;
+  if (USE_SUPABASE && sbSignup) {
+    const su = await sbSignup.auth.signUp({ email, password: senha });
+    if (su.error && !/already registered|already exists|User already/i.test(su.error.message)) {
+      throw new Error('Supabase signUp: ' + su.error.message);
+    }
+    authId = su.data?.user?.id || null;
+    if (!authId) {
+      const si = await sbSignup.auth.signInWithPassword({ email, password: senha });
+      if (!si.error) authId = si.data.user.id;
+    }
+    await sbSignup.auth.signOut().catch(()=>{});
+  }
+  // Insere/atualiza portal_users (com username)
+  await DB.createUser({ nome, cpf, tipo: tipo||'consultor', senha, criado:new Date().toISOString().slice(0,10) });
+  if (USE_SUPABASE) {
+    const updates = { auth_id: authId };
+    if (username) updates.username = username;
+    await sb.from('portal_users').update(updates).eq('cpf', cpf);
+  }
+  return { username: id, senha, nome };
+}
+
+// Fase 1: lê o JSON, valida e mostra confirmação ANTES de publicar.
+// O admin precisa confirmar o mês/ano explicitamente, e pode editar
+// se o JSON veio com mês errado (evita sobrescrever mês fechado por engano).
+let _pendingDemoUpload = null;
+async function adminUpload(evt) {
+  const file = evt.target.files[0]; if (!file) return;
+  const res = document.getElementById('upload-result');
+  try {
+    const text = await file.text();
+    const data = JSON.parse(text);
+    if (!data.mes || !data.consultores) { res.innerHTML = '<div class="alert alert-err">Formato invalido. Precisa ter "mes" e "consultores".</div>'; return; }
+    _pendingDemoUpload = { data, fileName: file.name };
+    const nc = Object.keys(data.consultores).length;
+    // Verifica se já existe demo desse mês (vai sobrescrever?)
+    let avisoSobrescrita = '';
+    try {
+      const mesesPublicados = await DB.getMeses();
+      if (mesesPublicados.includes(data.mes)) {
+        avisoSobrescrita = `<div class="alert alert-warn" style="margin-top:8px;background:#FEF3C7;border:1px solid #F59E0B;color:#92400E"><strong>Atenção:</strong> Já existe publicação de <strong>${fmtMes(data.mes)}</strong> no portal. Confirmar vai SOBRESCREVER os demos atuais desse mês.</div>`;
+      }
+    } catch(e) {}
+    res.innerHTML = `
+      <div class="card" style="border:2px solid var(--mp-navy)">
+        <div class="card-head" style="background:var(--mp-navy);border-radius:6px 6px 0 0">
+          <div>
+            <div style="color:#fff;font-weight:700;font-size:14px">Confirmar publicação</div>
+            <div style="color:rgba(255,255,255,.6);font-size:11px">Arquivo: ${file.name}</div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div style="display:flex;gap:24px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+            <div>
+              <div style="font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;margin-bottom:4px">Mês detectado no JSON</div>
+              <div style="font-size:18px;font-weight:700;color:var(--mp-navy)">${fmtMes(data.mes)}</div>
+            </div>
+            <div>
+              <div style="font-size:11px;color:var(--text2);font-weight:600;text-transform:uppercase;margin-bottom:4px">Pessoas</div>
+              <div style="font-size:18px;font-weight:700;color:var(--mp-navy)">${nc} consultores</div>
+            </div>
+          </div>
+          <div style="margin-top:8px">
+            <label style="font-size:12px;color:var(--text2);font-weight:600;display:block;margin-bottom:4px">Publicar para o mês:</label>
+            <input type="month" id="upload-mes-confirm" value="${data.mes}" style="padding:8px 12px;font-size:14px;border:1px solid var(--border2);border-radius:6px;font-weight:600;color:var(--mp-navy)">
+            <div style="font-size:11px;color:var(--text2);margin-top:4px">Se o mês estiver errado, troque aqui antes de publicar.</div>
+          </div>
+          ${avisoSobrescrita}
+          <div style="display:flex;gap:8px;margin-top:16px">
+            <button class="btn btn-primary" onclick="confirmarPublicacaoDemos()">Publicar agora</button>
+            <button class="btn btn-outline" onclick="cancelarPublicacaoDemos()">Cancelar</button>
+          </div>
+        </div>
+      </div>
+    `;
+    // Limpa o input file pra permitir re-upload do mesmo arquivo
+    evt.target.value = '';
+  } catch(e) { res.innerHTML = `<div class="alert alert-err">Erro: ${e.message}</div>`; }
+}
+
+function cancelarPublicacaoDemos() {
+  _pendingDemoUpload = null;
+  document.getElementById('upload-result').innerHTML = '<div class="alert alert-info">Upload cancelado. Selecione outro arquivo para tentar novamente.</div>';
+}
+
+// Fase 2: publica de fato, usando o mês confirmado/editado pelo admin.
+async function confirmarPublicacaoDemos() {
+  if (!_pendingDemoUpload) return;
+  const res = document.getElementById('upload-result');
+  const { data } = _pendingDemoUpload;
+  const mesEscolhido = document.getElementById('upload-mes-confirm').value;
+  if (!mesEscolhido || !/^\d{4}-\d{2}$/.test(mesEscolhido)) {
+    alert('Mês inválido. Formato esperado: YYYY-MM');
+    return;
+  }
+  res.innerHTML = '<div class="alert alert-info">Publicando demonstrativos...</div>';
+  try {
+    await DB.publishDemos(mesEscolhido, data.consultores);
+    // Cria/atualiza contas usando username+senhaInicial do JSON
+    let novos = 0, atualizados = 0;
+    const users = await DB.getAllUsers();
+    for (const [nome, dados] of Object.entries(data.consultores)) {
+      const existente = users.find(u => u.nome === nome);
+      const username = dados.username || null;
+      const senhaInicial = dados.senhaInicial || null;
+      if (!existente) {
+        if (!username || !senhaInicial) {
+          const cpf = String(Math.floor(10000000000 + Math.random() * 89999999999));
+          await criarUsuarioCompleto({ nome, cpf, senha: cpf, tipo: 'consultor' });
+        } else {
+          const cpf = String(Math.floor(10000000000 + Math.random() * 89999999999));
+          await criarUsuarioCompleto({ nome, cpf, username, senha: senhaInicial, tipo: 'consultor' });
+        }
+        novos++;
+      } else if (username && senhaInicial && !existente.username) {
+        try {
+          await sb.rpc('admin_set_username_senha', { cpf_param: existente.cpf, username_param: username, senha_param: senhaInicial });
+          if (!existente.auth_id) {
+            await criarUsuarioCompleto({ nome, cpf: existente.cpf, username, senha: senhaInicial, tipo: existente.tipo });
+          }
+          atualizados++;
+        } catch(e) { console.warn('Erro atualizando', nome, e); }
+      }
+    }
+    const nc = Object.keys(data.consultores).length;
+    let msg = `<div class="alert alert-ok">Demonstrativos de <strong>${fmtMes(mesEscolhido)}</strong> publicados! ${nc} pessoas`;
+    if (novos) msg += ` &middot; ${novos} usu&aacute;rios criados`;
+    if (atualizados) msg += ` &middot; ${atualizados} atualizados`;
+    msg += ` &middot; <a href="#" onclick="nav('admin-users');return false;" style="color:var(--mp-navy);font-weight:600">Ver usu&aacute;rios &rarr;</a></div>`;
+    res.innerHTML = msg;
+    _pendingDemoUpload = null;
+    await renderAdminMeses(); await renderUsers(); await renderDashboard(); await renderHistorico(); await renderAdminOverview();
+  } catch(e) { res.innerHTML = `<div class="alert alert-err">Erro: ${e.message}</div>`; }
+}
+async function renderAdminMeses() {
+  const el=document.getElementById('admin-meses-list');
+  const meses=await DB.getMeses();
+  if(!meses.length){el.innerHTML='<div style="color:var(--text2);font-size:12px">Nenhum demonstrativo publicado.</div>';return;}
+  let html='';
+  for(const m of meses){
+    const demos=await DB.getDemosMes(m);
+    const nc=Object.keys(demos).length;
+    html+=`<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid #F1F5F9"><div><span style="font-weight:600;font-size:13px;color:var(--mp-navy)">${fmtMes(m)}</span><span style="font-size:11px;color:var(--text2);margin-left:8px">${nc} consultores</span></div><div style="display:flex;gap:8px"><span class="tag tag-green">Publicado</span><button class="btn btn-outline btn-sm" onclick="renomearMes('${m}')">Renomear</button><button class="btn btn-danger btn-sm" onclick="delMes('${m}')">Remover</button></div></div>`;
+  }
+  el.innerHTML=html;
+}
+async function delMes(m) { if(!confirm('Remover '+fmtMes(m)+'?'))return; await DB.deleteMes(m); await renderAdminMeses(); await renderDashboard(); await renderHistorico(); await renderAdminOverview(); }
+async function renomearMes(mesAntigo) {
+  const novo = prompt(
+    `Renomear ${fmtMes(mesAntigo)} para qual mês?\n\nFormato: AAAA-MM\nExemplo: 2026-05 (para maio de 2026)`,
+    mesAntigo
+  );
+  if (!novo || novo === mesAntigo) return;
+  if (!/^\d{4}-\d{2}$/.test(novo)) {
+    alert('Formato inválido. Use AAAA-MM (ex: 2026-05).');
+    return;
+  }
+  const mm = parseInt(novo.split('-')[1], 10);
+  if (mm < 1 || mm > 12) { alert('Mês inválido (1-12).'); return; }
+  if (!confirm(`Mover todos os demos de ${fmtMes(mesAntigo)} para ${fmtMes(novo)}?\n\nIsso afeta também os logins dos consultores que estão vendo esse mês.`)) return;
+  try {
+    const n = await DB.renameMes(mesAntigo, novo);
+    alert(`Pronto! ${n} demonstrativo${n!==1?'s':''} movido${n!==1?'s':''} para ${fmtMes(novo)}.`);
+    await renderAdminMeses(); await renderDashboard(); await renderHistorico(); await renderAdminOverview();
+  } catch (e) {
+    alert('Erro: ' + e.message);
+  }
+}
+
+// ═══ ADMIN: VISAO GERAL ═══
+// Agrega todos os demonstrativos do mes selecionado e mostra:
+// - KPIs (total consultores, soma de liquidos, receita bruta, descontos)
+// - Tabela com todos consultores e valor liquido (clicavel para ver demo completo)
+// - Modal/expansao com o demonstrativo completo de cada um
+async function renderAdminOverview() {
+  if (!currentUser || (currentUser.tipo !== 'admin' && currentUser.tipo !== 'master')) return;
+  const sel = document.getElementById('overview-mes');
+  const content = document.getElementById('overview-content');
+  const sub = document.getElementById('overview-sub');
+  if (!sel || !content) return;
+  const meses = await DB.getMeses();
+  if (!meses.length) {
+    sel.innerHTML = '<option value="">(nenhum)</option>';
+    content.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></div><div class="empty-state-title">Nenhum demonstrativo publicado</div><div class="empty-state-desc">Faca o upload de um JSON em "Upload Demonstrativos" para comecar.</div></div>';
+    return;
+  }
+  // Preserva selecao atual
+  const cur = sel.value || meses[0];
+  sel.innerHTML = meses.map(m => `<option value="${m}" ${m===cur?'selected':''}>${fmtMes(m)}</option>`).join('');
+  const mes = sel.value;
+  sub.textContent = 'Dashboard administrativa - ' + fmtMes(mes);
+
+  const demos = await DB.getDemosMes(mes); // { nome: dados }
+  const nomes = Object.keys(demos).sort();
+  if (!nomes.length) {
+    content.innerHTML = '<div class="empty-state"><div class="empty-state-icon"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div><div class="empty-state-title">Sem demos neste mes</div></div>';
+    return;
+  }
+
+  // KPIs
+  let totalLiq = 0, totalPos = 0, totalNeg = 0, nPositivos = 0, nNegativos = 0;
+  const rows = nomes.map(nome => {
+    const d = demos[nome] || {};
+    const liq = +d.totalFinal || 0;
+    totalLiq += liq;
+    if (liq >= 0) { totalPos += liq; nPositivos++; } else { totalNeg += liq; nNegativos++; }
+    const tipo = d.tipo || 'consultor';
+    const tipoClass = tipo==='socio'?'tag-teal':tipo==='admin'?'tag-navy':tipo==='parceiro'?'tag-amber':'tag-blue';
+    const tipoLabel = tipo==='socio'?'Socio':tipo==='admin'?'Admin':tipo==='parceiro'?'Parceiro':'Consultor';
+    const liqClass = liq>=0?'pos':'neg';
+    return `<tr style="cursor:pointer" onclick="toggleOverviewDemo('${nome.replace(/'/g,"\\'")}')">
+      <td class="fw6" style="font-size:12px">${nome}</td>
+      <td><span class="tag ${tipoClass}" style="font-size:9px">${tipoLabel}</span></td>
+      <td class="mono num ${liqClass} fw6" style="white-space:nowrap;min-width:120px">${fmtBRL(liq)}</td>
+      <td style="text-align:right;font-size:10px;color:var(--text2)">clique para ver &#8594;</td>
+    </tr>
+    <tr id="ov-demo-${nome.replace(/[^a-zA-Z0-9]/g,'_')}" class="hidden"><td colspan="4" style="padding:0;background:#F8FAFC">
+      <div style="padding:20px">${renderDemo(demos[nome], mes)}</div>
+    </td></tr>`;
+  }).join('');
+
+  content.innerHTML = `
+    <div class="stats" style="margin-bottom:20px">
+      <div class="stat stat-accent">
+        <div class="stat-label">Consultores</div>
+        <div class="stat-value">${nomes.length}</div>
+        <div class="stat-sub">${nPositivos} a receber &middot; ${nNegativos} a pagar</div>
+      </div>
+      <div class="stat stat-teal">
+        <div class="stat-label">Total a pagar</div>
+        <div class="stat-value">${fmtBRL(totalPos)}</div>
+        <div class="stat-sub">liquidos positivos</div>
+      </div>
+      <div class="stat stat-navy">
+        <div class="stat-label">Total a receber/descontar</div>
+        <div class="stat-value" style="color:var(--red)">${fmtBRL(totalNeg)}</div>
+        <div class="stat-sub">liquidos negativos</div>
+      </div>
+      <div class="stat stat-green">
+        <div class="stat-label">Saldo geral</div>
+        <div class="stat-value" style="color:var(--green)">${fmtBRL(totalLiq)}</div>
+        <div class="stat-sub">soma de todos</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><div><div class="card-title">Demonstrativos de ${fmtMes(mes)}</div><div class="card-sub">${nomes.length} pessoas &middot; clique em qualquer linha para expandir</div></div></div>
+      <div class="tbl-wrap" style="padding:0">
+        <table class="tbl">
+          <thead><tr><th>Nome</th><th>Tipo</th><th class="num">Liquido total</th><th></th></tr></thead>
+          <tbody>${rows}</tbody>
+          <tfoot><tr><td colspan="2" class="fw7">TOTAL GERAL</td><td class="mono num fw7 ${totalLiq>=0?'pos':'neg'}" style="white-space:nowrap;min-width:120px">${fmtBRL(totalLiq)}</td><td></td></tr></tfoot>
+        </table>
+      </div>
+    </div>`;
+}
+
+// ═══ EXPORTAR DEMO (Excel / PDF) ═══
+// Percorre as tabelas do demo e gera xlsx com valores NUMÉRICOS (não texto).
+// Detecta células de valor BRL ("R$ 1.234,56" ou "(R$ 123,45)") e converte pra number
+// aplicando formatação contábil, preservando sinal negativo de valores entre parênteses.
+// Reconhece APENAS valores em formato BRL:
+//   "R$ 1.234,56"   → 1234.56
+//   "(R$ 123,45)"   → -123.45
+//   "R$ -50,00"     → -50.00
+// Retorna null para qualquer outro formato (grupo/cota como "0485/269",
+// números sem vírgula decimal, texto comum etc.). Isso evita que células de
+// grupo/cota, parcela, ciclo etc. sejam convertidas em número errado.
+function parseBRLtoNumber(txt) {
+  if (!txt) return null;
+  const s = String(txt).trim();
+  if (!s) return null;
+  // Precisa ter "R$" em algum lugar (formato oficial do painel)
+  if (!/R\$/.test(s)) return null;
+  const neg = /^\(.*\)$/.test(s) || /R\$\s*-/.test(s);
+  const limpo = s.replace(/[R$()\s\-—]/g,'').replace(/\./g,'').replace(',','.');
+  if (!limpo) return null;
+  const v = parseFloat(limpo);
+  if (isNaN(v)) return null;
+  return neg ? -v : v;
+}
+
+function baixarDemoExcel(nomeSafe, nome, mes) {
+  try {
+    const container = document.getElementById('demo-body-' + nomeSafe);
+    if (!container) { alert('Demo não encontrado'); return; }
+    const tabelas = container.querySelectorAll('table');
+    if (!tabelas.length) { alert('Sem dados para exportar'); return; }
+    const wb = XLSX.utils.book_new();
+    tabelas.forEach((tbl, idx) => {
+      // Converte tabela HTML em array 2D, detectando valores numéricos
+      const rows = [];
+      tbl.querySelectorAll('tr').forEach(tr => {
+        const row = [];
+        tr.querySelectorAll('th, td').forEach(cell => {
+          const txt = cell.textContent.trim();
+          // Só converte se for claramente BRL (tem "R$"). Grupo/cota, parcela,
+          // ciclo, refs etc. não têm "R$" e são mantidos como texto.
+          const asNum = parseBRLtoNumber(txt);
+          if (asNum !== null) row.push(asNum);
+          else row.push(txt);
+        });
+        if (row.length) rows.push(row);
+      });
+      const ws = XLSX.utils.aoa_to_sheet(rows);
+      // Aplica formato BRL às células que viraram números
+      const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
+      for (let R = range.s.r; R <= range.e.r; R++) {
+        for (let C = range.s.c; C <= range.e.c; C++) {
+          const addr = XLSX.utils.encode_cell({ r:R, c:C });
+          const cell = ws[addr];
+          if (cell && typeof cell.v === 'number') {
+            cell.t = 'n';
+            cell.z = '"R$ "#,##0.00;[Red]"(R$ "#,##0.00")"';
+          }
+        }
+      }
+      const nomeAba = (idx === 0 ? 'Demonstrativo' : 'Tabela ' + (idx+1)).slice(0,31);
+      XLSX.utils.book_append_sheet(wb, ws, nomeAba);
+    });
+    const filename = 'Demo_' + nome.replace(/\s+/g,'_') + '_' + mes + '.xlsx';
+    XLSX.writeFile(wb, filename);
+  } catch(e) { alert('Erro ao exportar Excel: ' + (e.message||e)); }
+}
+
+// Imprime o demo em janela nova (que vira PDF)
+function imprimirDemo(nomeSafe) {
+  const container = document.getElementById('demo-body-' + nomeSafe);
+  if (!container) { window.print(); return; }
+  // Abre janela nova com só o demo (estilo print)
+  const w = window.open('', '_blank', 'width=1100,height=900');
+  const stylesTags = Array.from(document.querySelectorAll('style,link[rel="stylesheet"]')).map(s => s.outerHTML).join('\n');
+  // CSS de impressão: a tabela tem 13 colunas (até "Obs parceiro"). Imprime em
+  // PAISAGEM e com table-layout:fixed pra TODAS as colunas caberem na largura
+  // da página (a tabela "crua" tem ~1240px e estourava, cortando a Obs). O card
+  // flui entre páginas em vez de pular inteiro (causa do "header sozinho").
+  const printCss = `
+    @page { size: A4 landscape; margin: 9mm; }
+    html, body { background:#fff !important; }
+    body { padding:16px; }
+    .tbl-wrap { overflow:visible !important; }
+    table.tbl { width:100% !important; table-layout:fixed !important; font-size:9px !important; }
+    .tbl th, .tbl td { padding:4px 6px !important; white-space:normal !important;
+                       word-break:break-word !important; vertical-align:top !important; }
+    /* força o conteúdo interno das células (ex.: Obs parceiro em itálico) a
+       quebrar linha também — senão estoura a coluna e corta */
+    .tbl td * { white-space:normal !important; overflow-wrap:anywhere !important; }
+    @media print {
+      body { padding:0 !important; }
+      /* card flui entre páginas — não pula inteiro deixando o topo vazio */
+      .card { break-inside:auto !important; page-break-inside:auto !important;
+              box-shadow:none !important; border:1px solid #e5e7eb !important; }
+      .card-head, .det-header { break-inside:avoid; }
+      .card-head { break-after:avoid; }
+      /* repete o cabeçalho/total da tabela em cada página */
+      .tbl thead { display:table-header-group; }
+      .tbl tfoot { display:table-footer-group; }
+      .tbl tr { break-inside:avoid; }
+    }
+  `;
+  w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Demonstrativo</title>${stylesTags}<style>${printCss}</style></head><body>${container.innerHTML}</body></html>`);
+  w.document.close();
+  // Larguras proporcionais nas 13 colunas da tabela principal — dá mais espaço
+  // pra Cliente/Obs e mantém as colunas curtas compactas (table-layout:fixed).
+  try {
+    const larguras = [7,5,8,11,8,6,6,6,9,9,8,8,9];
+    w.document.querySelectorAll('table.tbl').forEach(t => {
+      const ths = t.querySelectorAll('thead > tr > th');
+      if (ths.length === 13) ths.forEach((th,i) => th.style.width = larguras[i] + '%');
+    });
+  } catch(e) {}
+  setTimeout(() => { w.focus(); w.print(); }, 700);
+}
+
+function toggleOverviewDemo(nome) {
+  const id = 'ov-demo-' + nome.replace(/[^a-zA-Z0-9]/g,'_');
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('hidden');
+}
+
+// ═══ ADMIN: USERS ═══
+// Gera um login (username) a partir do nome: "JOSE BATISTA" -> "jose.batista".
+// Usa primeiro + último nome e trata duplicados (jose.batista, jose.batista2, ...).
+function gerarUsername(nome, users) {
+  const partes = (nome || '').normalize('NFD').replace(/[̀-ͯ]/g,'')
+    .toLowerCase().replace(/[^a-z\s]/g,' ').trim().split(/\s+/).filter(Boolean);
+  let base = partes[0] || 'usuario';
+  if (partes.length > 1) base += '.' + partes[partes.length - 1];
+  let username = base, n = 2;
+  while (users.some(u => (u.username || '').toLowerCase() === username)) {
+    username = base + n; n++;
+  }
+  return username;
+}
+
+async function addUser() {
+  const nome = document.getElementById('nu-nome').value.trim().toUpperCase();
+  const tipo = document.getElementById('nu-tipo').value;
+  const msg = document.getElementById('add-msg');
+  const senhaInput = document.getElementById('nu-senha');
+  const senhaCustom = senhaInput ? senhaInput.value.trim() : '';
+  if(!nome || nome.length < 3){ msg.innerHTML='<div class="alert alert-warn">Nome invalido.</div>'; return; }
+  const users = await DB.getAllUsers();
+  if(users.find(u => u.nome === nome)){ msg.innerHTML='<div class="alert alert-err">Ja existe um usuario com esse nome.</div>'; return; }
+  // Login gerado automaticamente — não precisa de CPF
+  const username = gerarUsername(nome, users);
+  // Senha: a que o admin digitou, ou o próprio login como senha inicial
+  const senha = senhaCustom || username;
+  if(senha.length < 6){ msg.innerHTML='<div class="alert alert-warn">A senha inicial deve ter no minimo 6 caracteres.</div>'; return; }
+  // CPF interno aleatório (não é exibido nem pedido — o login é por username)
+  const cpf = String(Math.floor(10000000000 + Math.random() * 89999999999));
+  try {
+    await criarUsuarioCompleto({ nome, cpf, username, senha, tipo });
+    registrarLog('usuario_acao', `Criou usuário ${nome} (${tipo})`);
+    msg.innerHTML=`<div class="alert alert-ok">${nome} cadastrado!<br>Login: <strong>${username}</strong> &nbsp;·&nbsp; Senha: <strong>${senha}</strong></div>`;
+    document.getElementById('nu-nome').value='';
+    if (senhaInput) senhaInput.value='';
+    await renderUsers();
+  } catch(e) {
+    msg.innerHTML='<div class="alert alert-err">Erro: '+(e.message||e)+'</div>';
+  }
+}
+// Modo de ordenação da tabela de usuários
+let _usersSort = 'role'; // 'role' (default) | 'login_recent' | 'login_oldest' | 'name'
+
+async function renderUsers() {
+  const users = await DB.getAllUsers();
+  const el = document.getElementById('users-list');
+  document.getElementById('user-count').textContent = users.length + ' usuarios';
+  // Busca último login (assinatura de senha) via RPC — fallback p/ quem ainda
+  // não tem ultimo_acesso registrado (pré-deploy desta feature).
+  let loginsMap = {};
+  try {
+    if (USE_SUPABASE && (currentUser.tipo === 'master' || currentUser.tipo === 'admin')) {
+      const { data: logins } = await sb.rpc('listar_logins_usuarios');
+      if (logins) logins.forEach(l => { loginsMap[l.auth_id] = l.last_sign_in_at; });
+    }
+  } catch(e) { console.warn('Não foi possível buscar últimos logins:', e); }
+  // Último acesso REAL ao portal (ultimo_acesso); cai pro último login se vazio
+  users.forEach(u => { u._last_login = u.ultimo_acesso || (u.auth_id ? loginsMap[u.auth_id] : null); });
+  // Ranking pra medalhas: pelos campos novos total_sessoes e dias_ativos_mes
+  // Todos os tipos competem (admin, master, sócio, consultor, parceiro) — campeão é quem usa mais.
+  // Só dá medalha pra quem tem valor > 0 (senão "ninguém usou ainda" virava campeão).
+  const _topSessoes = [...users].filter(u => (u.total_sessoes||0) > 0).sort((a,b)=>(b.total_sessoes||0)-(a.total_sessoes||0)).slice(0,3).map(u=>u.cpf);
+  const _topDias = [...users].filter(u => (u.dias_ativos_mes||0) > 0).sort((a,b)=>(b.dias_ativos_mes||0)-(a.dias_ativos_mes||0)).slice(0,3).map(u=>u.cpf);
+  const _medal = (cpf, top) => {
+    const i = top.indexOf(cpf);
+    return i === 0 ? '🥇 ' : i === 1 ? '🥈 ' : i === 2 ? '🥉 ' : '';
+  };
+  // Ordena de acordo com _usersSort
+  const _rank = t => (t==='master'?0:t==='admin'?1:t==='socio'?2:3);
+  if (_usersSort === 'login_recent') {
+    users.sort((a,b) => (new Date(b._last_login||0)) - (new Date(a._last_login||0)));
+  } else if (_usersSort === 'login_oldest') {
+    users.sort((a,b) => {
+      // Nunca logaram aparecem por último
+      const da = a._last_login ? new Date(a._last_login).getTime() : Infinity;
+      const db = b._last_login ? new Date(b._last_login).getTime() : Infinity;
+      return da - db;
+    });
+  } else if (_usersSort === 'name') {
+    users.sort((a,b) => (a.nome||'').localeCompare(b.nome||''));
+  } else if (_usersSort === 'sessoes') {
+    users.sort((a,b) => (b.total_sessoes||0) - (a.total_sessoes||0));
+  } else if (_usersSort === 'dias_mes') {
+    users.sort((a,b) => (b.dias_ativos_mes||0) - (a.dias_ativos_mes||0));
+  } else {
+    users.sort((a,b) => {
+      const ra = _rank(a.tipo), rb = _rank(b.tipo);
+      if (ra !== rb) return ra - rb;
+      return (a.nome||'').localeCompare(b.nome||'');
+    });
+  }
+  // Helper pra formatar data de login (relativo: "hoje", "2 dias", "nunca", etc.)
+  const fmtUltimoLogin = (iso) => {
+    if (!iso) return '<span style="color:var(--text3);font-style:italic;font-size:11px">nunca</span>';
+    const d = new Date(iso);
+    const diffMs = Date.now() - d.getTime();
+    const diffH = diffMs / (1000*60*60);
+    const diffD = diffH / 24;
+    let texto, cor;
+    if (diffH < 1) { texto = 'agora'; cor = '#10B981'; }
+    else if (diffH < 24) { texto = Math.floor(diffH) + 'h atrás'; cor = '#10B981'; }
+    else if (diffD < 7) { texto = Math.floor(diffD) + 'd atrás'; cor = 'var(--text)'; }
+    else if (diffD < 30) { texto = Math.floor(diffD/7) + 'sem atrás'; cor = 'var(--text2)'; }
+    else if (diffD < 365) { texto = Math.floor(diffD/30) + 'mês atrás'; cor = '#F59E0B'; }
+    else { texto = Math.floor(diffD/365) + 'a atrás'; cor = '#DC2626'; }
+    const dataLocal = d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+    return `<span style="font-size:11px;color:${cor}" title="${dataLocal}">${texto}</span>`;
+  };
+  const rows = users.map(u => {
+    const tc = u.tipo==='master'?'tag-amber':u.tipo==='admin'?'tag-navy':u.tipo==='socio'?'tag-teal':'tag-blue';
+    const tl = u.tipo==='master'?'Master':u.tipo==='admin'?'Admin':u.tipo==='socio'?'S&oacute;cio':u.tipo==='parceiro'?'Parceiro':'Consultor';
+    const userLogin = u.username ? u.username : `<span style="color:var(--text3);font-style:italic">(sem usu&aacute;rio)</span>`;
+    // Senha oculta por padrão; admin clica no olho para revelar (necessário para testar acesso)
+    const senhaDisplay = u.senha
+      ? `<span class="senha-cell" data-senha="${(u.senha+'').replace(/"/g,'&quot;')}" style="display:inline-flex;align-items:center;gap:6px"><span class="senha-val mono" style="font-size:11px">&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;</span><button type="button" onclick="toggleSenhaCell(this)" title="Mostrar/ocultar senha" style="background:none;border:0;padding:2px;cursor:pointer;color:var(--text3)"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span>`
+      : '<span style="color:var(--text3)">&mdash;</span>';
+    const canDel = u.cpf !== currentUser.cpf;
+    // Contadores de uso: medalha se top 3 (entre consultor/sócio/parceiro)
+    const sessoesNum = u.total_sessoes || 0;
+    const diasNum = u.dias_ativos_mes || 0;
+    const sessoesCell = `<span style="font-size:11.5px;font-weight:600;color:var(--text)" title="Total de sessões (gaps de 30min+)">${_medal(u.cpf, _topSessoes)}${sessoesNum}</span>`;
+    const diasCell = `<span style="font-size:11.5px;font-weight:600;color:var(--text)" title="Dias ativos no mês corrente">${_medal(u.cpf, _topDias)}${diasNum}</span>`;
+    return `<tr>
+      <td><span class="tag ${tc}" style="font-size:9px">${tl}</span></td>
+      <td style="font-weight:600;font-size:12px">${u.nome}</td>
+      <td class="mono" style="font-size:12px">${userLogin}</td>
+      <td>${senhaDisplay}</td>
+      <td>${fmtUltimoLogin(u._last_login)}</td>
+      <td style="text-align:center">${sessoesCell}</td>
+      <td style="text-align:center">${diasCell}</td>
+      <td style="text-align:right;white-space:nowrap">
+        ${(currentUser.tipo === 'master' && u.tipo !== 'master') ? `<button class="btn btn-outline btn-sm" onclick="abrirPermissoes('${u.cpf}')">Permissões</button>` : ''}
+        <button class="btn btn-outline btn-sm" onclick="editarUsername('${u.cpf}')">Editar usuário</button>
+        <button class="btn btn-outline btn-sm" onclick="resetPw('${u.cpf}')">Reset senha</button>
+        ${canDel ? `<button class="btn btn-danger btn-sm" onclick="delUser('${u.cpf}')">Remover</button>` : ''}
+      </td>
+    </tr>`;
+  }).join('');
+  // Cabeçalho clicável: alterna direção quando já ativo (ex: login_recent ↔ login_oldest)
+  const sortArrow = (cols) => {
+    if (cols.includes(_usersSort)) {
+      if (_usersSort === 'login_recent') return ' <span style="color:var(--mp-yellow,#C8C84A)">▼</span>';
+      if (_usersSort === 'login_oldest') return ' <span style="color:var(--mp-yellow,#C8C84A)">▲</span>';
+      return ' <span style="color:var(--mp-yellow,#C8C84A)">▼</span>';
+    }
+    return '';
+  };
+  el.innerHTML = `
+    <div class="tbl-wrap" style="padding:0">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th onclick="setUsersSort('role')" style="cursor:pointer;user-select:none" title="Ordenar por tipo">Tipo${sortArrow(['role'])}</th>
+            <th onclick="setUsersSort('name')" style="cursor:pointer;user-select:none" title="Ordenar por nome">Nome${sortArrow(['name'])}</th>
+            <th>Usu&aacute;rio</th>
+            <th>Senha</th>
+            <th onclick="toggleUsersSortLogin()" style="cursor:pointer;user-select:none" title="Clique pra alternar mais recente / mais antigo">&Uacute;ltimo acesso${sortArrow(['login_recent','login_oldest'])}</th>
+            <th onclick="setUsersSort('sessoes')" style="cursor:pointer;user-select:none;text-align:center" title="Total de sess&otilde;es (gaps de 30min+) &mdash; clique pra ordenar">Sess&otilde;es${sortArrow(['sessoes'])}</th>
+            <th onclick="setUsersSort('dias_mes')" style="cursor:pointer;user-select:none;text-align:center" title="Dias ativos no m&ecirc;s &mdash; clique pra ordenar">Dias/m&ecirc;s${sortArrow(['dias_mes'])}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+}
+
+function setUsersSort(key) {
+  _usersSort = key;
+  renderUsers();
+}
+
+// Header "Último login": alterna entre mais recente (▼) e mais antigo (▲)
+function toggleUsersSortLogin() {
+  _usersSort = (_usersSort === 'login_recent') ? 'login_oldest' : 'login_recent';
+  renderUsers();
+}
+// Toggle de revelar senha na tabela de usuários (admin only)
+function toggleSenhaCell(btn) {
+  const cell = btn.closest('.senha-cell');
+  if (!cell) return;
+  const span = cell.querySelector('.senha-val');
+  const senha = cell.getAttribute('data-senha') || '';
+  const oculta = '••••••••';
+  if (span.textContent === oculta) {
+    span.textContent = senha;
+    span.style.color = 'var(--text)';
+  } else {
+    span.textContent = oculta;
+    span.style.color = '';
+  }
+}
+
+// Gera senha temporária forte (10 chars: maiúscula+minúscula+número+símbolo)
+function gerarSenhaTemporaria() {
+  const mai = 'ABCDEFGHJKLMNPQRSTUVWXYZ';   // sem I/O (confusão visual)
+  const min = 'abcdefghjkmnpqrstuvwxyz';
+  const num = '23456789';                     // sem 0/1
+  const sim = '!@#$%&*';
+  const todos = mai + min + num + sim;
+  const pick = (s) => s[Math.floor(Math.random()*s.length)];
+  // Garante ao menos 1 de cada categoria
+  let s = pick(mai) + pick(min) + pick(num) + pick(sim);
+  for (let i=0; i<6; i++) s += pick(todos);
+  // Embaralha
+  return s.split('').sort(()=>Math.random()-0.5).join('');
+}
+
+async function resetPw(cpf) {
+  const u = await DB.getUser(cpf);
+  if (!u) { alert('Usuário não encontrado.'); return; }
+  if (!confirm(`Resetar a senha de ${u.nome}?\n\nUma senha temporária forte será gerada. Você precisará informá-la ao usuário, que será obrigado a trocar no próximo login.`)) return;
+  const senhaFinal = gerarSenhaTemporaria();
+  try {
+    if (USE_SUPABASE) {
+      const { error } = await sb.rpc('admin_resetar_senha', { cpf_param: cpf, nova_senha: senhaFinal });
+      if (error) throw error;
+    } else {
+      await DB.updateUser(cpf, { senha: senhaFinal });
+    }
+    // Mostra a senha temporária UMA vez para o admin copiar/passar ao usuário
+    prompt(`Senha temporária de ${u.nome}:\n\nCopie e envie ao usuário. Esta tela não vai mostrar a senha de novo.`, senhaFinal);
+  } catch(e) { alert('Erro: ' + (e.message||e)); }
+}
+
+// ═══ PERMISSÕES POR USUÁRIO ═══
+// Módulos gateáveis do menu lateral. (perfil sempre visível; admin tem própria seção)
+const MODULOS_MENU = [
+  { key: 'dashboard_vendas', label: 'Dashboard Vendas',     navId: 'ni-dashboard-vendas',     screen: 'dashboard-vendas', secao: 'menu' },
+  { key: 'assembleia',       label: 'Resultado Assembleia', navId: 'ni-assembleia',           screen: 'assembleia',        secao: 'menu' },
+  { key: 'lances',           label: 'Consulta de Lances',   navId: 'ni-lances',               screen: 'lances',            secao: 'menu' },
+  { key: 'analise_carteira', label: 'Análise de Carteira',  navId: 'ni-analise-carteira',     screen: 'analise-carteira',  secao: 'menu' },
+  { key: 'simuladores',      label: 'Simuladores',          navId: 'ni-simuladores',          screen: 'simuladores',       secao: 'menu' },
+  { key: 'tabelas',          label: 'Tabelas',              navId: 'ni-tabelas',              screen: 'tabelas',           secao: 'menu' },
+  { key: 'demonstrativo',    label: 'Demonstrativo',        navId: 'ni-dashboard',            screen: 'dashboard',         secao: 'menu' },
+  { key: 'historico',        label: 'Histórico',            navId: 'ni-historico',            screen: 'historico',         secao: 'menu' },
+  { key: 'faturamento',      label: 'Faturamento',          navId: 'ni-admin-faturamento',    screen: 'admin-faturamento', secao: 'menu' },
+  { key: 'admin_adesao',     label: 'Formulário de Adesão', navId: 'ni-admin-adesao',         screen: 'admin-adesao',      secao: 'menu' },
+  { key: 'base_conhecimento',label: 'Material de Apoio', navId: 'ni-base-conhecimento',     screen: 'base-conhecimento', secao: 'menu' },
+  { key: 'admin_overview',   label: 'Visão Geral',          navId: 'ni-admin-overview',       screen: 'admin-overview',    secao: 'admin' },
+  { key: 'admin_upload',     label: 'Upload Demonstrativos',navId: 'ni-admin-upload',         screen: 'admin-upload',      secao: 'admin' },
+  { key: 'painel_split',     label: 'Painel Split',         navId: 'ni-painel',               screen: 'painel',            secao: 'admin' },
+  { key: 'logs',             label: 'Logs de Atividade',    navId: 'ni-logs',                 screen: 'logs',              secao: 'admin' }
+];
+
+// CPF do usuário cuja modal de permissões está aberta no momento
+let _permCpfAtual = null;
+
+async function abrirPermissoes(cpf) {
+  const u = await DB.getUser(cpf);
+  if (!u) { alert('Usuário não encontrado.'); return; }
+  _permCpfAtual = cpf;
+  document.getElementById('perm-user-nome').textContent = u.nome + (u.tipo ? ' · ' + u.tipo : '');
+  const perms = u.permissoes || {};
+  // Se permissoes é null/undefined → checa tudo (default = vê tudo)
+  const semConfig = !u.permissoes;
+  let lastSecao = '';
+  const html = MODULOS_MENU.map(m => {
+    let header = '';
+    if (m.secao !== lastSecao) {
+      const titulo = m.secao === 'admin' ? 'Administração' : 'Menu';
+      header = `<div style="font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--text3,#6b7280);text-transform:uppercase;margin:${lastSecao ? '12px' : '0'} 0 4px">${titulo}</div>`;
+      lastSecao = m.secao;
+    }
+    // Menu: default visível (semConfig → checked). Administração: default oculto (semConfig → unchecked).
+    const checked = m.secao === 'admin'
+      ? perms[m.key] === true
+      : (semConfig || perms[m.key] !== false);
+    return header + `<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border,#e5e7eb);border-radius:8px;cursor:pointer;font-size:13px;color:var(--text,#111)">
+      <input type="checkbox" data-perm-key="${m.key}" ${checked ? 'checked' : ''} style="width:16px;height:16px;cursor:pointer">
+      <span>${m.label}</span>
+    </label>`;
+  }).join('');
+  document.getElementById('perm-checklist').innerHTML = html;
+  document.getElementById('modal-permissoes').style.display = 'flex';
+}
+
+function fecharPermissoes() {
+  document.getElementById('modal-permissoes').style.display = 'none';
+  _permCpfAtual = null;
+}
+
+function marcarTodasPerm(valor) {
+  document.querySelectorAll('#perm-checklist input[type="checkbox"]').forEach(cb => cb.checked = !!valor);
+}
+
+async function salvarPermissoes() {
+  if (!_permCpfAtual) return;
+  const perms = {};
+  document.querySelectorAll('#perm-checklist input[type="checkbox"]').forEach(cb => {
+    perms[cb.getAttribute('data-perm-key')] = cb.checked;
+  });
+  try {
+    let _alvoNome = _permCpfAtual;
+    try { const _u = await DB.getUser(_permCpfAtual); if (_u && _u.nome) _alvoNome = _u.nome; } catch(e) {}
+    await DB.updateUser(_permCpfAtual, { permissoes: perms });
+    registrarLog('usuario_acao', `Alterou permissões de ${_alvoNome}`);
+    fecharPermissoes();
+    await renderUsers();
+  } catch(e) { alert('Erro ao salvar: ' + (e.message||e)); }
+}
+
+// Aplica filtro de permissões no sidebar (esconde itens não permitidos).
+// Chamar após login e após qualquer refresh do usuário corrente.
+function aplicarPermissoesUI() {
+  if (!currentUser) return;
+  // Master sempre vê tudo.
+  if (currentUser.tipo === 'master') return;
+  const perms = currentUser.permissoes || {};
+  const semConfig = !currentUser.permissoes || typeof currentUser.permissoes !== 'object';
+  MODULOS_MENU.forEach(m => {
+    const el = document.getElementById(m.navId);
+    if (!el) return;
+    let visible;
+    if (m.secao === 'admin') {
+      // Administração: default oculto, só visível se permissoes[key] === true
+      visible = perms[m.key] === true;
+    } else {
+      // Menu: default visível, oculto só se permissoes[key] === false
+      visible = semConfig || perms[m.key] !== false;
+    }
+    // Exceção: Formulário de Adesão é visível pra TODOS os tipos
+    // (qualquer consultor/sócio/parceiro precisa do link pros clientes)
+    if (m.key === 'admin_adesao') {
+      visible = true;
+    }
+    // Exceção: Logs de Atividade — visível APENAS para o Master (gate por tipo)
+    if (m.key === 'logs') {
+      visible = (currentUser.tipo === 'master');
+    }
+    if (visible) el.classList.remove('hidden');
+    else el.classList.add('hidden');
+  });
+  // Se nenhum item de Administração está visível, esconde o bloco admin-nav inteiro
+  const adminNav = document.getElementById('admin-nav');
+  if (adminNav) {
+    const algumAdminVisivel = MODULOS_MENU.some(m =>
+      m.secao === 'admin' && perms[m.key] === true
+    );
+    // Master vê admin-nav sempre; admin só se tiver algum item liberado
+    if (currentUser.tipo === 'admin' && !algumAdminVisivel) {
+      adminNav.classList.add('hidden');
+    }
+  }
+}
+
+// Bloqueia navegação direta a um módulo que o usuário não pode acessar.
+// Retorna true se permitido, false se bloqueado.
+function podeAcessarScreen(screenId) {
+  if (!currentUser) return true;
+  if (currentUser.tipo === 'master') return true;
+  // Formulário de Adesão é permitido pra TODOS os tipos
+  if (screenId === 'admin-adesao') return true;
+  // Feedbacks: só master e sócio
+  if (screenId === 'feedbacks') return (currentUser.tipo === 'master' || currentUser.tipo === 'socio');
+  // Logs de Atividade: somente Master
+  if (screenId === 'logs') return (currentUser.tipo === 'master');
+  // Sala de Reunião: liberada pra todos os tipos
+  if (screenId === 'sala') return true;
+  const m = MODULOS_MENU.find(x => x.screen === screenId);
+  if (!m) return true; // screens não-gateáveis (perfil etc) liberadas
+  const perms = currentUser.permissoes || {};
+  const semConfig = !currentUser.permissoes || typeof currentUser.permissoes !== 'object';
+  if (m.secao === 'admin') {
+    // Administração: default negado, só libera se permissoes[key] === true
+    return perms[m.key] === true;
+  }
+  // Menu: default permitido, só nega se permissoes[key] === false
+  return semConfig || perms[m.key] !== false;
+}
+
+// Permite o admin editar o username (login) de um usuário já criado.
+// Útil quando o painel gera username esquisito (ex: "le.-" pro Edson) e
+// quer trocar manualmente. Não mexe na senha.
+async function editarUsername(cpf) {
+  const u = await DB.getUser(cpf);
+  if (!u) { alert('Usuário não encontrado.'); return; }
+  const atual = u.username || '(sem username)';
+  const novo = prompt(
+    `Editar username de ${u.nome}\n\nUsername atual: ${atual}\n\nNovo username (apenas letras minúsculas, números e ponto. Ex: edson.parceiro):`,
+    u.username || ''
+  );
+  if (!novo || novo === u.username) return;
+  const trimmed = String(novo).trim().toLowerCase();
+  if (!/^[a-z0-9.]+$/.test(trimmed)) {
+    alert('Username inválido. Use apenas letras minúsculas, números e ponto. Ex: edson.parceiro');
+    return;
+  }
+  try {
+    if (USE_SUPABASE) {
+      const { error } = await sb.from('portal_users').update({ username: trimmed }).eq('cpf', cpf);
+      if (error) throw error;
+    } else {
+      await DB.updateUser(cpf, { username: trimmed });
+    }
+    alert(`Username atualizado para "${trimmed}".\n\nO usuário pode usar esse login a partir de agora.`);
+    await renderUsers();
+  } catch(e) {
+    const msg = String(e.message||e);
+    if (/duplicate|unique/i.test(msg)) {
+      alert('Esse username já está em uso por outro usuário. Escolha outro.');
+    } else {
+      alert('Erro: ' + msg);
+    }
+  }
+}
+
+async function delUser(cpf) {
+  const u = await DB.getUser(cpf);
+  if (!u || !confirm('Remover ' + u.nome + '? Essa ação é irreversível.')) return;
+  try {
+    if (USE_SUPABASE) {
+      const { error } = await sb.rpc('admin_deletar_user', { cpf_param: cpf });
+      if (error) throw error;
+    } else {
+      await DB.deleteUser(cpf);
+    }
+    await renderUsers();
+  } catch(e) { alert('Erro: ' + (e.message||e)); }
+}
+
+
+// MÓDULO FATURAMENTO: extraído para faturamento.html (carregado via iframe lazy-load).
+
+// ═══ INIT ═══
+(async()=>{ await DB.init(); await checkSession(); })();
+</script>
+
+<!-- ════════════ MODAL DE CHAMADOS DE COMISSÃO ════════════ -->
+<div class="cham-overlay hidden" id="cham-overlay">
+  <div class="cham-modal" id="cham-modal">
+    <div class="cham-modal-head">
+      <div>
+        <div id="cham-modal-titulo" style="font-size:15px;font-weight:700;color:var(--mp-navy)">Novo chamado de comissão</div>
+        <div id="cham-modal-sub" style="font-size:11px;color:var(--text2);margin-top:2px"></div>
+      </div>
+      <button onclick="fecharChamadoModal()" style="background:transparent;border:0;font-size:22px;color:var(--text2);cursor:pointer;line-height:1">×</button>
+    </div>
+    <div class="cham-modal-body" id="cham-modal-body"></div>
+    <div class="cham-modal-foot" id="cham-modal-foot"></div>
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div id="cham-toast" style="display:none;position:fixed;bottom:24px;right:24px;background:var(--mp-navy);color:#fff;padding:13px 20px;border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.3);z-index:10000;font-size:13px;font-weight:600;max-width:340px"></div>
+
+<script>
+// ════════════════════════════════════════════════════════════════════
+// SISTEMA DE CHAMADOS DE COMISSÃO
+// ════════════════════════════════════════════════════════════════════
+let _chamFiltro = 'todos';
+let _chamLista = [];
+let _chamRealtimeSub = null;
+
+function _chamEhMaster() {
+  return currentUser && currentUser.tipo === 'master';
+}
+function _chamFmtData(ts) {
+  if (!ts) return '—';
+  const d = new Date(ts);
+  const hoje = new Date();
+  const ontem = new Date(Date.now() - 86400000);
+  if (d.toDateString() === hoje.toDateString()) return 'Hoje ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+  if (d.toDateString() === ontem.toDateString()) return 'Ontem ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+  return d.toLocaleDateString('pt-BR') + ' ' + d.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'});
+}
+function _chamEscape(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function _chamShowToast(msg, ms=4000) {
+  const t = document.getElementById('cham-toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  clearTimeout(t._tm);
+  t._tm = setTimeout(() => t.style.display = 'none', ms);
+}
+
+// ─── Carregar e renderizar lista de chamados ──────────────────────
+async function carregarChamados() {
+  try {
+    const { data, error } = await sb.from('portal_chamados_comissao')
+      .select('*')
+      .order('atualizado_em', { ascending: false });
+    if (error) throw error;
+    _chamLista = data || [];
+    renderChamadosLista();
+    atualizarBadgeHistorico();
+  } catch (e) {
+    console.error('Erro ao carregar chamados:', e);
+  }
+}
+
+function renderChamadosLista() {
+  const el = document.getElementById('cham-lista');
+  if (!el) return;
+  const lista = _chamLista.filter(c => _chamFiltro === 'todos' ? true : c.status === _chamFiltro);
+  if (lista.length === 0) {
+    el.innerHTML = `<div style="text-align:center;padding:24px;color:var(--text2);font-size:13px">${_chamLista.length === 0 ? 'Nenhum chamado aberto ainda. Clique em "Abrir chamado de comissão" pra criar.' : 'Nenhum chamado com esse filtro.'}</div>`;
+    return;
+  }
+  const ehMaster = _chamEhMaster();
+  el.innerHTML = lista.map(c => {
+    const stCls = 'cham-st-' + c.status;
+    const stLbl = c.status === 'aberto' ? 'Aberto' : c.status === 'respondido' ? 'Respondido' : 'Fechado';
+    // Tem resposta nova? Depende se é master ou consultor
+    let temNova = false;
+    if (ehMaster) {
+      temNova = c.status === 'aberto' && (!c.master_leu_em || new Date(c.master_leu_em) < new Date(c.atualizado_em));
+    } else {
+      temNova = c.status !== 'fechado' && c.ultima_resposta_em && (!c.consultor_leu_em || new Date(c.consultor_leu_em) < new Date(c.ultima_resposta_em));
+    }
+    return `
+      <div class="cham-card ${temNova ? 'tem-resposta-nova' : ''}" onclick="abrirThread('${c.id}')">
+        ${temNova ? '<div class="cham-novo-dot"></div>' : ''}
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:600;color:var(--mp-navy);margin-bottom:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${_chamEscape(c.assunto)}</div>
+          <div style="font-size:11px;color:var(--text2)">
+            ${ehMaster ? _chamEscape(c.consultor_nome) + ' · ' : ''}Última atualização: ${_chamFmtData(c.atualizado_em)}
+          </div>
+        </div>
+        <span class="cham-st ${stCls}">${stLbl}</span>
+      </div>`;
+  }).join('');
+}
+
+// ─── Badge no Histórico ───────────────────────────────────────────
+function atualizarBadgeHistorico() {
+  const badge = document.getElementById('ni-historico-badge');
+  if (!badge) return;
+  const ehMaster = _chamEhMaster();
+  const count = _chamLista.filter(c => {
+    if (ehMaster) return c.status === 'aberto' && (!c.master_leu_em || new Date(c.master_leu_em) < new Date(c.atualizado_em));
+    return c.status !== 'fechado' && c.ultima_resposta_em && (!c.consultor_leu_em || new Date(c.consultor_leu_em) < new Date(c.ultima_resposta_em));
+  }).length;
+  if (count > 0) { badge.textContent = count; badge.classList.add('visible'); }
+  else { badge.classList.remove('visible'); }
+  const titBadge = document.getElementById('cham-badge-titulo');
+  if (titBadge) {
+    if (count > 0) { titBadge.textContent = count + ' não lido' + (count>1?'s':''); titBadge.style.display = 'inline-block'; }
+    else { titBadge.style.display = 'none'; }
+  }
+}
+
+// ─── Filtros ──────────────────────────────────────────────────────
+document.addEventListener('click', (e) => {
+  const btn = e.target.closest('.cham-filtro-btn');
+  if (!btn) return;
+  document.querySelectorAll('.cham-filtro-btn').forEach(b => b.classList.remove('cham-filtro-ativo'));
+  btn.classList.add('cham-filtro-ativo');
+  _chamFiltro = btn.dataset.filtro;
+  renderChamadosLista();
+});
+
+// ─── Modal: novo chamado ──────────────────────────────────────────
+function abrirNovoChamado() {
+  if (!currentUser) { alert('Faça login pra abrir um chamado.'); return; }
+  document.getElementById('cham-modal-titulo').textContent = 'Novo chamado de comissão';
+  document.getElementById('cham-modal-sub').textContent = 'Descreva sua dúvida. Você será notificado quando responderem.';
+  document.getElementById('cham-modal-body').innerHTML = `
+    <div style="margin-bottom:14px">
+      <label style="display:block;font-size:11px;font-weight:600;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px">Assunto</label>
+      <input type="text" id="cham-novo-assunto" class="cham-input" placeholder="Ex: Comissão da venda Itaú VP025/513 não veio" maxlength="120">
+    </div>
+    <div style="margin-bottom:14px">
+      <label style="display:block;font-size:11px;font-weight:600;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px">Descrição</label>
+      <textarea id="cham-novo-texto" class="cham-input cham-textarea" placeholder="Explique com calma a dúvida ou problema..."></textarea>
+    </div>
+    <div>
+      <label style="display:block;font-size:11px;font-weight:600;color:var(--text2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px">Anexos (opcional)</label>
+      <input type="file" id="cham-novo-anexos" multiple style="font-size:12px">
+      <div style="font-size:10.5px;color:var(--text2);margin-top:4px">PDF, imagens, planilhas. Máx 10 MB por arquivo.</div>
+    </div>`;
+  document.getElementById('cham-modal-foot').innerHTML = `
+    <button onclick="fecharChamadoModal()" style="background:#fff;border:1px solid var(--border);color:var(--text2);padding:9px 16px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer">Cancelar</button>
+    <button onclick="salvarNovoChamado()" id="cham-btn-salvar" style="background:var(--mp-navy);color:#fff;border:0;padding:9px 18px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer">Abrir chamado</button>`;
+  document.getElementById('cham-overlay').classList.remove('hidden');
+  setTimeout(() => document.getElementById('cham-novo-assunto').focus(), 100);
+}
+
+async function salvarNovoChamado() {
+  const assunto = document.getElementById('cham-novo-assunto').value.trim();
+  const texto = document.getElementById('cham-novo-texto').value.trim();
+  const arquivos = Array.from(document.getElementById('cham-novo-anexos').files || []);
+  if (!assunto) { alert('Informe o assunto.'); return; }
+  if (!texto) { alert('Descreva sua dúvida.'); return; }
+  const btn = document.getElementById('cham-btn-salvar');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  try {
+    // Upload de anexos (se houver)
+    const anexos = await _chamUploadAnexos(arquivos);
+    const { data, error } = await sb.rpc('criar_chamado_comissao', {
+      p_assunto: assunto, p_mensagem: texto, p_anexos: anexos
+    });
+    if (error) throw error;
+    fecharChamadoModal();
+    await carregarChamados();
+    _chamShowToast('Chamado aberto! Você será notificado quando responderem.');
+    // Abre direto a thread
+    if (data) setTimeout(() => abrirThread(data), 400);
+  } catch (e) {
+    console.error(e);
+    alert('Erro ao abrir chamado: ' + (e.message || e));
+  } finally {
+    btn.disabled = false; btn.textContent = 'Abrir chamado';
+  }
+}
+
+// ─── Upload anexos pro bucket ─────────────────────────────────────
+async function _chamUploadAnexos(arquivos) {
+  if (!arquivos.length) return [];
+  const uid = currentUser?.auth_id || (await sb.auth.getSession()).data?.session?.user?.id;
+  if (!uid) throw new Error('Sem sessão');
+  const result = [];
+  for (const file of arquivos) {
+    if (file.size > 10 * 1024 * 1024) {
+      throw new Error('Arquivo "' + file.name + '" tem mais de 10 MB.');
+    }
+    const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+    const path = `${uid}/${Date.now()}_${safe}`;
+    const { error } = await sb.storage.from('chamados-anexos').upload(path, file, { cacheControl: '3600', upsert: false });
+    if (error) throw error;
+    result.push({ nome: file.name, path, tamanho: file.size, tipo: file.type });
+  }
+  return result;
+}
+
+async function _chamBaixarAnexo(path, nome) {
+  try {
+    const { data, error } = await sb.storage.from('chamados-anexos').createSignedUrl(path, 300);
+    if (error) throw error;
+    window.open(data.signedUrl, '_blank');
+  } catch (e) {
+    alert('Erro ao baixar anexo: ' + (e.message || e));
+  }
+}
+
+// ─── Modal: thread do chamado ─────────────────────────────────────
+async function abrirThread(chamadoId) {
+  const chamado = _chamLista.find(c => c.id === chamadoId);
+  if (!chamado) { alert('Chamado não encontrado.'); return; }
+  document.getElementById('cham-modal-titulo').textContent = chamado.assunto;
+  const stLbl = chamado.status === 'aberto' ? 'Aberto' : chamado.status === 'respondido' ? 'Respondido' : 'Fechado';
+  const ehMaster = _chamEhMaster();
+  document.getElementById('cham-modal-sub').innerHTML = `${ehMaster ? _chamEscape(chamado.consultor_nome) + ' · ' : ''}Status: <strong>${stLbl}</strong> · Aberto em ${_chamFmtData(chamado.criado_em)}`;
+  document.getElementById('cham-modal-body').innerHTML = '<div style="text-align:center;padding:20px;color:var(--text2);font-size:12px">Carregando mensagens...</div>';
+  document.getElementById('cham-modal-foot').innerHTML = '';
+  document.getElementById('cham-overlay').classList.remove('hidden');
+
+  try {
+    const { data: msgs, error } = await sb.from('portal_chamados_mensagens')
+      .select('*').eq('chamado_id', chamadoId).order('criado_em', { ascending: true });
+    if (error) throw error;
+    _renderThread(chamado, msgs || []);
+    // Só marca como lido se o badge NÃO estaria ativo pra esse user
+    // (não some o alerta enquanto ele ainda não respondeu / não fechou)
+    const ehMaster = _chamEhMaster();
+    const badgeAtivo = ehMaster
+      ? chamado.status === 'aberto'
+      : chamado.status !== 'fechado' && chamado.ultima_resposta_em;
+    if (!badgeAtivo) {
+      await sb.rpc('marcar_chamado_lido', { p_chamado_id: chamadoId });
+      await carregarChamados();
+    }
+  } catch (e) {
+    document.getElementById('cham-modal-body').innerHTML = '<div style="color:#DC2626;padding:14px">Erro: ' + (e.message || e) + '</div>';
+  }
+}
+
+function _renderThread(chamado, msgs) {
+  const ehMaster = _chamEhMaster();
+  const meuId = currentUser?.auth_id;
+  const html = msgs.map(m => {
+    const ehMinha = m.autor_auth_id === meuId;
+    const classe = m.autor_tipo === 'master' ? 'cham-msg-master' : 'cham-msg-consultor';
+    const anexos = (m.anexos || []).map(a => `<span class="cham-anexo-pill" onclick="_chamBaixarAnexo('${a.path}', '${_chamEscape(a.nome)}')"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>${_chamEscape(a.nome)}</span>`).join('');
+    return `
+      <div class="cham-msg ${classe}">
+        <div class="cham-msg-meta">${_chamEscape(m.autor_nome)} · ${_chamFmtData(m.criado_em)}</div>
+        <div>${_chamEscape(m.texto).replace(/\n/g,'<br>')}</div>
+        ${anexos ? '<div style="margin-top:6px">' + anexos + '</div>' : ''}
+      </div>`;
+  }).join('');
+  document.getElementById('cham-modal-body').innerHTML = `<div class="cham-thread">${html}</div>`;
+  // Footer: caixa de resposta (se não fechado)
+  if (chamado.status === 'fechado') {
+    // Reabrir liberado pra master E pro dono do chamado (a RPC já valida)
+    let html2 = `<div style="flex:1;font-size:12px;color:var(--text2);align-self:center">Chamado fechado.</div>`;
+    html2 += `<button onclick="acaoReabrir('${chamado.id}')" style="background:#fff;border:1px solid var(--border);color:var(--text2);padding:8px 14px;border-radius:7px;font-size:12px;font-weight:600;cursor:pointer">Reabrir</button>`;
+    document.getElementById('cham-modal-foot').innerHTML = html2;
+  } else {
+    document.getElementById('cham-modal-foot').innerHTML = `
+      <div style="flex:1">
+        <textarea id="cham-resp-texto" class="cham-input" style="min-height:60px;resize:vertical" placeholder="Escreva sua resposta..."></textarea>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+          <input type="file" id="cham-resp-anexos" multiple style="font-size:11px;flex:1">
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-self:flex-end">
+        <button onclick="acaoFechar('${chamado.id}')" style="background:#fff;border:1px solid var(--border);color:var(--text2);padding:7px 12px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer">Marcar como fechado</button>
+        <button onclick="enviarResposta('${chamado.id}')" id="cham-btn-resp" style="background:var(--mp-navy);color:#fff;border:0;padding:9px 18px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer">Enviar resposta</button>
+      </div>`;
+  }
+  // Scroll pro fim
+  const body = document.getElementById('cham-modal-body');
+  setTimeout(() => body.scrollTop = body.scrollHeight, 50);
+}
+
+async function enviarResposta(chamadoId) {
+  const texto = document.getElementById('cham-resp-texto').value.trim();
+  const arquivos = Array.from(document.getElementById('cham-resp-anexos').files || []);
+  if (!texto) { alert('Escreva a resposta.'); return; }
+  const btn = document.getElementById('cham-btn-resp');
+  btn.disabled = true; btn.textContent = 'Enviando...';
+  try {
+    const anexos = await _chamUploadAnexos(arquivos);
+    const { error } = await sb.rpc('responder_chamado_comissao', {
+      p_chamado_id: chamadoId, p_texto: texto, p_anexos: anexos
+    });
+    if (error) throw error;
+    await abrirThread(chamadoId);  // recarrega a thread
+    _chamShowToast('Resposta enviada.');
+  } catch (e) {
+    alert('Erro: ' + (e.message || e));
+    btn.disabled = false; btn.textContent = 'Enviar resposta';
+  }
+}
+async function acaoFechar(chamadoId) {
+  if (!confirm('Marcar este chamado como fechado?')) return;
+  try {
+    const { error } = await sb.rpc('fechar_chamado_comissao', { p_chamado_id: chamadoId });
+    if (error) throw error;
+    await carregarChamados();
+    await abrirThread(chamadoId);
+  } catch (e) { alert('Erro: ' + (e.message || e)); }
+}
+async function acaoReabrir(chamadoId) {
+  try {
+    const { error } = await sb.rpc('reabrir_chamado_comissao', { p_chamado_id: chamadoId });
+    if (error) throw error;
+    await carregarChamados();
+    await abrirThread(chamadoId);
+  } catch (e) { alert('Erro: ' + (e.message || e)); }
+}
+function fecharChamadoModal() {
+  document.getElementById('cham-overlay').classList.add('hidden');
+}
+
+// ─── Realtime: badge atualiza sozinho ─────────────────────────────
+function _chamSetupRealtime() {
+  if (_chamRealtimeSub) return;
+  _chamRealtimeSub = sb.channel('chamados-realtime')
+    .on('postgres_changes', { event:'*', schema:'public', table:'portal_chamados_comissao' }, async () => {
+      await carregarChamados();
+    })
+    .on('postgres_changes', { event:'INSERT', schema:'public', table:'portal_chamados_mensagens' }, async (payload) => {
+      // Notifica via toast se a mensagem é de outra pessoa
+      const meuId = currentUser?.auth_id;
+      if (payload.new.autor_auth_id !== meuId) {
+        const ehMasterMsg = payload.new.autor_tipo === 'master';
+        if (_chamEhMaster() && !ehMasterMsg) {
+          _chamShowToast('Novo chamado de ' + payload.new.autor_nome);
+        } else if (!_chamEhMaster() && ehMasterMsg) {
+          _chamShowToast('Resposta recebida no seu chamado de comissão');
+        }
+        await carregarChamados();
+      }
+    })
+    .subscribe();
+}
+
+// Inicializa quando o usuário estiver logado
+function _chamInit() {
+  if (currentUser && currentUser.auth_id) {
+    carregarChamados();
+    _chamSetupRealtime();
+  }
+}
+// Tenta inicializar a cada 2s até logar (simples; o sistema chama renderDashboard depois do login)
+const _chamInterval = setInterval(() => {
+  if (currentUser && currentUser.auth_id) {
+    _chamInit();
+    clearInterval(_chamInterval);
+  }
+}, 1500);
+
+// Fecha modal com ESC
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fecharChamadoModal(); });
+// Fecha modal clicando fora
+document.getElementById('cham-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'cham-overlay') fecharChamadoModal();
+});
+</script>
+
+</body>
+</html>

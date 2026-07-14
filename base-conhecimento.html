@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master Prime — Material de Apoio</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --mp-navy:   #2D3F5E;
+  --mp-navy-d: #1E2D45;
+  --mp-yellow: #C8C84A;
+  --mp-teal:   #4DBCC8;
+  --mp-blue:   #7A9BC8;
+  --bg:        #F4F6FA;
+  --card:      #FFFFFF;
+  --border:    #E2E8F0;
+  --border2:   #CBD5E1;
+  --text:      #1E293B;
+  --text2:     #64748B;
+  --text3:     #94A3B8;
+  --bradesco:  #CC092F;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: var(--bg); color: var(--text); font-family: 'Inter', -apple-system, system-ui, sans-serif; font-size: 13px; min-height: 100vh; }
+
+.wrap { padding: 32px 40px 56px; max-width: 1080px; margin: 0 auto; }
+
+/* ── Header ── */
+.kb-header { margin-bottom: 22px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; flex-wrap: wrap; }
+.kb-title { font-size: 24px; font-weight: 700; color: var(--mp-navy); letter-spacing: -0.4px; display: flex; align-items: center; gap: 10px; }
+.kb-title svg { width: 24px; height: 24px; color: var(--mp-teal); }
+.kb-sub { font-size: 13px; color: var(--text2); margin-top: 6px; }
+.dl-jump {
+  display: inline-flex; align-items: center; gap: 7px; flex-shrink: 0;
+  padding: 9px 14px; border-radius: 10px;
+  border: 1px solid var(--border2); background: var(--card);
+  font-size: 12.5px; font-weight: 600; color: var(--mp-navy);
+  cursor: pointer; font-family: inherit; transition: all .15s ease; white-space: nowrap;
+}
+.dl-jump:hover { border-color: var(--mp-teal); color: var(--mp-teal); box-shadow: 0 2px 7px rgba(45,63,94,.1); }
+.dl-jump svg { width: 15px; height: 15px; }
+
+/* ── Administradora pills ── */
+.adm-row { display: flex; gap: 10px; margin: 18px 0 16px; flex-wrap: wrap; }
+.adm-pill {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 16px; border-radius: 10px;
+  border: 1px solid var(--border); background: var(--card);
+  font-size: 13px; font-weight: 600; color: var(--text2);
+  cursor: pointer; font-family: inherit; transition: all .15s ease;
+}
+.adm-pill .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.adm-pill.active { border-color: var(--mp-navy); color: var(--mp-navy); background: #fff; box-shadow: 0 2px 7px rgba(45,63,94,.14); }
+.adm-pill.soon { opacity: .6; cursor: not-allowed; }
+.adm-pill .soon-tag { font-size: 9px; font-weight: 700; letter-spacing: .5px; text-transform: uppercase; background: #FEF3C7; color: #A16207; padding: 2px 6px; border-radius: 5px; }
+
+/* ── Search ── */
+.search-box { position: relative; margin-bottom: 14px; }
+.search-box svg.ico { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: var(--text3); pointer-events: none; }
+#search {
+  width: 100%; padding: 14px 44px 14px 44px;
+  border: 1px solid var(--border2); border-radius: 12px;
+  font-size: 14px; font-family: inherit; color: var(--text);
+  background: var(--card); outline: none; transition: border-color .15s, box-shadow .15s;
+}
+#search:focus { border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,.14); }
+#search::placeholder { color: var(--text3); }
+.search-clear {
+  position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+  width: 26px; height: 26px; border: 0; border-radius: 7px; background: transparent;
+  color: var(--text3); cursor: pointer; display: none; align-items: center; justify-content: center;
+}
+.search-clear:hover { background: var(--bg); color: var(--text2); }
+.search-clear.show { display: flex; }
+
+/* ── Category chips ── */
+.chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+.chip {
+  padding: 7px 13px; border-radius: 20px; border: 1px solid var(--border);
+  background: var(--card); color: var(--text2); font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: all .14s ease; white-space: nowrap;
+}
+.chip:hover { border-color: var(--mp-teal); color: var(--mp-navy); }
+.chip.active { background: var(--mp-navy); border-color: var(--mp-navy); color: #fff; }
+.chip .c-count { opacity: .65; font-weight: 600; margin-left: 3px; }
+
+/* ── Result info ── */
+.result-info { font-size: 12px; color: var(--text2); margin-bottom: 14px; font-weight: 500; }
+.result-info b { color: var(--mp-navy); }
+
+/* ── Category section ── */
+.cat-section { margin-bottom: 28px; }
+.cat-head {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
+  padding-bottom: 8px; border-bottom: 2px solid var(--border);
+}
+.cat-head .cat-name { font-size: 15px; font-weight: 700; color: var(--mp-navy); letter-spacing: -0.2px; }
+.cat-head .cat-count {
+  font-size: 11px; font-weight: 700; color: var(--text2);
+  background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 2px 9px;
+}
+
+/* ── Q&A item ── */
+.kb-item {
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  margin-bottom: 8px; overflow: hidden; transition: border-color .14s, box-shadow .14s;
+}
+.kb-item:hover { border-color: var(--border2); }
+.kb-item.open { border-color: var(--mp-teal); box-shadow: 0 3px 12px rgba(45,63,94,.07); }
+@keyframes maiaCardGlow {
+  0%   { box-shadow: 0 0 0 0 rgba(13, 148, 136, .55), 0 3px 12px rgba(45,63,94,.10); border-color: var(--mp-teal); }
+  35%  { box-shadow: 0 0 0 6px rgba(13, 148, 136, .14), 0 6px 20px rgba(13,148,136,.18); border-color: var(--mp-teal); }
+  100% { box-shadow: 0 0 0 0 rgba(13, 148, 136, 0), 0 3px 12px rgba(45,63,94,.07); border-color: var(--mp-teal); }
+}
+.kb-item.maia-highlight { animation: maiaCardGlow 2.2s ease-out; }
+.kb-q {
+  width: 100%; text-align: left; background: transparent; border: 0; cursor: pointer;
+  padding: 15px 16px; display: flex; align-items: center; gap: 12px;
+  font-family: inherit; font-size: 13.5px; font-weight: 600; color: var(--mp-navy);
+}
+.kb-q .badge {
+  font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px;
+  color: var(--mp-teal); background: #ECFDFB; border: 1px solid #CFF3F0;
+  padding: 3px 7px; border-radius: 5px; flex-shrink: 0;
+}
+.kb-q .q-text { flex-grow: 1; }
+.kb-q .chev { width: 17px; height: 17px; color: var(--text3); flex-shrink: 0; transition: transform .18s ease; }
+.kb-item.open .kb-q .chev { transform: rotate(180deg); color: var(--mp-teal); }
+.kb-a { display: none; padding: 0 16px 16px 16px; }
+.kb-item.open .kb-a { display: block; }
+.kb-a-inner { border-top: 1px solid var(--border); padding-top: 13px; }
+.kb-a p { font-size: 13px; line-height: 1.62; color: var(--text); margin-bottom: 9px; }
+.kb-a p:last-child { margin-bottom: 0; }
+.kb-a ul, .kb-a ol { margin: 4px 0 11px; padding-left: 22px; }
+.kb-a li { font-size: 13px; line-height: 1.6; color: var(--text); margin-bottom: 5px; }
+.kb-a li:last-child { margin-bottom: 0; }
+.kb-a mark { background: #FEF3C7; color: inherit; padding: 0 2px; border-radius: 2px; }
+
+/* ── Empty ── */
+.empty {
+  text-align: center; padding: 56px 20px; color: var(--text2);
+}
+.empty svg { width: 46px; height: 46px; color: var(--border2); margin-bottom: 12px; }
+.empty .e-title { font-size: 15px; font-weight: 600; color: var(--mp-navy); margin-bottom: 4px; }
+.empty .e-desc { font-size: 12.5px; }
+
+/* ── Footnote ── */
+.kb-foot {
+  margin-top: 32px; padding-top: 16px; border-top: 1px solid var(--border);
+  font-size: 11.5px; color: var(--text3); line-height: 1.6;
+}
+
+/* ── Downloads ── */
+.dl-section { margin-top: 34px; }
+.dl-head { font-size: 16px; font-weight: 700; color: var(--mp-navy); letter-spacing: -0.2px; display: flex; align-items: center; gap: 8px; }
+.dl-head svg { width: 19px; height: 19px; color: var(--mp-teal); }
+.dl-sub { font-size: 12px; color: var(--text2); margin: 5px 0 14px; }
+.dl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(258px, 1fr)); gap: 12px; }
+.dl-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+  padding: 16px; display: flex; flex-direction: column; gap: 9px;
+  transition: border-color .14s, box-shadow .14s;
+}
+.dl-card:hover { border-color: var(--mp-teal); box-shadow: 0 3px 12px rgba(45,63,94,.07); }
+.dl-ico { width: 34px; height: 34px; border-radius: 8px; background: #FFF5F6; color: var(--bradesco); display: flex; align-items: center; justify-content: center; }
+.dl-ico svg { width: 19px; height: 19px; }
+.dl-titulo { font-size: 13.5px; font-weight: 700; color: var(--mp-navy); }
+.dl-desc { font-size: 12px; color: var(--text2); line-height: 1.5; flex-grow: 1; }
+.dl-btn {
+  display: inline-flex; align-items: center; gap: 6px; align-self: flex-start;
+  padding: 8px 14px; border-radius: 8px; background: var(--mp-navy); color: #fff;
+  font-size: 12px; font-weight: 600; text-decoration: none; transition: background .14s;
+}
+.dl-btn:hover { background: var(--mp-teal); }
+.dl-btn svg { width: 14px; height: 14px; }
+
+@media (max-width: 760px) {
+  .wrap { padding: 20px 15px 40px; }
+  .kb-title { font-size: 20px; }
+  .kb-q { padding: 13px 13px; font-size: 13px; }
+  .kb-q .badge { display: none; }
+}
+
+/* ─── Modo Comparativo (Porto · Itaú · Bradesco lado a lado) ─── */
+.adm-pill[data-adm="comparar"] .dot {
+  background: linear-gradient(135deg, #0a52a8 0%, #EC7000 50%, var(--bradesco) 100%);
+}
+.chip .cd { display:inline-block; width:6px; height:6px; border-radius:50%; margin-right:2px; vertical-align:middle; }
+.chip .cd-porto    { background: #0a52a8; }
+.chip .cd-itau     { background: #EC7000; }
+.chip .cd-bradesco { background: var(--bradesco); }
+/* Modo Comparativo — card único que abre os 3 bancos juntos */
+.kb-bg-row { display: inline-flex; gap: 3px; margin-right: 8px; flex-shrink: 0; align-items: center; }
+.kb-bg { display: inline-block; width: 7px; height: 7px; border-radius: 50%; }
+.kb-bg-porto    { background: #0a52a8; }
+.kb-bg-itau     { background: #EC7000; }
+.kb-bg-bradesco { background: var(--bradesco); }
+.kb-merged .kb-a-inner {
+  padding-top: 0; border-top: none;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.kb-bank-block {
+  border-left: 3px solid; border-radius: 6px;
+  padding: 11px 14px 12px; background: #FBFCFE;
+}
+.kb-bank-porto    { border-color: #0a52a8; }
+.kb-bank-itau     { border-color: #EC7000; }
+.kb-bank-bradesco { border-color: var(--bradesco); }
+.kb-bank-head { display: flex; align-items: baseline; gap: 8px; margin-bottom: 6px; }
+.kb-bank-name {
+  font-size: 10.5px; font-weight: 800; letter-spacing: .9px;
+  text-transform: uppercase;
+}
+.kb-bank-porto .kb-bank-name    { color: #0a52a8; }
+.kb-bank-itau .kb-bank-name     { color: #EC7000; }
+.kb-bank-bradesco .kb-bank-name { color: var(--bradesco); }
+.kb-bank-subtitulo { font-size: 11.5px; color: var(--text3); font-style: italic; }
+.kb-bank-body p { font-size: 13px; line-height: 1.6; color: var(--text); margin-bottom: 8px; }
+.kb-bank-body p:last-child { margin-bottom: 0; }
+.kb-bank-body ul, .kb-bank-body ol { margin: 4px 0 10px; padding-left: 20px; }
+.kb-bank-body li { font-size: 13px; line-height: 1.55; color: var(--text); margin-bottom: 4px; }
+.kb-bank-empty { font-size: 12px; color: var(--text3); font-style: italic; padding: 4px 0 2px; }
+@media (max-width: 760px) {
+  .kb-bank-block { padding: 10px 12px 11px; }
+  .kb-bank-body p, .kb-bank-body li { font-size: 12.5px; }
+}
+
+/* ─── Maia (Assistente IA) · pill com gradient ─── */
+.adm-pill[data-adm="ia"] {
+  position: relative;
+}
+.adm-pill[data-adm="ia"] .maia-pill-dot {
+  background-image: var(--maia-photo);
+  background-color: #2D3F5E;
+  background-size: 145% auto;
+  background-position: center 28%;
+  background-repeat: no-repeat;
+  box-shadow: 0 0 0 2px rgba(77,188,200,.18);
+}
+.adm-pill[data-adm="ia"]::after {
+  content: 'IA';
+  position: absolute; top: -6px; right: -8px;
+  background: linear-gradient(135deg, var(--mp-teal), var(--mp-navy));
+  color: #fff; font-size: 8px; font-weight: 800; letter-spacing: .5px;
+  padding: 2px 5px; border-radius: 4px;
+  box-shadow: 0 2px 5px rgba(45,63,94,.25);
+}
+
+/* ─── Avatar da Maia (foto da personagem, com fallback "M") ─── */
+:root {
+  --maia-photo: url('maia.png');
+  --maia-gradient: linear-gradient(135deg, #4DBCC8 0%, #7A9BC8 45%, #2D3F5E 100%);
+}
+.maia-avatar {
+  border-radius: 50%;
+  background-image: var(--maia-photo);
+  background-color: #2D3F5E;
+  background-size: 145% auto;  /* zoom no rosto, esconde o texto "MAIA" embaixo */
+  background-position: center 28%;
+  background-repeat: no-repeat;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 700;
+  position: relative; flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(45,63,94,.15);
+  overflow: hidden;
+}
+/* Letra M só aparece se a foto não carregar (não acontece se maia.png existe) */
+.maia-avatar::before { display: none; }
+.maia-avatar-sm { width: 26px; height: 26px; font-size: 12px; }
+.maia-avatar-md { width: 36px; height: 36px; font-size: 15px; }
+/* Avatar grande (boas-vindas): mostra a foto inteira com o anel decorativo
+   alinhado com o crop circular. background-size 105% deixa a imagem levemente
+   maior pra esconder o badge "MAIA AGENTE VIRTUAL" no rodapé.
+   position center 5% mostra o topo da foto (onde está o anel) e desce a Maia
+   pra o centro visual, alinhando o anel da imagem com o crop circular. */
+.maia-avatar-lg {
+  width: 110px; height: 110px; font-size: 26px; margin-bottom: 2px;
+  background-size: 105% auto;
+  background-position: center 5%;
+}
+
+/* ─── Chat ─── */
+.kbc-root {
+  background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+  overflow: hidden; display: flex; flex-direction: column;
+  height: calc(100vh - 200px); min-height: 420px; max-height: 720px;
+  box-shadow: 0 2px 12px rgba(45,63,94,.05);
+}
+.kbc-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, #FBFCFE 0%, #fff 100%);
+}
+.kbc-head-l { display: flex; align-items: center; gap: 12px; }
+.kbc-head-icon {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: linear-gradient(135deg, var(--mp-teal), var(--mp-navy));
+  color: #fff; display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.kbc-head-title {
+  font-size: 14px; font-weight: 700; color: var(--mp-navy);
+  display: flex; align-items: center; gap: 8px;
+}
+.kbc-head-status {
+  font-size: 10.5px; font-weight: 600; color: #16A34A;
+  letter-spacing: .3px;
+}
+.kbc-head-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.kbc-examples-label {
+  font-size: 10.5px; color: var(--text2); margin-top: 10px;
+  text-transform: uppercase; letter-spacing: .8px; font-weight: 600;
+}
+.kbc-clear {
+  display: inline-flex; align-items: center; gap: 5px;
+  border: 1px solid var(--border2); background: #fff; color: var(--text2);
+  font-size: 11.5px; font-weight: 600; padding: 6px 10px; border-radius: 7px;
+  cursor: pointer; font-family: inherit;
+}
+.kbc-clear:hover { background: #FEF2F2; color: #DC2626; border-color: #FCA5A5; }
+
+.kbc-messages {
+  flex: 1; overflow-y: auto; padding: 18px 18px 8px;
+  display: flex; flex-direction: column; gap: 14px;
+}
+
+.kbc-welcome {
+  text-align: center; padding: 18px 20px 12px; color: var(--text2);
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+}
+.kbc-welcome-icon {
+  font-size: 30px; width: 60px; height: 60px; border-radius: 50%;
+  background: linear-gradient(135deg, rgba(77,188,200,.12), rgba(45,63,94,.08));
+  display: flex; align-items: center; justify-content: center; margin-bottom: 2px;
+}
+.kbc-welcome h3 { font-size: 15px; font-weight: 700; color: var(--mp-navy); margin-top: 2px; }
+.kbc-welcome p { font-size: 12.5px; max-width: 420px; line-height: 1.45; margin-top: 2px; }
+.kbc-examples {
+  display: flex; flex-wrap: wrap; gap: 6px; justify-content: center; margin-top: 10px;
+  max-width: 600px;
+}
+.kbc-example {
+  padding: 7px 13px; border-radius: 18px; border: 1px solid var(--border2);
+  background: #fff; color: var(--text); font-size: 12px; font-family: inherit;
+  cursor: pointer; transition: all .12s;
+}
+.kbc-example:hover {
+  background: var(--mp-navy); color: #fff; border-color: var(--mp-navy);
+  transform: translateY(-1px);
+}
+
+.kbc-msg { display: flex; max-width: 90%; gap: 9px; align-items: flex-end; }
+.kbc-msg.user { align-self: flex-end; justify-content: flex-end; }
+.kbc-msg.bot  { align-self: flex-start; }
+.kbc-msg.bot .maia-avatar { margin-bottom: 2px; }
+.kbc-bubble {
+  padding: 11px 14px; border-radius: 12px; font-size: 13.5px; line-height: 1.55;
+  word-wrap: break-word; overflow-wrap: break-word;
+}
+.kbc-msg.user .kbc-bubble {
+  background: var(--mp-navy); color: #fff; border-bottom-right-radius: 4px;
+}
+.kbc-msg.bot .kbc-bubble {
+  background: #F3F6FB; color: var(--text); border-bottom-left-radius: 4px;
+}
+.kbc-bubble p { margin: 0 0 6px; }
+.kbc-bubble p:last-child { margin-bottom: 0; }
+.kbc-bubble strong { font-weight: 700; color: var(--mp-navy); }
+.kbc-msg.user .kbc-bubble strong { color: #fff; }
+.kbc-bubble ul { margin: 5px 0 5px 18px; padding: 0; }
+.kbc-bubble li { margin-bottom: 3px; font-size: 13px; }
+.kbc-bubble code {
+  background: rgba(45,63,94,.08); color: var(--mp-navy);
+  padding: 1px 5px; border-radius: 3px; font-family: ui-monospace, Menlo, monospace; font-size: 12px;
+}
+.kbc-sources {
+  margin-top: 10px; padding-top: 9px; border-top: 1px dashed rgba(45,63,94,.18);
+  display: flex; flex-direction: column; gap: 4px;
+}
+.kbc-src {
+  font-size: 11px; color: var(--text2); font-weight: 500;
+  display: inline-block;
+}
+button.kbc-src-link {
+  background: transparent; border: 1px solid transparent;
+  text-align: left; font: inherit; color: var(--mp-teal); font-weight: 600;
+  padding: 4px 8px; border-radius: 6px; cursor: pointer;
+  transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+}
+button.kbc-src-link:hover {
+  background: rgba(13, 148, 136, .08); border-color: rgba(13, 148, 136, .25);
+  color: var(--mp-teal);
+}
+button.kbc-src-link:focus-visible {
+  outline: 2px solid rgba(13, 148, 136, .55); outline-offset: 1px;
+}
+
+.kbc-typing {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 18px 4px;
+}
+.kbc-typing .kbc-dot {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--mp-teal);
+  opacity: .5; animation: kbcBounce 1.1s infinite ease-in-out;
+}
+.kbc-typing .kbc-dot:nth-child(2) { animation-delay: .15s; }
+.kbc-typing .kbc-dot:nth-child(3) { animation-delay: .3s; }
+.kbc-typing-label { font-size: 11.5px; color: var(--text2); margin-left: 6px; font-style: italic; }
+@keyframes kbcBounce {
+  0%, 80%, 100% { opacity: .3; transform: translateY(0); }
+  40% { opacity: 1; transform: translateY(-3px); }
+}
+
+.kbc-form {
+  display: flex; gap: 8px; padding: 12px 14px;
+  border-top: 1px solid var(--border); background: #FAFBFD;
+}
+#kbc-input {
+  flex: 1; padding: 11px 14px; border: 1px solid var(--border2); border-radius: 10px;
+  font-size: 14px; font-family: inherit; color: var(--text); background: #fff; outline: none;
+}
+#kbc-input:focus { border-color: var(--mp-teal); box-shadow: 0 0 0 3px rgba(77,188,200,.14); }
+#kbc-input:disabled { opacity: .6; cursor: not-allowed; }
+.kbc-send {
+  width: 42px; height: 42px; border-radius: 10px; border: 0;
+  background: linear-gradient(135deg, var(--mp-teal), var(--mp-navy));
+  color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all .12s;
+}
+.kbc-send:hover:not(:disabled) { transform: scale(1.04); box-shadow: 0 4px 10px rgba(45,63,94,.25); }
+.kbc-send:disabled { opacity: .5; cursor: not-allowed; }
+.kbc-foot {
+  padding: 8px 18px 12px; font-size: 10.5px; color: var(--text3);
+  background: #FAFBFD; line-height: 1.4; text-align: center;
+}
+.kbc-foot::before { content: 'ℹ️ '; }
+
+.kbc-config-warning {
+  margin: 30px auto; max-width: 540px;
+  background: #FFF8E8; border: 1px solid #F0D9A0; border-radius: 12px;
+  padding: 20px; color: #8B6A2A; font-size: 13px; line-height: 1.6;
+}
+.kbc-config-warning h4 { font-size: 15px; font-weight: 700; margin-bottom: 8px; color: #8B6A2A; }
+.kbc-config-warning code {
+  background: rgba(139,106,42,.12); padding: 2px 6px; border-radius: 3px;
+  font-family: ui-monospace, Menlo, monospace; font-size: 12px;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="kb-header">
+    <div class="kb-header-text">
+      <div class="kb-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Material de Apoio
+      </div>
+      <div class="kb-sub">As regras de cada administradora, explicadas em linguagem simples — sua referência rápida no dia a dia.</div>
+    </div>
+    <button class="dl-jump" id="dl-jump" type="button" title="Ir para os materiais para baixar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Materiais para baixar
+    </button>
+  </div>
+
+  <div class="adm-row">
+    <button class="adm-pill" id="adm-porto" data-adm="porto">
+      <span class="dot" style="background:#0a52a8"></span> Porto
+    </button>
+    <button class="adm-pill" id="adm-itau" data-adm="itau">
+      <span class="dot" style="background:#EC7000"></span> Itaú
+    </button>
+    <button class="adm-pill" id="adm-bradesco" data-adm="bradesco">
+      <span class="dot" style="background:var(--bradesco)"></span> Bradesco
+    </button>
+    <button class="adm-pill" id="adm-fgts" data-adm="fgts">
+      <span class="dot" style="background:#0058a0"></span> FGTS Caixa
+    </button>
+    <button class="adm-pill" id="adm-comissoes" data-adm="comissoes">
+      <span class="dot" style="background:#10B981"></span> Comissões
+    </button>
+    <button class="adm-pill" id="adm-ia" data-adm="ia" title="Maia · Assistente IA Master Prime — pergunte em linguagem natural">
+      <span class="dot maia-pill-dot"></span> Maia
+    </button>
+  </div>
+
+  <div class="search-box">
+    <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+    <input type="text" id="search" placeholder="Buscar… ex.: lance, contemplação, FGTS, prazo de pagamento" autocomplete="off">
+    <button class="search-clear" id="search-clear" title="Limpar" aria-label="Limpar busca">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+
+  <div class="chips" id="chips"></div>
+
+  <div class="result-info" id="result-info" style="display:none"></div>
+
+  <div id="content"></div>
+
+  <div class="dl-section" id="downloads-section" style="display:none">
+    <div class="dl-head">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Materiais para baixar
+    </div>
+    <div class="dl-sub">Documentos oficiais para consultar e enviar ao cliente.</div>
+    <div class="dl-grid" id="downloads"></div>
+  </div>
+
+  <div class="kb-foot" id="kb-foot"></div>
+
+</div>
+
+<script src="kb-bradesco.js?v=20260625c"></script>
+<script src="kb-porto.js?v=20260630g"></script>
+<script src="kb-itau.js?v=20260629a"></script>
+<script src="kb-fgts.js?v=20260625b"></script>
+<script src="kb-comissoes.js?v=20260612d"></script>
+<script src="kb-chat-config.js?v=20260619d"></script>
+<script src="kb-chat.js?v=20260630a"></script>
+<script>
+(function () {
+  var ADM = window.KB_ADMIN || {};
+  var DATA = [], DOWNLOADS = [], CATS = [];
+  var COMPARE_CATS = [];
+  var activeAdm = null, activeChip = 'todas', query = '';
+
+  // ── FIX iframe: força anchors target="_blank" abrirem nova aba do BROWSER
+  // (não dentro do iframe). Quando o Material de Apoio é embedado no portal,
+  // sem isso o PDF/link navega o iframe e "engole" a tela. Vale pros botões
+  // "Abrir PDF" e pros links automáticos (linkify) nos textos das respostas.
+  document.addEventListener('click', function (e) {
+    var a = e.target && e.target.closest ? e.target.closest('a[target="_blank"]') : null;
+    if (!a) return;
+    if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    // Se NÃO estamos em iframe, deixa o browser fazer seu trabalho normal.
+    if (window === window.top) return;
+    e.preventDefault();
+    var topWin = window.top;
+    var w = null;
+    try { w = topWin.open(a.href, '_blank', 'noopener,noreferrer'); } catch (err) {}
+    if (!w) {
+      // Fallback: cria <a> temporário no top e clica nele
+      try {
+        var tmp = topWin.document.createElement('a');
+        tmp.href = a.href; tmp.target = '_blank'; tmp.rel = 'noopener noreferrer';
+        topWin.document.body.appendChild(tmp);
+        tmp.click();
+        topWin.document.body.removeChild(tmp);
+      } catch (err) {
+        alert('Permita pop-ups deste site nas configurações do navegador para abrir o link.');
+      }
+    }
+  }, true);  // capture phase: pega antes de outros handlers
+
+  // Categorias que cada banco nomeia diferente, mas tratam do mesmo tema.
+  var CAT_ALIASES = {
+    // Bradesco "credito_auto", Itaú "credito_veiculo", Porto "credito_movel" → mesma coisa
+    credito_auto:    'credito_movel_veiculo',
+    credito_veiculo: 'credito_movel_veiculo',
+    credito_movel:   'credito_movel_veiculo',
+    // Porto chama "transferencia", Itaú e Bradesco chamam "saida" → mesmo assunto
+    transferencia:   'saida_transferencia',
+    saida:           'saida_transferencia',
+    // Bradesco separa "objecoes" do resto; Porto e Itaú juntam tudo em "argumentos"
+    objecoes:        'argumentos'
+  };
+
+  // Rótulos genéricos das categorias no modo Comparativo.
+  var CAT_LABEL_GENERIC = {
+    visao_geral: 'Visão geral',
+    fundamentos: 'Entendendo o consórcio',
+    argumentos: 'Por que vender / objeções',
+    adesao: 'Adesão e atendimento',
+    contemplacao: 'Contemplação',
+    lance: 'Lance',
+    credito_imovel: 'Crédito — Imóvel',
+    credito_movel_veiculo: 'Crédito — Veículos e bens móveis',
+    pagamentos: 'Pagamentos e parcelas',
+    saida_transferencia: 'Transferência, cancelamento e saída',
+    seguro: 'Seguro',
+    sistema: 'Sistema e canais digitais',
+    canais: 'Canais e contatos',
+    plataforma_corretor: 'Plataforma do corretor',
+    glossario: 'Glossário'
+  };
+
+  // Equivalências de tópicos (perguntas iguais com títulos diferentes).
+  // Quando o título normalizado bate em qualquer item de um grupo, ele assume o 1º como canônico.
+  var TOPICO_ALIASES = [
+    // Visão geral — apresentações da administradora
+    ['o que e o', 'o que e a'],
+    ['quais sao os diferenciais da no', 'quais sao os diferenciais da', 'por que a e uma boa escolha para o cliente'],
+    ['o que a vende no portfolio', 'quais bens da para comprar com o', 'que produtos a oferece portfolio'],
+    // Fundamentos
+    ['o que e o grupo e a cota', 'o que e o grupo de e a cota'],
+    ['do que e composta a parcela mensal', 'do que e composta a parcela'],
+    ['como as parcelas sao reajustadas', 'como a carta de credito e atualizada reajuste'],
+    // Argumentos / objeções
+    ['por que o cliente deve fazer um', 'quais sao as vantagens do'],
+    ['o serve para formar patrimonio', 'serve como investimento e formacao de patrimonio'],
+    ['para que tipo de cliente o e indicado', 'para que tipo de cliente o e a melhor opcao'],
+    ['objecao o cliente acha a taxa de administracao alta', 'as taxas sao muito altas'],
+    ['o cliente diz e se eu demorar a ser contemplado', 'vou demorar muito para pegar o bem'],
+    // Contemplação
+    ['como funciona a contemplacao por sorteio', 'como funciona o sorteio'],
+    // Lance
+    ['como funciona o lance fixo', 'o que e o lance fixo'],
+    ['como e ate quando o cliente oferta o lance', 'quais sao as formas de ofertar o lance'],
+    ['diluir ou antecipar o que fazer com o lance vencedor', 'diluir ou abater o que fazer com o lance vencedor'],
+    ['qual o prazo para pagar o lance vencedor', 'qual o prazo para pagar o lance em dinheiro'],
+    ['o cliente pode usar o fgts no lance', 'como funciona o lance com fgts'],
+    ['o que e o lance quitacao', 'o que e o lance de quitacao'],
+    // Crédito — veículos e bens móveis
+    ['quais as etapas da compra depois de contemplado bens moveis', 'quais as etapas do faturamento do veiculo', 'quais as etapas para comprar o veiculo depois de contemplado'],
+    ['o que da para comprar com a carta de bens moveis', 'o que da para comprar enquadramento dos veiculos', 'o que o cliente pode fazer com a carta de credito de veiculos'],
+    ['quais documentos o cliente envia bens moveis', 'quais documentos sao necessarios para faturar o veiculo', 'quais documentos o cliente precisa apresentar'],
+    ['quanto tempo leva o processo de pos-contemplacao', 'quanto tempo leva o pagamento do veiculo', 'quanto tempo leva para o veiculo ser pago'],
+    ['e se a carta for maior ou menor que o veiculo', 'e se o veiculo custar menos que a carta de credito', 'e se a carta de credito for maior que o veiculo'],
+    ['como e avaliado o valor do veiculo', 'como e calculado o valor pago no veiculo'],
+    ['o que nao e permitido na compra de bens moveis', 'o que nao e permitido na compra do veiculo'],
+    // Crédito — imóvel
+    ['para que serve o credito do de imovel', 'o que o cliente pode fazer com a carta de credito de imovel', 'para que o cliente pode usar o credito do de imovel'],
+    ['quais documentos o cliente envia no de imovel', 'quais documentos minimos para iniciar a compra do imovel'],
+    ['como funciona o para construcao e reforma', 'como funciona usar a carta para construir ou reformar', 'como funciona a construcao e a reforma'],
+    ['qual a garantia no de imovel', 'qual e a garantia no de imovel'],
+    ['o cliente pode usar parte do credito para despesas do imovel', 'o cliente pode usar a sobra de credito para despesas do imovel'],
+    ['quais imoveis nao podem ser comprados', 'que imoveis o cliente nao pode comprar', 'o que nao e permitido na compra do imovel'],
+    ['quais as etapas do processo de imovel', 'quais as etapas do faturamento do imovel'],
+    ['da para comprar imovel no exterior com o', 'a carta pode ser usada para imovel no exterior ou para quitar emprestimo'],
+    ['que tipos de imovel o cliente pode comprar', 'quais sao as modalidades de aquisicao de imovel'],
+    // Pagamentos
+    ['quando vence a parcela do', 'quando vence a parcela'],
+    ['o que acontece se o cliente atrasar a parcela', 'o que acontece se o cliente nao pagar'],
+    ['o cliente pode antecipar parcelas ou quitar o', 'o cliente pode antecipar parcelas'],
+    // Seguro
+    ['o que o seguro prestamista cobre', 'qual e a cobertura do seguro prestamista', 'para que serve o seguro do', 'quais sao as coberturas do seguro'],
+    // Canais e contatos
+    ['central de relacionamento ao cliente', 'central de atendimento', 'central de atendimento ao consorciado'],
+    ['atendimento ao corretor', 'o que a central de atendimento resolve para o representante', 'central do parceiro'],
+    ['sac ouvidoria e sinistro', 'sac e ouvidoria'],
+    ['esteira do cliente e site', 'canais digitais e site', 'quais servicos o cliente faz nos canais digitais'],
+    // Transferência / saída / cancelamento
+    ['o cliente excluido recebe o dinheiro de volta', 'o cliente que cancela recebe o dinheiro de volta'],
+    ['quando o cliente e excluido do grupo', 'como funciona o cancelamento da cota'],
+    ['existe direito de arrependimento depois de assinar', 'existe direito de arrependimento depois de aderir'],
+    // Plataforma do corretor
+    ['o que e o gestao de carteira', 'como funciona a venda pela plataforma'],
+    // Glossário
+    ['credito', 'carta de credito'],
+    ['ago', 'assembleia ago']
+  ];
+
+  // Normaliza um título para gerar uma "chave de tópico" comparável entre bancos.
+  function topicoChave(titulo) {
+    var s = String(titulo || '')
+      .toLowerCase()
+      .normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[?!,.;:()"'—–]/g, ' ')
+      .replace(/\b(porto|itau|bradesco|consorcio|consorcios)\b/g, '')
+      .replace(/\s+/g, ' ').trim();
+    for (var i = 0; i < TOPICO_ALIASES.length; i++) {
+      if (TOPICO_ALIASES[i].indexOf(s) !== -1) return TOPICO_ALIASES[i][0];
+    }
+    return s;
+  }
+
+  // ── helpers ──
+  function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function norm(s) {
+    return String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+  }
+  // transforma URLs/sites (já escapados) em links clicáveis
+  function linkify(s) {
+    return s.replace(/(https?:\/\/[^\s<),;"']+|(?:[a-z0-9-]+\.)+(?:com\.br|gov\.br|vc)\b(?:\/[^\s<),;"']*)?)/gi, function (m) {
+      var url = /^https?:\/\//i.test(m) ? m : 'https://' + m;
+      return '<a href="' + url + '" target="_blank" rel="noopener">' + m + '</a>';
+    });
+  }
+  // renderiza o conteudo (paragrafos, listas com • e listas numeradas)
+  function renderConteudo(txt) {
+    var lines = String(txt).split('\n');
+    var html = '', stack = [], para = [];
+    // stack = [{tag:'ol'|'ul', buf:['li1','li2',...]}, ...] do nível 1 até o mais profundo.
+    // Sublistas indentadas viram <ul>/<ol> aninhadas dentro do último <li> do nível anterior,
+    // preservando a sequência da numeração ao voltar ao nível externo (sem reiniciar em 1).
+    function closeOne() {
+      var top = stack.pop();
+      var inner = '<' + top.tag + '>' +
+        top.buf.map(function (li) { return '<li>' + li + '</li>'; }).join('') +
+        '</' + top.tag + '>';
+      if (stack.length) {
+        var parent = stack[stack.length - 1];
+        if (parent.buf.length) parent.buf[parent.buf.length - 1] += inner;
+        else parent.buf.push(inner);
+      } else {
+        html += inner;
+      }
+    }
+    function closeAll() { while (stack.length) closeOne(); }
+    function flushPara() {
+      if (para.length) { html += '<p>' + para.join(' ') + '</p>'; para = []; }
+    }
+    // Converte **texto** em <strong>texto</strong> — markdown simples de negrito.
+    // Aplica DEPOIS de esc() (que já escapou < > & " '), então é seguro injetar tags.
+    function bold(s) { return String(s).replace(/\*\*([^*\n]+?)\*\*/g, '<strong>$1</strong>'); }
+    function fmt(s) { return bold(linkify(esc(s))); }
+    for (var i = 0; i < lines.length; i++) {
+      var raw = lines[i].replace(/\s+$/, '');
+      if (raw.trim() === '') { closeAll(); flushPara(); continue; }
+      var indent = (raw.match(/^(\s*)/) || ['', ''])[1].length;
+      var stripped = raw.trim();
+      var isBullet = stripped.charAt(0) === '•';
+      var olMatch = stripped.match(/^(\d+)\.\s+(.*)$/);
+      if (isBullet || olMatch) {
+        flushPara();
+        var tag = isBullet ? 'ul' : 'ol';
+        var content = isBullet ? stripped.replace(/^•\s*/, '') : olMatch[2];
+        var wantDepth = indent === 0 ? 1 : 2;
+        while (stack.length > wantDepth) closeOne();
+        if (stack.length === wantDepth) {
+          if (stack[stack.length - 1].tag !== tag) { closeOne(); stack.push({ tag: tag, buf: [] }); }
+        } else {
+          while (stack.length < wantDepth) stack.push({ tag: tag, buf: [] });
+        }
+        stack[stack.length - 1].buf.push(fmt(content));
+        continue;
+      }
+      closeAll();
+      para.push(fmt(stripped));
+    }
+    closeAll(); flushPara();
+    return html;
+  }
+
+  // ── carrega uma administradora (Bradesco / Porto) ──
+  function loadAdmin(key) {
+    var d = ADM[key];
+    if (!d) return;
+    activeAdm = key;
+    // Restaura UI (caso estivesse no estado inicial sem banco selecionado).
+    var _sb = document.querySelector('.search-box');
+    if (_sb) _sb.style.display = '';
+    var _chips = document.getElementById('chips');
+    if (_chips) _chips.style.display = '';
+    DATA = (d.entradas || []).slice().sort(function (a, b) {
+      return (a.categoria_ordem - b.categoria_ordem) || (a.ordem - b.ordem);
+    });
+    DOWNLOADS = d.downloads || [];
+    CATS = [];
+    var catMap = {};
+    DATA.forEach(function (e) {
+      if (!catMap[e.categoria_key]) {
+        catMap[e.categoria_key] = { key: e.categoria_key, label: e.categoria_label, ordem: e.categoria_ordem, itens: [] };
+        CATS.push(catMap[e.categoria_key]);
+      }
+      catMap[e.categoria_key].itens.push(e);
+    });
+    activeChip = 'todas';
+    query = '';
+    if (input) { input.value = ''; }
+    if (clearBtn) { clearBtn.classList.remove('show'); }
+    document.querySelectorAll('.adm-pill[data-adm]').forEach(function (p) {
+      p.classList.toggle('active', p.getAttribute('data-adm') === key);
+    });
+    var dlSub = document.querySelector('.dl-sub');
+    if (dlSub) { dlSub.textContent = 'Documentos oficiais da ' + (d.nome || '') + ' para consultar e enviar ao cliente.'; }
+    if (foot) { foot.innerHTML = esc(d.nota || '') + (d.atualizado ? '<br>Base revisada em ' + esc(d.atualizado) + '.' : ''); }
+    buildChips();
+    renderDownloads();
+    render();
+  }
+
+  // ── chips ──
+  function buildChips() {
+    var box = document.getElementById('chips');
+    var html = '<button class="chip active" data-cat="todas">Todas <span class="c-count">' + DATA.length + '</span></button>';
+    CATS.forEach(function (c) {
+      html += '<button class="chip" data-cat="' + c.key + '">' + esc(c.label) + ' <span class="c-count">' + c.itens.length + '</span></button>';
+    });
+    box.innerHTML = html;
+    box.querySelectorAll('.chip').forEach(function (ch) {
+      ch.addEventListener('click', function () {
+        activeChip = ch.getAttribute('data-cat');
+        box.querySelectorAll('.chip').forEach(function (x) { x.classList.remove('active'); });
+        ch.classList.add('active');
+        render();
+      });
+    });
+  }
+
+  // ── busca ──
+  function matches(e, terms) {
+    var hay = norm(e.titulo + ' ' + e.conteudo + ' ' + e.tags + ' ' + e.categoria_label);
+    for (var i = 0; i < terms.length; i++) {
+      if (hay.indexOf(terms[i]) === -1) return false;
+    }
+    return true;
+  }
+
+  // ── item HTML ──
+  function itemHTML(e, showBadge) {
+    var badge = showBadge ? '<span class="badge">' + esc(e.categoria_label) + '</span>' : '';
+    var slug = norm(e.titulo);
+    return '<div class="kb-item" data-titulo-slug="' + esc(slug) + '"' +
+      ' data-categoria-key="' + esc(e.categoria_key || '') + '"' +
+      ' data-categoria-label="' + esc(e.categoria_label || '') + '">' +
+      '<button class="kb-q">' + badge +
+        '<span class="q-text">' + esc(e.titulo) + '</span>' +
+        '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>' +
+      '</button>' +
+      '<div class="kb-a"><div class="kb-a-inner">' + renderConteudo(e.conteudo) + '</div></div>' +
+    '</div>';
+  }
+
+  // ── Função global: abrir card específico (usada pela Maia) ──
+  // adm: 'porto' | 'itau' | 'bradesco' | 'fgts' | 'comissoes'
+  // titulo: string com o título exato (ou aproximado) do card
+  window.maiaAbrirCard = function (adm, titulo) {
+    var key = (adm || '').toLowerCase().trim();
+    // Mapeia variações de nome → key interno
+    var map = { 'porto': 'porto', 'itau': 'itau', 'itaú': 'itau', 'bradesco': 'bradesco',
+                'fgts': 'fgts', 'fgts caixa': 'fgts', 'caixa': 'fgts',
+                'comissões': 'comissoes', 'comissoes': 'comissoes' };
+    key = map[key] || key;
+    if (!ADM[key]) return;
+
+    var targetSlug = norm(titulo || '');
+    function abrir() {
+      // Fecha o chat da Maia se estiver aberto
+      try {
+        if (window.MaiaChat && typeof window.MaiaChat.close === 'function') {
+          window.MaiaChat.close();
+        } else {
+          var pane = document.getElementById('kbc-pane');
+          if (pane) pane.classList.remove('open');
+        }
+      } catch (e) {}
+
+      // Procura o card no DOM (limpa filtro/busca pra garantir que está visível)
+      var content = document.getElementById('content');
+      if (!content) return;
+      var item = content.querySelector('.kb-item[data-titulo-slug="' + targetSlug + '"]');
+      // Fallback inteligente: score por overlap de palavras (≥3 letras, ignora stopwords)
+      if (!item && targetSlug) {
+        var STOPWORDS = { 'a':1,'o':1,'as':1,'os':1,'de':1,'do':1,'da':1,'dos':1,'das':1,'e':1,'em':1,
+          'no':1,'na':1,'nos':1,'nas':1,'um':1,'uma':1,'para':1,'pra':1,'por':1,'com':1,'sem':1,
+          'que':1,'qual':1,'quais':1,'quem':1,'quanto':1,'quanta':1,'quantos':1,'quantas':1,
+          'como':1,'onde':1,'quando':1,'porque':1,'porquê':1,'porq':1,'tem':1,'ter':1,'tinha':1,
+          'ser':1,'sou':1,'sao':1,'são':1,'foi':1,'era':1,'eh':1,'é':1,'meu':1,'minha':1,'seu':1,'sua':1,
+          'esse':1,'essa':1,'esses':1,'essas':1,'isso':1,'aquilo':1,'mais':1,'menos':1,'muito':1,
+          'pode':1,'posso':1,'podem':1,'podia':1,'so':1,'só':1,'também':1,'tambem':1
+        };
+        function tokens(s) {
+          return (s || '').split(/[^a-z0-9]+/).filter(function(t){
+            return t && t.length >= 3 && !STOPWORDS[t];
+          });
+        }
+        // Detecta polaridade NEGATIVA do título (menção a NÃO/PROIBIDO/VEDADO etc.).
+        // Sem isso o fuzzy match pode abrir o card "O que NÃO é permitido" quando a
+        // Maia citou "O que DÁ pra comprar" — são opostos semânticos com palavras-base
+        // em comum. A negação DOMINA: card com "NÃO é permitido" conta como negativo
+        // mesmo tendo "permitido" no título.
+        function polNeg(s) {
+          return /(^|[^a-z0-9])(nao|não|nunca|proibido|vedado|impedido|restrito|recusado|impeditivo)([^a-z0-9]|$)/.test(s || '');
+        }
+        var qTokens = tokens(targetSlug);
+        var qNeg = polNeg(targetSlug);
+        if (qTokens.length) {
+          var all = content.querySelectorAll('.kb-item[data-titulo-slug]');
+          var best = null, bestScore = -Infinity;
+          for (var i = 0; i < all.length; i++) {
+            var slugC = all[i].getAttribute('data-titulo-slug') || '';
+            var cTokens = tokens(slugC);
+            // Score base = nº de palavras em comum
+            var overlap = 0;
+            for (var j = 0; j < qTokens.length; j++) {
+              if (cTokens.indexOf(qTokens[j]) >= 0) overlap++;
+            }
+            // Penaliza polaridade DIFERENTE: query positiva (sem NÃO) abrindo card negativo
+            // ou vice-versa. Penalidade de 5 pontos é suficiente pra descartar mesmo com
+            // várias palavras coincidindo.
+            var cNeg = polNeg(slugC);
+            if (qNeg !== cNeg) overlap -= 5;
+            if (overlap > bestScore) { bestScore = overlap; best = all[i]; }
+          }
+          // Só usa se pelo menos 2 palavras em comum (ou metade do query, o que for menor)
+          var minScore = Math.min(2, qTokens.length);
+          if (best && bestScore >= minScore) item = best;
+        }
+      }
+      // Último fallback: se ainda não achou card, talvez a Maia tenha citado o
+      // NOME DA CATEGORIA em vez de um título de card (ex.: "Canais e contatos").
+      // Nesse caso abrimos o PRIMEIRO card da categoria que casa com o slug.
+      if (!item && targetSlug) {
+        var allItems = content.querySelectorAll('.kb-item[data-categoria-key]');
+        for (var k = 0; k < allItems.length; k++) {
+          var catKey = allItems[k].getAttribute('data-categoria-key') || '';
+          var catLabel = allItems[k].getAttribute('data-categoria-label') || '';
+          var catSlug = norm(catLabel);
+          // Match exato ou substring forte do nome da categoria
+          if (catSlug === targetSlug || (catSlug && targetSlug.indexOf(catSlug) >= 0) || (catSlug && catSlug.indexOf(targetSlug) >= 0)) {
+            item = allItems[k];
+            break;
+          }
+        }
+      }
+      if (!item) return;
+
+      // Abre o accordion
+      if (!item.classList.contains('open')) item.classList.add('open');
+      // Anima destaque
+      item.classList.remove('maia-highlight');
+      void item.offsetWidth; // reset anim
+      item.classList.add('maia-highlight');
+      setTimeout(function () { item.classList.remove('maia-highlight'); }, 2400);
+      // Rola até o card — usamos scroll instantâneo (smooth às vezes é ignorado
+      // quando há reflow concorrente após loadAdmin). O glow já chama atenção.
+      try {
+        item.scrollIntoView({ block: 'center' });
+      } catch (e) {
+        // fallback antigo (alguns browsers não aceitam o options object)
+        item.scrollIntoView();
+      }
+    }
+
+    // Se a aba ativa não é a certa, troca e espera o render
+    if (activeAdm !== key) {
+      // Limpa filtro/busca antes de trocar
+      try { if (input) input.value = ''; query = ''; activeChip = 'todas'; } catch(e) {}
+      loadAdmin(key);
+      setTimeout(abrir, 80);
+    } else {
+      // Se tinha filtro ativo ('todas' ou outro chip), garante que renderiza tudo
+      if (activeChip !== 'todas' || query) {
+        activeChip = 'todas';
+        query = '';
+        if (input) input.value = '';
+        if (clearBtn) clearBtn.classList.remove('show');
+        document.querySelectorAll('.chip').forEach(function (x) {
+          x.classList.toggle('active', x.getAttribute('data-cat') === 'todas');
+        });
+        render();
+        setTimeout(abrir, 50);
+      } else {
+        abrir();
+      }
+    }
+  };
+
+  // ── render ──
+  function render() {
+    var content = document.getElementById('content');
+    var info = document.getElementById('result-info');
+    var terms = norm(query).split(/\s+/).filter(Boolean);
+    var html = '';
+
+    if (terms.length) {
+      // modo busca: lista plana entre todas as categorias
+      var hits = DATA.filter(function (e) { return matches(e, terms); });
+      if (hits.length) {
+        info.style.display = 'block';
+        info.innerHTML = '<b>' + hits.length + '</b> resultado' + (hits.length > 1 ? 's' : '') + ' para "' + esc(query.trim()) + '"';
+        html += '<div class="cat-section">';
+        hits.forEach(function (e) { html += itemHTML(e, true); });
+        html += '</div>';
+      } else {
+        info.style.display = 'none';
+        html = emptyHTML('Nenhum resultado', 'Nenhum item encontrado para "' + esc(query.trim()) + '". Tente outra palavra.');
+      }
+    } else {
+      info.style.display = 'none';
+      var cats = CATS;
+      if (activeChip !== 'todas') {
+        cats = CATS.filter(function (c) { return c.key === activeChip; });
+      }
+      cats.forEach(function (c) {
+        html += '<div class="cat-section">' +
+          '<div class="cat-head"><span class="cat-name">' + esc(c.label) + '</span>' +
+          '<span class="cat-count">' + c.itens.length + '</span></div>';
+        c.itens.forEach(function (e) { html += itemHTML(e, false); });
+        html += '</div>';
+      });
+    }
+
+    content.innerHTML = html;
+    // liga accordions
+    content.querySelectorAll('.kb-q').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        btn.parentElement.classList.toggle('open');
+      });
+    });
+    // downloads: visível fora da busca
+    var dlSec = document.getElementById('downloads-section');
+    var showDl = !(terms.length || !DOWNLOADS.length);
+    if (dlSec) dlSec.style.display = showDl ? 'block' : 'none';
+    if (jumpBtn) jumpBtn.style.display = showDl ? 'inline-flex' : 'none';
+  }
+
+  // ── downloads ──
+  function renderDownloads() {
+    var box = document.getElementById('downloads');
+    if (!box || !DOWNLOADS.length) return;
+    // Ordena alfabeticamente pelo título (pt-BR, ignora acentos e maiúsculas)
+    var dlOrdenado = DOWNLOADS.slice().sort(function (a, b) {
+      return (a.titulo || '').localeCompare((b.titulo || ''), 'pt-BR', { sensitivity: 'base' });
+    });
+    box.innerHTML = dlOrdenado.map(function (d) {
+      return '<div class="dl-card">' +
+        '<div class="dl-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>' +
+        '<div class="dl-titulo">' + esc(d.titulo) + '</div>' +
+        '<div class="dl-desc">' + esc(d.descricao) + '</div>' +
+        '<a class="dl-btn" href="' + esc(d.arquivo) + '" target="_blank" rel="noopener">' +
+          '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>' +
+          'Abrir PDF</a>' +
+      '</div>';
+    }).join('');
+    // Anchors com target="_blank" já são tratados pelo handler global no topo
+    // do arquivo (que escapa do iframe e força nova aba). Sem handler aqui.
+  }
+
+  // ── modo Comparativo: UM card por assunto, abre os 3 bancos juntos ──
+  function loadComparativo() {
+    activeAdm = 'comparar';
+    query = '';
+    activeChip = 'todas';
+    if (input) input.value = '';
+    if (clearBtn) clearBtn.classList.remove('show');
+
+    // Mantém a busca visível (agora ela varre os 3 bancos do card).
+    var _sb = document.querySelector('.search-box');
+    if (_sb) _sb.style.display = '';
+    var dlSec = document.getElementById('downloads-section');
+    if (dlSec) dlSec.style.display = 'none';
+    if (jumpBtn) jumpBtn.style.display = 'none';
+    if (foot) foot.innerHTML = 'Comparativo das três administradoras no mesmo card — abra um assunto e veja Porto, Itaú e Bradesco juntos.';
+
+    document.querySelectorAll('.adm-pill[data-adm]').forEach(function (p) {
+      p.classList.toggle('active', p.getAttribute('data-adm') === 'comparar');
+    });
+
+    // Constrói: categoria -> tópico -> { porto, itau, bradesco }
+    COMPARE_CATS = [];
+    var catMap = {};
+    ['porto', 'itau', 'bradesco'].forEach(function (bk) {
+      var d = ADM[bk]; if (!d) return;
+      (d.entradas || []).forEach(function (e) {
+        var catKey = CAT_ALIASES[e.categoria_key] || e.categoria_key;
+        if (!catMap[catKey]) {
+          catMap[catKey] = {
+            key: catKey,
+            label: CAT_LABEL_GENERIC[catKey] || e.categoria_label,
+            ordem: e.categoria_ordem || 999,
+            topicMap: {},
+            bancos: { porto: 0, itau: 0, bradesco: 0 }
+          };
+        }
+        var c = catMap[catKey];
+        var topicKey = topicoChave(e.titulo);
+        if (!c.topicMap[topicKey]) {
+          c.topicMap[topicKey] = {
+            titulo: e.titulo,                  // 1º encontrado (Porto > Itaú > Bradesco, nessa ordem)
+            porto: null, itau: null, bradesco: null,
+            ordemMin: e.ordem || 999
+          };
+        }
+        if (!c.topicMap[topicKey][bk]) c.topicMap[topicKey][bk] = e;
+        if (e.ordem && e.ordem < c.topicMap[topicKey].ordemMin) c.topicMap[topicKey].ordemMin = e.ordem;
+        c.bancos[bk]++;
+        if (e.categoria_ordem && e.categoria_ordem < c.ordem) c.ordem = e.categoria_ordem;
+      });
+    });
+
+    Object.keys(catMap).forEach(function (k) {
+      var c = catMap[k];
+      c.numBancos = (c.bancos.porto > 0 ? 1 : 0) + (c.bancos.itau > 0 ? 1 : 0) + (c.bancos.bradesco > 0 ? 1 : 0);
+      c.topicos = Object.values(c.topicMap).map(function (t) {
+        t.numBancos = (t.porto ? 1 : 0) + (t.itau ? 1 : 0) + (t.bradesco ? 1 : 0);
+        return t;
+      }).sort(function (a, b) {
+        return (b.numBancos - a.numBancos) || (a.ordemMin - b.ordemMin);
+      });
+      delete c.topicMap;
+      COMPARE_CATS.push(c);
+    });
+
+    // Ordenação: glossário SEMPRE por último; o resto por nº de bancos (desc) e ordem original.
+    COMPARE_CATS.sort(function (a, b) {
+      var ag = a.key === 'glossario' ? 1 : 0;
+      var bg = b.key === 'glossario' ? 1 : 0;
+      if (ag !== bg) return ag - bg;
+      return (b.numBancos - a.numBancos) || (a.ordem - b.ordem) || a.label.localeCompare(b.label);
+    });
+
+    buildChipsComparativo();
+    renderComparativo();
+  }
+
+  function buildChipsComparativo() {
+    var box = document.getElementById('chips');
+    var totalTopicos = COMPARE_CATS.reduce(function (s, c) { return s + c.topicos.length; }, 0);
+    var html = '<button class="chip active" data-cat="todas">Todos os assuntos <span class="c-count">' + totalTopicos + '</span></button>';
+    COMPARE_CATS.forEach(function (c) {
+      var dots = '';
+      if (c.bancos.porto)    dots += '<span class="cd cd-porto" title="Porto"></span>';
+      if (c.bancos.itau)     dots += '<span class="cd cd-itau" title="Itaú"></span>';
+      if (c.bancos.bradesco) dots += '<span class="cd cd-bradesco" title="Bradesco"></span>';
+      html += '<button class="chip" data-cat="' + c.key + '">' + dots + ' ' + esc(c.label) +
+              ' <span class="c-count">' + c.topicos.length + '</span></button>';
+    });
+    box.innerHTML = html;
+    box.querySelectorAll('.chip').forEach(function (ch) {
+      ch.addEventListener('click', function () {
+        activeChip = ch.getAttribute('data-cat');
+        box.querySelectorAll('.chip').forEach(function (x) { x.classList.remove('active'); });
+        ch.classList.add('active');
+        renderComparativo();
+        try { window.scrollTo(0, 0); } catch (e) {}
+      });
+    });
+  }
+
+  // Renderiza um bloco por banco dentro do card mesclado.
+  function bankBlockHTML(bankKey, bankNome, entry) {
+    if (!entry) {
+      return '<div class="kb-bank-block kb-bank-' + bankKey + '">' +
+        '<div class="kb-bank-head"><span class="kb-bank-name">' + bankNome + '</span></div>' +
+        '<div class="kb-bank-empty">Informação ainda não disponível por essa administradora.</div>' +
+      '</div>';
+    }
+    return '<div class="kb-bank-block kb-bank-' + bankKey + '">' +
+      '<div class="kb-bank-head">' +
+        '<span class="kb-bank-name">' + bankNome + '</span>' +
+        '<span class="kb-bank-subtitulo">' + esc(entry.titulo) + '</span>' +
+      '</div>' +
+      '<div class="kb-bank-body">' + renderConteudo(entry.conteudo) + '</div>' +
+    '</div>';
+  }
+
+  // Um card por assunto: clica → abre Porto/Itaú/Bradesco empilhados.
+  function mergedItemHTML(t) {
+    var badges = '';
+    if (t.porto)    badges += '<span class="kb-bg kb-bg-porto" title="Porto"></span>';
+    if (t.itau)     badges += '<span class="kb-bg kb-bg-itau" title="Itaú"></span>';
+    if (t.bradesco) badges += '<span class="kb-bg kb-bg-bradesco" title="Bradesco"></span>';
+
+    return '<div class="kb-item kb-merged">' +
+      '<button class="kb-q">' +
+        '<span class="kb-bg-row">' + badges + '</span>' +
+        '<span class="q-text">' + esc(t.titulo) + '</span>' +
+        '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>' +
+      '</button>' +
+      '<div class="kb-a"><div class="kb-a-inner">' +
+        bankBlockHTML('porto', 'PORTO', t.porto) +
+        bankBlockHTML('itau', 'ITAÚ', t.itau) +
+        bankBlockHTML('bradesco', 'BRADESCO', t.bradesco) +
+      '</div></div>' +
+    '</div>';
+  }
+
+  function renderComparativo() {
+    var content = document.getElementById('content');
+    var info = document.getElementById('result-info');
+    var terms = norm(query).split(/\s+/).filter(Boolean);
+    var cats = COMPARE_CATS;
+    if (activeChip !== 'todas') cats = COMPARE_CATS.filter(function (c) { return c.key === activeChip; });
+
+    // Busca: filtra os tópicos que casam em QUALQUER um dos 3 bancos.
+    if (terms.length) {
+      cats = cats.map(function (c) {
+        var filtrados = c.topicos.filter(function (t) {
+          var hay = norm(t.titulo);
+          ['porto', 'itau', 'bradesco'].forEach(function (bk) {
+            var e = t[bk];
+            if (e) hay += ' ' + norm((e.titulo || '') + ' ' + (e.conteudo || '') + ' ' + (e.tags || ''));
+          });
+          for (var i = 0; i < terms.length; i++) {
+            if (hay.indexOf(terms[i]) === -1) return false;
+          }
+          return true;
+        });
+        return { key: c.key, label: c.label, bancos: c.bancos, numBancos: c.numBancos, ordem: c.ordem, topicos: filtrados };
+      }).filter(function (c) { return c.topicos.length > 0; });
+    }
+
+    if (info) {
+      if (terms.length) {
+        var total = cats.reduce(function (s, c) { return s + c.topicos.length; }, 0);
+        info.style.display = 'block';
+        info.innerHTML = '<b>' + total + '</b> resultado' + (total !== 1 ? 's' : '') + ' para "' + esc(query.trim()) + '"';
+      } else {
+        info.style.display = 'none';
+      }
+    }
+
+    if (!cats.length) {
+      content.innerHTML = emptyHTML(
+        terms.length ? 'Nenhum resultado' : 'Nenhum assunto',
+        terms.length ? 'Nenhum item encontrado para "' + esc(query.trim()) + '". Tente outra palavra.' : 'Selecione um assunto na lista acima.'
+      );
+      return;
+    }
+
+    var html = '';
+    cats.forEach(function (c) {
+      html += '<div class="cat-section">' +
+        '<div class="cat-head"><span class="cat-name">' + esc(c.label) + '</span>' +
+        '<span class="cat-count">' + c.topicos.length + '</span></div>';
+      c.topicos.forEach(function (t) { html += mergedItemHTML(t); });
+      html += '</div>';
+    });
+    content.innerHTML = html;
+    content.querySelectorAll('.kb-q').forEach(function (btn) {
+      btn.addEventListener('click', function () { btn.parentElement.classList.toggle('open'); });
+    });
+  }
+
+  function emptyHTML(title, desc) {
+    return '<div class="empty">' +
+      '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>' +
+      '<div class="e-title">' + title + '</div><div class="e-desc">' + desc + '</div></div>';
+  }
+
+  // ── busca: eventos ──
+  var input = document.getElementById('search');
+  var clearBtn = document.getElementById('search-clear');
+  var chipsBox = document.getElementById('chips');
+  input.addEventListener('input', function () {
+    query = input.value;
+    clearBtn.classList.toggle('show', query.trim().length > 0);
+    if (query.trim().length > 0) {
+      activeChip = 'todas';
+      chipsBox.querySelectorAll('.chip').forEach(function (x) {
+        x.classList.toggle('active', x.getAttribute('data-cat') === 'todas');
+      });
+    }
+    if (activeAdm === 'comparar') renderComparativo();
+    else render();
+  });
+  clearBtn.addEventListener('click', function () {
+    query = ''; input.value = ''; clearBtn.classList.remove('show');
+    input.focus();
+    if (activeAdm === 'comparar') renderComparativo();
+    else render();
+  });
+
+  // ── atalho: rolar até os materiais para baixar ──
+  var jumpBtn = document.getElementById('dl-jump');
+  if (jumpBtn) {
+    jumpBtn.addEventListener('click', function () {
+      var sec = document.getElementById('downloads-section');
+      if (sec) sec.scrollIntoView({ block: 'start' });
+    });
+  }
+
+  // ── footnote (preenchida por loadAdmin) ──
+  var foot = document.getElementById('kb-foot');
+
+  // ── alternância de administradora ──
+  document.querySelectorAll('.adm-pill[data-adm]').forEach(function (p) {
+    p.addEventListener('click', function () {
+      var k = p.getAttribute('data-adm');
+      if (k === activeAdm) return;
+      if (k === 'comparar') {
+        loadComparativo();
+      } else if (k === 'ia') {
+        loadAssistenteIA();
+      } else if (ADM[k]) {
+        loadAdmin(k);
+      } else {
+        return;
+      }
+      try { window.scrollTo(0, 0); } catch (e) {}
+    });
+  });
+
+  // ── Assistente IA — chat com Gemini ──
+  function loadAssistenteIA() {
+    activeAdm = 'ia';
+    document.querySelectorAll('.adm-pill[data-adm]').forEach(function (p) {
+      p.classList.toggle('active', p.getAttribute('data-adm') === 'ia');
+    });
+    // Esconde elementos do material normal
+    var hideIds = ['chips', 'result-info', 'downloads-section', 'kb-foot'];
+    hideIds.forEach(function (id) { var el = document.getElementById(id); if (el) el.style.display = 'none'; });
+    var sb = document.querySelector('.search-box'); if (sb) sb.style.display = 'none';
+    var dlJ = document.getElementById('dl-jump'); if (dlJ) dlJ.style.display = 'none';
+    var content = document.getElementById('content');
+    if (!content) return;
+
+    if (window.KB_CHAT && window.KB_CHAT.isConfigured()) {
+      window.KB_CHAT.mount(content);
+    } else {
+      content.innerHTML =
+        '<div class="kbc-config-warning">' +
+          '<h4>⚙️ Assistente IA — Configuração pendente</h4>' +
+          '<p>Pra ativar o chat, é preciso:</p>' +
+          '<ol style="margin: 8px 0 8px 22px;">' +
+            '<li>Pegar uma chave grátis do Google Gemini em <code>aistudio.google.com/apikey</code></li>' +
+            '<li>Restringir a chave aos domínios do portal (Google Cloud Console)</li>' +
+            '<li>Editar o arquivo <code>kb-chat-config.js</code> e colar a chave</li>' +
+            '<li>Commitar e dar refresh nessa página</li>' +
+          '</ol>' +
+          '<p style="margin-top:10px;font-size:12px;">Instruções completas estão dentro do arquivo <code>kb-chat-config.js</code> no repositório.</p>' +
+        '</div>';
+    }
+  }
+
+  // Quando troca pra outro banco/comparativo, restaura visibilidade dos elementos
+  // que o loadAssistenteIA() escondeu.
+  function restoreFromIA() {
+    var sb = document.querySelector('.search-box'); if (sb) sb.style.display = '';
+    var dlJ = document.getElementById('dl-jump'); if (dlJ) dlJ.style.display = '';
+    var ri = document.getElementById('result-info'); if (ri) ri.style.display = '';
+    var ch = document.getElementById('chips'); if (ch) ch.style.display = '';
+    var ds = document.getElementById('downloads-section'); if (ds) ds.style.display = '';
+    var ft = document.getElementById('kb-foot'); if (ft) ft.style.display = '';
+  }
+  var _origLoadAdmin = loadAdmin;
+  loadAdmin = function (key) {
+    restoreFromIA();
+    return _origLoadAdmin(key);
+  };
+  if (typeof loadComparativo === 'function') {
+    var _origLoadComp = loadComparativo;
+    loadComparativo = function () {
+      restoreFromIA();
+      // Comparativo não tem downloads próprios — mantém escondido
+      var ds = document.getElementById('downloads-section'); if (ds) ds.style.display = 'none';
+      var dlJ = document.getElementById('dl-jump'); if (dlJ) dlJ.style.display = 'none';
+      return _origLoadComp();
+    };
+  }
+
+  // ── init ──
+  document.querySelectorAll('.adm-pill[data-adm]').forEach(function (p) {
+    var k = p.getAttribute('data-adm');
+    // "comparar" e "ia" não correspondem a bancos em ADM — sempre habilitados.
+    if (k !== 'comparar' && k !== 'ia' && !ADM[k]) { p.disabled = true; p.classList.add('soon'); }
+  });
+  // Estado inicial: nenhuma administradora selecionada — o usuário escolhe na barra.
+  var _sbInit = document.querySelector('.search-box');
+  if (_sbInit) _sbInit.style.display = 'none';
+  var _chipsInit = document.getElementById('chips');
+  if (_chipsInit) _chipsInit.style.display = 'none';
+  var _dlJumpInit = document.getElementById('dl-jump');
+  if (_dlJumpInit) _dlJumpInit.style.display = 'none';
+  var temAlgum = ADM['bradesco'] || ADM['porto'] || ADM['itau'] || ADM['fgts'] || ADM['comissoes'];
+  if (!temAlgum) {
+    document.getElementById('content').innerHTML =
+      emptyHTML('Conteúdo não carregado', 'Os arquivos de conteúdo (kb-bradesco.js / kb-porto.js / kb-itau.js / kb-fgts.js / kb-comissoes.js) não foram encontrados.');
+  } else {
+    document.getElementById('content').innerHTML =
+      emptyHTML('Escolha uma seção', 'Selecione Porto, Itaú, Bradesco, FGTS Caixa ou Comissões acima para ver o material de apoio.');
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,2116 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Master Prime — Portal do Cliente</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    /* ===== ESTILOS (mantidos do original) ===== */
+    :root{
+      --mp-navy:#2D3F5E; --mp-navy-2:#1E2D45; --mp-teal:#4DBCC8; --mp-teal-2:#3AA7B3;
+      --mp-yellow:#F4C24A; --mp-amber:#E89D3A;
+      --bg:#F6F8FB; --card:#FFFFFF; --border:#E6EAF1; --border2:#D7DEE8;
+      --text:#1A2030; --text2:#5A6478; --text3:#8C95A7;
+      --green:#16A34A; --green-bg:#DCFCE7; --red:#DC2626; --red-bg:#FEE2E2;
+      --blue:#2563EB; --blue-bg:#DBEAFE; --amber:#D97706; --amber-bg:#FEF3C7;
+      --purple:#7C3AED; --purple-bg:#EDE9FE;
+      --r:14px; --r-sm:8px;
+      --shadow:0 1px 2px rgba(15,23,42,.04), 0 4px 12px rgba(15,23,42,.04);
+      --shadow-lg:0 8px 24px rgba(15,23,42,.10);
+      --fonte:'Inter',-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+      --fonte-mono:'DM Mono',ui-monospace,Menlo,Consolas,monospace;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:var(--fonte);
+      color:var(--text); font-size:13px; line-height:1.5;
+      background:
+        radial-gradient(ellipse at top left, rgba(77,188,200,.10), transparent 55%),
+        radial-gradient(ellipse at top right, rgba(244,194,74,.08), transparent 50%),
+        linear-gradient(180deg, #FAFCFE 0%, #F4F7FB 100%);
+      min-height:100vh; -webkit-font-smoothing:antialiased;
+    }
+    a{color:var(--mp-teal-2);text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    .header{
+      background:linear-gradient(135deg, var(--mp-navy) 0%, var(--mp-navy-2) 100%);
+      padding:0 28px; height:68px;
+      display:flex; align-items:center; justify-content:space-between;
+      box-shadow:0 2px 14px rgba(45,63,94,.18);
+      position:sticky; top:0; z-index:20;
+    }
+    .header-logo{display:flex;align-items:center;gap:10px}
+    .header-logo img{height:38px;width:auto;display:block;filter:brightness(0) invert(1);}
+    .header-right{display:flex;align-items:center;gap:14px}
+    .header-tag{font-size:10px;font-weight:700;color:rgba(255,255,255,.55);text-transform:uppercase;letter-spacing:1.6px;}
+
+    .container{max-width:960px;margin:0 auto;padding:36px 22px 80px}
+
+    .card{
+      background:var(--card); border-radius:var(--r);
+      box-shadow:var(--shadow); border:1px solid var(--border);
+      margin-bottom:18px; overflow:hidden;
+    }
+    .card-head{
+      padding:18px 22px 14px; border-bottom:1px solid var(--border);
+      display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+    }
+    .card-title{font-size:14px;font-weight:700;color:var(--text);letter-spacing:-.1px;display:flex;align-items:center;gap:8px}
+    .card-sub{font-size:11.5px;color:var(--text2);margin-top:3px;line-height:1.45}
+    .card-body{padding:20px 22px}
+
+    .footer-info{
+      margin-top: 28px; padding: 24px;
+      background: #FFFFFF; border: 1px solid var(--border);
+      border-radius: 14px; font-size: 12px; color: var(--text2);
+      line-height: 1.7; box-shadow: var(--shadow);
+    }
+    .footer-info h3{font-size: 14px;font-weight: 700;color: var(--mp-navy);margin-bottom: 12px;}
+    .footer-info strong{ color: var(--text); }
+    .footer-info ul{ padding-left: 20px; margin-bottom: 12px; }
+    .footer-info li{ margin-bottom: 4px; }
+    .footer-info .lgpd{margin-top: 16px;font-size: 11px;color: var(--text3);border-top: 1px solid var(--border);padding-top: 12px;}
+
+    .ico{width:16px;height:16px;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;color:currentColor}
+    .ico svg{width:100%;height:100%;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .ico-lg{width:24px;height:24px}
+    .ico-xl{width:34px;height:34px}
+
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      padding:11px 18px; border-radius:10px;
+      font-family:inherit; font-size:12.5px; font-weight:600;
+      cursor:pointer; border:none; transition:all .15s;
+      text-decoration:none; line-height:1; white-space:nowrap;
+    }
+    .btn-primary{background:var(--mp-navy);color:#fff;box-shadow:0 2px 8px rgba(45,63,94,.18)}
+    .btn-primary:hover{background:var(--mp-navy-2);transform:translateY(-1px);box-shadow:0 4px 12px rgba(45,63,94,.22)}
+    .btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none}
+    .btn-outline{background:#fff;color:var(--mp-navy);border:1.5px solid var(--border2)}
+    .btn-outline:hover{border-color:var(--mp-navy);background:#F8FAFC}
+    .btn-teal{background:var(--mp-teal);color:#fff;box-shadow:0 2px 8px rgba(77,188,200,.20)}
+    .btn-teal:hover{background:var(--mp-teal-2)}
+    .btn-sm{padding:8px 14px;font-size:11.5px;border-radius:8px}
+    .btn-xs{padding:6px 11px;font-size:11px;border-radius:6px}
+    .w-100{width:100%}
+
+    .btn-cta{
+      background:linear-gradient(135deg, var(--mp-teal) 0%, var(--mp-teal-2) 100%);
+      color:#fff; font-size:14px; font-weight:700; padding:16px 24px;
+      border-radius:12px; box-shadow:0 6px 20px rgba(77,188,200,.35);
+      border:none; width:100%; cursor:pointer; transition:all .2s;
+      display:inline-flex; align-items:center; justify-content:center; gap:10px;
+    }
+    .btn-cta:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(77,188,200,.45)}
+    .btn-cta:active{transform:translateY(0)}
+
+    .btn-secondary-link{
+      display:inline-flex; align-items:center; justify-content:center; gap:8px;
+      padding:11px 18px; border-radius:10px;
+      font-family:inherit; font-size:12.5px; font-weight:600;
+      cursor:pointer; border:1.5px solid var(--border2);
+      background:#fff; color:var(--text2); transition:all .15s;
+      width:100%;
+    }
+    .btn-secondary-link:hover{border-color:var(--mp-navy);color:var(--mp-navy);background:#F8FAFC}
+
+    .campo{margin-bottom:14px}
+    .campo label{display:block;font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;}
+    .campo .req{color:var(--red)}
+    .campo input,.campo textarea,.campo select{
+      width:100%; padding:10px 13px;
+      border:1.5px solid var(--border2); border-radius:8px;
+      font-family:inherit; font-size:13px; color:var(--text);
+      background:#fff; outline:none;
+      transition:border-color .15s, box-shadow .15s;
+    }
+    .campo input:focus,.campo textarea:focus,.campo select:focus{border-color:var(--mp-teal); box-shadow:0 0 0 3px rgba(77,188,200,.14);}
+    .campo input:disabled{background:#F8FAFC;color:var(--text3);cursor:not-allowed}
+    .campo textarea{resize:vertical;min-height:64px;font-family:inherit}
+    .campo .hint{font-size:11px;color:var(--text3);margin-top:4px}
+
+    .checkbox-lgpd{
+      display:flex; gap:12px; align-items:flex-start;
+      background:#F9FAFB; padding:14px 16px; border-radius:10px;
+      margin:12px 0; border:1px solid #E2E8F0;
+    }
+    .checkbox-lgpd input{margin-top:2px; width:18px; height:18px; cursor:pointer}
+    .checkbox-lgpd label{font-size:12px; line-height:1.5; color:var(--text2); cursor:pointer}
+    .checkbox-lgpd strong{color:var(--mp-navy)}
+
+    .tipo-pessoa-selector{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+    .tipo-pessoa-btn{
+      padding:14px 18px; border-radius:12px; border:2px solid var(--border2);
+      background:#fff; cursor:pointer; transition:all .15s; text-align:center;
+      font-family:inherit; font-size:13px; font-weight:600; color:var(--text2);
+    }
+    .tipo-pessoa-btn:hover{border-color:var(--mp-teal);color:var(--mp-teal)}
+    .tipo-pessoa-btn.ativo{border-color:var(--mp-teal);background:#F0FAFD;color:var(--mp-teal)}
+    .tipo-pessoa-btn .tipo-icon{font-size:24px;display:block;margin-bottom:6px;}
+    .tipo-pessoa-btn .tipo-label{font-size:12px;font-weight:700;display:block;}
+    .tipo-pessoa-btn .tipo-sub{font-size:10.5px;color:var(--text3);margin-top:2px;display:block;font-weight:400;}
+    .tipo-pessoa-btn.ativo .tipo-sub{color:var(--mp-teal-2)}
+
+    .alerta{
+      display: none;
+      padding: 14px 16px;
+      border-radius: 10px;
+      font-size: 14px;
+      margin-top: 16px;
+      border: 1px solid transparent;
+      line-height: 1.5;
+      background: #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      transition: all 0.3s;
+    }
+    .alerta.visivel{
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .alerta-erro{background: #FFF5F5;color: #C53030;border-color: #FEB2B2;}
+    .alerta-aviso{background: #FFFFF0;color: #975A16;border-color: #F6E05E;}
+    .alerta-sucesso{background: #F0FFF4;color: #276749;border-color: #9AE6B4;}
+    .alerta-info{background: #EBF8FF;color: #2A4365;border-color: #90CDF4;}
+
+    .tag{display:inline-flex;align-items:center;gap:5px;padding:3px 9px; font-size:10.5px; font-weight:700;border-radius:999px; line-height:1.3;background:#F1F5F9;color:var(--text2);}
+    .tag-blue{background:var(--blue-bg);color:#1E40AF}
+    .tag-amber{background:var(--amber-bg);color:#92400E}
+    .tag-purple{background:var(--purple-bg);color:#5B21B6}
+    .tag-teal{background:#CFFAFE;color:#0E7490}
+    .tag-green{background:var(--green-bg);color:#166534}
+    .tag-red{background:var(--red-bg);color:#991B1B}
+    .tag-gray{background:#F1F5F9;color:var(--text2)}
+
+    .start-wrap{max-width:520px;margin:30px auto 0;}
+    .start-card{background:var(--card); border-radius:18px;box-shadow:var(--shadow-lg); border:1px solid var(--border);overflow:hidden;}
+    .start-head{padding:34px 30px 26px; text-align:center;background:linear-gradient(180deg, #FAFCFE 0%, #FFFFFF 100%);border-bottom:1px solid var(--border);}
+    .start-head .badge-icon{width:56px;height:56px;border-radius:14px;margin:0 auto 14px;background:linear-gradient(135deg, var(--mp-teal) 0%, var(--mp-teal-2) 100%);display:flex;align-items:center;justify-content:center;color:#fff;box-shadow:0 6px 16px rgba(77,188,200,.30);}
+    .start-head h1{font-size:20px;font-weight:800;color:var(--mp-navy);margin-bottom:6px;letter-spacing:-.2px}
+    .start-head p{font-size:12.5px;color:var(--text2)}
+    .start-body{padding:24px 30px 28px}
+    .start-divider{display:flex;align-items:center;gap:14px;margin:22px 0 16px;color:var(--text3);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;}
+    .start-divider::before,.start-divider::after{content:"";flex:1;height:1px;background:var(--border)}
+
+    .proc-card-list{display:flex;flex-direction:column;gap:0}
+    .proc-row{display:flex; align-items:center; gap:14px;padding:14px 18px; border-radius:10px;border:1px solid var(--border); background:#fff;cursor:pointer; transition:all .15s;text-decoration:none; color:inherit;}
+    .proc-row+.proc-row{margin-top:8px}
+    .proc-row:hover{border-color:var(--mp-teal);background:#F8FCFD;transform:translateX(2px)}
+    .proc-info{flex:1;min-width:0}
+    .proc-name{font-weight:700;font-size:13px;color:var(--text);margin-bottom:2px}
+    .proc-meta{font-size:11px;color:var(--text2);display:flex;flex-wrap:wrap;gap:6px}
+    .proc-meta .mono{font-family:var(--fonte-mono);font-weight:700;color:var(--text)}
+    .proc-arrow{color:var(--text3);font-weight:700;font-size:14px}
+
+    .stepper{background:#fff; border:1px solid var(--border); border-radius:14px;padding:24px 26px; margin-bottom:18px;display:flex; gap:0; box-shadow:var(--shadow);overflow-x:auto;}
+    .step{display:flex; flex-direction:column; align-items:center;flex:1; min-width:90px; position:relative;}
+    .step:not(:last-child)::after{content:""; position:absolute; top:16px; left:calc(50% + 18px); right:calc(-50% + 18px);height:2px; background:var(--border); z-index:0;}
+    .step.concluido:not(:last-child)::after{background:var(--mp-teal)}
+    .step-dot{width:36px;height:36px;border-radius:50%;border:2px solid var(--border); background:#fff;display:flex;align-items:center;justify-content:center;z-index:1; position:relative; transition:all .3s;color:var(--text3);}
+    .step.concluido .step-dot{background:var(--mp-teal);border-color:var(--mp-teal);color:#fff}
+    .step.atual .step-dot{background:var(--mp-navy); border-color:var(--mp-navy); color:#fff;box-shadow:0 0 0 5px rgba(45,63,94,.12);}
+    .step-label{font-size:9.5px; font-weight:700; color:var(--text3);text-align:center; margin-top:8px; max-width:90px;line-height:1.3; text-transform:uppercase; letter-spacing:.4px;}
+    .step.atual .step-label{color:var(--mp-navy)}
+    .step.concluido .step-label{color:var(--mp-teal)}
+
+    .tabs{display:flex; gap:2px; padding:4px;background:#F1F5F9; border-radius:12px;margin-bottom:20px;}
+    .tab-btn{flex:1; padding:10px 14px;background:transparent; border:none;font-family:inherit; font-size:12px; font-weight:600;color:var(--text2); cursor:pointer;border-radius:9px; transition:all .15s;display:inline-flex; align-items:center; justify-content:center; gap:7px;white-space:nowrap;}
+    .tab-btn:hover:not(.ativa){color:var(--text);background:rgba(255,255,255,.6)}
+    .tab-btn.ativa{background:#fff;color:var(--mp-navy);box-shadow:0 2px 6px rgba(15,23,42,.06)}
+    .tab-count{font-size:10px; padding:1px 6px; border-radius:999px;background:#E2E8F0; color:var(--text2); font-weight:700;}
+    .tab-btn.ativa .tab-count{background:var(--mp-teal);color:#fff}
+    .painel{display:none}
+    .painel.ativo{display:block}
+
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+    .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:0 18px}
+    .grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:0 18px}
+
+    .doc-slots{display:flex;flex-direction:column;gap:14px}
+    .doc-slot{border:1.5px dashed var(--border2); border-radius:12px;padding:18px; transition:all .2s; background:#fff;}
+    .doc-slot.preenchido{border-style:solid;border-color:var(--green);background:#F7FEF9}
+    .doc-slot.opcional{border-color:#E2E8F0;background:#FAFBFD}
+    .doc-slot.dragover{border-color:var(--mp-teal);background:#F0FAFB;transform:scale(1.005)}
+    .doc-slot-head{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+    .doc-slot-icon{width:40px;height:40px;border-radius:10px;flex-shrink:0;background:#F1F5F9;color:var(--text2);display:flex;align-items:center;justify-content:center;}
+    .doc-slot.preenchido .doc-slot-icon{background:var(--green-bg);color:var(--green)}
+    .doc-slot-title{font-size:13px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px}
+    .doc-slot-sub{font-size:11px;color:var(--text2);margin-top:2px}
+    .doc-slot-action{margin-left:auto;display:flex;gap:6px;align-items:center}
+    .doc-slot input[type=file]{display:none}
+    .doc-slot-arquivo{display:flex; align-items:center; gap:10px;padding:8px 12px; background:#F1F5F9; border-radius:8px;font-size:12px; margin-top:6px;}
+    .doc-slot-arquivo .nome{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .doc-slot-arquivo .remover{background:none;border:none;color:var(--red);cursor:pointer;font-size:14px;padding:0 4px;}
+
+    .arquivo-item{display:flex; align-items:center; gap:10px;padding:10px 14px; border-radius:8px;border:1px solid var(--border);margin-bottom:8px; background:#fff; font-size:12.5px;}
+    .arquivo-item:hover{border-color:var(--mp-teal);background:#F8FCFD}
+    .arquivo-item .file-ico{width:34px;height:34px;border-radius:8px;flex-shrink:0;background:var(--blue-bg);color:var(--blue);display:flex;align-items:center;justify-content:center;}
+    .arquivo-item .file-info{flex:1;min-width:0}
+    .arquivo-item .file-name{font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .arquivo-item .file-meta{font-size:11px;color:var(--text2);margin-top:1px}
+
+    .timeline{max-height:420px; overflow-y:auto; padding:8px 6px 8px 0;display:flex; flex-direction:column; gap:14px;}
+    .timeline::-webkit-scrollbar{width:6px}
+    .timeline::-webkit-scrollbar-thumb{background:#CBD5E1;border-radius:3px}
+    .msg-item{display:flex;gap:10px;align-items:flex-start;max-width:85%}
+    .msg-item.cliente{align-self:flex-end;flex-direction:row-reverse}
+    .msg-avatar{width:32px;height:32px;border-radius:50%;flex-shrink:0; display:flex; align-items:center; justify-content:center;font-size:13px;font-weight:700; color:#fff;background:var(--mp-teal);}
+    .msg-item.admin .msg-avatar{background:var(--mp-navy)}
+    .msg-balao{padding:10px 14px; border-radius:14px;font-size:13px; line-height:1.5;background:var(--mp-teal);color:#fff;border-top-right-radius:4px;}
+    .msg-item.admin .msg-balao{background:#F1F5F9;color:var(--text);border-top-right-radius:14px;border-top-left-radius:4px}
+    .msg-hora{font-size:10.5px;color:var(--text3);margin-top:4px; padding:0 4px;}
+    .msg-input-wrap{display:flex; gap:10px;margin-top:18px; padding-top:18px;border-top:1px solid var(--border);}
+    .msg-input-wrap textarea{flex:1;padding:11px 14px;border:1.5px solid var(--border2); border-radius:10px;font-family:inherit;font-size:13px; resize:none;min-height:46px; max-height:120px; outline:none;transition:border-color .15s;}
+    .msg-input-wrap textarea:focus{border-color:var(--mp-teal)}
+
+    .hist-item{display:flex; gap:14px; padding:12px 0;border-bottom:1px solid var(--border);}
+    .hist-item:last-child{border-bottom:none}
+    .hist-dot{width:34px;height:34px;border-radius:50%;flex-shrink:0;background:var(--blue-bg);color:var(--blue);display:flex;align-items:center;justify-content:center;}
+    .hist-content{flex:1}
+    .hist-status{margin-bottom:4px}
+    .hist-obs{font-size:12px;color:var(--text);margin-top:4px}
+    .hist-hora{font-size:10.5px;color:var(--text3);margin-top:4px;font-family:var(--fonte-mono)}
+
+    .empty{padding:30px 20px;text-align:center;color:var(--text3)}
+    .empty-icon{width:48px;height:48px;border-radius:50%;background:#F1F5F9; margin:0 auto 12px;display:flex;align-items:center;justify-content:center;color:var(--text3);}
+    .empty-msg{font-size:12.5px}
+
+    .spinner{width:14px;height:14px;border:2px solid #E2E8F0;border-top-color:var(--mp-teal); border-radius:50%;display:inline-block; animation:spin .8s linear infinite;}
+    .spinner-dark{border-color:#E2E8F0;border-top-color:var(--mp-navy)}
+    .spinner-lg{width:32px;height:32px;border-width:3px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .notif{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--mp-navy);color:#fff;padding:11px 22px;border-radius:999px;font-size:12.5px;font-weight:600;box-shadow:0 6px 18px rgba(0,0,0,.28);z-index:999; display:flex; align-items:center; gap:8px;animation:fadeUp .3s ease;}
+    @keyframes fadeUp{from{opacity:0;transform:translateX(-50%) translateY(10px)}}
+    @keyframes fadeIn{from{opacity:0}}
+
+    #loading-page{min-height:calc(100vh - 62px);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+
+    .banco-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:18px; margin:24px 0;}
+    .banco-card{background:#fff; border:2px solid var(--border);border-radius:16px; padding:28px 20px;text-align:center; cursor:pointer;transition:all .2s; box-shadow:var(--shadow);}
+    .banco-card:hover{transform:translateY(-3px);box-shadow:0 10px 24px rgba(0,0,0,.08);}
+    .banco-card .banco-emoji{font-size:42px;margin-bottom:12px}
+    .banco-card .banco-nome{font-size:18px;font-weight:800;margin-bottom:6px}
+    .banco-card .banco-desc{font-size:12px;color:var(--text2)}
+    .banco-card .banco-seta{margin-top:14px;font-weight:600;font-size:13px;color:var(--text3)}
+
+    .secao-tipo-pessoa{
+      background:linear-gradient(135deg, #F0F9FF 0%, #F8FCFE 100%);
+      border:1px solid #BAE6FD; border-radius:12px;
+      padding:18px 20px; margin-bottom:18px;
+    }
+    .secao-tipo-titulo{font-size:12px;font-weight:700;color:var(--mp-navy);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px;display:flex;align-items:center;gap:6px;}
+
+    .sucesso-box{background:var(--green-bg);border:1.5px solid #86EFAC;border-radius:14px;padding:20px 22px;margin-bottom:16px;}
+    .sucesso-steps{counter-reset:step;display:flex;flex-direction:column;gap:10px;margin-top:12px;}
+    .sucesso-step{display:flex;align-items:flex-start;gap:10px;font-size:12.5px;color:var(--text)}
+    .sucesso-step-num{width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+
+    .section-divider{display:flex;align-items:center;gap:12px;margin:18px 0 14px;font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;}
+    .section-divider::before,.section-divider::after{content:"";flex:1;height:1px;background:var(--border)}
+
+    .bradesco-doc-alert{
+      background:#FFF5F5; border:1px solid #FECACA; border-radius:10px;
+      padding:14px 16px; margin-bottom:14px; font-size:12px; color:#991B1B;
+      display:flex; gap:10px; align-items:flex-start; line-height:1.5;
+    }
+
+    @media (max-width:680px){
+      .container{padding:24px 14px 60px}
+      .cliente-hero{grid-template-columns:1fr;padding:24px}
+      .protocolo-bar{grid-template-columns:1fr;gap:14px}
+      .protocolo-actions{align-items:flex-start}
+      .grid-2, .grid-3, .grid-4{grid-template-columns:1fr;gap:0}
+      .tabs{flex-wrap:wrap}
+      .tab-btn{flex:1 1 calc(50% - 1px);min-width:120px}
+      .stepper{padding:18px 14px}
+      .step{min-width:70px}
+      .step-label{font-size:8.5px}
+      .header{padding:0 18px}
+      .header-tag{display:none}
+      .tipo-pessoa-selector{grid-template-columns:1fr 1fr}
+    }
+  </style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-logo">
+    <img src="logo.png" alt="Master Prime">
+  </div>
+  <div class="header-right">
+    <span class="header-tag">Portal do Cliente</span>
+  </div>
+</header>
+
+<div id="root">
+  <div id="loading-page">
+    <div class="spinner spinner-dark spinner-lg"></div>
+    <p style="color:var(--text2);font-size:13px;">Carregando...</p>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// CONFIG
+// ════════════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://jhwciwvgagnuxakukyob.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx';
+
+const ETAPAS = [
+  { status:'Recebido' },
+  { status:'Em análise' },
+  { status:'Enviado para administradora' },
+  { status:'Em retorno da administradora' },
+  { status:'Finalizado' },
+];
+
+const BANCOS = [
+  {
+    id: 'itau',
+    nome: 'Itaú',
+    icone: '🏦',
+    corPrimaria: '#EC7000',
+    corPrimariaDark: '#C85E00',
+    corSecundaria: '#FF8C2E',
+    descricao: 'Processo de faturamento de cotas administradas pelo Itaú.',
+    subOperacoes: [
+      {
+        id: 'faturamento',
+        nome: 'Faturamento',
+        descricao: 'Envio de faturamento de cota(s) para administração.',
+        documentos: [
+          { key: 'documento_foto',  label: 'Documento com foto', sub: 'RG ou CNH (frente e verso)', obrigatorio: true, iconKey: 'id' },
+          { key: 'crlv',            label: 'CRLV do bem',        sub: 'Obrigatório apenas para veículos usados', obrigatorio: false, iconKey: 'car' },
+          { key: 'outros',          label: 'Outros documentos',  sub: 'Procurações, documentos complementares e etc', obrigatorio: false, iconKey: 'docs' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'bradesco',
+    nome: 'Bradesco',
+    icone: '🏛️',
+    corPrimaria: '#CC092F',
+    corPrimariaDark: '#A30022',
+    corSecundaria: '#E8304F',
+    descricao: 'Processo de faturamento para grupos administrados pelo Bradesco.',
+    subOperacoes: [
+      {
+        id: 'faturamento',
+        nome: 'Faturamento',
+        descricao: 'Envio de faturamento de cota(s) para administração.',
+        documentos: [
+          { key: 'documento_foto',  label: 'Documento com foto', sub: 'RG ou CNH (frente e verso)', obrigatorio: true, iconKey: 'id' },
+          { key: 'comprovante_residencia', label: 'Comprovante de residência', sub: 'Conta de luz, água ou similar (últimos 90 dias)', obrigatorio: true, iconKey: 'home' },
+          { key: 'comprovante_renda', label: 'Comprovante de renda', sub: 'Holerite, extrato bancário ou declaração de IR', obrigatorio: true, iconKey: 'docs' },
+          { key: 'documento_foto_vendedor',  label: 'Documento com foto do vendedor', sub: 'RG ou CNH (frente e verso)', obrigatorio: true, iconKey: 'id' },
+          { key: 'Doc.CRLV', label: 'CRLV do bem', sub: 'Documento do Veículo', obrigatorio: false, iconKey: 'car' },
+          { key: 'outros',          label: 'Outros documentos', sub: 'Declarações, comprovantes adicionais (opcional)', obrigatorio: false, iconKey: 'docs' }
+        ]
+      }
+    ]
+  },
+  {
+    id: 'porto',
+    nome: 'Porto Seguro',
+    icone: '🏢',
+    corPrimaria: '#003C8A',
+    corPrimariaDark: '#002A61',
+    corSecundaria: '#005BBC',
+    descricao: 'Processos de faturamento e transferência junto à Porto Seguro.',
+    subOperacoes: [
+      {
+        id: 'transferencia',
+        nome: 'Transferência de Cota',
+        descricao: 'Transferência de titularidade da cota para outra pessoa.',
+        documentos: [
+          { key: 'documento_foto_cedente',    label: 'Documento com foto do Cedente',       sub: 'Atual proprietário da cota',            obrigatorio: true,  iconKey: 'id' },
+          { key: 'documento_foto_cessionario',label: 'Documento com foto do Cessionário',   sub: 'Pessoa que está adquirindo/comprando a cota', obrigatorio: true,  iconKey: 'id' },
+          { key: 'comp_residencia_cessionario',label: 'Comprovante de residência do cessionário', sub: 'Pessoa que está adquirindo/comprando a cota', obrigatorio: true,  iconKey: 'home' },
+          { key: 'outros',                    label: 'Outros documentos',              sub: 'Procurações, declarações (opcional)',    obrigatorio: false, iconKey: 'docs' }
+        ]
+      },
+      {
+        id: 'faturamento',
+        nome: 'Faturamento',
+        descricao: 'Envio de faturamento de cota(s) para administração.',
+        documentos: [
+          { key: 'documento_foto',  label: 'Documento com foto', sub: 'RG ou CNH (frente e verso)', obrigatorio: true, iconKey: 'id' },
+          { key: 'Doc.CRLV', label: 'CRLV do bem', sub: 'Documento do Veículo', obrigatorio: false, iconKey: 'car' },
+          { key: 'outros',          label: 'Outros documentos', sub: 'Procurações, comprovantes e etc', obrigatorio: false, iconKey: 'docs' }
+        ]
+      }
+    ]
+  }
+];
+
+const SVG = {
+  search: '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>',
+  user:   '<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  doc:    '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+  upload: '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>',
+  msg:    '<svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>',
+  clock:  '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  check:  '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>',
+  x:      '<svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+  link:   '<svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+  arrow:  '<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>',
+  back:   '<svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>',
+  alert:  '<svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  id:     '<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><line x1="15" y1="8" x2="17" y2="8"/><line x1="15" y1="12" x2="17" y2="12"/><path d="M5 16c1-1.5 2.5-2 4-2s3 .5 4 2"/></svg>',
+  home:   '<svg viewBox="0 0 24 24"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+  docs:   '<svg viewBox="0 0 24 24"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/></svg>',
+  send:   '<svg viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>',
+  copy:   '<svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+  refresh:'<svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>',
+  save:   '<svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>',
+  open:   '<svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>',
+  car:    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="9" width="18" height="7" rx="2"/><path d="M5 9L7 5h10l2 4"/><circle cx="7" cy="17" r="1.5"/><circle cx="17" cy="17" r="1.5"/></svg>',
+  plus:   '<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  bank:   '<svg viewBox="0 0 24 24"><rect x="2" y="11" width="20" height="9" rx="2"/><path d="M12 2L2 7h20L12 2z"/><line x1="6" y1="11" x2="6" y2="20"/><line x1="10" y1="11" x2="10" y2="20"/><line x1="14" y1="11" x2="14" y2="20"/><line x1="18" y1="11" x2="18" y2="20"/></svg>',
+  pf:     '<svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  pj:     '<svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>',
+  money:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+};
+const ico = (key, cls='ico') => `<span class="${cls}">${SVG[key]||''}</span>`;
+
+const sb     = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const root   = document.getElementById('root');
+const params = new URLSearchParams(window.location.search);
+const TOKEN  = params.get('token');
+
+let arquivosPendentes = {};
+let processoAtual = null;
+let bancoSelecionado = null;
+let operacaoSelecionada = null;
+let tipoPessoa = 'pf'; // 'pf' ou 'pj'
+let _pollingInterval = null;
+
+// ════════════════ TOKEN ════════════════
+function gerarTokenSeguro() {
+  const array = new Uint8Array(16);
+  window.crypto.getRandomValues(array);
+  return Array.from(array).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+// ─── Notificações (sininho) — avisa a equipe interna do Faturamento ───
+function clienteNotificar(token, titulo, texto) {
+  if (!token) return;
+  try {
+    sb.rpc('notificar_processo_token', {
+      p_token: token,
+      p_titulo: titulo,
+      p_texto: texto || null
+    }).then(function(){}, function(){});
+  } catch (e) { /* silencioso */ }
+}
+
+// ════════════════ NOTIFICAÇÃO ════════════════
+function mostrarNotif(msg, tipo='ok') {
+  const n = document.createElement('div');
+  n.className = 'notif';
+  n.innerHTML = ico(tipo==='erro'?'alert':'check') + ' ' + msg;
+  document.body.appendChild(n);
+  setTimeout(() => n.remove(), 3500);
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+  if (TOKEN) await carregarProcesso(TOKEN);
+  else renderTelaConsulta();
+});
+
+// ════════════════ TELA CONSULTA ════════════════
+function renderTelaConsulta(){
+  root.innerHTML = `
+    <div class="container">
+      <div class="start-wrap">
+        <div class="start-card">
+          <div class="start-head">
+            <div class="badge-icon" style="background:linear-gradient(135deg,var(--mp-teal) 0%,var(--mp-teal-2) 100%)">
+              ${ico('doc','ico ico-lg')}
+            </div>
+            <h1>Portal do Cliente</h1>
+            <p>Inicie um novo processo ou acompanhe o andamento de um processo existente.</p>
+          </div>
+          <div class="start-body">
+            <button class="btn-cta" onclick="renderTelaSelecaoBanco()">
+              ${ico('plus','ico ico-lg')} Iniciar novo processo
+            </button>
+            <div style="margin-top:10px;font-size:11px;color:var(--text3);text-align:center;">
+              Preencha os dados e envie seus documentos online
+            </div>
+            <div class="start-divider">já tenho um processo</div>
+            <div id="alerta-consulta" class="alerta" style="margin-bottom:12px"></div>
+            <div class="campo">
+              <label>CPF ou CNPJ</label>
+              <input type="text" id="cpf-consulta" placeholder="000.000.000-00 ou 00.000.000/0001-00" maxlength="18"
+                oninput="mascaraCpfCnpj(this)"
+                onkeydown="if(event.key==='Enter') consultarProcesso()">
+            </div>
+            <button class="btn-secondary-link" onclick="consultarProcesso()">
+              ${ico('search')} Consultar processo em andamento
+            </button>
+          </div>
+        </div>
+        <div id="lista-processos-cpf" style="margin-top:18px"></div>
+      </div>
+    </div>`;
+}
+
+async function consultarProcesso(){
+  const raw = (document.getElementById('cpf-consulta').value||'').replace(/\D/g,'');
+  if (raw.length < 11){ alerta('alerta-consulta','Informe um CPF (11 dígitos) ou CNPJ (14 dígitos) válido.','erro'); return; }
+  const btn = document.querySelector('.btn-secondary-link');
+  if (btn){ btn.disabled=true; btn.innerHTML = '<span class="spinner"></span> Buscando...'; }
+  const { data, error } = await sb.rpc('cliente_listar_por_cpf', { p_cpf: raw });
+  if (btn){ btn.disabled=false; btn.innerHTML = ico('search')+' Consultar processo em andamento'; }
+  if (error){ alerta('alerta-consulta','Erro ao buscar. Tente novamente.','erro'); return; }
+  if (!data || data.length===0){ alerta('alerta-consulta','Nenhum processo encontrado para este documento.','erro'); return; }
+  if (data.length===1){ window.location.href = `?token=${data[0].token}`; return; }
+  const lista = document.getElementById('lista-processos-cpf');
+  lista.innerHTML = `
+    <div class="card">
+      <div class="card-head"><div><div class="card-title">Processos encontrados (${data.length})</div><div class="card-sub">Selecione qual deseja acompanhar</div></div></div>
+      <div class="card-body" style="padding:14px">
+        <div class="proc-card-list">
+          ${data.map(p => `
+            <a class="proc-row" href="?token=${esc(p.token)}">
+              <div class="proc-info">
+                <div class="proc-name">${esc(p.nome)}</div>
+                <div class="proc-meta">
+                  ${p.protocolo?`<span class="mono">${esc(p.protocolo)}</span>`:`<span style="color:var(--amber);font-weight:700">Protocolo pendente</span>`}
+                  ${p.grupo?`<span>· Grupo ${esc(p.grupo)}</span>`:''}
+                  ${p.cota?`<span>· Cota ${esc(p.cota)}</span>`:''}
+                  <span>· ${fmtData(p.criado_em)}</span>
+                </div>
+              </div>
+              <span class="tag ${tagClass(p.status)}">${esc(p.status)}</span>
+              <span class="proc-arrow">→</span>
+            </a>
+          `).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+// ════════════════ SELEÇÃO BANCO ════════════════
+function renderTelaSelecaoBanco(){
+  bancoSelecionado = null; operacaoSelecionada = null; tipoPessoa = 'pf';
+  root.innerHTML = `
+    <div class="container">
+      <div class="start-wrap" style="max-width:600px">
+        <div style="text-align:center; margin-bottom:24px">
+          <h2 style="font-size:20px; font-weight:800; color:var(--mp-navy); margin-bottom:6px">Selecione a Administradora</h2>
+          <p style="font-size:13px; color:var(--text2)">Escolha a Administradora do seu consórcio.</p>
+        </div>
+        <div class="banco-grid">
+          ${BANCOS.map(b => `
+            <div class="banco-card" style="border-top:4px solid ${b.corPrimaria}" onclick="selecionarBanco('${b.id}')">
+              <div class="banco-emoji">${b.icone}</div>
+              <div class="banco-nome" style="color:${b.corPrimaria}">${b.nome}</div>
+              <div class="banco-desc">${b.descricao}</div>
+              <div class="banco-seta">Avançar →</div>
+            </div>
+          `).join('')}
+        </div>
+        <div style="text-align:center; margin-top:18px">
+          <a href="#" onclick="renderTelaConsulta();return false;" style="font-size:12px;color:var(--text2);display:inline-flex;align-items:center;gap:5px">
+            ${ico('back')} Voltar
+          </a>
+        </div>
+      </div>
+    </div>`;
+}
+
+function selecionarBanco(bancoId){
+  const banco = BANCOS.find(b => b.id === bancoId);
+  if (!banco) return;
+  bancoSelecionado = banco;
+  if (banco.subOperacoes.length > 1) renderTelaSubOperacao(banco);
+  else { operacaoSelecionada = banco.subOperacoes[0]; renderTelaCadastro(banco, operacaoSelecionada); }
+}
+
+function renderTelaSubOperacao(banco){
+  root.innerHTML = `
+    <div class="container">
+      <div class="start-wrap" style="max-width:550px">
+        <div style="text-align:center; margin-bottom:24px">
+          <h2 style="font-size:20px; font-weight:800; color:${banco.corPrimaria}; margin-bottom:6px">${banco.nome}</h2>
+          <p style="font-size:13px; color:var(--text2)">Selecione o tipo de processo desejado.</p>
+        </div>
+        <div class="banco-grid">
+          ${banco.subOperacoes.map(op => `
+            <div class="banco-card" style="border-top:4px solid ${banco.corPrimaria}" onclick="selecionarSubOperacao('${op.id}')">
+              <div class="banco-emoji">📋</div>
+              <div class="banco-nome" style="color:${banco.corPrimaria}">${op.nome}</div>
+              <div class="banco-desc">${op.descricao}</div>
+              <div class="banco-seta">Iniciar →</div>
+            </div>
+          `).join('')}
+        </div>
+        <div style="text-align:center; margin-top:18px">
+          <a href="#" onclick="renderTelaSelecaoBanco();return false;" style="font-size:12px;color:var(--text2);display:inline-flex;align-items:center;gap:5px">
+            ${ico('back')} Escolher outro banco
+          </a>
+        </div>
+      </div>
+    </div>`;
+}
+
+function selecionarSubOperacao(opId){
+  if (!bancoSelecionado) return;
+  const op = bancoSelecionado.subOperacoes.find(o => o.id === opId);
+  if (!op) return;
+  operacaoSelecionada = op;
+  renderTelaCadastro(bancoSelecionado, operacaoSelecionada);
+}
+
+// ════════════════ BLOCO TIPO PESSOA ════════════════
+function renderBlocoTipoPessoa() {
+  return `
+    <div class="secao-tipo-pessoa">
+      <div class="secao-tipo-titulo">${ico('user')} Tipo de pessoa</div>
+      <div class="tipo-pessoa-selector">
+        <button type="button" class="tipo-pessoa-btn ${tipoPessoa==='pf'?'ativo':''}" onclick="selecionarTipoPessoa('pf')" id="btn-tp-pf">
+          <span class="tipo-icon">👤</span>
+          <span class="tipo-label">Pessoa Física</span>
+          <span class="tipo-sub">CPF</span>
+        </button>
+        <button type="button" class="tipo-pessoa-btn ${tipoPessoa==='pj'?'ativo':''}" onclick="selecionarTipoPessoa('pj')" id="btn-tp-pj">
+          <span class="tipo-icon">🏢</span>
+          <span class="tipo-label">Pessoa Jurídica</span>
+          <span class="tipo-sub">CNPJ · Contrato Social obrigatório</span>
+        </button>
+      </div>
+    </div>`;
+}
+
+function selecionarTipoPessoa(tipo) {
+  tipoPessoa = tipo;
+  document.querySelectorAll('.tipo-pessoa-btn').forEach(b => b.classList.remove('ativo'));
+  const btn = document.getElementById('btn-tp-' + tipo);
+  if (btn) btn.classList.add('ativo');
+  const campoCpf  = document.getElementById('bloco-cpf');
+  const campoCnpj = document.getElementById('bloco-cnpj');
+  const campoNome = document.getElementById('label-nome-doc');
+  if (campoCpf)  campoCpf.style.display  = tipo==='pf'  ? '' : 'none';
+  if (campoCnpj) campoCnpj.style.display = tipo==='pj'  ? '' : 'none';
+  if (campoNome) campoNome.textContent = tipo==='pj' ? 'Razão Social' : 'Nome Completo';
+  atualizarDocContratoSocial();
+}
+
+function atualizarDocContratoSocial() {
+  if (!operacaoSelecionada) return;
+  const jaTem = operacaoSelecionada.documentos.find(d => d.key === 'contrato_social');
+  if (tipoPessoa === 'pj' && !jaTem) {
+    operacaoSelecionada.documentos.push({
+      key: 'contrato_social',
+      label: 'Contrato Social',
+      sub: 'Documento da empresa (obrigatório para PJ)',
+      obrigatorio: true,
+      iconKey: 'docs'
+    });
+  } else if (tipoPessoa === 'pf' && jaTem) {
+    operacaoSelecionada.documentos = operacaoSelecionada.documentos.filter(d => d.key !== 'contrato_social');
+    delete arquivosPendentes['contrato_social'];
+  }
+  renderSlotsAnexo(operacaoSelecionada.documentos);
+}
+
+// ════════════════ BLOCO ESTADO CIVIL / CÔNJUGE ════════════════
+function renderBlocoEstadoCivil() {
+  return `
+    <div class="card">
+      <div class="card-head"><div class="card-title">${ico('user')} Estado Civil</div></div>
+      <div class="card-body">
+        <div class="campo">
+          <label>Estado Civil <span class="req">*</span></label>
+          <select id="f-estado_civil" onchange="toggleBlocoConjuge()">
+            <option value="">Selecione...</option>
+            <option value="solteiro">Solteiro(a)</option>
+            <option value="casado">Casado(a)</option>
+            <option value="divorciado">Divorciado(a)</option>
+            <option value="viuvo">Viúvo(a)</option>
+            <option value="uniao_estavel">União Estável</option>
+          </select>
+        </div>
+        <div id="bloco-conjuge" style="display:none;">
+          <div class="alert" style="background:var(--amber-bg);color:var(--amber);border-color:#FCD34D;display:flex;margin-bottom:14px;">
+            ${ico('alert')} Para processos de transferência da Porto, é obrigatório anexar documento do cônjuge.
+          </div>
+          <div class="grid-2">
+            <div class="campo"><label>Nome do cônjuge <span class="req">*</span></label><input type="text" id="f-conjuge-nome" placeholder="Nome completo"></div>
+            <div class="campo"><label>CPF do cônjuge <span class="req">*</span></label><input type="text" id="f-conjuge-cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)"></div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function toggleBlocoConjuge() {
+  const sel = document.getElementById('f-estado_civil');
+  const bloco = document.getElementById('bloco-conjuge');
+  if (!sel || !bloco) return;
+  const estado = sel.value;
+  const exibir = estado === 'casado' || estado === 'uniao_estavel';
+  bloco.style.display = exibir ? 'block' : 'none';
+  const nomeEl = document.getElementById('f-conjuge-nome');
+  const cpfEl  = document.getElementById('f-conjuge-cpf');
+  if (nomeEl) nomeEl.required = exibir;
+  if (cpfEl)  cpfEl.required  = exibir;
+}
+
+// ════════════════ BLOCO REPRESENTANTE LEGAL (Itaú PJ) ════════════════
+function renderBlocoRepresentanteLegal() {
+  return `
+    <div class="card" id="card-rep-legal" style="display:none;">
+      <div class="card-head"><div class="card-title">${ico('user')} Representante Legal (Itaú PJ)</div></div>
+      <div class="card-body">
+        <div class="alert" style="background:var(--amber-bg);color:var(--amber);border-color:#FCD34D;display:flex;margin-bottom:14px;">
+          ${ico('alert')} Para Itaú com CNPJ, são necessários os dados do representante legal para assinatura dos contratos.
+        </div>
+        <div class="grid-2">
+          <div class="campo"><label>Nome <span class="req">*</span></label><input type="text" id="f-rep-nome" placeholder="Nome completo"></div>
+          <div class="campo"><label>CPF <span class="req">*</span></label><input type="text" id="f-rep-cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)"></div>
+        </div>
+        <div class="campo"><label>E-mail <span class="req">*</span></label><input type="email" id="f-rep-email" placeholder="representante@email.com"></div>
+      </div>
+    </div>`;
+}
+
+function atualizarVisibilidadeRepresentante() {
+  if (!bancoSelecionado) return;
+  const card = document.getElementById('card-rep-legal');
+  if (!card) return;
+  card.style.display = (bancoSelecionado.id === 'itau' && tipoPessoa === 'pj') ? 'block' : 'none';
+}
+
+// ════════════════ BLOCO GRUPOS/COTAS MULTIPLOS ════════════════
+function adicionarGrupoCota(){
+  const container = document.getElementById('grupo-cota-container');
+  if (!container) return;
+  const linha = document.createElement('div');
+  linha.className = 'grid-2 grupo-cota-linha';
+  linha.style.marginBottom = '10px';
+  linha.innerHTML = `
+    <div class="campo"><label>Grupo</label><input type="text" class="f-grupo" placeholder="Ex: 12"></div>
+    <div class="campo"><label>Cota</label><input type="text" class="f-cota" placeholder="Ex: 0042"></div>`;
+  container.appendChild(linha);
+}
+
+// ════════════════ CADASTRO ════════════════
+function renderTelaCadastro(banco, operacao){
+  if (!banco || !operacao) { renderTelaSelecaoBanco(); return; }
+  arquivosPendentes = {};
+  tipoPessoa = 'pf';
+  operacao.documentos = operacao.documentos.filter(d => d.key !== 'contrato_social');
+  const cor = banco.corPrimaria;
+  const corDark = banco.corPrimariaDark;
+
+  let html = `
+    <div class="container">
+      <div class="cliente-hero" style="background:linear-gradient(135deg, ${cor} 0%, ${corDark} 100%)">
+        <div>
+          <h1>${banco.nome} – ${operacao.nome}</h1>
+          <p>${operacao.descricao}</p>
+        </div>
+      </div>
+      <div style="margin-bottom:14px">
+        <a href="#" onclick="voltarEtapaAnterior();return false;" style="font-size:12px;color:var(--text2);display:inline-flex;align-items:center;gap:5px">
+          ${ico('back')} Voltar
+        </a>
+      </div>`;
+
+  if (operacao.id === 'transferencia') {
+    html += `
+        ${renderBlocoTipoPessoa()}
+        <div class="card">
+          <div class="card-head"><div class="card-title">${ico('user')} Cedente (titular atual)</div></div>
+          <div class="card-body">
+            <div class="grid-2">
+              <div class="campo"><label id="label-nome-doc">Nome completo <span class="req">*</span></label><input type="text" id="f-cedente-nome" placeholder="Nome do cedente"></div>
+              <div id="bloco-cpf"><div class="campo"><label>CPF <span class="req">*</span></label><input type="text" id="f-cedente-cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)" style="font-family:var(--fonte-mono)"></div></div>
+              <div id="bloco-cnpj" style="display:none"><div class="campo"><label>CNPJ <span class="req">*</span></label><input type="text" id="f-cedente-cnpj" placeholder="00.000.000/0001-00" maxlength="18" oninput="mascaraCNPJ(this)" style="font-family:var(--fonte-mono)"></div></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>Grupo <span class="req">*</span></label><input type="text" id="f-cedente-grupo" placeholder="Ex: 12"></div>
+              <div class="campo"><label>Cota <span class="req">*</span></label><input type="text" id="f-cedente-cota" placeholder="Ex: 0042"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>E-mail</label><input type="email" id="f-cedente-email" placeholder="email@exemplo.com"></div>
+              <div class="campo"><label>Telefone</label><input type="text" id="f-cedente-telefone" placeholder="(00) 00000-0000" maxlength="15" oninput="mascaraTel(this)"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">${ico('user')} Cessionário (novo titular)</div></div>
+          <div class="card-body">
+            <div class="grid-2">
+              <div class="campo"><label>Nome completo <span class="req">*</span></label><input type="text" id="f-cessionario-nome" placeholder="Nome do cessionário"></div>
+              <div class="campo"><label>CPF / CNPJ <span class="req">*</span></label><input type="text" id="f-cessionario-cpf" placeholder="000.000.000-00 ou CNPJ" maxlength="18" oninput="mascaraCpfCnpjGenerico(this)" style="font-family:var(--fonte-mono)"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>Grupo <span class="req">*</span></label><input type="text" id="f-cessionario-grupo" placeholder="Ex: 12"></div>
+              <div class="campo"><label>Cota <span class="req">*</span></label><input type="text" id="f-cessionario-cota" placeholder="Ex: 0042"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>E-mail</label><input type="email" id="f-cessionario-email" placeholder="email@exemplo.com"></div>
+              <div class="campo"><label>Telefone</label><input type="text" id="f-cessionario-telefone" placeholder="(00) 00000-0000" maxlength="15" oninput="mascaraTel(this)"></div>
+            </div>
+            <div class="campo"><label>Endereço</label><input type="text" id="f-cessionario-endereco" placeholder="Rua, número, bairro, cidade - UF"></div>
+            ${renderBlocoEstadoCivil()}
+          </div>
+        </div>`;
+  } else if (banco.id === 'bradesco') {
+    html += `
+        ${renderBlocoTipoPessoa()}
+        <div class="bradesco-doc-alert">
+          ${ico('alert')}
+          <div>
+            <strong>Documentos obrigatórios para Bradesco:</strong>
+            <ul style="margin:6px 0 0 16px;padding:0;">
+              <li>Documento com foto (RG ou CNH do consorciado)</li>
+              <li>Comprovante de residência (conta de luz, água etc. – últimos 90 dias)</li>
+              <li>Comprovante de renda (holerite, extrato ou declaração de IR)</li>
+              <li>Documento com foto do vendedor (RG ou CNH)</li>
+            </ul>
+            <p style="margin-top:6px;font-size:11px;color:#991B1B;">⚠️ O processo <strong>não será enviado</strong> sem esses documentos.</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">${ico('user')} Dados do Consorciado</div></div>
+          <div class="card-body">
+            <div class="grid-2">
+              <div id="bloco-cpf"><div class="campo"><label>CPF <span class="req">*</span></label><input type="text" id="f-cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)"></div></div>
+              <div id="bloco-cnpj" style="display:none"><div class="campo"><label>CNPJ <span class="req">*</span></label><input type="text" id="f-cnpj" placeholder="00.000.000/0001-00" maxlength="18" oninput="mascaraCNPJ(this)"></div></div>
+              <div class="campo"><label>Data Nascimento</label><input type="date" id="f-data_nasc"></div>
+            </div>
+            <div class="campo"><label id="label-nome-doc">Nome Completo <span class="req">*</span></label><input type="text" id="f-nome" placeholder="Nome completo ou Razão Social"></div>
+            <div class="grid-3">
+              <div class="campo"><label>Estado Civil</label><select id="f-estado_civil" onchange="toggleBlocoConjuge()"><option value="">Selecione...</option><option value="solteiro">Solteiro(a)</option><option value="casado">Casado(a)</option><option value="divorciado">Divorciado(a)</option><option value="viuvo">Viúvo(a)</option><option value="uniao_estavel">União Estável</option></select></div>
+              <div class="campo"><label>Nº Documento Identificação</label><input type="text" id="f-doc_id" placeholder="Nº do documento"></div>
+              <div class="campo"><label>Tipo de Documento</label><select id="f-tipo_doc"><option value="">Selecione...</option><option value="rg">RG</option><option value="cnh">CNH</option><option value="outro">Outro</option></select></div>
+            </div>
+            <div id="bloco-conjuge" style="display:none;">
+              <div class="alert" style="background:var(--amber-bg);color:var(--amber);border-color:#FCD34D;display:flex;margin-bottom:14px;">
+                ${ico('alert')} Para processos de transferência, anexar documento do cônjuge.
+              </div>
+              <div class="grid-2">
+                <div class="campo"><label>Nome do cônjuge <span class="req">*</span></label><input type="text" id="f-conjuge-nome" placeholder="Nome completo"></div>
+                <div class="campo"><label>CPF do cônjuge <span class="req">*</span></label><input type="text" id="f-conjuge-cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)"></div>
+              </div>
+            </div>
+            <div class="grid-3">
+              <div class="campo"><label>Data de Expedição</label><input type="date" id="f-data_expedicao"></div>
+              <div class="campo"><label>Órgão Emissor</label><input type="text" id="f-orgao_emissor"></div>
+              <div class="campo"><label>Valor da Renda</label><input type="text" id="f-renda" placeholder="R$ 0,00" oninput="mascaraValor(this)"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>Cargo</label><input type="text" id="f-cargo"></div>
+              <div class="campo"><label>Nacionalidade</label><input type="text" id="f-nacionalidade" value="Brasileiro(a)"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>Estado de Naturalidade</label><input type="text" id="f-estado_naturalidade"></div>
+              <div class="campo"><label>Celular</label><input type="text" id="f-telefone" placeholder="(00) 00000-0000" maxlength="15" oninput="mascaraTel(this)"></div>
+            </div>
+            <div class="campo"><label>Email</label><input type="email" id="f-email" placeholder="email@exemplo.com"></div>
+            <div class="campo"><label>Endereço Completo</label><input type="text" id="f-endereco" placeholder="Logradouro, número, bairro, cidade - UF, CEP"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">${ico('bank')} Dados Bancários do Consorciado</div></div>
+          <div class="card-body">
+            <div class="campo"><label>Nome do Titular da Conta</label><input type="text" id="f-banco-nome" placeholder="Nome do titular da conta"></div>
+            <div class="grid-3">
+              <div class="campo"><label>Banco</label><input type="text" id="f-banco" placeholder="Ex: 001 - Banco do Brasil"></div>
+              <div class="campo"><label>Agência</label><input type="text" id="f-agencia"></div>
+              <div class="campo"><label>Conta</label><input type="text" id="f-conta"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>Dígito</label><input type="text" id="f-conta_digito" placeholder="Bradesco não usa dígito" maxlength="2"></div>
+              <div class="campo"><label>Tipo de Conta</label><select id="f-tipo_conta"><option value="">Selecione...</option><option value="corrente">Corrente</option><option value="poupanca">Poupança</option></select></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">${ico('user')} Grupo(s) e Cota(s)</div><button type="button" class="btn btn-outline btn-sm" onclick="adicionarGrupoCota()">+ Adicionar</button></div>
+          <div class="card-body" id="grupo-cota-container">
+            <div class="grid-2 grupo-cota-linha" style="margin-bottom:10px">
+              <div class="campo"><label>Grupo <span class="req">*</span></label><input type="text" class="f-grupo" placeholder="Ex: 12"></div>
+              <div class="campo"><label>Cota <span class="req">*</span></label><input type="text" class="f-cota" placeholder="Ex: 0042"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">${ico('car')} Dados do Veículo (Aquisição)</div></div>
+          <div class="card-body">
+            <div class="grid-3">
+              <div class="campo"><label>Chassi</label><input type="text" id="f-chassi"></div>
+              <div class="campo"><label>Placa</label><input type="text" id="f-placa"></div>
+              <div class="campo"><label>Renavam</label><input type="text" id="f-renavam"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>UF Licenciamento</label><input type="text" id="f-uf_lic"></div>
+              <div class="campo"><label>Marca</label><input type="text" id="f-marca"></div>
+            </div>
+            <div class="grid-3">
+              <div class="campo"><label>Modelo</label><input type="text" id="f-modelo"></div>
+              <div class="campo"><label>Cor do Veículo</label><input type="text" id="f-cor_veiculo"></div>
+              <div class="campo"><label>Ano Fabricação</label><input type="text" id="f-ano_fab"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>Ano Modelo</label><input type="text" id="f-ano_modelo"></div>
+              <div class="campo"><label>Valor de Venda R$ <span class="req">*</span></label><input type="text" id="f-valor_venda" placeholder="R$ 0,00" oninput="mascaraValor(this)"></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">${ico('user')} Dados do Vendedor do Veículo</div></div>
+          <div class="card-body">
+            <div class="grid-2">
+              <div class="campo"><label>Nome do Vendedor</label><input type="text" id="f-vend-nome"></div>
+              <div class="campo"><label>CPF/CNPJ</label><input type="text" id="f-vend-cpf" placeholder="000.000.000-00" maxlength="18" oninput="mascaraCpfCnpjGenerico(this)"></div>
+            </div>
+            <div class="campo"><label>Endereço</label><input type="text" id="f-vend-endereco"></div>
+            <div class="grid-3">
+              <div class="campo"><label>Banco</label><input type="text" id="f-vend-banco"></div>
+              <div class="campo"><label>Agência</label><input type="text" id="f-vend-agencia" placeholder="Ex: 1234"></div>
+              <div class="campo"><label>Conta</label><input type="text" id="f-vend-conta" placeholder="Ex: 12345-6"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>Tipo de Conta</label><select id="f-vend-tipo_conta"><option value="">Selecione...</option><option value="corrente">Corrente</option><option value="poupanca">Poupança</option></select></div>
+              <div class="campo"><label>Chave PIX (opcional)</label><input type="text" id="f-vend-pix" placeholder="CPF, CNPJ, e-mail ou celular"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>Email</label><input type="email" id="f-vend-email"></div>
+              <div class="campo"><label>Telefone para contato</label><input type="text" id="f-vend-telefone" placeholder="(00) 00000-0000" maxlength="15" oninput="mascaraTel(this)"></div>
+            </div>
+          </div>
+        </div>`;
+  } else if ((banco.id === 'porto' || banco.id === 'itau') && operacao.id === 'faturamento') {
+    html += `
+        ${renderBlocoTipoPessoa()}
+        <div class="card">
+          <div class="card-head"><div class="card-title">${ico('user')} Dados pessoais</div></div>
+          <div class="card-body">
+            <div class="grid-2">
+              <div class="campo"><label id="label-nome-doc">NOME COMPLETO <span class="req">*</span></label><input type="text" id="f-nome" placeholder="Seu nome completo ou Razão Social"></div>
+              <div id="bloco-cpf"><div class="campo"><label>CPF <span class="req">*</span></label><input type="text" id="f-cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)" style="font-family:var(--fonte-mono)"></div></div>
+              <div id="bloco-cnpj" style="display:none"><div class="campo"><label>CNPJ <span class="req">*</span></label><input type="text" id="f-cnpj" placeholder="00.000.000/0001-00" maxlength="18" oninput="mascaraCNPJ(this)" style="font-family:var(--fonte-mono)"></div></div>
+            </div>
+            ${renderBlocoEstadoCivil()}
+            <div class="grid-2">
+              <div class="campo"><label>GRUPO <span class="req">*</span></label><input type="text" id="f-grupo" placeholder="Ex: Grupo A, Grupo 12..."></div>
+              <div class="campo"><label>COTA <span class="req">*</span></label><input type="text" id="f-cota" placeholder="Ex: 0042"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>E-MAIL (NOTIFICAÇÕES)</label><input type="email" id="f-email" placeholder="seu@email.com"></div>
+              <div class="campo"><label>WHATSAPP (NOTIFICAÇÕES)</label><input type="text" id="f-telefone" placeholder="(00) 00000-0000" maxlength="15" oninput="mascaraTel(this)"></div>
+            </div>
+            <div class="campo">
+              <label>Condição do bem <span class="req">*</span></label>
+              <select id="f-condicao-bem" onchange="toggleCamposBem()">
+                <option value="">Selecione...</option>
+                <option value="novo">Novo</option>
+                <option value="usado">Usado</option>
+              </select>
+            </div>
+            <div id="campos-bem-novo" style="display:none;">
+              <div class="grid-2">
+                <div class="campo"><label>Modelo <span class="req">*</span></label><input type="text" id="f-modelo"></div>
+                <div class="campo"><label>Versão <span class="req">*</span></label><input type="text" id="f-versao"></div>
+              </div>
+              <div class="grid-2">
+                <div class="campo"><label>Cor <span class="req">*</span></label><input type="text" id="f-cor-veiculo"></div>
+                <div class="campo"><label>Ano Mod/Fab <span class="req">*</span></label><input type="text" id="f-ano-modfab" placeholder="Ex: 2024/2025"></div>
+              </div>
+            </div>
+            <div class="campo"><label>Valor de Venda R$ <span class="req">*</span></label><input type="text" id="f-valor_venda" placeholder="R$ 0,00" oninput="mascaraValor(this)"></div>
+            <div class="campo"><label>CORRETOR (OPCIONAL)</label><input type="text" id="f-corretor" placeholder="Nome do corretor, se houver"></div>
+            <div class="campo"><label>OBSERVAÇÕES</label><textarea id="f-descricao" placeholder="Descreva detalhes do seu caso (opcional)..."></textarea></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div class="card-title">${ico('bank')} Dados Bancários do Vendedor (para pagamento)</div></div>
+          <div class="card-body">
+            <div class="grid-2">
+              <div class="campo"><label>Nome do Vendedor <span class="req">*</span></label><input type="text" id="f-vendedor-nome" placeholder="Nome completo do vendedor"></div>
+              <div class="campo"><label>CPF / CNPJ <span class="req">*</span></label><input type="text" id="f-vendedor-cpf" placeholder="000.000.000-00 ou CNPJ" maxlength="18" oninput="mascaraCpfCnpjGenerico(this)"></div>
+            </div>
+            <div class="campo"><label>Endereço</label><input type="text" id="f-vendedor-endereco" placeholder="Rua, número, bairro, cidade - UF"></div>
+            <div class="grid-3">
+              <div class="campo"><label>Banco <span class="req">*</span></label><input type="text" id="f-vendedor-banco" placeholder="Ex: 341 - Itaú"></div>
+              <div class="campo"><label>Agência <span class="req">*</span></label><input type="text" id="f-vendedor-agencia" placeholder="Ex: 1234"></div>
+              <div class="campo"><label>Conta <span class="req">*</span></label><input type="text" id="f-vendedor-conta" placeholder="Ex: 12345-6"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>Dígito</label><input type="text" id="f-vendedor-digito" placeholder="Bradesco não usa dígito" maxlength="2"></div>
+              <div class="campo"><label>Tipo de Conta <span class="req">*</span></label>
+                <select id="f-vendedor-tipo_conta">
+                  <option value="">Selecione...</option>
+                  <option value="corrente">Conta Corrente</option>
+                  <option value="poupanca">Conta Poupança</option>
+                </select>
+              </div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>Chave PIX (opcional)</label><input type="text" id="f-vendedor-pix" placeholder="CPF, CNPJ, e-mail ou celular"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>E-mail</label><input type="email" id="f-vendedor-email" placeholder="email@exemplo.com"></div>
+              <div class="campo"><label>Telefone para contato</label><input type="text" id="f-vendedor-telefone" placeholder="(00) 00000-0000" maxlength="15" oninput="mascaraTel(this)"></div>
+            </div>
+          </div>
+        </div>
+        ${banco.id === 'itau' ? renderBlocoRepresentanteLegal() : ''}`;
+  } else {
+    html += `
+        ${renderBlocoTipoPessoa()}
+        <div class="card">
+          <div class="card-head"><div class="card-title">${ico('user')} Dados pessoais</div></div>
+          <div class="card-body">
+            <div class="grid-2">
+              <div class="campo"><label id="label-nome-doc">NOME COMPLETO <span class="req">*</span></label><input type="text" id="f-nome" placeholder="Seu nome completo"></div>
+              <div id="bloco-cpf"><div class="campo"><label>CPF <span class="req">*</span></label><input type="text" id="f-cpf" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)" style="font-family:var(--fonte-mono)"></div></div>
+              <div id="bloco-cnpj" style="display:none"><div class="campo"><label>CNPJ <span class="req">*</span></label><input type="text" id="f-cnpj" placeholder="00.000.000/0001-00" maxlength="18" oninput="mascaraCNPJ(this)" style="font-family:var(--fonte-mono)"></div></div>
+            </div>
+            ${renderBlocoEstadoCivil()}
+            <div class="grid-2">
+              <div class="campo"><label>GRUPO <span class="req">*</span></label><input type="text" id="f-grupo" placeholder="Ex: Grupo A, Grupo 12..."></div>
+              <div class="campo"><label>COTA <span class="req">*</span></label><input type="text" id="f-cota" placeholder="Ex: 0042"></div>
+            </div>
+            <div class="grid-2">
+              <div class="campo"><label>E-MAIL (NOTIFICAÇÕES)</label><input type="email" id="f-email" placeholder="seu@email.com"></div>
+              <div class="campo"><label>WHATSAPP (NOTIFICAÇÕES)</label><input type="text" id="f-telefone" placeholder="(00) 00000-0000" maxlength="15" oninput="mascaraTel(this)"></div>
+            </div>
+            <div class="campo"><label>Valor de Venda R$</label><input type="text" id="f-valor_venda" placeholder="R$ 0,00" oninput="mascaraValor(this)"></div>
+            <div class="campo"><label>CORRETOR (OPCIONAL)</label><input type="text" id="f-corretor" placeholder="Nome do corretor, se houver"></div>
+            <div class="campo"><label>OBSERVAÇÕES</label><textarea id="f-descricao" placeholder="Descreva detalhes do seu caso (opcional)..."></textarea></div>
+          </div>
+        </div>`;
+  }
+
+  html += `
+      <div class="checkbox-lgpd">
+        <input type="checkbox" id="autorizacao-lgpd" required>
+        <label for="autorizacao-lgpd">
+          <strong>Autorização de uso de dados (LGPD)</strong><br>
+          Autorizo a <strong>Master Prime</strong> a utilizar meus dados pessoais fornecidos neste formulário para fins de análise de crédito, processamento do consórcio, comunicação sobre o andamento do processo e demais finalidades relacionadas, conforme a Lei Geral de Proteção de Dados (Lei nº 13.709/2018). Declaro que li e concordo com os termos.
+        </label>
+      </div>
+  `;
+
+  html += `
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">${ico('upload')} Documentos</div><div class="card-sub">PDF, JPG ou PNG — até 16MB cada</div></div></div>
+        <div class="card-body"><div class="doc-slots" id="doc-slots"></div></div>
+      </div>
+      <button class="btn btn-primary w-100" id="btn-enviar" onclick="enviarCadastro()" style="background:${cor}; box-shadow:0 2px 8px ${cor}40; padding:14px;font-size:13px">
+        Enviar processo ${ico('arrow')}
+      </button>
+      <div id="alerta-cadastro" class="alerta" style="margin-top:16px;"></div>
+    </div>`;
+
+  root.innerHTML = html;
+  renderSlotsAnexo(operacao.documentos);
+  if (banco.id === 'itau') atualizarVisibilidadeRepresentante();
+}
+
+function mascaraValor(el) {
+  let v = el.value.replace(/\D/g, '');
+  v = (parseInt(v, 10) || 0).toString();
+  const reais = v.slice(0, -2).replace(/\B(?=(\d{3})+(?!\d))/g, '.') || '0';
+  const centavos = v.slice(-2).padStart(2, '0');
+  el.value = `R$ ${reais},${centavos}`;
+}
+
+function toggleCamposBem() {
+  const select = document.getElementById('f-condicao-bem');
+  const divNovo = document.getElementById('campos-bem-novo');
+  if (!select || !divNovo) return;
+  divNovo.style.display = (select.value === 'novo') ? 'block' : 'none';
+  atualizarSlotCRLV();
+}
+
+function voltarEtapaAnterior(){
+  if (bancoSelecionado && bancoSelecionado.subOperacoes.length > 1) renderTelaSubOperacao(bancoSelecionado);
+  else renderTelaSelecaoBanco();
+}
+
+function atualizarSlotCRLV() {
+  if (!operacaoSelecionada || !bancoSelecionado) return;
+  if ((bancoSelecionado.id === 'porto' || bancoSelecionado.id === 'itau') && operacaoSelecionada.id === 'faturamento') {
+    renderSlotsAnexo(operacaoSelecionada.documentos);
+  }
+}
+
+function renderSlotsAnexo(documentos){
+  const slots = document.getElementById('doc-slots');
+  if (!slots) return;
+
+  let crlvObrigatorio = false;
+  if (bancoSelecionado && operacaoSelecionada && operacaoSelecionada.id === 'faturamento') {
+    const selectCondicao = document.getElementById('f-condicao-bem');
+    if (selectCondicao && selectCondicao.value === 'usado') {
+      crlvObrigatorio = true;
+    }
+  }
+
+  slots.innerHTML = documentos.map(cat => {
+    const arq = arquivosPendentes[cat.key];
+    const isCRLV = cat.key === 'crlv' || cat.key === 'Doc.CRLV';
+    const obrigatorioAgora = cat.obrigatorio || (isCRLV && crlvObrigatorio);
+
+    return `
+      <div class="doc-slot ${arq?'preenchido':''} ${!obrigatorioAgora?'opcional':''}" data-cat="${cat.key}">
+        <div class="doc-slot-head">
+          <div class="doc-slot-icon">${ico(cat.iconKey,'ico ico-lg')}</div>
+          <div style="flex:1">
+            <div class="doc-slot-title">
+              ${esc(cat.label)}
+              ${obrigatorioAgora
+                ? '<span class="tag tag-red" style="font-size:9.5px">Obrigatório</span>'
+                : '<span class="tag tag-gray" style="font-size:9.5px">Opcional</span>'}
+            </div>
+            <div class="doc-slot-sub">${esc(cat.sub)}</div>
+          </div>
+          <div class="doc-slot-action">
+            <input type="file" id="f-${cat.key}" accept=".pdf,.jpg,.jpeg,.png" onchange="setArquivoSlot('${cat.key}', this)">
+            <button class="btn btn-outline btn-sm" type="button" onclick="document.getElementById('f-${cat.key}').click()">${arq?'Trocar':'Selecionar'}</button>
+          </div>
+        </div>
+        ${arq?`<div class="doc-slot-arquivo">${ico('doc')} <span class="nome">${esc(arq.name)}</span> <span style="color:var(--text3);font-size:11px">${(arq.size/1024).toFixed(0)} KB</span> <button class="remover" onclick="removerArquivoSlot('${cat.key}')" title="Remover">✕</button></div>`:''}
+      </div>`;
+  }).join('');
+
+  documentos.forEach(cat => {
+    const el = document.querySelector(`.doc-slot[data-cat="${cat.key}"]`);
+    if (!el) return;
+    el.addEventListener('dragover', e => { e.preventDefault(); el.classList.add('dragover'); });
+    el.addEventListener('dragleave', () => el.classList.remove('dragover'));
+    el.addEventListener('drop', e => {
+      e.preventDefault(); el.classList.remove('dragover');
+      if (e.dataTransfer.files.length){
+        const inp = document.getElementById(`f-${cat.key}`);
+        if (inp){ inp.files = e.dataTransfer.files; setArquivoSlot(cat.key, inp); }
+      }
+    });
+  });
+}
+
+function setArquivoSlot(catKey, input){
+  const f = input.files && input.files[0];
+  if (!f) return;
+  if (f.size > 16*1024*1024){ alerta('alerta-cadastro', `"${f.name}" passa de 16MB.`, 'erro'); return; }
+  arquivosPendentes[catKey] = f;
+  if (operacaoSelecionada) renderSlotsAnexo(operacaoSelecionada.documentos);
+}
+
+function removerArquivoSlot(catKey){
+  delete arquivosPendentes[catKey];
+  if (operacaoSelecionada) renderSlotsAnexo(operacaoSelecionada.documentos);
+}
+
+// ════════════════ ENVIAR CADASTRO ════════════════
+async function enviarCadastro(){
+  if (!bancoSelecionado || !operacaoSelecionada) {
+    alerta('alerta-cadastro','Selecione banco e tipo de operação.','erro'); return;
+  }
+
+  const autorizacao = document.getElementById('autorizacao-lgpd')?.checked;
+  if (!autorizacao) {
+    alerta('alerta-cadastro','Você precisa autorizar o uso dos seus dados conforme a LGPD para prosseguir.','erro');
+    return;
+  }
+
+  let nome, cpf, grupo, cota, email, tel, corretor=null, descricao=null, cedente=null, cessionario=null;
+  let dadosExtras = null;
+  const estadoCivil = document.getElementById('f-estado_civil')?.value || '';
+  const conjugeNome = document.getElementById('f-conjuge-nome')?.value?.trim() || null;
+  const conjugeCpf = document.getElementById('f-conjuge-cpf')?.value?.replace(/\D/g, '') || null;
+  const repNome = document.getElementById('f-rep-nome')?.value?.trim() || null;
+  const repCpf = document.getElementById('f-rep-cpf')?.value?.replace(/\D/g, '') || null;
+  const repEmail = document.getElementById('f-rep-email')?.value?.trim() || null;
+
+  if ((estadoCivil === 'casado' || estadoCivil === 'uniao_estavel')) {
+    if (!conjugeNome || !conjugeCpf || conjugeCpf.length !== 11) {
+      return alerta('alerta-cadastro','Preencha nome e CPF do cônjuge corretamente.','erro');
+    }
+  }
+
+  if (bancoSelecionado.id === 'itau' && tipoPessoa === 'pj') {
+    if (!repNome || !repCpf || repCpf.length !== 11 || !repEmail) {
+      return alerta('alerta-cadastro','Preencha todos os dados do representante legal (Itaú PJ).','erro');
+    }
+  }
+
+  if (operacaoSelecionada.id === 'transferencia') {
+    const cedNome = document.getElementById('f-cedente-nome')?.value?.trim();
+    const cedDocRaw = tipoPessoa === 'pj'
+      ? (document.getElementById('f-cedente-cnpj')?.value||'').replace(/\D/g,'')
+      : (document.getElementById('f-cedente-cpf')?.value||'').replace(/\D/g,'');
+    const cedGrupo = document.getElementById('f-cedente-grupo')?.value?.trim();
+    const cedCota  = document.getElementById('f-cedente-cota')?.value?.trim();
+    if (!cedNome || cedDocRaw.length < 11 || !cedGrupo || !cedCota) return alerta('alerta-cadastro','Preencha todos os campos obrigatórios do Cedente.','erro');
+    cedente = { nome: cedNome, cpf: cedDocRaw, tipo_pessoa: tipoPessoa, grupo: cedGrupo, cota: cedCota, email: document.getElementById('f-cedente-email')?.value?.trim()||null, telefone: document.getElementById('f-cedente-telefone')?.value?.trim()||null };
+
+    const cesNome = document.getElementById('f-cessionario-nome')?.value?.trim();
+    const cesCpf  = (document.getElementById('f-cessionario-cpf')?.value||'').replace(/\D/g,'');
+    const cesGrupo = document.getElementById('f-cessionario-grupo')?.value?.trim();
+    const cesCota  = document.getElementById('f-cessionario-cota')?.value?.trim();
+    if (!cesNome || cesCpf.length<11 || !cesGrupo || !cesCota) return alerta('alerta-cadastro','Preencha todos os campos obrigatórios do Cessionário.','erro');
+    cessionario = { nome: cesNome, cpf: cesCpf, grupo: cesGrupo, cota: cesCota, email: document.getElementById('f-cessionario-email')?.value?.trim()||null, telefone: document.getElementById('f-cessionario-telefone')?.value?.trim()||null, endereco: document.getElementById('f-cessionario-endereco')?.value?.trim()||null, estado_civil: estadoCivil, conjuge: { nome: conjugeNome, cpf: conjugeCpf } };
+
+    nome = cessionario.nome; cpf = cessionario.cpf; grupo = cessionario.grupo; cota = cessionario.cota;
+    email = cessionario.email; tel = cessionario.telefone;
+    dadosExtras = { banco: bancoSelecionado.id, tipo_operacao: operacaoSelecionada.id, tipo_pessoa: tipoPessoa, cedente, cessionario };
+  }
+  else if (bancoSelecionado.id === 'bradesco') {
+    nome = document.getElementById('f-nome')?.value?.trim();
+    cpf  = tipoPessoa === 'pj'
+      ? (document.getElementById('f-cnpj')?.value||'').replace(/\D/g,'')
+      : (document.getElementById('f-cpf')?.value||'').replace(/\D/g,'');
+    if (!nome) return alerta('alerta-cadastro','Nome é obrigatório.','erro');
+    if (cpf.length<11) return alerta('alerta-cadastro','CPF/CNPJ inválido.','erro');
+    email = document.getElementById('f-email')?.value?.trim()||null;
+    tel   = document.getElementById('f-telefone')?.value?.trim()||null;
+
+    const primeiraLinha = document.querySelector('.grupo-cota-linha');
+    grupo = primeiraLinha?.querySelector('.f-grupo')?.value?.trim() || '';
+    cota  = primeiraLinha?.querySelector('.f-cota')?.value?.trim() || '';
+    if (!grupo || !cota) return alerta('alerta-cadastro','Preencha ao menos um Grupo e uma Cota.','erro');
+
+    const linhas = document.querySelectorAll('.grupo-cota-linha');
+    const gruposCotas = [];
+    linhas.forEach(l => {
+      const g = l.querySelector('.f-grupo')?.value?.trim();
+      const c = l.querySelector('.f-cota')?.value?.trim();
+      if (g && c) gruposCotas.push({ grupo: g, cota: c });
+    });
+
+    if (!arquivosPendentes['comprovante_residencia']) return alerta('alerta-cadastro','⚠️ Anexe o Comprovante de residência.','erro');
+    if (!arquivosPendentes['comprovante_renda']) return alerta('alerta-cadastro','⚠️ Anexe o Comprovante de renda.','erro');
+    if (!arquivosPendentes['documento_foto']) return alerta('alerta-cadastro','⚠️ Anexe o Documento com foto do consorciado.','erro');
+    if (!arquivosPendentes['documento_foto_vendedor']) return alerta('alerta-cadastro','⚠️ Anexe o Documento com foto do vendedor.','erro');
+
+    dadosExtras = {
+      banco: bancoSelecionado.id, tipo_operacao: operacaoSelecionada.id, tipo_pessoa: tipoPessoa,
+      estado_civil: estadoCivil, conjuge: { nome: conjugeNome, cpf: conjugeCpf },
+      representante_legal: { nome: repNome, cpf: repCpf, email: repEmail },
+      consorciado: {
+        nome, cpf, tipo_pessoa: tipoPessoa, data_nasc: document.getElementById('f-data_nasc')?.value, estado_civil: estadoCivil,
+        doc_id: document.getElementById('f-doc_id')?.value, tipo_doc: document.getElementById('f-tipo_doc')?.value,
+        data_expedicao: document.getElementById('f-data_expedicao')?.value,
+        orgao_emissor: document.getElementById('f-orgao_emissor')?.value, renda: obterValorReal('f-renda'),
+        cargo: document.getElementById('f-cargo')?.value, nacionalidade: document.getElementById('f-nacionalidade')?.value,
+        estado_naturalidade: document.getElementById('f-estado_naturalidade')?.value,
+        celular: tel, email, endereco: document.getElementById('f-endereco')?.value
+      },
+      dados_bancarios: {
+        nome: document.getElementById('f-banco-nome')?.value || nome,
+        banco: document.getElementById('f-banco')?.value, agencia: document.getElementById('f-agencia')?.value,
+        conta: document.getElementById('f-conta')?.value, digito: document.getElementById('f-conta_digito')?.value || null,
+        tipo_conta: document.getElementById('f-tipo_conta')?.value
+      },
+      grupos_cotas: gruposCotas,
+      veiculo: {
+        chassi: document.getElementById('f-chassi')?.value, placa: document.getElementById('f-placa')?.value,
+        renavam: document.getElementById('f-renavam')?.value, uf_lic: document.getElementById('f-uf_lic')?.value,
+        marca: document.getElementById('f-marca')?.value, modelo: document.getElementById('f-modelo')?.value,
+        cor: document.getElementById('f-cor_veiculo')?.value, ano_fab: document.getElementById('f-ano_fab')?.value,
+        ano_modelo: document.getElementById('f-ano_modelo')?.value, valor_venda: obterValorReal('f-valor_venda')
+      },
+      vendedor: {
+        nome: document.getElementById('f-vend-nome')?.value, cpf: (document.getElementById('f-vend-cpf')?.value||'').replace(/\D/g,''),
+        endereco: document.getElementById('f-vend-endereco')?.value, banco: document.getElementById('f-vend-banco')?.value,
+        agencia: document.getElementById('f-vend-agencia')?.value, conta: document.getElementById('f-vend-conta')?.value,
+        tipo_conta: document.getElementById('f-vend-tipo_conta')?.value, pix: document.getElementById('f-vend-pix')?.value,
+        email: document.getElementById('f-vend-email')?.value, telefone: document.getElementById('f-vend-telefone')?.value
+      }
+    };
+  }
+  else {
+    nome   = document.getElementById('f-nome')?.value?.trim();
+    cpf    = tipoPessoa === 'pj'
+      ? (document.getElementById('f-cnpj')?.value||'').replace(/\D/g,'')
+      : (document.getElementById('f-cpf')?.value||'').replace(/\D/g,'');
+    grupo  = document.getElementById('f-grupo')?.value?.trim();
+    cota   = document.getElementById('f-cota')?.value?.trim();
+    email  = document.getElementById('f-email')?.value?.trim()||null;
+    tel    = document.getElementById('f-telefone')?.value?.trim()||null;
+    corretor = document.getElementById('f-corretor')?.value?.trim()||null;
+    descricao = document.getElementById('f-descricao')?.value?.trim()||null;
+
+    if (!nome) return alerta('alerta-cadastro','Nome é obrigatório.','erro');
+    if (cpf.length<11) return alerta('alerta-cadastro','CPF/CNPJ inválido.','erro');
+    if (!grupo) return alerta('alerta-cadastro','Grupo é obrigatório.','erro');
+    if (!cota)  return alerta('alerta-cadastro','Cota é obrigatória.','erro');
+
+    if ((bancoSelecionado.id === 'porto' || bancoSelecionado.id === 'itau') && operacaoSelecionada.id === 'faturamento') {
+      const condicaoBem = document.getElementById('f-condicao-bem')?.value;
+      if (!condicaoBem) return alerta('alerta-cadastro', 'Informe se o bem é novo ou usado.', 'erro');
+      if (condicaoBem === 'usado') {
+        const crlvKey = bancoSelecionado.id === 'itau' ? 'crlv' : 'Doc.CRLV';
+        if (!arquivosPendentes[crlvKey]) return alerta('alerta-cadastro', 'Para bem usado, o CRLV do bem é obrigatório.', 'erro');
+      } else if (condicaoBem === 'novo') {
+        const modelo = document.getElementById('f-modelo')?.value?.trim();
+        const versao = document.getElementById('f-versao')?.value?.trim();
+        const corVei = document.getElementById('f-cor-veiculo')?.value?.trim();
+        const anoModFab = document.getElementById('f-ano-modfab')?.value?.trim();
+        if (!modelo || !versao || !corVei || !anoModFab) return alerta('alerta-cadastro', 'Preencha todos os campos do veículo novo.', 'erro');
+      }
+
+      const valorVenda = obterValorReal('f-valor_venda');
+      if (!valorVenda || valorVenda <= 0) return alerta('alerta-cadastro', 'Informe o valor de venda do bem.', 'erro');
+
+      const vendBanco = document.getElementById('f-vendedor-banco')?.value?.trim();
+      const vendConta = document.getElementById('f-vendedor-conta')?.value?.trim();
+      if (!vendBanco || !vendConta) return alerta('alerta-cadastro', 'Preencha pelo menos banco e conta do vendedor.', 'erro');
+
+      dadosExtras = {
+        banco: bancoSelecionado.id, tipo_operacao: operacaoSelecionada.id, tipo_pessoa: tipoPessoa,
+        estado_civil: estadoCivil, conjuge: { nome: conjugeNome, cpf: conjugeCpf },
+        representante_legal: { nome: repNome, cpf: repCpf, email: repEmail },
+        condicao_bem: document.getElementById('f-condicao-bem')?.value,
+        modelo: document.getElementById('f-modelo')?.value, versao: document.getElementById('f-versao')?.value,
+        cor_veiculo: document.getElementById('f-cor-veiculo')?.value, ano_modfab: document.getElementById('f-ano-modfab')?.value,
+        valor_venda: valorVenda,
+        corretor, descricao,
+        vendedor: {
+          nome: document.getElementById('f-vendedor-nome')?.value,
+          cpf: (document.getElementById('f-vendedor-cpf')?.value||'').replace(/\D/g,''),
+          endereco: document.getElementById('f-vendedor-endereco')?.value,
+          banco: vendBanco, agencia: document.getElementById('f-vendedor-agencia')?.value, conta: vendConta,
+          digito: document.getElementById('f-vendedor-digito')?.value || null,
+          tipo_conta: document.getElementById('f-vendedor-tipo_conta')?.value,
+          pix: document.getElementById('f-vendedor-pix')?.value,
+          email: document.getElementById('f-vendedor-email')?.value,
+          telefone: document.getElementById('f-vendedor-telefone')?.value
+        }
+      };
+    } else {
+      dadosExtras = { banco: bancoSelecionado.id, tipo_operacao: operacaoSelecionada.id, tipo_pessoa: tipoPessoa, estado_civil: estadoCivil, conjuge: { nome: conjugeNome, cpf: conjugeCpf } };
+    }
+  }
+
+  const docsObrigatorios = operacaoSelecionada.documentos.filter(d => d.obrigatorio);
+  for (const cat of docsObrigatorios){
+    if (!arquivosPendentes[cat.key]) return alerta('alerta-cadastro', `Anexo obrigatório: ${cat.label}.`, 'erro');
+  }
+
+  const tokenGerado = gerarTokenSeguro();
+  const btn = document.getElementById('btn-enviar');
+  btn.disabled=true; btn.innerHTML='<span class="spinner"></span> Enviando...';
+
+  try{
+    const { data: criado, error: errC } = await sb.rpc('cliente_criar_processo', {
+      p_nome: nome,
+      p_cpf: cpf,
+      p_email: email,
+      p_telefone: tel,
+      p_grupo: grupo,
+      p_cota: cota,
+      p_corretor: corretor,
+      p_descricao: JSON.stringify(dadosExtras || {}),
+      p_dados_extras: dadosExtras,
+      p_token: tokenGerado
+    });
+    if (errC) throw new Error(errC.message);
+    const novoT = criado?.token || tokenGerado;
+
+    for (const cat of operacaoSelecionada.documentos){
+      const f = arquivosPendentes[cat.key];
+      if (!f) continue;
+      const path = `${novoT}/${cat.key}_${Date.now()}_${f.name}`;
+      const { error: errUp } = await sb.storage.from('arquivos').upload(path, f);
+      if (errUp){ console.warn('Upload falhou:', cat.key, errUp.message); continue; }
+      await sb.rpc('cliente_registrar_arquivo', {
+        p_token: novoT,
+        p_nome_original: f.name,
+        p_storage_path: path,
+        p_categoria: cat.key
+      });
+    }
+
+    arquivosPendentes = {};
+    clienteNotificar(novoT, 'Novo processo recebido', nome);
+    renderTelaSucesso(novoT, cpf);
+  } catch(e){
+    alerta('alerta-cadastro', 'Erro ao enviar: '+e.message, 'erro');
+    btn.disabled=false; btn.innerHTML='Enviar processo '+ico('arrow');
+  }
+}
+
+function obterValorReal(id) {
+  const el = document.getElementById(id);
+  if (!el) return 0;
+  const raw = el.value.replace(/\D/g, '');
+  return parseFloat(raw) / 100;
+}
+
+// ════════════════ TELA DE SUCESSO ════════════════
+function renderTelaSucesso(token, cpf) {
+  const linkConsulta = window.location.origin + window.location.pathname;
+  const cpfFormatado = cpf
+    ? cpf.length === 14
+      ? cpf.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5')
+      : cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')
+    : '';
+
+  root.innerHTML = `
+    <div class="container">
+      <div class="start-wrap" style="max-width:580px;margin-top:30px">
+        <div class="start-card">
+          <div class="start-head">
+            <div class="badge-icon" style="background:linear-gradient(135deg,var(--green) 0%,#0f9239 100%);box-shadow:0 6px 16px rgba(22,163,74,.30)">
+              ${ico('check','ico ico-lg')}
+            </div>
+            <h1 style="color:var(--green)">Processo enviado!</h1>
+            <p>Seus dados e documentos foram recebidos com sucesso.<br>Nossa equipe entrará em contato em breve.</p>
+          </div>
+          <div class="start-body">
+            <div style="background:var(--green-bg);border:1.5px solid #86EFAC;border-radius:12px;padding:18px 20px;margin-bottom:18px;">
+              <div style="font-size:13px;font-weight:700;color:#166534;margin-bottom:12px;display:flex;align-items:center;gap:8px">
+                ${ico('check')} Como acompanhar seu processo
+              </div>
+              <div style="display:flex;flex-direction:column;gap:10px;">
+                <div style="display:flex;align-items:flex-start;gap:10px;font-size:12.5px;color:var(--text)">
+                  <span style="width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">1</span>
+                  <span>Acesse novamente o link abaixo</span>
+                </div>
+                <div style="display:flex;align-items:flex-start;gap:10px;font-size:12.5px;color:var(--text)">
+                  <span style="width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">2</span>
+                  <span>Na seção <strong>"Consultar processo em andamento"</strong></span>
+                </div>
+                <div style="display:flex;align-items:flex-start;gap:10px;font-size:12.5px;color:var(--text)">
+                  <span style="width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px">3</span>
+                  <span>Informe seu CPF/CNPJ: <strong style="font-family:var(--fonte-mono)">${cpfFormatado}</strong></span>
+                </div>
+              </div>
+            </div>
+            <div style="background:var(--bg);border:1.5px solid var(--border2);border-radius:10px;padding:14px 16px;margin-bottom:16px;">
+              <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);margin-bottom:8px">Link para consulta</div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input type="text" value="${linkConsulta}" readonly onclick="this.select()"
+                  style="flex:1;padding:9px 12px;border:1.5px solid var(--border2);border-radius:8px;font-size:11px;font-family:var(--fonte-mono);color:var(--text);background:#fff;outline:none;">
+                <button class="btn btn-outline btn-sm" onclick="copiarLink('${linkConsulta}')">
+                  ${ico('copy')} Copiar
+                </button>
+              </div>
+            </div>
+            <div style="background:var(--amber-bg);border:1px solid #FCD34D;border-radius:10px;padding:12px 16px;margin-bottom:20px;font-size:12px;color:#92400E;line-height:1.6;display:flex;gap:8px;align-items:flex-start;">
+              ${ico('alert')}
+              <span><strong>Importante:</strong> O protocolo será gerado pela nossa equipe após contato com a Administradora. Fique atento às mensagens no portal.</span>
+            </div>
+            <button class="btn-cta" onclick="renderTelaConsulta()" style="margin-bottom:10px">
+              ${ico('search')} Consultar meu processo agora
+            </button>
+            <button class="btn btn-outline w-100" style="margin-top:10px" onclick="renderTelaSelecaoBanco()">
+              ${ico('doc')} Abrir outro processo
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function copiarLink(link) {
+  if (navigator.clipboard?.writeText) {
+    navigator.clipboard.writeText(link).then(() => mostrarNotif('Link copiado!'));
+  } else {
+    const el = document.createElement('textarea');
+    el.value = link; document.body.appendChild(el); el.select();
+    document.execCommand('copy'); document.body.removeChild(el);
+    mostrarNotif('Link copiado!');
+  }
+}
+
+// ════════════════ PORTAL DO PROCESSO ════════════════
+async function carregarProcesso(token){
+  root.innerHTML = `<div class="container" style="max-width:720px;margin:0 auto;padding:30px 18px 80px"><div class="card"><div class="card-body" style="text-align:center"><div class="spinner spinner-dark spinner-lg" style="margin-bottom:10px"></div><p style="color:var(--text2)">Carregando processo...</p></div></div></div>`;
+  const { data, error } = await sb.rpc('cliente_obter_por_token', { p_token: token });
+  if (error || !data){
+    root.innerHTML = `<div class="container" style="max-width:500px;margin-top:60px"><div class="card"><div class="card-body" style="text-align:center;padding:40px">${ico('alert')} <p style="margin-top:12px;color:var(--text2)">Processo não encontrado.</p><a href="${window.location.pathname}" class="btn btn-outline btn-sm" style="margin-top:16px">Voltar ao início</a></div></div></div>`;
+    return;
+  }
+  processoAtual = data;
+  renderPortalProcesso();
+}
+
+// ─── Card simples com os contatos da administradora ───
+function getContatoBanco(bancoId, bancoNome) {
+  const id = (bancoId || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+  const nome = (bancoNome || '').toString().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+
+  if (id === 'porto' || nome.includes('porto')) {
+    return `
+    <div class="card" style="border-top:4px solid #003C8A; margin-top:20px;">
+      <div class="card-head">
+        <div class="card-title">🏢 Porto Seguro — Canais de atendimento</div>
+      </div>
+      <div class="card-body">
+        <p><strong>(11) 3366-3006</strong> — São Paulo e Grande São Paulo</p>
+        <p><strong>0800 721 3006</strong> — demais regiões</p>
+        <p><strong>WhatsApp: (11) 3003-9303</strong></p>
+        <p><strong>0800 727 8736</strong> — Exclusivo para pessoas com deficiência auditiva</p>
+      </div>
+    </div>`;
+  } else if (id === 'itau' || id === 'itaú' || nome.includes('itau')) {
+    return `
+    <div class="card" style="border-top:4px solid #EC7000; margin-top:20px;">
+      <div class="card-head">
+        <div class="card-title">🏦 Itaú Consórcio — Canais de atendimento</div>
+      </div>
+      <div class="card-body">
+        <p><strong>SAC Itaú Consórcio: 0800 728 0728</strong> — diariamente, 24h</p>
+        <p><strong>Ouvidoria Corporativa Itaú: 0800 570 0011</strong> — dias úteis, das 9h às 18h</p>
+        <p><strong>0800 722 1722</strong> — Pessoas com deficiência auditiva e de fala, todos os dias, 24h</p>
+      </div>
+    </div>`;
+  } else if (id === 'bradesco' || nome.includes('bradesco')) {
+    return `
+    <div class="card" style="border-top:4px solid #CC092F; margin-top:20px;">
+      <div class="card-head">
+        <div class="card-title">🏛️ Bradesco — Central de Relacionamento</div>
+      </div>
+      <div class="card-body">
+        <p><strong>4004 4436</strong> — capitais e regiões metropolitanas</p>
+        <p><strong>0800 722 4436</strong> — demais localidades</p>
+        <p>Atendimento de segunda a sexta, das 8h às 20h (exceto feriados). O atendimento eletrônico funciona 24 horas, 7 dias por semana. A central não recebe ligações de celulares e telefones públicos.</p>
+      </div>
+    </div>`;
+  }
+  return '';
+}
+
+function formatarCpfCnpj(valor) {
+  if (!valor) return '-';
+  const num = valor.replace(/\D/g, '');
+  if (num.length === 11) return num.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+  if (num.length === 14) return num.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+  return valor;
+}
+
+function renderPortalProcesso(){
+  const p = processoAtual;
+  if (!p) return;
+  const idxEtapa = ETAPAS.findIndex(e => e.status === p.status);
+  const protocolo = p.protocolo || null;
+
+  // 🔍 IDENTIFICAÇÃO ROBUSTA DO BANCO (usa dados_extras.banco)
+  let bancoId = '';
+  if (p.dados_extras && p.dados_extras.banco) {
+    bancoId = p.dados_extras.banco;
+  } else if (p.banco) {
+    bancoId = p.banco;
+  }
+  bancoId = (bancoId || '').toString().toLowerCase().trim();
+
+  const bancoObj = BANCOS.find(b => b.id === bancoId) || { nome: 'Banco', corPrimaria: '#2D3F5E', corPrimariaDark: '#1E2D45' };
+  const bancoNome = p.banco_to_nome || bancoObj.nome;
+  const tipoOp = p.dados_extras?.tipo_operacao
+    ? p.dados_extras.tipo_operacao.charAt(0).toUpperCase() + p.dados_extras.tipo_operacao.slice(1)
+    : 'Faturamento';
+
+  const dadosClienteHtml = `
+    <div class="card" style="margin-bottom:18px;overflow:hidden">
+      <div style="padding:24px 26px;background:linear-gradient(135deg,${bancoObj.corPrimaria} 0%,${bancoObj.corPrimariaDark} 100%)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px">
+          <div>
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:rgba(255,255,255,.6);margin-bottom:8px">${esc(bancoNome)} · ${esc(tipoOp)}</div>
+            <div style="font-size:19px;font-weight:800;color:#fff;margin-bottom:4px">${esc(p.nome)}</div>
+            <div style="font-size:12px;color:rgba(255,255,255,.75)">${formatarCpfCnpj(p.cpf)}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:10px;color:rgba(255,255,255,.6);margin-bottom:5px">Status</div>
+            <span class="tag ${tagClass(p.status)}" style="font-size:12px">${esc(p.status)}</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px">
+          <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:10px;padding:10px 14px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text3);margin-bottom:3px">Protocolo</div>
+            <div style="font-size:13px;font-weight:700;color:var(--text);font-family:var(--fonte-mono)">${protocolo ? esc(protocolo) : '<span style="font-family:var(--fonte);font-weight:400;color:var(--text3);font-size:12px">Aguardando</span>'}</div>
+          </div>
+          <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:10px;padding:10px 14px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text3);margin-bottom:3px">Grupo · Cota</div>
+            <div style="font-size:13px;font-weight:700;color:var(--text)">${esc(p.grupo)||'-'} · ${esc(p.cota)||'-'}</div>
+          </div>
+          ${p.email ? `<div style="background:#F8FAFC;border:1px solid var(--border);border-radius:10px;padding:10px 14px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text3);margin-bottom:3px">E-mail</div><div style="font-size:12px;font-weight:600;color:var(--text);word-break:break-all">${esc(p.email)}</div></div>` : ''}
+          ${p.telefone ? `<div style="background:#F8FAFC;border:1px solid var(--border);border-radius:10px;padding:10px 14px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text3);margin-bottom:3px">WhatsApp</div><div style="font-size:13px;font-weight:700;color:var(--text)">${esc(p.telefone)}</div></div>` : ''}
+          <div style="background:#F8FAFC;border:1px solid var(--border);border-radius:10px;padding:10px 14px">
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--text3);margin-bottom:3px">Abertura</div>
+            <div style="font-size:12px;font-weight:600;color:var(--text)">${fmtData(p.criado_em)}</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+
+  const contatoAdmHtml = getContatoBanco(bancoId, bancoNome);
+
+  root.innerHTML = `
+    <div class="container">
+      <div class="stepper">
+        ${ETAPAS.map((etapa, i) => `
+          <div class="step ${i<idxEtapa?'concluido':''} ${i===idxEtapa?'atual':''}">
+            <div class="step-dot">${i<idxEtapa?ico('check'):i+1}</div>
+            <div class="step-label">${etapa.status}</div>
+          </div>
+        `).join('')}
+      </div>
+
+      ${dadosClienteHtml}
+
+      ${!protocolo ? `
+      <div class="alerta alerta-aviso visivel" style="margin-bottom:18px">
+        ${ico('alert')}
+        <div>
+          <strong>Protocolo pendente:</strong> Nossa equipe está em contato com a Administradora para gerar seu protocolo. Você será notificado assim que ele estiver disponível.
+        </div>
+      </div>` : ''}
+
+      <div class="tabs">
+        <button class="tab-btn ativa" onclick="abrirTab('painel-docs')" id="tab-docs">${ico('doc')} Documentos <span class="tab-count" id="count-docs">0</span></button>
+        <button class="tab-btn" onclick="abrirTab('painel-msg')" id="tab-msg">${ico('msg')} Conversa</button>
+        <button class="tab-btn" onclick="abrirTab('painel-hist')" id="tab-hist">${ico('clock')} Histórico</button>
+      </div>
+
+      <div class="painel ativo" id="painel-docs">
+        <div class="card">
+          <div class="card-head"><div class="card-title">${ico('upload')} Arquivos enviados</div></div>
+          <div class="card-body" id="lista-arquivos">
+            <div class="empty"><div class="empty-icon">${ico('doc')}</div><div class="empty-msg">Carregando...</div></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:20px;">
+          <div class="card-head">
+            <div>
+              <div class="card-title">${ico('upload')} Enviar novos documentos</div>
+              <div class="card-sub">Envie arquivos adicionais relacionados ao seu processo (PDF, JPG, PNG até 16MB cada)</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div id="alerta-upload-doc" class="alerta"></div>
+            <div class="campo">
+              <label>Descrição (opcional)</label>
+              <input type="text" id="nova-doc-desc" placeholder="Ex: Comprovante de residência atualizado">
+            </div>
+            <div class="campo">
+              <label>Arquivos <span class="req">*</span></label>
+              <input type="file" id="novos-docs-input" multiple accept=".pdf,.jpg,.jpeg,.png">
+              <div class="hint">Você pode selecionar vários arquivos de uma vez.</div>
+            </div>
+            <button class="btn btn-primary" id="btn-upload-docs" onclick="enviarNovosDocumentos()">${ico('upload')} Enviar arquivo(s)</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="painel" id="painel-msg">
+        <div class="card">
+          <div class="card-body" style="padding:16px">
+            <div class="timeline" id="chat-messages">
+              <div class="empty">Carregando mensagens...</div>
+            </div>
+            <div class="msg-input-wrap">
+              <textarea id="nova-msg" placeholder="Digite sua mensagem..." rows="1"
+                onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();enviarMensagem();}"></textarea>
+              <button class="btn btn-teal btn-sm" id="btn-enviar-msg" onclick="enviarMensagem()">${ico('send')}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="painel" id="painel-hist">
+        <div class="card">
+          <div class="card-body" id="historico">
+            <div class="empty">Carregando histórico...</div>
+          </div>
+        </div>
+      </div>
+
+      ${contatoAdmHtml}
+
+      <div class="footer-info">
+        <h3>Termos e Responsabilidades</h3>
+        <p><strong>Prezado Consorciado,</strong> nossa assessoria no processo de faturamento é uma cortesia da Master Prime para facilitar o seu processo de utilização da carta de crédito na aquisição do bem selecionado.</p>
+        <br>
+        <p><strong>Responsabilidades Master Prime:</strong></p>
+        <ul>
+          <li>Fornecer o checklist de documentos necessários.</li>
+          <li>Abrir o processo junto a administradora e monitorar as etapas posicionando o consorciado quanto à sua evolução.</li>
+          <li>Guiar o consorciado durante o processo esclarecendo as possíveis dúvidas e intermediar a comunicação entre a administradora e consorciado.</li>
+        </ul>
+        <p><strong>Responsabilidades do Consorciado:</strong></p>
+        <ul>
+          <li>Enviar a documentação informada completa e legível.</li>
+          <li>Fornecer as informações solicitadas pela nossa equipe para evolução do processo.</li>
+          <li>Efetivar prontamente as ações apontadas pelo nosso time, tais como, realização de biometrias, assinaturas, entre outras para manter o bom andamento do processo.</li>
+        </ul>
+        <p><strong>Responsabilidades da Administradora:</strong></p>
+        <ul>
+          <li>Cumprimento dos prazos em cada etapa do processo.</li>
+          <li>Análise da documentação do veículo ou imóvel e do perfil financeiro do consorciado para garantir a viabilidade da concessão do crédito com segurança para todas as partes.</li>
+          <li>Efetivar o pagamento diretamente ao vendedor, finalizando o processo.</li>
+        </ul>
+        <p><strong>Horário de Atendimento:</strong> Segunda a sexta-feira, das 09:00 às 18:00</p>
+        <div class="lgpd">Em conformidade com a Lei Geral de Proteção de Dados (LGPD), todos os dados fornecidos são utilizados exclusivamente para a finalidade do processo e protegidos conforme a legislação vigente.</div>
+      </div>
+    </div>`;
+
+  carregarDocumentos();
+  carregarMensagens();
+  carregarHistorico();
+  iniciarPolling();
+}
+
+// Enviar documentos complementares
+async function enviarNovosDocumentos() {
+  const input = document.getElementById('novos-docs-input');
+  const files = input.files;
+  if (!files || files.length === 0) {
+    alerta('alerta-upload-doc', 'Selecione pelo menos um arquivo.', 'erro');
+    return;
+  }
+  const descricao = document.getElementById('nova-doc-desc')?.value.trim() || 'Documento complementar';
+  const btn = document.getElementById('btn-upload-docs');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Enviando...';
+
+  try {
+    const { data: proc, error: procErr } = await sb
+      .from('portal_processos')
+      .select('id')
+      .eq('token', processoAtual.token)
+      .single();
+    if (procErr || !proc) throw new Error('Processo não encontrado: ' + procErr?.message);
+
+    const processoId = proc.id;
+    let successCount = 0;
+    const errors = [];
+
+    for (const file of files) {
+      if (file.size > 16 * 1024 * 1024) {
+        mostrarNotif(`Arquivo ${file.name} excede 16MB, ignorado.`, 'erro');
+        continue;
+      }
+      const timestamp = Date.now();
+      const safeName = file.name.replace(/[^a-zA-Z0-9.\-]/g, '_');
+      const path = `${processoAtual.token}/complementar_${timestamp}_${safeName}`;
+      
+      const { error: uploadErr } = await sb.storage.from('arquivos').upload(path, file);
+      if (uploadErr) {
+        errors.push(`${file.name}: ${uploadErr.message}`);
+        continue;
+      }
+      
+      const { error: insertErr } = await sb.from('portal_arquivos').insert({
+        processo_id: processoId,
+        nome_original: file.name,
+        storage_path: path,
+        categoria: 'complementar',
+        descricao: descricao || null
+      });
+      if (insertErr) {
+        errors.push(`${file.name}: erro no banco - ${insertErr.message}`);
+        await sb.storage.from('arquivos').remove([path]);
+        continue;
+      }
+      successCount++;
+    }
+
+if (successCount > 0) {
+  // Pop-up simples e discreto (substitui o alerta grande)
+  mostrarNotif(`${successCount} arquivo(s) enviado(s) com sucesso!`, 'ok');
+  
+  input.value = '';
+  const descInput = document.getElementById('nova-doc-desc');
+  if (descInput) descInput.value = '';
+  
+  await carregarDocumentos();
+  clienteNotificar(processoAtual.token, 'Novo documento enviado pelo cliente', processoAtual.nome);
+} else {
+      const msg = errors.length ? `Erros: ${errors.join('; ')}` : 'Nenhum arquivo enviado.';
+      alerta('alerta-upload-doc', msg, 'erro');
+    }
+  } catch (e) {
+    console.error(e);
+    alerta('alerta-upload-doc', 'Erro ao enviar: ' + e.message, 'erro');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `${ico('upload')} Enviar arquivo(s)`;
+  }
+}
+
+async function carregarDocumentos(){
+  const container = document.getElementById('lista-arquivos');
+  if (!container) return;
+
+  let data, error;
+  try {
+    const rpcRes = await sb.rpc('cliente_listar_arquivos', { p_token: processoAtual.token });
+    data = rpcRes.data; error = rpcRes.error;
+    if (error) {
+      const { data: proc } = await sb.from('portal_processos').select('id').eq('token', processoAtual.token).single();
+      if (proc) {
+        const fb = await sb.from('portal_arquivos').select('*').eq('processo_id', proc.id).order('criado_em');
+        data = fb.data; error = fb.error;
+      }
+    }
+  } catch(e) {
+    error = e;
+  }
+
+  if (error) {
+    container.innerHTML = `<div class="empty"><div class="empty-msg" style="color:var(--red)">Erro ao carregar documentos: ${error.message}</div></div>`;
+    return;
+  }
+  if (!data?.length){
+    container.innerHTML = '<div class="empty"><div class="empty-icon">'+ico('doc')+'</div><div class="empty-msg">Nenhum documento</div></div>';
+    atualizarCountDocs(0);
+    return;
+  }
+  container.innerHTML = data.map(arq => {
+    const url = sb.storage.from('arquivos').getPublicUrl(arq.storage_path).data.publicUrl;
+    let categoriaExibicao = arq.categoria || '';
+    if (categoriaExibicao === 'complementar') {
+      categoriaExibicao = arq.descricao || 'Complementar';
+    }
+    return `
+    <div class="arquivo-item" onclick="window.open('${url}','_blank')" style="cursor:pointer">
+      <div class="file-ico">${ico('doc')}</div>
+      <div class="file-info">
+        <div class="file-name">${esc(arq.nome_original)}</div>
+        <div class="file-meta">${esc(categoriaExibicao)} · ${fmtData(arq.criado_em)}</div>
+      </div>
+      <span style="font-size:10px;color:var(--mp-teal);font-weight:600">Abrir →</span>
+    </div>`;
+  }).join('');
+  atualizarCountDocs(data.length);
+}
+
+async function carregarMensagens(){
+  const timeline = document.getElementById('chat-messages');
+  if (!timeline) return;
+
+  let data, error;
+  try {
+    const rpcRes = await sb.rpc('cliente_listar_mensagens', { p_token: processoAtual.token });
+    data = rpcRes.data; error = rpcRes.error;
+    if (error) {
+      const { data: proc } = await sb.from('portal_processos').select('id').eq('token', processoAtual.token).single();
+      if (proc) {
+        const fb = await sb.from('portal_mensagens').select('*').eq('processo_id', proc.id).order('criado_em');
+        data = fb.data; error = fb.error;
+      }
+    }
+  } catch(e) {
+    error = e;
+  }
+
+  if (error) {
+    timeline.innerHTML = '<div class="empty">Erro ao carregar mensagens.</div>';
+    return;
+  }
+  if (!data?.length){
+    timeline.innerHTML = '<div class="empty">Nenhuma mensagem ainda. Envie sua primeira mensagem!</div>';
+    return;
+  }
+  timeline.innerHTML = data.map(m => {
+    const lado = (m.autor === 'admin') ? 'admin' : 'cliente';
+    return `
+    <div class="msg-item ${lado}">
+      <div class="msg-avatar">${lado === 'cliente' ? 'C' : 'A'}</div>
+      <div>
+        <div class="msg-balao">${esc(m.texto)}</div>
+        <div class="msg-hora">${fmtData(m.criado_em)}</div>
+      </div>
+    </div>`;
+  }).join('');
+  timeline.scrollTop = timeline.scrollHeight;
+}
+
+async function carregarHistorico(){
+  const hist = document.getElementById('historico');
+  if (!hist) return;
+
+  let data, error;
+  try {
+    const rpcRes = await sb.rpc('cliente_listar_historico_status', { p_token: processoAtual.token });
+    data = rpcRes.data; error = rpcRes.error;
+    if (error) {
+      const { data: proc } = await sb.from('portal_processos').select('id').eq('token', processoAtual.token).single();
+      if (proc) {
+        const fb = await sb.from('portal_historico').select('*').eq('processo_id', proc.id).order('criado_em', { ascending: false });
+        data = fb.data; error = fb.error;
+      }
+    }
+  } catch(e) {
+    error = e;
+  }
+
+  if (error) {
+    hist.innerHTML = '<div class="empty">Erro ao carregar histórico.</div>';
+    return;
+  }
+  if (!data?.length){
+    hist.innerHTML = '<div class="empty">Sem histórico ainda.</div>';
+    return;
+  }
+  hist.innerHTML = data.map(h => `
+    <div class="hist-item">
+      <div class="hist-dot">${ico('clock')}</div>
+      <div class="hist-content">
+        <div class="hist-status"><span class="tag ${tagClass(h.status_novo||h.status)}">${esc(h.status_novo||h.status||'-')}</span></div>
+        ${h.observacao?`<div class="hist-obs">${esc(h.observacao)}</div>`:''}
+        <div class="hist-hora">${fmtData(h.criado_em)}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function enviarMensagem(){
+  const textarea = document.getElementById('nova-msg');
+  const txt = textarea?.value.trim();
+  if (!txt || !processoAtual) return;
+
+  const btn = document.getElementById('btn-enviar-msg');
+  if (btn){ btn.disabled=true; btn.innerHTML='<span class="spinner"></span>'; }
+  textarea.disabled = true;
+
+  let error = null;
+  try {
+    const rpcRes = await sb.rpc('cliente_enviar_mensagem', {
+      p_token: processoAtual.token,
+      p_texto: txt,
+      p_autor: 'cliente'
+    });
+    error = rpcRes.error;
+    if (error) {
+      const { data: proc, error: ep } = await sb.from('portal_processos').select('id').eq('token', processoAtual.token).single();
+      if (!ep && proc) {
+        const ins = await sb.from('portal_mensagens').insert({ processo_id: proc.id, autor: 'cliente', texto: txt });
+        error = ins.error;
+      }
+    }
+  } catch(e) {
+    error = e;
+  }
+
+  if (btn){ btn.disabled=false; btn.innerHTML=ico('send'); }
+  textarea.disabled = false;
+
+  if (error) { mostrarNotif('Erro ao enviar mensagem.', 'erro'); return; }
+
+  textarea.value = '';
+  textarea.focus();
+  clienteNotificar(processoAtual && processoAtual.token, 'Nova mensagem do cliente', (processoAtual && processoAtual.nome) || '');
+  await carregarMensagens();
+}
+
+function iniciarPolling(){
+  if (_pollingInterval) clearInterval(_pollingInterval);
+  _pollingInterval = setInterval(async () => {
+    if (!processoAtual) return;
+    const { data } = await sb.rpc('cliente_obter_por_token', { p_token: processoAtual.token });
+    if (data && data.status !== processoAtual.status){
+      processoAtual = data;
+      renderPortalProcesso();
+    } else {
+      await carregarMensagens();
+      await carregarHistorico();
+    }
+  }, 30000);
+}
+
+function abrirTab(id){
+  document.querySelectorAll('.painel').forEach(p => p.classList.remove('ativo'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('ativa'));
+  const painel = document.getElementById(id);
+  if (painel) painel.classList.add('ativo');
+  const tabMap = { 'painel-docs':'tab-docs', 'painel-msg':'tab-msg', 'painel-hist':'tab-hist' };
+  const tabEl = document.getElementById(tabMap[id]);
+  if (tabEl) tabEl.classList.add('ativa');
+}
+
+function atualizarCountDocs(n){
+  const el = document.getElementById('count-docs');
+  if (el) el.textContent = n;
+}
+
+// ════════════════ UTILITÁRIOS ════════════════
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function v(id){ return document.getElementById(id)?.value; }
+function fmtData(d){
+  if (!d) return '';
+  const dt = new Date(d);
+  return dt.toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+function tagClass(s){
+  const map = {
+    'Recebido':'tag-blue','Em análise':'tag-amber','Enviado para administradora':'tag-teal',
+    'Em retorno da administradora':'tag-purple','Finalizado':'tag-green','Cancelado':'tag-red'
+  };
+  return map[s] || 'tag-gray';
+}
+
+function mascaraCPF(el){
+  let v = el.value.replace(/\D/g,'');
+  v = v.substring(0,11);
+  v = v.replace(/^(\d{3})(\d)/, '$1.$2');
+  v = v.replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3');
+  v = v.replace(/\.(\d{3})(\d)/, '.$1-$2');
+  el.value = v;
+}
+
+function mascaraCNPJ(el){
+  let v = el.value.replace(/\D/g,'');
+  v = v.substring(0,14);
+  v = v.replace(/^(\d{2})(\d)/, '$1.$2');
+  v = v.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+  v = v.replace(/\.(\d{3})(\d)/, '.$1/$2');
+  v = v.replace(/(\d{4})(\d)/, '$1-$2');
+  el.value = v;
+}
+
+function mascaraCpfCnpj(el){
+  let raw = el.value.replace(/\D/g,'');
+  if (raw.length <= 11) {
+    raw = raw.substring(0,11);
+    raw = raw.replace(/^(\d{3})(\d)/, '$1.$2');
+    raw = raw.replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3');
+    raw = raw.replace(/\.(\d{3})(\d)/, '.$1-$2');
+  } else {
+    raw = raw.substring(0,14);
+    raw = raw.replace(/^(\d{2})(\d)/, '$1.$2');
+    raw = raw.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3');
+    raw = raw.replace(/\.(\d{3})(\d)/, '.$1/$2');
+    raw = raw.replace(/(\d{4})(\d)/, '$1-$2');
+  }
+  el.value = raw;
+}
+
+function mascaraCpfCnpjGenerico(el){ mascaraCpfCnpj(el); }
+
+function mascaraTel(el){
+  let v = el.value.replace(/\D/g,'');
+  v = v.substring(0,11);
+  if (v.length>2) v = `(${v.substring(0,2)}) ${v.substring(2)}`;
+  if (v.length>10) v = v.substring(0,10)+'-'+v.substring(10);
+  el.value = v;
+}
+
+function alerta(id, msg, tipo){
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.className = `alerta alerta-${tipo} visivel`;
+  const iconHtml = SVG[tipo==='erro'?'alert':(tipo==='sucesso'?'check':'alert')] || SVG.alert;
+  el.innerHTML = `${iconHtml} ${msg}`;
+  setTimeout(() => el.classList.remove('visivel'), 6000);
+}
+</script>
+</body>
+</html>

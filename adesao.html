@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Master Prime — Adesão Bradesco</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════
+   ADESÃO BRADESCO — Tela Standalone (carregada via iframe)
+   Compartilha o design system do Portal do Consultor.
+   ══════════════════════════════════════════════════════ */
+:root {
+  --mp-navy:    #2D3F5E;
+  --mp-yellow:  #C8C84A;
+  --mp-teal:    #4DBCC8;
+  --mp-blue:    #7A9BC8;
+  --bg:         #F4F6FA;
+  --card:       #FFFFFF;
+  --border:     #E2E8F0;
+  --border2:    #CBD5E1;
+  --text:       #1E293B;
+  --text2:      #64748B;
+  --text3:      #94A3B8;
+  --green:  #16A34A;  --green-bg: #F0FDF4;
+  --red:    #DC2626;  --red-bg:   #FEF2F2;
+  --amber:  #D97706;  --amber-bg: #FFFBEB;
+  --blue:   #2563EB;  --blue-bg:  #EFF6FF;
+  --r: 10px;
+  --shadow:    0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+  --shadow-md: 0 4px 6px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.05);
+
+  /* Específicas Bradesco */
+  --bradesco-red:       #DC2626;
+  --bradesco-red-dark:  #991B1B;
+  --bradesco-red-light: #FEE2E2;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: 'Inter', sans-serif; font-size: 13px;
+  min-height: 100vh; padding: 28px 24px 60px;
+}
+.container { max-width: 1100px; margin: 0 auto; }
+
+/* ═══ Header Bradesco ═══ */
+.bradesco-header {
+  background: linear-gradient(135deg, var(--bradesco-red) 0%, var(--bradesco-red-dark) 100%);
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(220,38,38,.20);
+}
+
+/* ═══ Cards genéricos (mesmo padrão do Portal) ═══ */
+.card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--r); box-shadow: var(--shadow);
+  margin-bottom: 16px; overflow: hidden;
+  transition: border-color .15s, box-shadow .15s;
+}
+.card-head {
+  padding: 16px 22px 14px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+}
+.card-title { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: -.1px; }
+.card-sub { font-size: 12px; color: var(--text2); margin-top: 3px; }
+.card-body { padding: 20px 22px; }
+
+/* ═══ Cartões de seleção PF/PJ ═══ */
+.bradesco-card { transition: transform .15s, box-shadow .15s, border-color .15s; }
+.bradesco-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--bradesco-red) !important;
+}
+.bradesco-card.selected {
+  border-color: var(--bradesco-red) !important;
+  box-shadow: 0 0 0 3px rgba(220,38,38,.10), var(--shadow-md);
+}
+.bradesco-section-title {
+  font-size: 16px; font-weight: 700; color: var(--text);
+}
+.bradesco-badge {
+  display: inline-block;
+  padding: 4px 10px; border-radius: 6px;
+  background: var(--bradesco-red-light); color: var(--bradesco-red);
+  font-size: 10px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase;
+}
+
+/* ═══ Inputs (mesmo visual do login do Portal) ═══ */
+.login-label {
+  display: block; font-size: 11px; font-weight: 600; color: var(--text2);
+  text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px;
+}
+.login-input {
+  width: 100%; padding: 10px 12px; border: 1.5px solid var(--border2);
+  border-radius: 8px; font-size: 13px; color: var(--text);
+  font-family: 'Inter', sans-serif; outline: none;
+  transition: border-color .15s, box-shadow .15s; background: #fff;
+}
+.login-input:focus {
+  border-color: var(--bradesco-red);
+  box-shadow: 0 0 0 3px rgba(220,38,38,.12);
+}
+.login-input::placeholder { color: var(--text3); }
+select.login-input { cursor: pointer; }
+
+/* ═══ Botão Bradesco ═══ */
+.btn {
+  padding: 12px 22px; border: none; border-radius: 8px;
+  font-size: 13px; font-weight: 700; cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: background .15s, transform .15s, box-shadow .15s;
+}
+.bradesco-btn {
+  background: var(--bradesco-red); color: #fff;
+}
+.bradesco-btn:hover {
+  background: var(--bradesco-red-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(220,38,38,.30);
+}
+
+/* ═══ Mensagens (sucesso / erro / aviso) ═══ */
+.form-msg {
+  padding: 12px 16px; border-radius: 8px; margin-bottom: 16px;
+  font-size: 13px; font-weight: 500;
+  display: flex; align-items: center; gap: 10px;
+}
+.form-msg.success { background: var(--green-bg); color: var(--green); border: 1px solid #BBF7D0; }
+.form-msg.error   { background: var(--red-bg);   color: var(--red);   border: 1px solid #FECACA; }
+.form-msg.info    { background: var(--blue-bg);  color: var(--blue);  border: 1px solid #BFDBFE; }
+.form-msg.warn    { background: var(--amber-bg); color: var(--amber); border: 1px solid #FCD34D; }
+
+/* ═══ Responsivo ═══ */
+@media (max-width: 768px) {
+  body { padding: 20px 16px 40px; }
+  .card-body > div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+  div[style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ========== HEADER ========== -->
+  <div class="bradesco-header" style="border-radius:var(--r); padding:24px; margin-bottom:20px;">
+    <div style="display:flex; align-items:center; gap:16px;">
+      <div style="width:48px; height:48px; background:rgba(255,255,255,0.2); border-radius:12px; display:flex; align-items:center; justify-content:center;">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </div>
+      <div>
+        <div style="font-size:20px; font-weight:700;">Bradesco Administradora</div>
+        <div style="font-size:11px; color:rgba(255,255,255,0.7); margin-top:4px;">Consórcio Nacional Bradesco • Propostas de Adesão</div>
+      </div>
+    </div>
+    <div style="display:flex; gap:12px; margin-top:16px; flex-wrap:wrap;">
+      <div style="display:flex; align-items:center; gap:6px; font-size:11px; color:rgba(255,255,255,0.85);"><span style="width:6px; height:6px; background:#22C55E; border-radius:50%;"></span> Fácil aprovação</div>
+      <div style="display:flex; align-items:center; gap:6px; font-size:11px; color:rgba(255,255,255,0.85);"><span style="width:6px; height:6px; background:#22C55E; border-radius:50%;"></span> Taxas a partir de 1,99%</div>
+      <div style="display:flex; align-items:center; gap:6px; font-size:11px; color:rgba(255,255,255,0.85);"><span style="width:6px; height:6px; background:#22C55E; border-radius:50%;"></span> Lances livres ou fixos</div>
+    </div>
+  </div>
+
+  <!-- ========== Seleção PF / PJ ========== -->
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-bottom:24px;">
+    <div class="card bradesco-card" id="card-pf" style="cursor:pointer; border:2px solid var(--border);" onclick="selectBradescoForm('pf')">
+      <div style="padding:24px; text-align:center;">
+        <div style="width:64px; height:64px; border-radius:50%; background:var(--bradesco-red-light); margin:0 auto 16px; display:flex; align-items:center; justify-content:center;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <div class="bradesco-section-title">Pessoa Física</div>
+        <p style="font-size:12px; color:var(--text2); margin-top:8px;">Preenchimento rápido • CPF</p>
+        <div id="pf-badge" class="bradesco-badge" style="display:none; margin-top:12px;">Selecionado ✓</div>
+      </div>
+    </div>
+    <div class="card bradesco-card" id="card-pj" style="cursor:pointer; border:2px solid var(--border);" onclick="selectBradescoForm('pj')">
+      <div style="padding:24px; text-align:center;">
+        <div style="width:64px; height:64px; border-radius:50%; background:var(--bradesco-red-light); margin:0 auto 16px; display:flex; align-items:center; justify-content:center;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/></svg>
+        </div>
+        <div class="bradesco-section-title">Pessoa Jurídica</div>
+        <p style="font-size:12px; color:var(--text2); margin-top:8px;">Empresarial • CNPJ</p>
+        <div id="pj-badge" class="bradesco-badge" style="display:none; margin-top:12px;">Selecionado ✓</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== Formulário PF ========== -->
+  <div id="bradesco-pf-form" style="display:none;">
+    <div class="card">
+      <div class="card-head">
+        <div><div class="card-title">Proposta Pessoa Física</div><div class="card-sub">Dados pessoais do consorciado</div></div>
+        <span class="bradesco-badge">BRADESCO</span>
+      </div>
+      <div class="card-body">
+        <div id="form-bradesco-pf-msg"></div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+          <div><label class="login-label">CPF *</label><input class="login-input" id="bpf-cpf" placeholder="000.000.000-00" oninput="maskCPF(this)"></div>
+          <div><label class="login-label">Nome Completo *</label><input class="login-input" id="bpf-nome_completo" placeholder="Nome completo"></div>
+          <div><label class="login-label">Data de Nascimento *</label><input class="login-input" id="bpf-data_nascimento" type="date"></div>
+          <div><label class="login-label">Nacionalidade *</label><input class="login-input" id="bpf-nacionalidade" placeholder="Brasileira"></div>
+          <div><label class="login-label">Nome do Pai</label><input class="login-input" id="bpf-nome_pai" placeholder="Se ausente, digite 'Ausente'"></div>
+          <div><label class="login-label">Nome da Mãe *</label><input class="login-input" id="bpf-nome_mae" placeholder="Nome da mãe"></div>
+          <div><label class="login-label">Estado Civil *</label>
+            <select class="login-input" id="bpf-estado_civil">
+              <option value="">Selecione...</option>
+              <option>Solteiro(a)</option><option>Casado(a)</option><option>Divorciado(a)</option><option>Viúvo(a)</option><option>Outros</option>
+            </select>
+          </div>
+          <div><label class="login-label">Nome do Cônjuge</label><input class="login-input" id="bpf-nome_conjuge"></div>
+          <div><label class="login-label">CPF do Cônjuge</label><input class="login-input" id="bpf-cpf_conjuge" placeholder="000.000.000-00" oninput="maskCPF(this)"></div>
+          <div><label class="login-label">Data Nasc. Cônjuge</label><input class="login-input" id="bpf-data_nascimento_conjuge" type="date"></div>
+          <div><label class="login-label">Nome da Empresa *</label><input class="login-input" id="bpf-nome_empresa"></div>
+          <div><label class="login-label">Data de Admissão *</label><input class="login-input" id="bpf-data_admissao" type="date"></div>
+          <div><label class="login-label">Renda Mensal *</label><input class="login-input" id="bpf-renda_mensal" placeholder="R$ 0,00"></div>
+          <div><label class="login-label">CEP *</label><input class="login-input" id="bpf-cep" placeholder="00000-000"></div>
+          <div><label class="login-label">Logradouro *</label><input class="login-input" id="bpf-logradouro"></div>
+          <div><label class="login-label">Número *</label><input class="login-input" id="bpf-numero"></div>
+          <div><label class="login-label">Complemento</label><input class="login-input" id="bpf-complemento"></div>
+          <div><label class="login-label">Bairro *</label><input class="login-input" id="bpf-bairro"></div>
+          <div><label class="login-label">Cidade *</label><input class="login-input" id="bpf-cidade"></div>
+          <div><label class="login-label">Estado *</label><input class="login-input" id="bpf-estado" maxlength="2" placeholder="SP"></div>
+          <div><label class="login-label">Tempo de Residência *</label><input class="login-input" id="bpf-tempo_residencia" placeholder="ex: 2 anos"></div>
+          <div><label class="login-label">E-mail *</label><input class="login-input" id="bpf-email" type="email"></div>
+          <div><label class="login-label">Celular *</label><input class="login-input" id="bpf-celular" placeholder="(11) 99999-9999"></div>
+          <div><label class="login-label">Forma de Pagamento *</label><input class="login-input" id="bpf-forma_pagamento" placeholder="Débito em conta, boleto..."></div>
+          <div><label class="login-label">Deseja Seguro? *</label>
+            <select class="login-input" id="bpf-deseja_seguro">
+              <option value="">Selecione...</option><option>Sim</option><option>Não</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn bradesco-btn" style="margin-top:20px" onclick="submitForm('BradescoFormPF')">Salvar Proposta PF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== Formulário PJ ========== -->
+  <div id="bradesco-pj-form" style="display:none;">
+    <div class="card">
+      <div class="card-head">
+        <div><div class="card-title">Proposta Pessoa Jurídica</div><div class="card-sub">Dados da empresa e do sócio administrador</div></div>
+        <span class="bradesco-badge">BRADESCO</span>
+      </div>
+      <div class="card-body">
+        <div id="form-bradesco-pj-msg"></div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+          <div><label class="login-label">CNPJ *</label><input class="login-input" id="bpj-cnpj" placeholder="00.000.000/0001-00"></div>
+          <div><label class="login-label">Razão Social *</label><input class="login-input" id="bpj-razao_social"></div>
+          <div><label class="login-label">Nome Fantasia</label><input class="login-input" id="bpj-nome_fantasia"></div>
+          <div><label class="login-label">Ramo de Atividade *</label><input class="login-input" id="bpj-ramo_atividade"></div>
+          <div><label class="login-label">Nome do Sócio *</label><input class="login-input" id="bpj-socio_nome"></div>
+          <div><label class="login-label">CPF do Sócio *</label><input class="login-input" id="bpj-socio_cpf" oninput="maskCPF(this)"></div>
+          <div><label class="login-label">Data Nasc. Sócio *</label><input class="login-input" id="bpj-socio_data_nascimento" type="date"></div>
+          <div><label class="login-label">Tipo Documento *</label>
+            <select class="login-input" id="bpj-socio_tipo_documento">
+              <option value="">Selecione...</option><option>RG</option><option>CNH</option>
+            </select>
+          </div>
+          <div><label class="login-label">Número Documento *</label><input class="login-input" id="bpj-socio_numero_documento"></div>
+          <div><label class="login-label">% na Empresa *</label><input class="login-input" id="bpj-socio_percentual_empresa" placeholder="50"></div>
+          <div><label class="login-label">Estado Civil Sócio *</label>
+            <select class="login-input" id="bpj-socio_estado_civil">
+              <option value="">Selecione...</option>
+              <option>Solteiro(a)</option><option>Casado(a)</option><option>Divorciado(a)</option><option>Viúvo(a)</option><option>Outros</option>
+            </select>
+          </div>
+          <div><label class="login-label">Nome Cônjuge</label><input class="login-input" id="bpj-socio_nome_conjuge"></div>
+          <div><label class="login-label">CPF Cônjuge</label><input class="login-input" id="bpj-socio_cpf_conjuge" oninput="maskCPF(this)"></div>
+          <div><label class="login-label">E-mail *</label><input class="login-input" id="bpj-email" type="email"></div>
+          <div><label class="login-label">Celular *</label><input class="login-input" id="bpj-celular"></div>
+          <div><label class="login-label">CEP *</label><input class="login-input" id="bpj-cep"></div>
+          <div><label class="login-label">Logradouro *</label><input class="login-input" id="bpj-logradouro"></div>
+          <div><label class="login-label">Número *</label><input class="login-input" id="bpj-numero"></div>
+          <div><label class="login-label">Complemento</label><input class="login-input" id="bpj-complemento"></div>
+          <div><label class="login-label">Bairro *</label><input class="login-input" id="bpj-bairro"></div>
+          <div><label class="login-label">Cidade *</label><input class="login-input" id="bpj-cidade"></div>
+          <div><label class="login-label">Estado *</label><input class="login-input" id="bpj-estado" maxlength="2"></div>
+          <div><label class="login-label">Forma de Pagamento</label><input class="login-input" id="bpj-forma_pagamento"></div>
+          <div><label class="login-label">Deseja Seguro?</label>
+            <select class="login-input" id="bpj-deseja_seguro">
+              <option value="">Selecione...</option><option>Sim</option><option>Não</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn bradesco-btn" style="margin-top:20px" onclick="submitForm('BradescoFormPJ')">Salvar Proposta PJ</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// SUPABASE
+//   Usa a mesma sessão de auth do Portal do Consultor
+//   (mesmo origin → localStorage compartilhado).
+// ═══════════════════════════════════════════════════════
+const SUPABASE_URL = 'https://jhwciwvgagnuxakukyob.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ═══════════════════════════════════════════════════════
+// MÁSCARA DE CPF (mesmo padrão do Portal do Consultor)
+// ═══════════════════════════════════════════════════════
+function maskCPF(el) {
+  let v = el.value.replace(/\D/g, '');
+  if (v.length > 11) v = v.slice(0, 11);
+  if (v.length > 9)      v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/, '$1.$2.$3-$4');
+  else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/,        '$1.$2.$3');
+  else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/,                '$1.$2');
+  el.value = v;
+}
+
+// ═══════════════════════════════════════════════════════
+// SELEÇÃO PF / PJ
+// ═══════════════════════════════════════════════════════
+function selectBradescoForm(tipo) {
+  const cardPf  = document.getElementById('card-pf');
+  const cardPj  = document.getElementById('card-pj');
+  const badgePf = document.getElementById('pf-badge');
+  const badgePj = document.getElementById('pj-badge');
+  const formPf  = document.getElementById('bradesco-pf-form');
+  const formPj  = document.getElementById('bradesco-pj-form');
+
+  if (tipo === 'pf') {
+    cardPf.classList.add('selected');
+    cardPj.classList.remove('selected');
+    badgePf.style.display = 'inline-block';
+    badgePj.style.display = 'none';
+    formPf.style.display = 'block';
+    formPj.style.display = 'none';
+  } else {
+    cardPj.classList.add('selected');
+    cardPf.classList.remove('selected');
+    badgePj.style.display = 'inline-block';
+    badgePf.style.display = 'none';
+    formPj.style.display = 'block';
+    formPf.style.display = 'none';
+  }
+  const target = tipo === 'pf' ? formPf : formPj;
+  setTimeout(() => target.scrollIntoView({behavior: 'smooth', block: 'start'}), 50);
+}
+
+// ═══════════════════════════════════════════════════════
+// LIMPEZA DE FORMULÁRIO (após salvar com sucesso)
+// ═══════════════════════════════════════════════════════
+function clearFormFields(prefix) {
+  document.querySelectorAll('[id^="' + prefix + '"]').forEach(el => {
+    if (el.tagName === 'SELECT') el.selectedIndex = 0;
+    else el.value = '';
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// SUBMIT — grava no Supabase
+// ═══════════════════════════════════════════════════════
+async function submitForm(tipoForm) {
+  const isPF = tipoForm === 'BradescoFormPF';
+  const prefix = isPF ? 'bpf-' : 'bpj-';
+  const tabela = isPF ? 'portal_bradesco_propostas_pf' : 'portal_bradesco_propostas_pj';
+  const msgEl = document.getElementById(isPF ? 'form-bradesco-pf-msg' : 'form-bradesco-pj-msg');
+  const btnEl = document.querySelector('button[onclick="submitForm(\'' + tipoForm + '\')"]');
+
+  // Campos obrigatórios (espelha os labels com *)
+  const requiredIds = isPF
+    ? ['cpf','nome_completo','data_nascimento','nacionalidade','nome_mae','estado_civil',
+       'nome_empresa','data_admissao','renda_mensal','cep','logradouro','numero','bairro',
+       'cidade','estado','tempo_residencia','email','celular','forma_pagamento','deseja_seguro']
+    : ['cnpj','razao_social','ramo_atividade','socio_nome','socio_cpf','socio_data_nascimento',
+       'socio_tipo_documento','socio_numero_documento','socio_percentual_empresa','socio_estado_civil',
+       'email','celular','cep','logradouro','numero','bairro','cidade','estado'];
+
+  const dados = {};
+  const faltando = [];
+  document.querySelectorAll('[id^="' + prefix + '"]').forEach(el => {
+    const k = el.id.slice(prefix.length);
+    dados[k] = (el.value || '').trim();
+  });
+  for (const k of requiredIds) {
+    if (!dados[k]) faltando.push(k);
+  }
+
+  if (faltando.length > 0) {
+    msgEl.innerHTML = '<div class="form-msg error">Preencha os campos obrigatórios: ' +
+                      faltando.join(', ').replace(/_/g, ' ') + '</div>';
+    msgEl.scrollIntoView({behavior: 'smooth', block: 'center'});
+    return;
+  }
+
+  // Confere sessão de auth
+  const { data: sess } = await sb.auth.getSession();
+  if (!sess?.session?.user) {
+    msgEl.innerHTML =
+      '<div class="form-msg error">Sessão expirada. Faça login novamente no portal e tente de novo.</div>';
+    msgEl.scrollIntoView({behavior: 'smooth', block: 'center'});
+    return;
+  }
+  const user = sess.session.user;
+
+  // Busca o nome do consultor em portal_users (opcional, falha-suave)
+  let consultorNome = null;
+  try {
+    const { data: u } = await sb.from('portal_users').select('nome').eq('auth_id', user.id).maybeSingle();
+    consultorNome = u?.nome || null;
+  } catch (e) { /* ignora — coluna fica null */ }
+
+  // Monta payload
+  const payload = Object.assign({}, dados, {
+    consultor_auth_id: user.id,
+    consultor_nome: consultorNome,
+  });
+
+  // Bloqueia o botão durante o insert
+  if (btnEl) { btnEl.disabled = true; btnEl.style.opacity = '.6'; btnEl.textContent = 'Salvando...'; }
+  msgEl.innerHTML = '<div class="form-msg info">Enviando proposta...</div>';
+
+  const { data: inserted, error } = await sb.from(tabela).insert(payload).select('id').single();
+
+  if (btnEl) { btnEl.disabled = false; btnEl.style.opacity = '1'; btnEl.textContent = isPF ? 'Salvar Proposta PF' : 'Salvar Proposta PJ'; }
+
+  if (error) {
+    console.error('[Adesão Bradesco] Erro Supabase:', error);
+    msgEl.innerHTML =
+      '<div class="form-msg error">Erro ao salvar: ' + (error.message || 'desconhecido') +
+      '. Tente novamente ou avise o administrador.</div>';
+    msgEl.scrollIntoView({behavior: 'smooth', block: 'center'});
+    return;
+  }
+
+  // Sucesso!
+  msgEl.innerHTML =
+    '<div class="form-msg success">' +
+    '<strong>Proposta registrada com sucesso!</strong> ' +
+    'Protocolo: <span style="font-family:\'DM Mono\',monospace;">' + (inserted?.id || '—').slice(0,8) + '</span>. ' +
+    'Você pode preencher uma nova proposta abaixo.' +
+    '</div>';
+  msgEl.scrollIntoView({behavior: 'smooth', block: 'center'});
+  clearFormFields(prefix);
+}
+</script>
+</body>
+</html>
