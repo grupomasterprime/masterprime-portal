@@ -103,8 +103,8 @@ window.KB_ADMIN["comissoes"] = {
       "categoria_label": "Regras gerais",
       "categoria_ordem": 6,
       "titulo": "Recálculo da comissão por alteração de crédito",
-      "conteudo": "Em qualquer administradora, se o valor do crédito do plano for alterado depois da venda (aumento ou redução), a comissão é RECALCULADA PROPORCIONALMENTE.\n\nExemplos:\n• Cliente fechou uma cota de R$ 100.000 e depois pediu aumento pra R$ 150.000 → sua comissão aumenta proporcionalmente (50%).\n• Cliente fechou R$ 200.000 e pediu redução pra R$ 150.000 → sua comissão é reduzida proporcionalmente (25%).\n\nO recalculo é aplicado nas parcelas FUTURAS, não nas já pagas. Se já recebeu 2 de 6 parcelas e o crédito mudou na 3ª, da 3ª em diante vem o novo valor proporcional.",
-      "tags": "recalculo, aumento, reducao, credito, proporcional, alteracao",
+      "conteudo": "Quando o cliente altera o valor do crédito da cota (para menor OU maior) durante o período em que o vendedor ainda recebe comissão, a regra é:\n\n→ A comissão TODA é ESTORNADA (mesmo as parcelas que já foram pagas).\n→ A comissão é REPAGA integralmente sobre o NOVO valor de crédito.\n\nNo demonstrativo isso aparece como:\n1. Lançamentos NEGATIVOS (estorno do valor antes pago)\n2. Lançamentos POSITIVOS sobre o novo valor base\n\nIsso é um AJUSTE / RECÁLCULO da comissão — NÃO é um estorno definitivo (perda da comissão do vendedor). O valor final pago acompanha o novo crédito.\n\nExemplos:\n• Cliente fechou R$ 100.000 e pediu aumento pra R$ 150.000 → estorna toda a comissão do crédito antigo e repaga proporcional ao crédito de R$ 150.000 (sua comissão líquida aumenta).\n• Cliente fechou R$ 200.000 e pediu redução pra R$ 150.000 → estorna toda a comissão do crédito antigo e repaga proporcional ao crédito de R$ 150.000 (sua comissão líquida diminui).\n\nEm caso de dúvida com uma alteração específica no seu demonstrativo, abra um chamado de comissão pelo Histórico.",
+      "tags": "recalculo, aumento, reducao, credito, proporcional, alteracao, estorno, repaga, ajuste",
       "ordem": 1
     },
     {
