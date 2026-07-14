@@ -663,6 +663,43 @@ function render(g) {
   document.getElementById("emptyState").style.display="none";
   document.getElementById("result").classList.add("visible");
 }
+
+// ── BUSCA DIRETA — integração com a Análise de Carteira (protocolo do Vini) ──
+// A Análise chama applyDirectSearch(grupo, adm) no iframe, ou posta mensagem
+// SEARCH_GRUPO, ou deixa pendência em localStorage pra consumir no load.
+function applyDirectSearch(grupo, adm) {
+  try {
+    try { localStorage.removeItem('lanceSearchGrupo'); localStorage.removeItem('lanceSearchAdm'); } catch(e){}
+    const map = { 'PORTO SEGURO':'Porto Seguro', 'PORTO':'Porto Seguro', 'ITAU':'Itaú', 'ITAÚ':'Itaú', 'BRADESCO':'Bradesco' };
+    const admKey = map[String(adm||'').toUpperCase().trim()] || null;
+    const alvo = normGrupo(grupo);
+    const tryAdms = admKey ? [admKey] : [];
+    ['Porto Seguro','Itaú','Bradesco'].forEach(a => { if (!tryAdms.includes(a)) tryAdms.push(a); });
+    for (const a of tryAdms) {
+      const gs = (D[a] && D[a].grupos) ? Object.keys(D[a].grupos) : [];
+      const hit = gs.find(g => normGrupo(g) === alvo);
+      if (hit) { selectAdm(a); selectG(hit); return true; }
+    }
+    if (admKey) selectAdm(admKey);
+    document.getElementById('searchInput').value = String(grupo||'');
+    doSearch();
+    return false;
+  } catch(e) { console.error('applyDirectSearch:', e); return false; }
+}
+window.applyDirectSearch = applyDirectSearch;
+window.addEventListener('message', e => {
+  const d = e && e.data || {};
+  if (d.type === 'SEARCH_GRUPO') applyDirectSearch(d.grupo, d.adm);
+});
+(function consumePendingSearch(){
+  try {
+    const g = localStorage.getItem('lanceSearchGrupo');
+    if (g) {
+      const a = localStorage.getItem('lanceSearchAdm');
+      applyDirectSearch(g, a);
+    }
+  } catch(e){}
+})();
 </script>
 
 </body></html>
