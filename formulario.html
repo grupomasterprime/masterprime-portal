@@ -830,6 +830,8 @@ function wizModal(titulo, corpoHtml, aoFechar) {
 }
 
 function wizardize(prefix) {
+  // Modo visualização (?view=): ficha completa somente leitura — NUNCA aplicar o wizard
+  if (new URLSearchParams(location.search).has('view')) return;
   const wrap = $('form-' + prefix);
   if (!wrap || wrap.dataset.wiz === '1') return;
   wrap.dataset.wiz = '1';
