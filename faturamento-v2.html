@@ -211,6 +211,8 @@ textarea.inp{resize:vertical;min-height:60px}
 @keyframes spin{to{transform:rotate(360deg)}}
 #fat-loading{min-height:70vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:var(--text-2);font-size:12px}
 .feedback-msg{margin-top:8px;font-size:11px;min-height:18px}
+.du-chip{padding:6px 10px;border-radius:999px;border:1.5px solid var(--border-2);background:#fff;font-size:11px;font-weight:800;color:#0E7490;font-family:'Inter',sans-serif;transition:all .12s}
+.du-chip:hover{border-color:var(--teal);background:#ECFEFF}
 .alert-warn{display:flex;gap:8px;padding:11px 14px;border-radius:10px;font-size:12px;background:#FFFBEB;color:#92400E;border:1px solid #FDE68A;margin-bottom:12px;line-height:1.5}
 </style>
 </head>
@@ -1080,7 +1082,11 @@ async function fatVerProcesso(id) {
         <div style="margin-left:auto;display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;">
           <div>
             <div class="lbl">Previsão de retorno da administradora</div>
-            <input type="date" id="fat-previsao-${proc.id}" class="inp" style="width:auto;" value="${proc.previsao_retorno ? String(proc.previsao_retorno).slice(0,10) : ''}">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <input type="date" id="fat-previsao-${proc.id}" class="inp" style="width:auto;" value="${proc.previsao_retorno ? String(proc.previsao_retorno).slice(0,10) : ''}">
+              <input type="number" min="1" id="fat-previsao-du-${proc.id}" class="inp" style="width:92px;" placeholder="dias úteis" title="Somar N dias úteis a partir de hoje (calendário SP)" oninput='fatPrevisaoDeDU(${procIdArg})'>
+              ${[2,3,5,15].map(n => `<button class="du-chip" title="Hoje + ${n} dias úteis (SP)" onclick='fatPrevisaoAtalho(${procIdArg}, ${n})'>+${n}</button>`).join('')}
+            </div>
           </div>
           <button class="btn btn-outline btn-sm" onclick='fatSalvarPrevisao(${procIdArg})'>Salvar</button>
         </div>` : ''}
@@ -1437,6 +1443,27 @@ async function fatSalvarTaxaAprovada(processoId) {
 }
 
 // ════════ Ações do processo ════════
+// Previsão por DIAS ÚTEIS: soma N dias úteis a partir de hoje (calendário SP)
+// e preenche o campo de data, que continua editável.
+function somarDiasUteis(base, n) {
+  const d = _soData(base || new Date());
+  let add = 0;
+  while (add < n) { d.setDate(d.getDate() + 1); if (isDiaUtil(d)) add++; }
+  return d.getFullYear() + '-' + _p2(d.getMonth() + 1) + '-' + _p2(d.getDate());
+}
+function fatPrevisaoDeDU(processoId) {
+  const duInp = document.getElementById('fat-previsao-du-' + processoId);
+  const dataInp = document.getElementById('fat-previsao-' + processoId);
+  if (!duInp || !dataInp) return;
+  const n = parseInt(duInp.value, 10);
+  if (!Number.isFinite(n) || n <= 0) return;
+  dataInp.value = somarDiasUteis(new Date(), n);
+}
+function fatPrevisaoAtalho(processoId, n) {
+  const duInp = document.getElementById('fat-previsao-du-' + processoId);
+  if (duInp) duInp.value = n;
+  fatPrevisaoDeDU(processoId);
+}
 async function fatSalvarPrevisao(processoId) {
   const inp = document.getElementById('fat-previsao-' + processoId);
   if (!inp) return;

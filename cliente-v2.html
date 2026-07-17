@@ -32,8 +32,10 @@ button{cursor:pointer}
 .lockup .nm small{display:block;font-size:7.5px;font-weight:600;opacity:.8;letter-spacing:.8px}
 .c-hero h1{font-size:21px;margin-top:16px;letter-spacing:-.3px;font-weight:800}
 .c-hero p{font-size:13px;opacity:.85;margin-top:6px;line-height:1.5}
-.c-body{padding:20px;max-width:560px;margin:0 auto}
-.container{max-width:560px;margin:0 auto;padding:0}
+.c-body{padding:20px;max-width:640px;margin:0 auto}
+.container{max-width:640px;margin:0 auto;padding:0 20px}
+/* Desktop: conteúdo do hero limitado e alinhado com os cards (mesma coluna central) */
+.c-hero-in{max-width:600px;margin:0 auto}
 
 /* ── Cards brancos ── */
 .c-card,.card{background:#fff;border-radius:16px;border:1px solid var(--border);box-shadow:0 1px 3px rgba(15,42,74,.05);margin-bottom:12px;overflow:hidden}
@@ -562,11 +564,13 @@ function heroCliente(titulo, subtitulo, opts){
   opts = opts || {};
   return `
     <div class="c-hero ${opts.escuro ? 'escuro' : ''}">
-      ${opts.voltar ? `<a class="link-voltar" onclick="${opts.voltar}">&#8592; ${opts.voltarLabel || 'Voltar'}</a>` : ''}
-      ${lockupMP()}
-      ${titulo ? `<h1>${titulo}</h1>` : ''}
-      ${subtitulo ? `<p>${subtitulo}</p>` : ''}
-      ${opts.extra || ''}
+      <div class="c-hero-in">
+        ${opts.voltar ? `<a class="link-voltar" onclick="${opts.voltar}">&#8592; ${opts.voltarLabel || 'Voltar'}</a>` : ''}
+        ${lockupMP()}
+        ${titulo ? `<h1>${titulo}</h1>` : ''}
+        ${subtitulo ? `<p>${subtitulo}</p>` : ''}
+        ${opts.extra || ''}
+      </div>
     </div>`;
 }
 
@@ -1722,6 +1726,7 @@ function renderAcompanhamento(){
 
   root.innerHTML = `
     <div class="c-hero escuro">
+      <div class="c-hero-in">
       <a class="link-voltar" href="${window.location.pathname}">&#8592; Início do portal</a>
       ${lockupMP()}
       <div style="display:flex;gap:16px;align-items:center;margin-top:18px">
@@ -1739,6 +1744,7 @@ function renderAcompanhamento(){
         <div class="hero-cell"><div class="hl">Status</div><div class="hv">${esc(p.status)}</div></div>
         <div class="hero-cell"><div class="hl">Abertura</div><div class="hv">${fmtDataCurta(p.criado_em)}</div></div>
         <div class="hero-cell"><div class="hl">Atualização</div><div class="hv">${fmtDataCurta(p.atualizado_em || p.criado_em)}</div></div>
+      </div>
       </div>
     </div>
     <div class="c-body">
