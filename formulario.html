@@ -329,6 +329,18 @@ body {
 }
 
 .hidden { display: none !important; }
+/* ── Wizard (formulário por etapas) ── */
+.wiz-hide { display: none !important; }
+.field-err { border-color: #E05C5C !important; box-shadow: 0 0 0 3px rgba(224,92,92,.14) !important; }
+#wiz-modal-overlay { position: fixed; inset: 0; background: rgba(15,23,42,.55); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
+.wiz-modal { background: #fff; border-radius: 14px; max-width: 420px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,.25); overflow: hidden; animation: wizPop .18s ease-out; }
+@keyframes wizPop { from { transform: scale(.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.wiz-modal-head { background: #1E293B; color: #fff; padding: 14px 20px; font-weight: 700; font-size: 15px; display: flex; align-items: center; gap: 10px; }
+.wiz-modal-body { padding: 18px 20px; font-size: 14px; color: #334155; line-height: 1.55; }
+.wiz-modal-body ul { margin: 10px 0 0 18px; }
+.wiz-modal-body li { margin-bottom: 4px; }
+.wiz-modal-foot { padding: 0 20px 18px; display: flex; justify-content: flex-end; }
+
 
 .actions {
   display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
@@ -800,13 +812,136 @@ function aplicarAdminLock(prefix) {
 
 // ════════ FORM BUILDERS (PF e PJ injetados via JS pra reduzir tamanho do HTML) ════════
 // será expandido no próximo chunk
+// ════════ WIZARD — formulário por etapas (cliente vê uma seção por vez) ════════
+function wizModal(titulo, corpoHtml, aoFechar) {
+  const old = document.getElementById('wiz-modal-overlay');
+  if (old) old.remove();
+  const ov = document.createElement('div');
+  ov.id = 'wiz-modal-overlay';
+  ov.innerHTML = '<div class="wiz-modal">' +
+    '<div class="wiz-modal-head">\u26A0\uFE0F ' + titulo + '</div>' +
+    '<div class="wiz-modal-body">' + corpoHtml + '</div>' +
+    '<div class="wiz-modal-foot"><button type="button" class="btn btn-yellow" id="wiz-modal-ok">Entendi</button></div>' +
+    '</div>';
+  document.body.appendChild(ov);
+  const fechar = () => { ov.remove(); if (aoFechar) aoFechar(); };
+  document.getElementById('wiz-modal-ok').onclick = fechar;
+  ov.addEventListener('click', (e) => { if (e.target === ov) fechar(); });
+}
+
+function wizardize(prefix) {
+  const wrap = $('form-' + prefix);
+  if (!wrap || wrap.dataset.wiz === '1') return;
+  wrap.dataset.wiz = '1';
+  const cards = Array.from(wrap.querySelectorAll(':scope > .card'));
+  const actions = wrap.querySelector(':scope > .actions');
+  if (!cards.length || !actions) return;
+  actions.classList.add('wiz-hide'); // esconde a barra original (o submit original continua existindo)
+
+  const nav = document.createElement('div');
+  nav.className = 'actions';
+  nav.innerHTML = '<button type="button" class="btn btn-outline" id="' + prefix + '-wiz-back">\u2190 Voltar</button>' +
+                  '<div class="spacer"></div>' +
+                  '<button type="button" class="btn btn-yellow btn-lg" id="' + prefix + '-wiz-next">Continuar \u2192</button>';
+  wrap.appendChild(nav);
+  const bBack = document.getElementById(prefix + '-wiz-back');
+  const bNext = document.getElementById(prefix + '-wiz-next');
+  let cur = 0;
+
+  function cardOculto(card) {
+    if (card.style.display === 'none') return true;
+    const fields = card.querySelectorAll('.field');
+    if (!fields.length) return false; // ex.: card LGPD
+    return [...fields].every(f => f.style.display === 'none');
+  }
+
+  function labelDe(el) {
+    const f = el.closest('.field');
+    const lb = f ? f.querySelector('label') : null;
+    let t = lb ? lb.textContent.replace(/\*/g, '').trim() : '';
+    if (!t && el.id && el.id.indexOf('lgpd') >= 0) t = 'Autoriza\u00e7\u00e3o LGPD';
+    return t || 'Campo obrigat\u00f3rio';
+  }
+
+  // devolve TODOS os campos obrigatórios visíveis pendentes (vazios ou máscara incompleta) do card
+  function pendencias(card) {
+    const out = [];
+    const els = card.querySelectorAll('input, select, textarea');
+    for (const el of els) {
+      if (el.offsetParent === null) continue; // escondido (condicional / skip)
+      const v = (el.value || '').trim();
+      if (el.required && !v) { out.push({ el, motivo: '' }); continue; }
+      if (v) {
+        const m = el.dataset ? el.dataset.mask : null;
+        if (m === 'cpf'  && unmaskNum(v).length !== 11) { out.push({ el, motivo: ' (incompleto)' }); continue; }
+        if (m === 'cnpj' && unmaskNum(v).length !== 14) { out.push({ el, motivo: ' (incompleto)' }); continue; }
+        if (m === 'cep'  && unmaskNum(v).length !== 8)  { out.push({ el, motivo: ' (incompleto)' }); continue; }
+        if (m === 'date' && v.length !== 10)            { out.push({ el, motivo: ' (data incompleta)' }); continue; }
+        if (el.type === 'email' && !/.+@.+\..+/.test(v)) { out.push({ el, motivo: ' (inv\u00e1lido)' }); continue; }
+      }
+    }
+    return out;
+  }
+
+  function show(i, dir) {
+    dir = dir || 1;
+    i = Math.max(0, Math.min(i, cards.length - 1));
+    while (cardOculto(cards[i]) && i + dir >= 0 && i + dir <= cards.length - 1) i += dir;
+    cur = i;
+    cards.forEach((c, j) => c.classList.toggle('wiz-hide', j !== cur));
+    bNext.textContent = (cur === cards.length - 1) ? 'Concluir e Enviar' : 'Continuar \u2192';
+    showMsg(prefix, '');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function apontar(pend) {
+    // destaca todos, popup com a lista, e foca o primeiro ao fechar
+    pend.forEach(p => {
+      p.el.classList.add('field-err');
+      p.el.addEventListener('input', () => p.el.classList.remove('field-err'), { once: true });
+    });
+    const itens = pend.map(p => '<li><strong>' + labelDe(p.el) + '</strong>' + p.motivo + '</li>').join('');
+    wizModal('Falta pouco!', 'Para continuar, preencha:<ul>' + itens + '</ul>', () => {
+      const el = pend[0].el;
+      el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      try { el.focus({ preventScroll: true }); } catch (e) {}
+    });
+    showMsg(prefix, 'Preencha os campos destacados para continuar.');
+  }
+
+  bBack.onclick = () => { if (cur === 0) voltarTipo(); else show(cur - 1, -1); };
+  bNext.onclick = () => {
+    cards[cur].querySelectorAll('.field-err').forEach(e => e.classList.remove('field-err'));
+    const pend = pendencias(cards[cur]);
+    if (pend.length) { apontar(pend); return; }
+    if (cur < cards.length - 1) { show(cur + 1, 1); return; }
+    // última etapa: varre tudo de novo (garante etapas anteriores) e envia pelo fluxo original
+    for (let i = 0; i < cards.length; i++) {
+      if (cardOculto(cards[i])) continue;
+      const pg = pendencias(cards[i]);
+      if (pg.length) { show(i, 1); apontar(pg); return; }
+    }
+    document.getElementById(prefix + '-submit').click();
+    // se a validação final (LGPD, banco, seguro...) reprovar, mostra o aviso também no popup
+    setTimeout(() => {
+      const m = $(prefix + '-msg');
+      const txt = m ? m.textContent.trim() : '';
+      if (txt && !wrap.classList.contains('hidden')) wizModal('Quase l\u00e1!', txt);
+    }, 250);
+  };
+
+  show(0, 1);
+}
+
 function iniciarForm(tipo) {
   $('tela-tipo').classList.add('hidden');
   if (tipo === 'pf') {
     if (!$('form-pf').innerHTML.trim()) buildFormPF();
+    wizardize('pf');
     $('form-pf').classList.remove('hidden');
   } else {
     if (!$('form-pj').innerHTML.trim()) buildFormPJ();
+    wizardize('pj');
     $('form-pj').classList.remove('hidden');
   }
   bindMasks();
