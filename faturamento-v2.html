@@ -227,7 +227,7 @@ textarea.inp{resize:vertical;min-height:60px}
 
   <div class="a-top">
     <div>
-      <h1 id="fat-titulo">Processos <span class="v2">V2 · EM TESTE</span></h1>
+      <h1 id="fat-titulo">Processos </h1>
       <div class="sub" id="fat-subtitulo">—</div>
     </div>
     <div class="a-actions">
@@ -724,7 +724,7 @@ async function renderAdminFaturamento() {
   const isAdm = fatIsAdmin();
   document.querySelectorAll('.fat-admin-only').forEach(el => el.style.display = isAdm ? '' : 'none');
   const titulo = document.getElementById('fat-titulo');
-  if (titulo) titulo.innerHTML = (isAdm ? 'Processos' : 'Meus Processos') + ' <span class="v2">V2 · EM TESTE</span>';
+  if (titulo) titulo.innerHTML = (isAdm ? 'Processos' : 'Meus Processos') + ' ';
   const sub = document.getElementById('fat-subtitulo');
   if (sub) sub.textContent = (currentUser?.nome ? currentUser.nome.split(' ')[0] + ' · ' : '') + (isAdm ? 'visão administrador' : 'visão consultor');
 
@@ -1010,8 +1010,17 @@ async function fatVerProcesso(id) {
   const logo = fatLogoAdmin(proc);
   const avisos = [arqsRes.error, msgsRes.error, histRes.error].filter(Boolean);
 
-  const statusOpts = FAT_ETAPAS.map(e => `<option value="${e.status}" ${proc.status === e.status ? 'selected' : ''}>${e.status}</option>`).join('')
-    + `<option value="Cancelado" ${proc.status === 'Cancelado' ? 'selected' : ''}>Cancelado</option>`;
+  // Comunicação sincronizada com as etapas: processos com jornada v2 listam as
+  // etapas numeradas; legados seguem com os 5 status tradicionais.
+  const jornadaProc = jornadaDoProcesso(proc);
+  const statusOpts = jornadaProc
+    ? jornadaProc.etapas.map((e, i) =>
+        `<option value="${i}" ${proc.status !== 'Finalizado' && i === jornadaProc.atual ? 'selected' : ''}>${i + 1}. ${esc(e.nome)}</option>`).join('')
+    : FAT_ETAPAS.map(e => `<option value="${e.status}" ${proc.status === e.status ? 'selected' : ''}>${e.status}</option>`).join('')
+      + `<option value="Cancelado" ${proc.status === 'Cancelado' ? 'selected' : ''}>Cancelado</option>`;
+  // descricao antiga com JSON (bug corrigido no cliente): exibe vazio no textarea;
+  // os dados estruturados aparecem só na seção de dados complementares.
+  const descLimpa = (proc.descricao && String(proc.descricao).trim().startsWith('{')) ? '' : (proc.descricao || '');
   const consultorOpts = `<option value="">— Não atribuído —</option>` + fatConsultores.map(c =>
     `<option value="${esc(c.auth_id)}" ${proc.consultor_id === c.auth_id ? 'selected' : ''}>${esc(c.nome)}${c.tipo === 'admin' ? ' (admin)' : c.tipo === 'socio' ? ' (sócio)' : ''}</option>`).join('');
 
@@ -1089,6 +1098,7 @@ async function fatVerProcesso(id) {
             </div>
           </div>
           <button class="btn btn-outline btn-sm" onclick='fatSalvarPrevisao(${procIdArg})'>Salvar</button>
+          ${proc.previsao_retorno ? `<button class="btn btn-outline btn-sm" title="Remove a previsão; o semáforo volta a contar por dias parados" onclick='fatLimparPrevisao(${procIdArg})'>Limpar</button>` : ''}
         </div>` : ''}
       </div>
 
@@ -1134,7 +1144,7 @@ async function fatVerProcesso(id) {
             <div><label>E-mail</label><input class="inp" value="${esc(proc.email || '')}" id="fat-edit-email-${proc.id}"></div>
             <div><label>WhatsApp</label><input class="inp" value="${esc(proc.telefone || '')}" id="fat-edit-telefone-${proc.id}"></div>
             <div class="span-2"><label>Corretor (opcional)</label><input class="inp" value="${esc(proc.corretor || '')}" id="fat-edit-corretor-${proc.id}"></div>
-            <div class="span-2"><label>Observações</label><textarea class="inp" id="fat-edit-descricao-${proc.id}">${esc(proc.descricao || '')}</textarea></div>
+            <div class="span-2"><label>Observações</label><textarea class="inp" id="fat-edit-descricao-${proc.id}">${esc(descLimpa)}</textarea></div>
             <div class="span-2" style="display:flex;justify-content:flex-end;"><button class="btn btn-outline btn-sm" onclick='fatSalvarDadosProcesso(${procIdArg})'>Salvar dados do processo</button></div>
           </div>
         </div>` : ''}
@@ -1171,9 +1181,9 @@ async function fatVerProcesso(id) {
         </div>
         ${isAdm ? `
         <div class="m-card">
-          <div class="lbl">Atualizar status e notificar por e-mail</div>
-          <div style="font-size:11px;color:var(--text-2);margin-bottom:8px;">A mensagem abaixo será enviada para <b>${esc(proc.email || 'e-mail cadastrado')}</b> junto com o novo status.</div>
-          <select id="fat-novo-status-${proc.id}" class="inp" style="margin-bottom:8px;">${statusOpts}</select>
+          <div class="lbl">${jornadaProc ? 'Atualizar etapa e notificar por e-mail' : 'Atualizar status e notificar por e-mail'}</div>
+          <div style="font-size:11px;color:var(--text-2);margin-bottom:8px;">A mensagem abaixo será enviada para <b>${esc(proc.email || 'e-mail cadastrado')}</b> junto com ${jornadaProc ? 'a etapa atualizada da jornada' : 'o novo status'}.</div>
+          <select id="fat-novo-status-${proc.id}" class="inp" data-jornada="${jornadaProc ? 1 : 0}" style="margin-bottom:8px;">${statusOpts}</select>
           <textarea id="fat-email-msg-${proc.id}" class="inp" placeholder="Escreva as pendências ou orientações para o cliente..." style="min-height:70px;margin-bottom:8px;"></textarea>
           <button class="btn btn-primary btn-sm" onclick='fatNotificarCliente(${procIdArg})'>Salvar status e notificar cliente</button>
           <div class="feedback-msg" id="fat-email-feedback-${proc.id}"></div>
@@ -1207,12 +1217,39 @@ function fatBlocoEtapas(proc, podeEtapas) {
   const procIdArg = fatJsArg(proc.id);
   if (!j) {
     const idx = FAT_ETAPAS.findIndex(e => e.status === proc.status);
+    const aDef = normAdmin(proc.administradora || parseDE(proc.dados_extras).banco || 'porto') || 'porto';
+    const oDefRaw = fatOperacaoDe(proc);
+    const oDef = oDefRaw === 'transferencia' ? 'transferencia' : 'faturamento';
+    const catDef = catalogoJornada(aDef, oDef) || catalogoJornada('porto', 'faturamento');
     return `<div class="m-card">
       <div class="lbl">Jornada (processo legado)</div>
       <div class="tl">${FAT_ETAPAS.map((e, i) => `
         <div class="step ${i < idx ? 'done' : i === idx ? 'now' : ''}"><span class="pt">${i < idx ? '&#10003;' : (i + 1)}</span><b>${esc(e.status)}</b></div>`).join('')}
       </div>
-      <div class="alert-warn" style="margin:10px 0 0;">Processo aberto antes das jornadas v2: continua acompanhado pelo status tradicional acima. Nada muda para ele.</div>
+      <div class="alert-warn" style="margin:10px 0 0;">Processo aberto antes das jornadas v2: continua acompanhado pelo status tradicional acima.</div>
+      ${podeEtapas ? `
+      <div style="border-top:1px solid var(--border);margin-top:12px;padding-top:12px;">
+        <div class="lbl">Aplicar jornada v2 a este processo</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;">
+          <div><div class="lbl" style="font-size:9px;margin-bottom:3px;">Administradora</div>
+            <select id="fat-aplicar-admin-${proc.id}" class="inp" style="width:auto;" onchange='fatAplicarJornadaOpcoes(${procIdArg})'>
+              <option value="porto" ${aDef === 'porto' ? 'selected' : ''}>Porto</option>
+              <option value="itau" ${aDef === 'itau' ? 'selected' : ''}>Itaú</option>
+              <option value="bradesco" ${aDef === 'bradesco' ? 'selected' : ''}>Bradesco</option>
+            </select></div>
+          <div><div class="lbl" style="font-size:9px;margin-bottom:3px;">Operação</div>
+            <select id="fat-aplicar-op-${proc.id}" class="inp" style="width:auto;" onchange='fatAplicarJornadaOpcoes(${procIdArg})'>
+              <option value="faturamento" ${oDef !== 'transferencia' ? 'selected' : ''}>Faturamento</option>
+              <option value="transferencia" ${oDef === 'transferencia' ? 'selected' : ''}>Transferência</option>
+            </select></div>
+          <div><div class="lbl" style="font-size:9px;margin-bottom:3px;">Etapa atual</div>
+            <select id="fat-aplicar-etapa-${proc.id}" class="inp" style="width:auto;max-width:280px;">
+              ${catDef ? catDef.etapas.map((e, i) => `<option value="${i}">${i + 1}. ${esc(e.nome)}</option>`).join('') : ''}
+            </select></div>
+          <button class="btn btn-primary btn-sm" onclick='fatAplicarJornada(${procIdArg})'>Aplicar jornada v2</button>
+        </div>
+        <div style="font-size:10.5px;color:var(--text-3);margin-top:6px;">O processo ganha a jornada completa: as etapas anteriores à escolhida nascem concluídas e ele deixa de ser legado.</div>
+      </div>` : ''}
     </div>`;
   }
   const total = j.etapas.length;
@@ -1222,6 +1259,10 @@ function fatBlocoEtapas(proc, podeEtapas) {
   const atualNome = finalizado ? 'Jornada concluída' : (j.etapas[j.atual] ? j.etapas[j.atual].nome : 'Concluído');
   const ultima = j.atual >= total - 1;
   const temVoltavel = j.etapas.some(e => e.done_em && String(e.obs || '') !== 'Concluída na abertura do processo');
+  const selEtapas = `
+      <select class="inp" id="fat-etapa-select-${proc.id}" style="width:auto;max-width:300px;" title="Definir diretamente a etapa atual da jornada" onchange='fatDefinirEtapa(${procIdArg}, this.value)'>
+        ${j.etapas.map((e, i) => `<option value="${i}" ${!finalizado && i === j.atual ? 'selected' : ''}>${i + 1}. ${esc(e.nome)}</option>`).join('')}
+      </select>`;
   return `
     <div class="etapa-destaque">
       <div>
@@ -1230,12 +1271,14 @@ function fatBlocoEtapas(proc, podeEtapas) {
         <div class="sub">${feitas} de ${total} etapas concluídas · ${Math.round(feitas / total * 100)}%</div>
       </div>
       ${podeEtapas ? (!finalizado ? `
-      <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;">
+      <div style="margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        ${selEtapas}
         ${temVoltavel ? `<button class="btn btn-outline btn-sm" onclick='fatVoltarEtapa(${procIdArg})'>Voltar etapa</button>` : ''}
         <button class="btn btn-success btn-sm" onclick='fatConcluirEtapa(${procIdArg})'>${ultima ? 'Concluir etapa e finalizar processo' : 'Concluir etapa e avançar'}</button>
       </div>` : `
-      <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+      <div style="margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
         <span class="tagzinha tag-green-s">Finalizado${proc.finalizado_em ? ' em ' + fmtDataBR(proc.finalizado_em) : ''}</span>
+        ${selEtapas}
         ${temVoltavel ? `<button class="btn btn-outline btn-sm" onclick='fatVoltarEtapa(${procIdArg})'>Reabrir última etapa</button>` : ''}
       </div>`) : ''}
     </div>
@@ -1292,6 +1335,80 @@ async function fatConcluirEtapa(processoId) {
     autor: currentUser?.nome || 'admin'
   });
   fatNotificar(processoId, updates.status === 'Finalizado' ? 'Processo finalizado' : 'Etapa concluída', fatNomeCliente(processoId) + ' · ' + etapas[idx].nome);
+  await renderAdminFaturamento();
+  await fatVerProcesso(processoId);
+}
+
+// ── Definir etapa direto pela lista suspensa ──
+// Todas as anteriores ficam concluídas (done_em preservado ou now) e as
+// posteriores reabertas. Escolher a última etapa finaliza o processo.
+function fatMontarEtapasPara(j, novoIdx) {
+  const agora = new Date().toISOString();
+  const ultima = novoIdx >= j.etapas.length - 1;
+  const etapas = j.etapas.map((e, i) => {
+    const c = Object.assign({}, e);
+    if (i < novoIdx || (ultima && i === novoIdx)) c.done_em = c.done_em || agora;
+    else c.done_em = null;
+    return c;
+  });
+  return { etapas, etapa_atual: novoIdx, finaliza: ultima };
+}
+async function fatDefinirEtapa(processoId, novoIdx) {
+  novoIdx = parseInt(novoIdx, 10);
+  if (!Number.isFinite(novoIdx)) return;
+  const { data: proc, error } = await sb.from('portal_processos').select('*').eq('id', processoId).single();
+  if (error || !proc) { alert('Não foi possível carregar o processo.'); return; }
+  const j = jornadaDoProcesso(proc);
+  if (!j || !j.etapas[novoIdx]) return;
+  const m = fatMontarEtapasPara(j, novoIdx);
+  const updates = { etapas: m.etapas, etapa_atual: m.etapa_atual, atualizado_em: new Date() };
+  if (m.finaliza) { updates.status = 'Finalizado'; updates.finalizado_em = new Date().toISOString(); }
+  else if (proc.status === 'Finalizado') { updates.status = 'Em retorno da administradora'; updates.finalizado_em = null; }
+  const ok = await fatSalvarJornada(processoId, proc, updates, m.etapas, m.etapa_atual);
+  if (!ok) return;
+  await sb.from('portal_historico').insert({
+    processo_id: processoId,
+    status_novo: updates.status || proc.status,
+    observacao: 'Etapa atual definida: ' + (novoIdx + 1) + '. ' + m.etapas[novoIdx].nome,
+    autor: currentUser?.nome || 'admin'
+  });
+  fatNotificar(processoId, m.finaliza ? 'Processo finalizado' : 'Etapa atualizada', fatNomeCliente(processoId) + ' · ' + m.etapas[novoIdx].nome);
+  await renderAdminFaturamento();
+  await fatVerProcesso(processoId);
+}
+
+// ── Aplicar jornada v2 a um processo legado ──
+function fatAplicarJornadaOpcoes(processoId) {
+  const a = document.getElementById('fat-aplicar-admin-' + processoId)?.value;
+  const o = document.getElementById('fat-aplicar-op-' + processoId)?.value;
+  const sel = document.getElementById('fat-aplicar-etapa-' + processoId);
+  if (!sel) return;
+  const cat = catalogoJornada(a, o);
+  sel.innerHTML = cat ? cat.etapas.map((e, i) => `<option value="${i}">${i + 1}. ${esc(e.nome)}</option>`).join('') : '';
+}
+async function fatAplicarJornada(processoId) {
+  const a = document.getElementById('fat-aplicar-admin-' + processoId)?.value;
+  const o = document.getElementById('fat-aplicar-op-' + processoId)?.value;
+  const idx = parseInt(document.getElementById('fat-aplicar-etapa-' + processoId)?.value, 10);
+  const cat = catalogoJornada(a, o);
+  if (!cat || !Number.isFinite(idx) || !cat.etapas[idx]) { alert('Escolha administradora, operação e etapa atual.'); return; }
+  const { data: proc, error } = await sb.from('portal_processos').select('*').eq('id', processoId).single();
+  if (error || !proc) return;
+  const agora = new Date().toISOString();
+  const ultima = idx >= cat.etapas.length - 1;
+  const etapas = cat.etapas.map((e, i) => ({ k: e.k, nome: e.nome, done_em: (i < idx || (ultima && i === idx)) ? agora : null, obs: null }));
+  const nomes = { porto: 'Porto', itau: 'Itaú', bradesco: 'Bradesco' };
+  const updates = { administradora: nomes[a] || proc.administradora, operacao: o, etapas, etapa_atual: idx, atualizado_em: new Date() };
+  if (ultima) { updates.status = 'Finalizado'; updates.finalizado_em = agora; }
+  const ok = await fatSalvarJornada(processoId, proc, updates, etapas, idx);
+  if (!ok) return;
+  await sb.from('portal_historico').insert({
+    processo_id: processoId,
+    status_novo: updates.status || proc.status,
+    observacao: 'Jornada v2 aplicada: ' + (nomes[a] || a) + ' · ' + fatOperacaoLabel(o) + ' · etapa atual ' + (idx + 1) + '. ' + etapas[idx].nome,
+    autor: currentUser?.nome || 'admin'
+  });
+  fatNotificar(processoId, 'Jornada v2 aplicada', fatNomeCliente(processoId) + ' · ' + etapas[idx].nome);
   await renderAdminFaturamento();
   await fatVerProcesso(processoId);
 }
@@ -1474,6 +1591,14 @@ async function fatSalvarPrevisao(processoId) {
   await renderAdminFaturamento();
   await fatVerProcesso(processoId);
 }
+// Limpa a previsão: previsao_retorno = null e o semáforo volta a contar por dias parados.
+async function fatLimparPrevisao(processoId) {
+  const inp = document.getElementById('fat-previsao-' + processoId);
+  if (inp) inp.value = '';
+  const du = document.getElementById('fat-previsao-du-' + processoId);
+  if (du) du.value = '';
+  await fatSalvarPrevisao(processoId);
+}
 
 async function fatSalvarProtocolo(processoId) {
   const novoProtocolo = document.getElementById(`fat-protocolo-${processoId}`).value.trim().toUpperCase();
@@ -1527,38 +1652,66 @@ async function fatSalvarDadosProcesso(processoId) {
   await renderAdminFaturamento();
 }
 
+// Sincronizado com as etapas: processos com jornada v2 atualizam a etapa
+// (mesma lógica do select de etapa; Finalizado se última) e o e-mail informa a
+// etapa. Legados seguem com os 5 status tradicionais.
 async function fatNotificarCliente(processoId) {
-  const novoStatus = document.getElementById(`fat-novo-status-${processoId}`)?.value;
+  const sel = document.getElementById(`fat-novo-status-${processoId}`);
   const msgEmail = document.getElementById(`fat-email-msg-${processoId}`)?.value?.trim() || '';
   const feedbackEl = document.getElementById(`fat-email-feedback-${processoId}`);
-  if (!novoStatus) { if (feedbackEl) feedbackEl.innerHTML = '<span style="color:var(--red);">Selecione um status antes de notificar.</span>'; return; }
+  if (!sel || sel.value === '') { if (feedbackEl) feedbackEl.innerHTML = '<span style="color:var(--red);">Selecione antes de notificar.</span>'; return; }
   const emailInput = document.getElementById(`fat-edit-email-${processoId}`);
   const emailCliente = emailInput ? emailInput.value.trim() : '';
   if (!emailCliente) { if (feedbackEl) feedbackEl.innerHTML = '<span style="color:var(--red);">Cliente sem e-mail cadastrado.</span>'; return; }
   if (feedbackEl) feedbackEl.innerHTML = '<span class="spinner spinner-sm" style="margin-right:6px;"></span> Enviando...';
   try {
-    const { error: errUp } = await sb.from('portal_processos').update({ status: novoStatus, atualizado_em: new Date() }).eq('id', processoId);
-    if (errUp) throw new Error('Erro ao atualizar status: ' + errUp.message);
+    const { data: proc, error: errProc } = await sb.from('portal_processos').select('*').eq('id', processoId).single();
+    if (errProc || !proc) throw new Error('Processo não encontrado.');
+    const ehJornada = sel.dataset.jornada === '1';
+    const protocolo = proc.protocolo || 'em andamento';
+    let novoStatus, assunto, linhaPrincipal, obsHist;
+    if (ehJornada) {
+      const j = jornadaDoProcesso(proc);
+      const idx = parseInt(sel.value, 10);
+      if (!j || !j.etapas[idx]) throw new Error('Etapa inválida.');
+      const m = fatMontarEtapasPara(j, idx);
+      const updates = { etapas: m.etapas, etapa_atual: m.etapa_atual, atualizado_em: new Date() };
+      if (m.finaliza) { updates.status = 'Finalizado'; updates.finalizado_em = new Date().toISOString(); }
+      else if (proc.status === 'Finalizado') { updates.status = 'Em retorno da administradora'; updates.finalizado_em = null; }
+      const ok = await fatSalvarJornada(processoId, proc, updates, m.etapas, m.etapa_atual);
+      if (!ok) throw new Error('Não foi possível atualizar a etapa.');
+      novoStatus = updates.status || proc.status;
+      const rotulo = (idx + 1) + '. ' + m.etapas[idx].nome;
+      linhaPrincipal = m.finaliza
+        ? `Seu processo ${protocolo} foi concluído: ${rotulo}.`
+        : `Seu processo ${protocolo} avançou para a etapa: ${rotulo}.`;
+      assunto = `Atualização do seu processo - ${m.etapas[idx].nome}`;
+      obsHist = 'Etapa atualizada para: ' + rotulo + '.';
+    } else {
+      novoStatus = sel.value;
+      const { error: errUp } = await sb.from('portal_processos').update({ status: novoStatus, atualizado_em: new Date() }).eq('id', processoId);
+      if (errUp) throw new Error('Erro ao atualizar status: ' + errUp.message);
+      linhaPrincipal = `Seu processo ${protocolo} foi atualizado para: ${novoStatus}.`;
+      assunto = `Atualização do seu processo - ${novoStatus}`;
+      obsHist = 'Notificação por e-mail.';
+    }
     await sb.from('portal_historico').insert({
       processo_id: processoId, status_novo: novoStatus,
-      observacao: `Notificação por e-mail. ${msgEmail ? 'Msg: ' + msgEmail : ''}`.trim(),
+      observacao: `${obsHist} ${msgEmail ? 'Msg: ' + msgEmail : ''}`.trim(),
       autor: currentUser?.nome || 'admin'
     });
-    const { data: procAtual } = await sb.from('portal_processos').select('nome, protocolo').eq('id', processoId).single();
-    const nomeCliente = procAtual?.nome || 'Cliente';
-    const protocolo = procAtual?.protocolo || 'sem protocolo';
-    let corpoEmail = `Olá ${nomeCliente},\n\nSeu processo ${protocolo} foi atualizado para: ${novoStatus}.\n\n`;
+    let corpoEmail = `Olá ${proc.nome || 'Cliente'},\n\n${linhaPrincipal}\n\n`;
     if (msgEmail) corpoEmail += `Mensagem da equipe Master Prime:\n${msgEmail}\n\n`;
     corpoEmail += `Atenciosamente,\n${currentUser?.nome || 'Admin'}\nEquipe Master Prime`;
     const { error: fnError } = await sb.functions.invoke('enviar-email-atualizacao', {
-      body: { to: emailCliente, subject: `Atualização do seu processo - ${novoStatus}`, text: corpoEmail },
+      body: { to: emailCliente, subject: assunto, text: corpoEmail },
     });
     if (fnError) {
-      if (feedbackEl) feedbackEl.innerHTML = '<span style="color:#B45309;">Status salvo! Porém o e-mail não pôde ser enviado.</span>';
+      if (feedbackEl) feedbackEl.innerHTML = '<span style="color:#B45309;">Atualização salva! Porém o e-mail não pôde ser enviado.</span>';
     } else {
-      if (feedbackEl) feedbackEl.innerHTML = '<span style="color:#047857;">Status atualizado e cliente notificado por e-mail.</span>';
+      if (feedbackEl) feedbackEl.innerHTML = '<span style="color:#047857;">' + (ehJornada ? 'Etapa atualizada' : 'Status atualizado') + ' e cliente notificado por e-mail.</span>';
     }
-    fatNotificar(processoId, 'Status atualizado', `${fatNomeCliente(processoId)} · ${novoStatus}`);
+    fatNotificar(processoId, ehJornada ? 'Etapa atualizada' : 'Status atualizado', `${fatNomeCliente(processoId)} · ${novoStatus}`);
     await fatVerProcesso(processoId);
     await renderAdminFaturamento();
   } catch (e) {

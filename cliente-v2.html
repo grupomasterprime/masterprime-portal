@@ -236,6 +236,19 @@ button{cursor:pointer}
 .notif{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:11px 22px;border-radius:999px;font-size:12.5px;font-weight:600;box-shadow:0 6px 18px rgba(0,0,0,.28);z-index:999;display:flex;align-items:center;gap:8px;animation:fadeUp .3s ease;max-width:92vw}
 @keyframes fadeUp{from{opacity:0;transform:translateX(-50%) translateY(10px)}}
 #loading-page{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px}
+
+/* ── Pop-up de aviso/erro (estilo formulário de adesão) ── */
+.pop-overlay{position:fixed;inset:0;background:rgba(15,42,74,.55);z-index:1200;display:none;align-items:center;justify-content:center;padding:24px;animation:popFade .18s ease}
+.pop-overlay.aberto{display:flex}
+.pop-card{background:#fff;border-radius:16px;max-width:400px;width:100%;box-shadow:0 24px 60px rgba(15,42,74,.35);overflow:hidden;animation:popUp .22s ease}
+.pop-head{background:linear-gradient(135deg,var(--navy),var(--navy-2));color:#fff;padding:14px 18px;display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:800;letter-spacing:.2px}
+.pop-head svg{width:18px;height:18px;stroke:var(--cta);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.pop-body{padding:18px;font-size:13.5px;color:var(--text);line-height:1.6}
+.pop-foot{padding:0 18px 18px}
+.pop-btn{width:100%;padding:13px;border-radius:12px;border:0;background:var(--cta);color:var(--ink);font-size:14px;font-weight:800;font-family:inherit;transition:filter .15s}
+.pop-btn:hover{filter:brightness(.96)}
+@keyframes popFade{from{opacity:0}to{opacity:1}}
+@keyframes popUp{from{transform:translateY(14px) scale(.97);opacity:0}to{transform:translateY(0) scale(1);opacity:1}}
 .footer-info{margin-top:20px;padding:18px;background:#fff;border:1px solid var(--border);border-radius:14px;font-size:11.5px;color:var(--text2);line-height:1.65}
 .footer-info h3{font-size:13px;font-weight:800;color:var(--navy);margin-bottom:10px}
 .footer-info ul{padding-left:18px;margin:6px 0 10px}
@@ -414,7 +427,12 @@ const SVG = {
   book:'<svg viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
   open:'<svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>',
 };
-const ico = (key, cls='ico') => `<span class="${cls}">${SVG[key]||''}</span>`;
+// Todo SVG inline sai com width/height explícitos (nunca estoura sem CSS).
+const ico = (key, cls='ico') => {
+  const px = cls.indexOf('ico-lg') >= 0 ? 24 : 16;
+  const svg = (SVG[key] || '').replace('<svg ', '<svg width="' + px + '" height="' + px + '" ');
+  return `<span class="${cls}">${svg}</span>`;
+};
 
 // ════════════════════════════════════════════════════════════════
 // CALENDÁRIO DE DIAS ÚTEIS (SP) — fins de semana + feriados
@@ -609,7 +627,7 @@ async function consultarProcesso(){
   if (raw.length < 11){ alerta('alerta-consulta','Informe um CPF (11 dígitos) ou CNPJ (14 dígitos) válido.','erro'); return; }
   const { data, error } = await sb.rpc('cliente_listar_por_cpf', { p_cpf: raw });
   if (error){ alerta('alerta-consulta','Não conseguimos buscar agora. Tente novamente em instantes.','erro'); return; }
-  if (!data || !data.length){ alerta('alerta-consulta','Nenhum processo encontrado para este documento.','erro'); return; }
+  if (!data || !data.length){ alerta('alerta-consulta','Não encontramos nenhum processo para este CPF/CNPJ. Confira o número digitado ou inicie um novo processo.','erro'); return; }
   if (data.length === 1){ window.location.href = '?t=' + encodeURIComponent(data[0].token); return; }
   document.getElementById('lista-processos-cpf').innerHTML = `
     <div class="c-card">
@@ -886,33 +904,66 @@ function renderWizDados(){
       <div class="wiz-painel" data-sub="1" style="display:none">
         <div class="card"><div class="card-head"><div><div class="card-title">${ico('user')} Cessionário — dados pessoais</div><div class="card-sub">Quem vai assumir a cota. Preencha como nos dados de adesão.</div></div></div>
         <div class="card-body">
-          <div class="campo"><label>Nome completo <span class="req">*</span></label><input type="text" id="f-cessionario-nome" placeholder="Nome completo do novo titular"></div>
           <div class="grid-2">
             <div class="campo"><label>CPF <span class="req">*</span></label><input type="text" id="f-cessionario-cpf" inputmode="numeric" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)" style="font-family:var(--fonte-mono)" onblur="tentarAutofill('f-cessionario-cpf','f-cessionario-nascimento','cessionario')"></div>
             <div class="campo"><label>Data de nascimento <span class="req">*</span></label><input type="date" id="f-cessionario-nascimento" onblur="tentarAutofill('f-cessionario-cpf','f-cessionario-nascimento','cessionario')"></div>
           </div>
           <div id="aviso-autofill-cessionario"></div>
+          <div class="campo"><label>Nome completo <span class="req">*</span></label><input type="text" id="f-cessionario-nome" placeholder="Nome completo do novo titular"></div>
           <div class="grid-2">
-            <div class="campo"><label>Documento de identificação <span class="req">*</span></label><input type="text" id="f-cessionario-doc" placeholder="Número do RG ou CNH"></div>
-            <div class="campo"><label>Tipo / órgão emissor</label><input type="text" id="f-cessionario-doc-orgao" placeholder="Ex: RG - SSP/SP"></div>
+            <div class="campo"><label>Sexo <span class="req">*</span></label>
+              <select id="f-cessionario-sexo"><option value="">Selecione...</option><option value="feminino">Feminino</option><option value="masculino">Masculino</option></select>
+            </div>
+            <div class="campo"><label>Nacionalidade</label><input type="text" id="f-cessionario-nacionalidade" value="Brasileira"></div>
+          </div>
+          <div class="grid-2 manter">
+            <div class="campo"><label>UF de naturalidade</label><input type="text" id="f-cessionario-uf-natal" maxlength="2" placeholder="Ex: SP"></div>
+            <div class="campo"><label>Cidade natal</label><input type="text" id="f-cessionario-cidade-natal"></div>
+          </div>
+          <div class="campo"><label>Nome da mãe <span class="req">*</span></label><input type="text" id="f-cessionario-mae" placeholder="Nome completo da mãe"></div>
+          <div class="campo"><label>Nome do pai</label><input type="text" id="f-cessionario-pai" placeholder="Nome completo do pai (opcional)"></div>
+          <div class="grid-2">
+            <div class="campo"><label>Tipo de documento <span class="req">*</span></label>
+              <select id="f-cessionario-doc-tipo"><option value="">Selecione...</option><option value="rg">RG</option><option value="cnh">CNH</option><option value="rne">RNE</option></select>
+            </div>
+            <div class="campo"><label>Número do documento <span class="req">*</span></label><input type="text" id="f-cessionario-doc" placeholder="Número do RG ou CNH"></div>
+          </div>
+          <div class="grid-2">
+            <div class="campo"><label>Data de emissão</label><input type="date" id="f-cessionario-doc-emissao"></div>
+            <div class="campo"><label>Órgão emissor</label><input type="text" id="f-cessionario-doc-orgao" placeholder="Ex: SSP/SP"></div>
           </div>
           ${blocoEstadoCivil()}
           <div class="grid-2">
             <div class="campo"><label>E-mail <span class="req">*</span></label><input type="email" id="f-cessionario-email" placeholder="email@exemplo.com"></div>
-            <div class="campo"><label>Telefone / WhatsApp <span class="req">*</span></label><input type="text" id="f-cessionario-telefone" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="15" oninput="mascaraTel(this)"></div>
+            <div class="campo"><label>Celular / WhatsApp <span class="req">*</span></label><input type="text" id="f-cessionario-telefone" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="15" oninput="mascaraTel(this)"></div>
           </div>
         </div></div>
       </div>
       <div class="wiz-painel" data-sub="2" style="display:none">
-        <div class="card"><div class="card-head"><div class="card-title">${ico('home')} Cessionário — endereço e profissão</div></div>
+        <div class="card"><div class="card-head"><div><div class="card-title">${ico('home')} Cessionário — endereço</div><div class="card-sub">Informe o CEP para preenchermos o endereço automaticamente.</div></div></div>
+        <div class="card-body">
+          <div class="grid-2 manter">
+            <div class="campo"><label>CEP</label><input type="text" id="f-cessionario-cep" inputmode="numeric" placeholder="00000-000" maxlength="9" oninput="mascaraCEP(this)" onblur="buscarCepCessionario()"></div>
+            <div class="campo"><label>UF <span class="req">*</span></label><input type="text" id="f-cessionario-uf" maxlength="2" placeholder="Ex: SP"></div>
+          </div>
+          <div class="campo"><label>Logradouro <span class="req">*</span></label><input type="text" id="f-cessionario-logradouro" placeholder="Rua / avenida"></div>
+          <div class="grid-2 manter">
+            <div class="campo"><label>Número <span class="req">*</span></label><input type="text" id="f-cessionario-numero"></div>
+            <div class="campo"><label>Complemento</label><input type="text" id="f-cessionario-complemento" placeholder="Apto, bloco..."></div>
+          </div>
+          <div class="grid-2">
+            <div class="campo"><label>Bairro <span class="req">*</span></label><input type="text" id="f-cessionario-bairro"></div>
+            <div class="campo"><label>Cidade <span class="req">*</span></label><input type="text" id="f-cessionario-cidade"></div>
+          </div>
+        </div></div>
+        <div class="card"><div class="card-head"><div class="card-title">${ico('doc')} Cessionário — profissão e renda</div></div>
         <div class="card-body">
           <div class="grid-2">
-            <div class="campo"><label>CEP</label><input type="text" id="f-cessionario-cep" inputmode="numeric" placeholder="00000-000" maxlength="9" oninput="mascaraCEP(this)"></div>
-            <div class="campo"><label>Cidade / UF <span class="req">*</span></label><input type="text" id="f-cessionario-cidade" placeholder="Ex: São Paulo - SP"></div>
-          </div>
-          <div class="campo"><label>Endereço <span class="req">*</span></label><input type="text" id="f-cessionario-endereco" placeholder="Rua, número, complemento, bairro"></div>
-          <div class="grid-2">
             <div class="campo"><label>Profissão <span class="req">*</span></label><input type="text" id="f-cessionario-profissao" placeholder="Ex: Engenheira civil"></div>
+            <div class="campo"><label>Empresa</label><input type="text" id="f-cessionario-empresa" placeholder="Onde trabalha (opcional)"></div>
+          </div>
+          <div class="grid-2">
+            <div class="campo"><label>Data de admissão</label><input type="date" id="f-cessionario-admissao"></div>
             <div class="campo"><label>Renda mensal <span class="req">*</span></label><input type="text" id="f-cessionario-renda" inputmode="numeric" placeholder="R$ 0,00" oninput="mascaraValor(this)"></div>
           </div>
         </div></div>
@@ -1203,8 +1254,10 @@ function validarSubPasso(sub){
       if (valNum('f-cessionario-cpf').length < 11) return 'Informe o CPF/CNPJ do cessionário.';
       if (transferSimples) {
         if (!val('f-cessionario-nascimento')) return 'Informe a data de nascimento do cessionário.';
-        if (!val('f-cessionario-doc')) return 'Informe o documento de identificação do cessionário.';
-        if (!val('f-cessionario-email') || !val('f-cessionario-telefone')) return 'Informe e-mail e telefone do cessionário.';
+        if (!val('f-cessionario-sexo')) return 'Informe o sexo do cessionário.';
+        if (!val('f-cessionario-mae')) return 'Informe o nome da mãe do cessionário.';
+        if (!val('f-cessionario-doc-tipo') || !val('f-cessionario-doc')) return 'Informe o documento de identificação do cessionário (tipo e número).';
+        if (!val('f-cessionario-email') || !val('f-cessionario-telefone')) return 'Informe e-mail e celular do cessionário.';
       } else {
         if (!val('f-cessionario-grupo') || !val('f-cessionario-cota')) return 'Informe grupo e cota do cessionário.';
       }
@@ -1214,7 +1267,8 @@ function validarSubPasso(sub){
       return null;
     }
     if (transferSimples && sub === 2) {
-      if (!val('f-cessionario-endereco') || !val('f-cessionario-cidade')) return 'Informe o endereço e a cidade do cessionário.';
+      if (!val('f-cessionario-logradouro') || !val('f-cessionario-numero') || !val('f-cessionario-bairro') || !val('f-cessionario-cidade') || !val('f-cessionario-uf'))
+        return 'Preencha o endereço completo do cessionário (logradouro, número, bairro, cidade e UF).';
       if (!val('f-cessionario-profissao')) return 'Informe a profissão do cessionário.';
       if (!obterValorReal('f-cessionario-renda')) return 'Informe a renda mensal do cessionário.';
       return null;
@@ -1322,6 +1376,22 @@ async function tentarAutofill(cpfId, dataId, alvo){
   } catch(e) { /* autofill nunca bloqueia o formulário */ }
 }
 
+// ── Busca de CEP (viacep, best-effort) para o endereço do cessionário ──
+async function buscarCepCessionario(){
+  const cep = valNum('f-cessionario-cep');
+  if (cep.length !== 8) return;
+  try {
+    const r = await fetch('https://viacep.com.br/ws/' + cep + '/json/');
+    const d = await r.json();
+    if (!d || d.erro) return;
+    const setSeVazio = (id, v) => { const el = document.getElementById(id); if (el && !el.value.trim() && v) el.value = v; };
+    setSeVazio('f-cessionario-logradouro', d.logradouro);
+    setSeVazio('f-cessionario-bairro', d.bairro);
+    setSeVazio('f-cessionario-cidade', d.localidade);
+    setSeVazio('f-cessionario-uf', d.uf);
+  } catch(e) { /* nunca bloqueia o formulário */ }
+}
+
 // ── Slots de anexo (drag & drop igual ao cliente atual) ──
 function renderSlotsAnexo(){
   const slots = document.getElementById('doc-slots');
@@ -1394,7 +1464,8 @@ function preencherRevisaoTransfer(){
     linha('CPF do cessionário', val('f-cessionario-cpf')) +
     linha('E-mail', val('f-cessionario-email')) +
     linha('Telefone', val('f-cessionario-telefone')) +
-    linha('Cidade', val('f-cessionario-cidade')) +
+    linha('Endereço', [val('f-cessionario-logradouro'), val('f-cessionario-numero'), val('f-cessionario-bairro')].filter(Boolean).join(', ')) +
+    linha('Cidade', val('f-cessionario-cidade') + (val('f-cessionario-uf') ? ' - ' + val('f-cessionario-uf') : '')) +
     linha('Profissão', val('f-cessionario-profissao'));
 }
 
@@ -1432,12 +1503,32 @@ async function enviarCadastro(){
       estado_civil: estadoCivil, conjuge: { nome: conjugeNome, cpf: conjugeCpf }
     };
     if (transferSimples) {
+      // dados pessoais completos (estilo adesão)
       cessionario.data_nascimento = val('f-cessionario-nascimento') || null;
+      cessionario.sexo = val('f-cessionario-sexo') || null;
+      cessionario.nacionalidade = val('f-cessionario-nacionalidade') || null;
+      cessionario.uf_naturalidade = val('f-cessionario-uf-natal') || null;
+      cessionario.cidade_natal = val('f-cessionario-cidade-natal') || null;
+      cessionario.nome_mae = val('f-cessionario-mae') || null;
+      cessionario.nome_pai = val('f-cessionario-pai') || null;
+      // documento
+      cessionario.documento_tipo = val('f-cessionario-doc-tipo') || null;
       cessionario.documento = val('f-cessionario-doc') || null;
+      cessionario.documento_emissao = val('f-cessionario-doc-emissao') || null;
       cessionario.documento_orgao = val('f-cessionario-doc-orgao') || null;
+      // endereço completo
       cessionario.cep = val('f-cessionario-cep') || null;
+      cessionario.logradouro = val('f-cessionario-logradouro') || null;
+      cessionario.numero = val('f-cessionario-numero') || null;
+      cessionario.complemento = val('f-cessionario-complemento') || null;
+      cessionario.bairro = val('f-cessionario-bairro') || null;
       cessionario.cidade = val('f-cessionario-cidade') || null;
+      cessionario.uf = val('f-cessionario-uf') || null;
+      cessionario.endereco = [cessionario.logradouro, cessionario.numero, cessionario.complemento, cessionario.bairro].filter(Boolean).join(', ') || null;
+      // profissão e renda
       cessionario.profissao = val('f-cessionario-profissao') || null;
+      cessionario.empresa = val('f-cessionario-empresa') || null;
+      cessionario.data_admissao = val('f-cessionario-admissao') || null;
       cessionario.renda = obterValorReal('f-cessionario-renda') || null;
     } else {
       cessionario.data_nascimento = val('f-cessionario-nascimento') || null;
@@ -1560,7 +1651,7 @@ async function enviarCadastro(){
       p_grupo: grupo,
       p_cota: cota,
       p_corretor: corretor,
-      p_descricao: JSON.stringify(dadosExtras || {}),
+      p_descricao: descricao || null,
       p_dados_extras: dadosExtras,
       p_token: tokenGerado
     });
@@ -1579,6 +1670,14 @@ async function enviarCadastro(){
           p_etapa_atual: jor.etapa_atual
         });
       } catch(e) { /* silencioso */ }
+    }
+
+    // link do consultor (?c=CODIGO): resolve codigo_link em portal_users e
+    // grava consultor_id/consultor_nome (RPC aditiva SECURITY DEFINER, best-effort)
+    if (CODIGO_CONSULTOR) {
+      try {
+        await sb.rpc('cliente_v2_atribuir_consultor', { p_token: novoT, p_codigo: CODIGO_CONSULTOR });
+      } catch(e) { /* best-effort: nunca bloqueia a abertura */ }
     }
 
     for (const cat of documentos){
@@ -2076,12 +2175,41 @@ function mascaraValor(el){
   const cent = v.slice(-2).padStart(2,'0');
   el.value = 'R$ ' + reais + ',' + cent;
 }
+// ── Pop-up de aviso/erro (estilo do formulário de adesão) ──
+// Toda mensagem dinâmica de erro/aviso abre este modal centralizado;
+// nada de box inline vermelho.
+function popAlerta(msg, titulo){
+  let ov = document.getElementById('pop-alerta');
+  if (!ov){
+    ov = document.createElement('div');
+    ov.id = 'pop-alerta';
+    ov.className = 'pop-overlay';
+    ov.innerHTML = `
+      <div class="pop-card" role="alertdialog" aria-modal="true" aria-labelledby="pop-alerta-titulo">
+        <div class="pop-head">
+          <svg width="18" height="18" viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <span id="pop-alerta-titulo">Atenção</span>
+        </div>
+        <div class="pop-body" id="pop-alerta-msg"></div>
+        <div class="pop-foot"><button type="button" class="pop-btn" onclick="fecharPopAlerta()">Entendi</button></div>
+      </div>`;
+    ov.addEventListener('click', function(e){ if (e.target === ov) fecharPopAlerta(); });
+    document.body.appendChild(ov);
+  }
+  document.getElementById('pop-alerta-titulo').textContent = titulo || 'Atenção';
+  document.getElementById('pop-alerta-msg').innerHTML = msg;
+  ov.classList.add('aberto');
+  const btn = ov.querySelector('.pop-btn');
+  if (btn) setTimeout(() => btn.focus(), 60);
+}
+function fecharPopAlerta(){
+  const ov = document.getElementById('pop-alerta');
+  if (ov) ov.classList.remove('aberto');
+}
+document.addEventListener('keydown', function(e){ if (e.key === 'Escape') fecharPopAlerta(); });
+// Assinatura preservada (id mantido por compatibilidade; a mensagem vira pop-up).
 function alerta(id, msg, tipo){
-  const el = document.getElementById(id);
-  if (!el) return;
-  el.className = 'alerta alerta-' + (tipo || 'info') + ' visivel';
-  el.innerHTML = (SVG[tipo === 'erro' ? 'alert' : (tipo === 'sucesso' ? 'check' : 'alert')] || '') + ' <span>' + msg + '</span>';
-  setTimeout(() => el.classList.remove('visivel'), 7000);
+  popAlerta(msg, tipo === 'erro' ? 'Atenção' : (tipo === 'sucesso' ? 'Tudo certo' : 'Aviso'));
 }
 </script>
 </body>
