@@ -837,8 +837,10 @@ function renderWizDados(){
         <div class="card"><div class="card-head"><div class="card-title">${ico('user')} Cedente — titular atual da cota</div></div>
         <div class="card-body">
           <div class="campo"><label id="label-nome-doc">Nome completo <span class="req">*</span></label><input type="text" id="f-cedente-nome" placeholder="Nome do cedente"></div>
-          <div id="bloco-cpf"><div class="campo"><label>CPF <span class="req">*</span></label><input type="text" id="f-cedente-cpf" inputmode="numeric" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)" style="font-family:var(--fonte-mono)"></div></div>
+          <div id="bloco-cpf"><div class="campo"><label>CPF <span class="req">*</span></label><input type="text" id="f-cedente-cpf" inputmode="numeric" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)" style="font-family:var(--fonte-mono)" onblur="tentarAutofill('f-cedente-cpf','f-cedente-nascimento','cedente')"></div></div>
           <div id="bloco-cnpj" style="display:none"><div class="campo"><label>CNPJ <span class="req">*</span></label><input type="text" id="f-cedente-cnpj" inputmode="numeric" placeholder="00.000.000/0001-00" maxlength="18" oninput="mascaraCNPJ(this)" style="font-family:var(--fonte-mono)"></div></div>
+          <div class="campo"><label>Data de nascimento <span style="font-weight:400;color:var(--texto3,#94A3B8)">(preenche seus dados se já tiver cadastro)</span></label><input type="date" id="f-cedente-nascimento" onblur="tentarAutofill('f-cedente-cpf','f-cedente-nascimento','cedente')"></div>
+          <div id="aviso-autofill-cedente"></div>
           <div class="grid-2 manter">
             <div class="campo"><label>Grupo <span class="req">*</span></label><input type="text" id="f-cedente-grupo" placeholder="Ex: 12"></div>
             <div class="campo"><label>Cota <span class="req">*</span></label><input type="text" id="f-cedente-cota" placeholder="Ex: 0042"></div>
@@ -889,8 +891,10 @@ function renderWizDados(){
         <div class="card"><div class="card-head"><div class="card-title">${ico('user')} Cedente — titular atual da cota</div></div>
         <div class="card-body">
           <div class="campo"><label id="label-nome-doc">Nome completo <span class="req">*</span></label><input type="text" id="f-cedente-nome" placeholder="Nome do cedente"></div>
-          <div id="bloco-cpf"><div class="campo"><label>CPF <span class="req">*</span></label><input type="text" id="f-cedente-cpf" inputmode="numeric" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)" style="font-family:var(--fonte-mono)"></div></div>
+          <div id="bloco-cpf"><div class="campo"><label>CPF <span class="req">*</span></label><input type="text" id="f-cedente-cpf" inputmode="numeric" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)" style="font-family:var(--fonte-mono)" onblur="tentarAutofill('f-cedente-cpf','f-cedente-nascimento','cedente')"></div></div>
           <div id="bloco-cnpj" style="display:none"><div class="campo"><label>CNPJ <span class="req">*</span></label><input type="text" id="f-cedente-cnpj" inputmode="numeric" placeholder="00.000.000/0001-00" maxlength="18" oninput="mascaraCNPJ(this)" style="font-family:var(--fonte-mono)"></div></div>
+          <div class="campo"><label>Data de nascimento <span style="font-weight:400;color:var(--texto3,#94A3B8)">(preenche seus dados se já tiver cadastro)</span></label><input type="date" id="f-cedente-nascimento" onblur="tentarAutofill('f-cedente-cpf','f-cedente-nascimento','cedente')"></div>
+          <div id="aviso-autofill-cedente"></div>
           <div class="grid-2 manter">
             <div class="campo"><label>Grupo <span class="req">*</span></label><input type="text" id="f-cedente-grupo" placeholder="Ex: 12"></div>
             <div class="campo"><label>Cota <span class="req">*</span></label><input type="text" id="f-cedente-cota" placeholder="Ex: 0042"></div>
@@ -1359,6 +1363,10 @@ async function tentarAutofill(cpfId, dataId, alvo){
       setSeVazio('f-email', data.email);
       setSeVazio('f-telefone', tel);
       setSeVazio('f-endereco', endereco);
+    } else if (alvo === 'cedente') {
+      setSeVazio('f-cedente-nome', data.nome);
+      setSeVazio('f-cedente-email', data.email);
+      setSeVazio('f-cedente-telefone', tel);
     } else {
       setSeVazio('f-cessionario-nome', data.nome);
       setSeVazio('f-cessionario-email', data.email);
@@ -1492,8 +1500,7 @@ async function enviarCadastro(){
     const cedente = {
       nome: val('f-cedente-nome'), cpf: cedDoc, tipo_pessoa: wiz.tipoPessoa,
       grupo: val('f-cedente-grupo'), cota: val('f-cedente-cota'),
-      email: val('f-cedente-email') || null, telefone: val('f-cedente-telefone') || null
-    };
+      email: val('f-cedente-email') || null, telefone: val('f-cedente-telefone') || null, data_nascimento: (typeof val==='function' && val('f-cedente-nascimento')) || null };
     const cessionario = {
       nome: val('f-cessionario-nome'), cpf: valNum('f-cessionario-cpf'),
       grupo: transferSimples ? cedente.grupo : val('f-cessionario-grupo'),
