@@ -1195,13 +1195,27 @@ window.addEventListener('load', () => { portalInit(); });
 .btn-topclientes:hover{background:#1E2D45}
 .tc-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:200000;display:none;align-items:flex-start;justify-content:center;padding:4vh 16px;backdrop-filter:blur(2px)}
 .tc-overlay.aberto{display:flex}
-.tc-modal{background:#fff;border-radius:14px;max-width:960px;width:100%;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(15,23,42,.35);animation:tcIn .18s ease}
+.tc-modal{background:#fff;border-radius:14px;max-width:1120px;width:100%;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(15,23,42,.35);animation:tcIn .18s ease}
 @keyframes tcIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .tc-head{background:#2D3F5E;padding:18px 24px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .tc-head h2{color:#fff;font-size:16px;font-weight:800;letter-spacing:.3px}
 .tc-head .tc-sub{color:#C8C84A;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;margin-top:3px}
 .tc-close{background:rgba(255,255,255,.1);border:none;color:#CBD5E1;width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:15px;line-height:1;flex-shrink:0}
 .tc-close:hover{background:rgba(255,255,255,.2);color:#fff}
+.tc-visao{display:none;background:rgba(255,255,255,.08);border-radius:9px;padding:3px;gap:2px;margin-left:auto;margin-right:12px}
+.tc-visao.mostrar{display:inline-flex}
+.tc-visao button{background:transparent;border:none;color:#CBD5E1;font-size:11px;font-weight:600;padding:6px 14px;border-radius:7px;cursor:pointer;transition:.15s;font-family:inherit}
+.tc-visao button.ativa{background:#C8C84A;color:#2D3F5E}
+.tc-visao button:not(.ativa):hover{color:#fff}
+.tc-picker-wrap{position:relative}
+.tc-picker{display:none;position:absolute;top:calc(100% + 8px);right:0;background:#fff;border:1px solid #E2E8F0;border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.22);min-width:230px;max-height:300px;overflow:auto;z-index:10;padding:6px}
+.tc-picker.aberto{display:block}
+.tc-picker label{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:7px;cursor:pointer;font-size:12px;color:#1E293B;white-space:nowrap}
+.tc-picker label:hover{background:#F1F5F9}
+.tc-picker input{accent-color:#2D3F5E}
+.tc-picker .tc-picker-acoes{display:flex;justify-content:space-between;padding:6px 10px 4px;border-top:1px solid #F1F5F9;margin-top:4px}
+.tc-picker .tc-picker-acoes button{background:none;border:none;color:#2D3F5E;font-size:11px;font-weight:600;cursor:pointer;padding:2px 4px}
+.tc-picker .tc-picker-acoes button:hover{text-decoration:underline}
 .tc-hero{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:16px 24px;background:#F8FAFC;border-bottom:1px solid #E2E8F0}
 .tc-hero .th-item{background:#fff;border:1px solid #E2E8F0;border-left:4px solid #C8C84A;border-radius:10px;padding:12px 14px}
 .tc-hero .th-label{font-size:9.5px;color:#64748B;font-weight:700;letter-spacing:1px;text-transform:uppercase}
@@ -1210,16 +1224,18 @@ window.addEventListener('load', () => { portalInit(); });
 .tc-frase{padding:10px 24px;font-size:12px;color:#475569;background:#FFFDF2;border-bottom:1px solid #F0E9C8}
 .tc-frase strong{color:#2D3F5E}
 .tc-body{overflow:auto;padding:6px 24px 18px}
-.tc-body table{width:100%;border-collapse:collapse;font-size:12px}
+.tc-body table{width:100%;border-collapse:collapse;font-size:11.5px}
 .tc-body th{position:sticky;top:0;background:#fff;text-align:left;padding:10px 8px;font-size:10px;color:#64748B;font-weight:700;letter-spacing:.8px;text-transform:uppercase;border-bottom:2px solid #E2E8F0;white-space:nowrap}
 .tc-body th.num,.tc-body td.num{text-align:right}
-.tc-body td{padding:9px 8px;border-bottom:1px solid #F1F5F9;color:#1E293B;vertical-align:middle}
+.tc-body td{padding:8px 6px;border-bottom:1px solid #F1F5F9;color:#1E293B;vertical-align:middle}
 .tc-body tr:hover td{background:#F8FAFC}
 .tc-rank{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;background:#EEF2F7;color:#475569;font-weight:700;font-size:11px}
 .tc-rank.ouro{background:#C8C84A;color:#2D3F5E}
-.tc-nome{font-weight:600;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tc-nome{font-weight:600;max-width:215px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tc-cons{font-size:11px;color:#475569;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tc-adms{font-size:11px;color:#64748B;white-space:nowrap}
 .tc-cpfsub{font-size:10px;color:#94A3B8;font-weight:400;margin-top:1px}
-.tc-share{display:flex;align-items:center;gap:8px;min-width:120px}
+.tc-share{display:flex;align-items:center;gap:6px;min-width:92px}
 .tc-bar{flex:1;height:6px;background:#EEF2F7;border-radius:4px;overflow:hidden}
 .tc-bar span{display:block;height:100%;background:linear-gradient(90deg,#C8C84A,#a8a83a);border-radius:4px}
 .tc-foot{padding:12px 24px;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fff;flex-wrap:wrap}
@@ -1230,6 +1246,14 @@ window.addEventListener('load', () => { portalInit(); });
   <div class="tc-modal">
     <div class="tc-head">
       <div><h2>Top Clientes</h2><div class="tc-sub" id="tcSub">Regra de Pareto · 20/80</div></div>
+      <div class="tc-visao" id="tcVisaoWrap">
+        <button id="tcBtnGeral" class="ativa" onclick="tcTrocarVisao('geral')">Geral</button>
+        <button id="tcBtnMeus" onclick="tcTrocarVisao('meus')">Minha carteira</button>
+        <div class="tc-picker-wrap">
+          <button id="tcBtnEscolher" onclick="tcTogglePicker(event)">Escolher</button>
+          <div class="tc-picker" id="tcPicker" onclick="event.stopPropagation()"></div>
+        </div>
+      </div>
       <button class="tc-close" onclick="fecharTopClientes()" aria-label="Fechar">&#10005;</button>
     </div>
     <div class="tc-hero" id="tcHero"></div>
@@ -1246,10 +1270,70 @@ window.addEventListener('load', () => { portalInit(); });
 </div>
 <script>
 let tcUltimoCalc = null;
+function tcAdmCurto(a) {
+  const u = (a || '').toUpperCase();
+  if (u.includes('PORTO')) return 'Porto';
+  if (u.includes('ITA')) return 'Itaú';
+  if (u.includes('BRADESCO')) return 'Bradesco';
+  if (u.includes('SANTANDER')) return 'Santander';
+  return a;
+}
+let tcVisao = 'geral';
+let tcSelecionados = [];
+function tcTrocarVisao(v) {
+  tcVisao = v;
+  tcAtualizarBotoes();
+  if (v !== 'custom') document.getElementById('tcPicker').classList.remove('aberto');
+  abrirTopClientes();
+}
+function tcAtualizarBotoes() {
+  document.getElementById('tcBtnGeral').classList.toggle('ativa', tcVisao === 'geral');
+  document.getElementById('tcBtnMeus').classList.toggle('ativa', tcVisao === 'meus');
+  const be = document.getElementById('tcBtnEscolher');
+  be.classList.toggle('ativa', tcVisao === 'custom');
+  be.textContent = tcVisao === 'custom' && tcSelecionados.length ? 'Escolher (' + tcSelecionados.length + ')' : 'Escolher';
+}
+function tcTogglePicker(ev) {
+  if (ev) ev.stopPropagation();
+  const p = document.getElementById('tcPicker');
+  if (p.classList.contains('aberto')) { p.classList.remove('aberto'); return; }
+  const consultores = [...new Set((rawData || []).map(d => d.consultor).filter(Boolean))].sort();
+  p.innerHTML = consultores.map(nome =>
+    '<label><input type="checkbox" value="' + nome.replace(/"/g, '&quot;') + '"' + (tcSelecionados.includes(nome) ? ' checked' : '') + ' onchange="tcMarcarConsultor(this)"><span>' + nome + '</span></label>'
+  ).join('') + '<div class="tc-picker-acoes"><button onclick="tcLimparEscolha()">Limpar</button><button onclick="document.getElementById(\'tcPicker\').classList.remove(\'aberto\')">Fechar</button></div>';
+  p.classList.add('aberto');
+}
+function tcMarcarConsultor(cb) {
+  if (cb.checked) { if (!tcSelecionados.includes(cb.value)) tcSelecionados.push(cb.value); }
+  else tcSelecionados = tcSelecionados.filter(n => n !== cb.value);
+  tcVisao = tcSelecionados.length ? 'custom' : 'geral';
+  tcAtualizarBotoes();
+  abrirTopClientes();
+}
+function tcLimparEscolha() {
+  tcSelecionados = [];
+  tcVisao = 'geral';
+  tcAtualizarBotoes();
+  document.getElementById('tcPicker').classList.remove('aberto');
+  abrirTopClientes();
+}
+document.addEventListener('click', e => {
+  const p = document.getElementById('tcPicker');
+  if (p && p.classList.contains('aberto') && !e.target.closest('.tc-picker-wrap')) p.classList.remove('aberto');
+});
 function tcCalcular() {
   let base = rawData || [];
-  const fc = getMSValues('wrapConsultor');
-  if (fc.length) base = base.filter(d => fc.includes(d.consultor));
+  let escopoTxt = null;
+  if (tcVisao === 'meus' && portalUser) {
+    base = base.filter(d => d.consultor === portalUser.nome);
+    escopoTxt = 'Minha carteira · ' + portalUser.nome;
+  } else if (tcVisao === 'custom' && tcSelecionados.length) {
+    base = base.filter(d => tcSelecionados.includes(d.consultor));
+    escopoTxt = tcSelecionados.join(' + ');
+  } else {
+    const fc = getMSValues('wrapConsultor');
+    if (fc.length) { base = base.filter(d => fc.includes(d.consultor)); escopoTxt = fc.join(', '); }
+  }
   const map = {};
   base.forEach(d => {
     const nome = (d.cliente || '').trim();
@@ -1270,12 +1354,13 @@ function tcCalcular() {
   const topN = Math.max(1, Math.ceil(clientes.length * 0.2));
   const top = clientes.slice(0, topN);
   const topCred = top.reduce((s, c) => s + c.credito, 0);
-  return { clientes, top, topN, totalCred, topCred, escopo: fc.length ? fc.join(', ') : null };
+  return { clientes, top, topN, totalCred, topCred, escopo: escopoTxt };
 }
 function abrirTopClientes() {
   const c = tcCalcular();
   tcUltimoCalc = c;
-  const podeVerTudo = (typeof canSeeAll === 'function') && canSeeAll(portalUser);
+  const podeVerTudo = (typeof canSeeAll === 'function') && canSeeAll(portalUser) && tcVisao !== 'meus';
+  document.getElementById('tcVisaoWrap').classList.toggle('mostrar', (typeof canSeeAll === 'function') && canSeeAll(portalUser));
   const pct = c.totalCred ? (c.topCred / c.totalCred * 100) : 0;
   document.getElementById('tcSub').textContent = 'Regra de Pareto · 20/80 · ' + (c.escopo ? c.escopo : (podeVerTudo ? 'Todos os consultores' : (portalUser ? portalUser.nome : '')));
   document.getElementById('tcHero').innerHTML =
@@ -1288,13 +1373,13 @@ function abrirTopClientes() {
     acum += cli.credito;
     const pctCli = c.totalCred ? (cli.credito / c.totalCred * 100) : 0;
     const pctAcum = c.totalCred ? (acum / c.totalCred * 100) : 0;
-    const admsTxt = Object.keys(cli.adms).sort((a, b) => cli.adms[b] - cli.adms[a]).join(' · ');
+    const admsTxt = [...new Set(Object.keys(cli.adms).sort((a, b) => cli.adms[b] - cli.adms[a]).map(tcAdmCurto))].join(' · ');
     const consPrincipal = Object.keys(cli.consultores).sort((a, b) => cli.consultores[b] - cli.consultores[a])[0] || '-';
     return '<tr>' +
       '<td><span class="tc-rank' + (i < 3 ? ' ouro' : '') + '">' + (i + 1) + '</span></td>' +
       '<td><div class="tc-nome" title="' + (cli.nome || '') + '">' + (cli.nome || '(sem nome)') + '</div><div class="tc-cpfsub">' + (cli.cpf || '') + '</div></td>' +
-      (podeVerTudo ? '<td class="tc-col-opt" style="font-size:11px;color:#475569">' + consPrincipal + '</td>' : '') +
-      '<td class="tc-col-opt" style="font-size:11px;color:#64748B">' + admsTxt + '</td>' +
+      (podeVerTudo ? '<td class="tc-col-opt"><div class="tc-cons" title="' + consPrincipal + '">' + consPrincipal + '</div></td>' : '') +
+      '<td class="tc-col-opt"><span class="tc-adms">' + admsTxt + '</span></td>' +
       '<td class="num">' + cli.cotas + '</td>' +
       '<td class="num" style="font-weight:700;color:#2D3F5E;white-space:nowrap">' + fmtFull(cli.credito) + '</td>' +
       '<td class="num" style="color:#64748B">' + pctCli.toFixed(1) + '%</td>' +
@@ -1303,7 +1388,7 @@ function abrirTopClientes() {
       '</tr>';
   }).join('');
   document.getElementById('tcBody').innerHTML = c.clientes.length === 0
-    ? '<div style="padding:40px;text-align:center;color:#94A3B8">Nenhum cliente encontrado na base.</div>'
+    ? '<div style="padding:40px;text-align:center;color:#94A3B8">' + (tcVisao === 'meus' ? 'Nenhuma venda encontrada no seu nome (' + (portalUser ? portalUser.nome : '') + ') na base.' : 'Nenhum cliente encontrado na base.') + '</div>'
     : '<table><thead><tr><th>#</th><th>Cliente</th>' + (podeVerTudo ? '<th class="tc-col-opt">Consultor</th>' : '') + '<th class="tc-col-opt">Administradoras</th><th class="num">Cotas</th><th class="num">Cr&eacute;dito Total</th><th class="num">% do total</th><th>Acumulado</th><th class="tc-col-opt">&Uacute;ltima compra</th></tr></thead><tbody>' + linhas + '</tbody></table>';
   document.getElementById('tcOverlay').classList.add('aberto');
 }
@@ -1317,7 +1402,7 @@ function exportarTopClientes() {
     acum += cli.credito;
     const o = { '#': i + 1, 'Cliente': cli.nome, 'CPF/CNPJ': cli.cpf };
     if (podeVerTudo) o['Consultor'] = Object.keys(cli.consultores).sort((a, b) => cli.consultores[b] - cli.consultores[a])[0] || '';
-    o['Administradoras'] = Object.keys(cli.adms).join(' / ');
+    o['Administradoras'] = [...new Set(Object.keys(cli.adms).map(tcAdmCurto))].join(' / ');
     o['Cotas'] = cli.cotas;
     o['Credito Total'] = cli.credito;
     o['% do Total'] = c.totalCred ? +(cli.credito / c.totalCred * 100).toFixed(2) : 0;
