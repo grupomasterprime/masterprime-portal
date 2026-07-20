@@ -1328,6 +1328,12 @@ function tcMarcarConsultor(cb) {
   tcVisao = tcSelecionados.length ? 'custom' : 'geral';
   tcAtualizarBotoes();
   abrirTopClientes();
+  // depois de marcar, limpa a busca e ja deixa pronta pro proximo nome
+  const bi = document.getElementById('tcBusca');
+  if (bi) {
+    if (bi.value) { bi.value = ''; tcFiltrarPicker(''); }
+    setTimeout(() => bi.focus(), 30);
+  }
 }
 function tcLimparEscolha() {
   tcSelecionados = [];
