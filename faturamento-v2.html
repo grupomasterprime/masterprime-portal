@@ -546,6 +546,7 @@ let currentUser = null;
 function fmtCPF(c) { c = String(c||'').replace(/\D/g,''); if (c.length === 14) return c.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/,'$1.$2.$3/$4-$5'); if (c.length !== 11) return c; return c.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'); }
 function maskCPF(el) { let v = el.value.replace(/\D/g,''); if (v.length > 11) v = v.slice(0,11); if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4'); else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3'); else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/,'$1.$2'); el.value = v; }
 function cleanCPF(v) { return (v||'').replace(/\D/g,''); }
+function maskCpfCnpj(el) { let v = el.value.replace(/\D/g,''); if (v.length > 14) v = v.slice(0,14); if (v.length > 11) { v = v.replace(/^(\d{2})(\d{0,3})(\d{0,3})(\d{0,4})(\d{0,2}).*$/, function(m,a,b,c,d,e){ let s=a; if(b)s+='.'+b; if(c)s+='.'+c; if(d)s+='/'+d; if(e)s+='-'+e; return s; }); } else if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4'); else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3'); else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/,'$1.$2'); el.value = v; }
 function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 function fmtDataBR(d) { return d ? new Date(d).toLocaleDateString('pt-BR') : '—'; }
 function fmtDataHoraBR(d) { return d ? new Date(d).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' }) : '—'; }
@@ -1136,7 +1137,7 @@ async function fatVerProcesso(id) {
           <div class="lbl">Editar dados básicos</div>
           <div class="form-grid">
             <div><label>Nome</label><input class="inp" value="${esc(proc.nome || '')}" id="fat-edit-nome-${proc.id}"></div>
-            <div><label>CPF</label><input class="inp mono" value="${fmtCPF(proc.cpf || '')}" maxlength="14" oninput="maskCPF(this)" id="fat-edit-cpf-${proc.id}"></div>
+            <div><label>CPF ou CNPJ</label><input class="inp mono" value="${fmtCPF(proc.cpf || '')}" maxlength="18" oninput="maskCpfCnpj(this)" id="fat-edit-cpf-${proc.id}"></div>
             <div><label>Grupo</label><input class="inp" value="${esc(proc.grupo || '')}" id="fat-edit-grupo-${proc.id}"></div>
             <div><label>Cota</label><input class="inp" value="${esc(proc.cota || '')}" id="fat-edit-cota-${proc.id}"></div>
             <div><label>Valor venda (R$)</label><input class="inp" value="${esc(proc.valor_venda || '')}" placeholder="0,00" id="fat-edit-valor_venda-${proc.id}"></div>
