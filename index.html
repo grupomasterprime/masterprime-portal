@@ -1426,11 +1426,17 @@ async function enterPortal() {
   if (_adesaoAdminItem) {
     _adesaoAdminItem.style.display = '';
   }
-  // NOVA ABA: Feedbacks — visível APENAS para master e sócio
+  // Feedbacks — master/sócio veem a tela completa (dentro de Administração);
+  // consultor/parceiro veem SOMENTE os próprios (a página feedbacks.html decide),
+  // e pra eles o item muda pro menu comum, logo após o Histórico.
   const _feedbacksItem = document.getElementById('ni-feedbacks');
   if (_feedbacksItem) {
-    const podeVerFeedbacks = (currentUser.tipo === 'master' || currentUser.tipo === 'socio');
-    _feedbacksItem.classList.toggle('hidden', !podeVerFeedbacks);
+    _feedbacksItem.classList.remove('hidden');
+    const _ehGestorFb = (currentUser.tipo === 'master' || currentUser.tipo === 'socio');
+    if (!_ehGestorFb) {
+      const _histRef = document.getElementById('ni-historico');
+      if (_histRef && _histRef.parentNode) _histRef.parentNode.insertBefore(_feedbacksItem, _histRef.nextSibling);
+    }
   }
   // NOVA ABA: Logs de Atividade — visível APENAS para o Master
   const _logsItem = document.getElementById('ni-logs');
@@ -1483,10 +1489,8 @@ function nav(id) {
   }
   // NOVA ABA: Formulário de Adesão — liberado pra todos os tipos
   // (qualquer consultor/sócio/parceiro precisa preencher pros clientes)
-  // FEEDBACKS — só master e sócio (privado dos avaliadores)
-  if (id === 'feedbacks' && currentUser && !(currentUser.tipo === 'master' || currentUser.tipo === 'socio')) {
-    id = 'perfil';
-  }
+  // FEEDBACKS — liberado pra todos: a própria página mostra só os do usuário
+  // quando ele não é master/sócio (e a RLS do banco garante por baixo).
   // LOGS DE ATIVIDADE — somente Master
   if (id === 'logs' && currentUser && currentUser.tipo !== 'master') {
     id = 'perfil';
@@ -2442,8 +2446,8 @@ function podeAcessarScreen(screenId) {
   if (currentUser.tipo === 'master') return true;
   // Formulário de Adesão é permitido pra TODOS os tipos
   if (screenId === 'admin-adesao') return true;
-  // Feedbacks: só master e sócio
-  if (screenId === 'feedbacks') return (currentUser.tipo === 'master' || currentUser.tipo === 'socio');
+  // Feedbacks: liberado pra todos (cada um vê só os seus na própria página)
+  if (screenId === 'feedbacks') return true;
   // Logs de Atividade: somente Master
   if (screenId === 'logs') return (currentUser.tipo === 'master');
   // Sala de Reunião: liberada pra todos os tipos
