@@ -159,6 +159,10 @@ tbody td:nth-child(4){font-weight:700;color:#16A34A}
         <span class="filter-label">Contemplação</span>
         <div class="ms-wrap" id="wrapSit"></div>
       </div>
+      <div class="filter-group" style="margin-left:auto;justify-content:flex-end">
+        <span class="filter-label">&nbsp;</span>
+        <button class="btn btn-topclientes" onclick="abrirTopClientes()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:6px"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>Top Clientes · 20/80</button>
+      </div>
     </div>
 
     <!-- KPIs Apropriação (linha de cima) -->
@@ -1183,6 +1187,150 @@ window.addEventListener('load', () => { portalInit(); });
   window.addEventListener('scroll', reposition, true);
   window.addEventListener('resize', reposition);
 })();
+</script>
+
+<!-- ══════════════ TOP CLIENTES · PARETO 20/80 ══════════════ -->
+<style>
+.btn-topclientes{background:#2D3F5E;color:#C8C84A;border:1px solid #2D3F5E;display:inline-flex;align-items:center}
+.btn-topclientes:hover{background:#1E2D45}
+.tc-overlay{position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:200000;display:none;align-items:flex-start;justify-content:center;padding:4vh 16px;backdrop-filter:blur(2px)}
+.tc-overlay.aberto{display:flex}
+.tc-modal{background:#fff;border-radius:14px;max-width:960px;width:100%;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 24px 64px rgba(15,23,42,.35);animation:tcIn .18s ease}
+@keyframes tcIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.tc-head{background:#2D3F5E;padding:18px 24px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.tc-head h2{color:#fff;font-size:16px;font-weight:800;letter-spacing:.3px}
+.tc-head .tc-sub{color:#C8C84A;font-size:10px;letter-spacing:1.6px;text-transform:uppercase;margin-top:3px}
+.tc-close{background:rgba(255,255,255,.1);border:none;color:#CBD5E1;width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:15px;line-height:1;flex-shrink:0}
+.tc-close:hover{background:rgba(255,255,255,.2);color:#fff}
+.tc-hero{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;padding:16px 24px;background:#F8FAFC;border-bottom:1px solid #E2E8F0}
+.tc-hero .th-item{background:#fff;border:1px solid #E2E8F0;border-left:4px solid #C8C84A;border-radius:10px;padding:12px 14px}
+.tc-hero .th-label{font-size:9.5px;color:#64748B;font-weight:700;letter-spacing:1px;text-transform:uppercase}
+.tc-hero .th-val{font-size:19px;color:#2D3F5E;font-weight:800;margin-top:3px}
+.tc-hero .th-note{font-size:10px;color:#94A3B8;margin-top:2px}
+.tc-frase{padding:10px 24px;font-size:12px;color:#475569;background:#FFFDF2;border-bottom:1px solid #F0E9C8}
+.tc-frase strong{color:#2D3F5E}
+.tc-body{overflow:auto;padding:6px 24px 18px}
+.tc-body table{width:100%;border-collapse:collapse;font-size:12px}
+.tc-body th{position:sticky;top:0;background:#fff;text-align:left;padding:10px 8px;font-size:10px;color:#64748B;font-weight:700;letter-spacing:.8px;text-transform:uppercase;border-bottom:2px solid #E2E8F0;white-space:nowrap}
+.tc-body th.num,.tc-body td.num{text-align:right}
+.tc-body td{padding:9px 8px;border-bottom:1px solid #F1F5F9;color:#1E293B;vertical-align:middle}
+.tc-body tr:hover td{background:#F8FAFC}
+.tc-rank{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:7px;background:#EEF2F7;color:#475569;font-weight:700;font-size:11px}
+.tc-rank.ouro{background:#C8C84A;color:#2D3F5E}
+.tc-nome{font-weight:600;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tc-cpfsub{font-size:10px;color:#94A3B8;font-weight:400;margin-top:1px}
+.tc-share{display:flex;align-items:center;gap:8px;min-width:120px}
+.tc-bar{flex:1;height:6px;background:#EEF2F7;border-radius:4px;overflow:hidden}
+.tc-bar span{display:block;height:100%;background:linear-gradient(90deg,#C8C84A,#a8a83a);border-radius:4px}
+.tc-foot{padding:12px 24px;border-top:1px solid #E2E8F0;display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fff;flex-wrap:wrap}
+.tc-foot .tc-obs{font-size:10.5px;color:#94A3B8;max-width:540px}
+@media (max-width:720px){.tc-hero{grid-template-columns:1fr}.tc-nome{max-width:150px}.tc-col-opt{display:none}}
+</style>
+<div class="tc-overlay" id="tcOverlay" onclick="if(event.target===this)fecharTopClientes()">
+  <div class="tc-modal">
+    <div class="tc-head">
+      <div><h2>Top Clientes</h2><div class="tc-sub" id="tcSub">Regra de Pareto · 20/80</div></div>
+      <button class="tc-close" onclick="fecharTopClientes()" aria-label="Fechar">&#10005;</button>
+    </div>
+    <div class="tc-hero" id="tcHero"></div>
+    <div class="tc-frase" id="tcFrase"></div>
+    <div class="tc-body" id="tcBody"></div>
+    <div class="tc-foot">
+      <div class="tc-obs">Ranking pela base completa (todos os anos), somando todo o cr&eacute;dito de cada cliente. Os filtros de ano/m&ecirc;s/administradora n&atilde;o interferem &mdash; apenas o filtro de consultor.</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-refresh" onclick="exportarTopClientes()" style="padding:7px 14px;font-size:11px">Exportar Excel</button>
+        <button class="btn btn-logout" onclick="fecharTopClientes()" style="border-color:#CBD5E1;color:#475569;padding:7px 14px;font-size:11px">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+let tcUltimoCalc = null;
+function tcCalcular() {
+  let base = rawData || [];
+  const fc = getMSValues('wrapConsultor');
+  if (fc.length) base = base.filter(d => fc.includes(d.consultor));
+  const map = {};
+  base.forEach(d => {
+    const nome = (d.cliente || '').trim();
+    const cpfDig = (d.cpf || '').replace(/\D/g, '');
+    if (!nome && !cpfDig) return;
+    const k = cpfDig || ('N:' + nome.toUpperCase());
+    if (!map[k]) map[k] = { nome: nome, cpf: (d.cpf || '').trim(), cotas: 0, credito: 0, adms: {}, consultores: {}, ultimaOrd: '', ultimaTxt: '' };
+    const g = map[k];
+    g.cotas++; g.credito += (d.credito || 0);
+    if (nome && nome.length > (g.nome || '').length) g.nome = nome;
+    if (d.adm) g.adms[d.adm] = (g.adms[d.adm] || 0) + 1;
+    if (d.consultor) g.consultores[d.consultor] = (g.consultores[d.consultor] || 0) + (d.credito || 0);
+    const ord = toSortDate(d.dataVenda);
+    if (ord && ord > g.ultimaOrd) { g.ultimaOrd = ord; g.ultimaTxt = formatBR(d.dataVenda); }
+  });
+  const clientes = Object.values(map).sort((a, b) => b.credito - a.credito);
+  const totalCred = clientes.reduce((s, c) => s + c.credito, 0);
+  const topN = Math.max(1, Math.ceil(clientes.length * 0.2));
+  const top = clientes.slice(0, topN);
+  const topCred = top.reduce((s, c) => s + c.credito, 0);
+  return { clientes, top, topN, totalCred, topCred, escopo: fc.length ? fc.join(', ') : null };
+}
+function abrirTopClientes() {
+  const c = tcCalcular();
+  tcUltimoCalc = c;
+  const podeVerTudo = (typeof canSeeAll === 'function') && canSeeAll(portalUser);
+  const pct = c.totalCred ? (c.topCred / c.totalCred * 100) : 0;
+  document.getElementById('tcSub').textContent = 'Regra de Pareto · 20/80 · ' + (c.escopo ? c.escopo : (podeVerTudo ? 'Todos os consultores' : (portalUser ? portalUser.nome : '')));
+  document.getElementById('tcHero').innerHTML =
+    '<div class="th-item"><div class="th-label">Melhores clientes</div><div class="th-val">' + c.topN + '</div><div class="th-note">20% de ' + c.clientes.length + ' clientes da base</div></div>' +
+    '<div class="th-item"><div class="th-label">Cr&eacute;dito que eles somam</div><div class="th-val">' + fmtFull(c.topCred) + '</div><div class="th-note">de ' + fmtFull(c.totalCred) + ' no total</div></div>' +
+    '<div class="th-item"><div class="th-label">Concentra&ccedil;&atilde;o</div><div class="th-val">' + pct.toFixed(1) + '%</div><div class="th-note">do cr&eacute;dito est&aacute; nesses clientes</div></div>';
+  document.getElementById('tcFrase').innerHTML = 'Pareto na pr&aacute;tica: <strong>' + c.topN + ' clientes</strong> (20% da carteira) respondem por <strong>' + pct.toFixed(1) + '%</strong> de todo o cr&eacute;dito vendido. S&atilde;o eles que merecem o contato mais pr&oacute;ximo.';
+  let acum = 0;
+  const linhas = c.top.map((cli, i) => {
+    acum += cli.credito;
+    const pctCli = c.totalCred ? (cli.credito / c.totalCred * 100) : 0;
+    const pctAcum = c.totalCred ? (acum / c.totalCred * 100) : 0;
+    const admsTxt = Object.keys(cli.adms).sort((a, b) => cli.adms[b] - cli.adms[a]).join(' · ');
+    const consPrincipal = Object.keys(cli.consultores).sort((a, b) => cli.consultores[b] - cli.consultores[a])[0] || '-';
+    return '<tr>' +
+      '<td><span class="tc-rank' + (i < 3 ? ' ouro' : '') + '">' + (i + 1) + '</span></td>' +
+      '<td><div class="tc-nome" title="' + (cli.nome || '') + '">' + (cli.nome || '(sem nome)') + '</div><div class="tc-cpfsub">' + (cli.cpf || '') + '</div></td>' +
+      (podeVerTudo ? '<td class="tc-col-opt" style="font-size:11px;color:#475569">' + consPrincipal + '</td>' : '') +
+      '<td class="tc-col-opt" style="font-size:11px;color:#64748B">' + admsTxt + '</td>' +
+      '<td class="num">' + cli.cotas + '</td>' +
+      '<td class="num" style="font-weight:700;color:#2D3F5E;white-space:nowrap">' + fmtFull(cli.credito) + '</td>' +
+      '<td class="num" style="color:#64748B">' + pctCli.toFixed(1) + '%</td>' +
+      '<td><div class="tc-share"><div class="tc-bar"><span style="width:' + Math.min(100, pctAcum).toFixed(1) + '%"></span></div><span style="font-size:10.5px;color:#94A3B8;min-width:38px;text-align:right">' + pctAcum.toFixed(1) + '%</span></div></td>' +
+      '<td class="tc-col-opt" style="font-size:11px;color:#64748B;white-space:nowrap">' + (cli.ultimaTxt || '-') + '</td>' +
+      '</tr>';
+  }).join('');
+  document.getElementById('tcBody').innerHTML = c.clientes.length === 0
+    ? '<div style="padding:40px;text-align:center;color:#94A3B8">Nenhum cliente encontrado na base.</div>'
+    : '<table><thead><tr><th>#</th><th>Cliente</th>' + (podeVerTudo ? '<th class="tc-col-opt">Consultor</th>' : '') + '<th class="tc-col-opt">Administradoras</th><th class="num">Cotas</th><th class="num">Cr&eacute;dito Total</th><th class="num">% do total</th><th>Acumulado</th><th class="tc-col-opt">&Uacute;ltima compra</th></tr></thead><tbody>' + linhas + '</tbody></table>';
+  document.getElementById('tcOverlay').classList.add('aberto');
+}
+function fecharTopClientes() { document.getElementById('tcOverlay').classList.remove('aberto'); }
+document.addEventListener('keydown', e => { if (e.key === 'Escape') fecharTopClientes(); });
+function exportarTopClientes() {
+  const c = tcUltimoCalc || tcCalcular();
+  const podeVerTudo = (typeof canSeeAll === 'function') && canSeeAll(portalUser);
+  let acum = 0;
+  const rows = c.top.map((cli, i) => {
+    acum += cli.credito;
+    const o = { '#': i + 1, 'Cliente': cli.nome, 'CPF/CNPJ': cli.cpf };
+    if (podeVerTudo) o['Consultor'] = Object.keys(cli.consultores).sort((a, b) => cli.consultores[b] - cli.consultores[a])[0] || '';
+    o['Administradoras'] = Object.keys(cli.adms).join(' / ');
+    o['Cotas'] = cli.cotas;
+    o['Credito Total'] = cli.credito;
+    o['% do Total'] = c.totalCred ? +(cli.credito / c.totalCred * 100).toFixed(2) : 0;
+    o['% Acumulado'] = c.totalCred ? +(acum / c.totalCred * 100).toFixed(2) : 0;
+    o['Ultima Compra'] = cli.ultimaTxt || '';
+    return o;
+  });
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{ wch: 4 }, { wch: 34 }, { wch: 18 }].concat(podeVerTudo ? [{ wch: 20 }] : []).concat([{ wch: 22 }, { wch: 7 }, { wch: 15 }, { wch: 10 }, { wch: 12 }, { wch: 13 }]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Top Clientes 20-80');
+  XLSX.writeFile(wb, 'top-clientes-pareto-' + new Date().toISOString().slice(0, 10) + '.xlsx');
+}
 </script>
 </body>
 </html>
