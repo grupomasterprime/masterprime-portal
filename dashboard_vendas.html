@@ -1228,12 +1228,12 @@ window.addEventListener('load', () => { portalInit(); });
 .tc-hero .th-note{font-size:10px;color:#94A3B8;margin-top:2px}
 .tc-frase{padding:10px 24px;font-size:12px;color:#475569;background:#FFFDF2;border-bottom:1px solid #F0E9C8}
 .tc-frase strong{color:#2D3F5E}
-.tc-pensar{padding:12px 24px;background:#F8FAFC;border-bottom:1px solid #E2E8F0}
-.tc-pensar-titulo{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#2D3F5E;margin-bottom:7px;cursor:pointer;display:flex;align-items:center;gap:6px;user-select:none}
+.tc-pensar{padding:8px 24px;background:#F8FAFC;border-bottom:1px solid #E2E8F0}
+.tc-pensar-titulo{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#2D3F5E;margin-bottom:0;cursor:pointer;display:flex;align-items:center;gap:6px;user-select:none}
 .tc-pensar-titulo .seta{transition:.15s;display:inline-block}
 .tc-pensar.fechado .seta{transform:rotate(-90deg)}
 .tc-pensar.fechado .tc-pensar-lista{display:none}
-.tc-pensar-lista{display:grid;grid-template-columns:1fr 1fr;gap:6px 20px;font-size:11.5px;color:#475569;line-height:1.5}
+.tc-pensar-lista{margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px 20px;font-size:11.5px;color:#475569;line-height:1.5}
 .tc-pensar-lista div{padding-left:14px;position:relative}
 .tc-pensar-lista div::before{content:'';position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:2px;background:#C8C84A}
 .tc-pensar-lista strong{color:#2D3F5E}
@@ -1273,13 +1273,13 @@ window.addEventListener('load', () => { portalInit(); });
     </div>
     <div class="tc-hero" id="tcHero"></div>
     <div class="tc-frase" id="tcFrase"></div>
-    <div class="tc-pensar" id="tcPensar">
+    <div class="tc-pensar fechado" id="tcPensar">
       <div class="tc-pensar-titulo" onclick="document.getElementById('tcPensar').classList.toggle('fechado')"><span class="seta">&#9662;</span> Com essa lista na m&atilde;o, pense em cada um</div>
       <div class="tc-pensar-lista">
-        <div><strong>Quem &eacute; essa pessoa?</strong> Qual a profiss&atilde;o e a renda dela? Est&aacute; no formul&aacute;rio de ades&atilde;o &mdash; e diz muito sobre o pr&oacute;ximo cr&eacute;dito que ela pode contratar.</div>
-        <div><strong>Ela veio por indica&ccedil;&atilde;o?</strong> Quem indicou? Essa pessoa que indicou j&aacute; recebeu um obrigado &mdash; e j&aacute; foi convidada a indicar de novo?</div>
-        <div><strong>Quando foi seu &uacute;ltimo contato de valor?</strong> Sem vender nada: um parab&eacute;ns pela contempla&ccedil;&atilde;o, uma informa&ccedil;&atilde;o &uacute;til, um lembrete de assembleia.</div>
-        <div><strong>Quem essa pessoa pode indicar?</strong> Cliente que concentra cr&eacute;dito costuma conviver com gente do mesmo perfil. Pe&ccedil;a a indica&ccedil;&atilde;o com nome e sobrenome.</div>
+        <div><strong>Quem &eacute; essa pessoa?</strong> Profiss&atilde;o e renda est&atilde;o no formul&aacute;rio de ades&atilde;o &mdash; e apontam o pr&oacute;ximo cr&eacute;dito.</div>
+        <div><strong>Veio por indica&ccedil;&atilde;o?</strong> Quem indicou j&aacute; recebeu um obrigado &mdash; e j&aacute; foi convidado a indicar de novo?</div>
+        <div><strong>&Uacute;ltimo contato de valor?</strong> Sem vender: parab&eacute;ns pela contempla&ccedil;&atilde;o, uma informa&ccedil;&atilde;o &uacute;til, um lembrete de assembleia.</div>
+        <div><strong>Quem ela pode indicar?</strong> Quem concentra cr&eacute;dito convive com gente do mesmo perfil. Pe&ccedil;a a indica&ccedil;&atilde;o com nome e sobrenome.</div>
       </div>
     </div>
     <div class="tc-body" id="tcBody"></div>
