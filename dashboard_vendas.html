@@ -161,7 +161,7 @@ tbody td:nth-child(4){font-weight:700;color:#16A34A}
       </div>
       <div class="filter-group" style="margin-left:auto;justify-content:flex-end">
         <span class="filter-label">&nbsp;</span>
-        <button class="btn btn-topclientes" onclick="abrirTopClientes()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:6px"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>Top Clientes · 20/80</button>
+        <button class="btn btn-topclientes" onclick="abrirTopClientes()"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:-2px;margin-right:6px"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>Top Clientes · 80/20</button>
       </div>
     </div>
 
@@ -1189,7 +1189,7 @@ window.addEventListener('load', () => { portalInit(); });
 })();
 </script>
 
-<!-- ══════════════ TOP CLIENTES · PARETO 20/80 ══════════════ -->
+<!-- ══════════════ TOP CLIENTES · PARETO 80/20 ══════════════ -->
 <style>
 .btn-topclientes{background:#2D3F5E;color:#C8C84A;border:1px solid #2D3F5E;display:inline-flex;align-items:center}
 .btn-topclientes:hover{background:#1E2D45}
@@ -1228,6 +1228,16 @@ window.addEventListener('load', () => { portalInit(); });
 .tc-hero .th-note{font-size:10px;color:#94A3B8;margin-top:2px}
 .tc-frase{padding:10px 24px;font-size:12px;color:#475569;background:#FFFDF2;border-bottom:1px solid #F0E9C8}
 .tc-frase strong{color:#2D3F5E}
+.tc-pensar{padding:12px 24px;background:#F8FAFC;border-bottom:1px solid #E2E8F0}
+.tc-pensar-titulo{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#2D3F5E;margin-bottom:7px;cursor:pointer;display:flex;align-items:center;gap:6px;user-select:none}
+.tc-pensar-titulo .seta{transition:.15s;display:inline-block}
+.tc-pensar.fechado .seta{transform:rotate(-90deg)}
+.tc-pensar.fechado .tc-pensar-lista{display:none}
+.tc-pensar-lista{display:grid;grid-template-columns:1fr 1fr;gap:6px 20px;font-size:11.5px;color:#475569;line-height:1.5}
+.tc-pensar-lista div{padding-left:14px;position:relative}
+.tc-pensar-lista div::before{content:'';position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:2px;background:#C8C84A}
+.tc-pensar-lista strong{color:#2D3F5E}
+@media (max-width:720px){.tc-pensar-lista{grid-template-columns:1fr}}
 .tc-body{overflow:auto;padding:6px 24px 18px}
 .tc-body table{width:100%;border-collapse:collapse;font-size:11.5px}
 .tc-body th{position:sticky;top:0;background:#fff;text-align:left;padding:10px 8px;font-size:10px;color:#64748B;font-weight:700;letter-spacing:.8px;text-transform:uppercase;border-bottom:2px solid #E2E8F0;white-space:nowrap}
@@ -1250,7 +1260,7 @@ window.addEventListener('load', () => { portalInit(); });
 <div class="tc-overlay" id="tcOverlay" onclick="if(event.target===this)fecharTopClientes()">
   <div class="tc-modal">
     <div class="tc-head">
-      <div><h2>Top Clientes</h2><div class="tc-sub" id="tcSub">Regra de Pareto · 20/80</div></div>
+      <div><h2>Top Clientes</h2><div class="tc-sub" id="tcSub">Regra de Pareto · 80/20</div></div>
       <div class="tc-visao" id="tcVisaoWrap">
         <button id="tcBtnGeral" class="ativa" onclick="tcTrocarVisao('geral')">Geral</button>
         <button id="tcBtnMeus" onclick="tcTrocarVisao('meus')">Minha carteira</button>
@@ -1263,6 +1273,15 @@ window.addEventListener('load', () => { portalInit(); });
     </div>
     <div class="tc-hero" id="tcHero"></div>
     <div class="tc-frase" id="tcFrase"></div>
+    <div class="tc-pensar" id="tcPensar">
+      <div class="tc-pensar-titulo" onclick="document.getElementById('tcPensar').classList.toggle('fechado')"><span class="seta">&#9662;</span> Com essa lista na m&atilde;o, pense em cada um</div>
+      <div class="tc-pensar-lista">
+        <div><strong>Quem &eacute; essa pessoa?</strong> Qual a profiss&atilde;o e a renda dela? Est&aacute; no formul&aacute;rio de ades&atilde;o &mdash; e diz muito sobre o pr&oacute;ximo cr&eacute;dito que ela pode contratar.</div>
+        <div><strong>Ela veio por indica&ccedil;&atilde;o?</strong> Quem indicou? Essa pessoa que indicou j&aacute; recebeu um obrigado &mdash; e j&aacute; foi convidada a indicar de novo?</div>
+        <div><strong>Quando foi seu &uacute;ltimo contato de valor?</strong> Sem vender nada: um parab&eacute;ns pela contempla&ccedil;&atilde;o, uma informa&ccedil;&atilde;o &uacute;til, um lembrete de assembleia.</div>
+        <div><strong>Quem essa pessoa pode indicar?</strong> Cliente que concentra cr&eacute;dito costuma conviver com gente do mesmo perfil. Pe&ccedil;a a indica&ccedil;&atilde;o com nome e sobrenome.</div>
+      </div>
+    </div>
     <div class="tc-body" id="tcBody"></div>
     <div class="tc-foot">
       <div class="tc-obs">Ranking pela base completa (todos os anos), somando todo o cr&eacute;dito de cada cliente. Os filtros de ano/m&ecirc;s/administradora n&atilde;o interferem &mdash; apenas o filtro de consultor.</div>
@@ -1387,7 +1406,7 @@ function abrirTopClientes() {
   const podeVerTudo = (typeof canSeeAll === 'function') && canSeeAll(portalUser) && tcVisao !== 'meus';
   document.getElementById('tcVisaoWrap').classList.toggle('mostrar', (typeof canSeeAll === 'function') && canSeeAll(portalUser));
   const pct = c.totalCred ? (c.topCred / c.totalCred * 100) : 0;
-  document.getElementById('tcSub').textContent = 'Regra de Pareto · 20/80 · ' + (c.escopo ? c.escopo : (podeVerTudo ? 'Todos os consultores' : (portalUser ? portalUser.nome : '')));
+  document.getElementById('tcSub').textContent = 'Regra de Pareto · 80/20 · ' + (c.escopo ? c.escopo : (podeVerTudo ? 'Todos os consultores' : (portalUser ? portalUser.nome : '')));
   document.getElementById('tcHero').innerHTML =
     '<div class="th-item"><div class="th-label">Melhores clientes</div><div class="th-val">' + c.topN + '</div><div class="th-note">20% de ' + c.clientes.length + ' clientes da base</div></div>' +
     '<div class="th-item"><div class="th-label">Cr&eacute;dito que eles somam</div><div class="th-val">' + fmtFull(c.topCred) + '</div><div class="th-note">de ' + fmtFull(c.totalCred) + ' no total</div></div>' +
@@ -1438,7 +1457,7 @@ function exportarTopClientes() {
   const ws = XLSX.utils.json_to_sheet(rows);
   ws['!cols'] = [{ wch: 4 }, { wch: 34 }, { wch: 18 }].concat(podeVerTudo ? [{ wch: 20 }] : []).concat([{ wch: 22 }, { wch: 7 }, { wch: 15 }, { wch: 10 }, { wch: 12 }, { wch: 13 }]);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, 'Top Clientes 20-80');
+  XLSX.utils.book_append_sheet(wb, ws, 'Top Clientes 80-20');
   XLSX.writeFile(wb, 'top-clientes-pareto-' + new Date().toISOString().slice(0, 10) + '.xlsx');
 }
 </script>
