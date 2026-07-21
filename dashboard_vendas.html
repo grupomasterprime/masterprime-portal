@@ -1233,6 +1233,11 @@ window.addEventListener('load', () => { portalInit(); });
 .tc-pensar-titulo .seta{transition:.15s;display:inline-block}
 .tc-pensar.fechado .seta{transform:rotate(-90deg)}
 .tc-pensar.fechado .tc-pensar-lista{display:none}
+.tc-pensar-titulo:hover{color:#1D4E89}
+.tc-pensar-chip{margin-left:auto;background:#C8C84A;color:#2D3F5E;border-radius:20px;padding:3px 12px;font-size:9px;font-weight:800;letter-spacing:.6px;white-space:nowrap}
+.tc-pensar-titulo:hover .tc-pensar-chip{background:#d8d85a}
+.tc-pensar.fechado .tc-pensar-chip::after{content:"CLIQUE PARA ABRIR"}
+.tc-pensar:not(.fechado) .tc-pensar-chip::after{content:"CLIQUE PARA FECHAR"}
 .tc-pensar-lista{margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px 20px;font-size:11.5px;color:#475569;line-height:1.5}
 .tc-pensar-lista div{padding-left:14px;position:relative}
 .tc-pensar-lista div::before{content:'';position:absolute;left:0;top:7px;width:6px;height:6px;border-radius:2px;background:#C8C84A}
@@ -1274,7 +1279,7 @@ window.addEventListener('load', () => { portalInit(); });
     <div class="tc-hero" id="tcHero"></div>
     <div class="tc-frase" id="tcFrase"></div>
     <div class="tc-pensar fechado" id="tcPensar">
-      <div class="tc-pensar-titulo" onclick="document.getElementById('tcPensar').classList.toggle('fechado')"><span class="seta">&#9662;</span> Com essa lista na m&atilde;o, pense em cada um</div>
+      <div class="tc-pensar-titulo" onclick="document.getElementById('tcPensar').classList.toggle('fechado')"><span class="seta">&#9662;</span> Com essa lista na m&atilde;o, pense em cada um<span class="tc-pensar-chip"></span></div>
       <div class="tc-pensar-lista">
         <div><strong>Quem &eacute; essa pessoa?</strong> Profiss&atilde;o e renda est&atilde;o no formul&aacute;rio de ades&atilde;o &mdash; e apontam o pr&oacute;ximo cr&eacute;dito.</div>
         <div><strong>Veio por indica&ccedil;&atilde;o?</strong> Quem indicou j&aacute; recebeu um obrigado &mdash; e j&aacute; foi convidado a indicar de novo?</div>
