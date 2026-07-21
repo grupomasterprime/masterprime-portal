@@ -1650,7 +1650,10 @@ async function enviarCadastro(){
   if (btn){ btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Enviando...'; }
 
   try {
-    const { data: criado, error: errC } = await sb.rpc('cliente_criar_processo', {
+    // Criação com retries automáticos em falha de rede ("Failed to fetch"):
+    // um soluço de conexão não pode derrubar o envio do cliente. O token é o
+    // mesmo em todas as tentativas, então não há risco de duplicar.
+    const paramsCriar = {
       p_nome: nome,
       p_cpf: cpf,
       p_email: email,
@@ -1661,9 +1664,27 @@ async function enviarCadastro(){
       p_descricao: descricao || null,
       p_dados_extras: dadosExtras,
       p_token: tokenGerado
-    });
-    if (errC) throw new Error(errC.message);
+    };
+    const ehErroRede = m => /failed to fetch|networkerror|network request failed|load failed/i.test(m || '');
+    let criado = null, errC = null;
+    for (let tentativa = 1; tentativa <= 3; tentativa++) {
+      const r = await sb.rpc('cliente_criar_processo', paramsCriar);
+      criado = r.data; errC = r.error;
+      if (!(errC && ehErroRede(errC.message))) break;
+      if (btn) btn.innerHTML = '<span class="spinner"></span> Conexão oscilou, tentando de novo (' + tentativa + '/3)...';
+      await new Promise(res => setTimeout(res, 1500 * tentativa));
+    }
+    if (errC) {
+      if (ehErroRede(errC.message))
+        throw new Error('sua conexão com a internet oscilou. Confira o sinal (Wi-Fi/4G) e toque em "Enviar processo" de novo — nenhum dado foi perdido.');
+      throw new Error(errC.message);
+    }
     const novoT = (criado && criado.token) || tokenGerado;
+
+    // ═══ A PARTIR DAQUI O PROCESSO JÁ EXISTE NO BANCO. ═══
+    // Nada abaixo pode jogar o cliente numa tela de erro (senão ele reenvia e
+    // duplica o processo). Tudo é best-effort; pendências vão pro aviso da equipe.
+    const pendencias = [];
 
     // grava as colunas novas (best-effort; se a RPC v2 ainda não existir, o
     // fallback dados_extras.jornada_v2 garante que nada quebra)
@@ -1690,20 +1711,37 @@ async function enviarCadastro(){
     for (const cat of documentos){
       const f = arquivosPendentes[cat.key];
       if (!f) continue;
-      const path = novoT + '/' + cat.key + '_' + Date.now() + '_' + f.name;
-      const { error: errUp } = await sb.storage.from('arquivos').upload(path, f);
-      if (errUp){ console.warn('Upload falhou:', cat.key, errUp.message); continue; }
-      await sb.rpc('cliente_registrar_arquivo', {
-        p_token: novoT,
-        p_nome_original: f.name,
-        p_storage_path: path,
-        p_categoria: cat.key
-      });
+      // até 2 tentativas por arquivo; se mesmo assim falhar, o processo segue
+      // e a equipe é avisada de que o documento ficou faltando
+      let subiu = false;
+      for (let tent = 1; tent <= 2 && !subiu; tent++) {
+        try {
+          const path = novoT + '/' + cat.key + '_' + Date.now() + '_' + f.name;
+          const { error: errUp } = await sb.storage.from('arquivos').upload(path, f);
+          if (errUp) { console.warn('Upload falhou:', cat.key, errUp.message); continue; }
+          try {
+            await sb.rpc('cliente_registrar_arquivo', {
+              p_token: novoT,
+              p_nome_original: f.name,
+              p_storage_path: path,
+              p_categoria: cat.key
+            });
+          } catch(eReg) { console.warn('Registro do arquivo falhou:', cat.key); }
+          subiu = true;
+        } catch(eUp) { console.warn('Upload lançou erro:', cat.key, eUp && eUp.message); }
+      }
+      if (!subiu) pendencias.push(cat.label || cat.key);
     }
 
     arquivosPendentes = {};
-    clienteNotificar(novoT, 'Novo processo recebido', nome);   // sininho da equipe; e-mail NÃO é enviado na abertura
+    try {
+      clienteNotificar(novoT, 'Novo processo recebido', nome);   // sininho da equipe; e-mail NÃO é enviado na abertura
+      if (pendencias.length) clienteNotificar(novoT, 'Documentos pendentes no envio', 'Falha de conexão ao subir: ' + pendencias.join(', ') + '. Pedir ao cliente pelo chat.');
+    } catch(e) { /* nunca bloqueia o sucesso */ }
     renderTelaSucesso(novoT, cpf);
+    if (pendencias.length) {
+      try { mostrarNotif('Processo enviado! Só não conseguimos subir: ' + pendencias.join(', ') + '. Nossa equipe vai te pedir pelo chat.', 'erro'); } catch(e) {}
+    }
   } catch(e){
     alerta('alerta-cadastro','Não conseguimos enviar agora: ' + e.message, 'erro');
     if (btn){ btn.disabled = false; btn.innerHTML = 'Enviar processo ' + ico('arrow'); }
