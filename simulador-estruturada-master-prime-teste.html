@@ -33,7 +33,12 @@
   .test-banner { background: var(--soft-blue); border: 1px solid #CBD5E1; color: var(--navy); padding: 10px 16px; border-radius: 8px; font-size: 12px; margin-bottom: 16px; text-align: center; }
 
   /* Tabela principal */
-  .ops-table-wrapper { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 24px; }
+  .ops-table-wrapper { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow-x: auto; margin-bottom: 24px; }
+  /* Coluna de ações (Editar/Duplicar/Excluir) fixa à direita: com muitas colunas
+     a tabela rola na horizontal e os botões ficam sempre visíveis */
+  .ops-table thead th:last-child { position: sticky; right: 0; background: var(--navy); z-index: 2; }
+  .ops-table tbody tr:not(.empty-row):not(.add-row) td:last-child { position: sticky; right: 0; background: var(--card, #fff); z-index: 1; box-shadow: -8px 0 10px -8px rgba(15,23,42,.25); }
+  .ops-table tfoot td:last-child { position: sticky; right: 0; background: var(--navy); z-index: 1; }
   .ops-table { width: 100%; border-collapse: collapse; font-size: 13px; }
   .ops-table thead { background: var(--navy); color: #fff; }
   .ops-table thead th { padding: 12px 10px; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; text-align: center; }
@@ -142,7 +147,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="simulacao-store.js"></script>
-<script src="pdf-master-prime.js?v=20260722"></script>
+<script src="pdf-master-prime.js?v=20260722b"></script>
 <script src="simulador-autosave.js?v=20260625b"></script>
 <script src="analitico-cet.js"></script>
 

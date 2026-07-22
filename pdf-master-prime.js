@@ -256,24 +256,28 @@
     const fontHeader = compact ? '11.5px' : '12.5px';
     const fontCell = compact ? '14px' : '15px';
 
+    const nCols = (bloco.colunas || []).length;
     const headHtml = (bloco.colunas || []).map((c, i) => `
-      <th style="padding:${padCell}; font-size:${fontHeader}; font-weight:700; letter-spacing:1.2px; color:${NAVY}; text-align:${i === 0 ? 'left' : 'center'}; border-bottom:2px solid ${BORDER}; vertical-align:middle;">${c}</th>
+      <th style="padding:${padCell}; font-size:${fontHeader}; font-weight:700; letter-spacing:1px; background:${NAVY}; color:#fff; text-align:${i === 0 ? 'left' : 'center'}; ${i < nCols-1 ? 'border-right:1px solid rgba(255,255,255,.16);' : ''} vertical-align:middle;">${c}</th>
     `).join('');
 
     const linhasHtml = (bloco.linhas || []).map((linha, iL) => {
       const isTotal = !!linha.total;
-      const bg = isTotal ? CARD_BG : (iL % 2 === 1 ? ZEBRA : '#fff');
+      // Linha Total: faixa navy com texto branco (mesmo padrão da tela)
+      const bg = isTotal ? NAVY : (iL % 2 === 1 ? ZEBRA : '#fff');
+      const corTexto = isTotal ? '#fff' : '#111827';
       const fontWeight = isTotal ? '700' : '600';
+      const bordaV = isTotal ? 'rgba(255,255,255,.16)' : BORDER;
       const cellsHtml = (linha.celulas || []).map((v, iV) => `
-        <td style="padding:${padCell}; font-size:${fontCell}; font-weight:${fontWeight}; color:#111827; text-align:${iV === 0 ? 'left' : 'center'}; vertical-align:middle;">${v == null ? '' : v}</td>
+        <td style="padding:${padCell}; font-size:${fontCell}; font-weight:${fontWeight}; color:${corTexto}; text-align:${iV === 0 ? 'left' : 'center'}; ${iV < nCols-1 ? `border-right:1px solid ${bordaV};` : ''} border-top:1px solid ${BORDER}; vertical-align:middle;">${v == null ? '' : v}</td>
       `).join('');
       return `<tr style="background:${bg};">${cellsHtml}</tr>`;
     }).join('');
 
     return `
       ${bloco.titulo ? `<div style="font-size:14px; font-weight:700; letter-spacing:2.5px; color:${NAVY}; margin:28px 0 16px;">${bloco.titulo}</div>` : '<div style="margin-top:24px;"></div>'}
-      <table style="width:100%; border-collapse:collapse; border-spacing:0; border:1px solid ${BORDER}; border-radius:8px; overflow:hidden;">
-        <thead><tr style="background:${CARD_BG};">${headHtml}</tr></thead>
+      <table style="width:100%; border-collapse:separate; border-spacing:0; border:1px solid ${BORDER}; border-radius:10px; overflow:hidden;">
+        <thead><tr>${headHtml}</tr></thead>
         <tbody>${linhasHtml}</tbody>
       </table>`;
   }
