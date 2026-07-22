@@ -39,19 +39,20 @@
   .ops-table thead th:last-child { position: sticky; right: 0; background: var(--navy); z-index: 2; }
   .ops-table tbody tr:not(.empty-row):not(.add-row) td:last-child { position: sticky; right: 0; background: var(--card, #fff); z-index: 1; box-shadow: -8px 0 10px -8px rgba(15,23,42,.25); }
   .ops-table tfoot td:last-child { position: sticky; right: 0; background: var(--navy); z-index: 1; }
-  .ops-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .ops-table { width: 100%; border-collapse: collapse; font-size: 12px; }
   .ops-table thead { background: var(--navy); color: #fff; }
-  .ops-table thead th { padding: 12px 10px; font-size: 11px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; text-align: center; }
-  .ops-table tbody td { padding: 12px 10px; text-align: center; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .ops-table thead th { padding: 10px 3px; font-size: 10px; font-weight: 600; letter-spacing: 0.3px; text-transform: uppercase; text-align: center; white-space: normal; line-height: 1.25; }
+  .ops-table tbody td { padding: 10px 3px; font-size: 11.5px; text-align: center; border-bottom: 1px solid var(--border); white-space: nowrap; }
   .ops-table tbody tr:last-child td { border-bottom: none; }
   .ops-table tfoot { background: var(--navy); color: #fff; font-weight: 600; }
-  .ops-table tfoot td { padding: 12px 10px; text-align: center; font-size: 13px; white-space: nowrap; }
+  .ops-table tfoot td { padding: 10px 3px; text-align: center; font-size: 11.5px; white-space: nowrap; }
   .ops-table .empty-row td { padding: 32px; text-align: center; color: var(--text-muted); font-style: italic; white-space: normal; }
   .ops-table .add-row td { padding: 0; text-align: center; }
   .add-btn { background: #fff; color: var(--navy); border: none; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 14px 28px; font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 0; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.15s; }
   .add-btn:hover { background: var(--soft-blue); }
-  .row-actions { display: flex; gap: 6px; justify-content: center; }
-  .row-actions button { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 11px; color: var(--text-muted); }
+  .row-actions { display: flex; gap: 4px; justify-content: center; }
+  .row-actions button { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 5px 6px; cursor: pointer; color: var(--text-muted); display: inline-flex; align-items: center; }
+  .row-actions .btn-del:hover { color: #DC2626; border-color: #DC2626; }
   .row-actions button:hover { background: var(--bg); }
   .row-actions .btn-edit:hover { color: var(--navy); border-color: var(--navy); }
   .row-actions .btn-dup:hover { color: var(--navy-soft); border-color: var(--navy-soft); }
@@ -921,7 +922,7 @@ function renderOps() {
       <td class="col-fgts${hasFgts ? '' : ' hidden'}">${lanceFgtsTotal > 0 ? formatMoney(lanceFgtsTotal) : '—'}</td>
       <td>${formatMoney(credDispTotal)}</td>
       <td>${formatMoney(parcPosTotal)}</td>
-      <td><div class="row-actions"><button class="btn-edit" data-action="edit" data-id="${op.id}">Editar</button><button class="btn-dup" data-action="dup" data-id="${op.id}">Duplicar</button><button class="btn-del" data-action="del" data-id="${op.id}">Excluir</button></div></td>
+      <td><div class="row-actions"><button class="btn-edit" data-action="edit" data-id="${op.id}" title="Editar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg></button><button class="btn-dup" data-action="dup" data-id="${op.id}" title="Duplicar"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button><button class="btn-del" data-action="del" data-id="${op.id}" title="Excluir"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button></div></td>
     </tr>`;
   }).join('');
 
