@@ -161,15 +161,17 @@
       parcelas = d.parcelas.slice();
     } else {
       parcelas = [];
+      // Convenção Conkey: o reajuste incide JÁ na parcela do mês do aniversário
+      // (12ª, 24ª...), não a partir da seguinte.
       let pPre = parcBase;
       for (let m = 1; m <= exp; m++) {
-        parcelas.push(pPre);
         if (reajOn && m % period === 0) pPre *= (1 + reaj);
+        parcelas.push(pPre);
       }
       let pPos = parcPos;
       for (let m = exp + 1; m <= exp + prazoRestPos; m++) {
-        parcelas.push(pPos);
         if (reajOn && m % period === 0) pPos *= (1 + reaj);
+        parcelas.push(pPos);
       }
     }
 

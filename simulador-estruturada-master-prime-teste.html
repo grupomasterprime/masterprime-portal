@@ -142,7 +142,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="simulacao-store.js"></script>
-<script src="pdf-master-prime.js?v=20260624f"></script>
+<script src="pdf-master-prime.js?v=20260722"></script>
 <script src="simulador-autosave.js?v=20260625b"></script>
 <script src="analitico-cet.js"></script>
 
@@ -1045,16 +1045,18 @@ function renderOps() {
       const expOp = parseInt(op.expectativa || '1', 10) || 1;
       const restOp = op.prazoRestante || 0;
       const q = op.qtdCartas || 1;
+      // Convenção Conkey: o reajuste incide JÁ na parcela do mês do aniversário
+      // (12ª, 24ª...), não a partir da seguinte.
       let idx = 0;
       let pPre = (op.parcelaInicialUnit || 0) * q;
       for (let m = 1; m <= expOp; m++, idx++) {
-        fluxoAgregado[idx] = (fluxoAgregado[idx] || 0) + pPre;
         if (reajOn && m % perOp === 0) pPre *= (1 + reajOp);
+        fluxoAgregado[idx] = (fluxoAgregado[idx] || 0) + pPre;
       }
       let pPos = (op.parcelaPosUnit || 0) * q;
       for (let m = expOp + 1; m <= expOp + restOp; m++, idx++) {
-        fluxoAgregado[idx] = (fluxoAgregado[idx] || 0) + pPos;
         if (reajOn && m % perOp === 0) pPos *= (1 + reajOp);
+        fluxoAgregado[idx] = (fluxoAgregado[idx] || 0) + pPos;
       }
     });
     AnaliticoCet.set('agregado', {
