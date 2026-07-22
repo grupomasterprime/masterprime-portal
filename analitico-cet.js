@@ -145,8 +145,10 @@
     if (!d || !d.credito) { alert('Preencha primeiro a simulação.'); return; }
     ensureModal();
 
-    // Constrói parcelas mês a mês — com reajuste cumulativo se reaj > 0
-    const parcelas = [];
+    // Constrói parcelas mês a mês — com reajuste cumulativo se reaj > 0.
+    // O caller pode passar `parcelas` (array mensal pronto): usado pelo
+    // agregado da Proposta Estruturada, onde cada operação tem seu próprio
+    // reajuste e o fluxo correto é a soma dos fluxos individuais.
     const exp = d.expectativa || 1;
     const parcBase = d.parcelaBase || d.parcelaInicial || 0;
     const parcPos = d.parcelaPos || 0;
@@ -154,28 +156,36 @@
     const reaj = d.reajuste || 0;
     const period = d.period || 12;
     const reajOn = reaj > 0 && d.tipoReajuste;
-    let pPre = parcBase;
-    for (let m = 1; m <= exp; m++) {
-      parcelas.push(pPre);
-      if (reajOn && m % period === 0) pPre *= (1 + reaj);
-    }
-    let pPos = parcPos;
-    for (let m = exp + 1; m <= exp + prazoRestPos; m++) {
-      parcelas.push(pPos);
-      if (reajOn && m % period === 0) pPos *= (1 + reaj);
+    let parcelas;
+    if (Array.isArray(d.parcelas) && d.parcelas.length) {
+      parcelas = d.parcelas.slice();
+    } else {
+      parcelas = [];
+      let pPre = parcBase;
+      for (let m = 1; m <= exp; m++) {
+        parcelas.push(pPre);
+        if (reajOn && m % period === 0) pPre *= (1 + reaj);
+      }
+      let pPos = parcPos;
+      for (let m = exp + 1; m <= exp + prazoRestPos; m++) {
+        parcelas.push(pPos);
+        if (reajOn && m % period === 0) pPos *= (1 + reaj);
+      }
     }
 
     const totalGeral = parcelas.reduce((a,b)=>a+b, 0);
 
-    // Agrupa por ano (Conkey style: saldo no INÍCIO do ano = total - acumulado - parc do mês 1)
+    // Agrupa por ano (Conkey style). Saldo devedor do ano = parcela vigente ×
+    // meses restantes após o 1º mês do ano — idêntico à fórmula antiga quando
+    // a parcela é fixa, e igual ao demonstrativo Conkey quando há reajuste.
     const anos = [];
-    let pagoAcumulado = 0;
-    for (let i = 0; i < parcelas.length; i += 12) {
+    const N = parcelas.length;
+    for (let i = 0; i < N; i += 12) {
       const slice = parcelas.slice(i, i+12);
       const totalAno = slice.reduce((a,b)=>a+b, 0);
-      const parcelaMes1 = parcelas[i] || 0;
-      const parcMensal = slice[slice.length-1] || parcPos;
-      const saldoInicio = totalGeral - pagoAcumulado - parcelaMes1;
+      const parcVigente = (parcelas[i+1] != null ? parcelas[i+1] : parcelas[i]) || 0;
+      const parcMensal = slice.length ? totalAno / slice.length : parcPos;   // média do ano (padrão Conkey)
+      const saldoInicio = parcVigente * Math.max(0, N - i - 1);
       anos.push({
         ano: anos.length+1,
         carta: d.credito,
@@ -183,7 +193,6 @@
         parcela: parcMensal,
         total: totalAno
       });
-      pagoAcumulado += totalAno;
     }
 
     // Memória de cálculo — aceita HTML customizado (memoriaHtml) ou usa fórmula padrão Op Simples

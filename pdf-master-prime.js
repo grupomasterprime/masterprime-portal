@@ -251,8 +251,10 @@
   function renderTabelaAmpla(bloco) {
     const compact = !!bloco.compact || (bloco.colunas || []).length >= 9;
     const padCell = compact ? '12px 10px' : '16px 14px';
-    const fontHeader = compact ? '11px' : '12px';
-    const fontCell = compact ? '13px' : '14px';
+    // Fontes maiores e texto mais escuro para legibilidade em impressão
+    // (feedback Vlamir 20/07/2026, comparativo visual com o PDF da Conkey)
+    const fontHeader = compact ? '11.5px' : '12.5px';
+    const fontCell = compact ? '14px' : '15px';
 
     const headHtml = (bloco.colunas || []).map((c, i) => `
       <th style="padding:${padCell}; font-size:${fontHeader}; font-weight:700; letter-spacing:1.2px; color:${NAVY}; text-align:${i === 0 ? 'left' : 'center'}; border-bottom:2px solid ${BORDER}; vertical-align:middle;">${c}</th>
@@ -261,9 +263,9 @@
     const linhasHtml = (bloco.linhas || []).map((linha, iL) => {
       const isTotal = !!linha.total;
       const bg = isTotal ? CARD_BG : (iL % 2 === 1 ? ZEBRA : '#fff');
-      const fontWeight = isTotal ? '700' : '500';
+      const fontWeight = isTotal ? '700' : '600';
       const cellsHtml = (linha.celulas || []).map((v, iV) => `
-        <td style="padding:${padCell}; font-size:${fontCell}; font-weight:${fontWeight}; color:#1F2937; text-align:${iV === 0 ? 'left' : 'center'}; vertical-align:middle;">${v == null ? '' : v}</td>
+        <td style="padding:${padCell}; font-size:${fontCell}; font-weight:${fontWeight}; color:#111827; text-align:${iV === 0 ? 'left' : 'center'}; vertical-align:middle;">${v == null ? '' : v}</td>
       `).join('');
       return `<tr style="background:${bg};">${cellsHtml}</tr>`;
     }).join('');
@@ -475,8 +477,8 @@
       const bg = iL % 2 === 0 ? ZEBRA : '#fff';
       return `
         <tr style="background:${bg};">
-          <td style="padding:18px 26px; font-size:16px; color:#374151; border-right:1px solid ${BORDER}; width:60%;">${linha.label}</td>
-          <td style="padding:18px 26px; font-size:18px; font-weight:700; color:#1F2937; text-align:right;">${linha.valor}</td>
+          <td style="padding:18px 26px; font-size:16px; font-weight:500; color:#1F2937; border-right:1px solid ${BORDER}; width:60%;">${linha.label}</td>
+          <td style="padding:18px 26px; font-size:18px; font-weight:700; color:#111827; text-align:right;">${linha.valor}</td>
         </tr>`;
     }).join('');
 

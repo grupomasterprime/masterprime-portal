@@ -626,13 +626,19 @@ function recalc() {
   document.getElementById('creditoAtualizado').value = formatMoney(creditoAtualizado);
 
   // Saldo devedor
+  // O saldo é amortizado pela parcela do PLANO efetivamente paga (com redutor,
+  // se houver), não pela parcela cheia. Antes descontava a cheia e a parcela
+  // pós-contemplação saía menor que a real (caso 50% redução: 2.411,84 vs
+  // 2.417,20 da Conkey — apontado pelo Vlamir em 20/07/2026).
   let saldo = totalDevido;
-  let parcelaAtual = parcelaBase;
+  let parcelaAtual = parcelaBase;            // parcela cheia (referência pós-contemplação)
+  let parcelaPagaPlano = parcelaComRedutor;  // o que amortiza o saldo até contemplar
   for (let m=1; m<=expectativa; m++) {
-    saldo -= parcelaAtual;
+    saldo -= parcelaPagaPlano;
     if (reajuste>0 && tipoReajuste && m % period === 0) {
       saldo *= (1+reajuste);
       parcelaAtual *= (1+reajuste);
+      parcelaPagaPlano *= (1+reajuste);
     }
   }
   saldo = Math.max(0, saldo);
@@ -1028,6 +1034,29 @@ function renderOps() {
         <span class="ace-mem-res">${(op.cetMensal||0).toFixed(4)} % a.m.</span>
       </div>
     `).join('');
+    // Fluxo mensal agregado: soma o fluxo de cada operação (cada uma com o
+    // próprio reajuste). A tabela ano a ano passa a mostrar a evolução REAL
+    // das parcelas (ex.: pré-fixado 3% a.a. no Itaú) em vez de parcela fixa.
+    const fluxoAgregado = [];
+    operacoes.forEach(op => {
+      const reajOp = unmaskPct(op.reajuste)/100;
+      const perOp = op.tipoReajuste ? (op.tipoReajuste.endsWith('-anual') ? 12 : op.tipoReajuste.endsWith('-semestral') ? 6 : 1) : 12;
+      const reajOn = reajOp > 0 && op.tipoReajuste;
+      const expOp = parseInt(op.expectativa || '1', 10) || 1;
+      const restOp = op.prazoRestante || 0;
+      const q = op.qtdCartas || 1;
+      let idx = 0;
+      let pPre = (op.parcelaInicialUnit || 0) * q;
+      for (let m = 1; m <= expOp; m++, idx++) {
+        fluxoAgregado[idx] = (fluxoAgregado[idx] || 0) + pPre;
+        if (reajOn && m % perOp === 0) pPre *= (1 + reajOp);
+      }
+      let pPos = (op.parcelaPosUnit || 0) * q;
+      for (let m = expOp + 1; m <= expOp + restOp; m++, idx++) {
+        fluxoAgregado[idx] = (fluxoAgregado[idx] || 0) + pPos;
+        if (reajOn && m % perOp === 0) pPos *= (1 + reajOp);
+      }
+    });
     AnaliticoCet.set('agregado', {
       titulo: 'Proposta Estruturada · CET agregado',
       credito: sumTotal,
@@ -1035,6 +1064,7 @@ function renderOps() {
       expectativa: 1,
       parcelaPos: sumParcPos,
       prazoRestPos: restMed,
+      parcelas: fluxoAgregado,
       memoriaHtml: `
         <div class="ace-mem-step">
           <span><strong>1.</strong> Você está estruturando <strong>${operacoes.length} operação${operacoes.length>1?'ões':''}</strong>:</span>
