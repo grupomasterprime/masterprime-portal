@@ -238,8 +238,9 @@ let selG=null, selMi=11, dtmr=null;
 
 (function(){
   document.getElementById("ec").textContent = keys.length+" grupos disponíveis";
-  selMi=11;
-  document.getElementById("ms").value="11";
+  // padrão: sempre a competência mais recente (não hardcodar índice!)
+  selMi=COMPS.length-1;
+  document.getElementById("ms").value=String(selMi);
   const inp=document.getElementById("si");
   inp.addEventListener("input", ()=>{ clearTimeout(dtmr); dtmr=setTimeout(doSearch,130); });
   inp.addEventListener("focus", doSearch);
@@ -273,7 +274,11 @@ function closeDD(){ document.getElementById("dd").classList.remove("open"); }
 
 function selGrupo(g){
   selG=g; document.getElementById("si").value=g; closeDD();
-  // mantém o mês selecionado pelo usuário — não muda automaticamente
+  // vai direto para a última competência COM DADOS deste grupo
+  const gd=D[g];
+  let ult=COMPS.length-1;
+  for(let i=COMPS.length-1;i>=0;i--){ if(gd[i]){ ult=i; break; } }
+  selMi=ult; document.getElementById("ms").value=String(ult);
   render(g);
 }
 
