@@ -302,7 +302,7 @@ const PROCESSOS_CATALOGO = [
   { admin:'bradesco', operacao:'faturamento', etapas:[
     { k:'contratacao',            nome:'Contratação',                              pre:true },
     { k:'contemplacao',           nome:'Contemplação',                             pre:true },
-    { k:'escolha_veiculo',        nome:'Escolha do veículo / dados do bem',        prazo_du:2 },
+    { k:'escolha_veiculo',        nome:'Escolha do veículo / dados do bem',        pre:true, obsPre:'Dados do veículo informados pelo cliente no formulário' },
     { k:'analise_credito',        nome:'Análise de crédito',                       prazo_du:3 },
     { k:'vistoria',               nome:'Vistoria (somente usados)',                prazo_du:3 },
     { k:'autorizacao_fat',        nome:'Autorização de faturamento',               prazo_du:3 },
@@ -500,7 +500,7 @@ function montarEtapasIniciais(admin, operacao){
   const etapas = cat.etapas.map(e => ({
     k: e.k, nome: e.nome,
     done_em: e.pre ? agora : null,
-    obs: e.pre ? 'Concluída na abertura do processo' : null
+    obs: e.pre ? (e.obsPre || 'Concluída na abertura do processo') : null
   }));
   const atual = etapas.findIndex(e => !e.done_em);
   return { etapas, etapa_atual: atual < 0 ? etapas.length - 1 : atual };
@@ -748,6 +748,7 @@ function selecionarTipoPessoa(tipo){
   if (lblNome) lblNome.innerHTML = (tipo === 'pj' ? 'Razão Social' : 'Nome completo') + ' <span class="req">*</span>';
   atualizarDocContratoSocial();
   atualizarVisibilidadeRepresentante();
+  atualizarVisibilidadeSocio();
 }
 function docsDoFluxo(){
   if (!wiz.admin || !wiz.op) return null;
@@ -756,11 +757,15 @@ function docsDoFluxo(){
   const lista = base.map(d => Object.assign({}, d));
   if (wiz.tipoPessoa === 'pj' && wiz.op === 'faturamento') {
     lista.push({ key:'contrato_social', label:'Contrato Social', sub:'Documento da empresa (obrigatório para PJ)', obrigatorio:true, iconKey:'docs' });
+    // Porto PJ: além do contrato social, a Porto exige a CNH do sócio que assina.
+    if (wiz.admin.id === 'porto') {
+      lista.push({ key:'cnh_socio', label:'CNH do sócio', sub:'CNH do sócio responsável (frente e verso)', obrigatorio:true, iconKey:'id' });
+    }
   }
   return lista;
 }
 function atualizarDocContratoSocial(){
-  if (wiz.tipoPessoa === 'pf') delete arquivosPendentes['contrato_social'];
+  if (wiz.tipoPessoa === 'pf') { delete arquivosPendentes['contrato_social']; delete arquivosPendentes['cnh_socio']; }
   renderSlotsAnexo();
 }
 function blocoEstadoCivil(){
@@ -806,6 +811,33 @@ function atualizarVisibilidadeRepresentante(){
   const card = document.getElementById('card-rep-legal');
   if (!card) return;
   card.style.display = (wiz.admin && wiz.admin.id === 'itau' && wiz.tipoPessoa === 'pj' && wiz.op === 'faturamento') ? 'block' : 'none';
+}
+
+// Porto PJ: a administradora exige os dados do sócio que assina, além do contrato social
+// e da CNH dele (esses dois vão como anexo, no passo de documentos).
+function blocoSocioPorto(){
+  return `
+    <div class="card" id="card-socio-porto" style="display:none">
+      <div class="card-head"><div><div class="card-title">${ico('user')} Dados do sócio (Porto PJ)</div><div class="card-sub">A Porto exige os dados do sócio responsável quando o titular é CNPJ. Anexe também o Contrato Social e a CNH do sócio no passo de documentos.</div></div></div>
+      <div class="card-body">
+        <div class="grid-2">
+          <div class="campo"><label>Nome do sócio <span class="req">*</span></label><input type="text" id="f-socio-nome" placeholder="Nome completo"></div>
+          <div class="campo"><label>CPF <span class="req">*</span></label><input type="text" id="f-socio-cpf" inputmode="numeric" placeholder="000.000.000-00" maxlength="14" oninput="mascaraCPF(this)"></div>
+        </div>
+        <div class="grid-2">
+          <div class="campo"><label>E-mail <span class="req">*</span></label><input type="email" id="f-socio-email" placeholder="socio@email.com"></div>
+          <div class="campo"><label>Telefone <span class="req">*</span></label><input type="text" id="f-socio-telefone" inputmode="numeric" placeholder="(00) 00000-0000" maxlength="15" oninput="mascaraTel(this)"></div>
+        </div>
+      </div>
+    </div>`;
+}
+function socioPortoObrigatorio(){
+  return !!(wiz.admin && wiz.admin.id === 'porto' && wiz.tipoPessoa === 'pj' && wiz.op === 'faturamento');
+}
+function atualizarVisibilidadeSocio(){
+  const card = document.getElementById('card-socio-porto');
+  if (!card) return;
+  card.style.display = socioPortoObrigatorio() ? 'block' : 'none';
 }
 
 // ── Passo 3: dados (sub-passos curtos por fluxo) ──
@@ -1172,6 +1204,7 @@ function renderWizDados(){
           </div>
         </div></div>
         ${a.id === 'itau' ? blocoRepresentanteLegal() : ''}
+        ${a.id === 'porto' ? blocoSocioPorto() : ''}
       </div>
       <div class="wiz-painel" data-sub="3" style="display:none">
         <div class="card">
@@ -1201,6 +1234,7 @@ function renderWizDados(){
   atualizarSubPasso();
   renderSlotsAnexo();
   atualizarVisibilidadeRepresentante();
+  atualizarVisibilidadeSocio();
 }
 
 function blocoLgpdEnvio(){
@@ -1319,6 +1353,10 @@ function validarSubPasso(sub){
     if (a.id === 'itau' && wiz.tipoPessoa === 'pj') {
       if (!val('f-rep-nome') || valNum('f-rep-cpf').length !== 11 || !val('f-rep-email'))
         return 'Preencha todos os dados do representante legal (Itaú PJ).';
+    }
+    if (socioPortoObrigatorio()) {
+      if (!val('f-socio-nome') || valNum('f-socio-cpf').length !== 11 || !val('f-socio-email') || valNum('f-socio-telefone').length < 10)
+        return 'Preencha nome, CPF, e-mail e telefone do sócio (Porto PJ).';
     }
     return null;
   }
@@ -1612,6 +1650,7 @@ async function enviarCadastro(){
     Object.assign(dadosExtras, {
       estado_civil: estadoCivil, conjuge: { nome: conjugeNome, cpf: conjugeCpf },
       representante_legal: { nome: val('f-rep-nome') || null, cpf: valNum('f-rep-cpf') || null, email: val('f-rep-email') || null },
+      socio: { nome: val('f-socio-nome') || null, cpf: valNum('f-socio-cpf') || null, email: val('f-socio-email') || null, telefone: val('f-socio-telefone') || null },
       data_nascimento: val('f-data_nasc') || null,
       endereco: val('f-endereco') || null,
       condicao_bem: cond,
