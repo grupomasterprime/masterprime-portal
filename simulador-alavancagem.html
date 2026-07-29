@@ -486,6 +486,7 @@ function recalc(){
     const lanceTotalValor = credito * (pP + pE + pFGTS);
     const baseDados = {
       credito: credito,
+      creditoAtualizado: creditoAtualizado, // teto da coluna "Carta de crédito" no analítico
       taxaAdm: taxaAdm,
       fundo: fundo,
       lanceProprios:   lanceTotalValor, // Alavancagem usa lance total no denominador

@@ -136,6 +136,14 @@
   .tab-analitico tfoot td { background: var(--navy); color: #fff; padding: 12px 14px; font-weight: 700; font-size: 12px; }
   .tab-analitico tfoot td:first-child { text-align: left; border-bottom-left-radius: 10px; }
   .tab-analitico tfoot td:last-child { text-align: right; border-bottom-right-radius: 10px; font-family: 'DM Mono', ui-monospace, monospace; }
+  .tab-analitico tbody tr.ano-row { cursor: pointer; }
+  .tab-analitico tbody tr.ano-row .chev { display: inline-block; width: 0; height: 0; border-left: 5px solid var(--navy); border-top: 4px solid transparent; border-bottom: 4px solid transparent; margin-right: 8px; vertical-align: middle; transition: transform .15s ease; }
+  .tab-analitico tbody tr.ano-row.aberta .chev { transform: rotate(90deg); }
+  .tab-analitico tbody tr.mes-row { display: none; background: #FAFBFC; }
+  .tab-analitico tbody tr.mes-row.visivel { display: table-row; }
+  .tab-analitico tbody tr.mes-row td { padding: 7px 14px; font-size: 12px; color: #6B7280; border-bottom: 1px dashed var(--border); }
+  .tab-analitico tbody tr.mes-row td:first-child { font-weight: 500; color: #6B7280; padding-left: 33px; }
+  .tag-cont { display: inline-block; background: var(--navy); color: #fff; font-size: 9px; font-weight: 600; padding: 1px 5px; border-radius: 4px; margin-left: 7px; letter-spacing: .4px; vertical-align: middle; }
 </style>
 </head>
 <body>
@@ -360,7 +368,7 @@
               <th>Ano</th>
               <th>Carta de crédito</th>
               <th>Saldo devedor</th>
-              <th>Parcela</th>
+              <th title="Média mensal do ano">Parcela</th>
               <th>Total pago</th>
             </tr>
           </thead>
@@ -796,6 +804,21 @@ function abrirAnalitico(modo) {
 
   const totalGeral = parcelas.reduce((a, b) => a + b, 0);
 
+  // Carta de crédito mês a mês: reajusta nos aniversários ATÉ a contemplação e depois congela.
+  // O teto de reajustes é o mesmo usado no campo "Crédito atualizado" (Math.floor(expectativa / period)),
+  // então a última linha da coluna bate exatamente com o crédito atualizado mostrado na tela.
+  const cartas = [];
+  const maxReajCarta = (s.reajuste > 0 && s.tipoReajuste) ? Math.floor(s.expectativa / period) : 0;
+  let cAtual = s.credito;
+  let nReajCarta = 0;
+  for (let m = 1; m <= parcelas.length; m++) {
+    cartas.push(cAtual);
+    if (s.reajuste > 0 && s.tipoReajuste && m % period === 0 && nReajCarta < maxReajCarta) {
+      cAtual *= (1 + s.reajuste);
+      nReajCarta++;
+    }
+  }
+
   // Agrupa por ano (12 meses) e calcula saldo devedor decrescente
   // Padrão Conkey: saldo devedor no INÍCIO do ano = total restante - parcela do mês 1 do ano
   const anos = [];
@@ -804,14 +827,31 @@ function abrirAnalitico(modo) {
     const slice = parcelas.slice(i, i + 12);
     const totalAno = slice.reduce((a, b) => a + b, 0);
     const parcelaMes1 = parcelas[i] || 0;
-    const parcelaMensal = slice[slice.length - 1] || parcPos;
+    // Padrão Conkey: a coluna "Parcela" do ano é a MÉDIA mensal do ano (total do ano ÷ nº de meses).
+    const parcelaMensal = slice.length ? (totalAno / slice.length) : parcPos;
     const saldoInicioAno = totalGeral - pagoAcumulado - parcelaMes1;
+    // Detalhamento mês a mês do ano (abre ao clicar na linha do ano)
+    let acumMes = pagoAcumulado;
+    const meses = slice.map((p, j) => {
+      const nMes = i + j + 1;
+      const saldoMes = totalGeral - acumMes - p;
+      acumMes += p;
+      return {
+        mes: nMes,
+        cartaCredito: cartas[i + j] != null ? cartas[i + j] : s.credito,
+        saldoDevedor: saldoMes,
+        parcela: p,
+        acumulado: acumMes,
+        contemplacao: nMes === s.expectativa,
+      };
+    });
     anos.push({
       ano: anos.length + 1,
-      cartaCredito: s.credito,
+      cartaCredito: cartas[i] != null ? cartas[i] : s.credito,
       saldoDevedor: saldoInicioAno,
       parcela: parcelaMensal,
       totalPago: totalAno,
+      meses: meses,
     });
     pagoAcumulado += totalAno;
   }
@@ -882,17 +922,30 @@ function abrirAnalitico(modo) {
 
   const tbody = document.getElementById('analiticoBody');
   tbody.innerHTML = anos.map(a => `
-    <tr>
-      <td>${a.ano}</td>
+    <tr class="ano-row" data-ano="${a.ano}" onclick="toggleAnoAnalitico(${a.ano})" title="Clique para ver mês a mês">
+      <td><span class="chev"></span>${a.ano}</td>
       <td>${fmt(a.cartaCredito)}</td>
       <td>${fmt(a.saldoDevedor)}</td>
       <td>${fmt(a.parcela)}</td>
       <td>${fmt(a.totalPago)}</td>
     </tr>
+    ${a.meses.map(m => `
+    <tr class="mes-row" data-ano="${a.ano}">
+      <td>Mês ${m.mes}${m.contemplacao ? '<span class="tag-cont">CONTEMPLAÇÃO</span>' : ''}</td>
+      <td>${fmt(m.cartaCredito)}</td>
+      <td>${fmt(m.saldoDevedor)}</td>
+      <td>${fmt(m.parcela)}</td>
+      <td title="Acumulado pago até este mês">${fmt(m.acumulado)}</td>
+    </tr>`).join('')}
   `).join('');
   document.getElementById('analiticoTotal').textContent = fmt(totalGeral);
-  document.getElementById('analiticoSub').textContent = titulo + ' · memória de cálculo ano a ano';
+  document.getElementById('analiticoSub').textContent = titulo + ' · memória de cálculo ano a ano (clique no ano para abrir mês a mês)';
   document.getElementById('modalAnalitico').classList.add('aberto');
+}
+function toggleAnoAnalitico(ano) {
+  const linhaAno = document.querySelector('#analiticoBody tr.ano-row[data-ano="' + ano + '"]');
+  if (linhaAno) linhaAno.classList.toggle('aberta');
+  document.querySelectorAll('#analiticoBody tr.mes-row[data-ano="' + ano + '"]').forEach(tr => tr.classList.toggle('visivel'));
 }
 function fecharAnalitico() {
   document.getElementById('modalAnalitico').classList.remove('aberto');

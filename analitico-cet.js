@@ -177,6 +177,28 @@
 
     const totalGeral = parcelas.reduce((a,b)=>a+b, 0);
 
+    // Carta de crédito mês a mês: reajusta nos aniversários ATÉ a contemplação e
+    // congela depois (mesma convenção Conkey usada nas parcelas — o reajuste
+    // incide JÁ no mês do aniversário). O teto de reajustes é Math.floor(exp/period),
+    // o mesmo do campo "Crédito atualizado" dos simuladores.
+    // Sem índice de reajuste (ex.: lado do financiamento no Cons × Financ, e o
+    // agregado da Proposta Estruturada) a carta permanece fixa, como antes.
+    // Se o caller informar `creditoAtualizado` (o valor que a própria tela mostra),
+    // ele é o teto — assim a coluna nunca contradiz o campo exibido no simulador.
+    const maxReajCarta = reajOn ? Math.floor(exp / period) : 0;
+    const tetoCarta = (d.creditoAtualizado != null && d.creditoAtualizado > 0) ? d.creditoAtualizado : null;
+    const cartas = [];
+    let cartaAtual = d.credito;
+    let nReajCarta = 0;
+    for (let m = 1; m <= parcelas.length; m++) {
+      if (reajOn && m % period === 0 && nReajCarta < maxReajCarta) {
+        cartaAtual *= (1 + reaj);
+        nReajCarta++;
+        if (tetoCarta != null) cartaAtual = Math.min(cartaAtual, tetoCarta);
+      }
+      cartas.push(cartaAtual);
+    }
+
     // Agrupa por ano (Conkey style). Saldo devedor do ano = parcela vigente ×
     // meses restantes após o 1º mês do ano — idêntico à fórmula antiga quando
     // a parcela é fixa, e igual ao demonstrativo Conkey quando há reajuste.
@@ -190,7 +212,7 @@
       const saldoInicio = parcVigente * Math.max(0, N - i - 1);
       anos.push({
         ano: anos.length+1,
-        carta: d.credito,
+        carta: (cartas[i] != null ? cartas[i] : d.credito),
         saldo: saldoInicio,
         parcela: parcMensal,
         total: totalAno
