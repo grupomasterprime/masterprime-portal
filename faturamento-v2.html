@@ -608,8 +608,9 @@ function fatDiasUteisDesde(iso) {
   if (!iso) return 0;
   return diasUteisEntre(iso, new Date());
 }
-// Verde = dentro do prazo_du da etapa atual · Amarelo = previsão hoje OU estourou prazo_du
-// Vermelho = previsão vencida OU estourou prazo_du * 2
+// Verde = ainda dentro do prazo_du da etapa · Amarelo = ÚLTIMO dia do prazo (du == prazo_du),
+// o retorno tem que vir hoje · Vermelho = passou do prazo_du, nem que seja por 1 d.u.
+// (mesma lógica já usada na previsão de retorno: hoje = amarelo, venceu = vermelho)
 function fatSemaforo(p) {
   if (p.status === 'Finalizado' || p.status === 'Cancelado')
     return { cls: 'sem-neutro', label: p.status === 'Finalizado' ? 'Concluído' : 'Cancelado', nivel: 0 };
@@ -626,8 +627,8 @@ function fatSemaforo(p) {
     const anterior = j.etapas.slice(0, j.atual).reverse().find(e => e.done_em);
     const inicio = (anterior && anterior.done_em) || p.criado_em;
     const du = fatDiasUteisDesde(inicio);
-    if (du > prazo * 2) return { cls: 'sem-verm',    label: 'Atrasado (' + du + '/' + prazo + ' d.u.)', nivel: 3 };
-    if (du > prazo)     return { cls: 'sem-amarelo', label: 'No limite (' + du + '/' + prazo + ' d.u.)', nivel: 2 };
+    if (du > prazo)     return { cls: 'sem-verm',    label: 'Atrasado (' + du + '/' + prazo + ' d.u.)', nivel: 3 };
+    if (du === prazo)   return { cls: 'sem-amarelo', label: 'Último dia (' + du + '/' + prazo + ' d.u.)', nivel: 2 };
     return { cls: 'sem-verde', label: 'Em dia (' + du + '/' + prazo + ' d.u.)', nivel: 1 };
   }
   const parado = fatDiasUteisDesde(p.atualizado_em || p.criado_em);
