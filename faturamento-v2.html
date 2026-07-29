@@ -755,18 +755,22 @@ async function renderAdminFaturamento() {
   fatFiltrar();
 }
 
+// Uma lista só, usada TANTO na contagem do card "Em andamento" QUANTO no filtro do clique,
+// para os dois nunca mais divergirem (antes o card contava 3 status e o clique filtrava 1).
+const FAT_STATUS_ANDAMENTO = ['Em análise', 'Enviado para administradora', 'Em retorno da administradora'];
+
 function fatRenderKpis() {
   const vivos = fatProcessos.filter(p => !p.arquivado);
   const total = vivos.length;
   const recebidos = vivos.filter(p => p.status === 'Recebido').length;
-  const andamento = vivos.filter(p => ['Em análise','Enviado para administradora','Em retorno da administradora'].includes(p.status)).length;
+  const andamento = vivos.filter(p => FAT_STATUS_ANDAMENTO.includes(p.status)).length;
   const finalizados = vivos.filter(p => p.status === 'Finalizado').length;
   const hojeN = vivos.filter(p => fatSemaforo(p).nivel === 2).length;
   const atrasados = vivos.filter(p => fatSemaforo(p).nivel === 3).length;
   document.getElementById('fat-kpis').innerHTML = `
     <div class="kpi k-teal" onclick="fatLimparFiltros()" title="Ver todos"><span>Total</span><b>${total}</b></div>
     <div class="kpi" onclick="fatFiltrarPorStatus('Recebido')" title="Filtrar: Recebido"><span>Recebidos</span><b>${recebidos}</b></div>
-    <div class="kpi" onclick="fatFiltrarPorStatus('Em análise')" title="Filtrar: em andamento"><span>Em andamento</span><b>${andamento}</b></div>
+    <div class="kpi" onclick="fatFiltrarAndamento()" title="Filtrar: em análise, enviados e em retorno da administradora"><span>Em andamento</span><b>${andamento}</b></div>
     <div class="kpi k-green" onclick="fatFiltrarPorStatus('Finalizado')" title="Filtrar: Finalizado"><span>Finalizados</span><b>${finalizados}</b></div>
     <div class="kpi k-yel" onclick="fatFiltrarNivel(2)" title="Filtrar: resposta prevista para hoje"><span>Resposta hoje</span><b>${hojeN}</b></div>
     <div class="kpi k-red" onclick="fatFiltrarNivel(3)" title="Filtrar: atrasados"><span>Atrasados</span><b>${atrasados}</b></div>`;
@@ -776,6 +780,14 @@ function fatFiltrarNivel(n) {
   document.getElementById('fat-busca').value = '';
   document.getElementById('fat-status-filtro').value = '';
   fatFiltrados = fatProcessos.filter(p => !p.arquivado && fatSemaforo(p).nivel === n);
+  fatRenderTabela(fatFiltrados);
+}
+// Mesmo caminho que os cards "Resposta hoje" e "Atrasados" já usavam: filtra direto,
+// sem passar pelo seletor de status (que só aceita um status por vez).
+function fatFiltrarAndamento() {
+  document.getElementById('fat-busca').value = '';
+  document.getElementById('fat-status-filtro').value = '';
+  fatFiltrados = fatProcessos.filter(p => !p.arquivado && FAT_STATUS_ANDAMENTO.includes(p.status));
   fatRenderTabela(fatFiltrados);
 }
 function fatFiltrarPorStatus(status) {
