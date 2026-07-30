@@ -186,6 +186,13 @@ textarea.inp{resize:vertical;min-height:60px}
 .int-cotas input{width:100%;padding:8px 10px;border:1.5px solid var(--border-2);border-radius:8px;font-size:12px;outline:none;font-family:'Inter',sans-serif}
 .int-cotas input:focus{border-color:var(--teal)}
 .int-cotas th,.int-cotas td{padding:7px 9px}
+.int-cotas .int-acoes{white-space:nowrap}
+.int-cotas .int-acoes .btn{padding:5px 8px;font-size:10.5px}
+.int-cotas .int-acoes .btn+.btn{margin-left:5px}
+.int-qtd{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.int-qtd .sep{font-size:11px;font-weight:700;color:var(--text-3)}
+.int-qtd input{width:64px;padding:7px 8px;border:1.5px solid var(--border-2);border-radius:8px;font-size:12px;font-weight:700;text-align:center;color:var(--ink);outline:none;font-family:'Inter',sans-serif}
+.int-qtd input:focus{border-color:var(--teal)}
 .arq-resumo{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:16px}
 .arq-resumo .cel{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 13px}
 .arq-resumo .cel .lbl{margin-bottom:2px;font-size:9px}
@@ -337,16 +344,21 @@ textarea.inp{resize:vertical;min-height:60px}
       <div class="m-body">
         <div class="int-grid">
           <div><div class="lbl">Nome do cliente</div><input id="fat-int-nome" class="inp" placeholder="Nome completo"></div>
-          <div><div class="lbl">CPF</div><input id="fat-int-cpf" class="inp" maxlength="14" oninput="maskCPF(this)" placeholder="000.000.000-00"></div>
-          <div><div class="lbl">Data de nascimento</div><input id="fat-int-nasc" type="date" class="inp"></div>
+          <div><div class="lbl">CPF ou CNPJ</div><input id="fat-int-cpf" class="inp" maxlength="18" oninput="fatInternoDoc(this)" placeholder="CPF ou CNPJ"></div>
+          <div><div class="lbl" id="fat-int-lbl-data">Data de nascimento</div><input id="fat-int-nasc" type="date" class="inp"></div>
         </div>
         <div class="lbl">Cotas para redução de taxa</div>
         <table class="int-cotas">
-          <thead><tr><th style="width:110px;">Grupo</th><th>Crédito (R$)</th><th>Taxa atual (%)</th><th>Taxa desejada (%)</th><th style="width:84px;"></th></tr></thead>
+          <thead><tr><th style="width:104px;">Grupo</th><th>Crédito (R$)</th><th>Taxa atual (%)</th><th>Taxa desejada (%)</th><th style="width:150px;"></th></tr></thead>
           <tbody id="fat-int-cotas-body"></tbody>
         </table>
         <div style="display:flex;justify-content:space-between;align-items:center;margin:10px 0 16px;flex-wrap:wrap;gap:8px;">
-          <button class="btn btn-outline btn-sm" onclick="fatInternoAddCota()">+ Adicionar cota</button>
+          <div class="int-qtd">
+            <button class="btn btn-outline btn-sm" onclick="fatInternoAddCota()">+ Adicionar cota</button>
+            <span class="sep">ou</span>
+            <input id="fat-int-qtd" type="number" min="1" max="50" step="1" value="4" title="Quantas cotas adicionar de uma vez">
+            <button class="btn btn-outline btn-sm" onclick="fatInternoAddVarias()" title="Cria a tabela já com essa quantidade de cotas">Gerar cotas</button>
+          </div>
           <div style="font-size:12.5px;font-weight:800;color:var(--ink);">Total de crédito: <span id="fat-int-total" class="mono">R$ 0,00</span></div>
         </div>
         <div class="feedback-msg" id="fat-int-feedback"></div>
@@ -1483,7 +1495,7 @@ function fatBlocoInternoDados(proc, podeEtapas) {
       <div class="lbl" style="margin:0;">Redução de taxa Itaú — processo interno</div>
       <button class="btn btn-cta btn-sm" style="margin-left:auto;" id="fat-btn-pedido-${proc.id}" onclick='fatCopiarPedidoItau(${fatJsArg(proc.id)})'>Copiar pedido para e-mail</button>
     </div>
-    ${de.data_nascimento ? `<div style="font-size:11.5px;color:var(--text-2);margin-bottom:8px;">Nascimento do cliente: <b>${esc(String(de.data_nascimento).split('-').reverse().join('/'))}</b></div>` : ''}
+    ${de.data_nascimento ? `<div style="font-size:11.5px;color:var(--text-2);margin-bottom:8px;">${fatEhPJProc(proc) ? 'Constituição da empresa' : 'Nascimento do cliente'}: <b>${esc(String(de.data_nascimento).split('-').reverse().join('/'))}</b></div>` : ''}
     <table style="margin-bottom:8px;">
       <thead><tr><th>#</th><th>Grupo</th><th>Crédito</th><th>Taxa atual</th><th>Taxa desejada</th></tr></thead>
       <tbody>${linhas || '<tr><td colspan="5" style="color:var(--text-3);">Sem cotas informadas</td></tr>'}</tbody>
@@ -1500,6 +1512,13 @@ function fatBlocoInternoDados(proc, podeEtapas) {
   </div>`;
 }
 
+// Um processo é PJ quando marcado como tal ou quando o documento tem 14 dígitos (CNPJ).
+function fatEhPJProc(proc) {
+  const de = parseDE(proc && proc.dados_extras);
+  if (de.pessoa) return String(de.pessoa).toUpperCase() === 'PJ';
+  return cleanCPF(proc && proc.cpf).length === 14;
+}
+
 // Monta o texto pronto do pedido de redução de taxa e copia para a área de transferência.
 function fatMontarPedidoItau(proc) {
   const de = parseDE(proc.dados_extras);
@@ -1513,16 +1532,19 @@ function fatMontarPedidoItau(proc) {
     String(c.grupo || '—').padEnd(l0) + ' | ' + moeda(c.credito).padEnd(l1) + '  | ' + String((c.taxa_atual ?? '—') + '%').padEnd(c2.length) + ' | ' + String((c.taxa_desejada ?? '—') + '%')
   );
   const total = cotas.reduce((soma, c) => soma + (parseFloat(c.credito) || 0), 0);
+  const pj = fatEhPJProc(proc);
+  const lblDoc = pj ? 'CNPJ' : 'CPF';
+  const lblData = pj ? 'Data de constituição' : 'Data de nascimento';
   return [
-    'Assunto sugerido: Solicitação de redução de taxa — ' + (proc.nome || '') + ' (CPF ' + fmtCPF(proc.cpf) + ')',
+    'Assunto sugerido: Solicitação de redução de taxa — ' + (proc.nome || '') + ' (' + lblDoc + ' ' + fmtCPF(proc.cpf) + ')',
     '',
     'Prezados, bom dia.',
     '',
     'Solicitamos a análise de redução de taxa para o cliente abaixo:',
     '',
     'Nome: ' + (proc.nome || ''),
-    'CPF: ' + fmtCPF(proc.cpf),
-    'Data de nascimento: ' + nasc,
+    lblDoc + ': ' + fmtCPF(proc.cpf),
+    lblData + ': ' + nasc,
     '',
     'Cotas:',
     c0.padEnd(l0) + ' | ' + c1.padEnd(l1) + '  | ' + c2 + ' | ' + c3,
@@ -1537,18 +1559,98 @@ function fatMontarPedidoItau(proc) {
     'Equipe Master Prime'
   ].join('\n');
 }
+
+// Versão em HTML do mesmo pedido: rótulos em negrito e as cotas dentro de uma tabela
+// de cabeçalho laranja, no padrão que o Itaú já recebe hoje.
+function fatMontarPedidoItauHTML(proc) {
+  const de = parseDE(proc.dados_extras);
+  const cotas = de.cotas || [];
+  const pj = fatEhPJProc(proc);
+  const lblDoc = pj ? 'CNPJ' : 'CPF';
+  const lblData = pj ? 'Data de constituição' : 'Data de nascimento';
+  const nasc = de.data_nascimento ? String(de.data_nascimento).split('-').reverse().join('/') : '—';
+  const moeda = v => (parseFloat(v) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+  const pct = v => (v === null || v === undefined || String(v).trim() === '') ? '—' : String(v).replace('.', ',') + '%';
+  const LARANJA = '#E8792B', LARANJA_CLARO = '#FCE9DA', BORDA = '#D9D9D9';
+  const tdBase = 'border:1px solid ' + BORDA + ';padding:7px 10px;font-size:13px;font-family:Calibri,Arial,sans-serif;';
+  const th = 'border:1px solid ' + BORDA + ';padding:8px 10px;background:' + LARANJA + ';color:#FFFFFF;font-weight:bold;font-size:13px;font-family:Calibri,Arial,sans-serif;text-align:center;';
+  const tot = 'border:1px solid ' + BORDA + ';padding:8px 10px;background:' + LARANJA_CLARO + ';color:#7A3B0E;font-weight:bold;font-size:13px;font-family:Calibri,Arial,sans-serif;text-align:center;';
+  const total = cotas.reduce((soma, c) => soma + (parseFloat(c.credito) || 0), 0);
+  const taxasAtuais = Array.from(new Set(cotas.map(c => pct(c.taxa_atual)).filter(v => v !== '—')));
+  const taxasDes = Array.from(new Set(cotas.map(c => pct(c.taxa_desejada)).filter(v => v !== '—')));
+  const linhas = cotas.map(c => '<tr>' +
+    '<td style="' + tdBase + 'text-align:center;">' + esc(String(c.grupo || '—')) + '</td>' +
+    '<td style="' + tdBase + 'text-align:right;">' + esc(moeda(c.credito)) + '</td>' +
+    '<td style="' + tdBase + 'text-align:center;">' + esc(pct(c.taxa_atual)) + '</td>' +
+    '<td style="' + tdBase + 'text-align:center;">' + esc(pct(c.taxa_desejada)) + '</td>' +
+    '</tr>').join('');
+  const p = 'margin:0 0 10px;font-size:13px;font-family:Calibri,Arial,sans-serif;color:#1F1F1F;';
+  return '<div style="font-family:Calibri,Arial,sans-serif;font-size:13px;color:#1F1F1F;">' +
+    '<p style="' + p + '">Prezados, bom dia.</p>' +
+    '<p style="' + p + '">Solicitamos a análise de <b>redução de taxa</b> para o cliente abaixo:</p>' +
+    '<p style="' + p + '"><b>Nome:</b> ' + esc(proc.nome || '') + '<br>' +
+      '<b>' + lblDoc + ':</b> ' + esc(fmtCPF(proc.cpf)) + '<br>' +
+      '<b>' + lblData + ':</b> ' + esc(nasc) + '</p>' +
+    '<table cellspacing="0" cellpadding="0" style="border-collapse:collapse;border:1px solid ' + BORDA + ';margin:6px 0 12px;">' +
+    '<thead><tr>' +
+      '<th style="' + th + '">GRUPO</th>' +
+      '<th style="' + th + '">VALOR DO BEM</th>' +
+      '<th style="' + th + '">TAXA ATUAL</th>' +
+      '<th style="' + th + '">TAXA SOLICITADA</th>' +
+    '</tr></thead>' +
+    '<tbody>' + (linhas || '<tr><td colspan="4" style="' + tdBase + 'text-align:center;color:#888;">Sem cotas informadas</td></tr>') + '</tbody>' +
+    '<tfoot><tr>' +
+      '<td style="' + tot + '">' + cotas.length + '</td>' +
+      '<td style="' + tot + 'text-align:right;">' + esc(moeda(total)) + '</td>' +
+      '<td style="' + tot + '">' + esc(taxasAtuais.length === 1 ? taxasAtuais[0] : '—') + '</td>' +
+      '<td style="' + tot + '">' + esc(taxasDes.length === 1 ? taxasDes[0] : '—') + '</td>' +
+    '</tr></tfoot>' +
+    '</table>' +
+    '<p style="' + p + '">Ficamos à disposição para qualquer informação adicional.</p>' +
+    '<p style="' + p + '">Atenciosamente,<br><b>Equipe Master Prime</b></p>' +
+    '</div>';
+}
+
 async function fatCopiarPedidoItau(processoId) {
   const { data: proc } = await sb.from('portal_processos').select('*').eq('id', processoId).single();
   if (!proc) return;
   const texto = fatMontarPedidoItau(proc);
-  window.__ultimoPedidoCopiado = texto;   // facilita testes automatizados
+  const html = fatMontarPedidoItauHTML(proc);
+  window.__ultimoPedidoCopiado = texto;        // facilita testes automatizados
+  window.__ultimoPedidoCopiadoHTML = html;
   let ok = false;
+  // 1) Preferido: escreve HTML + texto puro, para o Outlook colar a tabela formatada.
   try {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      await navigator.clipboard.writeText(texto);
+    if (navigator.clipboard && window.ClipboardItem && navigator.clipboard.write) {
+      await navigator.clipboard.write([new ClipboardItem({
+        'text/html': new Blob([html], { type: 'text/html' }),
+        'text/plain': new Blob([texto], { type: 'text/plain' })
+      })]);
       ok = true;
     }
-  } catch (e) { /* cai para o fallback */ }
+  } catch (e) { /* cai para os próximos caminhos */ }
+  // 2) Fallback com formatação: seleciona um nó HTML oculto e usa execCommand.
+  if (!ok) {
+    try {
+      const div = document.createElement('div');
+      div.innerHTML = html;
+      div.setAttribute('contenteditable', 'true');
+      div.style.position = 'fixed'; div.style.left = '-9999px'; div.style.top = '0';
+      div.style.whiteSpace = 'normal'; div.style.opacity = '0';
+      document.body.appendChild(div);
+      const range = document.createRange();
+      range.selectNodeContents(div);
+      const sel = window.getSelection();
+      sel.removeAllRanges(); sel.addRange(range);
+      ok = document.execCommand('copy');
+      sel.removeAllRanges();
+      document.body.removeChild(div);
+    } catch (e) { ok = false; }
+  }
+  // 3) Último recurso: texto puro.
+  if (!ok) {
+    try { if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(texto); ok = true; } } catch (e) { /* segue */ }
+  }
   if (!ok) {
     try {
       const ta = document.createElement('textarea');
@@ -1874,6 +1976,9 @@ function fatAbrirInterno() {
   document.getElementById('fat-int-nasc').value = '';
   document.getElementById('fat-int-feedback').innerHTML = '';
   document.getElementById('fat-int-cotas-body').innerHTML = '';
+  const qtd = document.getElementById('fat-int-qtd');
+  if (qtd) qtd.value = '4';
+  fatInternoAtualizarLabelData();
   fatInternoAddCota();
   overlay.classList.add('aberto');
 }
@@ -1881,18 +1986,66 @@ function fatFecharInterno(event) {
   if (event && event.target !== document.getElementById('fat-interno-overlay')) return;
   document.getElementById('fat-interno-overlay').classList.remove('aberto');
 }
-function fatInternoAddCota() {
+// Detecta se o documento digitado é PJ (14 dígitos = CNPJ) e ajusta o rótulo da data.
+function fatInternoEhPJ() {
+  const el = document.getElementById('fat-int-cpf');
+  return !!el && cleanCPF(el.value).length > 11;
+}
+function fatInternoAtualizarLabelData() {
+  const lbl = document.getElementById('fat-int-lbl-data');
+  if (lbl) lbl.textContent = fatInternoEhPJ() ? 'Data de constituição' : 'Data de nascimento';
+}
+function fatInternoDoc(el) {
+  maskCpfCnpj(el);
+  fatInternoAtualizarLabelData();
+}
+// Cria de uma vez a quantidade de cotas escolhida no seletor ao lado do botão.
+function fatInternoAddVarias() {
+  const inp = document.getElementById('fat-int-qtd');
   const tbody = document.getElementById('fat-int-cotas-body');
-  if (!tbody) return;
+  if (!inp || !tbody) return;
+  let n = parseInt(inp.value, 10);
+  if (!Number.isFinite(n) || n < 1) n = 1;
+  if (n > 50) n = 50;
+  inp.value = String(n);
+  // Se as linhas existentes estiverem todas em branco, a tabela é refeita com a quantidade pedida.
+  const linhas = Array.from(tbody.querySelectorAll('tr'));
+  const vazia = tr => !Array.from(tr.querySelectorAll('input')).some(i => i.value.trim() !== '');
+  if (linhas.length && linhas.every(vazia)) tbody.innerHTML = '';
+  for (let i = 0; i < n; i++) fatInternoAddCota();
+}
+// dados opcional: { grupo, credito, taxa_atual, taxa_desejada }; depois opcional: <tr> após o qual inserir.
+function fatInternoAddCota(dados, depois) {
+  const tbody = document.getElementById('fat-int-cotas-body');
+  if (!tbody) return null;
+  const d = dados || {};
   const tr = document.createElement('tr');
   tr.innerHTML = `
-    <td><input class="fat-int-grupo" placeholder="Ex: 20044"></td>
-    <td><input class="fat-int-credito" inputmode="numeric" placeholder="80.000,00" oninput="fatInternoSoma()"></td>
-    <td><input class="fat-int-taxa-atual" inputmode="decimal" placeholder="18"></td>
-    <td><input class="fat-int-taxa-des" inputmode="decimal" placeholder="12"></td>
-    <td><button class="btn btn-danger btn-sm" onclick="fatInternoRemCota(this)">Remover</button></td>`;
-  tbody.appendChild(tr);
+    <td><input class="fat-int-grupo" placeholder="Ex: 20044" value="${esc(d.grupo || '')}"></td>
+    <td><input class="fat-int-credito" inputmode="numeric" placeholder="80.000,00" oninput="fatInternoSoma()" value="${esc(d.credito || '')}"></td>
+    <td><input class="fat-int-taxa-atual" inputmode="decimal" placeholder="18" value="${esc(d.taxa_atual || '')}"></td>
+    <td><input class="fat-int-taxa-des" inputmode="decimal" placeholder="12" value="${esc(d.taxa_desejada || '')}"></td>
+    <td class="int-acoes">
+      <button class="btn btn-outline btn-sm" onclick="fatInternoDupCota(this)" title="Duplicar esta cota">Duplicar</button>
+      <button class="btn btn-danger btn-sm" onclick="fatInternoRemCota(this)" title="Remover esta cota">Remover</button>
+    </td>`;
+  if (depois && depois.parentNode === tbody) tbody.insertBefore(tr, depois.nextSibling);
+  else tbody.appendChild(tr);
   fatInternoSoma();
+  return tr;
+}
+// Copia a linha já preenchida para uma nova logo abaixo — útil quando várias cotas são iguais.
+function fatInternoDupCota(btn) {
+  const tr = btn.closest('tr');
+  if (!tr) return;
+  const val = sel => tr.querySelector(sel)?.value || '';
+  const novo = fatInternoAddCota({
+    grupo: val('.fat-int-grupo'),
+    credito: val('.fat-int-credito'),
+    taxa_atual: val('.fat-int-taxa-atual'),
+    taxa_desejada: val('.fat-int-taxa-des')
+  }, tr);
+  if (novo) novo.querySelector('.fat-int-grupo')?.focus();
 }
 function fatInternoRemCota(btn) {
   const tr = btn.closest('tr');
@@ -1915,7 +2068,8 @@ async function fatCriarInterno() {
   const cpf = cleanCPF(document.getElementById('fat-int-cpf').value);
   const nasc = document.getElementById('fat-int-nasc').value || null;
   if (!nome) { fb.innerHTML = '<span style="color:var(--red);">Informe o nome do cliente.</span>'; return; }
-  if (cpf.length !== 11) { fb.innerHTML = '<span style="color:var(--red);">Informe um CPF válido.</span>'; return; }
+  if (cpf.length !== 11 && cpf.length !== 14) { fb.innerHTML = '<span style="color:var(--red);">Informe um CPF (11 dígitos) ou CNPJ (14 dígitos) válido.</span>'; return; }
+  const ehPJ = cpf.length === 14;
   const cotas = [];
   document.querySelectorAll('#fat-int-cotas-body tr').forEach(tr => {
     const grupo = tr.querySelector('.fat-int-grupo')?.value.trim() || null;
@@ -1930,6 +2084,7 @@ async function fatCriarInterno() {
   const token = fatGerarTokenSeguro();   // gerado por consistência, mas nunca exibido
   const dadosExtras = {
     banco: 'itau', tipo_operacao: 'reducao_taxa', interno: true,
+    pessoa: ehPJ ? 'PJ' : 'PF',
     data_nascimento: nasc, cotas, total_credito: totalCredito,
     jornada_v2: jor ? { administradora: 'Itaú', operacao: 'reducao_taxa', etapas: jor.etapas, etapa_atual: jor.etapa_atual } : null
   };
