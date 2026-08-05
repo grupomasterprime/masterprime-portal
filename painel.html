@@ -2211,6 +2211,27 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
 
     if (pct > 0.04) {
       // Split percentual direto (40% VAGNER, 50% DOUGLAS etc.)
+      // Regra confirmada pelo Allan em 05/08/2026:
+      // - Nome CONHECIDO (sócio, consultor do Elite, alias ou parceiro das listas) →
+      //   divide entre eles como sempre (demonstrativo).
+      // - Nome DESCONHECIDO (ex: "50% MURILO") → parceiro externo por fração: a parte
+      //   dele (NN% da comissão do consultor, na categoria do consultor — Black 3% →
+      //   1,5% cada em "50%") vira CARTA DE PARCERIA do consultor da venda ("vc paga").
+      //   O consultor recebe a linha integral e repassa do bolso. Funciona com 50%,
+      //   40%, 33% etc., sem precisar saber a categoria do parceiro.
+      const ehConhecido = TODOS_SOCIOS.includes(nome) || nome === normNome(consultor) ||
+        Object.keys(S.elite||{}).includes(nome) || Object.values(ALIASES).includes(nome) ||
+        PARCEIROS_DEMO.includes(nome) || PARCEIROS_COM_NF.includes(nome) ||
+        VENDEDORES_SEM_ADM.includes(nome) || PARCEIROS_CARTA.some(p => nome.includes(p));
+      if (!ehConhecido) {
+        const multEf = multConsultor || 0.625;
+        const baseCat = (linhaCtx && linhaCtx.isPesado) ? 0.03 : 0.04;
+        return { tipo:'ok', partes:[
+          { quem:nome, fracBruto:pct * multEf, pctOrig:pct * multEf * baseCat,
+            ehParceiro:true, masterPaga:false, oculto:false,
+            ehCarta:true, cartaResp:consultor, ehLiquido:ehLiq }
+        ]};
+      }
       return { tipo:'ok', partes:[
         { quem:nome, fracBruto:pct, ehParceiro:false, masterPaga:false, oculto:false, ehCarta:false }
       ]};
