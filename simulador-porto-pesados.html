@@ -268,7 +268,8 @@
           <button type="button" class="lance-btn fixo40" data-strat="fixo40-embutido">Fixo 40% + Emb.</button>
         </div>
         <div class="clear-btn-row">
-          <button type="button" class="lance-btn" data-strat="fidelidade" title="Lance Fidelidade: embutido de 20% sobre o crédito">Fidelidade 20%</button>
+          <button type="button" class="lance-btn" data-strat="fidelidade-bolso" title="Lance Fidelidade: oferta de 20% paga do bolso">Fidelidade 20% · Bolso</button>
+          <button type="button" class="lance-btn" data-strat="fidelidade-embutido" title="Lance Fidelidade: oferta de 20% paga com lance embutido">Fidelidade 20% + Emb.</button>
           <button type="button" class="clear-btn" data-strat="limpar">Limpar</button>
         </div>
 
@@ -676,10 +677,20 @@ function aplicaEstrategia(strat, pctLivre = null) {
       if (recProp < 0) recProp = 0;
       break;
     }
-    case 'fidelidade': {
-      // Lance Fidelidade: embutido de 20% SOBRE O CRÉDITO (não sobre a categoria).
-      embutido = i.credito * 0.20;
-      recProp = 0;
+    case 'fidelidade-bolso': {
+      // Lance Fidelidade: oferta de 20% da categoria (igual ao fixo de 40%), paga do bolso.
+      const fid = categoria * 0.20;
+      recProp = fid;
+      embutido = 0;
+      break;
+    }
+    case 'fidelidade-embutido': {
+      // Lance Fidelidade: oferta de 20% da categoria, paga com embutido (até o máx.)
+      // e o restante do bolso.
+      const fid = categoria * 0.20;
+      embutido = Math.min(maxEmb, Math.max(0, fid));
+      recProp = fid - embutido;
+      if (recProp < 0) recProp = 0;
       break;
     }
   }
