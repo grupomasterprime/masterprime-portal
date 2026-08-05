@@ -1202,9 +1202,13 @@ function parcTotBradesco(pct) {
 }
 
 function itauParcTotal(grupo, dataVenda=null) {
-  const g = String(grupo||'').trim();
+  // Normaliza o grupo antes dos testes de prefixo: remove o "I" e os zeros à
+  // esquerda (extrato Itaú de jul/2026 passou a vir com grupo de 6 dígitos,
+  // ex. "050146" → "50146"), igual o ehGrupo10Parcelas já fazia.
+  const g = String(grupo||'').trim().replace(/^I/,'').replace(/^0+/,'');
   const gn = parseInt(g.replace(/\D/g,'')) || 0;
   if (ehGrupo10Parcelas(grupo)) return 10; // 50141, 50127, 50136, 50142
+  if (gn === 78) return 6; // grupo 000078 — Imóvel, regra padrão (6 parcelas iguais)
   if (/^(20|50)/.test(g)) return 4;
   if (/^40/.test(g)) {
     if (gn <= 40199) return 6;
