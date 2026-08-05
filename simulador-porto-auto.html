@@ -301,6 +301,7 @@
           <button type="button" class="lance-btn" data-strat="livre-embutido">Livre + Embutido</button>
           <button type="button" class="lance-btn" data-strat="fixo-bolso">Fixo · Bolso</button>
           <button type="button" class="lance-btn" data-strat="fixo-embutido">Fixo + Embutido</button>
+          <button type="button" class="lance-btn" data-strat="fidelidade" title="Lance Fidelidade: embutido de 20% sobre o crédito">Fidelidade 20%</button>
           <button type="button" class="clear-btn" data-strat="limpar">Limpar</button>
         </div>
 
@@ -734,6 +735,12 @@ function aplicaEstrategia(strat, pctLivre = null) {
       if (recProp < 0) recProp = 0;
       break;
     }
+    case 'fidelidade': {
+      // Lance Fidelidade: embutido de 20% SOBRE O CRÉDITO (não sobre a categoria).
+      embutido = i.credito * 0.20;
+      recProp = 0;
+      break;
+    }
   }
 
   if (recProp < 0) recProp = 0;
@@ -822,6 +829,11 @@ document.getElementById('btnTaxasDefault').addEventListener('click', () => {
 // digita % que excederia esse limite, o R$ é clampado e o % recalculado.
 // ═══════════════════════════════════════════════════════
 let _paSyncing = false;
+// Base dos campos de % digitados: % SOBRE O CRÉDITO (igual à dica dos campos).
+// A representatividade sobre a categoria continua na barra LANCE TOTAL.
+function _paBasePct() {
+  return unmaskMoney(get('pa-credito').value);
+}
 function _paCategoria() {
   const credito = unmaskMoney(get('pa-credito').value);
   const adm = unmaskPct(get('pa-taxaAdm').value) / 100;
@@ -835,7 +847,7 @@ function _paMaxEmbutidoRs() {
 }
 function syncPctToRs(idPct, idRs) {
   if (_paSyncing) return;
-  const cat = _paCategoria();
+  const cat = _paBasePct();
   const pct = unmaskPct(get(idPct).value) / 100;
   if (!(cat > 0) || !(pct >= 0)) return;
   _paSyncing = true;
@@ -855,7 +867,7 @@ function syncPctToRs(idPct, idRs) {
 }
 function syncRsToPct(idRs, idPct) {
   if (_paSyncing) return;
-  const cat = _paCategoria();
+  const cat = _paBasePct();
   let v = unmaskMoney(get(idRs).value);
   if (!(cat > 0)) return;
   _paSyncing = true;
@@ -898,7 +910,7 @@ get('pa-recProp').addEventListener('input', () => syncRsToPct('pa-recProp', 'pa-
 // Recalcula % do lance dinamicamente quando taxas/crédito/limite mudam
 function _paRefreshPcts() {
   if (_paSyncing) return;
-  const cat = _paCategoria();
+  const cat = _paBasePct();
   if (!(cat > 0)) return;
   _paSyncing = true;
   // Re-clamp embutido (caso o crédito ou pctEmbMax tenham reduzido o max)
