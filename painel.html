@@ -1412,20 +1412,36 @@ function parseAdemicon(data) {
   const header = (data[0]||[]).map(x => String(x).toLowerCase());
   const idxParc = header.findIndex(h => h.includes('parcela'));
   const idxData = header.findIndex(h => h.includes('data'));
-  const idxCli  = header.findIndex(h => h.includes('cliente') || h.includes('nome'));
+  // "Cliente" tem prioridade sobre "nome" — o layout ago/2026 tem "Nome ponto de
+  // venda" ANTES de "Nome do Cliente", e só "nome" pegaria a coluna errada.
+  const idxCliente = header.findIndex(h => h.includes('cliente'));
+  const idxCli  = idxCliente >= 0 ? idxCliente : header.findIndex(h => h.includes('nome'));
+  // Layout ago/2026 da Ademicon: nova col 0 "Status" ("Comissão Paga"), "Valor bruto"
+  // foi pra col 1, Grupo/Cota pra 4/5 etc. Localiza tudo pelo cabeçalho, com os
+  // índices do layout jul/2026 como fallback — assim os dois formatos funcionam.
+  const idxVal   = header.findIndex(h => h.includes('valor bruto') || h === 'valor' || h.includes('bruto'));
+  const idxGrupo = header.findIndex(h => h.includes('grupo'));
+  const idxCota  = header.findIndex(h => h.includes('cota'));
+  const idxCtr   = header.findIndex(h => h.includes('contrato'));
+  const idxSeg   = header.findIndex(h => h.includes('segmento'));
   // Fallback pro layout novo se header não bater
   const cParc = idxParc >= 0 ? idxParc : 8;
   const cData = idxData >= 0 ? idxData : 7;
   const cCli  = idxCli  >= 0 ? idxCli  : 9;
+  const cVal   = idxVal   >= 0 ? idxVal   : 0;
+  const cGrupo = idxGrupo >= 0 ? idxGrupo : 2;
+  const cCota  = idxCota  >= 0 ? idxCota  : 3;
+  const cCtr   = idxCtr   >= 0 ? idxCtr   : 5;
+  const cSeg   = idxSeg   >= 0 ? idxSeg   : 4;
   const rows = [];
   for (let i = 1; i < data.length; i++) {
     const r = data[i];
-    const recebido = parseFloat(String(r[0]||0).replace(',','.')) || 0;
+    const recebido = parseFloat(String(r[cVal]||0).replace(',','.')) || 0;
     if (!recebido) continue;
-    const grupo = String(r[2]||'').trim().replace(/^0+/, '') || String(r[2]||'').trim();
-    const cota = String(r[3]||'').trim();
-    const segmento = String(r[4]||'').trim();
-    const contrato = String(r[5]||'').replace(/\D/g,'');
+    const grupo = String(r[cGrupo]||'').trim().replace(/^0+/, '') || String(r[cGrupo]||'').trim();
+    const cota = String(r[cCota]||'').trim();
+    const segmento = String(r[cSeg]||'').trim();
+    const contrato = String(r[cCtr]||'').replace(/\D/g,'');
     // Ademicon paga a comissão em 14 parcelas (plano 50%-Diluído / regra 1027,
     // distribuído em 15 meses com a 14ª pulada). Mostra "X/14" igual Porto/Itaú/Bradesco.
     const parcRaw = String(r[cParc]||'').trim();
