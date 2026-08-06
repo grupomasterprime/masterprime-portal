@@ -401,6 +401,7 @@ body.embedded-mode .portal-menu-fab { display:flex; }
         <img src="logo.png" alt="Master Prime" style="width:100%;max-width:200px;height:auto;display:block;margin:0 auto;filter:brightness(0) invert(1)">
       </div>
       <div class="sb-section">Menu</div>
+      <div class="sb-item" onclick="nav('home')" id="ni-home"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span> Início</div>
       <div class="sb-item active" onclick="nav('dashboard-vendas')" id="ni-dashboard-vendas"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18.7 8l-5.1 5.2-2.8-2.7L7 14.3"/></svg></span> Dashboard Vendas</div>
       <div class="sb-item" onclick="nav('assembleia')" id="ni-assembleia"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg></span> Resultado Assembleia</div>
       <div class="sb-item" onclick="nav('lances')" id="ni-lances"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></span> Consulta de Lances</div>
@@ -440,6 +441,88 @@ body.embedded-mode .portal-menu-fab { display:flex; }
       </div>
     </aside>
     <main class="main">
+
+      <!-- HOME / INÍCIO — placar Acelera Agosto (lê portal_vendas_cache do Supabase) -->
+      <div class="screen" id="s-home">
+        <style>
+          #s-home .hm-hero{background:linear-gradient(120deg,#2D3F5E 0%,#22314b 70%);border-radius:16px;color:#fff;padding:24px 26px;display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end;justify-content:space-between;margin-bottom:16px}
+          #s-home .hm-camp{font-size:11px;font-weight:700;letter-spacing:2.5px;color:#9fd4ff;text-transform:uppercase}
+          #s-home .hm-hero h1{margin:6px 0 4px;font-size:24px;color:#fff}
+          #s-home .hm-sub{font-size:13px;opacity:.85;max-width:520px;line-height:1.45}
+          #s-home .hm-badge{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:11px 16px;text-align:right}
+          #s-home .hm-badge .k{font-size:11px;opacity:.8}
+          #s-home .hm-badge .v{font-size:20px;font-weight:800}
+          #s-home .hm-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:0 0 16px}
+          #s-home .hm-tile{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:13px 15px}
+          #s-home .hm-tile .k{font-size:10.5px;color:#52514e;text-transform:uppercase;letter-spacing:.6px}
+          #s-home .hm-tile .v{font-size:21px;font-weight:800;margin-top:3px}
+          #s-home .hm-tile .d{font-size:11px;color:#8a8984;margin-top:2px}
+          #s-home .hm-tile .up{color:#0a7f3f}
+          #s-home .hm-tile .down{color:#b91c1c}
+          #s-home .hm-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:18px 20px}
+          #s-home .hm-card h2{margin:0;font-size:15px}
+          #s-home .hm-csub{font-size:12px;color:#52514e;margin:3px 0 8px}
+          #s-home .hm-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:#52514e;margin:4px 0 4px}
+          #s-home .hm-legend .it{display:flex;align-items:center;gap:6px}
+          #s-home .hm-sw{width:14px;height:4px;border-radius:2px;display:inline-block}
+          #s-home .hm-sw.bar{height:10px;border-radius:2.5px}
+          #s-home .hm-chartbox{position:relative}
+          #s-home .hm-tip{position:absolute;pointer-events:none;background:#fff;border:1px solid #e5e7eb;box-shadow:0 6px 20px rgba(15,23,42,.13);border-radius:9px;padding:9px 12px;font-size:12px;display:none;min-width:200px;z-index:5}
+          #s-home .hm-tip .row{display:flex;justify-content:space-between;gap:16px;margin-top:3px}
+          #s-home .hm-tip .dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+          #s-home .hm-foot{font-size:11px;color:#8a8984;margin-top:8px}
+          #s-home .hm-news{margin-top:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px}
+          #s-home .hm-news .n{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:15px}
+          #s-home .hm-news .tag{font-size:10px;font-weight:700;letter-spacing:1.4px;color:#2a78d6}
+          #s-home .hm-news h3{margin:6px 0 6px;font-size:13.5px}
+          #s-home .hm-news p{margin:0;font-size:12.5px;color:#52514e;line-height:1.5}
+          #s-home .hm-news .dt{font-size:11px;color:#8a8984;margin-top:9px}
+          #s-home .hm-vazio{background:#fff;border:1px dashed #cbd5e1;border-radius:14px;padding:34px;text-align:center;color:#64748b;font-size:13px}
+        </style>
+        <div class="hm-hero">
+          <div>
+            <div class="hm-camp">⚡ Campanha Porto · Acelera Agosto 2026</div>
+            <h1>Acelera Agosto</h1>
+            <div class="hm-sub">Ano passado fechamos agosto com <b>R$ 106,1 milhões</b>. Este ano o objetivo é
+            <b>30% a mais</b> — e o placar abaixo atualiza a cada dia. Vendas de 02 a 31/08 nas condições
+            da campanha têm cronograma especial de comissão.</div>
+          </div>
+          <div class="hm-badge">
+            <div class="k">OBJETIVO DO MÊS</div>
+            <div class="v">R$ 137.962.907</div>
+            <div class="k" style="margin-top:2px">106.125.313,55 + 30%</div>
+          </div>
+        </div>
+        <div class="hm-tiles" id="hm-tiles"></div>
+        <div class="hm-card" id="hm-card">
+          <h2>Acelera Agosto — acumulado do mês, dia a dia</h2>
+          <div class="hm-csub">Linha = crédito vendido acumulado (R$) · Barras = cotas acumuladas · vendas Porto · agosto/2026 vs agosto/2025</div>
+          <div class="hm-legend">
+            <span class="it"><span class="hm-sw" style="background:#2a78d6"></span> Crédito 2026</span>
+            <span class="it"><span class="hm-sw" style="background:#eda100"></span> Crédito 2025</span>
+            <span class="it"><span class="hm-sw bar" style="background:#9ec5f4"></span> Cotas 2026</span>
+            <span class="it"><span class="hm-sw bar" style="background:#f3cf85"></span> Cotas 2025</span>
+            <span class="it"><span class="hm-sw" style="height:0;border-top:2px dashed #6b7280;background:none"></span> Objetivo R$ 137,9 mi</span>
+          </div>
+          <div class="hm-chartbox" id="hm-box">
+            <svg id="hm-chart" width="100%" height="400" viewBox="0 0 1020 430" role="img" aria-label="Crédito e cotas acumulados de agosto, 2026 contra 2025"></svg>
+            <div class="hm-tip" id="hm-tip"></div>
+          </div>
+          <div class="hm-foot" id="hm-foot">Carregando dados…</div>
+        </div>
+        <div class="hm-vazio" id="hm-vazio" style="display:none">O placar ainda não tem dados — um administrador precisa abrir o <b>Dashboard Vendas</b> para a primeira atualização do OneDrive.</div>
+        <div class="hm-news">
+          <div class="n"><div class="tag">CAMPANHA</div><h3>Acelera Agosto: comissão em cronograma especial</h3>
+            <p>Vendas de 02 a 31/08 nas condições da campanha: Imóvel em 12 parcelas com a 12ª de 17,5%; Auto e Pesados em 7 parcelas iguais. Confira o Cronograma de Comissionamento no Material de Apoio.</p>
+            <div class="dt">06/08/2026</div></div>
+          <div class="n"><div class="tag">FERRAMENTAS</div><h3>Simuladores Porto com botão Fidelidade 20%</h3>
+            <p>Os simuladores de Imóvel, Auto e Pesados agora têm as estratégias "Fidelidade 20% · Bolso" e "Fidelidade 20% + Embutido", e a barra do lance mostra a representatividade real na categoria.</p>
+            <div class="dt">05/08/2026</div></div>
+          <div class="n"><div class="tag">COMISSÕES</div><h3>Dúvidas de comissão? Use o chamado do portal</h3>
+            <p>Os chamados do Histórico são respondidos primeiro — com registro completo pra consultar depois. A Maia também responde regras de comissionamento na hora.</p>
+            <div class="dt">04/08/2026</div></div>
+        </div>
+      </div>
 
       <!-- DASHBOARD -->
       <div class="screen active" id="s-dashboard">
@@ -1455,7 +1538,7 @@ async function enterPortal() {
   document.getElementById('perfil-tipo').innerHTML=`<span class="tag tag-${_tagCls}">${role}</span>`;
   // Escolhe a primeira tela permitida (fallback pra perfil se nenhuma)
   const _telaInicial = (function(){
-    const ordem = ['dashboard-vendas','assembleia','lances','simuladores','dashboard','historico','admin-faturamento'];
+    const ordem = ['home','dashboard-vendas','assembleia','lances','simuladores','dashboard','historico','admin-faturamento'];
     for (const t of ordem) { if (podeAcessarScreen(t)) return t; }
     return 'perfil';
   })();
@@ -1523,6 +1606,8 @@ function nav(id) {
       ifr.src = ifr.dataset.target + sep + 'v=' + bust;
     }
   }
+  // Home: carrega/atualiza o placar da campanha ao entrar na tela
+  if (id === 'home') { try { initHome(); } catch(e) { console.warn('home:', e); } }
   // Apenas o Painel Split abre em tela cheia (esconde sidebar do portal)
   const app = document.getElementById('portal-app');
   const fab = document.getElementById('portal-menu-fab');
@@ -2887,5 +2972,156 @@ document.getElementById('cham-overlay').addEventListener('click', (e) => {
 });
 </script>
 
+<script id="home-acelera-agosto">
+// ═══════════════════════════════════════════════════════════════════
+// HOME — Placar Acelera Agosto (Porto) · lê portal_vendas_cache (Supabase),
+// que o Dashboard Vendas mantém atualizado do OneDrive. Sem chamadas ao Graph.
+// ═══════════════════════════════════════════════════════════════════
+const HM_META = 137962907.62;          // 106.125.313,55 + 30%
+const HM_TOTAL_2025_FIXO = 106125313.55;
+const HM_ANO_BASE = 2025, HM_ANO_ATUAL = 2026, HM_MES = 8, HM_DIAS = 31;
+let _hmLastFetch = 0;
+
+function hmDia(row){
+  // dia/mês/ano da venda a partir do cache (data ISO serializada ou dataVenda texto)
+  if (row.data) {
+    const d = new Date(row.data);
+    if (!isNaN(d)) return { y: d.getUTCFullYear(), m: d.getUTCMonth()+1, d: d.getUTCDate() };
+  }
+  const t = String(row.dataVenda||'').trim();
+  let m = t.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})/);
+  if (m) return { y:+m[3], m:+m[2], d:+m[1] };
+  m = t.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return { y:+m[1], m:+m[2], d:+m[3] };
+  return null;
+}
+function hmAgrega(rows, ano, ateDia){
+  const cred = new Array(HM_DIAS).fill(0), cot = new Array(HM_DIAS).fill(0);
+  rows.forEach(r => {
+    if (!(String(r.adm||'').toUpperCase().includes('PORTO'))) return;
+    const dt = hmDia(r);
+    if (!dt || dt.y !== ano || dt.m !== HM_MES) return;
+    const di = Math.min(HM_DIAS, Math.max(1, dt.d)) - 1;
+    cred[di] += (parseFloat(r.credito) || 0);
+    cot[di]  += 1;
+  });
+  const oc = [], oq = []; let ac = 0, aq = 0;
+  for (let i = 0; i < (ateDia || HM_DIAS); i++) { ac += cred[i]; aq += cot[i]; oc.push(ac); oq.push(aq); }
+  return { cred: oc, cot: oq };
+}
+const hmFmtMi = v => 'R$ ' + (v/1e6).toLocaleString('pt-BR',{maximumFractionDigits:1}) + ' mi';
+const hmFmtBR = v => 'R$ ' + v.toLocaleString('pt-BR',{maximumFractionDigits:0});
+
+async function initHome(force){
+  if (!force && Date.now() - _hmLastFetch < 5*60*1000) return; // cache local 5 min
+  if (!sb) return;
+  let payload = null;
+  try {
+    const { data } = await sb.from('portal_vendas_cache').select('dados,atualizado_em,atualizado_por').eq('id',1).maybeSingle();
+    payload = data;
+  } catch(e) { console.warn('home cache:', e); }
+  const vazio = document.getElementById('hm-vazio'), card = document.getElementById('hm-card'), tiles = document.getElementById('hm-tiles');
+  if (!payload || !Array.isArray(payload.dados) || !payload.dados.length) {
+    if (card) card.style.display = 'none';
+    if (tiles) tiles.style.display = 'none';
+    if (vazio) vazio.style.display = '';
+    return;
+  }
+  _hmLastFetch = Date.now();
+  if (card) card.style.display = '';
+  if (tiles) tiles.style.display = '';
+  if (vazio) vazio.style.display = 'none';
+
+  const agora = new Date();
+  let hoje;
+  if (agora.getFullYear() === HM_ANO_ATUAL && agora.getMonth()+1 === HM_MES) hoje = agora.getDate();
+  else if (agora > new Date(HM_ANO_ATUAL, HM_MES-1, HM_DIAS)) hoje = HM_DIAS;
+  else hoje = 1;
+
+  const a25 = hmAgrega(payload.dados, HM_ANO_BASE);
+  const a26 = hmAgrega(payload.dados, HM_ANO_ATUAL, hoje);
+  const tot25 = a25.cred[HM_DIAS-1] || HM_TOTAL_2025_FIXO;
+  const v26 = a26.cred[hoje-1] || 0, q26 = a26.cot[hoje-1] || 0;
+  const v25hj = a25.cred[hoje-1] || 0;
+  const pctMeta = v26/HM_META*100;
+  const vsAno = v25hj > 0 ? (v26/v25hj-1)*100 : 0;
+  const cls = vsAno >= 0 ? 'up' : 'down';
+  const sinal = vsAno >= 0 ? '+' : '';
+
+  document.getElementById('hm-tiles').innerHTML = `
+    <div class="hm-tile"><div class="k">Vendido até dia ${hoje}</div><div class="v">${hmFmtMi(v26)}</div><div class="d">${q26} cotas · só Porto</div></div>
+    <div class="hm-tile"><div class="k">% do objetivo</div><div class="v">${pctMeta.toLocaleString('pt-BR',{maximumFractionDigits:1})}%</div><div class="d">objetivo ${hmFmtMi(HM_META)}</div></div>
+    <div class="hm-tile"><div class="k">vs mesmo dia de 2025</div><div class="v ${cls}">${sinal}${vsAno.toLocaleString('pt-BR',{maximumFractionDigits:0})}%</div><div class="d">${hmFmtMi(v25hj)} em 2025</div></div>
+    <div class="hm-tile"><div class="k">Faltam</div><div class="v">${hmFmtMi(Math.max(0,HM_META-v26))}</div><div class="d">${HM_DIAS-hoje} dias de campanha</div></div>`;
+
+  hmRenderChart(a25.cred, a25.cot, a26.cred, a26.cot, hoje, tot25);
+
+  const ft = document.getElementById('hm-foot');
+  if (ft) {
+    let quando = '';
+    if (payload.atualizado_em) { try { quando = new Date(payload.atualizado_em).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}); } catch(e){} }
+    ft.textContent = 'Fonte: Base de Vendas (OneDrive) · atualizado ' + (quando ? 'em ' + quando : 'recentemente') + (payload.atualizado_por ? ' por ' + payload.atualizado_por : '') + ' · 2026 aparece até o dia atual';
+  }
+}
+
+function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25){
+  const svg = document.getElementById('hm-chart'); if (!svg) return;
+  svg.innerHTML = '';
+  const NS='http://www.w3.org/2000/svg';
+  const W=1020, H=430, ML=74, MR=64, MT=18, MB=44, PH=H-MT-MB;
+  const X = d => ML + (d-1)/(HM_DIAS-1)*(W-ML-MR);
+  const maxC = Math.max(HM_META, tot25, cred26[hoje-1]||0)*1.04;
+  const Y1 = v => MT + PH - v/maxC*PH;
+  const maxQ = Math.max(cot25[HM_DIAS-1]||1, cot26[hoje-1]||1)*1.06;
+  const Y2 = v => MT + PH - v/maxQ*PH;
+  function el(t,a){const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);svg.appendChild(e);return e;}
+  function txt(x,y,c,a={}){const e=el('text',Object.assign({x,y,'font-size':11,fill:'#52514e'},a));e.textContent=c;return e;}
+  [0.25,0.5,0.75,1].forEach(f=>{ const v=HM_META*f;
+    el('line',{x1:ML,x2:W-MR,y1:Y1(v),y2:Y1(v),stroke:'#eceae6','stroke-width':1});
+    txt(ML-8,Y1(v)+4,(v/1e6).toFixed(0)+' mi',{'text-anchor':'end',fill:'#8a8984'});
+  });
+  [0.5,1].forEach(f=>{ txt(W-MR+8,Y2(maxQ*f)+4,String(Math.round(maxQ*f)),{fill:'#8a8984'}); });
+  txt(W-MR+8,MT-4,'cotas',{'font-size':10,fill:'#8a8984'});
+  txt(ML-8,MT-4,'crédito',{'font-size':10,'text-anchor':'end',fill:'#8a8984'});
+  el('line',{x1:ML,x2:W-MR,y1:Y1(0),y2:Y1(0),stroke:'#d6d4cf','stroke-width':1});
+  for(let d=1;d<=HM_DIAS;d+=2) txt(X(d),H-MB+18,String(d).padStart(2,'0'),{'text-anchor':'middle',fill:'#8a8984'});
+  txt(ML,H-8,'dias de agosto',{fill:'#8a8984'});
+  el('line',{x1:ML,x2:W-MR,y1:Y1(HM_META),y2:Y1(HM_META),stroke:'#6b7280','stroke-width':1.6,'stroke-dasharray':'6 5'});
+  txt(W-MR,Y1(HM_META)-6,'OBJETIVO  R$ 137,9 mi',{'text-anchor':'end','font-weight':'700',fill:'#6b7280'});
+  const bw=7;
+  for(let d=1;d<=HM_DIAS;d++){
+    const x=X(d);
+    el('rect',{x:x-bw-1,y:Y2(cot25[d-1]||0),width:bw,height:Math.max(0,Y1(0)-Y2(cot25[d-1]||0)),rx:2,fill:'#f3cf85',opacity:.85});
+    if(d<=hoje) el('rect',{x:x+1,y:Y2(cot26[d-1]||0),width:bw,height:Math.max(0,Y1(0)-Y2(cot26[d-1]||0)),rx:2,fill:'#9ec5f4'});
+  }
+  function path(data,color,wd){
+    const p=data.map((v,i)=>(i?'L':'M')+X(i+1)+' '+Y1(v)).join(' ');
+    el('path',{d:p,fill:'none',stroke:color,'stroke-width':wd,'stroke-linecap':'round'});
+  }
+  path(cred25,'#eda100',2.2);
+  path(cred26,'#2a78d6',3.4);
+  txt(X(HM_DIAS)-2,Y1(cred25[HM_DIAS-1])-10,'2025 · '+hmFmtMi(tot25),{'text-anchor':'end','font-weight':'700',fill:'#b47b00'});
+  el('circle',{cx:X(hoje),cy:Y1(cred26[hoje-1]||0),r:4.5,fill:'#2a78d6',stroke:'#fff','stroke-width':2});
+  txt(X(hoje)+9,Y1(cred26[hoje-1]||0)-8,'2026 · '+hmFmtMi(cred26[hoje-1]||0),{'font-weight':'800',fill:'#1c5cab'});
+  // hover
+  const box=document.getElementById('hm-box'), tip=document.getElementById('hm-tip');
+  const cross=el('line',{x1:0,x2:0,y1:MT,y2:Y1(0),stroke:'#9ca3af','stroke-width':1,'stroke-dasharray':'3 3',visibility:'hidden'});
+  svg.onmousemove = ev => {
+    const r=svg.getBoundingClientRect(), sx=W/r.width;
+    let d=Math.round(((ev.clientX-r.left)*sx-ML)/(W-ML-MR)*(HM_DIAS-1))+1;
+    d=Math.max(1,Math.min(HM_DIAS,d));
+    cross.setAttribute('x1',X(d)); cross.setAttribute('x2',X(d)); cross.setAttribute('visibility','visible');
+    const l26 = d<=hoje ? `<div class="row"><span><span class="dot" style="background:#2a78d6"></span>2026</span><b>${hmFmtBR(cred26[d-1]||0)} · ${cot26[d-1]||0} cotas</b></div>`
+                        : `<div class="row"><span><span class="dot" style="background:#2a78d6"></span>2026</span><span style="color:#8a8984">ainda não chegou</span></div>`;
+    tip.innerHTML = `<b>Dia ${String(d).padStart(2,'0')}/08 · acumulado</b>${l26}
+      <div class="row"><span><span class="dot" style="background:#eda100"></span>2025</span><b>${hmFmtBR(cred25[d-1]||0)} · ${cot25[d-1]||0} cotas</b></div>`;
+    tip.style.display='block';
+    const bx=box.getBoundingClientRect();
+    let left=(ev.clientX-bx.left)+14; if(left>bx.width-230) left-=260;
+    tip.style.left=left+'px'; tip.style.top=((ev.clientY-bx.top)-10)+'px';
+  };
+  svg.onmouseleave = () => { tip.style.display='none'; cross.setAttribute('visibility','hidden'); };
+}
+</script>
 </body>
 </html>
