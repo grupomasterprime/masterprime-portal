@@ -955,6 +955,7 @@ function fatRenderDadosComplementares(proc) {
     { label: 'Banco', valor: d.dados_bancarios.banco },
     { label: 'Agência', valor: d.dados_bancarios.agencia },
     { label: 'Conta', valor: d.dados_bancarios.conta },
+    { label: 'Dígito', valor: d.dados_bancarios.digito },
     { label: 'Tipo', valor: d.dados_bancarios.tipo_conta },
   ]));
   html += secao('Vendedor', gridInfo([
@@ -963,6 +964,7 @@ function fatRenderDadosComplementares(proc) {
     { label: 'Banco', valor: d.vendedor.banco },
     { label: 'Agência', valor: d.vendedor.agencia },
     { label: 'Conta', valor: d.vendedor.conta },
+    { label: 'Dígito', valor: d.vendedor.digito },
     { label: 'PIX', valor: d.vendedor.pix },
     { label: 'E-mail', valor: d.vendedor.email },
     { label: 'Telefone', valor: d.vendedor.telefone },
