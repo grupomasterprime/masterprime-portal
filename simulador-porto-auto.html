@@ -843,7 +843,8 @@ let _paSyncing = false;
 // Base dos campos de % digitados: % SOBRE O CRÉDITO (igual à dica dos campos).
 // A representatividade sobre a categoria continua na barra LANCE TOTAL.
 function _paBasePct() {
-  return unmaskMoney(get('pa-credito').value);
+  // % digitado sobre a CATEGORIA, igual à barra LANCE TOTAL (decisão Allan 07/08/2026)
+  return _paCategoria();
 }
 function _paCategoria() {
   const credito = unmaskMoney(get('pa-credito').value);

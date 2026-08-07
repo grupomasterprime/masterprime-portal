@@ -820,11 +820,11 @@ function _piCategoria() {
   const fundo = unmaskPct(get('pi-fundo').value) / 100;
   return credito * (1 + adesao + adm + fundo);
 }
-// Base dos campos de % digitados (lance a pagar / FGTS / embutido): % SOBRE O CRÉDITO,
-// igual à dica dos campos. A representatividade do lance sobre a categoria continua
-// sendo exibida na barra "LANCE TOTAL" (ex.: 30% do crédito → 23,84% da categoria).
+// Base dos campos de % digitados (lance a pagar / FGTS / embutido): % SOBRE A CATEGORIA,
+// pra bater com a barra "LANCE TOTAL" (decisão Allan 07/08/2026 — ex.: Fidelidade
+// aparece 20,00% no campo e 20,00% na barra, sem confusão).
 function _piBasePct() {
-  return unmaskMoney(get('pi-credito').value);
+  return _piCategoria();
 }
 function _piMaxEmbutidoRs() {
   const credito = unmaskMoney(get('pi-credito').value);

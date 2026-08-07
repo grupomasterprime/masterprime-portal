@@ -773,7 +773,8 @@ let _ppSyncing = false;
 // Base dos campos de % digitados: % SOBRE O CRÉDITO (igual à dica dos campos).
 // A representatividade sobre a categoria continua na barra LANCE TOTAL.
 function _ppBasePct() {
-  return unmaskMoney(get('pp-credito').value);
+  // % digitado sobre a CATEGORIA, igual à barra LANCE TOTAL (decisão Allan 07/08/2026)
+  return _ppCategoria();
 }
 function _ppCategoria() {
   const credito = unmaskMoney(get('pp-credito').value);
