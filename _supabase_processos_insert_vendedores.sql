@@ -30,3 +30,5 @@ select policyname, cmd, roles
 from pg_policies
 where schemaname = 'public' and tablename = 'portal_processos'
 order by cmd, policyname;
+
+-- Deploy: commit trivial para destravar o GitHub Pages (07/08/2026).
