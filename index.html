@@ -488,7 +488,7 @@ body.embedded-mode .portal-menu-fab { display:flex; }
             <div class="hm-camp">Campanha Porto · Acelera Agosto 2026</div>
             <h1>Acelera Agosto</h1>
             <div class="hm-sub">Ano passado fechamos agosto com <b>R$ 106,1 milhões</b>. Este ano o objetivo é
-            <b>30% a mais</b> — e o placar abaixo atualiza a cada dia. Consulte o
+            <b>30% a mais</b>. Consulte o
             <b>Manual de Comissão</b> no Material de Apoio para saber mais sobre os recebimentos.</div>
             <a class="hm-btn-tabelas" href="https://tanamao.figma.site/consorcio" target="_blank" rel="noopener">Tabelas &amp; Materiais Porto — Tá na Mão!</a>
             <a class="hm-btn-tabelas hm-btn-outline" href="javascript:void(0)" onclick="abrirTabelasPorto()">Grupos em Campanha — Tabelas</a>
@@ -499,8 +499,9 @@ body.embedded-mode .portal-menu-fab { display:flex; }
             <div class="k" style="margin-top:2px">106.125.313,55 + 30%</div>
           </div>
         </div>
-        <div class="hm-tiles" id="hm-tiles"></div>
-        <div class="hm-card" id="hm-card">
+        <!-- Placar e gráfico ocultos por enquanto (decisão Allan 07/08/2026) — pra reativar, remover os display:none abaixo e restaurar a frase do placar no hm-sub -->
+        <div class="hm-tiles" id="hm-tiles" style="display:none"></div>
+        <div class="hm-card" id="hm-card" style="display:none">
           <h2>Acelera Agosto — acumulado do mês, dia a dia</h2>
           <div class="hm-csub">Linha = crédito vendido acumulado (R$) · Barras = cotas acumuladas · vendas Porto · agosto/2026 vs agosto/2025</div>
           <div class="hm-legend">
@@ -3043,6 +3044,16 @@ function hmAgrega(rows, ano, ateDia){
 const hmFmtMi = v => 'R$ ' + (v/1e6).toLocaleString('pt-BR',{maximumFractionDigits:1}) + ' mi';
 const hmFmtBR = v => 'R$ ' + v.toLocaleString('pt-BR',{maximumFractionDigits:0});
 
+// Placar completo visível SÓ para os sócios por enquanto (decisão Allan 07/08/2026).
+// Pra liberar pra todo mundo: faça hmPlacarOculto() retornar false.
+function hmPlacarOculto(){
+  const u = (typeof currentUser !== 'undefined' && currentUser) ? currentUser : null;
+  if (!u) return true;
+  if (u.tipo === 'master' || u.tipo === 'socio') return false;
+  const nome = String(u.nome||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const SOCIOS = ['ALLAN ALMEIDA','CARLOS EDUARDO','RENATO BENEDETTI','VAGNER SANTOS'];
+  return !SOCIOS.includes(nome);
+}
 async function initHome(force){
   if (!force && Date.now() - _hmLastFetch < 5*60*1000) return; // cache local 5 min
   if (!sb) return;
@@ -3055,12 +3066,13 @@ async function initHome(force){
   if (!payload || !Array.isArray(payload.dados) || !payload.dados.length) {
     if (card) card.style.display = 'none';
     if (tiles) tiles.style.display = 'none';
-    if (vazio) vazio.style.display = '';
+    if (vazio) vazio.style.display = hmPlacarOculto() ? 'none' : '';
     return;
   }
   _hmLastFetch = Date.now();
-  if (card) card.style.display = '';
-  if (tiles) tiles.style.display = '';
+  const HM_PLACAR_OCULTO = hmPlacarOculto();
+  if (card) card.style.display = HM_PLACAR_OCULTO ? 'none' : '';
+  if (tiles) tiles.style.display = HM_PLACAR_OCULTO ? 'none' : '';
   if (vazio) vazio.style.display = 'none';
 
   const agora = new Date();
