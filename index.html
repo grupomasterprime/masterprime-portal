@@ -2998,13 +2998,25 @@ function hmDia(row){
   if (m) return { y:+m[1], m:+m[2], d:+m[3] };
   return null;
 }
+function hmMesNum(s){
+  const t = String(s||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').slice(0,3);
+  return ({JAN:1,FEV:2,MAR:3,ABR:4,MAI:5,JUN:6,JUL:7,AGO:8,SET:9,OUT:10,NOV:11,DEZ:12})[t] || null;
+}
 function hmAgrega(rows, ano, ateDia){
   const cred = new Array(HM_DIAS).fill(0), cot = new Array(HM_DIAS).fill(0);
   rows.forEach(r => {
     if (!(String(r.adm||'').toUpperCase().includes('PORTO'))) return;
     const dt = hmDia(r);
-    if (!dt || dt.y !== ano || dt.m !== HM_MES) return;
-    const di = Math.min(HM_DIAS, Math.max(1, dt.d)) - 1;
+    // Mês e ano seguem as COLUNAS da planilha (mesma regra do Dashboard);
+    // a data da venda só define o DIA no gráfico. Sem data ou com data de
+    // outro mês, a venda ainda conta: cai no dia 1 (data anterior) ou 31 (posterior).
+    const anoRow = parseInt(r.ano) || (dt ? dt.y : null);
+    const mesRow = hmMesNum(r.mes) || (dt ? dt.m : null);
+    if (anoRow !== ano || mesRow !== HM_MES) return;
+    let dia = 1;
+    if (dt) dia = (dt.y < ano || (dt.y === ano && dt.m < HM_MES)) ? 1
+                : (dt.y > ano || (dt.y === ano && dt.m > HM_MES)) ? HM_DIAS : dt.d;
+    const di = Math.min(HM_DIAS, Math.max(1, dia)) - 1;
     cred[di] += (parseFloat(r.credito) || 0);
     cot[di]  += 1;
   });
@@ -3110,8 +3122,12 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25){
   const box=document.getElementById('hm-box'), tip=document.getElementById('hm-tip');
   const cross=el('line',{x1:0,x2:0,y1:MT,y2:Y1(0),stroke:'#9ca3af','stroke-width':1,'stroke-dasharray':'3 3',visibility:'hidden'});
   svg.onmousemove = ev => {
-    const r=svg.getBoundingClientRect(), sx=W/r.width;
-    let d=Math.round(((ev.clientX-r.left)*sx-ML)/(W-ML-MR)*(HM_DIAS-1))+1;
+    const r=svg.getBoundingClientRect();
+    // O SVG usa preserveAspectRatio padrão (meet): a arte é escalada uniformemente
+    // e centralizada — precisa descontar a sobra lateral antes de mapear pro dia.
+    const sc=Math.min(r.width/W, r.height/H), ox=(r.width - W*sc)/2;
+    const vx=(ev.clientX - r.left - ox)/sc;
+    let d=Math.round((vx-ML)/(W-ML-MR)*(HM_DIAS-1))+1;
     d=Math.max(1,Math.min(HM_DIAS,d));
     cross.setAttribute('x1',X(d)); cross.setAttribute('x2',X(d)); cross.setAttribute('visibility','visible');
     const l26 = d<=hoje ? `<div class="row"><span><span class="dot" style="background:#2a78d6"></span>2026</span><b>${hmFmtBR(cred26[d-1]||0)} · ${cot26[d-1]||0} cotas</b></div>`
