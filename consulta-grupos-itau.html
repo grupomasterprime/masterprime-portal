@@ -884,6 +884,19 @@ document.getElementById('hdr-title').textContent = `Tabela de Vendas ${ADMINS[ad
 carregarCalc();
 renderChips();
 render();
+
+// Deep-link: abrir direto numa administradora (atalho da Home usa #porto).
+// Funciona no carregamento, em mudança de hash e via postMessage do portal.
+function aplicarHashAdmin() {
+  const h = (location.hash || '').replace('#','').toUpperCase();
+  if (h && ADMINS[h] && ADMINS[h].disponivel && h !== adminAtual) trocarAdmin(h);
+}
+window.addEventListener('hashchange', aplicarHashAdmin);
+window.addEventListener('message', ev => {
+  const a = ev && ev.data && ev.data.admin;
+  if (a && ADMINS[a] && ADMINS[a].disponivel && a !== adminAtual) trocarAdmin(a);
+});
+aplicarHashAdmin();
 </script>
 </body>
 </html>

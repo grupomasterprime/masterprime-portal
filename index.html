@@ -491,7 +491,7 @@ body.embedded-mode .portal-menu-fab { display:flex; }
             <b>30% a mais</b> — e o placar abaixo atualiza a cada dia. Consulte o
             <b>Manual de Comissão</b> no Material de Apoio para saber mais sobre os recebimentos.</div>
             <a class="hm-btn-tabelas" href="https://tanamao.figma.site/consorcio" target="_blank" rel="noopener">Tabelas &amp; Materiais Porto — Tá na Mão!</a>
-            <a class="hm-btn-tabelas hm-btn-outline" href="javascript:void(0)" onclick="nav('tabelas')">Grupos em Campanha — Tabelas</a>
+            <a class="hm-btn-tabelas hm-btn-outline" href="javascript:void(0)" onclick="abrirTabelasPorto()">Grupos em Campanha — Tabelas</a>
           </div>
           <div class="hm-badge">
             <div class="k">OBJETIVO DO MÊS</div>
@@ -3000,6 +3000,19 @@ function hmDia(row){
   m = t.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (m) return { y:+m[1], m:+m[2], d:+m[3] };
   return null;
+}
+function abrirTabelasPorto(){
+  // Atalho da Home: abre a tela Tabelas já na aba Porto.
+  nav('tabelas');
+  const ifr = document.getElementById('iframe-tabelas');
+  if (!ifr) return;
+  const cur = ifr.getAttribute('src');
+  if (cur && cur !== 'about:blank' && !cur.includes('#porto')) {
+    ifr.src = cur.split('#')[0] + '#porto';       // mesma página: só dispara hashchange
+  }
+  // Se o iframe já estava aberto (com ou sem hash), avisa direto:
+  setTimeout(() => { try { ifr.contentWindow.postMessage({ admin: 'PORTO' }, '*'); } catch(e) {} }, 400);
+  setTimeout(() => { try { ifr.contentWindow.postMessage({ admin: 'PORTO' }, '*'); } catch(e) {} }, 1500);
 }
 function hmMesNum(s){
   const t = String(s||'').trim().toUpperCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').slice(0,3);
