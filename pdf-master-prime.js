@@ -863,8 +863,13 @@
         <div style="font-size:26px; color:#0F172A; font-weight:800; white-space:nowrap; letter-spacing:-0.4px;">${esc(o.value) || '—'}</div>
       </div>`;
 
+    // Crédito Líquido (hero) SEMPRE em primeiro, logo abaixo do título da seção
+    // (pedido do Allan em 11/08/2026); os demais seguem na ordem enviada.
     let outputsHtml = '';
-    outputs.forEach((o, i) => { outputsHtml += (i === heroIdx) ? heroDir(o) : rowDir(o); });
+    if (outputs.length) {
+      outputsHtml += heroDir(outputs[heroIdx]);
+      outputs.forEach((o, i) => { if (i !== heroIdx) outputsHtml += rowDir(o); });
+    }
 
     // Data da simulação no rodapé
     const _hj = new Date();
