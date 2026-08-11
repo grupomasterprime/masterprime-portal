@@ -770,103 +770,158 @@
       </div>`;
   }
 
+  // Valor "zerado" (R$ 0,00 · 0,00% · 0,000%) não agrega nada na simulação e só
+  // ocupa espaço — padrão aprovado por Allan/Renato em 11/08/2026: linhas zeradas
+  // ficam ocultas. Para forçar exibição de um campo mesmo zerado, passe
+  // { ..., ocultarSeZero: false } no input.
+  function _isValorZerado(v) {
+    if (v === undefined || v === null) return false;
+    const s = String(v).trim();
+    return /^R\$\s*0(?:[.,]0+)?$/.test(s) || /^0(?:[.,]0+)?\s*%$/.test(s);
+  }
+
   function buildTemplateComercial(opts) {
     const theme = ADMIN_THEME[opts.logoAdmin] || ADMIN_THEME.porto;
     const logoUrl = LOGO_ADMIN_DATA[opts.logoAdmin] || '';
 
-    // Inputs (DADOS DA PROPOSTA)
-    const inputsHtml = (opts.inputs || []).map(_renderInputComercial).join('');
+    // ── LAYOUT "PADRÃO RENATO" (aprovado 11/08/2026) ─────────────────────
+    // Tabela limpa em duas colunas: DADOS DA PROPOSTA + OFERTA DE LANCE à
+    // esquerda (linhas com divisórias finas) e RESULTADO DA SIMULAÇÃO à
+    // direita com o Crédito Líquido em faixa destacada. Linhas zeradas são
+    // ocultas e o rodapé traz a data da simulação.
 
-    // Outputs (RESULTADO DA SIMULAÇÃO) — eleva pra hero o que tem .hero=true
-    // OU o que contém "Crédito Líquido" / "Crédito liquido" no label
-    const outputs = (opts.outputs || []);
-    const heroIdx = outputs.findIndex(o =>
-      o.hero === true ||
-      (o.label && /cr[ée]dito\s*l[íi]quido/i.test(o.label))
-    );
-    let outputsHtml = '';
-    if (heroIdx >= 0) {
-      outputsHtml += _renderOutputComercial(outputs[heroIdx], true);
-      outputs.forEach((o, i) => {
-        if (i !== heroIdx) outputsHtml += _renderOutputComercial(o, false);
-      });
-    } else {
-      // sem hero detectado — primeiro vira hero por default
-      outputs.forEach((o, i) => {
-        outputsHtml += _renderOutputComercial(o, i === 0);
+    const esc = s => String(s === undefined || s === null ? '' : s);
+
+    // Linha da coluna esquerda: rótulo + valor (valor em coluna alinhada)
+    const rowEsq = (label, value) => `
+      <div style="display:grid; grid-template-columns:1.15fr 1fr; align-items:center; padding:13px 22px; border-top:1px solid #EEF1F5;">
+        <div style="font-size:16.5px; color:#1E293B; font-weight:500;">${esc(label)}</div>
+        <div style="font-size:18px; color:#0F172A; font-weight:700;">${esc(value) || '—'}</div>
+      </div>`;
+
+    const secaoEsq = (titulo, comBorda) => `
+      <div style="padding:16px 22px 12px; ${comBorda ? 'border-top:1px solid #EEF1F5;' : ''}">
+        <div style="font-size:15.5px; color:#0F172A; font-weight:700; letter-spacing:1px; text-transform:uppercase;">${esc(titulo)}</div>
+      </div>`;
+
+    // Inputs (DADOS DA PROPOSTA) — oculta linhas zeradas (fundo reserva 0%, seguro 0% etc.)
+    const inputsVisiveis = (opts.inputs || [])
+      .filter(inp => inp.ocultarSeZero === false || !_isValorZerado(inp.value));
+    const inputsHtml = inputsVisiveis.map(inp => rowEsq(inp.label, inp.value)).join('');
+
+    // Oferta de lance — some com as chaves de percentual zerado
+    let lanceFiltrado = opts.lance;
+    if (lanceFiltrado) {
+      lanceFiltrado = Object.assign({}, lanceFiltrado);
+      ['embutido', 'apagar', 'total'].forEach(k => {
+        const item = lanceFiltrado[k];
+        if (item && _isValorZerado(String(item.pct || '').trim() + ' %')) delete lanceFiltrado[k];
       });
     }
+    let lanceHtml = '';
+    if (lanceFiltrado && (lanceFiltrado.embutido || lanceFiltrado.apagar || lanceFiltrado.total)) {
+      const fmtPct = p => (String(p || '0,00').includes('%') ? String(p) : String(p) + '%');
+      const fmtRs  = r => (String(r || '0,00').trim().startsWith('R$') ? String(r) : 'R$ ' + String(r));
+      let linhas = '';
+      if (lanceFiltrado.modo === 'simples') {
+        const it = lanceFiltrado.total || lanceFiltrado.embutido || lanceFiltrado.apagar;
+        linhas += rowEsq('% Lance', fmtPct(it.pct));
+        linhas += rowEsq('Valor lance', fmtRs(it.rs));
+      } else {
+        if (lanceFiltrado.embutido) {
+          linhas += rowEsq('% Lance embutido', fmtPct(lanceFiltrado.embutido.pct));
+          linhas += rowEsq('Valor embutido', fmtRs(lanceFiltrado.embutido.rs));
+        }
+        if (lanceFiltrado.apagar) {
+          linhas += rowEsq('% Lance a pagar', fmtPct(lanceFiltrado.apagar.pct));
+          linhas += rowEsq('Valor lance a pagar', fmtRs(lanceFiltrado.apagar.rs));
+        }
+        if (lanceFiltrado.total) {
+          linhas += rowEsq('% Lance total', fmtPct(lanceFiltrado.total.pct));
+          linhas += rowEsq('Valor total', fmtRs(lanceFiltrado.total.rs));
+        }
+      }
+      lanceHtml = secaoEsq('Oferta de Lance', true) + linhas;
+    }
 
-    const lanceHtml = _renderLanceCaixa(opts.lance, theme.corAcento);
+    // Outputs (RESULTADO DA SIMULAÇÃO) — hero = faixa destacada do Crédito Líquido
+    const outputs = (opts.outputs || []);
+    let heroIdx = outputs.findIndex(o =>
+      o.hero === true || (o.label && /cr[ée]dito\s*l[íi]quido/i.test(o.label))
+    );
+    if (heroIdx < 0 && outputs.length) heroIdx = 0;
+
+    const rowDir = o => `
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:18px; padding:26px 24px; border-top:1px solid #EEF1F5;">
+        <div style="font-size:17px; color:#1E293B; font-weight:500;">${esc(o.label)}${o.subAcima ? `<div style="font-size:12px; color:#94A3B8; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; margin-top:4px;">${esc(o.subAcima)}</div>` : ''}</div>
+        <div style="font-size:21px; color:#0F172A; font-weight:700; white-space:nowrap;">${esc(o.value) || '—'}</div>
+      </div>`;
+
+    const heroDir = o => `
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:18px; padding:22px 24px; background:#EDF2FA; border-top:1px solid #E3EAF4; border-bottom:1px solid #E3EAF4;">
+        <div style="font-size:16px; color:#0F172A; font-weight:700; letter-spacing:1px; text-transform:uppercase;">${esc(o.label)}</div>
+        <div style="font-size:26px; color:#0F172A; font-weight:800; white-space:nowrap; letter-spacing:-0.4px;">${esc(o.value) || '—'}</div>
+      </div>`;
+
+    let outputsHtml = '';
+    outputs.forEach((o, i) => { outputsHtml += (i === heroIdx) ? heroDir(o) : rowDir(o); });
+
+    // Data da simulação no rodapé
+    const _hj = new Date();
+    const dataSimulacao = String(_hj.getDate()).padStart(2, '0') + '/' + String(_hj.getMonth() + 1).padStart(2, '0') + '/' + _hj.getFullYear();
 
     return `
-      <div style="width:1300px; background:#fff; font-family:'Inter','Helvetica Neue',-apple-system,system-ui,sans-serif; color:#0F172A; padding:44px 52px 32px; box-sizing:border-box;">
+      <div style="width:1300px; background:#FAFBFC; font-family:'Inter','Helvetica Neue',-apple-system,system-ui,sans-serif; color:#0F172A; padding:44px 52px 32px; box-sizing:border-box;">
 
-        <!-- HEADER PRINCIPAL: tag + título sans + caixa dupla (MP + admin logo) -->
-        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:32px;">
-          <div style="max-width:74%;">
-            <div style="display:inline-block; font-size:11.5px; font-weight:700; color:${theme.corAcento}; letter-spacing:2px; text-transform:uppercase; margin-bottom:18px; padding:6px 14px; background:${theme.corAcento}14; border-radius:999px;">Simulação de Crédito</div>
-            <div style="font-family:'Inter',-apple-system,system-ui,sans-serif; font-size:54px; font-weight:700; color:#0F172A; line-height:1.05; letter-spacing:-1.4px;">${opts.subtitulo || 'Consórcio'}</div>
-            ${opts.subtituloSecundario ? `<div style="font-size:18px; color:#64748B; font-weight:500; margin-top:10px; letter-spacing:-0.1px;">${opts.subtituloSecundario}</div>` : ''}
+        <!-- HEADER: tag + título + logos (MP + admin) -->
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:34px;">
+          <div style="max-width:70%;">
+            <div style="font-size:15px; font-weight:600; color:#64748B; letter-spacing:2px; text-transform:uppercase; margin-bottom:14px;">Simulação de Crédito</div>
+            <div style="font-size:52px; font-weight:800; color:#0F172A; line-height:1.05; letter-spacing:-1.4px;">${esc(opts.subtitulo) || 'Consórcio'}</div>
+            ${opts.subtituloSecundario ? `<div style="font-size:18px; color:#64748B; font-weight:500; margin-top:10px;">${esc(opts.subtituloSecundario)}</div>` : ''}
           </div>
           <div style="display:flex; flex-direction:column; align-items:flex-end;">
             <div style="display:flex; align-items:center; gap:14px;">
-              <div style="height:96px; padding:0 4px; border-radius:18px; background:#fff; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; box-shadow:0 1px 2px rgba(15,23,42,0.04);">
+              <div style="height:96px; padding:0 4px; border-radius:16px; background:#fff; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; box-shadow:0 1px 2px rgba(15,23,42,0.04);">
                 <img src="${LOGO_DATA_URL}" alt="Master Prime" style="height:92px; width:auto; display:block;">
               </div>
               ${opts.hideAdminLogo ? '' : `
-              <div style="width:1px; height:56px; background:#E2E8F0;"></div>
-              <div style="width:96px; height:96px; border-radius:18px; background:#fff; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; padding:10px; box-shadow:0 1px 2px rgba(15,23,42,0.04);">
+              <div style="width:96px; height:96px; border-radius:16px; background:#fff; border:1px solid #E2E8F0; display:flex; align-items:center; justify-content:center; padding:10px; box-shadow:0 1px 2px rgba(15,23,42,0.04);">
                 <img src="${logoUrl}" alt="Admin" style="max-width:100%; max-height:100%; object-fit:contain;">
               </div>
               `}
             </div>
-            <div style="font-size:10.5px; color:#94A3B8; letter-spacing:1.5px; text-transform:uppercase; margin-top:12px; font-weight:600;">${opts.hideAdminLogo ? 'Master Prime' : 'Representante Autorizado'}</div>
+            <div style="font-size:12px; color:#94A3B8; letter-spacing:1.8px; text-transform:uppercase; margin-top:14px; font-weight:600;">${opts.hideAdminLogo ? 'Master Prime' : 'Representante Autorizado'}</div>
           </div>
         </div>
 
-        <!-- CAIXA PRINCIPAL: 2 colunas (dados + resultado) -->
-        <div style="display:grid; grid-template-columns:1.18fr 1fr; gap:24px; align-items:stretch;">
+        <!-- DUAS COLUNAS: dados/lance + resultado -->
+        <div style="display:grid; grid-template-columns:1fr 1.06fr; gap:26px; align-items:start;">
 
-          <!-- COLUNA ESQUERDA: DADOS DA PROPOSTA -->
-          <div style="background:#fff; border:1px solid #E2E8F0; border-radius:20px; padding:30px 32px; box-shadow:0 1px 3px rgba(15,23,42,0.04);">
-            <div style="display:flex; align-items:center; gap:10px; margin-bottom:24px;">
-              <span style="width:6px; height:24px; background:${theme.corAcento}; border-radius:3px;"></span>
-              <div style="font-size:13.5px; color:#0F172A; letter-spacing:2px; text-transform:uppercase; font-weight:700;">Dados da Proposta</div>
-            </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:26px 32px;">
-              ${inputsHtml}
-            </div>
+          <!-- ESQUERDA: DADOS DA PROPOSTA + OFERTA DE LANCE -->
+          <div style="background:#fff; border:1px solid #E6E9EF; border-radius:10px; overflow:hidden;">
+            ${secaoEsq('Dados da Proposta', false)}
+            ${inputsHtml}
             ${lanceHtml}
           </div>
 
-          <!-- COLUNA DIREITA: RESULTADO DA SIMULAÇÃO -->
-          <div style="background:linear-gradient(160deg, ${theme.corPanel} 0%, ${theme.corPanel}EE 60%, ${theme.corPanel}DD 100%); border-radius:20px; padding:30px 32px; color:#fff; position:relative; overflow:hidden;">
-            <!-- ornamento sutil de fundo -->
-            <div style="position:absolute; top:-60px; right:-60px; width:240px; height:240px; border-radius:50%; background:${theme.corAcento}; opacity:0.10; pointer-events:none;"></div>
-            <div style="position:relative;">
-              <div style="display:flex; align-items:center; gap:10px; margin-bottom:24px;">
-                <span style="width:6px; height:24px; background:${theme.corAcento}; border-radius:3px;"></span>
-                <div style="font-size:13.5px; color:#fff; letter-spacing:2px; text-transform:uppercase; font-weight:700;">Resultado da Simulação</div>
-              </div>
-              ${outputsHtml}
-            </div>
+          <!-- DIREITA: RESULTADO DA SIMULAÇÃO -->
+          <div style="background:#fff; border:1px solid #E6E9EF; border-radius:10px; overflow:hidden;">
+            ${secaoEsq('Resultado da Simulação', false)}
+            ${outputsHtml}
           </div>
         </div>
 
         ${opts.observacoes && String(opts.observacoes).trim() ? `
         <!-- OBSERVAÇÕES -->
-        <div style="margin-top:26px; background:#fff; border:1px solid #E2E8F0; border-radius:20px; padding:24px 28px; box-shadow:0 1px 3px rgba(15,23,42,0.04);">
-          <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
-            <span style="width:6px; height:22px; background:${theme.corAcento}; border-radius:3px;"></span>
-            <div style="font-size:12.5px; color:#0F172A; letter-spacing:2px; text-transform:uppercase; font-weight:700;">Observações</div>
-          </div>
-          <div style="font-size:13.5px; color:#334155; line-height:1.55; white-space:pre-wrap; word-wrap:break-word;">${String(opts.observacoes).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
+        <div style="margin-top:24px; background:#fff; border:1px solid #E6E9EF; border-radius:10px; padding:20px 24px;">
+          <div style="font-size:14.5px; color:#0F172A; letter-spacing:1px; text-transform:uppercase; font-weight:700; margin-bottom:10px;">Observações</div>
+          <div style="font-size:15px; color:#334155; line-height:1.55; white-space:pre-wrap; word-wrap:break-word;">${String(opts.observacoes).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
         </div>` : ''}
 
         <!-- RODAPÉ -->
-        <div style="margin-top:30px; padding-top:18px; border-top:1px solid #EEF2F6; display:flex; justify-content:space-between; align-items:center; color:#94A3B8; font-size:11.5px;">
-          <div>Simulação meramente informativa · valores sujeitos às condições do grupo e à análise da administradora</div>
+        <div style="margin-top:30px; padding-top:16px; display:flex; justify-content:space-between; align-items:center; color:#94A3B8; font-size:14px;">
+          <div>Simulação meramente informativa · valores sujeitos às condições do grupo e à análise da administradora · gerada em ${dataSimulacao}</div>
           <div style="font-weight:700; color:#475569; letter-spacing:0.2px;">grupomasterprime.com.br</div>
         </div>
 
