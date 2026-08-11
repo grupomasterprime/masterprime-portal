@@ -510,6 +510,7 @@ body.embedded-mode .portal-menu-fab { display:flex; }
             <span class="it"><span class="hm-sw bar" style="background:#9ec5f4"></span> Cotas 2026</span>
             <span class="it"><span class="hm-sw bar" style="background:#f3cf85"></span> Cotas 2025</span>
             <span class="it"><span class="hm-sw" style="height:0;border-top:2px dashed #6b7280;background:none"></span> Objetivo R$ 137,9 mi</span>
+            <span class="it"><span class="hm-sw" style="height:0;border-top:2px dashed #2a78d6;background:none"></span> Projeção 2026</span>
           </div>
           <div class="hm-chartbox" id="hm-box">
             <svg id="hm-chart" width="100%" height="400" viewBox="0 0 1020 430" role="img" aria-label="Crédito e cotas acumulados de agosto, 2026 contra 2025"></svg>
@@ -3091,13 +3092,23 @@ async function initHome(force){
   const cls = vsAno >= 0 ? 'up' : 'down';
   const sinal = vsAno >= 0 ? '+' : '';
 
+  // Projeção de fechamento: aplica no total de 2025 o ritmo relativo de 2026
+  // (quanto 2026 está rodando vs 2025 no mesmo dia). Assim a projeção segue a
+  // curva real de agosto, que concentra as vendas no fim do mês, em vez de uma
+  // reta linear que subestimaria o fechamento. Sem base de 2025 no dia, cai na
+  // projeção linear pelo ritmo diário.
+  const projecao = v25hj > 0 ? tot25 * (v26 / v25hj) : (hoje > 0 ? v26 / hoje * HM_DIAS : 0);
+  const pctProj = projecao / HM_META * 100;
+  const clsProj = projecao >= HM_META ? 'up' : 'down';
+
   document.getElementById('hm-tiles').innerHTML = `
     <div class="hm-tile"><div class="k">Vendido até dia ${hoje}</div><div class="v">${hmFmtMi(v26)}</div><div class="d">${q26} cotas · só Porto</div></div>
     <div class="hm-tile"><div class="k">% do objetivo</div><div class="v">${pctMeta.toLocaleString('pt-BR',{maximumFractionDigits:1})}%</div><div class="d">objetivo ${hmFmtMi(HM_META)}</div></div>
     <div class="hm-tile"><div class="k">vs mesmo dia de 2025</div><div class="v ${cls}">${sinal}${vsAno.toLocaleString('pt-BR',{maximumFractionDigits:0})}%</div><div class="d">${hmFmtMi(v25hj)} em 2025</div></div>
+    <div class="hm-tile"><div class="k">Projeção de fechamento</div><div class="v ${clsProj}">${hmFmtMi(projecao)}</div><div class="d">no ritmo atual, pela curva de 2025 · ${pctProj.toLocaleString('pt-BR',{maximumFractionDigits:0})}% do objetivo</div></div>
     <div class="hm-tile"><div class="k">Faltam</div><div class="v">${hmFmtMi(Math.max(0,HM_META-v26))}</div><div class="d">${HM_DIAS-hoje} dias de campanha</div></div>`;
 
-  hmRenderChart(a25.cred, a25.cot, a26.cred, a26.cot, hoje, tot25);
+  hmRenderChart(a25.cred, a25.cot, a26.cred, a26.cot, hoje, tot25, projecao);
 
   const ft = document.getElementById('hm-foot');
   if (ft) {
@@ -3107,13 +3118,13 @@ async function initHome(force){
   }
 }
 
-function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25){
+function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
   const svg = document.getElementById('hm-chart'); if (!svg) return;
   svg.innerHTML = '';
   const NS='http://www.w3.org/2000/svg';
   const W=1020, H=430, ML=74, MR=64, MT=18, MB=44, PH=H-MT-MB;
   const X = d => ML + (d-1)/(HM_DIAS-1)*(W-ML-MR);
-  const maxC = Math.max(HM_META, tot25, cred26[hoje-1]||0)*1.04;
+  const maxC = Math.max(HM_META, tot25, cred26[hoje-1]||0, proj||0)*1.04;
   const Y1 = v => MT + PH - v/maxC*PH;
   const maxQ = Math.max(cot25[HM_DIAS-1]||1, cot26[hoje-1]||1)*1.06;
   const Y2 = v => MT + PH - v/maxQ*PH;
@@ -3143,6 +3154,20 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25){
   }
   path(cred25,'#eda100',2.2);
   path(cred26,'#2a78d6',3.4);
+  // Projeção 2026: do dia atual até o fim do mês, seguindo o formato da curva
+  // de 2025 escalado pelo ritmo relativo de 2026 (mesma conta do card).
+  const projArr = [];
+  if (proj > 0 && hoje < HM_DIAS) {
+    const fator = (cred25[hoje-1]||0) > 0 ? (cred26[hoje-1]||0)/cred25[hoje-1] : null;
+    let pd = 'M'+X(hoje)+' '+Y1(cred26[hoje-1]||0);
+    for (let d = hoje+1; d <= HM_DIAS; d++) {
+      const v = fator != null ? (cred25[d-1]||0)*fator : (cred26[hoje-1]||0)/hoje*d;
+      projArr[d-1] = v;
+      pd += ' L'+X(d)+' '+Y1(v);
+    }
+    el('path',{d:pd,fill:'none',stroke:'#2a78d6','stroke-width':2,'stroke-dasharray':'5 5',opacity:.7,'stroke-linecap':'round'});
+    txt(X(HM_DIAS)-2, Y1(proj)-8, 'PROJEÇÃO · '+hmFmtMi(proj), {'text-anchor':'end','font-weight':'700',fill:'#2a78d6',opacity:.9});
+  }
   txt(X(HM_DIAS)-2,Y1(cred25[HM_DIAS-1])-10,'2025 · '+hmFmtMi(tot25),{'text-anchor':'end','font-weight':'700',fill:'#b47b00'});
   el('circle',{cx:X(hoje),cy:Y1(cred26[hoje-1]||0),r:4.5,fill:'#2a78d6',stroke:'#fff','stroke-width':2});
   txt(X(hoje)+9,Y1(cred26[hoje-1]||0)-8,'2026 · '+hmFmtMi(cred26[hoje-1]||0),{'font-weight':'800',fill:'#1c5cab'});
@@ -3159,7 +3184,8 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25){
     d=Math.max(1,Math.min(HM_DIAS,d));
     cross.setAttribute('x1',X(d)); cross.setAttribute('x2',X(d)); cross.setAttribute('visibility','visible');
     const l26 = d<=hoje ? `<div class="row"><span><span class="dot" style="background:#2a78d6"></span>2026</span><b>${hmFmtBR(cred26[d-1]||0)} · ${cot26[d-1]||0} cotas</b></div>`
-                        : `<div class="row"><span><span class="dot" style="background:#2a78d6"></span>2026</span><span style="color:#8a8984">ainda não chegou</span></div>`;
+                        : (projArr[d-1] ? `<div class="row"><span><span class="dot" style="background:#9ec5f4"></span>2026 projeção</span><b>${hmFmtBR(projArr[d-1])}</b></div>`
+                                        : `<div class="row"><span><span class="dot" style="background:#2a78d6"></span>2026</span><span style="color:#8a8984">ainda não chegou</span></div>`);
     tip.innerHTML = `<b>Dia ${String(d).padStart(2,'0')}/08 · acumulado</b>${l26}
       <div class="row"><span><span class="dot" style="background:#eda100"></span>2025</span><b>${hmFmtBR(cred25[d-1]||0)} · ${cot25[d-1]||0} cotas</b></div>`;
     tip.style.display='block';
