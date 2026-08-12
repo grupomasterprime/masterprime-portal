@@ -284,7 +284,13 @@ textarea.inp{resize:vertical;min-height:60px}
       </div>
     </div>
     <div class="filtros">
-      <input type="text" id="fat-busca" placeholder="Buscar por nome, CPF, protocolo, consultor..." oninput="fatFiltrar()">
+      <input type="text" id="fat-busca" placeholder="Buscar por nome, CPF, protocolo, consultor, operação..." oninput="fatFiltrar()">
+      <select id="fat-operacao-filtro" onchange="fatFiltrar()">
+        <option value="">Todas as operações</option>
+        <option value="faturamento">Faturamento</option>
+        <option value="transferencia">Transferência</option>
+        <option value="reducao_taxa">Redução de taxa</option>
+      </select>
       <select id="fat-status-filtro" onchange="fatFiltrar()">
         <option value="">Todos os status</option>
         <option>Recebido</option>
@@ -815,13 +821,20 @@ function fatFiltrar() {
   const busca  = document.getElementById('fat-busca')?.value.toLowerCase() || '';
   const status = document.getElementById('fat-status-filtro')?.value || '';
   const origem = document.getElementById('fat-origem-filtro')?.value || '';
+  const operacao = document.getElementById('fat-operacao-filtro')?.value || '';
   fatFiltrados = fatProcessos.filter(p => {
     const arq = !!p.arquivado;
     if (fatView === 'arquivados' ? !arq : arq) return false;
     if (origem === 'clientes' && fatEhInterno(p)) return false;
     if (origem === 'internos' && !fatEhInterno(p)) return false;
-    const texto = `${p.nome} ${p.cpf} ${p.protocolo} ${p.grupo||''} ${p.cota||''} ${p.corretor||''} ${p.consultor_nome||''}`.toLowerCase();
-    return (!busca || texto.includes(busca)) && (!status || p.status === status);
+    if (operacao && fatOperacaoDe(p) !== operacao) return false;
+    // Operação entra no texto da busca: digitar "redução", "transferência"
+    // ou "faturamento" no campo de busca também filtra por tipo.
+    const opLabel = fatOperacaoLabel(fatOperacaoDe(p));
+    const texto = `${p.nome} ${p.cpf} ${p.protocolo} ${p.grupo||''} ${p.cota||''} ${p.corretor||''} ${p.consultor_nome||''} ${opLabel}`.toLowerCase();
+    const buscaNorm = busca.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    const textoNorm = texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    return (!busca || textoNorm.includes(buscaNorm)) && (!status || p.status === status);
   });
   fatRenderTabela(fatFiltrados);
 }
@@ -829,6 +842,7 @@ function fatLimparFiltros() {
   document.getElementById('fat-busca').value = '';
   document.getElementById('fat-status-filtro').value = '';
   const o = document.getElementById('fat-origem-filtro'); if (o) o.value = '';
+  const op = document.getElementById('fat-operacao-filtro'); if (op) op.value = '';
   fatFiltrar();
 }
 function fatMudarView(v) {
