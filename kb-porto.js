@@ -1557,7 +1557,134 @@ window.KB_ADMIN["porto"] = {
       "tags": "pacto antenupcial, regime bens, comunhao, separacao, aquestos, 1977, conjuge",
       "ordem": 33
     }
-                                                                                                                                                          ],
+                                                                                                                                                        ,
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Como enviar a documentação da carta de crédito Imóvel (canal digital)",
+      "conteudo": "A Porto tem um canal digital exclusivo para envio da documentação de utilização da carta de crédito de imóvel: um chatbot acessado pelo link porto.vc/botimovel.\n\nRegras de envio:\n\n• Toda a documentação vai pela plataforma digital, completa e legível.\n• Formatos preferenciais: PDF e JPEG.\n• Documento desatualizado ou pendente de regularização prejudica o parecer e pode atrasar o processo.\n• Após a análise, a Porto pode pedir documentação complementar.\n\nDica: o consorciado pode pedir a avaliação econômica do imóvel antecipadamente, enquanto providencia o restante da documentação para a análise jurídica.",
+      "tags": "botimovel, chatbot, envio, documentação, imóvel, canal, análise",
+      "ordem": 34
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Documentação pessoal (PF) para usar a carta de Imóvel: o que vale e validades",
+      "conteudo": "Para qualquer uso da carta de crédito de imóvel, o consorciado pessoa física envia:\n\n• Documento de identidade: RG, CPF, CNH ou registro de entidade de classe profissional.\n• Comprovante de estado civil: certidão de nascimento ou casamento ATUALIZADA, com averbação do estado civil atual.\n• Comprovante de endereço em nome do titular, emitido há menos de 60 dias: contas de água, gás, energia, telefone ou fatura de cartão. Se não houver em nome do consorciado, vale contrato de locação mencionando o endereço.\n\nAtenção:\n\n• Casado ou em união estável: o cônjuge ou convivente deve ser incluído na cota, com a documentação pessoal dele também.\n• União estável: apresentar Escritura Pública ou Declaração de União Estável, conforme o caso.\n• Estrangeiro: documentos emitidos no exterior precisam ser legalizados em repartição consular (embaixada ou consulado) e transcritos em Cartório do 1º Ofício de Registro Civil do município de domicílio no Brasil.",
+      "tags": "documentos, pessoa física, RG, CPF, CNH, estado civil, endereço, união estável, estrangeiro, validade",
+      "ordem": 35
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Documentação de pessoa jurídica (PJ) para usar a carta de Imóvel",
+      "conteudo": "Quando o consorciado é pessoa jurídica, além dos documentos pessoais dos representantes legais, a empresa envia:\n\n• Contrato Social Consolidado e alterações posteriores (ou Estatuto de Constituição, no caso de S.A., cooperativas e entidades sem fins lucrativos).\n• Certidão de breve relato (certidão simplificada) da Junta Comercial do Estado, emitida há menos de 180 dias.\n• Cartão CNPJ (emitido no site da Receita Federal).\n• Certidão Negativa de Débitos de Tributos Federais (Receita Federal / PGFN, pelo CNPJ).\n• Comprovante de endereço em nome da pessoa jurídica, emitido há menos de 60 dias (comprova a sede ou filial).",
+      "tags": "pessoa jurídica, PJ, contrato social, estatuto, junta comercial, breve relato, CNPJ, CND, certidão negativa",
+      "ordem": 36
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Documentação do imóvel: validades e o que a matrícula precisa ter",
+      "conteudo": "Documentos do imóvel urbano para análise:\n\n• Matrícula individualizada do imóvel com certidão de ônus, emitida há menos de 30 dias (inclui vaga de garagem e box, se houver, com metragens corretas).\n• Cartela de IPTU, certidão de valor venal ou certidão de dados cadastrais, emitida há menos de 30 dias, com endereço completo e metragens.\n• Certidão negativa de débitos imobiliários da Prefeitura (IPTU, ITBI e demais tributos do imóvel).\n\nA matrícula deve conter as averbações de: estado civil dos proprietários, área construída atual (e ampliações), inexistência de área construída no caso de terreno, e logradouro atualizado.\n\nRestrições importantes:\n\n• NÃO é permitido usar o crédito para imóvel na planta, em construção ou fração ideal.\n• NÃO pode adquirir terreno quando houver lance ou complemento por meio de FGTS.",
+      "tags": "matrícula, certidão de ônus, IPTU, valor venal, dados cadastrais, certidão negativa, validade, 30 dias, planta, fração ideal, terreno, FGTS",
+      "ordem": 37
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Imóvel rural: documentos específicos",
+      "conteudo": "Para aquisição de imóvel rural com a carta de crédito, além dos demais documentos, são exigidos dois itens específicos:\n\n• ITR (Imposto sobre a Propriedade Territorial Rural) com os DARFs e comprovantes de pagamento dos últimos 5 anos.\n• CCIR (Certificado de Cadastro de Imóvel Rural).",
+      "tags": "imóvel rural, ITR, CCIR, DARF, rural, documentos",
+      "ordem": 38
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Imóvel em condomínio: declaração de débitos condominiais",
+      "conteudo": "Para imóvel constituído em condomínio, a análise exige:\n\n• Declaração de débitos condominiais emitida há menos de 30 dias, assinada pela administradora do condomínio ou pelo síndico eleito.\n• Junto com ela: a Ata de Assembleia que nomeia o síndico OU o Contrato de Prestação de Serviço entre condomínio e administradora.\n\nAtenção:\n\n• A declaração também deve mencionar as vagas de garagem e o box, se for o caso.\n• Quem assina precisa ter poderes legais para isso, com nome legível e devidamente qualificado.",
+      "tags": "condomínio, débitos condominiais, síndico, ata, declaração, apartamento",
+      "ordem": 39
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Imóvel alugado: direito de preferência do inquilino",
+      "conteudo": "Se o imóvel que será comprado está alugado, o inquilino tem direito de preferência sobre a venda (Lei 8.245/91).\n\nPara a análise, é preciso apresentar:\n\n• Carta resposta assinada pelo inquilino, manifestando a renúncia ao direito de preferência (ou o exercício dele).\n• Contrato de locação junto com a carta.",
+      "tags": "imóvel alugado, locação, inquilino, direito de preferência, lei 8245, carta resposta",
+      "ordem": 40
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Prazos, custos e pagamento da carta de Imóvel",
+      "conteudo": "Prazos e custos que o consultor precisa saber ao orientar o cliente:\n\n• Aprovação do crédito: para cotas contempladas por sorteio ou lance não quitadas, o crédito precisa ser aprovado, e a aprovação vale por 180 dias.\n• Pagamento: a Porto paga o bem em até 2 dias úteis após receber a matrícula com o registro da alienação fiduciária em nome da Porto Seguro.\n• Custos por conta do consorciado: avaliação do imóvel, ITBI, emolumentos cartorários, registro, emissão do contrato de alienação, tarifas e impostos. Cota quitada em menos de 180 dias também tem custas próprias, conforme o Regulamento.\n• FGTS: para usar, o cliente procura empresa credenciada ou agente financeiro autorizado (Manual da Casa Própria e regras do Conselho Curador do FGTS), com custos por conta dele.\n\nNa construção ou reforma, formalizada a garantia, o pagamento do crédito é feito na modalidade reembolso, conforme a documentação da obra.",
+      "tags": "prazo, pagamento, 2 dias, aprovação, 180 dias, ITBI, cartório, custos, FGTS, reembolso",
+      "ordem": 41
+    },
+    {
+      "categoria_key": "credito_imovel",
+      "categoria_label": "Crédito e compra — Imóvel",
+      "categoria_ordem": 7,
+      "titulo": "Condições gerais: usufruto, inalienabilidade, venda entre parentes e espólio",
+      "conteudo": "Casos especiais que travam ou condicionam a operação de imóvel:\n\n• Cláusula de inalienabilidade averbada na matrícula: precisa ser cancelada previamente.\n• Usufruto: a Porto NÃO aliena imóvel com cláusula de usufruto. Havendo usufruto na matrícula, deve ser cancelado antes.\n• Venda de ascendente para descendente (pais para filhos): apresentar declaração dos pais informando quantos e quais são os outros filhos, com cópias dos documentos pessoais deles e dos respectivos cônjuges (RG, CPF e certidão de casamento ou nascimento). Os demais descendentes e cônjuges assinam o contrato consentindo com a venda.\n• Incapaz (interdito ou menor) ou espólio: é preciso alvará judicial válido autorizando a transmissão, com valor, forma de recebimento e o representante.",
+      "tags": "usufruto, inalienabilidade, ascendente, descendente, pais, filhos, espólio, menor, alvará judicial, condições gerais",
+      "ordem": 42
+    },
+    {
+      "categoria_key": "venda_estruturada",
+      "categoria_label": "Vendas Estruturadas (acima de R$ 5 milhões)",
+      "categoria_ordem": 8,
+      "titulo": "O que é a Venda Estruturada (Mesa de Negócios PortoBank)?",
+      "conteudo": "Vendas Estruturadas é o atendimento especial da Mesa de Negócios do PortoBank para operações de consórcio com crédito A PARTIR DE R$ 5 MILHÕES.\n\nEm vez de montar a operação sozinho nas tabelas normais, o consultor aciona a Mesa, que cria um estudo personalizado com: composição de grupos, taxas diferenciadas e projeção de lances para o perfil do cliente.\n\nÉ o caminho certo para clientes de alto valor: compra de imóvel de grande porte, ampliação de negócios, substituição de dívidas, alavancagem patrimonial.",
+      "tags": "venda estruturada, mesa de negócios, portobank, 5 milhões, alto valor, grandes créditos",
+      "ordem": 1
+    },
+    {
+      "categoria_key": "venda_estruturada",
+      "categoria_label": "Vendas Estruturadas (acima de R$ 5 milhões)",
+      "categoria_ordem": 8,
+      "titulo": "Como acionar a Mesa de Negócios (canais e informações do perfil)",
+      "conteudo": "Canais para solicitar uma Venda Estruturada:\n\n• WhatsApp: (11) 3004-6215\n• E-mail: mesadenegocios.bank@portoseguro.com.br\n\nPara a análise começar, envie as informações do perfil do cliente:\n\n• Qual o objetivo do crédito (compra de imóvel, ampliação de negócios, substituição de dívidas etc.)\n• Se o cliente tem negociação com outra administradora ou banco (se sim, enviar a proposta ou simulação concorrente)\n• Qual a expectativa de contemplação (prazo)\n• Se possui recurso próprio para a operação\n• Se vai usar lance embutido\n• Exceções a analisar: taxa, garantias, regras, alinhamento com produto ou pós-contemplação",
+      "tags": "mesa de negócios, whatsapp, e-mail, contato, perfil, checklist, como solicitar",
+      "ordem": 2
+    },
+    {
+      "categoria_key": "venda_estruturada",
+      "categoria_label": "Vendas Estruturadas (acima de R$ 5 milhões)",
+      "categoria_ordem": 8,
+      "titulo": "Venda Estruturada: documentos de Pessoa Física",
+      "conteudo": "Documentação obrigatória para cliente pessoa física:\n\n• Nome completo\n• IRPF: declaração de Imposto de Renda na ÍNTEGRA, com a página de recibo, do último ano base\n• Comprovante de renda: comprovante de rendimentos mensais conforme o vínculo empregatício\n• Profissional liberal, autônomo ou empresário: extratos bancários na íntegra dos 3 últimos meses, gerados em PDF",
+      "tags": "venda estruturada, pessoa física, IRPF, imposto de renda, comprovante de renda, extratos, documentos",
+      "ordem": 3
+    },
+    {
+      "categoria_key": "venda_estruturada",
+      "categoria_label": "Vendas Estruturadas (acima de R$ 5 milhões)",
+      "categoria_ordem": 8,
+      "titulo": "Venda Estruturada: documentos de Pessoa Jurídica",
+      "conteudo": "Documentação obrigatória para cliente pessoa jurídica:\n\n• Contrato social e última atualização\n• Balanços patrimoniais fiscais dos últimos 3 exercícios com DRE, extraídos da ECD (Escrituração Contábil Digital) e com protocolo de entrega\n• IRPF dos sócios\n\nAtenção: os documentos fiscais (Balanço/ECD) precisam estar completos e com o protocolo de entrega, senão a análise não anda.",
+      "tags": "venda estruturada, pessoa jurídica, balanço, DRE, ECD, protocolo, IRPF sócios, documentos",
+      "ordem": 4
+    },
+    {
+      "categoria_key": "venda_estruturada",
+      "categoria_label": "Vendas Estruturadas (acima de R$ 5 milhões)",
+      "categoria_ordem": 8,
+      "titulo": "Venda Estruturada: prazos (SLA) e boas práticas",
+      "conteudo": "Fluxo e prazos da Mesa de Negócios:\n\n• Triagem (4 horas): a Mesa analisa o perfil e confirma se os documentos estão OK.\n• Análise de crédito (72 horas úteis): o ticket é aberto e priorizado junto ao time de crédito sênior.\n• Estruturação da proposta (24 horas úteis): criação do estudo de grupos, taxas e projeção de lances.\n\nBoas práticas:\n\n• SEMPRE informe a expectativa de contemplação do cliente (prazo).\n• Negócio complexo? A Mesa pode fazer reunião via Meet com o comercial e o cliente.\n• Documentos fiscais completos e com protocolo de entrega evitam retrabalho.",
+      "tags": "venda estruturada, prazo, SLA, triagem, análise de crédito, 72 horas, proposta, meet",
+      "ordem": 5
+    }
+  ],
   "downloads": [
     {"titulo": "FAQ — Lance Fidelidade (ago/2026)", "descricao": "Perguntas e respostas oficiais da nova modalidade: elegibilidade, valor de 20%, pagamento com embutido, apuração e ordem da assembleia.", "arquivo": "kb-porto-lance-fidelidade-faq.pdf"},
     {"titulo": "Guia de Bolso — Lance Fidelidade", "descricao": "Resumo rápido do Lance Fidelidade para usar na venda: requisitos, diferenciais e onde ofertar.", "arquivo": "kb-porto-lance-fidelidade-guia-bolso.pdf"},
