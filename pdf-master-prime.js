@@ -784,27 +784,33 @@
     const theme = ADMIN_THEME[opts.logoAdmin] || ADMIN_THEME.porto;
     const logoUrl = LOGO_ADMIN_DATA[opts.logoAdmin] || '';
 
-    // ── LAYOUT "PADRÃO RENATO" (aprovado 11/08/2026) ─────────────────────
-    // Tabela limpa em duas colunas: DADOS DA PROPOSTA + OFERTA DE LANCE à
-    // esquerda (linhas com divisórias finas) e RESULTADO DA SIMULAÇÃO à
-    // direita com o Crédito Líquido em faixa destacada. Linhas zeradas são
-    // ocultas e o rodapé traz a data da simulação.
+    // ── LAYOUT "PADRÃO RENATO v2" (ajustes Allan 18/08/2026) ─────────────
+    // · Seções numeradas (1-4) com barrinha na cor da administradora
+    // · Crédito Líquido e Parcela pós-contemplação em faixa destacada
+    // · Valor lance a pagar destacado quando existir
+    // · Seção 4 "Pós-contemplação" com parcela pós + prazo restante
+    // · Moldura externa opcional (opts.moldura !== false)
 
     const esc = s => String(s === undefined || s === null ? '' : s);
 
-    // Linha da coluna esquerda: rótulo + valor (valor em coluna alinhada)
-    const rowEsq = (label, value) => `
+    const rowEsq = (label, value, destaque) => destaque ? `
+      <div style="display:grid; grid-template-columns:1.15fr 1fr; align-items:center; padding:13px 22px; background:#0033A012; border-top:1px solid #0033A022;">
+        <div style="font-size:16.5px; color:#0F172A; font-weight:700;">${esc(label)}</div>
+        <div style="font-size:18px; color:#0F172A; font-weight:800;">${esc(value) || '—'}</div>
+      </div>` : `
       <div style="display:grid; grid-template-columns:1.15fr 1fr; align-items:center; padding:13px 22px; border-top:1px solid #EEF1F5;">
         <div style="font-size:16.5px; color:#1E293B; font-weight:500;">${esc(label)}</div>
         <div style="font-size:18px; color:#0F172A; font-weight:700;">${esc(value) || '—'}</div>
       </div>`;
 
-    const secaoEsq = (titulo, comBorda) => `
-      <div style="padding:16px 22px 12px; ${comBorda ? 'border-top:1px solid #EEF1F5;' : ''}">
-        <div style="font-size:15.5px; color:#0F172A; font-weight:700; letter-spacing:1px; text-transform:uppercase;">${esc(titulo)}</div>
+    const secao = (num, titulo, comBorda) => `
+      <div style="display:flex; align-items:center; gap:12px; padding:18px 22px 14px; ${comBorda ? 'border-top:1px solid #EEF1F5;' : ''}">
+        <span style="width:6px; height:22px; border-radius:3px; background:${theme.corAcento}; flex-shrink:0;"></span>
+        <span style="font-size:15px; font-weight:800; color:${theme.corAcento};">${num}</span>
+        <span style="font-size:18px; color:#0F172A; font-weight:800; letter-spacing:1px; text-transform:uppercase;">${esc(titulo)}</span>
       </div>`;
 
-    // Inputs (DADOS DA PROPOSTA) — oculta linhas zeradas (fundo reserva 0%, seguro 0% etc.)
+    // Inputs (DADOS DA PROPOSTA) — oculta linhas zeradas
     const inputsVisiveis = (opts.inputs || [])
       .filter(inp => inp.ocultarSeZero === false || !_isValorZerado(inp.value));
     const inputsHtml = inputsVisiveis.map(inp => rowEsq(inp.label, inp.value)).join('');
@@ -826,7 +832,8 @@
       if (lanceFiltrado.modo === 'simples') {
         const it = lanceFiltrado.total || lanceFiltrado.embutido || lanceFiltrado.apagar;
         linhas += rowEsq('% Lance', fmtPct(it.pct));
-        linhas += rowEsq('Valor lance', fmtRs(it.rs));
+        // No modo simples (Bradesco) o lance é todo recurso próprio: destaca o valor
+        linhas += rowEsq('Valor lance', fmtRs(it.rs), true);
       } else {
         if (lanceFiltrado.embutido) {
           linhas += rowEsq('% Lance embutido', fmtPct(lanceFiltrado.embutido.pct));
@@ -834,52 +841,96 @@
         }
         if (lanceFiltrado.apagar) {
           linhas += rowEsq('% Lance a pagar', fmtPct(lanceFiltrado.apagar.pct));
-          linhas += rowEsq('Valor lance a pagar', fmtRs(lanceFiltrado.apagar.rs));
+          // DESTAQUE: o dinheiro que sai do bolso do cliente
+          linhas += rowEsq('Valor lance a pagar', fmtRs(lanceFiltrado.apagar.rs), true);
         }
         if (lanceFiltrado.total) {
           linhas += rowEsq('% Lance total', fmtPct(lanceFiltrado.total.pct));
           linhas += rowEsq('Valor total', fmtRs(lanceFiltrado.total.rs));
         }
       }
-      lanceHtml = secaoEsq('Oferta de Lance', true) + linhas;
+      lanceHtml = `
+          <div style="background:#fff; border:1px solid #E6E9EF; border-radius:10px; overflow:hidden; margin-top:24px;">
+            ${secao('2', 'Oferta de Lance', false)}
+            ${linhas}
+          </div>`;
+    }
+    const numResultado = lanceHtml ? '3' : '2';
+    const numPos = lanceHtml ? '4' : '3';
+    if (false) {
     }
 
-    // Outputs (RESULTADO DA SIMULAÇÃO) — hero = faixa destacada do Crédito Líquido
-    const outputs = (opts.outputs || []);
+    // Outputs — separa a seção 4 (pós-contemplação: parcela pós + prazo restante)
+    const outputsAll = (opts.outputs || []);
+    const ehPos = o => o.label && (/p[óo]s[\s-]*contempl/i.test(o.label) || /prazo\s+restante/i.test(o.label));
+    const outputsPos = outputsAll.filter(ehPos);
+    const outputs = outputsAll.filter(o => !ehPos(o));
+
     let heroIdx = outputs.findIndex(o =>
       o.hero === true || (o.label && /cr[ée]dito\s*l[íi]quido/i.test(o.label))
     );
     if (heroIdx < 0 && outputs.length) heroIdx = 0;
 
+    const rowDirDestaque = o => `
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:18px; padding:24px 24px; background:#0033A012; border-top:1px solid #0033A022;">
+        <div style="font-size:17px; color:#0F172A; font-weight:700;">${esc(o.label)}${o.subAcima ? `<div style="font-size:12px; color:#94A3B8; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; margin-top:4px;">${esc(o.subAcima)}</div>` : ''}</div>
+        <div style="font-size:21px; color:#0F172A; font-weight:800; white-space:nowrap;">${esc(o.value) || '—'}</div>
+      </div>`;
+
     const rowDir = o => `
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:18px; padding:26px 24px; border-top:1px solid #EEF1F5;">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:18px; padding:24px 24px; border-top:1px solid #EEF1F5;">
         <div style="font-size:17px; color:#1E293B; font-weight:500;">${esc(o.label)}${o.subAcima ? `<div style="font-size:12px; color:#94A3B8; font-weight:600; letter-spacing:0.8px; text-transform:uppercase; margin-top:4px;">${esc(o.subAcima)}</div>` : ''}</div>
         <div style="font-size:21px; color:#0F172A; font-weight:700; white-space:nowrap;">${esc(o.value) || '—'}</div>
       </div>`;
 
-    const heroDir = o => `
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:18px; padding:22px 24px; background:#EDF2FA; border-top:1px solid #E3EAF4; border-bottom:1px solid #E3EAF4;">
-        <div style="font-size:16px; color:#0F172A; font-weight:700; letter-spacing:1px; text-transform:uppercase;">${esc(o.label)}</div>
+    const heroDir = o => {
+      const lab = esc(o.label);
+      const labSize = lab.length > 18 ? 19 : 24; // rótulo longo (ex. parcela pós) encolhe pra caber
+      return `
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:18px; padding:22px 24px; background:#0033A012; border-top:1px solid #0033A022; border-bottom:1px solid #0033A022;">
+        <div style="font-size:${labSize}px; color:#0F172A; font-weight:800; letter-spacing:0.5px; text-transform:uppercase;">${lab}</div>
         <div style="font-size:26px; color:#0F172A; font-weight:800; white-space:nowrap; letter-spacing:-0.4px;">${esc(o.value) || '—'}</div>
       </div>`;
+    };
 
-    // Crédito Líquido (hero) SEMPRE em primeiro, logo abaixo do título da seção
-    // (pedido do Allan em 11/08/2026); os demais seguem na ordem enviada.
     let outputsHtml = '';
     if (outputs.length) {
       outputsHtml += heroDir(outputs[heroIdx]);
       outputs.forEach((o, i) => { if (i !== heroIdx) outputsHtml += rowDir(o); });
     }
 
+    // Seção 4: parcela pós-contemplação (destaque) + prazo restante
+    let posHtml = '';
+    if (outputsPos.length) {
+      const posLinhas = outputsPos.map(o => {
+        const lab = o.label || '';
+        // Destaca a parcela pós que muda de valor; a "1ª parcela pós" do Bradesco
+        // (que mantém o valor da inicial) fica sem destaque — pedido Allan 18/08.
+        const destacar = /p[óo]s[\s-]*contempl/i.test(lab) && !/^\s*1ª/i.test(lab);
+        return destacar ? rowDirDestaque(o) : rowDir(o);
+      }).join('');
+      posHtml = `
+          <div style="background:#fff; border:1px solid #E6E9EF; border-radius:10px; overflow:hidden; margin-top:24px;">
+            ${secao(numPos, 'Pós-contemplação', false)}
+            ${posLinhas}
+          </div>`;
+    }
+
     // Data da simulação no rodapé
     const _hj = new Date();
     const dataSimulacao = String(_hj.getDate()).padStart(2, '0') + '/' + String(_hj.getMonth() + 1).padStart(2, '0') + '/' + _hj.getFullYear();
 
+    // Moldura externa (cinza) — liga/desliga via opts.moldura (padrão: ligada)
+    const comMoldura = opts.moldura !== false;
+    const molduraAbre  = comMoldura ? '<div style="border:3.5px solid #94A0B0; border-radius:18px; padding:34px 38px; background:#FDFDFE; box-shadow:0 2px 10px rgba(15,23,42,0.06);">' : '';
+    const molduraFecha = comMoldura ? '</div>' : '';
+
     return `
-      <div style="width:1300px; background:#FAFBFC; font-family:'Inter','Helvetica Neue',-apple-system,system-ui,sans-serif; color:#0F172A; padding:44px 52px 32px; box-sizing:border-box;">
+      <div style="width:1300px; background:#FAFBFC; font-family:'Inter','Helvetica Neue',-apple-system,system-ui,sans-serif; color:#0F172A; padding:40px 44px 30px; box-sizing:border-box;">
+      ${molduraAbre}
 
         <!-- HEADER: tag + título + logos (MP + admin) -->
-        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:34px;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:30px;">
           <div style="max-width:70%;">
             <div style="font-size:15px; font-weight:600; color:#64748B; letter-spacing:2px; text-transform:uppercase; margin-bottom:14px;">Simulação de Crédito</div>
             <div style="font-size:52px; font-weight:800; color:#0F172A; line-height:1.05; letter-spacing:-1.4px;">${esc(opts.subtitulo) || 'Consórcio'}</div>
@@ -900,20 +951,25 @@
           </div>
         </div>
 
-        <!-- DUAS COLUNAS: dados/lance + resultado -->
+        <!-- DUAS COLUNAS: dados/lance + resultado/pós -->
         <div style="display:grid; grid-template-columns:1fr 1.06fr; gap:26px; align-items:start;">
 
-          <!-- ESQUERDA: DADOS DA PROPOSTA + OFERTA DE LANCE -->
-          <div style="background:#fff; border:1px solid #E6E9EF; border-radius:10px; overflow:hidden;">
-            ${secaoEsq('Dados da Proposta', false)}
-            ${inputsHtml}
+          <!-- ESQUERDA: 1 DADOS + 2 OFERTA DE LANCE (cards separados) -->
+          <div>
+            <div style="background:#fff; border:1px solid #E6E9EF; border-radius:10px; overflow:hidden;">
+              ${secao('1', 'Dados da Proposta', false)}
+              ${inputsHtml}
+            </div>
             ${lanceHtml}
           </div>
 
-          <!-- DIREITA: RESULTADO DA SIMULAÇÃO -->
-          <div style="background:#fff; border:1px solid #E6E9EF; border-radius:10px; overflow:hidden;">
-            ${secaoEsq('Resultado da Simulação', false)}
-            ${outputsHtml}
+          <!-- DIREITA: 3 RESULTADO + 4 PÓS-CONTEMPLAÇÃO -->
+          <div>
+            <div style="background:#fff; border:1px solid #E6E9EF; border-radius:10px; overflow:hidden;">
+              ${secao(numResultado, 'Resultado da Simulação', false)}
+              ${outputsHtml}
+            </div>
+            ${posHtml}
           </div>
         </div>
 
@@ -925,11 +981,12 @@
         </div>` : ''}
 
         <!-- RODAPÉ -->
-        <div style="margin-top:30px; padding-top:16px; display:flex; justify-content:space-between; align-items:center; color:#94A3B8; font-size:14px;">
-          <div>Simulação meramente informativa · valores sujeitos às condições do grupo e à análise da administradora · gerada em ${dataSimulacao}</div>
-          <div style="font-weight:700; color:#475569; letter-spacing:0.2px;">grupomasterprime.com.br</div>
+        <div style="margin-top:28px; padding-top:16px; display:flex; justify-content:space-between; align-items:center; color:#94A3B8; font-size:14px;">
+          <div style="font-size:13px;">Simulação meramente informativa · valores sujeitos às condições do grupo e à análise da administradora · gerada em ${dataSimulacao}</div>
+          <div style="font-weight:700; color:#475569; letter-spacing:0.2px; margin-left:24px; white-space:nowrap;">grupomasterprime.com.br</div>
         </div>
 
+      ${molduraFecha}
       </div>`;
   }
 
