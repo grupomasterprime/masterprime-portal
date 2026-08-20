@@ -308,7 +308,7 @@
 
         <div class="lance-bloco">
           <div class="grid grid-2">
-            <div class="field" title="% sobre crédito (digite % ou R$, o outro preenche)">
+            <div class="field" title="% sobre a categoria (crédito + taxa adm + FR), mesma base do Lance Total. Digite % ou R$, o outro preenche">
               <label>% Lance Embutido</label>
               <input type="text" id="pa-pctEmbutido" data-mask="pct2" placeholder="0,00 %">
               <span class="field-suffix">%</span>
@@ -318,7 +318,7 @@
               <input type="text" id="pa-embutido" placeholder="R$ 0,00" data-mask="money">
               <div class="lance-max-hint" id="pa-embutidoMaxHint">Máx. R$ 0,00</div>
             </div>
-            <div class="field" title="% sobre crédito (digite % ou R$, o outro preenche)">
+            <div class="field" title="% sobre a categoria (crédito + taxa adm + FR), mesma base do Lance Total. Digite % ou R$, o outro preenche">
               <label>% Lance a Pagar</label>
               <input type="text" id="pa-pctLanceFixo" data-mask="pct2" placeholder="0,00 %">
               <span class="field-suffix">%</span>
@@ -757,10 +757,11 @@ function aplicaEstrategia(strat, pctLivre = null) {
   if (recProp < 0) recProp = 0;
   get('pa-recProp').value = recProp > 0 ? maskMoney(String(Math.round(recProp * 100))) : '';
   get('pa-embutido').value = embutido > 0 ? maskMoney(String(Math.round(embutido * 100))) : '';
-  // Preenche também os % correspondentes (espelhamento sobre crédito)
-  if (i.credito > 0) {
-    get('pa-pctEmbutido').value = embutido > 0 ? ((embutido / i.credito) * 100).toFixed(2).replace('.', ',') + ' %' : '';
-    get('pa-pctLanceFixo').value = recProp > 0 ? ((recProp / i.credito) * 100).toFixed(2).replace('.', ',') + ' %' : '';
+  // Preenche também os % correspondentes (mesma base da barra LANCE TOTAL: categoria)
+  const catPct = _paBasePct();
+  if (catPct > 0) {
+    get('pa-pctEmbutido').value = embutido > 0 ? ((embutido / catPct) * 100).toFixed(2).replace('.', ',') + ' %' : '';
+    get('pa-pctLanceFixo').value = recProp > 0 ? ((recProp / catPct) * 100).toFixed(2).replace('.', ',') + ' %' : '';
   }
   recalc();
 }
@@ -909,7 +910,8 @@ function paClampEmbutido() {
   if (credito > 0 && vEmb > maxRs) {
     _paSyncing = true;
     get('pa-embutido').value = maskMoney(String(Math.round(maxRs * 100)));
-    get('pa-pctEmbutido').value = (pctMax * 100).toFixed(2).replace('.', ',') + ' %';
+    const catClamp = _paBasePct();
+    get('pa-pctEmbutido').value = catClamp > 0 ? ((maxRs / catClamp) * 100).toFixed(2).replace('.', ',') + ' %' : '';
     _paSyncing = false;
   }
 }

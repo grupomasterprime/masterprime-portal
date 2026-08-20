@@ -277,7 +277,7 @@
 
         <div class="lance-bloco">
           <div class="grid grid-2">
-            <div class="field" title="% sobre crédito (digite % ou R$, o outro preenche)">
+            <div class="field" title="% sobre a categoria (crédito + taxa adm + FR), mesma base do Lance Total. Digite % ou R$, o outro preenche">
               <label>% Lance a Pagar</label>
               <input type="text" id="pi-pctRecProp" data-mask="pct2" placeholder="0,00 %">
               <span class="field-suffix">%</span>
@@ -286,7 +286,7 @@
               <label>Recurso próprio (R$)</label>
               <input type="text" id="pi-recProp" placeholder="R$ 0,00" data-mask="money">
             </div>
-            <div class="field" title="% sobre crédito (digite % ou R$, o outro preenche)">
+            <div class="field" title="% sobre a categoria (crédito + taxa adm + FR), mesma base do Lance Total. Digite % ou R$, o outro preenche">
               <label>% FGTS</label>
               <input type="text" id="pi-pctFgts" data-mask="pct2" placeholder="0,00 %">
               <span class="field-suffix">%</span>
@@ -295,7 +295,7 @@
               <label>FGTS (R$)</label>
               <input type="text" id="pi-fgts" placeholder="R$ 0,00" data-mask="money">
             </div>
-            <div class="field" title="% sobre crédito (digite % ou R$, o outro preenche)">
+            <div class="field" title="% sobre a categoria (crédito + taxa adm + FR), mesma base do Lance Total. Digite % ou R$, o outro preenche">
               <label>% Lance Embutido</label>
               <input type="text" id="pi-pctEmbutido" data-mask="pct2" placeholder="0,00 %">
               <span class="field-suffix">%</span>
@@ -739,10 +739,11 @@ function aplicaEstrategia(strat, pctLivre = null) {
   if (recProp < 0) recProp = 0;
   get('pi-recProp').value = recProp > 0 ? maskMoney(String(Math.round(recProp * 100))) : '';
   get('pi-embutido').value = embutido > 0 ? maskMoney(String(Math.round(embutido * 100))) : '';
-  // Preenche também os % correspondentes (espelhamento sobre crédito)
-  if (i.credito > 0) {
-    get('pi-pctRecProp').value = recProp > 0 ? ((recProp / i.credito) * 100).toFixed(2).replace('.', ',') + ' %' : '';
-    get('pi-pctEmbutido').value = embutido > 0 ? ((embutido / i.credito) * 100).toFixed(2).replace('.', ',') + ' %' : '';
+  // Preenche também os % correspondentes (mesma base da barra LANCE TOTAL: categoria)
+  const catPct = _piBasePct();
+  if (catPct > 0) {
+    get('pi-pctRecProp').value = recProp > 0 ? ((recProp / catPct) * 100).toFixed(2).replace('.', ',') + ' %' : '';
+    get('pi-pctEmbutido').value = embutido > 0 ? ((embutido / catPct) * 100).toFixed(2).replace('.', ',') + ' %' : '';
   }
   recalc();
 }
