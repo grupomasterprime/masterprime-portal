@@ -256,8 +256,6 @@
           <select id="tipoLance">
             <option value="carta">Carta de crédito</option>
             <option value="categoria">Categoria</option>
-            <option value="saldo">Saldo devedor</option>
-            <option value="cat-carta">Categoria (Total) e Carta (Emb.)</option>
             <option value="bradesco-imovel">Bradesco Imóvel</option>
             <option value="bradesco-auto">Bradesco Auto</option>
           </select>
@@ -357,11 +355,20 @@ function calcularOperacao(op){
   const parcelaCheia=prazo>0?(totalDevido/prazo):0;
   let creditoAtualizado=credito;
   if(reajuste>0){const num=Math.floor(expectativa/12); creditoAtualizado=credito*Math.pow(1+reajuste,num);}
-  // Bradesco multiplica pela Categoria (Crédito × (1+adm+fundo)) e divide pelo Fator
+  // BASE DO LANCE conforme o "Tipo de lance" escolhido:
+  //   carta (padrão) → % sobre a carta de crédito atualizada
+  //   categoria      → % sobre a categoria (crédito × (1 + adm + fundo))
+  //   bradesco-*     → categoria ÷ fator (1,0425 imóvel · 1,0525 auto), sem embutido
+  const _baseLance = (_tipoLance === 'categoria')
+    ? creditoAtualizado * (1 + taxaAdm + fundo)
+    : creditoAtualizado;
   const lanceP = _isBrad
     ? (creditoAtualizado * (1 + taxaAdm + fundo) * pP) / _fatorBrad
-    : creditoAtualizado * pP;
-  const lanceE = creditoAtualizado * pE;
+    : _baseLance * pP;
+  const lanceE = _baseLance * pE;
+  // Fração do embutido SOBRE A CARTA — usada na redução proporcional da parcela
+  // pós-contemplação, qualquer que seja a base escolhida para digitar o %.
+  const pEcarta = creditoAtualizado > 0 ? lanceE / creditoAtualizado : 0;
   const creditoDisp=creditoAtualizado-lanceE;
 
   // SEGURO e ADESÃO — conferido no Conkey:
@@ -376,7 +383,7 @@ function calcularOperacao(op){
   //   as parcelas pós-contemplação PROPORCIONALMENTE (× (1−pE)), acompanhando o
   //   reajuste anual — e não num valor fixo. Com reajuste = 0 as duas formas coincidem,
   //   então os cenários calibrados anteriormente continuam batendo.
-  const parcelaMes = m => parcelaBase*Math.pow(1+reajuste, Math.floor(m/12)) * (m > expectativa ? (1-pE) : 1)
+  const parcelaMes = m => parcelaBase*Math.pow(1+reajuste, Math.floor(m/12)) * (m > expectativa ? (1-pEcarta) : 1)
                           + seguroMensal
                           + (m <= prazoAdesao ? adesaoMensal : 0);
   const parcelaInicial = parcelaMes(1);
@@ -396,7 +403,7 @@ function calcularOperacao(op){
   //   pagamento; para o lucro conta o valor cheio devido.
   let custoCheio = lanceP;
   for(let m = 1; m <= prazo; m++){
-    custoCheio += parcelaCheia*Math.pow(1+reajuste, Math.floor(m/12)) * (m > expectativa ? (1-pE) : 1)
+    custoCheio += parcelaCheia*Math.pow(1+reajuste, Math.floor(m/12)) * (m > expectativa ? (1-pEcarta) : 1)
                 + seguroMensal
                 + (m <= prazoAdesao ? adesaoMensal : 0);
   }
