@@ -640,6 +640,8 @@ function fatSemaforo(p) {
     const corridos = fatDiasDesde(p.previsao_retorno);
     if (corridos > 0) { const du = fatDiasUteisDesde(p.previsao_retorno); return { cls: 'sem-verm', label: 'Atrasado (' + du + ' d.u.)', nivel: 3 }; }
     if (corridos === 0) return { cls: 'sem-amarelo', label: 'Resposta hoje', nivel: 2 };
+    // Previsão no FUTURO: estamos aguardando a administradora, não conta atraso de etapa.
+    return { cls: 'sem-verde', label: 'Aguardando retorno (' + String(p.previsao_retorno).slice(0, 10).split('-').reverse().join('/') + ')', nivel: 1 };
   }
   const j = jornadaDoProcesso(p);
   if (j && j.etapas[j.atual]) {
