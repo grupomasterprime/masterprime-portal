@@ -145,21 +145,7 @@ body { background: #f4f5f7; color: #1f2937; font-family: 'Segoe UI', system-ui, 
       <input class="si" id="si" type="text" placeholder="Buscar grupo (ex: AF046, I0222, VP002, A0305)..." autocomplete="off">
       <div class="dd" id="dd"></div>
     </div>
-    <select class="ms" id="ms" onchange="onMC()">
-      <option value="12" selected="">Jun/26</option>
-      <option value="11">Mai/26</option>
-      <option value="10">Abr/26</option>
-      <option value="9">Mar/26</option>
-      <option value="8">Fev/26</option>
-      <option value="7">Jan/26</option>
-      <option value="6">Dez/25</option>
-      <option value="5">Nov/25</option>
-      <option value="4">Out/25</option>
-      <option value="3">Set/25</option>
-      <option value="2">Ago/25</option>
-      <option value="1">Jul/25</option>
-      <option value="0">Jun/25</option>
-    </select>
+    <select class="ms" id="ms" onchange="onMC()"></select>
   </div>
 
   <div class="empty" id="emp">
@@ -238,9 +224,13 @@ let selG=null, selMi=11, dtmr=null;
 
 (function(){
   document.getElementById("ec").textContent = keys.length+" grupos disponíveis";
+  // Dropdown de competências gerado a partir de COMPS (mais recente primeiro),
+  // para nunca faltar a competência nova quando os dados forem atualizados.
+  const msEl=document.getElementById("ms");
+  msEl.innerHTML=COMPS.map((c,i)=>'<option value="'+i+'">'+c+'</option>').reverse().join("");
   // padrão: sempre a competência mais recente (não hardcodar índice!)
   selMi=COMPS.length-1;
-  document.getElementById("ms").value=String(selMi);
+  msEl.value=String(selMi);
   const inp=document.getElementById("si");
   inp.addEventListener("input", ()=>{ clearTimeout(dtmr); dtmr=setTimeout(doSearch,130); });
   inp.addEventListener("focus", doSearch);
