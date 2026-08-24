@@ -402,6 +402,7 @@ body {
     <div class="success-icon">✓</div>
     <h2>Recebemos sua proposta!</h2>
     <p>Em breve a Master Prime entrará em contato para os próximos passos.</p>
+    <p id="cliente-display" style="font-size:15px; font-weight:600; color:var(--mp-navy); margin-top:10px;"></p>
     <div class="success-protocolo" id="protocolo-display">—</div>
     <p style="font-size:12px">Guarde este protocolo para consultas futuras.</p>
   </div>
@@ -1832,6 +1833,10 @@ async function enviarProposta(prefix, dados) {
     }
     const protocolo = data?.[0]?.protocolo || 'sem protocolo';
     $('protocolo-display').textContent = protocolo;
+    // Nome do cliente na tela de sucesso: sai no print que o cliente manda,
+    // facilitando a equipe adm localizar a proposta (PJ usa razão social em dados.nome).
+    const _nomeCliente = (dados && dados.nome) ? String(dados.nome).trim() : '';
+    $('cliente-display').textContent = _nomeCliente;
     // Log de atividade: ficha criada. Contexto pode ser anônimo (form público) —
     // por isso passamos p_usuario com o nome do consultor quando conhecido.
     // sb.rpc(...) é "lazy": precisa do .then() pra disparar a requisição.
