@@ -1775,7 +1775,8 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
   if (!ind || !String(ind).trim() || String(ind) === '0')
     return { tipo:'ok', partes:[] };
 
-  const raw = String(ind).trim().replace(/(\d+[,\.]?\d*)\s*\.\s*%/g, '$1%'); // "1,5%. X" → "1,5% X"
+  const raw = String(ind).trim().replace(/(\d+[,\.]?\d*)\s*\.\s*%/g, '$1%') // "1,5 . %" → "1,5%"
+                             .replace(/%\s*\./g, '%'); // "1,5%. X" → "1,5% X"
   const s   = raw.toUpperCase().replace(/(\d+),(\d+)%/g, '$1.$2%') // normaliza decimais
                                .replace(/(\d+)\.(\d+)%/g, (m,a,b) => a+','+b+'%'); // volta p/ vírgula
 
@@ -1825,7 +1826,8 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
   // Parceiros sem valor: geram carta stub (só info do contrato, sem valor)
   const PARCEIROS_SEM_PCT = ['AGNES','ANA BALDIN','ANA BALDIM','MANTOVANI','ROGER',
     'MARCIA SIQUELI','PARCERIA AGNES','PARCERIA ANA','PARCERIA FATORI','PARCERIA EDMOND',
-    'PARCEIRO LEIDI','BRAIN','CLECIANE','FATORI','NATHALIA','WILIAN'];
+    'PARCEIRO LEIDI','BRAIN','CLECIANE','FATORI','NATHALIA','WILIAN',
+    'PACHECO','DIEGO CAVALCANTI','DANILO CASTRO','MESSIAS'];
   const nomeStub = PARCEIROS_SEM_PCT.find(p => s.startsWith(p) || s === p);
   if (nomeStub) {
     const nomeNorm = normNome(nomeStub.replace(/^PARCERIA\s+|^PARCEIRO\s+/, ''));
@@ -1897,6 +1899,11 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
   // ── Strada: "1% STRADA LIQUIDO / 1% RODRIGUES SILVA" (default LÍQUIDO; BRUTO se explícito) ──
   if (s.includes('STRADA') && s.includes('%')) {
     const partes = [];
+    let selfFracStrada;
+    // Consultores internos no split usam a base da CATEGORIA (mult × 4%), para o %
+    // literal da OBS valer de verdade (ex: "1% RODRIGUES SILVA" = 1% do crédito).
+    // Corrigido em 24/08/2026 (decisão Allan): antes usava base 4% e pagava a menor.
+    const catStrada = (multConsultor || 0.625) * 4 / 100;
     const partsStr = s.split('/').map(p => p.trim());
     partsStr.forEach(p => {
       const m = p.match(/^(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s]+?)(?:\s+(BRUTO|LIQUIDO))?$/);
@@ -1905,16 +1912,25 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
         const quem = normNome(m[2].trim());
         // Regra geral: BRUTO na OBS = não desconta. LIQUIDO ou ausente = desconta NF+ADM.
         const ehLiq = m[3] !== 'BRUTO';
-        partes.push({
-          quem, fracBruto: pctObsToFrac(pct),
-          ehParceiro: quem === 'STRADA', masterPaga: quem === 'STRADA',
-          oculto: false, ehCarta: false,
-          // Só faz sentido para parceiros externos (Strada). Rodrigues etc. é interno.
-          ehLiquido: quem === 'STRADA' ? ehLiq : false
-        });
+        if (quem === 'STRADA') {
+          partes.push({
+            quem, fracBruto: pctObsToFrac(pct), pctOrig: pct,
+            ehParceiro: true, masterPaga: true,
+            oculto: false, ehCarta: false, ehLiquido: ehLiq
+          });
+        } else if (quem === normNome(consultor)) {
+          // Próprio consultor com fração explícita
+          selfFracStrada = catStrada > 0 ? pct / catStrada : 0;
+          partes.push({ quem, fracBruto: selfFracStrada, pctOrig: pct, ehSelf: true,
+            ehParceiro: false, masterPaga: false, oculto: false, ehCarta: false });
+        } else {
+          // Outro consultor interno: fração sobre a categoria do consultor da linha
+          partes.push({ quem, fracBruto: catStrada > 0 ? pct / catStrada : 0, pctOrig: pct,
+            ehParceiro: false, masterPaga: false, oculto: false, ehCarta: false, ehLiquido: false });
+        }
       }
     });
-    if (partes.length) return { tipo:'ok', partes };
+    if (partes.length) return { tipo:'ok', partes, selfFrac: selfFracStrada };
   }
 
   // ── XP = Strada ──
@@ -1973,11 +1989,24 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
     else if (mF && PARCEIROS_CARTA.some(p=>normNome(mF[1].trim()).includes(p))) { nomeP=normNome(mF[1].trim()); pctP=parseFloat(mF[2].replace(',','.'))/100; modP=mF[3]||''; }
 
     if (pctP > 0 && nomeP) {
-      const ehCarta = PARCEIROS_CARTA.some(p => nomeP.includes(p));
+      const ehCartaLista = PARCEIROS_CARTA.some(p => nomeP.includes(p));
+      // Parceiro externo fora da lista (Samuel, Guto, Marinho etc.): também gera carta
+      // na tabela de Cartas de Parceria, mas SEM a linha extra do responsável
+      // (semLinhaResp) — o repasse dele já é financiado pela 2ª parte abaixo.
+      const ehExternoP = !ehCartaLista && !TODOS_SOCIOS.includes(nomeP) &&
+        !Object.keys(S.elite||{}).includes(nomeP) && !Object.values(ALIASES||{}).includes(nomeP);
+      const ehCarta = ehCartaLista || ehExternoP;
       // Regra geral: BRUTO na OBS = não desconta. LIQUIDO ou ausente = desconta NF+ADM.
       const ehLiqCarta = modP !== 'BRUTO';
+      // Responsável é o PRÓPRIO consultor da venda (ex: "1% VITOR LIQUIDO PATRICIA REPASSA"
+      // em venda da Patricia): linha única com o valor cheio + carta "você paga" na linha.
+      if (normNome(resp) === normNome(consultor)) {
+        return { tipo:'ok', selfFrac:1, partes:[
+          { quem:nomeP, fracBruto:pctObsToFrac(pctP), ehParceiro:true, masterPaga:false, oculto:false, ehCarta, cartaResp:normNome(consultor), ehLiquido:ehLiqCarta, semLinhaResp:ehExternoP },
+        ]};
+      }
       return { tipo:'ok', partes:[
-        { quem:nomeP, fracBruto:pctObsToFrac(pctP), ehParceiro:true, masterPaga:false, oculto:false, ehCarta, cartaResp:resp, ehLiquido:ehLiqCarta },
+        { quem:nomeP, fracBruto:pctObsToFrac(pctP), ehParceiro:true, masterPaga:false, oculto:false, ehCarta, cartaResp:resp, ehLiquido:ehLiqCarta, semLinhaResp:ehExternoP },
         { quem:resp, fracBruto:pctObsToFrac(pctP), ehParceiro:false, masterPaga:false, oculto:false, ehCarta:false },
       ]};
     }
@@ -2291,7 +2320,9 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
       // "X% NOME [BRUTO|LIQUIDO] RESP REPASSA" dentro de um split →
       // carta de parceria do NOME paga pelo RESP (o RESP recebe o mesmo % para repassar).
       // Ex: "1% VIVIANE LIQUIDO LEIDIANE REPASSA / 1,2% ALESSANDRO / 0,8% LEIDIANE"
-      const mRep = p.match(/^(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s\.\-]+?)(?:\s+(BRUTO|LIQUIDO))?\s+([A-ZÀ-Ö\s]+?)\s+REPASSA$/);
+      // LIQUIDO/BRUTO é obrigatório aqui: é ele que separa o nome do parceiro do nome
+      // do responsável (ex: "1% VIVIANE SAFRA LIQUIDO LEIDIANE REPASSA").
+      const mRep = p.match(/^(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s\.\-]+?)\s+(BRUTO|LIQUIDO)\s+([A-ZÀ-Ö\s]+?)\s+REPASSA$/);
       if (mRep) {
         const pctR  = parseFloat(mRep[1].replace(',','.'))/100;
         const nomeR = normNome(mRep[2].trim());
@@ -2353,7 +2384,7 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
     // Se o consultor já declarou a própria parte (ehSelf), o valor explícito prevalece.
     if (selfFrac === undefined) {
       const fracCartaRep = partes
-        .filter(p => p.ehCartaRepasseSplit && catDecimalSplit > 0)
+        .filter(p => p.ehCartaRepasseSplit && catDecimalSplit > 0 && p.cartaResp !== normNome(consultor))
         .reduce((t, p) => t + (p.pctOrig / catDecimalSplit), 0);
       if (fracCartaRep > 0) {
         const somaOutros = partes.filter(p => !p.ehParceiro && !p.ehSelf)
@@ -2525,7 +2556,7 @@ function processarLinha(linha, match, ciclo, mult, split, isAdvanced=false) {
         ...linha, dataVenda:dv, nomeCliente:nc,
         valor:valParc, brutoParc:brutoPart, nfParc, admParc, ehLiquido:!!parte.ehLiquido
       });
-      if (parte.cartaResp !== consultor) {
+      if (parte.cartaResp !== consultor && !parte.semLinhaResp) {
         addResultado(parte.cartaResp, TODOS_SOCIOS.includes(parte.cartaResp)?'socio':'vendedor', {
           ...linha, dataVenda:dv, ciclo, nomeCliente:nc,
           mult:parte.fracBruto, brutoCons:brutoPart, nfCons:nfParc, admCons:admParc, liqCons:valParc,
