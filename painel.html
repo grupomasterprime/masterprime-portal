@@ -2042,7 +2042,9 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
   //   "1% MOISES LIQUIDO / 1,5% RENATO BENEDETTI DIRETO"   ← no fim (também aceito)
   const marcaDireto = /\bDIRETO\b/.test(s);
   const strLimpa = s.replace(/\s+DIRETO\b/g, '');
-  const mCartaSplit = strLimpa.match(/^(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s\.]+?)(?:\s+(LIQUIDO|BRUTO))?\s*\/\s*(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s\.]+?)$/);
+  // Strings com REPASSA usam o formato "carta com repasse dentro de split" (mais abaixo)
+  const mCartaSplit = /\bREPASSA\b/.test(strLimpa) ? null
+    : strLimpa.match(/^(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s\.]+?)(?:\s+(LIQUIDO|BRUTO))?\s*\/\s*(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s\.]+?)$/);
   if (mCartaSplit) {
     const pParc = parseFloat(mCartaSplit[1].replace(',','.'))/100;
     const nomeParc = normNome(mCartaSplit[2].trim());
@@ -2286,6 +2288,23 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
     });
     const catDecimalSplit = hasSocioInSplit ? 0.04 : ((multConsultor || 0.625) * 4 / 100);
     partsDiv.forEach(p => {
+      // "X% NOME [BRUTO|LIQUIDO] RESP REPASSA" dentro de um split →
+      // carta de parceria do NOME paga pelo RESP (o RESP recebe o mesmo % para repassar).
+      // Ex: "1% VIVIANE LIQUIDO LEIDIANE REPASSA / 1,2% ALESSANDRO / 0,8% LEIDIANE"
+      const mRep = p.match(/^(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s\.\-]+?)(?:\s+(BRUTO|LIQUIDO))?\s+([A-ZÀ-Ö\s]+?)\s+REPASSA$/);
+      if (mRep) {
+        const pctR  = parseFloat(mRep[1].replace(',','.'))/100;
+        const nomeR = normNome(mRep[2].trim());
+        const ehLiqR = mRep[3] !== 'BRUTO';
+        const respR = normNome(mRep[4].trim());
+        if (pctR > 0 && nomeR && respR) {
+          // O RESP não entra como parte do split: a linha de repasse dele é gerada
+          // automaticamente pela carta (cartaResp !== consultor → addResultado extra).
+          partes.push({ quem:nomeR, fracBruto:pctObsToFrac(pctR), pctOrig:pctR, ehParceiro:true, masterPaga:false,
+            oculto:false, ehCarta:true, cartaResp:respR, ehLiquido:ehLiqR, ehCartaRepasseSplit:true });
+          return;
+        }
+      }
       const m = p.match(/^(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s\.\-]+?)(?:\s+(BRUTO|LIQUIDO))?$/);
       if (m) {
         const pct   = parseFloat(m[1].replace(',','.'))/100;
@@ -2328,6 +2347,20 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
     // Se o split contém o próprio consultor (ehSelf — ex: "2% BETE / 0,5% ENOQUE LIQUIDO / 0,5% SEGUROS LIQUIDO"),
     // os parceiros LIQUIDO geram demonstrativo próprio (Master paga eles do excedente)
     // e ficam ESCONDIDOS da OBS no demonstrativo do consultor.
+    // Carta com repasse dentro do split (ehCartaRepasseSplit): o % da carta também
+    // sai da conta do consultor da linha. Ex: "1% VIVIANE LIQUIDO LEIDIANE REPASSA /
+    // 0,8% LEIDIANE" → consultor fica automaticamente com o restante (1,2% num Black 3%).
+    // Se o consultor já declarou a própria parte (ehSelf), o valor explícito prevalece.
+    if (selfFrac === undefined) {
+      const fracCartaRep = partes
+        .filter(p => p.ehCartaRepasseSplit && catDecimalSplit > 0)
+        .reduce((t, p) => t + (p.pctOrig / catDecimalSplit), 0);
+      if (fracCartaRep > 0) {
+        const somaOutros = partes.filter(p => !p.ehParceiro && !p.ehSelf)
+          .reduce((t, p) => t + p.fracBruto, 0);
+        selfFrac = Math.max(0, 1 - somaOutros - fracCartaRep);
+      }
+    }
     const temSelf = partes.some(p => p.ehSelf);
     if (temSelf) {
       partes.forEach(p => {
