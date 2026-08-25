@@ -1239,7 +1239,10 @@ function _pararAutoLogout() {
 }
 
 function _iniciarAutoLogout() {
+  // DESATIVADO em 25/08/2026 (decisão Allan): sem limite de inatividade,
+  // a sessão só encerra quando a pessoa clica em Sair.
   _pararAutoLogout();
+  return;
   // Throttle: só reseta se passou pelo menos 5s desde último reset
   let _ultimoReset = 0;
   const handler = () => {
