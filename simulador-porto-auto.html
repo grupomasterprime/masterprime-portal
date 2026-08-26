@@ -288,24 +288,6 @@
         </div>
       </section>
 
-      <!-- ───── Tabela FIPE (API pública Parallelum, dados oficiais FIPE) ───── -->
-      <section class="card card-compact">
-        <div class="card-header">
-          <span class="badge-teal"></span>
-          <h3>Tabela FIPE</h3>
-          <button type="button" class="reset-btn" id="fipeLimpar">Limpar</button>
-        </div>
-        <div class="grid grid-3">
-          <div class="field"><label>Marca</label><select id="fipeMarca"><option value="">Carregando…</option></select></div>
-          <div class="field"><label>Modelo</label><select id="fipeModelo" disabled><option value="">Selecione a marca</option></select></div>
-          <div class="field"><label>Ano</label><select id="fipeAno" disabled><option value="">Selecione o modelo</option></select></div>
-        </div>
-        <div id="fipeResultado" style="display:none;margin-top:10px;font-size:13px;align-items:center;gap:8px">
-          <span>Valor FIPE: <strong id="fipeValor"></strong> <span id="fipeRef" style="color:#6B7280;font-size:12px"></span></span>
-          <button type="button" class="reset-btn" id="fipeUsar" style="margin-left:8px">Usar como valor do crédito</button>
-        </div>
-      </section>
-
       <!-- ───── Oferta de Lance ───── -->
       <section class="card card-compact">
         <div class="card-header">
@@ -355,6 +337,24 @@
               </span>
             </div>
           </div>
+        </div>
+      </section>
+
+      <!-- ───── Tabela FIPE (API pública Parallelum, dados oficiais FIPE) ───── -->
+      <section class="card card-compact">
+        <div class="card-header">
+          <span class="badge-teal"></span>
+          <h3>Tabela FIPE</h3>
+          <button type="button" class="reset-btn" id="fipeLimpar">Limpar</button>
+        </div>
+        <div class="grid grid-3">
+          <div class="field"><label>Marca</label><input type="text" id="fipeMarca" list="fipeMarcaList" placeholder="Carregando…" autocomplete="off"><datalist id="fipeMarcaList"></datalist></div>
+          <div class="field"><label>Modelo</label><input type="text" id="fipeModelo" list="fipeModeloList" placeholder="Selecione a marca" autocomplete="off" disabled><datalist id="fipeModeloList"></datalist></div>
+          <div class="field"><label>Ano</label><input type="text" id="fipeAno" list="fipeAnoList" placeholder="Selecione o modelo" autocomplete="off" disabled><datalist id="fipeAnoList"></datalist></div>
+        </div>
+        <div id="fipeResultado" style="display:none;margin-top:10px;font-size:13px;align-items:center;gap:8px">
+          <span>Valor FIPE: <strong id="fipeValor"></strong> <span id="fipeRef" style="color:#6B7280;font-size:12px"></span></span>
+          <button type="button" class="reset-btn" id="fipeUsar" style="margin-left:8px">Usar como valor do crédito</button>
         </div>
       </section>
 
@@ -1286,44 +1286,60 @@ if (window.PdfConfigPersonalizado) {
 // ═══════════════════════════════════════════════════════
 (function fipe() {
   const API = 'https://parallelum.com.br/fipe/api/v1/carros';
-  const selMarca = document.getElementById('fipeMarca');
-  const selModelo = document.getElementById('fipeModelo');
-  const selAno = document.getElementById('fipeAno');
+  const inMarca = document.getElementById('fipeMarca');
+  const inModelo = document.getElementById('fipeModelo');
+  const inAno = document.getElementById('fipeAno');
   const box = document.getElementById('fipeResultado');
-  if (!selMarca) return;
-  let valorAtual = null;
-  const opts = (sel, lista, placeholder) => {
-    sel.innerHTML = '<option value="">' + placeholder + '</option>'
-      + lista.map(x => '<option value="' + x.codigo + '">' + x.nome + '</option>').join('');
-    sel.disabled = false;
+  if (!inMarca) return;
+  let marcas = [], modelos = [], anos = [], valorAtual = null;
+  const fill = (dlId, lista) => {
+    document.getElementById(dlId).innerHTML = lista.map(x =>
+      '<option value="' + String(x.nome).replace(/"/g, '&quot;') + '"></option>').join('');
+  };
+  const achar = (lista, v) => {
+    const t = String(v || '').trim().toLowerCase();
+    return t ? lista.find(x => String(x.nome).toLowerCase() === t) : null;
   };
   const resetFrom = nivel => {
     valorAtual = null; box.style.display = 'none';
-    if (nivel <= 1) { selModelo.innerHTML = '<option value="">Selecione a marca</option>'; selModelo.disabled = true; }
-    if (nivel <= 2) { selAno.innerHTML = '<option value="">Selecione o modelo</option>'; selAno.disabled = true; }
+    if (nivel <= 1) { modelos = []; inModelo.value = ''; inModelo.disabled = true; inModelo.placeholder = 'Selecione a marca'; fill('fipeModeloList', []); }
+    if (nivel <= 2) { anos = []; inAno.value = ''; inAno.disabled = true; inAno.placeholder = 'Selecione o modelo'; fill('fipeAnoList', []); }
   };
-  fetch(API + '/marcas').then(r => r.json()).then(l => opts(selMarca, l, 'Selecione…'))
-    .catch(() => { selMarca.innerHTML = '<option value="">FIPE indisponível</option>'; });
-  selMarca.addEventListener('change', () => {
+  fetch(API + '/marcas').then(r => r.json()).then(l => {
+    marcas = l; fill('fipeMarcaList', l);
+    inMarca.placeholder = 'Digite p/ buscar (ex: Fiat)';
+  }).catch(() => { inMarca.placeholder = 'FIPE indisponível'; });
+  inMarca.addEventListener('input', () => {
+    const m = achar(marcas, inMarca.value);
     resetFrom(1);
-    if (!selMarca.value) return;
-    selModelo.innerHTML = '<option value="">Carregando…</option>';
-    fetch(API + '/marcas/' + selMarca.value + '/modelos')
-      .then(r => r.json()).then(d => opts(selModelo, d.modelos || [], 'Selecione…'))
-      .catch(() => resetFrom(1));
+    if (!m) return;
+    inModelo.placeholder = 'Carregando…';
+    fetch(API + '/marcas/' + m.codigo + '/modelos')
+      .then(r => r.json()).then(d => {
+        modelos = d.modelos || []; fill('fipeModeloList', modelos);
+        inModelo.disabled = false; inModelo.placeholder = 'Digite p/ buscar (ex: Strada)';
+        inModelo.focus();
+      }).catch(() => resetFrom(1));
+    inMarca.dataset.codigo = m.codigo;
   });
-  selModelo.addEventListener('change', () => {
+  inModelo.addEventListener('input', () => {
+    const mo = achar(modelos, inModelo.value);
     resetFrom(2);
-    if (!selModelo.value) return;
-    selAno.innerHTML = '<option value="">Carregando…</option>';
-    fetch(API + '/marcas/' + selMarca.value + '/modelos/' + selModelo.value + '/anos')
-      .then(r => r.json()).then(l => opts(selAno, l, 'Selecione…'))
-      .catch(() => resetFrom(2));
+    if (!mo) return;
+    inAno.placeholder = 'Carregando…';
+    fetch(API + '/marcas/' + inMarca.dataset.codigo + '/modelos/' + mo.codigo + '/anos')
+      .then(r => r.json()).then(l => {
+        anos = l; fill('fipeAnoList', l);
+        inAno.disabled = false; inAno.placeholder = 'Digite ou escolha o ano';
+        inAno.focus();
+      }).catch(() => resetFrom(2));
+    inModelo.dataset.codigo = mo.codigo;
   });
-  selAno.addEventListener('change', () => {
+  inAno.addEventListener('input', () => {
     valorAtual = null; box.style.display = 'none';
-    if (!selAno.value) return;
-    fetch(API + '/marcas/' + selMarca.value + '/modelos/' + selModelo.value + '/anos/' + selAno.value)
+    const a = achar(anos, inAno.value);
+    if (!a) return;
+    fetch(API + '/marcas/' + inMarca.dataset.codigo + '/modelos/' + inModelo.dataset.codigo + '/anos/' + a.codigo)
       .then(r => r.json()).then(d => {
         if (!d || !d.Valor) return;
         valorAtual = d.Valor;
@@ -1340,7 +1356,7 @@ if (window.PdfConfigPersonalizado) {
     el.dispatchEvent(new Event('change', { bubbles: true }));
   });
   document.getElementById('fipeLimpar').addEventListener('click', () => {
-    selMarca.selectedIndex = 0; resetFrom(1);
+    inMarca.value = ''; resetFrom(1);
   });
 })();
 </script>
