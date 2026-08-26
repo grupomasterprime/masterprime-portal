@@ -490,6 +490,8 @@ body.embedded-mode .portal-menu-fab { display:flex; }
           @keyframes idxroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
           #s-home .idx-item{color:#cbd5e1;font-size:12.5px;display:inline-flex;gap:7px;align-items:center}
           #s-home .idx-item b{color:#fff;font-weight:700}
+          #s-home .idx-item b.up{color:#6ee7a0}
+          #s-home .idx-item b.dn{color:#fda4a4}
           #s-home .idx-dot{width:5px;height:5px;border-radius:50%;background:#F3CF85;display:inline-block}
           #s-home .idx-painel{display:none;grid-template-columns:repeat(auto-fit,minmax(128px,1fr));gap:10px;margin-bottom:16px}
           #s-home .idx-card{background:#fff;border:1px solid #E2E8F0;border-radius:10px;padding:10px 13px}
@@ -3276,17 +3278,32 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
     });
     if (usd && usd.length) cards.push({ n: 'Dólar', v: 'R$ ' + fmt(usd[usd.length - 1], 2), s: 'PTAX venda', d: amostra(usd, 13), cor: '#1D7A4C', tk: ['DÓLAR', 'R$ ' + fmt(usd[usd.length - 1], 2)] });
     if (!cards.length) return;
+    // Direção vs ponto anterior (~1 mês): verde subiu, vermelho caiu
+    const dirDe = c => {
+      if (!c.d || c.d.length < 2) return 0;
+      const dlt = c.d[c.d.length - 1] - c.d[c.d.length - 2];
+      return Math.abs(dlt) < 1e-9 ? 0 : (dlt > 0 ? 1 : -1);
+    };
     // Painel com mini gráficos
     const painel = document.getElementById('idxPainel');
     if (painel) {
-      painel.innerHTML = cards.map(c =>
-        '<div class="idx-card"><div class="n">' + c.n + '</div><div class="v">' + c.v + '</div><div class="s">' + c.s + '</div>' + spark(c.d, c.cor) + '</div>').join('');
+      painel.innerHTML = cards.map(c => {
+        const dir = dirDe(c);
+        const seta = dir > 0 ? '<span style="color:#1D7A4C;font-size:11px;margin-left:4px">&#9650;</span>'
+                   : dir < 0 ? '<span style="color:#C0392B;font-size:11px;margin-left:4px">&#9660;</span>' : '';
+        return '<div class="idx-card"><div class="n">' + c.n + '</div><div class="v">' + c.v + seta + '</div><div class="s">' + c.s + '</div>' + spark(c.d, c.cor) + '</div>';
+      }).join('');
       painel.style.display = 'grid';
     }
     // Ticker
     const track = document.getElementById('idxTrack');
     if (track) {
-      const html = cards.map(c => '<span class="idx-item"><span class="idx-dot"></span>' + c.tk[0] + ' <b>' + c.tk[1] + '</b></span>').join('');
+      const html = cards.map(c => {
+        const dir = dirDe(c);
+        const cls = dir > 0 ? 'up' : dir < 0 ? 'dn' : '';
+        const seta = dir > 0 ? ' &#9650;' : dir < 0 ? ' &#9660;' : '';
+        return '<span class="idx-item"><span class="idx-dot"></span>' + c.tk[0] + ' <b class="' + cls + '">' + c.tk[1] + seta + '</b></span>';
+      }).join('');
       track.innerHTML = html + html; // duplicado p/ loop contínuo
       document.getElementById('idxTicker').style.display = 'flex';
     }
