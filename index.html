@@ -3223,10 +3223,16 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
 // se a API falhar, os blocos simplesmente não aparecem.
 // ═══════════════════════════════════════════════════════════════════
 (function indicesBCB() {
-  const sgs = (cod, n) =>
-    fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.' + cod + '/dados/ultimos/' + n + '?formato=json')
+  // A API do SGS limita o atalho "ultimos/N" a 20 registros; a busca por
+  // janela de datas não tem esse limite, então pedimos por período.
+  const fmtData = d => String(d.getDate()).padStart(2, '0') + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear();
+  const sgs = (cod, mesesAtras) => {
+    const fim = new Date(), ini = new Date();
+    ini.setMonth(ini.getMonth() - mesesAtras);
+    return fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.' + cod + '/dados?formato=json&dataInicial=' + fmtData(ini) + '&dataFinal=' + fmtData(fim))
       .then(r => r.ok ? r.json() : Promise.reject())
       .then(d => d.map(x => parseFloat(String(x.valor).replace(',', '.'))));
+  };
   const fmt = (v, dec) => v.toLocaleString('pt-BR', { minimumFractionDigits: dec, maximumFractionDigits: dec });
   // Acumulado 12m móvel: recebe 24 variações mensais, devolve 13 pontos de acumulado
   const acum12 = mensal => {
@@ -3252,12 +3258,12 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       + '<circle cx="' + w + '" cy="' + y(d[d.length - 1]) + '" r="2.6" fill="' + cor + '"/></svg>';
   };
   Promise.all([
-    sgs(432, 380).catch(() => null),   // Meta Selic (diária) ~ 12 meses
-    sgs(4389, 260).catch(() => null),  // CDI anualizado (diária, dias úteis) ~ 12 meses
-    sgs(433, 24).catch(() => null),    // IPCA var. mensal
-    sgs(189, 24).catch(() => null),    // IGP-M var. mensal
-    sgs(192, 24).catch(() => null),    // INCC var. mensal
-    sgs(1, 260).catch(() => null)      // Dólar PTAX venda (diária)
+    sgs(432, 13).catch(() => null),   // Meta Selic (diária) · últimos 13 meses
+    sgs(4389, 13).catch(() => null),  // CDI anualizado (diária) · últimos 13 meses
+    sgs(433, 26).catch(() => null),   // IPCA var. mensal · 26 meses p/ acumulado móvel
+    sgs(189, 26).catch(() => null),   // IGP-M var. mensal
+    sgs(192, 26).catch(() => null),   // INCC var. mensal
+    sgs(1, 13).catch(() => null)      // Dólar PTAX venda (diária)
   ]).then(([selic, cdi, ipca, igpm, incc, usd]) => {
     const cards = [];
     if (selic && selic.length) cards.push({ n: 'Selic', v: fmt(selic[selic.length - 1], 2) + '%', s: 'meta a.a. · BCB', d: amostra(selic, 13), cor: '#2D3F5E', tk: ['SELIC', fmt(selic[selic.length - 1], 2) + '% a.a.'] });
