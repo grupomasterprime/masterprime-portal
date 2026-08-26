@@ -614,6 +614,13 @@ function bindMasks(root = document) {
     el.addEventListener('blur', () => lookupCEP(el));
   });
   $$('[data-mask="phone"]', root).forEach(el => el.addEventListener('input', e => e.target.value = maskPhone(e.target.value)));
+  // IBGE: municípios da UF de naturalidade no autocomplete da cidade
+  const ufNat = $('pf-uf_naturalidade');
+  if (ufNat && !ufNat.dataset.wiredMunicipios) {
+    ufNat.dataset.wiredMunicipios = '1';
+    ufNat.addEventListener('change', () => carregarMunicipios(ufNat.value));
+    if (ufNat.value) carregarMunicipios(ufNat.value);
+  }
   $$('[data-mask="money"]', root).forEach(el => el.addEventListener('input', e => e.target.value = maskMoney(e.target.value)));
   $$('[data-mask="date"]', root).forEach(el => el.addEventListener('input', e => e.target.value = maskDate(e.target.value)));
   // Uppercase sem acentos pra inputs de texto comum (exclui email, money, e que tenham data-no-upper)
@@ -711,6 +718,24 @@ async function lookupCNPJ(input) {
       if (tel.length >= 10) set('tel_comercial', maskPhone(tel));
     }
   } catch(e) { /* silencioso: cliente preenche na mão */ }
+}
+
+// IBGE: ao escolher a UF de naturalidade, carrega a lista oficial de
+// municípios daquele estado no autocomplete da cidade de nascimento.
+// Elimina erro de digitação na hora de emitir a proposta.
+const _municipiosCache = {};
+async function carregarMunicipios(uf) {
+  const dl = $('municipios-list');
+  if (!dl || !uf) return;
+  try {
+    if (!_municipiosCache[uf]) {
+      const r = await fetch('https://servicodados.ibge.gov.br/api/v1/localidades/estados/' + uf + '/municipios?orderBy=nome');
+      if (!r.ok) return;
+      const lista = await r.json();
+      _municipiosCache[uf] = lista.map(m => upperNoAccent(m.nome));
+    }
+    dl.innerHTML = _municipiosCache[uf].map(n => '<option value="' + n + '"></option>').join('');
+  } catch(e) { /* silencioso: campo segue livre */ }
 }
 
 // ════════ INIT ════════
@@ -1200,7 +1225,7 @@ function buildFormPF() {
       <div class="grid-3" style="margin-top:14px">
         <div class="field"><label>Nacionalidade<span class="req">*</span></label><select id="pf-nacionalidade" required><option value="">—</option><option>Brasileira</option><option>Estrangeira</option><option>Naturalizada</option></select></div>
         <div class="field"><label>UF Naturalidade<span class="req">*</span></label><select id="pf-uf_naturalidade" required><option value="">—</option><option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option><option>SE</option><option>TO</option></select></div>
-        <div class="field"><label>Naturalidade (Cidade)<span class="req">*</span></label><input id="pf-cidade_nascimento" placeholder="Ex: São Paulo" required></div>
+        <div class="field"><label>Naturalidade (Cidade)<span class="req">*</span></label><input id="pf-cidade_nascimento" list="municipios-list" placeholder="Ex: São Paulo" required><datalist id="municipios-list"></datalist></div>
       </div>
       <div class="grid-2" style="margin-top:14px">
         <div class="field"><label>Nome da Mãe<span class="req">*</span></label><input id="pf-nome_mae" placeholder="Nome completo" required></div>

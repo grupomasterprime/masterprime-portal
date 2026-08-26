@@ -225,7 +225,7 @@
             <option value="aniv-grupo">Aniversário do grupo</option>
           </select>
         </div>
-        <div class="field"><label>% Reajuste</label><input type="text" id="reajuste" placeholder="0,00 %" data-mask="pct2"></div>
+        <div class="field"><label>% Reajuste</label><input type="text" id="reajuste" placeholder="0,00 %" data-mask="pct2"><small id="reajusteIndices" style="display:none;color:#6B7280;font-size:11px;margin-top:2px"></small></div>
         <div class="field">
           <label>% Seguro <input type="checkbox" id="seguroOn" style="margin-left:8px;"></label>
           <input type="text" id="seguro" placeholder="0,0000 %" data-mask="pct4" disabled>
@@ -898,6 +898,39 @@ renderOps();
       }
     })
     .catch(() => {});
+})();
+
+// ═══════════════════════════════════════════════════════
+// ÍNDICES DE REAJUSTE (INCC, IPCA, IGP-M) — API pública do BCB
+// Mostra o acumulado de 12 meses embaixo do campo % Reajuste;
+// clicar num índice aplica o valor no campo.
+// ═══════════════════════════════════════════════════════
+(function indicesReajuste() {
+  const campo = document.getElementById('reajuste');
+  const nota = document.getElementById('reajusteIndices');
+  if (!campo || !nota) return;
+  const SERIES = [ { nome: 'INCC', sgs: 192 }, { nome: 'IPCA', sgs: 433 }, { nome: 'IGP-M', sgs: 189 } ];
+  Promise.all(SERIES.map(s =>
+    fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.' + s.sgs + '/dados/ultimos/12?formato=json')
+      .then(r => r.ok ? r.json() : Promise.reject())
+      .then(d => {
+        if (!Array.isArray(d) || d.length < 12) return null;
+        const acc = d.reduce((a, x) => a * (1 + parseFloat(String(x.valor).replace(',', '.')) / 100), 1);
+        return { nome: s.nome, pct: (acc - 1) * 100 };
+      }).catch(() => null)
+  )).then(rs => {
+    const ok = rs.filter(x => x && isFinite(x.pct));
+    if (!ok.length) return;
+    nota.innerHTML = 'Acumulado 12m (BCB), clique p/ aplicar: ' + ok.map(x =>
+      '<a href="#" data-pct="' + x.pct.toFixed(2) + '" style="font-weight:600;text-decoration:underline;color:inherit">'
+      + x.nome + ' ' + x.pct.toFixed(2).replace('.', ',') + '%</a>').join(' · ');
+    nota.style.display = 'block';
+    nota.querySelectorAll('a').forEach(a => a.addEventListener('click', ev => {
+      ev.preventDefault();
+      campo.value = a.dataset.pct.replace('.', ',') + ' %';
+      campo.dispatchEvent(new Event('input', { bubbles: true }));
+    }));
+  });
 })();
 
 // ═══════════════════════════════════════════════════════

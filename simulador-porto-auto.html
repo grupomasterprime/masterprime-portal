@@ -288,6 +288,24 @@
         </div>
       </section>
 
+      <!-- ───── Tabela FIPE (API pública Parallelum, dados oficiais FIPE) ───── -->
+      <section class="card card-compact">
+        <div class="card-header">
+          <span class="badge-teal"></span>
+          <h3>Tabela FIPE</h3>
+          <button type="button" class="reset-btn" id="fipeLimpar">Limpar</button>
+        </div>
+        <div class="grid grid-3">
+          <div class="field"><label>Marca</label><select id="fipeMarca"><option value="">Carregando…</option></select></div>
+          <div class="field"><label>Modelo</label><select id="fipeModelo" disabled><option value="">Selecione a marca</option></select></div>
+          <div class="field"><label>Ano</label><select id="fipeAno" disabled><option value="">Selecione o modelo</option></select></div>
+        </div>
+        <div id="fipeResultado" style="display:none;margin-top:10px;font-size:13px;align-items:center;gap:8px">
+          <span>Valor FIPE: <strong id="fipeValor"></strong> <span id="fipeRef" style="color:#6B7280;font-size:12px"></span></span>
+          <button type="button" class="reset-btn" id="fipeUsar" style="margin-left:8px">Usar como valor do crédito</button>
+        </div>
+      </section>
+
       <!-- ───── Oferta de Lance ───── -->
       <section class="card card-compact">
         <div class="card-header">
@@ -1258,6 +1276,71 @@ if (window.PdfConfigPersonalizado) {
     mountPoint:  document.getElementById('simStoreMount'),
     serialize:   () => window.SimulacaoStore.snapshotForm(),
     restore:     (dados) => window.SimulacaoStore.restoreForm(dados, { recalc: recalc })
+  });
+})();
+
+// ═══════════════════════════════════════════════════════
+// TABELA FIPE (API pública Parallelum, sem chave)
+// Marca > Modelo > Ano > valor oficial. "Usar como valor do
+// crédito" joga o valor no campo e recalcula tudo.
+// ═══════════════════════════════════════════════════════
+(function fipe() {
+  const API = 'https://parallelum.com.br/fipe/api/v1/carros';
+  const selMarca = document.getElementById('fipeMarca');
+  const selModelo = document.getElementById('fipeModelo');
+  const selAno = document.getElementById('fipeAno');
+  const box = document.getElementById('fipeResultado');
+  if (!selMarca) return;
+  let valorAtual = null;
+  const opts = (sel, lista, placeholder) => {
+    sel.innerHTML = '<option value="">' + placeholder + '</option>'
+      + lista.map(x => '<option value="' + x.codigo + '">' + x.nome + '</option>').join('');
+    sel.disabled = false;
+  };
+  const resetFrom = nivel => {
+    valorAtual = null; box.style.display = 'none';
+    if (nivel <= 1) { selModelo.innerHTML = '<option value="">Selecione a marca</option>'; selModelo.disabled = true; }
+    if (nivel <= 2) { selAno.innerHTML = '<option value="">Selecione o modelo</option>'; selAno.disabled = true; }
+  };
+  fetch(API + '/marcas').then(r => r.json()).then(l => opts(selMarca, l, 'Selecione…'))
+    .catch(() => { selMarca.innerHTML = '<option value="">FIPE indisponível</option>'; });
+  selMarca.addEventListener('change', () => {
+    resetFrom(1);
+    if (!selMarca.value) return;
+    selModelo.innerHTML = '<option value="">Carregando…</option>';
+    fetch(API + '/marcas/' + selMarca.value + '/modelos')
+      .then(r => r.json()).then(d => opts(selModelo, d.modelos || [], 'Selecione…'))
+      .catch(() => resetFrom(1));
+  });
+  selModelo.addEventListener('change', () => {
+    resetFrom(2);
+    if (!selModelo.value) return;
+    selAno.innerHTML = '<option value="">Carregando…</option>';
+    fetch(API + '/marcas/' + selMarca.value + '/modelos/' + selModelo.value + '/anos')
+      .then(r => r.json()).then(l => opts(selAno, l, 'Selecione…'))
+      .catch(() => resetFrom(2));
+  });
+  selAno.addEventListener('change', () => {
+    valorAtual = null; box.style.display = 'none';
+    if (!selAno.value) return;
+    fetch(API + '/marcas/' + selMarca.value + '/modelos/' + selModelo.value + '/anos/' + selAno.value)
+      .then(r => r.json()).then(d => {
+        if (!d || !d.Valor) return;
+        valorAtual = d.Valor;
+        document.getElementById('fipeValor').textContent = d.Valor;
+        document.getElementById('fipeRef').textContent = '(' + (d.Marca || '') + ' ' + (d.Modelo || '') + ' ' + (d.AnoModelo || '') + ' · ref. ' + (d.MesReferencia || '') + ')';
+        box.style.display = 'flex';
+      }).catch(() => {});
+  });
+  document.getElementById('fipeUsar').addEventListener('click', () => {
+    if (!valorAtual) return;
+    const el = document.getElementById('pa-credito');
+    el.value = valorAtual;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  document.getElementById('fipeLimpar').addEventListener('click', () => {
+    selMarca.selectedIndex = 0; resetFrom(1);
   });
 })();
 </script>
