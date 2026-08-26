@@ -347,6 +347,7 @@
             <option value="categoria">Categoria</option>
             <option value="saldo">Saldo devedor</option>
             <option value="cat-carta">Categoria (total) e carta (emb.)</option>
+            <option value="porto">Porto (total na categoria)</option>
           <option value="bradesco-imovel">Bradesco Imóvel</option>
           <option value="bradesco-auto">Bradesco Auto</option>
           </select>
@@ -359,7 +360,7 @@
           <label>% Lance com FGTS <span class="toggle-input"><input type="checkbox" id="fgtsOn" disabled><span class="toggle-slider"></span></span></label>
           <input type="text" id="lanceFGTS" placeholder="0,0000 %" data-mask="pct4" disabled>
         </div>
-        <div class="field"><label>% Total de lance</label><input type="text" id="totalLance" placeholder="0,0000 %" disabled class="disabled"></div>
+        <div class="field"><label>% Total de lance</label><input type="text" id="totalLance" placeholder="0,0000 %" data-mask="pct4" disabled class="disabled"></div>
         <div class="field"><label>Lance rec. próprios</label><input type="text" id="lanceProprios_v" placeholder="R$ 0,00" disabled class="disabled"></div>
         <div class="field"><label>Lance embutido</label><input type="text" id="lanceEmbutido_v" placeholder="R$ 0,00" disabled class="disabled"></div>
         <div class="field"><label>Lance com FGTS</label><input type="text" id="lanceFGTS_v" placeholder="R$ 0,00" disabled class="disabled"></div>
@@ -509,6 +510,25 @@ function setupToggle(toggleId, ...inputIds) {
   });
 }
 
+// Habilita/desabilita os campos de lance conforme o tipo escolhido.
+// No modo "Porto (total na categoria)" o usuário digita o % TOTAL (base categoria)
+// e o embutido em % da CARTA (padrão 30, teto da Porto); o rec. próprio passa a
+// ser calculado, igual ao simulador simples da Porto (Livre + Embutido).
+function syncLanceFieldsUI() {
+  const isLance = document.getElementById('tipoContemplacao').value === 'lance';
+  const isPorto = document.getElementById('tipoLance').value === 'porto';
+  const tot = document.getElementById('totalLance');
+  const prop = document.getElementById('lanceProprios');
+  tot.disabled = !(isLance && isPorto);
+  tot.classList.toggle('disabled', !(isLance && isPorto));
+  prop.disabled = !isLance || isPorto;
+  prop.classList.toggle('disabled', !isLance || isPorto);
+  if (isLance && isPorto) {
+    const emb = document.getElementById('lanceEmbutido');
+    if (!unmaskPct(emb.value)) emb.value = '30,0000 %';
+  }
+}
+
 function wireModalLogic() {
   setupToggle('seguroOn','seguro','tipoSeguro');
   setupToggle('redutorOn','redutor','reducaoSobre');
@@ -536,8 +556,14 @@ function wireModalLogic() {
       document.getElementById('lanceEmbutido').classList.toggle('disabled', !isLance);
       document.getElementById('fgtsOn').disabled = !isLance;
       if (isAlgo && !document.getElementById('tipoLance').value) document.getElementById('tipoLance').value = 'carta';
+      syncLanceFieldsUI();
       recalc();
     });
+  }
+  const tipoLanceSel = document.getElementById('tipoLance');
+  if (!tipoLanceSel.dataset.setupPorto) {
+    tipoLanceSel.dataset.setupPorto = '1';
+    tipoLanceSel.addEventListener('change', () => { syncLanceFieldsUI(); recalc(); });
   }
 
   document.getElementById('resetProposta').addEventListener('click', () => {
@@ -549,7 +575,7 @@ function wireModalLogic() {
     recalc();
   });
   document.getElementById('resetContemplacao').addEventListener('click', () => {
-    ['lanceProprios','lanceEmbutido','lanceFGTS'].forEach(id => document.getElementById(id).value = '');
+    ['lanceProprios','lanceEmbutido','lanceFGTS','totalLance'].forEach(id => document.getElementById(id).value = '');
     ['tipoContemplacao','tipoLance'].forEach(id => document.getElementById(id).selectedIndex = 0);
     document.getElementById('expectativa').value = '1';
     const f = document.getElementById('fgtsOn'); f.checked = false; f.dispatchEvent(new Event('change'));
@@ -581,8 +607,11 @@ function recalc() {
   const expectativa = parseInt(document.getElementById('expectativa').value || '1', 10);
   const tipoLance = document.getElementById('tipoLance').value;
   const _isBrad = (tipoLance === 'bradesco-imovel' || tipoLance === 'bradesco-auto');
+  const _isPorto = (tipoLance === 'porto');
   const _fatorBrad = (tipoLance === 'bradesco-imovel') ? 1.0425 : (tipoLance === 'bradesco-auto') ? 1.0525 : 1;
   const pProprios = unmaskPct(document.getElementById('lanceProprios').value)/100;
+  // Porto (total na categoria): o campo % Total de lance vira ENTRADA
+  const pTotal = unmaskPct(document.getElementById('totalLance').value)/100;
   // Bradesco (Imóvel/Auto): só % sobre Categoria, não tem embutido nem FGTS
   const pEmbutido = _isBrad ? 0 : unmaskPct(document.getElementById('lanceEmbutido').value)/100;
   const fgtsOn = document.getElementById('fgtsOn').checked;
@@ -651,20 +680,30 @@ function recalc() {
 
   // Lance e valor de referência
   let valorRef = creditoAtualizado;
-  if (tipoLance === 'categoria' || tipoLance === 'cat-carta' || _isBrad) valorRef = creditoAtualizado*(1+taxaAdm+fundo);
+  if (tipoLance === 'categoria' || tipoLance === 'cat-carta' || _isPorto || _isBrad) valorRef = creditoAtualizado*(1+taxaAdm+fundo);
   else if (tipoLance === 'saldo') valorRef = saldo;
   document.getElementById('valorRef').value = formatMoney(valorRef);
 
   // Bradesco: Lance R$ = (Categoria × % Lance) / Fator (1,0425 imóvel · 1,0525 auto)
-  const lanceProprios_v = (tipoLance === 'cat-carta')
-    ? valorRef*pProprios
-    : (valorRef*pProprios) / _fatorBrad;
-  const lanceEmbutido_v = (tipoLance === 'cat-carta') ? creditoAtualizado*pEmbutido : valorRef*pEmbutido;
-  const lanceFGTS_v = (tipoLance === 'cat-carta') ? valorRef*pFGTS : valorRef*pFGTS;
+  const lanceEmbutido_v = (tipoLance === 'cat-carta' || _isPorto) ? creditoAtualizado*pEmbutido : valorRef*pEmbutido;
+  const lanceFGTS_v = valorRef*pFGTS;
+  // Porto (total na categoria): rec. próprio = total (na categoria) menos
+  // embutido (% da carta) e FGTS, igual ao "Livre + Embutido" do simulador simples.
+  const lanceProprios_v = _isPorto
+    ? Math.max(0, valorRef*pTotal - lanceEmbutido_v - lanceFGTS_v)
+    : (tipoLance === 'cat-carta')
+      ? valorRef*pProprios
+      : (valorRef*pProprios) / _fatorBrad;
   const valorTotalLance = lanceProprios_v + lanceEmbutido_v + lanceFGTS_v;
-  const totalLancePct = (pProprios + pEmbutido + pFGTS)*100;
+  // % Total de lance calculado pelo VALOR sobre a referência (igual ao Modo Investidor
+  // e à Proposta Simples). Somar os % digitados misturava bases no modo
+  // "Categoria (total) e carta (emb.)": próprios em % da categoria + embutido em % da carta.
+  const totalLancePct = valorRef > 0 ? (valorTotalLance / valorRef) * 100 : 0;
 
-  document.getElementById('totalLance').value = formatPct(totalLancePct, 4);
+  // No modo Porto o % Total é digitado pelo usuário; não sobrescreve enquanto digita.
+  if (!_isPorto) document.getElementById('totalLance').value = formatPct(totalLancePct, 4);
+  // No modo Porto o % de rec. próprios vira campo calculado (base categoria)
+  if (_isPorto) document.getElementById('lanceProprios').value = formatPct(valorRef > 0 ? (lanceProprios_v/valorRef)*100 : 0, 4);
   document.getElementById('lanceProprios_v').value = formatMoney(lanceProprios_v);
   document.getElementById('lanceEmbutido_v').value = formatMoney(lanceEmbutido_v);
   document.getElementById('lanceFGTS_v').value = formatMoney(lanceFGTS_v);
@@ -673,7 +712,7 @@ function recalc() {
   // Crédito disponível
   let creditoDisp = creditoAtualizado;
   if (tipoLance === 'categoria') creditoDisp = creditoAtualizado - lanceEmbutido_v - lanceFGTS_v;
-  else if (tipoLance === 'cat-carta') creditoDisp = creditoAtualizado - lanceEmbutido_v - lanceFGTS_v;
+  else if (tipoLance === 'cat-carta' || _isPorto) creditoDisp = creditoAtualizado - lanceEmbutido_v - lanceFGTS_v;
   else if (tipoLance === 'carta') creditoDisp = creditoAtualizado - lanceEmbutido_v - lanceFGTS_v;
   else if (tipoLance === 'saldo') creditoDisp = creditoAtualizado;
   document.getElementById('creditoDisponivel').textContent = formatMoney(creditoDisp);
@@ -842,6 +881,10 @@ function loadIntoForm(op) {
   document.getElementById('tipoContemplacao').dispatchEvent(new Event('change'));
   document.getElementById('expectativa').value = op.expectativa || '1';
   document.getElementById('tipoLance').value = op.tipoLance;
+  if (op.tipoLance === 'porto' && op.totalLancePct != null) {
+    document.getElementById('totalLance').value = formatPct(op.totalLancePct, 4);
+  }
+  syncLanceFieldsUI();
   document.getElementById('lanceProprios').value = op.lanceProprios;
   document.getElementById('lanceEmbutido').value = op.lanceEmbutido;
   document.getElementById('lanceFGTS').value = op.lanceFGTS;
