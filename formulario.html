@@ -514,8 +514,10 @@ const ADMINS_LABEL = { porto: 'Porto', bradesco: 'Bradesco', itau: 'Itaú' };
 // Campos que NÃO entram em cada admin específico (escondidos quando ?admin=X está travado)
 const SKIP_FIELDS = {
   porto: {
-    // Porto não pede: sexo, pai, empresa, data_admissao, emancipado, uf_naturalidade
-    pf: ['pf-sexo','pf-nome_pai','pf-nome_empresa','pf-data_admissao','pf-uf_naturalidade'],
+    // Porto não pede: pai, empresa, data_admissao, emancipado.
+    // Sexo e UF de naturalidade VOLTARAM a ser pedidos (26/08/2026): a emissão
+    // na Porto exige os dois e a equipe tinha que deduzir quando vinham em branco.
+    pf: ['pf-nome_pai','pf-nome_empresa','pf-data_admissao'],
     pj: []
   },
   itau: {
@@ -1812,6 +1814,7 @@ function validarPF(d) {
   if (!skip('sexo') && !d.sexo) return 'Sexo é obrigatório';
   if (!skip('nacionalidade') && !d.nacionalidade) return 'Nacionalidade é obrigatória';
   if (!skip('cidade_nascimento') && !d.cidade_nascimento) return 'Cidade de nascimento é obrigatória';
+  if (!skip('uf_naturalidade') && !d.uf_naturalidade) return 'UF de naturalidade é obrigatória';
   if (!d.nome_mae) return 'Nome da mãe é obrigatório';
   if (!d.tipo_documento) return 'Tipo de documento é obrigatório';
   if (!d.numero_documento) return 'Número do documento é obrigatório';
