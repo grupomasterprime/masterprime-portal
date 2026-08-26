@@ -1190,6 +1190,10 @@ function buildFormPF() {
         <div class="field"><label>Cidade<span class="req">*</span></label><input id="pf-cidade" required></div>
         <div class="field"><label>UF<span class="req">*</span></label><select id="pf-estado" required><option value="">—</option><option>AC</option><option>AL</option><option>AP</option><option>AM</option><option>BA</option><option>CE</option><option>DF</option><option>ES</option><option>GO</option><option>MA</option><option>MT</option><option>MS</option><option>MG</option><option>PA</option><option>PB</option><option>PR</option><option>PE</option><option>PI</option><option>RJ</option><option>RN</option><option>RS</option><option>RO</option><option>RR</option><option>SC</option><option>SP</option><option>SE</option><option>TO</option></select></div>
       </div>
+      <div class="grid-2" style="margin-top:14px">
+        <div class="field"><label>Tipo de Residência<span class="req">*</span></label><select id="pf-tipo_residencia" required><option value="">Selecione...</option><option>Própria</option><option>De familiares</option><option>Alugada</option></select></div>
+        <div class="field"><label>Tempo de Residência (anos)<span class="req">*</span></label><input id="pf-tempo_residencia" inputmode="numeric" maxlength="2" placeholder="Ex.: 5" required oninput="this.value=this.value.replace(/\D/g,'')"></div>
+      </div>
     </div>
 
     <div class="card">
@@ -1735,6 +1739,10 @@ function validarPF(d) {
   if (unmaskNum(d.celular).length < 10) return 'Celular inválido';
   if (d.cep.length !== 8) return 'CEP inválido';
   if (!d.logradouro || !d.numero || !d.bairro || !d.cidade || !d.estado) return 'Preencha o endereço completo';
+  // Tipo e tempo de residência: pedidos no cadastro do Bradesco (opções do portal deles:
+  // Própria, De familiares, Alugada). Patrimônio fica de fora: não sai no PDF de nenhuma admin.
+  if (!skip('tipo_residencia') && !d.tipo_residencia) return 'Selecione o tipo de residência';
+  if (!skip('tempo_residencia') && d.tempo_residencia === '') return 'Informe o tempo de residência (em anos)';
   // Empresa + Data Admissão: obrigatórios em Bradesco e link Master Prime geral.
   // Porto e Itaú estão no SKIP_FIELDS, então skip() devolve true e pula a regra.
   if (!skip('nome_empresa') && (!d.nome_empresa || d.nome_empresa.trim().length < 2)) return 'Empresa onde trabalha é obrigatória';
