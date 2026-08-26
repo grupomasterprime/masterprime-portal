@@ -1352,6 +1352,28 @@ renderOps();
     }
   });
 })();
+
+// ═══════════════════════════════════════════════════════
+// SELIC AUTOMÁTICA DO BANCO CENTRAL
+// Busca a meta Selic oficial na API pública do BCB (série SGS 432)
+// e preenche o campo ao abrir a página. O campo continua editável;
+// se a busca falhar (offline etc.), fica o valor padrão do HTML.
+// ═══════════════════════════════════════════════════════
+(function autoSelic() {
+  const campo = document.getElementById('selic');
+  if (!campo) return;
+  const valorInicial = campo.value;
+  fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados/ultimos/1?formato=json')
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(d => {
+      const v = parseFloat(String(d && d[0] && d[0].valor).replace(',', '.'));
+      if (!isFinite(v) || v <= 0 || v >= 100) return;
+      // Só sobrescreve se o usuário ainda não mexeu no campo.
+      if (campo.value !== valorInicial) return;
+      campo.value = v.toFixed(2).replace('.', ',') + ' %';
+    })
+    .catch(() => {});
+})();
 </script>
 
 </body>

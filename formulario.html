@@ -605,7 +605,10 @@ function bindMasks(root = document) {
     if (el && !el.getAttribute('inputmode')) el.setAttribute('inputmode', 'numeric');
   });
   $$('[data-mask="cpf"]', root).forEach(el => el.addEventListener('input', e => e.target.value = maskCPF(e.target.value)));
-  $$('[data-mask="cnpj"]', root).forEach(el => el.addEventListener('input', e => e.target.value = maskCNPJ(e.target.value)));
+  $$('[data-mask="cnpj"]', root).forEach(el => {
+    el.addEventListener('input', e => e.target.value = maskCNPJ(e.target.value));
+    el.addEventListener('blur', () => lookupCNPJ(el));
+  });
   $$('[data-mask="cep"]', root).forEach(el => {
     el.addEventListener('input', e => e.target.value = maskCEP(e.target.value));
     el.addEventListener('blur', () => lookupCEP(el));
@@ -646,6 +649,68 @@ async function lookupCEP(input) {
     set('cidade', d.localidade);
     set('estado', d.uf);
   } catch(e) { /* silencioso */ }
+}
+
+// BrasilAPI CNPJ: ao digitar o CNPJ, preenche a ficha PJ com os dados
+// públicos da Receita Federal (razão social, CNAE, endereço, capital etc.).
+// Só preenche campos VAZIOS: nunca sobrescreve o que o cliente já digitou.
+async function lookupCNPJ(input) {
+  if (input.id !== 'pj-cnpj') return;
+  const cnpj = unmaskNum(input.value);
+  if (cnpj.length !== 14) return;
+  if (input.dataset.lastCnpj === cnpj) return;
+  try {
+    const r = await fetch('https://brasilapi.com.br/api/cnpj/v1/' + cnpj);
+    if (!r.ok) return;
+    const d = await r.json();
+    input.dataset.lastCnpj = cnpj;
+    const set = (id, val) => {
+      const el = $('pj-' + id);
+      if (!el || val == null || String(val).trim() === '') return;
+      if (el.value) return;
+      el.value = String(val);
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+    set('razao_social', upperNoAccent(d.razao_social || ''));
+    set('nome_fantasia', upperNoAccent(d.nome_fantasia || ''));
+    if (d.data_inicio_atividade) {
+      const p = String(d.data_inicio_atividade).split('-');
+      if (p.length === 3) set('data_constituicao', p[2] + '/' + p[1] + '/' + p[0]);
+    }
+    if (d.cnae_fiscal) {
+      const c = String(d.cnae_fiscal).replace(/\D/g, '');
+      if (c.length === 7) set('cnae_principal', c.slice(0, 4) + '-' + c[4] + '/' + c.slice(5));
+    }
+    if (d.natureza_juridica) {
+      const sel = $('pj-natureza_juridica');
+      if (sel && !sel.value) {
+        const alvo = upperNoAccent(String(d.natureza_juridica).replace(/^\d+[\s-]*/, '')).trim();
+        const opt = [...sel.options].find(o => o.value && upperNoAccent(o.value).trim() === alvo);
+        if (opt) sel.value = opt.value;
+      }
+    }
+    if (d.capital_social > 0) {
+      set('valor_capital', 'R$ ' + Number(d.capital_social).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+    }
+    // Endereço fiscal completo (marca o CEP como resolvido pra o ViaCEP não sobrescrever)
+    const cepDigits = String(d.cep || '').replace(/\D/g, '');
+    if (cepDigits.length === 8) {
+      const cepEl = $('pj-cep');
+      if (cepEl && !cepEl.value) { cepEl.value = maskCEP(cepDigits); cepEl.dataset.lastCep = cepDigits; }
+    }
+    set('tipo_logradouro', upperNoAccent(d.descricao_tipo_de_logradouro || ''));
+    set('logradouro', upperNoAccent(d.logradouro || ''));
+    set('numero', upperNoAccent(String(d.numero || '')));
+    set('complemento', upperNoAccent(d.complemento || ''));
+    set('bairro', upperNoAccent(d.bairro || ''));
+    set('cidade', upperNoAccent(d.municipio || ''));
+    const ufSel = $('pj-estado');
+    if (ufSel && !ufSel.value && d.uf) ufSel.value = String(d.uf).toUpperCase();
+    if (d.ddd_telefone_1) {
+      const tel = String(d.ddd_telefone_1).replace(/\D/g, '');
+      if (tel.length >= 10) set('tel_comercial', maskPhone(tel));
+    }
+  } catch(e) { /* silencioso: cliente preenche na mão */ }
 }
 
 // ════════ INIT ════════
