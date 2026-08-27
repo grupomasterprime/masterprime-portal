@@ -355,7 +355,7 @@
         <div class="field"><label>Valor de referência</label><input type="text" id="valorRef" placeholder="R$ 0,00" disabled class="disabled"></div>
         <div class="field"><label>Crédito atualizado</label><input type="text" id="creditoAtualizado" placeholder="R$ 0,00" disabled class="disabled"></div>
         <div class="field"><label>% Lance rec. próprios</label><input type="text" id="lanceProprios" placeholder="0,0000 %" data-mask="pct4" disabled></div>
-        <div class="field"><label>% Lance embutido</label><input type="text" id="lanceEmbutido" placeholder="0,0000 %" data-mask="pct4" disabled></div>
+        <div class="field"><label id="lblLanceEmbutido">% Lance embutido</label><input type="text" id="lanceEmbutido" placeholder="0,0000 %" data-mask="pct4" disabled></div>
         <div class="field">
           <label>% Lance com FGTS <span class="toggle-input"><input type="checkbox" id="fgtsOn" disabled><span class="toggle-slider"></span></span></label>
           <input type="text" id="lanceFGTS" placeholder="0,0000 %" data-mask="pct4" disabled>
@@ -527,6 +527,9 @@ function syncLanceFieldsUI() {
     const emb = document.getElementById('lanceEmbutido');
     if (!unmaskPct(emb.value)) emb.value = '30,0000 %';
   }
+  // Rótulo do embutido muda no modo Porto: deixa claro que a base é a CARTA
+  const lblEmb = document.getElementById('lblLanceEmbutido');
+  if (lblEmb) lblEmb.textContent = isPorto ? '% Emb. máx (da carta)' : '% Lance embutido';
 }
 
 function wireModalLogic() {
@@ -563,7 +566,15 @@ function wireModalLogic() {
   const tipoLanceSel = document.getElementById('tipoLance');
   if (!tipoLanceSel.dataset.setupPorto) {
     tipoLanceSel.dataset.setupPorto = '1';
-    tipoLanceSel.addEventListener('change', () => { syncLanceFieldsUI(); recalc(); });
+    tipoLanceSel.addEventListener('change', () => {
+      // Ao ENTRAR no modo Porto, o embutido volta ao teto (30% da carta):
+      // o usuário digita só o % total; o simulador limita o embutido à oferta
+      // sozinho (caso Fidelidade). Evita o erro de digitar o embutido em outra base.
+      if (tipoLanceSel.value === 'porto') {
+        document.getElementById('lanceEmbutido').value = '30,0000 %';
+      }
+      syncLanceFieldsUI(); recalc();
+    });
   }
 
   document.getElementById('resetProposta').addEventListener('click', () => {
