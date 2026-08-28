@@ -41,6 +41,14 @@ button{cursor:pointer;font-family:inherit}
 .lead .nm{font-weight:800;color:var(--ink);font-size:14px}
 .lead .dt{font-size:11.5px;color:var(--text-3);margin-top:2px}
 .badge{display:inline-block;font-size:11px;font-weight:800;border-radius:12px;padding:3px 11px;margin-top:8px;color:#fff;background:var(--c,#94A3B8)}
+.prog{display:flex;gap:4px;margin-top:10px}
+.prog .seg{flex:1;height:6px;border-radius:4px;background:#E6EBF2}
+.prog .seg.on{background:var(--c,#94A3B8)}
+.prog-steps{display:flex;justify-content:space-between;font-size:9.5px;font-weight:600;color:var(--text-3);margin-top:4px;letter-spacing:.2px}
+.prog-steps span{flex:1;text-align:center}
+.prog-steps span:first-child{text-align:left}
+.prog-steps span:last-child{text-align:right}
+.prog-steps span.on{color:var(--c,#94A3B8);font-weight:800}
 .hist-btn{background:none;border:none;color:var(--teal);font-size:11.5px;font-weight:700;padding:6px 0 0;text-decoration:underline}
 .hist{margin-top:8px;border-left:2px solid var(--border);padding-left:12px}
 .hist div{font-size:11.5px;color:var(--text-2);padding-bottom:5px}
@@ -274,8 +282,13 @@ async function carregarLeads(){
 function renderLeads(leads){
   const el = $('ap-lista');
   if (!leads || !leads.length) { el.innerHTML = '<div class="vazio">Você ainda não enviou nenhuma indicação.</div>'; return; }
+  const ORDEM = ['novo','contato','qualificado','proposta','vendido'];
+  const NOMES_CURTOS = ['Recebida','Contato','Qualificada','Proposta','Venda'];
   el.innerHTML = leads.map((l, i) => {
     const et = ETAPAS[l.etapa] || ETAPAS.novo;
+    const idx = ORDEM.indexOf(l.etapa);
+    const segs = ORDEM.map((s, k) => '<div class="seg' + (idx >= 0 && k <= idx ? ' on' : '') + '"></div>').join('');
+    const steps = NOMES_CURTOS.map((n, k) => '<span' + (idx >= 0 && k <= idx ? ' class="on"' : '') + '>' + n + '</span>').join('');
     const hist = (l.historico || []).map(h => {
       const de = h.de ? (ETAPAS[h.de] || {}).nome : null;
       const para = (ETAPAS[h.para] || {}).nome || '';
@@ -285,6 +298,8 @@ function renderLeads(leads){
       <div class="nm">${esc(l.nome)}</div>
       <div class="dt">Enviada em ${fmtData(l.criado_em)}</div>
       <span class="badge">${et.nome}</span>
+      <div class="prog">${segs}</div>
+      <div class="prog-steps">${steps}</div>
       <div><button class="hist-btn" onclick="this.nextElementSibling.classList.toggle('hidden')">Ver histórico</button>
       <div class="hist hidden">${hist || '<div>Sem movimentações ainda</div>'}</div></div>
     </div>`;
