@@ -355,7 +355,7 @@
         <div class="field"><label>Valor de referência</label><input type="text" id="valorRef" placeholder="R$ 0,00" disabled class="disabled"></div>
         <div class="field"><label>Crédito atualizado</label><input type="text" id="creditoAtualizado" placeholder="R$ 0,00" disabled class="disabled"></div>
         <div class="field"><label>% Lance rec. próprios</label><input type="text" id="lanceProprios" placeholder="0,0000 %" data-mask="pct4" disabled></div>
-        <div class="field"><label id="lblLanceEmbutido">% Lance embutido</label><input type="text" id="lanceEmbutido" placeholder="0,0000 %" data-mask="pct4" disabled></div>
+        <div class="field"><label id="lblLanceEmbutido">% Lance embutido</label><input type="text" id="lanceEmbutido" placeholder="0,0000 %" data-mask="pct4" disabled><small id="embEquivCat" style="display:none;color:#6B7280;font-size:11px;margin-top:2px"></small></div>
         <div class="field">
           <label>% Lance com FGTS <span class="toggle-input"><input type="checkbox" id="fgtsOn" disabled><span class="toggle-slider"></span></span></label>
           <input type="text" id="lanceFGTS" placeholder="0,0000 %" data-mask="pct4" disabled>
@@ -719,6 +719,17 @@ function recalc() {
   if (!_isPorto) document.getElementById('totalLance').value = formatPct(totalLancePct, 4);
   // No modo Porto o % de rec. próprios vira campo calculado (base categoria)
   if (_isPorto) document.getElementById('lanceProprios').value = formatPct(valorRef > 0 ? (lanceProprios_v/valorRef)*100 : 0, 4);
+  // Mostra a equivalência do embutido na base CATEGORIA (o simulador simples da
+  // Porto exibe nessa base; sem isso parece que os % divergem entre os dois)
+  const _embEq = document.getElementById('embEquivCat');
+  if (_embEq) {
+    if (_isPorto && valorRef > 0 && lanceEmbutido_v > 0) {
+      _embEq.textContent = '= ' + formatPct((lanceEmbutido_v/valorRef)*100, 2) + ' da categoria';
+      _embEq.style.display = 'block';
+    } else {
+      _embEq.style.display = 'none';
+    }
+  }
   document.getElementById('lanceProprios_v').value = formatMoney(lanceProprios_v);
   document.getElementById('lanceEmbutido_v').value = formatMoney(lanceEmbutido_v);
   document.getElementById('lanceFGTS_v').value = formatMoney(lanceFGTS_v);
