@@ -78,6 +78,24 @@ select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 1
 .btn-s{font-size:11px;font-weight:700;padding:6px 11px;border-radius:7px;border:1px solid var(--border);background:#fff;color:var(--text)}
 .btn-s.p{background:var(--navy);color:#fff;border-color:var(--navy)}
 
+/* relatorios */
+.rep-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px}
+.rep-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:13px 15px}
+.rep-card .k{font-size:10px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--text-2)}
+.rep-card .v{font-size:21px;font-weight:800;color:var(--ink);margin-top:4px}
+.rep-card .s{font-size:10.5px;color:var(--text-3);margin-top:2px}
+.rep-h{font-size:13px;color:var(--ink);margin:16px 0 8px}
+.rep-wrap{background:#fff;border:1px solid var(--border);border-radius:12px;overflow-x:auto}
+.rtab{width:100%;border-collapse:collapse;font-size:12px}
+.rtab th{background:#F1F5F9;color:var(--text-2);font-size:10.5px;text-transform:uppercase;letter-spacing:.4px;padding:9px 12px;text-align:left;white-space:nowrap}
+.rtab th.num, .rtab td.num{text-align:right}
+.rtab td{padding:9px 12px;border-top:1px solid var(--border);white-space:nowrap}
+.rtab tr.tot td{font-weight:800;background:#F8FAFC;color:var(--ink)}
+.conv-b{display:inline-block;min-width:46px;text-align:center;font-weight:800;border-radius:8px;padding:2px 8px;font-size:11px}
+.conv-hi{background:#D1FAE5;color:#065F46}
+.conv-md{background:#FEF3C7;color:#92400E}
+.conv-lo{background:#F1F5F9;color:#64748B}
+
 #loading{padding:60px;text-align:center;color:var(--text-2)}
 .vazio{padding:34px;text-align:center;color:var(--text-3);font-size:12.5px}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:12.5px;padding:10px 18px;border-radius:10px;z-index:99}
@@ -95,6 +113,7 @@ select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 1
   <div class="tabs">
     <button class="tab-btn on" id="tab-funil" onclick="mostrarAba('funil')">Funil</button>
     <button class="tab-btn" id="tab-ind" onclick="mostrarAba('ind')">Meus Indicadores</button>
+    <button class="tab-btn" id="tab-rel" onclick="mostrarAba('rel')">Relatórios</button>
   </div>
 </div>
 
@@ -119,6 +138,24 @@ select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 1
       <button class="btn btn-p" onclick="abrirNovoIndicador()">+ Cadastrar Indicador</button>
     </div>
     <div class="ind-grid" id="ind-grid"></div>
+  </div>
+
+  <!-- ── ABA RELATORIOS ── -->
+  <div class="wrap hidden" id="aba-rel">
+    <div class="toolbar">
+      <label style="font-size:11.5px;color:var(--text-2);font-weight:700">Período</label>
+      <input type="date" class="f" id="rel-de" onchange="renderRelatorio()">
+      <span style="color:var(--text-3)">até</span>
+      <input type="date" class="f" id="rel-ate" onchange="renderRelatorio()">
+      <button class="btn btn-g" onclick="relPeriodoTudo()">Tudo</button>
+      <span class="sp"></span>
+      <button class="btn btn-g" onclick="carregarTudo().then(renderRelatorio)">Atualizar</button>
+    </div>
+    <div class="rep-cards" id="rel-cards"></div>
+    <h3 class="rep-h">Conversão por consultor</h3>
+    <div class="rep-wrap"><table class="rtab" id="rel-cons"></table></div>
+    <h3 class="rep-h">Conversão por indicador</h3>
+    <div class="rep-wrap"><table class="rtab" id="rel-ind"></table></div>
   </div>
 </div>
 
@@ -232,8 +269,11 @@ $('md-cotas').addEventListener('input', e => e.target.value = e.target.value.rep
 function mostrarAba(a){
   $('tab-funil').classList.toggle('on', a === 'funil');
   $('tab-ind').classList.toggle('on', a === 'ind');
+  $('tab-rel').classList.toggle('on', a === 'rel');
   $('aba-funil').classList.toggle('hidden', a !== 'funil');
   $('aba-ind').classList.toggle('hidden', a !== 'ind');
+  $('aba-rel').classList.toggle('hidden', a !== 'rel');
+  if (a === 'rel') renderRelatorio();
 }
 
 // ══════════ CARGA ══════════
@@ -454,6 +494,69 @@ async function salvarIndicador(){
   copiarLink(data.token);
   toast('Indicador cadastrado, link copiado');
   carregarTudo();
+}
+
+// ══════════ RELATORIOS ══════════
+function relPeriodoTudo(){ $('rel-de').value = ''; $('rel-ate').value = ''; renderRelatorio(); }
+
+function relLeadsPeriodo(){
+  const de = $('rel-de').value ? new Date($('rel-de').value + 'T00:00:00') : null;
+  const ate = $('rel-ate').value ? new Date($('rel-ate').value + 'T23:59:59') : null;
+  return LEADS.filter(l => {
+    const d = new Date(l.criado_em);
+    if (de && d < de) return false;
+    if (ate && d > ate) return false;
+    return true;
+  });
+}
+
+function convBadge(v, tot){
+  const p = tot ? Math.round(v / tot * 100) : 0;
+  const cls = p >= 30 ? 'conv-hi' : (p >= 10 ? 'conv-md' : 'conv-lo');
+  return `<span class="conv-b ${cls}">${p}%</span>`;
+}
+function fmtBRL0(n){ return Number(n || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+function relAgrupa(leads, chave, nomeFn){
+  const g = {};
+  leads.forEach(l => {
+    const k = chave(l);
+    if (k === null) return;
+    if (!g[k]) g[k] = { nome: nomeFn(l), total: 0, andamento: 0, vendidos: 0, perdidos: 0, credito: 0, cotas: 0 };
+    const x = g[k];
+    x.total++;
+    if (l.etapa === 'vendido') { x.vendidos++; x.credito += Number(l.valor_credito || 0); x.cotas += Number(l.qtd_cotas || 0); }
+    else if (l.etapa === 'perdido') x.perdidos++;
+    else x.andamento++;
+  });
+  return Object.values(g).sort((a, b) => b.credito - a.credito || b.vendidos - a.vendidos || b.total - a.total);
+}
+
+function relTabela(el, linhas, rotulo){
+  const head = `<tr><th>${rotulo}</th><th class="num">Leads</th><th class="num">Em andamento</th><th class="num">Vendidos</th><th class="num">Perdidos</th><th class="num">Conversão</th><th class="num">Crédito vendido</th><th class="num">Cotas</th></tr>`;
+  if (!linhas.length) { el.innerHTML = head + `<tr><td colspan="8" style="text-align:center;color:var(--text-3);padding:18px">Sem leads no período</td></tr>`; return; }
+  const tot = { total: 0, andamento: 0, vendidos: 0, perdidos: 0, credito: 0, cotas: 0 };
+  const rows = linhas.map(x => {
+    tot.total += x.total; tot.andamento += x.andamento; tot.vendidos += x.vendidos; tot.perdidos += x.perdidos; tot.credito += x.credito; tot.cotas += x.cotas;
+    return `<tr><td>${esc(x.nome)}</td><td class="num">${x.total}</td><td class="num">${x.andamento}</td><td class="num">${x.vendidos}</td><td class="num">${x.perdidos}</td><td class="num">${convBadge(x.vendidos, x.total)}</td><td class="num">R$ ${fmtBRL0(x.credito)}</td><td class="num">${x.cotas}</td></tr>`;
+  }).join('');
+  const trTot = linhas.length > 1 ? `<tr class="tot"><td>Total</td><td class="num">${tot.total}</td><td class="num">${tot.andamento}</td><td class="num">${tot.vendidos}</td><td class="num">${tot.perdidos}</td><td class="num">${convBadge(tot.vendidos, tot.total)}</td><td class="num">R$ ${fmtBRL0(tot.credito)}</td><td class="num">${tot.cotas}</td></tr>` : '';
+  el.innerHTML = head + rows + trTot;
+}
+
+function renderRelatorio(){
+  const leads = relLeadsPeriodo();
+  const vendidos = leads.filter(l => l.etapa === 'vendido');
+  const credito = vendidos.reduce((s, l) => s + Number(l.valor_credito || 0), 0);
+  const cotas = vendidos.reduce((s, l) => s + Number(l.qtd_cotas || 0), 0);
+  const indicacoes = leads.filter(l => l.origem === 'indicador').length;
+  $('rel-cards').innerHTML = `
+    <div class="rep-card"><div class="k">Leads no período</div><div class="v">${leads.length}</div><div class="s">${indicacoes} por indicação</div></div>
+    <div class="rep-card"><div class="k">Vendas</div><div class="v">${vendidos.length}</div><div class="s">${cotas} cota${cotas === 1 ? '' : 's'}</div></div>
+    <div class="rep-card"><div class="k">Conversão</div><div class="v">${leads.length ? Math.round(vendidos.length / leads.length * 100) : 0}%</div><div class="s">vendas sobre leads</div></div>
+    <div class="rep-card"><div class="k">Crédito vendido</div><div class="v" style="color:#065F46">R$ ${fmtBRL0(credito)}</div><div class="s">no período</div></div>`;
+  relTabela($('rel-cons'), relAgrupa(leads, l => l.consultor_id == null ? 'sem' : String(l.consultor_id), l => l.consultor ? l.consultor.nome : 'Sem consultor definido'), 'Consultor');
+  relTabela($('rel-ind'), relAgrupa(leads.filter(l => l.indicador_id), l => String(l.indicador_id), l => l.indicador ? l.indicador.nome : 'Indicador removido'), 'Indicador');
 }
 
 // ══════════ INIT ══════════
