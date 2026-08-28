@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Master Prime - Portal do Indicador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --navy:#0F2A4A; --navy-2:#1D4E89; --teal:#0FA3A3; --cta:#F4C24A;
+  --bg:#F6F8FB; --border:#E6EBF2; --ink:#152A43; --text:#334155; --text-2:#64748B; --text-3:#94A3B8;
+  --green:#10B981; --amber:#F59E0B; --red:#EF4444; --purple:#7C3AED; --blue:#2563EB;
+}
+*{margin:0;box-sizing:border-box;font-family:'Inter',-apple-system,sans-serif}
+body{background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
+button{cursor:pointer;font-family:inherit}
+.hidden{display:none !important}
+
+.topo{background:linear-gradient(120deg,var(--navy) 0%,#12345E 70%);color:#fff;padding:26px 20px 30px;text-align:center}
+.topo .marca{font-size:12px;font-weight:800;letter-spacing:2.5px;color:var(--cta);text-transform:uppercase}
+.topo h1{font-size:21px;font-weight:800;margin-top:6px}
+.topo .sub{font-size:12.5px;opacity:.75;margin-top:5px}
+
+.wrap{max-width:520px;margin:-14px auto 40px;padding:0 14px}
+.card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:20px;margin-bottom:14px;box-shadow:0 4px 14px rgba(15,42,74,.06)}
+.card h2{font-size:14.5px;color:var(--ink);margin-bottom:12px}
+.fg{margin-bottom:12px}
+.fg label{display:block;font-size:11px;font-weight:700;color:var(--text-2);margin-bottom:5px;text-transform:uppercase;letter-spacing:.4px}
+.fg input,.fg select,.fg textarea{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:12px 13px;font-size:15px;font-family:inherit}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--teal)}
+.btn{width:100%;border:none;border-radius:10px;font-size:14px;font-weight:800;padding:13px}
+.btn-p{background:var(--navy);color:#fff}
+.btn-cta{background:var(--cta);color:var(--ink)}
+.btn-l{background:none;border:none;color:var(--text-2);font-size:12px;text-decoration:underline;width:auto;padding:6px}
+.msg-err{background:#FEF2F2;color:#B91C1C;border-radius:9px;padding:10px 13px;font-size:12.5px;margin-bottom:12px}
+.msg-ok{background:#ECFDF5;color:#065F46;border-radius:9px;padding:10px 13px;font-size:12.5px;margin-bottom:12px}
+
+.lead{border:1px solid var(--border);border-left:5px solid var(--c,#94A3B8);border-radius:11px;padding:13px 14px;margin-bottom:10px}
+.lead .nm{font-weight:800;color:var(--ink);font-size:14px}
+.lead .dt{font-size:11.5px;color:var(--text-3);margin-top:2px}
+.badge{display:inline-block;font-size:11px;font-weight:800;border-radius:12px;padding:3px 11px;margin-top:8px;color:#fff;background:var(--c,#94A3B8)}
+.hist-btn{background:none;border:none;color:var(--teal);font-size:11.5px;font-weight:700;padding:6px 0 0;text-decoration:underline}
+.hist{margin-top:8px;border-left:2px solid var(--border);padding-left:12px}
+.hist div{font-size:11.5px;color:var(--text-2);padding-bottom:5px}
+.vazio{text-align:center;color:var(--text-3);font-size:12.5px;padding:18px 0}
+.saud{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.saud .n{font-size:13px;color:var(--text-2)}
+.saud .n b{color:var(--ink)}
+.rodape{text-align:center;font-size:11px;color:var(--text-3);padding:10px 0 26px}
+</style>
+</head>
+<body>
+
+<div class="topo">
+  <div class="marca">Master Prime</div>
+  <h1>Portal do Indicador</h1>
+  <div class="sub">Indique clientes e acompanhe cada um até a venda</div>
+</div>
+
+<div class="wrap">
+  <div class="card" id="tela-loading"><div class="vazio">Carregando...</div></div>
+
+  <!-- primeiro acesso: criar PIN -->
+  <div class="card hidden" id="tela-pin-novo">
+    <h2>Bem-vindo! Primeiro acesso</h2>
+    <p style="font-size:12.5px;color:var(--text-2);margin-bottom:14px">Olá, <b id="pn-nome"></b>. Para proteger suas indicações, confirme seu CPF e crie um PIN de 6 números. Você vai usar esse PIN nos próximos acessos.</p>
+    <div id="pn-err"></div>
+    <div class="fg"><label>Seu CPF</label><input id="pn-cpf" inputmode="numeric" placeholder="000.000.000-00" maxlength="14"></div>
+    <div class="fg"><label>Crie um PIN de 6 números</label><input id="pn-pin" inputmode="numeric" type="password" maxlength="6" placeholder="******"></div>
+    <div class="fg"><label>Repita o PIN</label><input id="pn-pin2" inputmode="numeric" type="password" maxlength="6" placeholder="******"></div>
+    <button class="btn btn-p" onclick="definirPin()">Criar PIN e entrar</button>
+  </div>
+
+  <!-- pedir PIN (link conhecido) -->
+  <div class="card hidden" id="tela-pin">
+    <h2>Digite seu PIN</h2>
+    <p style="font-size:12.5px;color:var(--text-2);margin-bottom:14px">Olá, <b id="pp-nome"></b>. Informe o PIN que você criou no primeiro acesso.</p>
+    <div id="pp-err"></div>
+    <div class="fg"><label>PIN</label><input id="pp-pin" inputmode="numeric" type="password" maxlength="6" placeholder="******"></div>
+    <button class="btn btn-p" onclick="entrarComPin()">Entrar</button>
+  </div>
+
+  <!-- login sem link: CPF + PIN -->
+  <div class="card hidden" id="tela-login">
+    <h2>Entrar</h2>
+    <p style="font-size:12.5px;color:var(--text-2);margin-bottom:14px">Digite o CPF e o PIN cadastrados. Se você recebeu um link pessoal, prefira entrar por ele.</p>
+    <div id="lg-err"></div>
+    <div class="fg"><label>CPF</label><input id="lg-cpf" inputmode="numeric" placeholder="000.000.000-00" maxlength="14"></div>
+    <div class="fg"><label>PIN</label><input id="lg-pin" inputmode="numeric" type="password" maxlength="6" placeholder="******"></div>
+    <button class="btn btn-p" onclick="loginCpfPin()">Entrar</button>
+  </div>
+
+  <!-- área logada -->
+  <div class="hidden" id="tela-app">
+    <div class="card">
+      <div class="saud">
+        <div class="n">Olá, <b id="ap-nome"></b></div>
+        <button class="btn-l" onclick="sair()">Sair</button>
+      </div>
+      <h2>Indicar um cliente</h2>
+      <div id="ap-msg"></div>
+      <div class="fg"><label>Nome do cliente</label><input id="ap-lnome" placeholder="Nome completo"></div>
+      <div class="fg"><label>Celular</label><input id="ap-ltel" inputmode="numeric" placeholder="(11) 99999-9999" maxlength="15"></div>
+      <div class="fg"><label>Interesse</label>
+        <select id="ap-lint"><option value="">Selecione...</option><option>Automóvel</option><option>Imóvel</option><option>Pesados</option><option>Investimento</option><option>Outro</option></select>
+      </div>
+      <div class="fg"><label>Observação (opcional)</label><textarea id="ap-lobs" rows="2" placeholder="Ex.: amigo do trabalho, quer trocar de carro"></textarea></div>
+      <button class="btn btn-cta" onclick="enviarLead()">Enviar indicação</button>
+    </div>
+
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <h2 style="margin:0">Minhas indicações</h2>
+        <button class="btn-l" onclick="carregarLeads()">Atualizar</button>
+      </div>
+      <div id="ap-lista"><div class="vazio">Carregando...</div></div>
+    </div>
+  </div>
+
+  <div class="rodape">Grupo Master Prime · Corretora de Consórcios e Seguros</div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://jhwciwvgagnuxakukyob.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false } });
+
+const ETAPAS = {
+  novo:        { nome: 'Recebida',              cor: '#2563EB' },
+  contato:     { nome: 'Em contato',            cor: '#0FA3A3' },
+  qualificado: { nome: 'Qualificada',           cor: '#7C3AED' },
+  proposta:    { nome: 'Proposta em andamento', cor: '#F59E0B' },
+  vendido:     { nome: 'Venda concluída!',      cor: '#10B981' },
+  perdido:     { nome: 'Não avançou',           cor: '#94A3B8' }
+};
+
+const $ = id => document.getElementById(id);
+function so(id){
+  ['tela-loading','tela-pin-novo','tela-pin','tela-login','tela-app'].forEach(t => $(t).classList.add('hidden'));
+  $(id).classList.remove('hidden');
+}
+function maskCPF(v){ v = v.replace(/\D/g,'').slice(0,11); return v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2'); }
+function maskTel(v){ v = v.replace(/\D/g,'').slice(0,11); if (v.length <= 10) return v.replace(/(\d{2})(\d)/,'($1) $2').replace(/(\d{4})(\d)/,'$1-$2'); return v.replace(/(\d{2})(\d)/,'($1) $2').replace(/(\d{5})(\d)/,'$1-$2'); }
+['pn-cpf','lg-cpf'].forEach(id => $(id).addEventListener('input', e => e.target.value = maskCPF(e.target.value)));
+$('ap-ltel').addEventListener('input', e => e.target.value = maskTel(e.target.value));
+function fmtData(d){ const x = new Date(d); return x.toLocaleDateString('pt-BR'); }
+function esc(s){ return String(s == null ? '' : s).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+function err(id, m){ $(id).innerHTML = m ? '<div class="msg-err">' + esc(m) + '</div>' : ''; }
+
+let TOKEN = null, PIN = null, NOME = '';
+
+async function rpc(fn, args){
+  const { data, error } = await sb.rpc(fn, args);
+  if (error) throw new Error(error.message);
+  return data;
+}
+
+// ══════════ FLUXO DE ENTRADA ══════════
+(async function init(){
+  const urlToken = new URLSearchParams(location.search).get('t');
+  let salvo = null;
+  try { salvo = JSON.parse(localStorage.getItem('mp_indicador') || 'null'); } catch(e) {}
+
+  if (urlToken) {
+    const info = await rpc('crm_indicador_info', { p_token: urlToken }).catch(() => null);
+    if (!info) { so('tela-login'); err('lg-err', 'Link inválido ou desativado. Fale com seu consultor.'); return; }
+    TOKEN = urlToken; NOME = info.nome;
+    if (info.precisa_pin) { $('pn-nome').textContent = info.nome; so('tela-pin-novo'); return; }
+    if (salvo && salvo.t === urlToken && salvo.p) {
+      PIN = salvo.p;
+      if (await entrar()) return;
+    }
+    $('pp-nome').textContent = info.nome;
+    so('tela-pin');
+    return;
+  }
+  if (salvo && salvo.t && salvo.p) {
+    TOKEN = salvo.t; PIN = salvo.p; NOME = salvo.n || '';
+    if (await entrar()) return;
+  }
+  so('tela-login');
+})();
+
+async function definirPin(){
+  err('pn-err', '');
+  const cpf = $('pn-cpf').value.replace(/\D/g, '');
+  const pin = $('pn-pin').value.replace(/\D/g, '');
+  if (cpf.length !== 11) { err('pn-err', 'Digite seu CPF completo'); return; }
+  if (pin.length < 6) { err('pn-err', 'O PIN precisa ter 6 números'); return; }
+  if (pin !== $('pn-pin2').value.replace(/\D/g, '')) { err('pn-err', 'Os dois PINs não conferem'); return; }
+  const ok = await rpc('crm_indicador_definir_pin', { p_token: TOKEN, p_cpf: cpf, p_pin: pin }).catch(() => false);
+  if (!ok) { err('pn-err', 'CPF não confere com o cadastro. Confira com seu consultor.'); return; }
+  PIN = pin;
+  await entrar(true);
+}
+
+async function entrarComPin(){
+  err('pp-err', '');
+  PIN = $('pp-pin').value.replace(/\D/g, '');
+  if (PIN.length < 4) { err('pp-err', 'Digite o PIN'); return; }
+  if (!await entrar(true)) err('pp-err', 'PIN incorreto');
+}
+
+async function loginCpfPin(){
+  err('lg-err', '');
+  const cpf = $('lg-cpf').value.replace(/\D/g, '');
+  const pin = $('lg-pin').value.replace(/\D/g, '');
+  if (cpf.length !== 11 || pin.length < 4) { err('lg-err', 'Digite o CPF e o PIN'); return; }
+  const tk = await rpc('crm_indicador_login', { p_cpf: cpf, p_pin: pin }).catch(() => null);
+  if (!tk) { err('lg-err', 'CPF ou PIN incorretos. Se ainda não criou o PIN, entre pelo seu link pessoal.'); return; }
+  TOKEN = tk; PIN = pin;
+  await entrar(true);
+}
+
+async function entrar(mostrarErro){
+  const leads = await rpc('crm_indicador_meus_leads', { p_token: TOKEN, p_pin: PIN }).catch(() => null);
+  if (leads === null) { PIN = null; return false; }
+  if (!NOME) {
+    const info = await rpc('crm_indicador_info', { p_token: TOKEN }).catch(() => null);
+    NOME = info ? info.nome : '';
+  }
+  try { localStorage.setItem('mp_indicador', JSON.stringify({ t: TOKEN, p: PIN, n: NOME })); } catch(e) {}
+  $('ap-nome').textContent = (NOME || '').split(' ')[0];
+  so('tela-app');
+  renderLeads(leads);
+  return true;
+}
+
+function sair(){
+  try { localStorage.removeItem('mp_indicador'); } catch(e) {}
+  TOKEN = null; PIN = null;
+  location.href = location.pathname;
+}
+
+// ══════════ ÁREA LOGADA ══════════
+async function enviarLead(){
+  $('ap-msg').innerHTML = '';
+  const nome = $('ap-lnome').value.trim();
+  const tel = $('ap-ltel').value.trim();
+  if (nome.length < 3) { $('ap-msg').innerHTML = '<div class="msg-err">Informe o nome do cliente</div>'; return; }
+  if (tel.replace(/\D/g, '').length < 10) { $('ap-msg').innerHTML = '<div class="msg-err">Informe o celular com DDD</div>'; return; }
+  const ok = await rpc('crm_indicador_enviar_lead', {
+    p_token: TOKEN, p_pin: PIN, p_nome: nome, p_telefone: tel,
+    p_interesse: $('ap-lint').value, p_obs: $('ap-lobs').value.trim()
+  }).catch(() => false);
+  if (!ok) { $('ap-msg').innerHTML = '<div class="msg-err">Não foi possível enviar. Tente novamente.</div>'; return; }
+  $('ap-msg').innerHTML = '<div class="msg-ok">Indicação enviada! Nossa equipe vai entrar em contato com ' + esc(nome.split(' ')[0]) + '.</div>';
+  ['ap-lnome','ap-ltel','ap-lobs'].forEach(id => $(id).value = '');
+  $('ap-lint').value = '';
+  carregarLeads();
+}
+
+async function carregarLeads(){
+  const leads = await rpc('crm_indicador_meus_leads', { p_token: TOKEN, p_pin: PIN }).catch(() => null);
+  if (leads) renderLeads(leads);
+}
+
+function renderLeads(leads){
+  const el = $('ap-lista');
+  if (!leads || !leads.length) { el.innerHTML = '<div class="vazio">Você ainda não enviou nenhuma indicação.</div>'; return; }
+  el.innerHTML = leads.map((l, i) => {
+    const et = ETAPAS[l.etapa] || ETAPAS.novo;
+    const hist = (l.historico || []).map(h => {
+      const de = h.de ? (ETAPAS[h.de] || {}).nome : null;
+      const para = (ETAPAS[h.para] || {}).nome || '';
+      return '<div>' + fmtData(h.quando) + ': ' + (de ? de + ' para ' + para : 'Indicação recebida') + '</div>';
+    }).join('');
+    return `<div class="lead" style="--c:${et.cor}">
+      <div class="nm">${esc(l.nome)}</div>
+      <div class="dt">Enviada em ${fmtData(l.criado_em)}</div>
+      <span class="badge">${et.nome}</span>
+      <div><button class="hist-btn" onclick="this.nextElementSibling.classList.toggle('hidden')">Ver histórico</button>
+      <div class="hist hidden">${hist || '<div>Sem movimentações ainda</div>'}</div></div>
+    </div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>

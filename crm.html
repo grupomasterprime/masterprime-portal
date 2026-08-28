@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Master Prime - CRM de Leads</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --navy:#0F2A4A; --navy-2:#1D4E89; --teal:#0FA3A3; --cta:#F4C24A;
+  --bg:#F6F8FB; --card:#FFFFFF; --border:#E6EBF2; --ink:#152A43;
+  --text:#334155; --text-2:#64748B; --text-3:#94A3B8;
+  --green:#10B981; --amber:#F59E0B; --red:#EF4444; --purple:#7C3AED; --blue:#2563EB;
+}
+*{margin:0;box-sizing:border-box;font-family:'Inter',-apple-system,sans-serif}
+body{background:var(--bg);color:var(--text);font-size:13px;min-height:100vh}
+button{cursor:pointer;font-family:inherit}
+.hidden{display:none !important}
+
+.a-top{background:var(--navy);color:#fff;padding:18px 26px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.a-top h1{font-size:19px;font-weight:800;letter-spacing:-.3px}
+.a-top .sub{font-size:11.5px;opacity:.7;margin-top:3px}
+.tabs{display:flex;gap:8px}
+.tab-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:12px;font-weight:700;padding:8px 16px;border-radius:8px}
+.tab-btn.on{background:var(--cta);color:var(--ink);border-color:var(--cta)}
+
+.wrap{padding:18px 26px;max-width:1600px;margin:0 auto}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.toolbar .sp{flex:1}
+.btn{border:none;border-radius:8px;font-size:12.5px;font-weight:700;padding:9px 16px}
+.btn-p{background:var(--navy);color:#fff}
+.btn-g{background:#fff;border:1px solid var(--border);color:var(--text)}
+select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12.5px;background:#fff;color:var(--text)}
+
+/* kanban */
+.kb{display:grid;grid-template-columns:repeat(6,minmax(200px,1fr));gap:10px;align-items:start;overflow-x:auto}
+.kb-col{background:#EEF2F7;border-radius:12px;padding:10px;min-height:120px}
+.kb-col.drag-over{outline:2px dashed var(--teal);outline-offset:-2px}
+.kb-h{display:flex;align-items:center;justify-content:space-between;margin:2px 4px 10px}
+.kb-h .t{font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase}
+.kb-h .n{font-size:11px;font-weight:700;background:#fff;border-radius:10px;padding:2px 8px;color:var(--text-2)}
+.lead{background:#fff;border:1px solid var(--border);border-left:4px solid var(--c,#94A3B8);border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:grab}
+.lead:active{cursor:grabbing}
+.lead .nm{font-weight:700;font-size:12.5px;color:var(--ink)}
+.lead .mt{font-size:11px;color:var(--text-2);margin-top:3px}
+.lead .tg{display:inline-block;font-size:10px;font-weight:700;border-radius:8px;padding:1px 7px;margin-top:6px}
+.tg-ind{background:#FEF3C7;color:#92400E}
+.tg-man{background:#E0E7FF;color:#3730A3}
+
+/* modais */
+.ovl{position:fixed;inset:0;background:rgba(15,42,74,.45);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.mod{background:#fff;border-radius:14px;max-width:560px;width:100%;max-height:92vh;overflow:auto;padding:22px}
+.mod h2{font-size:15px;color:var(--ink);margin-bottom:14px}
+.fg{margin-bottom:11px}
+.fg label{display:block;font-size:11px;font-weight:700;color:var(--text-2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px}
+.fg input,.fg select,.fg textarea{width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 11px;font-size:13px;font-family:inherit}
+.mod-ft{display:flex;gap:10px;justify-content:flex-end;margin-top:16px}
+.msg-err{background:#FEF2F2;color:#B91C1C;border-radius:8px;padding:9px 12px;font-size:12px;margin-top:10px}
+
+/* timeline */
+.tl{border-left:2px solid var(--border);margin:8px 0 0 6px;padding-left:14px}
+.tl-i{position:relative;padding-bottom:10px;font-size:12px}
+.tl-i::before{content:'';position:absolute;left:-19.5px;top:3px;width:9px;height:9px;border-radius:50%;background:var(--teal)}
+.tl-i .dt{color:var(--text-3);font-size:10.5px}
+
+/* indicadores */
+.ind-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.ind-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px}
+.ind-card .nm{font-weight:800;color:var(--ink);font-size:13.5px}
+.ind-card .ln{font-size:11.5px;color:var(--text-2);margin-top:3px}
+.badge{display:inline-block;font-size:10px;font-weight:800;border-radius:10px;padding:2px 9px}
+.b-ok{background:#D1FAE5;color:#065F46}
+.b-pend{background:#FEF3C7;color:#92400E}
+.b-off{background:#F1F5F9;color:#64748B}
+.ind-a{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.btn-s{font-size:11px;font-weight:700;padding:6px 11px;border-radius:7px;border:1px solid var(--border);background:#fff;color:var(--text)}
+.btn-s.p{background:var(--navy);color:#fff;border-color:var(--navy)}
+
+#loading{padding:60px;text-align:center;color:var(--text-2)}
+.vazio{padding:34px;text-align:center;color:var(--text-3);font-size:12.5px}
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:12.5px;padding:10px 18px;border-radius:10px;z-index:99}
+@media (max-width:1100px){ .kb{grid-template-columns:repeat(3,minmax(200px,1fr))} }
+@media (max-width:640px){ .kb{grid-template-columns:1fr 1fr} .wrap{padding:12px} }
+</style>
+</head>
+<body>
+
+<div class="a-top">
+  <div>
+    <h1>CRM de Leads</h1>
+    <div class="sub">Funil de indicações e oportunidades Master Prime</div>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn on" id="tab-funil" onclick="mostrarAba('funil')">Funil</button>
+    <button class="tab-btn" id="tab-ind" onclick="mostrarAba('ind')">Meus Indicadores</button>
+  </div>
+</div>
+
+<div id="loading">Carregando...</div>
+
+<div id="app" class="hidden">
+  <!-- ── ABA FUNIL ── -->
+  <div class="wrap" id="aba-funil">
+    <div class="toolbar">
+      <select class="f" id="filtro-consultor" onchange="renderKanban()" style="display:none"></select>
+      <span class="sp"></span>
+      <button class="btn btn-g" onclick="carregarTudo()">Atualizar</button>
+      <button class="btn btn-p" onclick="abrirNovoLead()">+ Novo Lead</button>
+    </div>
+    <div class="kb" id="kanban"></div>
+  </div>
+
+  <!-- ── ABA INDICADORES ── -->
+  <div class="wrap hidden" id="aba-ind">
+    <div class="toolbar">
+      <span class="sp"></span>
+      <button class="btn btn-p" onclick="abrirNovoIndicador()">+ Cadastrar Indicador</button>
+    </div>
+    <div class="ind-grid" id="ind-grid"></div>
+  </div>
+</div>
+
+<!-- modal novo lead -->
+<div class="ovl hidden" id="ovl-lead">
+  <div class="mod">
+    <h2 id="ml-titulo">Novo Lead</h2>
+    <div class="fg"><label>Nome do cliente</label><input id="ml-nome"></div>
+    <div class="fg"><label>Telefone</label><input id="ml-tel" placeholder="(11) 99999-9999"></div>
+    <div class="fg"><label>Interesse</label>
+      <select id="ml-int"><option value="">Selecione...</option><option>Automóvel</option><option>Imóvel</option><option>Pesados</option><option>Investimento</option><option>Outro</option></select>
+    </div>
+    <div class="fg"><label>Consultor responsável</label><select id="ml-cons"></select></div>
+    <div class="fg"><label>Observação</label><textarea id="ml-obs" rows="2"></textarea></div>
+    <div id="ml-err"></div>
+    <div class="mod-ft">
+      <button class="btn btn-g" onclick="fechar('ovl-lead')">Cancelar</button>
+      <button class="btn btn-p" onclick="salvarNovoLead()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- modal detalhe do lead -->
+<div class="ovl hidden" id="ovl-det">
+  <div class="mod">
+    <h2 id="md-nome"></h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fg"><label>Etapa</label>
+        <select id="md-etapa"></select>
+      </div>
+      <div class="fg"><label>Consultor</label><select id="md-cons"></select></div>
+    </div>
+    <div class="fg" id="md-fg-motivo" style="display:none"><label>Motivo da perda</label><input id="md-motivo" placeholder="Obrigatório ao marcar como Perdido"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fg"><label>Telefone</label><input id="md-tel"></div>
+      <div class="fg"><label>Interesse</label><input id="md-int"></div>
+    </div>
+    <div class="fg"><label>Observação</label><textarea id="md-obs" rows="2"></textarea></div>
+    <div class="fg"><label>Linha do tempo</label><div class="tl" id="md-tl"></div></div>
+    <div class="fg"><label>Adicionar anotação</label>
+      <div style="display:flex;gap:8px">
+        <input id="md-nota" style="flex:1" placeholder="Ex.: liguei, pediu retorno amanhã">
+        <button class="btn btn-g" onclick="addNota()">Anotar</button>
+      </div>
+    </div>
+    <div id="md-err"></div>
+    <div class="mod-ft">
+      <button class="btn btn-g" onclick="fechar('ovl-det')">Fechar</button>
+      <button class="btn btn-p" onclick="salvarDetalhe()">Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
+<!-- modal novo indicador -->
+<div class="ovl hidden" id="ovl-ind">
+  <div class="mod">
+    <h2>Cadastrar Indicador</h2>
+    <p style="font-size:12px;color:var(--text-2);margin-bottom:12px">O indicador recebe um link pessoal para enviar leads e acompanhar o andamento. No primeiro acesso ele confirma o CPF e cria um PIN.</p>
+    <div class="fg"><label>Nome completo</label><input id="mi-nome"></div>
+    <div class="fg"><label>CPF</label><input id="mi-cpf" placeholder="000.000.000-00" maxlength="14"></div>
+    <div class="fg"><label>Celular (opcional)</label><input id="mi-cel" placeholder="(11) 99999-9999"></div>
+    <div class="fg" id="mi-fg-cons"><label>Consultor dono do link</label><select id="mi-cons"></select></div>
+    <div id="mi-err"></div>
+    <div class="mod-ft">
+      <button class="btn btn-g" onclick="fechar('ovl-ind')">Cancelar</button>
+      <button class="btn btn-p" onclick="salvarIndicador()">Cadastrar e gerar link</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://jhwciwvgagnuxakukyob.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const INDICADOR_URL = 'https://grupomasterprime.github.io/masterprime-portal/indicador.html';
+const ETAPAS = [
+  { id:'novo',        nome:'Novo',         cor:'#2563EB' },
+  { id:'contato',     nome:'Em contato',   cor:'#0FA3A3' },
+  { id:'qualificado', nome:'Qualificado',  cor:'#7C3AED' },
+  { id:'proposta',    nome:'Proposta',     cor:'#F59E0B' },
+  { id:'vendido',     nome:'Vendido',      cor:'#10B981' },
+  { id:'perdido',     nome:'Perdido',      cor:'#EF4444' }
+];
+const etapaDef = id => ETAPAS.find(e => e.id === id) || ETAPAS[0];
+
+let currentUser = null, ehAdmin = false;
+let LEADS = [], INDICADORES = [], USUARIOS = [];
+let leadAberto = null;
+
+const $ = id => document.getElementById(id);
+function fechar(id){ $(id).classList.add('hidden'); }
+function toast(t){
+  const el = document.createElement('div'); el.className = 'toast'; el.textContent = t;
+  document.body.appendChild(el); setTimeout(() => el.remove(), 2600);
+}
+function esc(s){ return String(s == null ? '' : s).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+function fmtData(d){ if(!d) return ''; const x = new Date(d); return x.toLocaleDateString('pt-BR') + ' ' + x.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+function maskCPF(v){ v = v.replace(/\D/g,'').slice(0,11); return v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2'); }
+$('mi-cpf').addEventListener('input', e => e.target.value = maskCPF(e.target.value));
+
+function mostrarAba(a){
+  $('tab-funil').classList.toggle('on', a === 'funil');
+  $('tab-ind').classList.toggle('on', a === 'ind');
+  $('aba-funil').classList.toggle('hidden', a !== 'funil');
+  $('aba-ind').classList.toggle('hidden', a !== 'ind');
+}
+
+// ══════════ CARGA ══════════
+async function carregarTudo(){
+  const [leads, inds, users] = await Promise.all([
+    sb.from('crm_leads').select('*, indicador:crm_indicadores(nome), consultor:portal_users(nome)').order('criado_em', { ascending:false }),
+    sb.from('crm_indicadores').select('*, consultor:portal_users(nome), leads:crm_leads(id, etapa)').order('criado_em', { ascending:false }),
+    sb.from('portal_users').select('id, nome, tipo').order('nome')
+  ]);
+  LEADS = leads.data || [];
+  INDICADORES = inds.data || [];
+  USUARIOS = users.data || [];
+  // Consultor comum vê os leads dele (e os sem dono); admin, socio e master veem tudo
+  if (!ehAdmin) {
+    LEADS = LEADS.filter(l => l.consultor_id === currentUser.id || l.consultor_id == null);
+    INDICADORES = INDICADORES.filter(i => i.consultor_id === currentUser.id);
+  }
+  montarSelectConsultores();
+  renderKanban();
+  renderIndicadores();
+}
+
+function montarSelectConsultores(){
+  const opts = USUARIOS.map(u => `<option value="${u.id}">${esc(u.nome)}</option>`).join('');
+  $('ml-cons').innerHTML = opts;
+  $('md-cons').innerHTML = opts;
+  $('mi-cons').innerHTML = opts;
+  $('ml-cons').value = currentUser.id;
+  $('mi-cons').value = currentUser.id;
+  if (!ehAdmin) {
+    $('ml-cons').disabled = true;
+    $('mi-cons').disabled = true;
+    $('md-cons').disabled = true;
+  }
+  if (ehAdmin) {
+    const f = $('filtro-consultor');
+    f.style.display = '';
+    f.innerHTML = '<option value="">Todos os consultores</option>' + opts;
+  }
+}
+
+// ══════════ KANBAN ══════════
+function renderKanban(){
+  const filtro = ehAdmin ? $('filtro-consultor').value : '';
+  const kb = $('kanban');
+  kb.innerHTML = ETAPAS.map(et => {
+    const itens = LEADS.filter(l => l.etapa === et.id && (!filtro || String(l.consultor_id) === filtro));
+    return `<div class="kb-col" data-etapa="${et.id}" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropLead(event)">
+      <div class="kb-h"><span class="t" style="color:${et.cor}">${et.nome}</span><span class="n">${itens.length}</span></div>
+      ${itens.map(l => `
+        <div class="lead" style="--c:${et.cor}" draggable="true" ondragstart="dragStart(event,'${l.id}')" onclick="abrirDetalhe('${l.id}')">
+          <div class="nm">${esc(l.nome)}</div>
+          <div class="mt">${esc(l.interesse || 'Sem interesse definido')}${l.consultor ? ' · ' + esc(primeiroNome(l.consultor.nome)) : ''}</div>
+          <span class="tg ${l.origem === 'indicador' ? 'tg-ind' : 'tg-man'}">${l.origem === 'indicador' ? 'Indicação: ' + esc(l.indicador ? l.indicador.nome : '') : 'Cadastro manual'}</span>
+        </div>`).join('') || '<div style="font-size:11px;color:var(--text-3);text-align:center;padding:12px 0">vazio</div>'}
+    </div>`;
+  }).join('');
+}
+function primeiroNome(n){ const p = String(n || '').trim().split(/\s+/); return p[0] + (p[1] ? ' ' + p[1][0] + '.' : ''); }
+
+let dragId = null;
+function dragStart(ev, id){ dragId = id; ev.dataTransfer.effectAllowed = 'move'; }
+function dragOver(ev){ ev.preventDefault(); ev.currentTarget.classList.add('drag-over'); }
+function dragLeave(ev){ ev.currentTarget.classList.remove('drag-over'); }
+async function dropLead(ev){
+  ev.preventDefault();
+  ev.currentTarget.classList.remove('drag-over');
+  const etapa = ev.currentTarget.dataset.etapa;
+  if (!dragId) return;
+  const lead = LEADS.find(l => l.id === dragId);
+  if (!lead || lead.etapa === etapa) return;
+  if (etapa === 'perdido') { abrirDetalhe(dragId, 'perdido'); return; }
+  const { error } = await sb.from('crm_leads').update({ etapa }).eq('id', dragId);
+  if (error) { toast('Erro: ' + error.message); return; }
+  lead.etapa = etapa;
+  renderKanban();
+  toast('Lead movido para ' + etapaDef(etapa).nome);
+}
+
+// ══════════ NOVO LEAD ══════════
+function abrirNovoLead(){
+  ['ml-nome','ml-tel','ml-obs'].forEach(id => $(id).value = '');
+  $('ml-int').value = ''; $('ml-cons').value = currentUser.id; $('ml-err').innerHTML = '';
+  $('ovl-lead').classList.remove('hidden');
+}
+async function salvarNovoLead(){
+  const nome = $('ml-nome').value.trim();
+  if (!nome) { $('ml-err').innerHTML = '<div class="msg-err">Informe o nome do cliente</div>'; return; }
+  const { error } = await sb.from('crm_leads').insert({
+    nome, telefone: $('ml-tel').value.trim(), interesse: $('ml-int').value,
+    observacao: $('ml-obs').value.trim(), consultor_id: parseInt($('ml-cons').value, 10), origem: 'manual'
+  });
+  if (error) { $('ml-err').innerHTML = '<div class="msg-err">' + esc(error.message) + '</div>'; return; }
+  fechar('ovl-lead'); toast('Lead cadastrado');
+  carregarTudo();
+}
+
+// ══════════ DETALHE ══════════
+async function abrirDetalhe(id, forcarEtapa){
+  const l = LEADS.find(x => x.id === id);
+  if (!l) return;
+  leadAberto = l;
+  $('md-nome').textContent = l.nome;
+  $('md-etapa').innerHTML = ETAPAS.map(e => `<option value="${e.id}">${e.nome}</option>`).join('');
+  $('md-etapa').value = forcarEtapa || l.etapa;
+  $('md-cons').value = l.consultor_id || '';
+  $('md-tel').value = l.telefone || '';
+  $('md-int').value = l.interesse || '';
+  $('md-obs').value = l.observacao || '';
+  $('md-motivo').value = l.motivo_perda || '';
+  $('md-err').innerHTML = ''; $('md-nota').value = '';
+  atualizaMotivo();
+  $('md-etapa').onchange = atualizaMotivo;
+  $('ovl-det').classList.remove('hidden');
+  // timeline
+  const { data: evs } = await sb.from('crm_lead_eventos').select('*').eq('lead_id', id).order('criado_em');
+  $('md-tl').innerHTML = (evs || []).map(e => {
+    let txt = '';
+    if (e.tipo === 'criado') txt = 'Lead criado' + (e.autor === 'indicador' ? ' pelo indicador' : ' pela equipe');
+    else if (e.tipo === 'etapa') txt = etapaDef(e.de_etapa).nome + ' para ' + etapaDef(e.para_etapa).nome;
+    else txt = esc(e.nota) + (e.autor ? ' (' + esc(e.autor) + ')' : '');
+    return `<div class="tl-i"><div>${txt}</div><div class="dt">${fmtData(e.criado_em)}</div></div>`;
+  }).join('') || '<div style="font-size:11.5px;color:var(--text-3)">Sem eventos</div>';
+}
+function atualizaMotivo(){
+  $('md-fg-motivo').style.display = $('md-etapa').value === 'perdido' ? '' : 'none';
+}
+async function salvarDetalhe(){
+  const l = leadAberto; if (!l) return;
+  const etapa = $('md-etapa').value;
+  const motivo = $('md-motivo').value.trim();
+  if (etapa === 'perdido' && !motivo) { $('md-err').innerHTML = '<div class="msg-err">Informe o motivo da perda</div>'; return; }
+  const upd = {
+    etapa, motivo_perda: etapa === 'perdido' ? motivo : null,
+    telefone: $('md-tel').value.trim(), interesse: $('md-int').value.trim(),
+    observacao: $('md-obs').value.trim()
+  };
+  if (ehAdmin) upd.consultor_id = parseInt($('md-cons').value, 10) || null;
+  const { error } = await sb.from('crm_leads').update(upd).eq('id', l.id);
+  if (error) { $('md-err').innerHTML = '<div class="msg-err">' + esc(error.message) + '</div>'; return; }
+  fechar('ovl-det'); toast('Lead atualizado');
+  carregarTudo();
+}
+async function addNota(){
+  const l = leadAberto; if (!l) return;
+  const nota = $('md-nota').value.trim(); if (!nota) return;
+  const { error } = await sb.from('crm_lead_eventos').insert({ lead_id: l.id, tipo: 'nota', nota, autor: currentUser.nome });
+  if (error) { toast('Erro: ' + error.message); return; }
+  $('md-nota').value = '';
+  abrirDetalhe(l.id);
+}
+
+// ══════════ INDICADORES ══════════
+function renderIndicadores(){
+  const g = $('ind-grid');
+  if (!INDICADORES.length) { g.innerHTML = '<div class="vazio">Nenhum indicador cadastrado ainda. Clique em Cadastrar Indicador para gerar o primeiro link.</div>'; return; }
+  g.innerHTML = INDICADORES.map(i => {
+    const leads = i.leads || [];
+    const vendidos = leads.filter(l => l.etapa === 'vendido').length;
+    const st = !i.ativo ? '<span class="badge b-off">Desativado</span>'
+      : (i.pin_hash ? '<span class="badge b-ok">Ativo</span>' : '<span class="badge b-pend">Aguardando 1º acesso</span>');
+    return `<div class="ind-card">
+      <div style="display:flex;justify-content:space-between;align-items:start;gap:8px">
+        <div class="nm">${esc(i.nome)}</div>${st}
+      </div>
+      <div class="ln">CPF final ${esc(String(i.cpf).replace(/\D/g,'').slice(-3))}${i.celular ? ' · ' + esc(i.celular) : ''}${ehAdmin && i.consultor ? ' · Consultor: ' + esc(primeiroNome(i.consultor.nome)) : ''}</div>
+      <div class="ln">${leads.length} lead${leads.length === 1 ? '' : 's'} enviado${leads.length === 1 ? '' : 's'} · ${vendidos} vendido${vendidos === 1 ? '' : 's'}</div>
+      <div class="ind-a">
+        <button class="btn-s p" onclick="copiarLink('${i.token}')">Copiar link</button>
+        <button class="btn-s" onclick="copiarConvite('${i.token}', '${esc(i.nome).replace(/'/g, '')}')">Copiar convite</button>
+        ${i.ativo ? `<button class="btn-s" onclick="toggleIndicador('${i.id}', false)">Desativar</button>` : `<button class="btn-s" onclick="toggleIndicador('${i.id}', true)">Reativar</button>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+function copiarLink(token){
+  navigator.clipboard.writeText(INDICADOR_URL + '?t=' + token).then(() => toast('Link copiado'));
+}
+function copiarConvite(token, nome){
+  const p = nome.split(' ')[0];
+  const txt = 'Oi ' + p + '! Esse é o seu link de indicações da Master Prime: ' + INDICADOR_URL + '?t=' + token
+    + '\nNo primeiro acesso confirme seu CPF e crie um PIN. Por lá você envia seus indicados e acompanha cada um até a venda.';
+  navigator.clipboard.writeText(txt).then(() => toast('Convite copiado'));
+}
+async function toggleIndicador(id, ativo){
+  const { error } = await sb.from('crm_indicadores').update({ ativo }).eq('id', id);
+  if (error) { toast('Erro: ' + error.message); return; }
+  toast(ativo ? 'Indicador reativado' : 'Indicador desativado');
+  carregarTudo();
+}
+function abrirNovoIndicador(){
+  ['mi-nome','mi-cpf','mi-cel'].forEach(id => $(id).value = '');
+  $('mi-cons').value = currentUser.id; $('mi-err').innerHTML = '';
+  $('ovl-ind').classList.remove('hidden');
+}
+async function salvarIndicador(){
+  const nome = $('mi-nome').value.trim();
+  const cpf = $('mi-cpf').value.replace(/\D/g, '');
+  if (!nome || cpf.length !== 11) { $('mi-err').innerHTML = '<div class="msg-err">Informe o nome e um CPF válido (11 dígitos)</div>'; return; }
+  const { data, error } = await sb.from('crm_indicadores')
+    .insert({ nome, cpf, celular: $('mi-cel').value.trim(), consultor_id: parseInt($('mi-cons').value, 10) })
+    .select('token').single();
+  if (error) {
+    const m = /unique|duplicate/i.test(error.message) ? 'Já existe um indicador com esse CPF' : error.message;
+    $('mi-err').innerHTML = '<div class="msg-err">' + esc(m) + '</div>'; return;
+  }
+  fechar('ovl-ind');
+  copiarLink(data.token);
+  toast('Indicador cadastrado, link copiado');
+  carregarTudo();
+}
+
+// ══════════ INIT ══════════
+(async function init(){
+  try {
+    const { data: sess } = await sb.auth.getSession();
+    if (!sess?.session?.user) {
+      if (window.parent && window.parent !== window) { window.parent.location.href = '/'; } else { window.location.href = '/'; }
+      return;
+    }
+    const { data: user } = await sb.from('portal_users').select('*').eq('auth_id', sess.session.user.id).maybeSingle();
+    if (!user) { $('loading').textContent = 'Perfil não encontrado. Contate o administrador.'; return; }
+    currentUser = user;
+    ehAdmin = ['admin','socio','master'].includes(String(user.tipo || '').toLowerCase());
+    await carregarTudo();
+    $('loading').classList.add('hidden');
+    $('app').classList.remove('hidden');
+  } catch (e) {
+    $('loading').textContent = 'Erro ao carregar: ' + (e.message || e);
+  }
+})();
+</script>
+</body>
+</html>
