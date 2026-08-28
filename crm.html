@@ -35,13 +35,13 @@ button{cursor:pointer;font-family:inherit}
 select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12.5px;background:#fff;color:var(--text)}
 
 /* kanban */
-.kb{display:grid;grid-template-columns:repeat(6,minmax(200px,1fr));gap:10px;align-items:start;overflow-x:auto}
-.kb-col{background:#EEF2F7;border-radius:12px;padding:10px;min-height:120px}
+.kb{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;align-items:start}
+.kb-col{background:#EEF2F7;border-radius:12px;padding:8px;min-height:120px;min-width:0}
 .kb-col.drag-over{outline:2px dashed var(--teal);outline-offset:-2px}
 .kb-h{display:flex;align-items:center;justify-content:space-between;margin:2px 4px 10px}
 .kb-h .t{font-size:11px;font-weight:800;letter-spacing:.6px;text-transform:uppercase}
 .kb-h .n{font-size:11px;font-weight:700;background:#fff;border-radius:10px;padding:2px 8px;color:var(--text-2)}
-.lead{background:#fff;border:1px solid var(--border);border-left:4px solid var(--c,#94A3B8);border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:grab}
+.lead{background:#fff;border:1px solid var(--border);border-left:4px solid var(--c,#94A3B8);border-radius:10px;padding:9px 10px;margin-bottom:8px;cursor:grab;overflow-wrap:anywhere}
 .lead:active{cursor:grabbing}
 .lead .nm{font-weight:700;font-size:12.5px;color:var(--ink)}
 .lead .mt{font-size:11px;color:var(--text-2);margin-top:3px}
@@ -81,7 +81,7 @@ select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 1
 #loading{padding:60px;text-align:center;color:var(--text-2)}
 .vazio{padding:34px;text-align:center;color:var(--text-3);font-size:12.5px}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:12.5px;padding:10px 18px;border-radius:10px;z-index:99}
-@media (max-width:1100px){ .kb{grid-template-columns:repeat(3,minmax(200px,1fr))} }
+@media (max-width:1100px){ .kb{grid-template-columns:repeat(3,minmax(0,1fr))} }
 @media (max-width:640px){ .kb{grid-template-columns:1fr 1fr} .wrap{padding:12px} }
 </style>
 </head>
@@ -152,6 +152,10 @@ select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 1
       <div class="fg"><label>Consultor</label><select id="md-cons"></select></div>
     </div>
     <div class="fg" id="md-fg-motivo" style="display:none"><label>Motivo da perda</label><input id="md-motivo" placeholder="Obrigatório ao marcar como Perdido"></div>
+    <div id="md-fg-venda" style="display:none;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="fg"><label>Crédito vendido (R$)</label><input id="md-credito" inputmode="numeric" placeholder="Ex.: 100.000,00"></div>
+      <div class="fg"><label>Quantidade de cotas</label><input id="md-cotas" inputmode="numeric" placeholder="Ex.: 1" maxlength="3"></div>
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <div class="fg"><label>Telefone</label><input id="md-tel"></div>
       <div class="fg"><label>Interesse</label><input id="md-int"></div>
@@ -219,6 +223,11 @@ function esc(s){ return String(s == null ? '' : s).replace(/[<>&"]/g, c => ({'<'
 function fmtData(d){ if(!d) return ''; const x = new Date(d); return x.toLocaleDateString('pt-BR') + ' ' + x.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
 function maskCPF(v){ v = v.replace(/\D/g,'').slice(0,11); return v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2'); }
 $('mi-cpf').addEventListener('input', e => e.target.value = maskCPF(e.target.value));
+function maskMoney(v){ v = String(v).replace(/\D/g,''); if (!v) return ''; v = (parseInt(v, 10) / 100).toFixed(2); return v.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
+function parseMoney(v){ const n = parseFloat(String(v).replace(/\./g, '').replace(',', '.')); return isNaN(n) ? null : n; }
+function fmtBRL(n){ return Number(n).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+$('md-credito').addEventListener('input', e => e.target.value = maskMoney(e.target.value));
+$('md-cotas').addEventListener('input', e => e.target.value = e.target.value.replace(/\D/g, ''));
 
 function mostrarAba(a){
   $('tab-funil').classList.toggle('on', a === 'funil');
@@ -278,6 +287,7 @@ function renderKanban(){
         <div class="lead" style="--c:${et.cor}" draggable="true" ondragstart="dragStart(event,'${l.id}')" onclick="abrirDetalhe('${l.id}')">
           <div class="nm">${esc(l.nome)}</div>
           <div class="mt">${esc(l.interesse || 'Sem interesse definido')}${l.consultor ? ' · ' + esc(primeiroNome(l.consultor.nome)) : ''}</div>
+          ${l.etapa === 'vendido' && l.valor_credito != null ? `<div class="mt" style="color:#065F46;font-weight:700">R$ ${fmtBRL(l.valor_credito)}${l.qtd_cotas ? ' · ' + l.qtd_cotas + ' cota' + (l.qtd_cotas > 1 ? 's' : '') : ''}</div>` : ''}
           <span class="tg ${l.origem === 'indicador' ? 'tg-ind' : 'tg-man'}">${l.origem === 'indicador' ? 'Indicação: ' + esc(l.indicador ? l.indicador.nome : '') : 'Cadastro manual'}</span>
         </div>`).join('') || '<div style="font-size:11px;color:var(--text-3);text-align:center;padding:12px 0">vazio</div>'}
     </div>`;
@@ -296,7 +306,7 @@ async function dropLead(ev){
   if (!dragId) return;
   const lead = LEADS.find(l => l.id === dragId);
   if (!lead || lead.etapa === etapa) return;
-  if (etapa === 'perdido') { abrirDetalhe(dragId, 'perdido'); return; }
+  if (etapa === 'perdido' || etapa === 'vendido') { abrirDetalhe(dragId, etapa); return; }
   const { error } = await sb.from('crm_leads').update({ etapa }).eq('id', dragId);
   if (error) { toast('Erro: ' + error.message); return; }
   lead.etapa = etapa;
@@ -335,6 +345,8 @@ async function abrirDetalhe(id, forcarEtapa){
   $('md-int').value = l.interesse || '';
   $('md-obs').value = l.observacao || '';
   $('md-motivo').value = l.motivo_perda || '';
+  $('md-credito').value = l.valor_credito != null ? fmtBRL(l.valor_credito) : '';
+  $('md-cotas').value = l.qtd_cotas != null ? String(l.qtd_cotas) : '';
   $('md-err').innerHTML = ''; $('md-nota').value = '';
   atualizaMotivo();
   $('md-etapa').onchange = atualizaMotivo;
@@ -351,6 +363,7 @@ async function abrirDetalhe(id, forcarEtapa){
 }
 function atualizaMotivo(){
   $('md-fg-motivo').style.display = $('md-etapa').value === 'perdido' ? '' : 'none';
+  $('md-fg-venda').style.display = $('md-etapa').value === 'vendido' ? 'grid' : 'none';
 }
 async function salvarDetalhe(){
   const l = leadAberto; if (!l) return;
@@ -362,6 +375,12 @@ async function salvarDetalhe(){
     telefone: $('md-tel').value.trim(), interesse: $('md-int').value.trim(),
     observacao: $('md-obs').value.trim()
   };
+  if (etapa === 'vendido') {
+    const cred = parseMoney($('md-credito').value);
+    if (!cred) { $('md-err').innerHTML = '<div class="msg-err">Informe o crédito vendido (R$)</div>'; return; }
+    upd.valor_credito = cred;
+    upd.qtd_cotas = parseInt($('md-cotas').value, 10) || 1;
+  }
   if (ehAdmin) upd.consultor_id = parseInt($('md-cons').value, 10) || null;
   const { error } = await sb.from('crm_leads').update(upd).eq('id', l.id);
   if (error) { $('md-err').innerHTML = '<div class="msg-err">' + esc(error.message) + '</div>'; return; }
@@ -452,6 +471,10 @@ async function salvarIndicador(){
     await carregarTudo();
     $('loading').classList.add('hidden');
     $('app').classList.remove('hidden');
+    // Atualização em tempo real: recarrega o funil quando qualquer lead muda
+    sb.channel('crm-page-realtime')
+      .on('postgres_changes', { event:'*', schema:'public', table:'crm_leads' }, () => carregarTudo())
+      .subscribe();
   } catch (e) {
     $('loading').textContent = 'Erro ao carregar: ' + (e.message || e);
   }
