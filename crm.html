@@ -48,6 +48,10 @@ select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 1
 .lead .tg{display:inline-block;font-size:10px;font-weight:700;border-radius:8px;padding:1px 7px;margin-top:6px}
 .tg-ind{background:#FEF3C7;color:#92400E}
 .tg-man{background:#E0E7FF;color:#3730A3}
+.lead.atrasado{border-color:#F59E0B;border-left-color:#F59E0B !important}
+.parado{color:#B45309 !important;font-weight:700}
+.wa-btn{font-size:10px;font-weight:700;color:#128C7E;border:1px solid #128C7E;border-radius:8px;padding:1px 7px;text-decoration:none;white-space:nowrap}
+.wa-btn:hover{background:#128C7E;color:#fff}
 
 /* modais */
 .ovl{position:fixed;inset:0;background:rgba(15,42,74,.45);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
@@ -124,7 +128,9 @@ select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 1
   <div class="wrap" id="aba-funil">
     <div class="toolbar">
       <select class="f" id="filtro-consultor" onchange="renderKanban()" style="display:none"></select>
+      <input class="f" id="busca" placeholder="Buscar cliente, telefone, indicador..." oninput="renderKanban()" style="min-width:230px">
       <span class="sp"></span>
+      <button class="btn btn-g" id="btn-antigos" onclick="toggleAntigos()" style="display:none"></button>
       <button class="btn btn-g" onclick="carregarTudo()">Atualizar</button>
       <button class="btn btn-p" onclick="abrirNovoLead()">+ Novo Lead</button>
     </div>
@@ -316,20 +322,49 @@ function montarSelectConsultores(){
 }
 
 // ══════════ KANBAN ══════════
+// Arquivamento: Vendido e Perdido saem do funil depois de 30 dias (seguem no banco
+// e nos relatórios). Busca ativa ou "Ver antigos" trazem eles de volta pra tela.
+const DIAS_ARQUIVO = 30, DIAS_PARADO = 7;
+let MOSTRAR_ANTIGOS = false;
+function idadeDias(l){ const d = new Date(l.atualizado_em || l.criado_em); return (Date.now() - d.getTime()) / 86400000; }
+function ehAntigo(l){ return (l.etapa === 'vendido' || l.etapa === 'perdido') && idadeDias(l) > DIAS_ARQUIVO; }
+function toggleAntigos(){ MOSTRAR_ANTIGOS = !MOSTRAR_ANTIGOS; renderKanban(); }
+function buscaMatch(l, q){
+  if (!q) return true;
+  const alvo = [l.nome, l.telefone, l.interesse, l.observacao, l.motivo_perda,
+    l.indicador ? l.indicador.nome : '', l.consultor ? l.consultor.nome : ''].join(' ').toLowerCase();
+  return q.split(/\s+/).every(t => alvo.includes(t));
+}
 function renderKanban(){
   const filtro = ehAdmin ? $('filtro-consultor').value : '';
+  const q = ($('busca').value || '').trim().toLowerCase();
+  const base = LEADS.filter(l => (!filtro || String(l.consultor_id) === filtro) && buscaMatch(l, q));
+  const antigos = base.filter(ehAntigo).length;
+  const visiveis = (q || MOSTRAR_ANTIGOS) ? base : base.filter(l => !ehAntigo(l));
+  const ba = $('btn-antigos');
+  if (q || antigos === 0) { ba.style.display = 'none'; }
+  else { ba.style.display = ''; ba.textContent = MOSTRAR_ANTIGOS ? 'Ocultar antigos' : 'Ver antigos (' + antigos + ')'; }
   const kb = $('kanban');
   kb.innerHTML = ETAPAS.map(et => {
-    const itens = LEADS.filter(l => l.etapa === et.id && (!filtro || String(l.consultor_id) === filtro));
+    const itens = visiveis.filter(l => l.etapa === et.id);
     return `<div class="kb-col" data-etapa="${et.id}" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropLead(event)">
       <div class="kb-h"><span class="t" style="color:${et.cor}">${et.nome}</span><span class="n">${itens.length}</span></div>
-      ${itens.map(l => `
-        <div class="lead" style="--c:${et.cor}" draggable="true" ondragstart="dragStart(event,'${l.id}')" onclick="abrirDetalhe('${l.id}')">
+      ${itens.map(l => {
+        const parado = ['novo','contato','qualificado','proposta'].includes(l.etapa) && idadeDias(l) >= DIAS_PARADO;
+        const tel = String(l.telefone || '').replace(/\D/g, '');
+        const wa = tel.length >= 10 ? `<a class="wa-btn" href="https://wa.me/55${tel}" target="_blank" rel="noopener" onclick="event.stopPropagation()">WhatsApp</a>` : '';
+        return `
+        <div class="lead${parado ? ' atrasado' : ''}" style="--c:${et.cor}" draggable="true" ondragstart="dragStart(event,'${l.id}')" onclick="abrirDetalhe('${l.id}')">
           <div class="nm">${esc(l.nome)}</div>
           <div class="mt">${esc(l.interesse || 'Sem interesse definido')}${l.consultor ? ' · ' + esc(primeiroNome(l.consultor.nome)) : ''}</div>
           ${l.etapa === 'vendido' && l.valor_credito != null ? `<div class="mt" style="color:#065F46;font-weight:700">R$ ${fmtBRL(l.valor_credito)}${l.qtd_cotas ? ' · ' + l.qtd_cotas + ' cota' + (l.qtd_cotas > 1 ? 's' : '') : ''}</div>` : ''}
-          <span class="tg ${l.origem === 'indicador' ? 'tg-ind' : 'tg-man'}">${l.origem === 'indicador' ? 'Indicação: ' + esc(l.indicador ? l.indicador.nome : '') : 'Cadastro manual'}</span>
-        </div>`).join('') || '<div style="font-size:11px;color:var(--text-3);text-align:center;padding:12px 0">vazio</div>'}
+          ${parado ? `<div class="mt parado">Parado há ${Math.floor(idadeDias(l))} dia${Math.floor(idadeDias(l)) === 1 ? '' : 's'}</div>` : ''}
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-top:6px">
+            <span class="tg ${l.origem === 'indicador' ? 'tg-ind' : 'tg-man'}" style="margin-top:0">${l.origem === 'indicador' ? 'Indicação: ' + esc(l.indicador ? l.indicador.nome : '') : 'Cadastro manual'}</span>
+            ${wa}
+          </div>
+        </div>`;
+      }).join('') || '<div style="font-size:11px;color:var(--text-3);text-align:center;padding:12px 0">vazio</div>'}
     </div>`;
   }).join('');
 }
