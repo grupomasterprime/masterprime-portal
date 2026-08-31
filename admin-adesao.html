@@ -711,6 +711,10 @@ function renderList() {
             Copiar como texto (WhatsApp)
           </button>
           ${a._source === 'nova' ? `
+          <button class="copy-all-btn" style="background:#128C7E;" onclick="copiarResumoWhats('${a.id}')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            Copiar resumo + link (WhatsApp)
+          </button>
           <button class="copy-all-btn" style="background:var(--mp-navy);" onclick="abrirLinkFicha('${a.id}')">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
             Abrir link de visualização
@@ -931,6 +935,25 @@ function copyTextAsPlain(id) {
     text += `*${c.label}:* ${dados[c.id] || ''}\n`;
   });
   copyText(text);
+}
+
+// Resumo curto pra WhatsApp: ficha recebida + dados principais + link de visualização
+function copiarResumoWhats(id) {
+  const a = allAdesoes.find(x => x.id === id);
+  if (!a) return;
+  const d = a.dados || {};
+  const link = 'https://grupomasterprime.github.io/masterprime-portal/formulario.html?view=' + a.id;
+  const ehPJ = String(a.tipo_pessoa || '').toLowerCase().includes('j');
+  const tel = d.celular || d.telefone || d.celular_socio || '';
+  let t = '*Ficha de adesão recebida*\n';
+  if (a.protocolo) t += '*Protocolo:* ' + a.protocolo + '\n';
+  t += '\n';
+  t += '*Nome:* ' + (a.nome_cliente || '') + '\n';
+  t += (ehPJ ? '*CNPJ:* ' : '*CPF:* ') + (a.cpf_cnpj || '') + '\n';
+  if (tel) t += '*Telefone:* ' + tel + '\n';
+  if (d.email) t += '*E-mail:* ' + d.email + '\n';
+  t += '\n*Ficha completa:* ' + link;
+  copyText(t);
 }
 
 // Campos pras propostas NOVAS (portal_propostas) — schema unificado Master Prime
