@@ -459,12 +459,28 @@ function renderIndicadores(){
     </div>`;
   }).join('');
 }
-function copiarLink(token){
-  navigator.clipboard.writeText(INDICADOR_URL + '?t=' + token).then(() => toast('Link copiado'));
+// Encurtador de links Master Prime (tabela short_links + página l.html)
+async function encurtarLink(url){
+  try {
+    const { data: ja } = await sb.from('short_links').select('codigo').eq('url', url).limit(1);
+    if (ja && ja.length) return 'https://grupomasterprime.github.io/masterprime-portal/l?c=' + ja[0].codigo;
+    for (let i = 0; i < 4; i++) {
+      const codigo = Math.random().toString(36).slice(2, 7);
+      const { error } = await sb.from('short_links').insert({ codigo, url });
+      if (!error) return 'https://grupomasterprime.github.io/masterprime-portal/l?c=' + codigo;
+      if (!/duplicate|unique/i.test(error.message || '')) break;
+    }
+  } catch (e) { /* cai no link longo */ }
+  return url;
 }
-function copiarConvite(token, nome){
+async function copiarLink(token){
+  const curto = await encurtarLink(INDICADOR_URL + '?t=' + token);
+  navigator.clipboard.writeText(curto).then(() => toast('Link copiado'));
+}
+async function copiarConvite(token, nome){
   const p = nome.split(' ')[0];
-  const txt = 'Oi ' + p + '! Esse é o seu link de indicações da Master Prime: ' + INDICADOR_URL + '?t=' + token
+  const curto = await encurtarLink(INDICADOR_URL + '?t=' + token);
+  const txt = 'Oi ' + p + '! Esse é o seu link de indicações da Master Prime: ' + curto
     + '\nNo primeiro acesso confirme seu CPF e crie um PIN. Por lá você envia seus indicados e acompanha cada um até a venda.';
   navigator.clipboard.writeText(txt).then(() => toast('Convite copiado'));
 }

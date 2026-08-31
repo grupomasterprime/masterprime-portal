@@ -937,12 +937,27 @@ function copyTextAsPlain(id) {
   copyText(text);
 }
 
+// Encurtador de links Master Prime (tabela short_links + página l.html)
+async function encurtarLink(url) {
+  try {
+    const { data: ja } = await sb.from('short_links').select('codigo').eq('url', url).limit(1);
+    if (ja && ja.length) return 'https://grupomasterprime.github.io/masterprime-portal/l?c=' + ja[0].codigo;
+    for (let i = 0; i < 4; i++) {
+      const codigo = Math.random().toString(36).slice(2, 7);
+      const { error } = await sb.from('short_links').insert({ codigo, url });
+      if (!error) return 'https://grupomasterprime.github.io/masterprime-portal/l?c=' + codigo;
+      if (!/duplicate|unique/i.test(error.message || '')) break;
+    }
+  } catch (e) { /* cai no link longo */ }
+  return url;
+}
+
 // Resumo curto pra WhatsApp: ficha recebida + dados principais + link de visualização
-function copiarResumoWhats(id) {
+async function copiarResumoWhats(id) {
   const a = allAdesoes.find(x => x.id === id);
   if (!a) return;
   const d = a.dados || {};
-  const link = 'https://grupomasterprime.github.io/masterprime-portal/formulario.html?view=' + a.id;
+  const link = await encurtarLink('https://grupomasterprime.github.io/masterprime-portal/formulario.html?view=' + a.id);
   const ehPJ = String(a.tipo_pessoa || '').toLowerCase().includes('j');
   const tel = d.celular || d.telefone || d.celular_socio || '';
   let t = '*Ficha de adesão recebida*\n';
