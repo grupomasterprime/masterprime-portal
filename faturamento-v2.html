@@ -1994,13 +1994,27 @@ async function fatDeletarProcesso(id) {
   await renderAdminFaturamento();
 }
 
-function fatCopiarLink(token) {
-  const link = fatLinkCliente(token);
+// Encurtador de links Master Prime (tabela short_links + página l.html)
+async function encurtarLink(url) {
+  try {
+    const { data: ja } = await sb.from('short_links').select('codigo').eq('url', url).limit(1);
+    if (ja && ja.length) return 'https://grupomasterprime.github.io/masterprime-portal/l?c=' + ja[0].codigo;
+    for (let i = 0; i < 4; i++) {
+      const codigo = Math.random().toString(36).slice(2, 7);
+      const { error } = await sb.from('short_links').insert({ codigo, url });
+      if (!error) return 'https://grupomasterprime.github.io/masterprime-portal/l?c=' + codigo;
+      if (!/duplicate|unique/i.test(error.message || '')) break;
+    }
+  } catch (e) { /* cai no link longo */ }
+  return url;
+}
+async function fatCopiarLink(token) {
+  const link = await encurtarLink(fatLinkCliente(token));
   if (navigator.clipboard?.writeText) navigator.clipboard.writeText(link).then(() => alert('Link copiado para o cliente!'));
   else prompt('Copie o link do cliente:', link);
 }
-function fatCopiarLinkFixo() {
-  const link = fatLinkInicioCliente();
+async function fatCopiarLinkFixo() {
+  const link = await encurtarLink(fatLinkInicioCliente());
   if (navigator.clipboard?.writeText) navigator.clipboard.writeText(link).then(() => alert('Link fixo copiado!'));
   else prompt('Copie o link fixo:', link);
 }
