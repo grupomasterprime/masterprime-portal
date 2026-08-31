@@ -3009,8 +3009,10 @@ document.getElementById('cham-overlay').addEventListener('click', (e) => {
 
 <script id="crm-notificacoes">
 // ═══════════════════════════════════════════════════════════════════
-// NOTIFICAÇÕES DO CRM DE LEADS
-// Badge vermelho no menu com leads na etapa Novo + toast em tempo real
+// NOTIFICAÇÕES DO CRM DE VENDAS
+// Badge vermelho no menu com leads novos que você ainda não viu + toast
+// em tempo real. Abrir a tela do CRM marca tudo como visto (por usuário,
+// neste navegador); o badge volta se chegar lead novo depois disso.
 // ═══════════════════════════════════════════════════════════════════
 let _crmLeadsSub = null;
 function _crmEhAdmin() {
@@ -3019,17 +3021,27 @@ function _crmEhAdmin() {
 function _crmLeadEhMeu(l) {
   return _crmEhAdmin() || l.consultor_id === currentUser?.id || l.consultor_id == null;
 }
+function _crmVistoKey() { return 'mp_crm_visto_' + (currentUser?.id || 'x'); }
+function _crmVisto() { try { return localStorage.getItem(_crmVistoKey()) || ''; } catch (e) { return ''; } }
+function _crmMarcarVisto() {
+  try { localStorage.setItem(_crmVistoKey(), new Date().toISOString()); } catch (e) {}
+  _crmAtualizarBadge();
+}
 async function _crmAtualizarBadge() {
   if (!currentUser) return;
   try {
-    const { data } = await sb.from('crm_leads').select('id, consultor_id').eq('etapa', 'novo');
-    const meus = (data || []).filter(_crmLeadEhMeu);
+    const { data } = await sb.from('crm_leads').select('id, consultor_id, criado_em').eq('etapa', 'novo');
+    const visto = _crmVisto();
+    const meus = (data || []).filter(_crmLeadEhMeu)
+      .filter(l => !visto || String(l.criado_em) > visto);
     const badge = document.getElementById('ni-crm-badge');
     if (!badge) return;
     if (meus.length > 0) { badge.textContent = meus.length; badge.classList.add('visible'); }
     else { badge.classList.remove('visible'); }
   } catch (e) { /* silencioso */ }
 }
+// Abrir a tela do CRM marca os leads como vistos
+document.getElementById('ni-crm')?.addEventListener('click', () => setTimeout(_crmMarcarVisto, 600));
 function _crmSetupRealtime() {
   if (_crmLeadsSub) return;
   _crmLeadsSub = sb.channel('crm-leads-notif')
