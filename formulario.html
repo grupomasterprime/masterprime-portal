@@ -579,16 +579,49 @@ function upperNoAccent(s) {
   return (s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toUpperCase();
 }
 // Separa "341 - Itaú Unibanco" em { codigo: '341', nome: 'Itaú Unibanco' }
+function _normTxt(s) { return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim(); }
+function _bancosLista() {
+  return $$('#bancos-list option').map(o => {
+    const mm = String(o.value).match(/^(\d+)\s*[-–]\s*(.+)$/);
+    return mm ? { codigo: mm[1], nome: mm[2].trim() } : null;
+  }).filter(Boolean);
+}
+// Aceita clique na lista OU texto digitado. Se o cliente só escrever "Bradesco"
+// (ou "brades", "itau"...), resolve sozinho para o banco da lista; com mais de um
+// parecido, fica com o nome mais curto (ex.: "Bradesco" e não "Bradesco Financiamentos").
+// Se não achar nada parecido, aceita o texto como nome do banco mesmo assim.
 function parseBanco(s) {
   if (!s) return { codigo: '', nome: '' };
-  const m = String(s).match(/^(\d+)\s*[-–]\s*(.+)$/);
+  const raw = String(s).trim();
+  const m = raw.match(/^(\d+)\s*[-–]\s*(.+)$/);
   if (m) return { codigo: m[1], nome: m[2].trim() };
-  // Se digitou apenas o código ou só o nome
-  if (/^\d+$/.test(s.trim())) return { codigo: s.trim(), nome: '' };
-  return { codigo: '', nome: s.trim() };
+  const opts = _bancosLista();
+  if (/^\d+$/.test(raw)) {
+    const o = opts.find(x => x.codigo === raw.padStart(3, '0'));
+    return o || { codigo: raw, nome: '' };
+  }
+  const q = _normTxt(raw);
+  if (q.length >= 3) {
+    const exato = opts.find(x => _normTxt(x.nome) === q);
+    if (exato) return exato;
+    const comeca = opts.filter(x => _normTxt(x.nome).startsWith(q)).sort((a, b) => a.nome.length - b.nome.length);
+    if (comeca.length) return comeca[0];
+    const contem = opts.filter(x => _normTxt(x.nome).includes(q)).sort((a, b) => a.nome.length - b.nome.length);
+    if (contem.length) return contem[0];
+  }
+  return { codigo: '', nome: raw };
 }
 
 function bindMasks(root = document) {
+  // Campo Banco: ao sair do campo, completa com "código - nome" se reconheceu o banco digitado
+  $$('#pf-banco, #pj-banco', root).forEach(el => {
+    if (el._bancoBound) return;
+    el._bancoBound = true;
+    el.addEventListener('blur', () => {
+      const r = parseBanco(el.value);
+      if (r.codigo && r.nome) el.value = r.codigo + ' - ' + r.nome;
+    });
+  });
   // Define teclado numérico em mobile para campos com máscara numérica
   $$('[data-mask="cpf"], [data-mask="cnpj"], [data-mask="cep"], [data-mask="phone"], [data-mask="money"], [data-mask="date"]', root).forEach(el => {
     el.setAttribute('inputmode', 'numeric');
@@ -1854,7 +1887,7 @@ function validarPF(d) {
     if (!ag || !cc) return `Para Débito Automático ${ADMINS_LABEL[d.administradora]||''}, preencha a conta corrente`;
   }
   // Bancário pra devolução = sempre obrigatório (TITULAR DA COTA)
-  if (!d.banco_codigo || !d.agencia || !d.conta_corrente || !d.dac) return 'Preencha os dados bancários para devolução (selecione o banco da lista, agência, conta e dígito)';
+  if (!(d.banco_codigo || d.banco_nome) || !d.agencia || !d.conta_corrente || !d.dac) return 'Preencha os dados bancários para devolução (banco, agência, conta e dígito)';
   if (!d.aceita_seguro) return 'Informe se aceita o seguro';
   if (d.lgpd_aceito !== 'true') return 'É necessário aceitar a autorização LGPD para prosseguir';
   return null;
@@ -1894,7 +1927,7 @@ function validarPJ(d) {
     const cc = $('pj-debito_conta')?.value || '';
     if (!ag || !cc) return `Para Débito Automático ${ADMINS_LABEL[d.administradora]||''}, preencha a conta corrente`;
   }
-  if (!d.banco_codigo || !d.agencia || !d.conta_corrente || !d.dac) return 'Preencha os dados bancários da empresa (selecione o banco da lista, agência, conta e dígito)';
+  if (!(d.banco_codigo || d.banco_nome) || !d.agencia || !d.conta_corrente || !d.dac) return 'Preencha os dados bancários da empresa (banco, agência, conta e dígito)';
   // PJ não tem seguro de vida — empresa não tem vida. Validação removida.
   if (d.lgpd_aceito !== 'true') return 'É necessário aceitar a autorização LGPD para prosseguir';
   return null;

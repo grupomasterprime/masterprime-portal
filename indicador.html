@@ -63,12 +63,22 @@ button{cursor:pointer;font-family:inherit}
 .stat{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 6px;text-align:center}
 .stat .v{font-size:19px;font-weight:800;color:var(--ink)}
 .stat .k{font-size:9.5px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
-.funil{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.funil{display:flex;gap:6px;overflow-x:auto;min-width:0;max-width:100%;padding-bottom:6px;margin-bottom:10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .funil::-webkit-scrollbar{display:none}
 .chip{flex:0 0 auto;border:1.5px solid var(--border);background:#fff;border-radius:999px;padding:6px 11px;font-size:11.5px;font-weight:700;color:var(--text-2);cursor:pointer;white-space:nowrap;font-family:inherit}
 .chip .n{display:inline-block;background:#F1F5F9;border-radius:8px;padding:0 6px;margin-left:5px;font-size:10.5px}
 .chip.on{background:var(--c,var(--navy));border-color:var(--c,var(--navy));color:#fff}
 .chip.on .n{background:rgba(255,255,255,.28);color:#fff}
+.fun-svg{display:block;width:100%;max-width:340px;margin:2px auto 0;overflow:visible}
+.fun-st{cursor:pointer;transition:opacity .15s}
+.fun-st.dim{opacity:.28}
+.fun-st.sel polygon{stroke:#152A43;stroke-width:2.5;stroke-linejoin:round}
+.fun-st:hover polygon{filter:brightness(1.06)}
+.fun-perd{display:flex;justify-content:center;margin-top:10px}
+.fun-perd button{border:1.5px solid var(--border);background:#F1F5F9;color:var(--text-2);border-radius:999px;padding:6px 14px;font-size:11.5px;font-weight:700;cursor:pointer;font-family:inherit}
+.fun-perd button.on{background:#94A3B8;border-color:#94A3B8;color:#fff}
+.fun-perd button.dim{opacity:.4}
+.fun-leg{text-align:center;font-size:11px;color:var(--text-3);margin-top:10px}
 
 /* aparencia de PC em telas grandes */
 @media (min-width:900px){
@@ -80,7 +90,10 @@ button{cursor:pointer;font-family:inherit}
   .card{padding:26px 28px}
   #tela-loading,#tela-pin-novo,#tela-pin,#tela-login{max-width:520px;margin-left:auto;margin-right:auto}
   #tela-app{display:grid;grid-template-columns:420px 1fr;gap:18px;align-items:start}
-  #tela-app > .card{margin-bottom:0}
+  #tela-app > .card{margin-bottom:0;min-width:0}
+  .card-form{grid-column:1;grid-row:1 / span 2}
+  .card-funil{grid-column:2;grid-row:1}
+  .card-leads{grid-column:2;grid-row:2}
   .lead{padding:15px 16px}
 }
 </style>
@@ -128,7 +141,7 @@ button{cursor:pointer;font-family:inherit}
 
   <!-- área logada -->
   <div class="hidden" id="tela-app">
-    <div class="card">
+    <div class="card card-form">
       <div class="saud">
         <div class="n">Olá, <b id="ap-nome"></b></div>
         <button class="btn-l" onclick="sair()">Sair</button>
@@ -144,14 +157,18 @@ button{cursor:pointer;font-family:inherit}
       <button class="btn btn-cta" onclick="enviarLead()">Enviar indicação</button>
     </div>
 
-    <div class="card">
+    <div class="card card-leads">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
         <h2 style="margin:0">Minhas indicações</h2>
         <button class="btn-l" onclick="carregarLeads()">Atualizar</button>
       </div>
-      <div class="stats" id="ap-stats"></div>
-      <div class="funil" id="ap-funil"></div>
       <div id="ap-lista"><div class="vazio">Carregando...</div></div>
+    </div>
+
+    <div class="card card-funil">
+      <h2>Meu funil</h2>
+      <div class="stats" id="ap-stats"></div>
+      <div id="ap-funil"></div>
     </div>
   </div>
 
@@ -300,6 +317,28 @@ const FUNIL_CHIPS = [
 ];
 function filtrar(f){ FILTRO = f; renderLeads(TODOS_LEADS, true); }
 
+// Funil desenhado em SVG: cada etapa é um trapézio simétrico com gradiente, nome e
+// contagem dentro. Clicou numa etapa, filtra a lista (as outras esmaecem).
+function funilSVG(cont){
+  const W = 340, H = 50, GAP = 4;
+  const etapas = [['novo','Recebidas'], ['contato','Em contato'], ['qualificado','Qualificadas'], ['proposta','Proposta'], ['vendido','Vendas']];
+  const larg = [1, 0.86, 0.72, 0.58, 0.45, 0.34];
+  let defs = '', shapes = '';
+  etapas.forEach(([id, nome], i) => {
+    const cor = ETAPAS[id].cor;
+    const wt = W * larg[i], wb = W * larg[i + 1], y = i * (H + GAP);
+    const x1 = (W - wt) / 2, x2 = (W + wt) / 2, x3 = (W + wb) / 2, x4 = (W - wb) / 2;
+    const cls = 'fun-st' + (FILTRO === id ? ' sel' : (FILTRO !== 'todas' ? ' dim' : ''));
+    defs += `<linearGradient id="fg${i}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${cor}" stop-opacity=".82"/><stop offset="1" stop-color="${cor}"/></linearGradient>`;
+    shapes += `<g class="${cls}" onclick="filtrar('${FILTRO === id ? 'todas' : id}')">
+      <polygon points="${x1},${y} ${x2},${y} ${x3},${y + H} ${x4},${y + H}" fill="url(#fg${i})"/>
+      <text x="${W / 2}" y="${y + 20}" text-anchor="middle" font-size="11.5" font-weight="700" fill="#fff" fill-opacity=".92" font-family="Inter,-apple-system,sans-serif">${nome}</text>
+      <text x="${W / 2}" y="${y + 40}" text-anchor="middle" font-size="17" font-weight="800" fill="#fff" font-family="Inter,-apple-system,sans-serif">${cont(id)}</text>
+    </g>`;
+  });
+  return `<svg class="fun-svg" viewBox="-4 -4 ${W + 8} ${etapas.length * (H + GAP) + 4}"><defs>${defs}</defs>${shapes}</svg>`;
+}
+
 function renderLeads(leads, manterFiltro){
   TODOS_LEADS = leads || [];
   if (!manterFiltro) FILTRO = 'todas';
@@ -312,10 +351,9 @@ function renderLeads(leads, manterFiltro){
     <div class="stat"><div class="v" style="color:#065F46">${vendas}</div><div class="k">Vendas</div></div>
     <div class="stat"><div class="v" style="color:#065F46">${conv}%</div><div class="k">Conversão</div></div>` : '';
   const cont = id => TODOS_LEADS.filter(l => l.etapa === id).length;
-  $('ap-funil').innerHTML = total ? [
-    `<button class="chip${FILTRO === 'todas' ? ' on' : ''}" onclick="filtrar('todas')">Todas<span class="n">${total}</span></button>`,
-    ...FUNIL_CHIPS.map(([id, nome]) => `<button class="chip${FILTRO === id ? ' on' : ''}" style="--c:${ETAPAS[id].cor}" onclick="filtrar('${id}')">${nome}<span class="n">${cont(id)}</span></button>`)
-  ].join('') : '';
+  $('ap-funil').innerHTML = total ? funilSVG(cont) + `
+    <div class="fun-perd"><button class="${FILTRO === 'perdido' ? 'on' : (FILTRO !== 'todas' ? 'dim' : '')}" onclick="filtrar('${FILTRO === 'perdido' ? 'todas' : 'perdido'}')">Não avançou · ${cont('perdido')}</button></div>
+    <div class="fun-leg">${FILTRO === 'todas' ? 'Toque numa etapa para ver só aquelas indicações' : '<button class="btn-l" onclick="filtrar(\'todas\')">Mostrar todas as indicações</button>'}</div>` : '<div class="vazio">O funil aparece assim que você enviar a primeira indicação.</div>';
   if (!total) { el.innerHTML = '<div class="vazio">Você ainda não enviou nenhuma indicação.</div>'; return; }
   const lista = FILTRO === 'todas' ? TODOS_LEADS : TODOS_LEADS.filter(l => l.etapa === FILTRO);
   if (!lista.length) { el.innerHTML = '<div class="vazio">Nenhuma indicação nesta etapa.</div>'; return; }
