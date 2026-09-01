@@ -95,6 +95,9 @@ select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 1
 .ind-a{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 .btn-s{font-size:11px;font-weight:700;padding:6px 11px;border-radius:7px;border:1px solid var(--border);background:#fff;color:var(--text)}
 .btn-s.p{background:var(--navy);color:#fff;border-color:var(--navy)}
+.btn-s.btn-danger{color:#B91C1C;border-color:#FECACA}
+.btn-s.btn-danger:hover{background:#FEF2F2}
+.btn.btn-danger{background:#B91C1C;color:#fff}
 
 /* relatorios */
 .rep-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:18px}
@@ -233,6 +236,18 @@ select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 1
 </div>
 
 <!-- modal rodizio de leads do indicador -->
+<div class="ovl hidden" id="ovl-exc">
+  <div class="mod" style="max-width:440px">
+    <h2>Excluir indicador</h2>
+    <p style="font-size:13px;color:var(--text-2);margin:8px 0 4px">Tem certeza que quer excluir <b id="exc-nome"></b>?</p>
+    <p style="font-size:12px;color:var(--text-2);margin-bottom:12px">O link dele deixa de funcionar na hora e o cadastro some da lista. Isso não tem volta. Se a ideia é só pausar, use Desativar.</p>
+    <div id="exc-err"></div>
+    <div class="mod-ft">
+      <button class="btn btn-g" onclick="fechar('ovl-exc')">Cancelar</button>
+      <button class="btn btn-danger" id="exc-btn" onclick="excluirIndicador()">Excluir</button>
+    </div>
+  </div>
+</div>
 <div class="ovl hidden" id="ovl-rod">
   <div class="mod">
     <h2 id="rod-titulo">Rodízio de leads</h2>
@@ -551,6 +566,7 @@ function renderIndicadores(){
         <button class="btn-s" onclick="copiarConvite('${i.token}', '${esc(i.nome).replace(/'/g, '')}')">Copiar convite</button>
         <button class="btn-s" onclick="abrirRodizio('${i.id}')">Rodízio</button>
         ${i.ativo ? `<button class="btn-s" onclick="toggleIndicador('${i.id}', false)">Desativar</button>` : `<button class="btn-s" onclick="toggleIndicador('${i.id}', true)">Reativar</button>`}
+        ${!leads.length ? `<button class="btn-s btn-danger" onclick="abrirExcluirIndicador('${i.id}')">Excluir</button>` : ''}
       </div>
     </div>`;
   }).join('');
@@ -579,6 +595,28 @@ async function copiarConvite(token, nome){
   const txt = 'Oi ' + p + '! Esse é o seu link de indicações da Master Prime: ' + curto
     + '\nNo primeiro acesso confirme seu CPF e crie um PIN. Por lá você envia seus indicados e acompanha cada um até a venda.';
   navigator.clipboard.writeText(txt).then(() => toast('Convite copiado'));
+}
+// Excluir: só aparece para indicador sem nenhum lead. Com leads, o histórico ficaria
+// órfão, então o caminho é Desativar.
+let EXCLUIR_ID = null;
+function abrirExcluirIndicador(id){
+  const i = INDICADORES.find(x => String(x.id) === String(id));
+  if (!i) return;
+  if ((i.leads || []).length) { toast('Esse indicador já tem leads. Use Desativar.'); return; }
+  EXCLUIR_ID = i.id;
+  $('exc-nome').textContent = i.nome;
+  $('exc-err').innerHTML = '';
+  $('ovl-exc').classList.remove('hidden');
+}
+async function excluirIndicador(){
+  if (!EXCLUIR_ID) return;
+  const btn = $('exc-btn'); btn.disabled = true; btn.textContent = 'Excluindo...';
+  const { error } = await sb.from('crm_indicadores').delete().eq('id', EXCLUIR_ID);
+  btn.disabled = false; btn.textContent = 'Excluir';
+  if (error) { $('exc-err').innerHTML = '<div class="msg-err">' + esc(error.message) + '</div>'; return; }
+  fechar('ovl-exc'); EXCLUIR_ID = null;
+  toast('Indicador excluído');
+  carregarTudo();
 }
 async function toggleIndicador(id, ativo){
   const { error } = await sb.from('crm_indicadores').update({ ativo }).eq('id', id);
