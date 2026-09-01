@@ -58,6 +58,18 @@ button{cursor:pointer;font-family:inherit}
 .saud .n b{color:var(--ink)}
 .rodape{text-align:center;font-size:11px;color:var(--text-3);padding:10px 0 26px}
 
+/* resumo e funil do indicador */
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat{background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:10px 6px;text-align:center}
+.stat .v{font-size:19px;font-weight:800;color:var(--ink)}
+.stat .k{font-size:9.5px;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.4px;margin-top:2px}
+.funil{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.funil::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1.5px solid var(--border);background:#fff;border-radius:999px;padding:6px 11px;font-size:11.5px;font-weight:700;color:var(--text-2);cursor:pointer;white-space:nowrap;font-family:inherit}
+.chip .n{display:inline-block;background:#F1F5F9;border-radius:8px;padding:0 6px;margin-left:5px;font-size:10.5px}
+.chip.on{background:var(--c,var(--navy));border-color:var(--c,var(--navy));color:#fff}
+.chip.on .n{background:rgba(255,255,255,.28);color:#fff}
+
 /* aparencia de PC em telas grandes */
 @media (min-width:900px){
   .topo{padding:38px 20px 46px}
@@ -137,6 +149,8 @@ button{cursor:pointer;font-family:inherit}
         <h2 style="margin:0">Minhas indicações</h2>
         <button class="btn-l" onclick="carregarLeads()">Atualizar</button>
       </div>
+      <div class="stats" id="ap-stats"></div>
+      <div class="funil" id="ap-funil"></div>
       <div id="ap-lista"><div class="vazio">Carregando...</div></div>
     </div>
   </div>
@@ -279,12 +293,35 @@ async function carregarLeads(){
   if (leads) renderLeads(leads);
 }
 
-function renderLeads(leads){
+let TODOS_LEADS = [], FILTRO = 'todas';
+const FUNIL_CHIPS = [
+  ['novo','Recebidas'], ['contato','Em contato'], ['qualificado','Qualificadas'],
+  ['proposta','Proposta'], ['vendido','Vendas'], ['perdido','Não avançou']
+];
+function filtrar(f){ FILTRO = f; renderLeads(TODOS_LEADS, true); }
+
+function renderLeads(leads, manterFiltro){
+  TODOS_LEADS = leads || [];
+  if (!manterFiltro) FILTRO = 'todas';
   const el = $('ap-lista');
-  if (!leads || !leads.length) { el.innerHTML = '<div class="vazio">Você ainda não enviou nenhuma indicação.</div>'; return; }
+  const total = TODOS_LEADS.length;
+  const vendas = TODOS_LEADS.filter(l => l.etapa === 'vendido').length;
+  const conv = total ? Math.round(vendas / total * 100) : 0;
+  $('ap-stats').innerHTML = total ? `
+    <div class="stat"><div class="v">${total}</div><div class="k">Indicações</div></div>
+    <div class="stat"><div class="v" style="color:#065F46">${vendas}</div><div class="k">Vendas</div></div>
+    <div class="stat"><div class="v" style="color:#065F46">${conv}%</div><div class="k">Conversão</div></div>` : '';
+  const cont = id => TODOS_LEADS.filter(l => l.etapa === id).length;
+  $('ap-funil').innerHTML = total ? [
+    `<button class="chip${FILTRO === 'todas' ? ' on' : ''}" onclick="filtrar('todas')">Todas<span class="n">${total}</span></button>`,
+    ...FUNIL_CHIPS.map(([id, nome]) => `<button class="chip${FILTRO === id ? ' on' : ''}" style="--c:${ETAPAS[id].cor}" onclick="filtrar('${id}')">${nome}<span class="n">${cont(id)}</span></button>`)
+  ].join('') : '';
+  if (!total) { el.innerHTML = '<div class="vazio">Você ainda não enviou nenhuma indicação.</div>'; return; }
+  const lista = FILTRO === 'todas' ? TODOS_LEADS : TODOS_LEADS.filter(l => l.etapa === FILTRO);
+  if (!lista.length) { el.innerHTML = '<div class="vazio">Nenhuma indicação nesta etapa.</div>'; return; }
   const ORDEM = ['novo','contato','qualificado','proposta','vendido'];
   const NOMES_CURTOS = ['Recebida','Contato','Qualificada','Proposta','Venda'];
-  el.innerHTML = leads.map((l, i) => {
+  el.innerHTML = lista.map((l, i) => {
     const et = ETAPAS[l.etapa] || ETAPAS.novo;
     const idx = ORDEM.indexOf(l.etapa);
     const segs = ORDEM.map((s, k) => '<div class="seg' + (idx >= 0 && k <= idx ? ' on' : '') + '"></div>').join('');

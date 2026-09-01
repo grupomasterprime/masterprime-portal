@@ -219,6 +219,20 @@ select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 1
   </div>
 </div>
 
+<!-- modal rodizio de leads do indicador -->
+<div class="ovl hidden" id="ovl-rod">
+  <div class="mod">
+    <h2 id="rod-titulo">Rodízio de leads</h2>
+    <p style="font-size:12px;color:var(--text-2);margin-bottom:12px">Marque quem vai receber os leads deste indicador. Cada lead novo vai para o próximo da lista, revezando entre os marcados. Sem ninguém marcado, os leads vão para o dono do link.</p>
+    <div id="rod-lista" style="max-height:300px;overflow:auto;border:1px solid var(--border);border-radius:8px;padding:6px 12px"></div>
+    <div id="rod-err"></div>
+    <div class="mod-ft">
+      <button class="btn btn-g" onclick="fechar('ovl-rod')">Cancelar</button>
+      <button class="btn btn-p" onclick="salvarRodizio()">Salvar rodízio</button>
+    </div>
+  </div>
+</div>
+
 <!-- modal novo indicador -->
 <div class="ovl hidden" id="ovl-ind">
   <div class="mod">
@@ -285,13 +299,19 @@ function mostrarAba(a){
 // ══════════ CARGA ══════════
 async function carregarTudo(){
   const [leads, inds, users] = await Promise.all([
-    sb.from('crm_leads').select('*, indicador:crm_indicadores(nome), consultor:portal_users(nome)').order('criado_em', { ascending:false }),
-    sb.from('crm_indicadores').select('*, consultor:portal_users(nome), leads:crm_leads(id, etapa)').order('criado_em', { ascending:false }),
-    sb.from('portal_users').select('id, nome, tipo').order('nome')
+    sb.from('crm_leads').select('*, indicador:crm_indicadores(nome)').order('criado_em', { ascending:false }),
+    sb.from('crm_indicadores').select('*, leads:crm_leads(id, etapa)').order('criado_em', { ascending:false }),
+    // Lista da equipe via função segura (id, nome, tipo): a tabela portal_users só deixa
+    // admin/master ler todo mundo, e consultor comum via só a própria linha (ficava em branco).
+    sb.rpc('crm_usuarios')
   ]);
   LEADS = leads.data || [];
   INDICADORES = inds.data || [];
   USUARIOS = users.data || [];
+  // Resolve o nome do consultor pela lista (mesmo resultado pra qualquer usuário)
+  const nomeDe = id => { const u = USUARIOS.find(x => String(x.id) === String(id)); return u ? u.nome : null; };
+  LEADS.forEach(l => { const n = nomeDe(l.consultor_id); l.consultor = n ? { nome: n } : null; });
+  INDICADORES.forEach(i => { const n = nomeDe(i.consultor_id); i.consultor = n ? { nome: n } : null; });
   // Consultor comum vê os leads dele (e os sem dono); admin, socio e master veem tudo
   if (!ehAdmin) {
     LEADS = LEADS.filter(l => l.consultor_id === currentUser.id || l.consultor_id == null);
@@ -456,7 +476,7 @@ async function salvarDetalhe(){
     upd.valor_credito = cred;
     upd.qtd_cotas = parseInt($('md-cotas').value, 10) || 1;
   }
-  if (ehAdmin) upd.consultor_id = parseInt($('md-cons').value, 10) || null;
+  if (ehAdmin) { const cv = parseInt($('md-cons').value, 10); if (!isNaN(cv)) upd.consultor_id = cv; }
   const { error } = await sb.from('crm_leads').update(upd).eq('id', l.id);
   if (error) { $('md-err').innerHTML = '<div class="msg-err">' + esc(error.message) + '</div>'; return; }
   fechar('ovl-det'); toast('Lead atualizado');
@@ -480,15 +500,18 @@ function renderIndicadores(){
     const vendidos = leads.filter(l => l.etapa === 'vendido').length;
     const st = !i.ativo ? '<span class="badge b-off">Desativado</span>'
       : (i.pin_hash ? '<span class="badge b-ok">Ativo</span>' : '<span class="badge b-pend">Aguardando 1º acesso</span>');
+    const rod = (i.rodizio_consultores || []).map(id => { const u = USUARIOS.find(x => String(x.id) === String(id)); return u ? primeiroNome(u.nome) : null; }).filter(Boolean);
     return `<div class="ind-card">
       <div style="display:flex;justify-content:space-between;align-items:start;gap:8px">
         <div class="nm">${esc(i.nome)}</div>${st}
       </div>
       <div class="ln">CPF final ${esc(String(i.cpf).replace(/\D/g,'').slice(-3))}${i.celular ? ' · ' + esc(i.celular) : ''}${ehAdmin && i.consultor ? ' · Consultor: ' + esc(primeiroNome(i.consultor.nome)) : ''}</div>
       <div class="ln">${leads.length} lead${leads.length === 1 ? '' : 's'} enviado${leads.length === 1 ? '' : 's'} · ${vendidos} vendido${vendidos === 1 ? '' : 's'}</div>
+      <div class="ln" style="color:${rod.length ? '#0E7490' : 'var(--text-3)'}">${rod.length ? 'Rodízio: ' + esc(rod.join(', ')) : 'Leads vão para o dono do link'}</div>
       <div class="ind-a">
         <button class="btn-s p" onclick="copiarLink('${i.token}')">Copiar link</button>
         <button class="btn-s" onclick="copiarConvite('${i.token}', '${esc(i.nome).replace(/'/g, '')}')">Copiar convite</button>
+        <button class="btn-s" onclick="abrirRodizio('${i.id}')">Rodízio</button>
         ${i.ativo ? `<button class="btn-s" onclick="toggleIndicador('${i.id}', false)">Desativar</button>` : `<button class="btn-s" onclick="toggleIndicador('${i.id}', true)">Reativar</button>`}
       </div>
     </div>`;
@@ -525,6 +548,25 @@ async function toggleIndicador(id, ativo){
   toast(ativo ? 'Indicador reativado' : 'Indicador desativado');
   carregarTudo();
 }
+// ══════════ RODIZIO DE LEADS DO INDICADOR ══════════
+let rodIndicadorId = null;
+function abrirRodizio(id){
+  const i = INDICADORES.find(x => x.id === id); if (!i) return;
+  rodIndicadorId = id;
+  const sel = (i.rodizio_consultores || []).map(String);
+  $('rod-titulo').textContent = 'Rodízio de leads: ' + i.nome;
+  $('rod-lista').innerHTML = USUARIOS.map(u => `<label style="display:flex;align-items:center;gap:9px;padding:6px 0;font-size:12.5px;cursor:pointer;border-bottom:1px solid #F1F5F9"><input type="checkbox" value="${u.id}" ${sel.includes(String(u.id)) ? 'checked' : ''}> ${esc(u.nome)}</label>`).join('');
+  $('rod-err').innerHTML = '';
+  $('ovl-rod').classList.remove('hidden');
+}
+async function salvarRodizio(){
+  const ids = [...$('rod-lista').querySelectorAll('input:checked')].map(c => parseInt(c.value, 10));
+  const { error } = await sb.from('crm_indicadores').update({ rodizio_consultores: ids, rodizio_pos: 0 }).eq('id', rodIndicadorId);
+  if (error) { $('rod-err').innerHTML = '<div class="msg-err">' + esc(error.message) + '</div>'; return; }
+  fechar('ovl-rod'); toast(ids.length ? 'Rodízio salvo' : 'Rodízio removido, leads voltam para o dono do link');
+  carregarTudo();
+}
+
 function abrirNovoIndicador(){
   ['mi-nome','mi-cpf','mi-cel'].forEach(id => $(id).value = '');
   $('mi-cons').value = currentUser.id; $('mi-err').innerHTML = '';
