@@ -436,6 +436,12 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 
 <!-- ══════════════════ MAIN ══════════════════ -->
 <main class="main">
+<!-- Banner de fechamento salvo (auto-save local, IndexedDB) -->
+<div id="save-banner" style="display:none;background:#FFFBEB;border:1px solid #F4C24A;border-radius:12px;padding:13px 16px;margin-bottom:16px;align-items:center;gap:12px;flex-wrap:wrap">
+  <span id="save-banner-txt" style="font-size:13px;color:#78500F;flex:1;min-width:220px"></span>
+  <button class="btn btn-primary btn-sm" onclick="retomarFechamento()">Retomar</button>
+  <button class="btn btn-outline btn-sm" onclick="descartarFechamento()">Descartar salvo</button>
+</div>
 
 <!-- ── EXTRATOS ── -->
 <div class="screen" id="s-extratos">
@@ -569,7 +575,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
     <button class="btn btn-outline" onclick="nav('extratos')">← Voltar</button>
     <button class="btn btn-primary" onclick="nav('avulsos')">Próximo → Lançamentos Avulsos</button>
   </div>
-</div> -->
+</div>
 <div class="screen" id="s-calcular">
   <div class="page-title">Calcular</div>
   <div class="page-sub">Revisar dados e processar o fechamento do mês</div>
@@ -1069,6 +1075,8 @@ const _mesInicial = (() => {
 const S = {
   mes: _mesInicial,
   extratos: {},     // { PORTO: [...], ITAU: [...], ... }
+  extMeta: {},      // { PORTO: {nome, n}, ... } (pro auto-save re-marcar os cards)
+  eliteCiclos: [],  // ciclos lidos da planilha Master Elite (pro auto-save re-renderizar)
   base: [],         // contratos da base de vendas
   elite: {},        // { NOME: { '1/2026': 0.75, ... } }
   avulsos: [],      // [{nome, descricao, parcela, obs, valor, cnpj}]
@@ -1097,6 +1105,7 @@ function nav(id) {
 
 function setMes(v) {
   S.mes = v;
+  if (typeof checarSalvo === 'function') checarSalvo(v);
   const [y,m] = v.split('-');
   const mn = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
   document.querySelector('.mes-sel').value = v;
@@ -1169,11 +1178,32 @@ function fmtData(v) {
 }
 
 // ── CATEGORIA ────────────────────────────────────────────────────────────
-function getMult(consultor, ciclo) {
+// Mudança de categoria NO MEIO do ciclo trimestral: a planilha Master Elite só
+// tem um valor por ciclo, então promoções que entram em vigor no meio do
+// trimestre ficam aqui, por DATA DA VENDA. Vendas anteriores à data seguem a
+// planilha Elite normalmente; vendas a partir da data usam o mult da regra.
+// Quando o ciclo seguinte for lançado na planilha Elite já com a categoria
+// nova, a regra vira só histórico (continua certa para as vendas antigas).
+const MULT_VIGENCIA = {
+  // Douglas entrou no programa Elite em 01/08/2026 com 2,5% (decisão Allan 01/09).
+  'DOUGLAS BOMFIM': [ { desde: { y:2026, m:8, d:1 }, mult: 0.625 } ],
+};
+function getMult(consultor, ciclo, dataVenda) {
   // Normaliza via normNome/ALIASES para que variantes ("JOÃO PORTO MAX",
   // "JOAO PORTOMAX", etc.) batam com a key cadastrada no Master Elite.
   const n = normNome(consultor);
   if (TODOS_SOCIOS.includes(n)) return 1.0;
+  // Regras de vigência por data da venda (mudança no meio do ciclo)
+  const vig = MULT_VIGENCIA[n];
+  if (vig && dataVenda) {
+    const p = parseDateStr(dataVenda);
+    if (p) {
+      const chave = p.y*10000 + p.m*100 + p.d;
+      let m;
+      vig.forEach(r => { const c = r.desde.y*10000 + r.desde.m*100 + r.desde.d; if (chave >= c) m = r.mult; });
+      if (m !== undefined) return m;
+    }
+  }
   // Consultores com mult fixo hardcoded (fora da planilha Master Elite)
   if (MULT_CUSTOM_FIXO[n] !== undefined) return MULT_CUSTOM_FIXO[n];
   const row = S.elite[n];
@@ -1522,10 +1552,20 @@ function loadExtrato(evt, adm) {
       else if (adm === 'BRADESCO') rows = parseBradesco(data);
       else if (adm === 'ADEMICON') rows = parseAdemicon(data);
       else                         rows = parseGenerico(data, adm);
-      if (!S.extratos[adm]) S.extratos[adm] = [];
-      S.extratos[adm].push(...rows);
-      markOk(adm, file.name, rows.length);
+      // Subir de novo SUBSTITUI o extrato daquela administradora (antes acumulava
+      // e duplicava). "Outras" continua somando arquivos, com botão de limpar.
+      if (adm === 'OUTROS') {
+        if (!S.extratos[adm]) S.extratos[adm] = [];
+        S.extratos[adm].push(...rows);
+        S.extMeta[adm] = { nome: (S.extMeta[adm] && S.extMeta[adm].n ? 'vários arquivos' : file.name), n: S.extratos[adm].length };
+      } else {
+        S.extratos[adm] = rows;
+        S.extMeta[adm] = { nome: file.name, n: rows.length };
+      }
+      markOk(adm, S.extMeta[adm].nome, S.extMeta[adm].n);
       renderExtPreview();
+      salvarLocal();
+      evt.target.value = '';
     } catch(err) {
       alert('Erro ao ler extrato ' + adm + ': ' + err.message);
     }
@@ -1545,10 +1585,40 @@ function markOk(adm, nome, n) {
   b.textContent = n + ' ok';
   el.appendChild(b);
   el.querySelector('.uz-sub').textContent = nome.length > 25 ? nome.slice(0,23)+'…' : nome;
+  // Botão de limpar só este extrato
+  if (!el.querySelector('.uz-x')) {
+    const x = document.createElement('button');
+    x.className = 'uz-x';
+    x.type = 'button';
+    x.textContent = 'Limpar';
+    x.style.cssText = 'position:absolute;top:6px;right:6px;font-size:10px;padding:2px 8px;border-radius:6px;border:1px solid #FECACA;background:#fff;color:#B91C1C;cursor:pointer';
+    x.onclick = ev => { ev.preventDefault(); ev.stopPropagation(); limparExtrato(adm); };
+    el.style.position = 'relative';
+    el.appendChild(x);
+  }
+}
+
+function limparExtrato(adm) {
+  delete S.extratos[adm];
+  delete S.extMeta[adm];
+  const el = document.getElementById('uz-' + adm);
+  if (el) {
+    el.classList.remove('ok');
+    el.querySelector('.uz-badge')?.remove();
+    el.querySelector('.uz-x')?.remove();
+    const subs = { PORTO:'Grupo · Cota · Comissão', ITAU:'Grupo · Cota · Entradas', BRADESCO:'Contrato · % · Líquido', ADEMICON:'2% base', OUTROS:'Demais administradoras' };
+    if (subs[adm]) el.querySelector('.uz-sub').textContent = subs[adm];
+  }
+  if (Object.values(S.extratos).flat().length) renderExtPreview();
+  else document.getElementById('prev-card').classList.add('hidden');
+  salvarLocal();
 }
 
 function limparExtratos() {
   S.extratos = {};
+  S.extMeta = {};
+  document.querySelectorAll('.uz-x').forEach(x => x.remove());
+  salvarLocal();
   document.querySelectorAll('.uz').forEach(u => {
     u.classList.remove('ok');
     const b = u.querySelector('.uz-badge');
@@ -1613,6 +1683,7 @@ function loadBase(evt) {
         `<div class="alert alert-ok"><span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg></span><span>${S.base.length} contratos carregados da aba "${wsName}"</span></div>`;
       // Update button
       document.querySelector('[onclick="document.getElementById(\'base-file\').click()"]').innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> ' + S.base.length + ' contratos';
+      salvarLocal();
     } catch(err) {
       document.getElementById('base-log').innerHTML =
         `<div class="alert alert-err"><span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span><span>Erro: ${err.message}</span></div>`;
@@ -1653,7 +1724,9 @@ function loadElite(evt) {
         });
         count++;
       }
+      S.eliteCiclos = ciclos;
       renderEliteTable(ciclos);
+      salvarLocal();
       document.querySelector('[onclick="document.getElementById(\'elite-file\').click()"]').innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> ' + count + ' consultores';
     } catch(err) {
       wrap.innerHTML = `<div class="alert alert-err"><span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></span><span>Erro: ${err.message}</span></div>`;
@@ -2331,7 +2404,12 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
         if (pctR > 0 && nomeR && respR) {
           // O RESP não entra como parte do split: a linha de repasse dele é gerada
           // automaticamente pela carta (cartaResp !== consultor → addResultado extra).
-          partes.push({ quem:nomeR, fracBruto:pctObsToFrac(pctR), pctOrig:pctR, ehParceiro:true, masterPaga:false,
+          // Fração convertida pela CATEGORIA do consultor da linha (catDecimalSplit),
+          // igual às outras partes do split, para o % literal da OBS valer de verdade.
+          // Corrigido em 01/09/2026 (mesma correção do Strada de 24/08): antes usava
+          // pctObsToFrac (base 4%) e num consultor 3% um "1%" saía como 0,75%.
+          const fracR = catDecimalSplit > 0 ? pctR / catDecimalSplit : pctObsToFrac(pctR);
+          partes.push({ quem:nomeR, fracBruto:fracR, pctOrig:pctR, ehParceiro:true, masterPaga:false,
             oculto:false, ehCarta:true, cartaResp:respR, ehLiquido:ehLiqR, ehCartaRepasseSplit:true });
           return;
         }
@@ -2806,7 +2884,7 @@ function _executarCalculo() {
       if (!match || !(match.indicacao || '').trim()) {
         const consultor = match ? normNome(match.consultor) : 'ESTORNO';
         const ciclo = toCiclo(match?.dataVenda || linha.dataVenda);
-        let mult = match ? getMult(consultor, ciclo) : 1;
+        let mult = match ? getMult(consultor, ciclo, match?.dataVenda || linha.dataVenda) : 1;
         if (linha.ehItau10Parc && mult >= 0.625 && mult < 1.0) mult = mult * 0.8;
         if (linha.ehItau8Mais2) {
           const pn = linha.parcNum || parseInt(String(linha.parcela).split('/')[0]) || 0;
@@ -2830,7 +2908,7 @@ function _executarCalculo() {
       const indicacao = match.indicacao;
       const dv = match.dataVenda || linha.dataVenda;
       const ciclo = toCiclo(dv);
-      const mult = getMult(consultor, ciclo);
+      const mult = getMult(consultor, ciclo, dv);
       const split = parseInd(indicacao, consultor, mult, linha);
       if (split.tipo === 'revisar') {
         S.excecoes.push({linha, idx, tipo:'estorno_split_complexo', consultor, indicacao, ciclo});
@@ -2858,7 +2936,7 @@ function _executarCalculo() {
     const indicacao = match.indicacao || '';
     const dv        = match.dataVenda || linha.dataVenda;
     const ciclo     = toCiclo(dv);
-    const mult      = getMult(consultor, ciclo);
+    const mult      = getMult(consultor, ciclo, dv);
     const split     = parseInd(indicacao, consultor, mult, linha);
 
     if (split.tipo === 'revisar') {
@@ -3452,6 +3530,7 @@ function loadAvulsos(evt) {
       if (el) el.innerHTML = `<div class="alert alert-ok"><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span><span>${S.avulsos.length} lançamentos carregados — <strong>${file.name}</strong></span></div>`;
       // Atualiza a lista de consultores para incluir pessoas que só têm avulsos
       if (document.getElementById('cons-list')) renderResultados();
+      salvarLocal();
     } catch(err) {
       alert('Erro ao ler avulsos: ' + err.message);
     }
@@ -3545,6 +3624,7 @@ function loadDespesasSala(evt) {
       const el = document.getElementById('despesas-log');
       const total = S.despesasSala.corretora.length + S.despesasSala.consultoria.length + S.despesasSala.socios.length;
       if (el) el.innerHTML = `<div class="alert alert-ok"><span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></span><span>${total} despesas carregadas — <strong>${file.name}</strong></span></div>`;
+      salvarLocal();
     } catch(err) {
       console.error(err);
       alert('Erro ao ler despesas: ' + err.message);
@@ -4040,8 +4120,8 @@ function resolverExc(i) {
   const consultor = prompt(`Consultor para ${exc.linha.grupoCota||exc.linha.contrato}:`, exc.consultor||'');
   if (!consultor) return;
   const indicacao = prompt('Indicação (deixe vazio se não tiver):', exc.indicacao||'');
-  const mult = getMult(normNome(consultor), toCiclo(exc.linha.dataVenda));
-  const split = parseInd(indicacao||'', normNome(consultor), getMult(normNome(consultor), toCiclo(exc.linha.dataVenda)), exc.linha);
+  const mult = getMult(normNome(consultor), toCiclo(exc.linha.dataVenda), exc.linha.dataVenda);
+  const split = parseInd(indicacao||'', normNome(consultor), getMult(normNome(consultor), toCiclo(exc.linha.dataVenda), exc.linha.dataVenda), exc.linha);
   processarLinha(exc.linha, {
     consultor: normNome(consultor),
     indicacao: indicacao||'',
@@ -4754,11 +4834,109 @@ function publicarNoPortal() {
   alert('<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg> JSON gerado!\n\n' + nc + ' consultores incluídos\nMês: ' + S.mes + '\n\nAgora entre no Portal como admin e faça o upload deste arquivo em "Upload Demonstrativos".');
 }
 
+// ── AUTO-SAVE LOCAL (IndexedDB) ──────────────────────────────────────────────
+// Grava as ENTRADAS do fechamento (base, extratos, elite, avulsos, despesas)
+// no navegador, uma gravação por mês de referência. Assim uma correção depois
+// do fechamento não exige subir tudo de novo: abre o painel, Retomar, sobe só
+// a planilha que mudou e recalcula. O resultado não é salvo (recalcula em 1 clique).
+const _DB_NOME = 'painel-split';
+function _dbOpen() {
+  return new Promise((res, rej) => {
+    const r = indexedDB.open(_DB_NOME, 1);
+    r.onupgradeneeded = () => r.result.createObjectStore('fechamentos');
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+function _dbSet(k, v) { return _dbOpen().then(db => new Promise((res, rej) => { const tx = db.transaction('fechamentos','readwrite'); tx.objectStore('fechamentos').put(v, k); tx.oncomplete = res; tx.onerror = () => rej(tx.error); })); }
+function _dbGet(k) { return _dbOpen().then(db => new Promise((res, rej) => { const rq = db.transaction('fechamentos').objectStore('fechamentos').get(k); rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error); })); }
+function _dbDel(k) { return _dbOpen().then(db => new Promise((res, rej) => { const tx = db.transaction('fechamentos','readwrite'); tx.objectStore('fechamentos').delete(k); tx.oncomplete = res; tx.onerror = () => rej(tx.error); })); }
+
+let _salvandoTimer = null;
+function salvarLocal() {
+  // Debounce curto: várias gravações seguidas viram uma só
+  clearTimeout(_salvandoTimer);
+  _salvandoTimer = setTimeout(() => {
+    const rec = {
+      mes: S.mes, salvoEm: Date.now(),
+      extratos: S.extratos, extMeta: S.extMeta,
+      base: S.base, elite: S.elite, eliteCiclos: S.eliteCiclos,
+      avulsos: S.avulsos, despesasSala: S.despesasSala,
+    };
+    _dbSet(S.mes, rec).catch(e => console.warn('auto-save falhou:', e));
+  }, 800);
+}
+
+function _resumoSalvo(rec) {
+  const pedacos = [];
+  if (rec.base && rec.base.length) pedacos.push(rec.base.length + ' contratos da base');
+  const adms = Object.keys(rec.extratos || {}).filter(a => (rec.extratos[a]||[]).length);
+  if (adms.length) pedacos.push('extratos: ' + adms.join(', '));
+  if (rec.elite && Object.keys(rec.elite).length) pedacos.push('Master Elite');
+  if (rec.avulsos && rec.avulsos.length) pedacos.push(rec.avulsos.length + ' avulsos');
+  const d = rec.despesasSala;
+  if (d && (d.corretora.length + d.consultoria.length + d.socios.length)) pedacos.push('despesas da sala');
+  return pedacos.join(' · ') || 'sem dados';
+}
+
+let _recSalvo = null;
+function checarSalvo(mes) {
+  _dbGet(mes).then(rec => {
+    const b = document.getElementById('save-banner');
+    if (!rec || !b) { if (b) b.style.display = 'none'; _recSalvo = null; return; }
+    _recSalvo = rec;
+    const q = new Date(rec.salvoEm).toLocaleString('pt-BR', { day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' });
+    const [y, m] = String(mes).split('-');
+    document.getElementById('save-banner-txt').innerHTML =
+      '<b>Fechamento de ' + m + '/' + y + ' salvo neste navegador</b> (em ' + q + '): ' + _resumoSalvo(rec) + '. Retome para não subir tudo de novo.';
+    b.style.display = 'flex';
+  }).catch(() => {});
+}
+
+function retomarFechamento() {
+  const rec = _recSalvo;
+  if (!rec) return;
+  S.extratos = rec.extratos || {};
+  S.extMeta = rec.extMeta || {};
+  S.base = rec.base || [];
+  S.elite = rec.elite || {};
+  S.eliteCiclos = rec.eliteCiclos || [];
+  S.avulsos = rec.avulsos || [];
+  if (rec.despesasSala) S.despesasSala = rec.despesasSala;
+  // Re-pinta as telas de entrada
+  Object.keys(S.extMeta).forEach(adm => markOk(adm, S.extMeta[adm].nome, S.extMeta[adm].n));
+  renderExtPreview();
+  if (S.base.length) {
+    document.getElementById('base-log').innerHTML =
+      '<div class="alert alert-ok"><span>OK</span><span>' + S.base.length + ' contratos restaurados do salvamento local</span></div>';
+    const bb = document.querySelector('[onclick="document.getElementById(\'base-file\').click()"]');
+    if (bb) bb.textContent = S.base.length + ' contratos';
+  }
+  if (Object.keys(S.elite).length && S.eliteCiclos.length) {
+    renderEliteTable(S.eliteCiclos);
+    const eb = document.querySelector('[onclick="document.getElementById(\'elite-file\').click()"]');
+    if (eb) eb.textContent = Object.keys(S.elite).length + ' consultores';
+  }
+  renderAvulsosPreview();
+  renderDespesasSala();
+  atualizarResumoCalc();
+  document.getElementById('save-banner').style.display = 'none';
+  alert('Fechamento restaurado. Agora suba só o que mudou (se algo mudou) e clique em Calcular.');
+}
+
+function descartarFechamento() {
+  if (!confirm('Apagar o fechamento salvo de ' + S.mes + ' deste navegador? As planilhas em si não são afetadas.')) return;
+  _dbDel(S.mes).catch(() => {});
+  _recSalvo = null;
+  document.getElementById('save-banner').style.display = 'none';
+}
+
 // ── INIT ────────────────────────────────────────────────────────────────────
 // Seta o input do mês pro mês atual dinâmico (_mesInicial calculado no topo)
 document.getElementById('mes-inp').value = _mesInicial;
 setMes(_mesInicial);
 atualizarResumoCalc();
+checarSalvo(_mesInicial);
 </script>
 </body>
 </html>

@@ -502,43 +502,44 @@ body.embedded-mode .portal-menu-fab { display:flex; }
         </style>
         <div class="idx-ticker" id="idxTicker"><div class="idx-track" id="idxTrack"></div></div>
         <div class="idx-painel" id="idxPainel"></div>
-        <div class="hm-hero">
+        <!-- Hero do Setembro Recorde: visível SÓ para sócios e master (hmPlacarOculto).
+             Consultores e parceiros veem apenas os índices de mercado por enquanto. -->
+        <div class="hm-hero" id="hm-hero" style="display:none">
           <div>
-            <div class="hm-camp">Campanha Porto · Acelera Agosto 2026</div>
-            <h1>Acelera Agosto</h1>
-            <div class="hm-sub">Ano passado fechamos agosto com <b>R$ 106,1 milhões</b>. Este ano o objetivo é
-            <b>30% a mais</b>. Consulte o
-            <b>Manual de Comissão</b> no Material de Apoio para saber mais sobre os recebimentos.</div>
+            <div class="hm-camp">Setembro 2026 · Todas as administradoras</div>
+            <h1>Setembro Recorde</h1>
+            <div class="hm-sub" id="hm-sub-txt">O melhor setembro da nossa história foi o de 2025: <b>R$ 35,17 milhões</b> e <b>136 cotas</b>.
+            Este mês o objetivo é <b>bater esse recorde</b>.</div>
             <a class="hm-btn-tabelas" href="https://tanamao.figma.site/consorcio" target="_blank" rel="noopener">Tabelas &amp; Materiais Porto — Tá na Mão!</a>
             <a class="hm-btn-tabelas hm-btn-outline" href="javascript:void(0)" onclick="abrirTabelasPorto()">Grupos em Campanha — Tabelas</a>
           </div>
           <div class="hm-badge">
             <div class="k">OBJETIVO DO MÊS</div>
-            <div class="v">R$ 137.962.907</div>
-            <div class="k" style="margin-top:2px">106.125.313,55 + 30%</div>
+            <div class="v" id="hm-obj-v">R$ 35.170.573</div>
+            <div class="k" style="margin-top:2px" id="hm-obj-k">melhor setembro (2025)</div>
           </div>
         </div>
         <!-- Placar e gráfico ocultos por enquanto (decisão Allan 07/08/2026) — pra reativar, remover os display:none abaixo e restaurar a frase do placar no hm-sub -->
         <div class="hm-tiles" id="hm-tiles" style="display:none"></div>
         <div class="hm-card" id="hm-card" style="display:none">
-          <h2>Acelera Agosto — acumulado do mês, dia a dia</h2>
-          <div class="hm-csub">Linha = crédito vendido acumulado (R$) · Barras = cotas acumuladas · vendas Porto · agosto/2026 vs agosto/2025</div>
+          <h2>Setembro Recorde: acumulado do mês, dia a dia</h2>
+          <div class="hm-csub">Linha = crédito vendido acumulado (R$) · Barras = cotas acumuladas · todas as administradoras · setembro/2026 vs setembro/2025</div>
           <div class="hm-legend">
             <span class="it"><span class="hm-sw" style="background:#2a78d6"></span> Crédito 2026</span>
             <span class="it"><span class="hm-sw" style="background:#eda100"></span> Crédito 2025</span>
             <span class="it"><span class="hm-sw bar" style="background:#9ec5f4"></span> Cotas 2026</span>
             <span class="it"><span class="hm-sw bar" style="background:#f3cf85"></span> Cotas 2025</span>
-            <span class="it"><span class="hm-sw" style="height:0;border-top:2px dashed #6b7280;background:none"></span> Objetivo R$ 137,9 mi</span>
+            <span class="it"><span class="hm-sw" style="height:0;border-top:2px dashed #6b7280;background:none"></span> <span id="hm-leg-obj">Objetivo</span></span>
             <span class="it"><span class="hm-sw" style="height:0;border-top:2px dashed #2a78d6;background:none"></span> Projeção 2026</span>
           </div>
           <div class="hm-chartbox" id="hm-box">
-            <svg id="hm-chart" width="100%" height="400" viewBox="0 0 1020 430" role="img" aria-label="Crédito e cotas acumulados de agosto, 2026 contra 2025"></svg>
+            <svg id="hm-chart" width="100%" height="400" viewBox="0 0 1020 430" role="img" aria-label="Crédito e cotas acumulados de setembro, 2026 contra 2025"></svg>
             <div class="hm-tip" id="hm-tip"></div>
           </div>
           <div class="hm-foot" id="hm-foot">Carregando dados…</div>
         </div>
         <div class="hm-vazio" id="hm-vazio" style="display:none">O placar ainda não tem dados — um administrador precisa abrir o <b>Dashboard Vendas</b> para a primeira atualização do OneDrive.</div>
-        <div class="hm-news">
+        <div class="hm-news" id="hm-news-box" style="display:none">
           <div class="n"><div class="tag">CAMPANHA</div><h3>Acelera Agosto: comissão em cronograma especial</h3>
             <p>Vendas de 02 a 31/08 nas condições da campanha: Imóvel em 12 parcelas com a 12ª de 17,5%; Auto e Pesados em 7 parcelas iguais. Confira o Cronograma de Comissionamento no Material de Apoio.</p>
             <div class="dt">06/08/2026</div></div>
@@ -3067,12 +3068,16 @@ const _crmNotifInterval = setInterval(() => {
 
 <script id="home-acelera-agosto">
 // ═══════════════════════════════════════════════════════════════════
-// HOME — Placar Acelera Agosto (Porto) · lê portal_vendas_cache (Supabase),
+// HOME — Placar Setembro Recorde · lê portal_vendas_cache (Supabase),
 // que o Dashboard Vendas mantém atualizado do OneDrive. Sem chamadas ao Graph.
 // ═══════════════════════════════════════════════════════════════════
-const HM_META = 137962907.62;          // 106.125.313,55 + 30%
-const HM_TOTAL_2025_FIXO = 106125313.55;
-const HM_ANO_BASE = 2025, HM_ANO_ATUAL = 2026, HM_MES = 8, HM_DIAS = 31;
+// Setembro Recorde: por ora o objetivo é o melhor setembro da história (2025,
+// R$ 35.170.572,70 e 136 cotas, todas as administradoras). Quando os sócios
+// definirem o objetivo do mês, é só trocar o valor de HM_META aqui.
+const HM_RECORDE = 35170572.70;
+let HM_META = HM_RECORDE;
+const HM_TOTAL_2025_FIXO = 35170572.70;
+const HM_ANO_BASE = 2025, HM_ANO_ATUAL = 2026, HM_MES = 9, HM_DIAS = 30;
 let _hmLastFetch = 0;
 
 function hmDia(row){
@@ -3108,7 +3113,7 @@ function hmMesNum(s){
 function hmAgrega(rows, ano, ateDia){
   const cred = new Array(HM_DIAS).fill(0), cot = new Array(HM_DIAS).fill(0);
   rows.forEach(r => {
-    if (!(String(r.adm||'').toUpperCase().includes('PORTO'))) return;
+    // Setembro Recorde conta todas as administradoras (o Acelera Agosto filtrava Porto).
     const dt = hmDia(r);
     // Mês e ano seguem as COLUNAS da planilha (mesma regra do Dashboard);
     // a data da venda só define o DIA no gráfico. Sem data ou com data de
@@ -3149,17 +3154,29 @@ async function initHome(force){
     payload = data;
   } catch(e) { console.warn('home cache:', e); }
   const vazio = document.getElementById('hm-vazio'), card = document.getElementById('hm-card'), tiles = document.getElementById('hm-tiles');
+  const hero = document.getElementById('hm-hero'), news = document.getElementById('hm-news-box');
+  const HM_PLACAR_OCULTO = hmPlacarOculto();
+  // Hero e notícias seguem a mesma regra do placar: só sócios e master veem.
+  if (hero) hero.style.display = HM_PLACAR_OCULTO ? 'none' : '';
+  if (news) news.style.display = HM_PLACAR_OCULTO ? 'none' : '';
   if (!payload || !Array.isArray(payload.dados) || !payload.dados.length) {
     if (card) card.style.display = 'none';
     if (tiles) tiles.style.display = 'none';
-    if (vazio) vazio.style.display = hmPlacarOculto() ? 'none' : '';
+    if (vazio) vazio.style.display = HM_PLACAR_OCULTO ? 'none' : '';
     return;
   }
   _hmLastFetch = Date.now();
-  const HM_PLACAR_OCULTO = hmPlacarOculto();
   if (card) card.style.display = HM_PLACAR_OCULTO ? 'none' : '';
   if (tiles) tiles.style.display = HM_PLACAR_OCULTO ? 'none' : '';
   if (vazio) vazio.style.display = 'none';
+
+  // Objetivo do mês: fixo em HM_META (recorde de setembro). O crescimento do ano
+  // deixou de entrar na conta a pedido do Allan (01/09) até os sócios definirem.
+  const objV = document.getElementById('hm-obj-v'), objK = document.getElementById('hm-obj-k');
+  if (objV) objV.textContent = 'R$ ' + Math.round(HM_META).toLocaleString('pt-BR');
+  if (objK) objK.textContent = 'melhor setembro (2025)';
+  const legObj = document.getElementById('hm-leg-obj');
+  if (legObj) legObj.textContent = 'Objetivo ' + hmFmtMi(HM_META);
 
   const agora = new Date();
   let hoje;
@@ -3179,7 +3196,7 @@ async function initHome(force){
 
   // Projeção de fechamento: aplica no total de 2025 o ritmo relativo de 2026
   // (quanto 2026 está rodando vs 2025 no mesmo dia). Assim a projeção segue a
-  // curva real de agosto, que concentra as vendas no fim do mês, em vez de uma
+  // curva real do mês, que concentra as vendas no fim, em vez de uma
   // reta linear que subestimaria o fechamento. Sem base de 2025 no dia, cai na
   // projeção linear pelo ritmo diário.
   const projecao = v25hj > 0 ? tot25 * (v26 / v25hj) : (hoje > 0 ? v26 / hoje * HM_DIAS : 0);
@@ -3187,11 +3204,11 @@ async function initHome(force){
   const clsProj = projecao >= HM_META ? 'up' : 'down';
 
   document.getElementById('hm-tiles').innerHTML = `
-    <div class="hm-tile"><div class="k">Vendido até dia ${hoje}</div><div class="v">${hmFmtMi(v26)}</div><div class="d">${q26} cotas · só Porto</div></div>
+    <div class="hm-tile"><div class="k">Vendido até dia ${hoje}</div><div class="v">${hmFmtMi(v26)}</div><div class="d">${q26} cotas · todas as adms</div></div>
     <div class="hm-tile"><div class="k">% do objetivo</div><div class="v">${pctMeta.toLocaleString('pt-BR',{maximumFractionDigits:1})}%</div><div class="d">objetivo ${hmFmtMi(HM_META)}</div></div>
     <div class="hm-tile"><div class="k">vs mesmo dia de 2025</div><div class="v ${cls}">${sinal}${vsAno.toLocaleString('pt-BR',{maximumFractionDigits:0})}%</div><div class="d">${hmFmtMi(v25hj)} em 2025</div></div>
     <div class="hm-tile"><div class="k">Projeção de fechamento</div><div class="v ${clsProj}">${hmFmtMi(projecao)}</div><div class="d">no ritmo atual, pela curva de 2025 · ${pctProj.toLocaleString('pt-BR',{maximumFractionDigits:0})}% do objetivo</div></div>
-    <div class="hm-tile"><div class="k">Faltam</div><div class="v">${hmFmtMi(Math.max(0,HM_META-v26))}</div><div class="d">${HM_DIAS-hoje} dias de campanha</div></div>`;
+    <div class="hm-tile"><div class="k">Faltam</div><div class="v">${hmFmtMi(Math.max(0,HM_META-v26))}</div><div class="d">${HM_DIAS-hoje} dias restantes</div></div>`;
 
   hmRenderChart(a25.cred, a25.cot, a26.cred, a26.cot, hoje, tot25, projecao);
 
@@ -3224,9 +3241,9 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
   txt(ML-8,MT-4,'crédito',{'font-size':10,'text-anchor':'end',fill:'#8a8984'});
   el('line',{x1:ML,x2:W-MR,y1:Y1(0),y2:Y1(0),stroke:'#d6d4cf','stroke-width':1});
   for(let d=1;d<=HM_DIAS;d+=2) txt(X(d),H-MB+18,String(d).padStart(2,'0'),{'text-anchor':'middle',fill:'#8a8984'});
-  txt(ML,H-8,'dias de agosto',{fill:'#8a8984'});
+  txt(ML,H-8,'dias de setembro',{fill:'#8a8984'});
   el('line',{x1:ML,x2:W-MR,y1:Y1(HM_META),y2:Y1(HM_META),stroke:'#6b7280','stroke-width':1.6,'stroke-dasharray':'6 5'});
-  txt(W-MR,Y1(HM_META)-6,'OBJETIVO  R$ 137,9 mi',{'text-anchor':'end','font-weight':'700',fill:'#6b7280'});
+  txt(W-MR,Y1(HM_META)-6,'OBJETIVO  '+hmFmtMi(HM_META),{'text-anchor':'end','font-weight':'700',fill:'#6b7280'});
   const bw=7;
   for(let d=1;d<=HM_DIAS;d++){
     const x=X(d);
@@ -3271,7 +3288,7 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
     const l26 = d<=hoje ? `<div class="row"><span><span class="dot" style="background:#2a78d6"></span>2026</span><b>${hmFmtBR(cred26[d-1]||0)} · ${cot26[d-1]||0} cotas</b></div>`
                         : (projArr[d-1] ? `<div class="row"><span><span class="dot" style="background:#9ec5f4"></span>2026 projeção</span><b>${hmFmtBR(projArr[d-1])}</b></div>`
                                         : `<div class="row"><span><span class="dot" style="background:#2a78d6"></span>2026</span><span style="color:#8a8984">ainda não chegou</span></div>`);
-    tip.innerHTML = `<b>Dia ${String(d).padStart(2,'0')}/08 · acumulado</b>${l26}
+    tip.innerHTML = `<b>Dia ${String(d).padStart(2,'0')}/09 · acumulado</b>${l26}
       <div class="row"><span><span class="dot" style="background:#eda100"></span>2025</span><b>${hmFmtBR(cred25[d-1]||0)} · ${cot25[d-1]||0} cotas</b></div>`;
     tip.style.display='block';
     const bx=box.getBoundingClientRect();
