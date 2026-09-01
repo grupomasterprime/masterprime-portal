@@ -35,6 +35,16 @@ button{cursor:pointer;font-family:inherit}
 select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12.5px;background:#fff;color:var(--text)}
 
 /* kanban */
+.resumo{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.rs{background:#fff;border:1px solid var(--border);border-radius:10px;padding:9px 12px;min-width:0}
+.rs .k{font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rs .v{font-size:18px;font-weight:800;color:var(--ink);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rs .s{font-size:10px;color:var(--text-3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rs.clique{cursor:pointer;user-select:none}
+.rs.clique:hover{border-color:#F59E0B}
+.rs.alerta .v{color:#B45309}
+.rs.on{background:#FFFBEB;border-color:#F59E0B;box-shadow:0 0 0 2px rgba(245,158,11,.25)}
+.rs.on .s{color:#B45309;font-weight:700}
 .kb{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;align-items:start}
 .kb-col{background:#EEF2F7;border-radius:12px;padding:8px;min-height:120px;min-width:0}
 .kb-col.drag-over{outline:2px dashed var(--teal);outline-offset:-2px}
@@ -107,8 +117,8 @@ select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 1
 #loading{padding:60px;text-align:center;color:var(--text-2)}
 .vazio{padding:34px;text-align:center;color:var(--text-3);font-size:12.5px}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:12.5px;padding:10px 18px;border-radius:10px;z-index:99}
-@media (max-width:1100px){ .kb{grid-template-columns:repeat(3,minmax(0,1fr))} }
-@media (max-width:640px){ .kb{grid-template-columns:1fr 1fr} .wrap{padding:12px} }
+@media (max-width:1100px){ .kb{grid-template-columns:repeat(3,minmax(0,1fr))} .resumo{grid-template-columns:repeat(3,minmax(0,1fr))} }
+@media (max-width:640px){ .kb{grid-template-columns:1fr 1fr} .wrap{padding:12px} .resumo{grid-template-columns:repeat(3,minmax(0,1fr));gap:6px} .rs{padding:8px 9px} .rs .v{font-size:16px} }
 </style>
 </head>
 <body>
@@ -138,6 +148,7 @@ select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 1
       <button class="btn btn-g" onclick="carregarTudo()">Atualizar</button>
       <button class="btn btn-p" onclick="abrirNovoLead()">+ Novo Lead</button>
     </div>
+    <div class="resumo" id="resumo"></div>
     <div class="kb" id="kanban"></div>
   </div>
 
@@ -357,10 +368,35 @@ function buscaMatch(l, q){
     l.indicador ? l.indicador.nome : '', l.consultor ? l.consultor.nome : ''].join(' ').toLowerCase();
   return q.split(/\s+/).every(t => alvo.includes(t));
 }
+let SO_PARADOS = false;
+function ehParado(l){ return ['novo','contato','qualificado','proposta'].includes(l.etapa) && idadeDias(l) >= DIAS_PARADO; }
+function toggleParados(){ SO_PARADOS = !SO_PARADOS; renderKanban(); }
+// Faixa de numeros em cima do kanban. Consultor ve os dele; socio/admin ve o que o
+// dropdown de consultor escolher (todos ou um). Nao considera a busca nem o arquivamento.
+function renderResumo(doCons){
+  const total = doCons.length;
+  const vend = doCons.filter(l => l.etapa === 'vendido');
+  const andamento = doCons.filter(l => !['vendido','perdido'].includes(l.etapa)).length;
+  const parados = doCons.filter(ehParado).length;
+  const credito = vend.reduce((s, l) => s + Number(l.valor_credito || 0), 0);
+  const cotas = vend.reduce((s, l) => s + Number(l.qtd_cotas || 0), 0);
+  const conv = total ? Math.round(vend.length / total * 100) : 0;
+  const mes = new Date(); mes.setDate(1); mes.setHours(0,0,0,0);
+  const noMes = doCons.filter(l => new Date(l.criado_em) >= mes).length;
+  $('resumo').innerHTML = `
+    <div class="rs"><div class="k">Leads</div><div class="v">${total}</div><div class="s">${noMes} neste mês</div></div>
+    <div class="rs"><div class="k">Em andamento</div><div class="v">${andamento}</div><div class="s">no funil agora</div></div>
+    <div class="rs"><div class="k">Vendas</div><div class="v">${vend.length}</div><div class="s">${cotas} cota${cotas === 1 ? '' : 's'}</div></div>
+    <div class="rs"><div class="k">Conversão</div><div class="v">${conv}%</div><div class="s">vendas sobre leads</div></div>
+    <div class="rs"><div class="k">Crédito vendido</div><div class="v" style="color:#065F46">R$ ${fmtBRL0(credito)}</div><div class="s">soma das vendas</div></div>
+    <div class="rs clique${parados ? ' alerta' : ''}${SO_PARADOS ? ' on' : ''}" onclick="toggleParados()" title="Clique para ver só os leads parados"><div class="k">Parados ${DIAS_PARADO}+ dias</div><div class="v">${parados}</div><div class="s">${SO_PARADOS ? 'Mostrando só parados. Clique para voltar' : (parados ? 'Clique para filtrar' : 'Tudo em dia')}</div></div>`;
+}
 function renderKanban(){
   const filtro = ehAdmin ? $('filtro-consultor').value : '';
   const q = ($('busca').value || '').trim().toLowerCase();
-  const base = LEADS.filter(l => (!filtro || String(l.consultor_id) === filtro) && buscaMatch(l, q));
+  const doCons = LEADS.filter(l => !filtro || String(l.consultor_id) === filtro);
+  renderResumo(doCons);
+  const base = doCons.filter(l => buscaMatch(l, q) && (!SO_PARADOS || ehParado(l)));
   const antigos = base.filter(ehAntigo).length;
   const visiveis = (q || MOSTRAR_ANTIGOS) ? base : base.filter(l => !ehAntigo(l));
   const ba = $('btn-antigos');
@@ -372,7 +408,7 @@ function renderKanban(){
     return `<div class="kb-col" data-etapa="${et.id}" ondragover="dragOver(event)" ondragleave="dragLeave(event)" ondrop="dropLead(event)">
       <div class="kb-h"><span class="t" style="color:${et.cor}">${et.nome}</span><span class="n">${itens.length}</span></div>
       ${itens.map(l => {
-        const parado = ['novo','contato','qualificado','proposta'].includes(l.etapa) && idadeDias(l) >= DIAS_PARADO;
+        const parado = ehParado(l);
         const tel = String(l.telefone || '').replace(/\D/g, '');
         const wa = tel.length >= 10 ? `<a class="wa-btn" href="https://wa.me/55${tel}" target="_blank" rel="noopener" onclick="event.stopPropagation()">WhatsApp</a>` : '';
         return `
