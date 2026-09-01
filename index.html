@@ -3340,12 +3340,21 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       const ac = acum12(serie);
       cards.push({ n: nome, v: fmt(ac[ac.length - 1], 2) + '%', s: 'acum. 12 meses', d: ac, cor: '#B4552D', tk: [nome + ' 12M', fmt(ac[ac.length - 1], 2) + '%'] });
     });
-    if (usd && usd.length) cards.push({ n: 'Dólar', v: 'R$ ' + fmt(usd[usd.length - 1], 2), s: 'PTAX venda', d: amostra(usd, 13), cor: '#1D7A4C', tk: ['DÓLAR', 'R$ ' + fmt(usd[usd.length - 1], 2)] });
+    if (usd && usd.length) {
+      // Dólar: a seta compara com o dia útil anterior (não com o ponto da amostra do gráfico,
+      // que fica ~1 mês atrás e fazia o dólar cair e aparecer verde).
+      const hoje = usd[usd.length - 1], ontem = usd.length > 1 ? usd[usd.length - 2] : hoje;
+      const varDia = ontem ? (hoje / ontem - 1) * 100 : 0;
+      const txtVar = (varDia > 0 ? '+' : '') + fmt(varDia, 2) + '% no dia';
+      cards.push({ n: 'Dólar', v: 'R$ ' + fmt(hoje, 2), s: 'PTAX venda · ' + txtVar, d: amostra(usd, 13), cor: '#1D7A4C', ref: ontem, tk: ['DÓLAR', 'R$ ' + fmt(hoje, 2)] });
+    }
     if (!cards.length) return;
-    // Direção vs ponto anterior (~1 mês): verde subiu, vermelho caiu
+    // Direção: verde subiu, vermelho caiu. Selic, CDI e índices comparam com ~1 mês atrás
+    // (ponto anterior da série); o dólar compara com o dia anterior (c.ref).
     const dirDe = c => {
       if (!c.d || c.d.length < 2) return 0;
-      const dlt = c.d[c.d.length - 1] - c.d[c.d.length - 2];
+      const ant = c.ref != null ? c.ref : c.d[c.d.length - 2];
+      const dlt = c.d[c.d.length - 1] - ant;
       return Math.abs(dlt) < 1e-9 ? 0 : (dlt > 0 ? 1 : -1);
     };
     // Painel com mini gráficos
