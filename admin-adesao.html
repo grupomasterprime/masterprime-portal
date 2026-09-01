@@ -960,11 +960,16 @@ async function copiarResumoWhats(id) {
   const link = await encurtarLink('https://grupomasterprime.github.io/masterprime-portal/formulario.html?view=' + a.id);
   const ehPJ = String(a.tipo_pessoa || '').toLowerCase().includes('j');
   const tel = d.celular || d.telefone || d.celular_socio || '';
+  // CPF/CNPJ formatado com pontuação (o banco guarda só os dígitos)
+  const dig = String(a.cpf_cnpj || '').replace(/\D/g, '');
+  let doc = a.cpf_cnpj || '';
+  if (dig.length === 11) doc = dig.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+  else if (dig.length === 14) doc = dig.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
   let t = '*Ficha de adesão recebida*\n';
   if (a.protocolo) t += '*Protocolo:* ' + a.protocolo + '\n';
   t += '\n';
   t += '*Nome:* ' + (a.nome_cliente || '') + '\n';
-  t += (ehPJ ? '*CNPJ:* ' : '*CPF:* ') + (a.cpf_cnpj || '') + '\n';
+  t += (dig.length === 14 || (ehPJ && dig.length !== 11) ? '*CNPJ:* ' : '*CPF:* ') + doc + '\n';
   if (tel) t += '*Telefone:* ' + tel + '\n';
   if (d.email) t += '*E-mail:* ' + d.email + '\n';
   t += '\n*Ficha completa:* ' + link;

@@ -1627,7 +1627,7 @@ function addSocio() {
       <div class="field"><label>CPF do Cônjuge</label><input data-socio="cpf_conjuge" data-mask="cpf"></div>
     </div>
     <div class="grid-2" style="margin-top:12px">
-      <div class="field"><label>E-mail do Sócio${r}</label><input data-socio="email" type="email" placeholder="email@exemplo.com" onblur="checkSocioEmail(this)"><span class="help" data-socio-msg="email" style="color:var(--red);display:none">E-mail deve ser diferente do e-mail da empresa</span></div>
+      <div class="field"><label>E-mail do Sócio${r}</label><input data-socio="email" type="email" placeholder="email@exemplo.com" onblur="checkSocioEmail(this)"><span class="help">Precisa ser diferente do e-mail da empresa. Evite hotmail e msn.</span><span class="help" data-socio-msg="email" style="color:var(--red);display:none">E-mail deve ser diferente do e-mail da empresa</span></div>
       <div class="field"><label>Telefone do Sócio</label><input data-socio="telefone" data-mask="phone" placeholder="(11) 99999-9999"></div>
     </div>
   `;
@@ -1878,10 +1878,12 @@ function validarPJ(d) {
   if (!s1.rg || !s1.data_emissao_rg || !s1.orgao_expedidor) return 'Preencha RG, Data de Emissão RG e Órgão Expedidor do 1º sócio';
   if (!s1.data_nascimento || !s1.nome_pai || !s1.nome_mae) return 'Preencha Data de Nascimento, Nome do Pai e Nome da Mãe do 1º sócio';
   if (!s1.data_entrada || !s1.participacao || !s1.administrador) return 'Preencha Data de Entrada, Participação % e se é Administrador do 1º sócio';
+  // E-mail do 1º sócio é obrigatório: a Porto exige e-mail próprio do sócio na emissão
+  if (!s1.email || !/.+@.+\..+/.test(s1.email)) return 'Informe o e-mail do 1º sócio (a administradora exige um e-mail do sócio diferente do e-mail da empresa)';
   // Email do sócio deve ser DIFERENTE do email da empresa
   for (let i = 0; i < d.socios.length; i++) {
     const s = d.socios[i];
-    if (s.email && d.email && s.email === d.email) {
+    if (s.email && d.email && String(s.email).toLowerCase().trim() === String(d.email).toLowerCase().trim()) {
       return `E-mail do ${i+1}º sócio (${s.nome}) precisa ser diferente do e-mail da empresa`;
     }
   }
