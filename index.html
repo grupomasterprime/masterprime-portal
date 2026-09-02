@@ -3155,7 +3155,10 @@ async function initHome(force){
   } catch(e) { console.warn('home cache:', e); }
   const vazio = document.getElementById('hm-vazio'), card = document.getElementById('hm-card'), tiles = document.getElementById('hm-tiles');
   const hero = document.getElementById('hm-hero'), news = document.getElementById('hm-news-box');
-  const HM_PLACAR_OCULTO = hmPlacarOculto();
+  // Hero e gráfico ocultos PARA TODOS por enquanto (decisão Allan 02/09/2026).
+  // Pra voltar a mostrar aos sócios: HM_TUDO_OCULTO = false.
+  const HM_TUDO_OCULTO = true;
+  const HM_PLACAR_OCULTO = HM_TUDO_OCULTO || hmPlacarOculto();
   // Hero e notícias seguem a mesma regra do placar: só sócios e master veem.
   if (hero) hero.style.display = HM_PLACAR_OCULTO ? 'none' : '';
   if (news) news.style.display = HM_PLACAR_OCULTO ? 'none' : '';
