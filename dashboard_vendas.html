@@ -375,18 +375,30 @@ async function loadDataFromOneDrive() {
     const encodedPath = encodeURIComponent(CONFIG.filePath).replace(/%2F/g, '/');
     const base = `https://graph.microsoft.com/v1.0/me/drive/root:${encodedPath}:/workbook`;
     
-    const wsResp = await fetch(`${base}/worksheets`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (!wsResp.ok) throw new Error(`Erro ao acessar planilha: ${wsResp.status} ${wsResp.statusText}`);
+    // O Graph às vezes responde 503/504/429 transitório (planilha grande sendo
+    // aberta do lado da Microsoft, ou throttling). Tenta até 4 vezes com espera
+    // crescente antes de mostrar erro pro usuário.
+    async function fetchGraph(url, descricao) {
+      let ultimo = null;
+      for (let tent = 1; tent <= 4; tent++) {
+        const r = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+        if (r.ok) return r;
+        ultimo = r;
+        if (![503, 504, 429, 500, 502].includes(r.status)) break;
+        const espera = tent * 3000;
+        document.getElementById('statusText').textContent =
+          'OneDrive ocupado (' + r.status + '), tentando de novo em ' + (espera/1000) + 's... (' + tent + '/4)';
+        await new Promise(res => setTimeout(res, espera));
+      }
+      throw new Error(descricao + ': ' + ultimo.status + ' ' + ultimo.statusText);
+    }
+
+    const wsResp = await fetchGraph(`${base}/worksheets`, 'Erro ao acessar planilha');
     const wsData = await wsResp.json();
     const sheetName = wsData.value.find(w => w.name === 'Base de Vendas')?.name || wsData.value[0].name;
 
     // 2. Ler dados (usedRange)
-    const rangeResp = await fetch(`${base}/worksheets('${encodeURIComponent(sheetName)}')/usedRange`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (!rangeResp.ok) throw new Error(`Erro ao ler dados: ${rangeResp.status}`);
+    const rangeResp = await fetchGraph(`${base}/worksheets('${encodeURIComponent(sheetName)}')/usedRange`, 'Erro ao ler dados');
     const rangeData = await rangeResp.json();
 
     // 3. Parse
@@ -474,7 +486,7 @@ async function loadDataFromOneDrive() {
     console.error('Erro:', e);
     document.getElementById('loadingScreen').style.display = 'none';
     document.getElementById('loginScreen').style.display = '';
-    alert('Erro ao carregar dados: ' + e.message);
+    alert('Erro ao carregar dados: ' + e.message + '\n\nO OneDrive/Microsoft pode estar instável. Aguarde alguns segundos e clique em Atualizar de novo.');
   }
 }
 

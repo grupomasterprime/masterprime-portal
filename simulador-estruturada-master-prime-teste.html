@@ -679,19 +679,31 @@ function recalc() {
   let saldo = totalDevido;
   let parcelaAtual = parcelaBase;            // parcela cheia (referência pós-contemplação)
   let parcelaPagaPlano = parcelaComRedutor;  // o que amortiza o saldo até contemplar
+  // Porto, quadro "redução de prazo": o simulador dedicado amortiza esse saldo
+  // pela parcela CHEIA quando é PJ (sem seguro) e pela reduzida quando é PF.
+  // Mantido igual ao dedicado (referência da casa) na bateria de 02/09/2026.
+  const _portoPF = seguroOn && seguro > 0;
+  let saldoPrazoPorto = totalDevido;
   for (let m=1; m<=expectativa; m++) {
     saldo -= parcelaPagaPlano;
+    saldoPrazoPorto -= (_portoPF ? parcelaPagaPlano : parcelaAtual);
     if (reajuste>0 && tipoReajuste && m % period === 0) {
       saldo *= (1+reajuste);
+      saldoPrazoPorto *= (1+reajuste);
       parcelaAtual *= (1+reajuste);
       parcelaPagaPlano *= (1+reajuste);
     }
   }
   saldo = Math.max(0, saldo);
+  saldoPrazoPorto = Math.max(0, saldoPrazoPorto);
 
   // Lance e valor de referência
   let valorRef = creditoAtualizado;
-  if (tipoLance === 'categoria' || tipoLance === 'cat-carta' || _isPorto || _isBrad) valorRef = creditoAtualizado*(1+taxaAdm+fundo);
+  // Porto: a Categoria do simulador dedicado é crédito x (1 + adm + ADESÃO + fundo).
+  // Sem a adesão aqui, um lance de 20% dava R$ menor que o dedicado (visto na
+  // bateria de testes de 02/09/2026, caso A1).
+  if (_isPorto) valorRef = creditoAtualizado*(1+taxaAdm+fundo+((adesaoOn&&adesao>0)?adesao:0));
+  else if (tipoLance === 'categoria' || tipoLance === 'cat-carta' || _isBrad) valorRef = creditoAtualizado*(1+taxaAdm+fundo);
   else if (tipoLance === 'saldo') valorRef = saldo;
   document.getElementById('valorRef').value = formatMoney(valorRef);
 
@@ -757,9 +769,20 @@ function recalc() {
   // Pós contemplação
   const saldoAposLance = Math.max(0, saldo - valorTotalLance);
   const prazoRestante = Math.max(0, prazo - expectativa);
-  const parcReducaoParcela = prazoRestante > 0 ? saldoAposLance/prazoRestante : 0;
-  const parcReducaoPrazo = parcelaAtual;
-  const novoPrazoReducao = parcReducaoPrazo > 0 ? Math.ceil(saldoAposLance/parcReducaoPrazo) : 0;
+  let parcReducaoParcela = prazoRestante > 0 ? saldoAposLance/prazoRestante : 0;
+  let parcReducaoPrazo = parcelaAtual;
+  let novoPrazoReducao = parcReducaoPrazo > 0 ? Math.ceil(saldoAposLance/parcReducaoPrazo) : 0;
+  if (_isPorto) {
+    // Igual ao dedicado da Porto (bateria 02/09/2026):
+    // 1) o seguro é recalculado sobre o saldo pós-lance e somado às parcelas;
+    // 2) o prazo do quadro "redução de prazo" usa saldoPrazoPorto (cheia p/ PJ,
+    //    reduzida p/ PF) e arredonda como o dedicado (Math.round).
+    const novoSeguroPos = _portoPF ? saldoAposLance * seguro : 0;
+    parcReducaoParcela += novoSeguroPos;
+    const saldoPrazoAposLance = Math.max(0, saldoPrazoPorto - valorTotalLance);
+    novoPrazoReducao = parcelaAtual > 0 ? Math.round(saldoPrazoAposLance/parcelaAtual) : 0;
+    parcReducaoPrazo = parcelaAtual + novoSeguroPos;
+  }
 
   document.getElementById('reducaoParcela_parc').textContent = formatMoney(parcReducaoParcela);
   document.getElementById('reducaoParcela_prazo').textContent = prazoRestante;
