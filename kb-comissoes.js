@@ -13,7 +13,7 @@ window.KB_ADMIN["comissoes"] = {
       "categoria_label": "Como sua comissão é paga",
       "categoria_ordem": 1,
       "titulo": "Em quantas vezes recebo minha comissão?",
-      "conteudo": "Depende da administradora e do tipo de bem vendido. Resumo geral:\n\n• PORTO Pesados/Bike/BM: 6 parcelas variáveis (20%, 10%, 10%, 15%, 20%, 25%)\n• PORTO Automóvel: 6 parcelas iguais (atualizado 2026, era 4)\n• PORTO Imóvel padrão: à vista, 5x ou 12x — varia pela venda\n• PORTO Imóvel novas regras 2026: Opção 1 (adm antecipada, 5x) ou Opção 2 (adm diluída, 12 parcelas crescentes 7→12%)\n• PORTO — ATENÇÃO CAMPANHAS: vendas de 06/07 a 31/07/2026 (campanha de julho) e de 02/08 a 31/08/2026 (Acelera Agosto) seguem cronogramas próprios — veja o card de campanhas da Porto.\n\n• ITAÚ Imóvel padrão: 6 parcelas iguais (atualizado 2026)\n• ITAÚ Imóvel com redutor: 13 parcelas iguais (~7,69% cada)\n• ITAÚ Automóvel padrão: 4 parcelas iguais\n• ITAÚ Automóvel grupo com 50% de redutor: 10 parcelas iguais\n\n• BRADESCO Automóvel: 6 parcelas iguais (16,67% cada)\n• BRADESCO Imóvel: 10 parcelas iguais (10% cada)\n\n• ADEMICON 50% Diluído: 14 parcelas em 3 etapas (1-10: 5,60%; 11-13: ~10,32%; pula 14; 15: 13,05%)\n\nVeja o PDF completo no fim desta seção para detalhes visuais e exemplos.",
+      "conteudo": "Depende da administradora e do tipo de bem vendido. Resumo geral:\n\n• PORTO Pesados/Bike/BM: 6 parcelas variáveis (20%, 10%, 10%, 15%, 20%, 25%)\n• PORTO Automóvel: 6 parcelas iguais (atualizado 2026, era 4)\n• PORTO Imóvel padrão: à vista, 5x ou 12x — varia pela venda\n• PORTO Imóvel novas regras 2026: Opção 1 (adm antecipada, 5x) ou Opção 2 (adm diluída, 12 parcelas crescentes 7→12%)\n• PORTO — ATENÇÃO CAMPANHAS: vendas de 06/07 a 31/07/2026 (campanha de julho) e de 02/08 a 31/08/2026 (Acelera Agosto) seguem cronogramas próprios — veja o card de campanhas da Porto.\n\n• ITAÚ Imóvel padrão: 6 parcelas iguais (atualizado 2026)\n• ITAÚ Imóvel com redutor: vendas até 31/01/2026 em 13 parcelas iguais (~7,69% cada); vendas a partir de 01/02/2026 em 12 parcelas iguais (~8,33% cada)\n• ITAÚ Automóvel padrão: 4 parcelas iguais\n• ITAÚ Automóvel grupo com 50% de redutor: 10 parcelas iguais\n\n• BRADESCO Automóvel: 6 parcelas iguais (16,67% cada)\n• BRADESCO Imóvel: 10 parcelas iguais (10% cada)\n\n• ADEMICON 50% Diluído: 14 parcelas em 3 etapas (1-10: 5,60%; 11-13: ~10,32%; pula 14; 15: 13,05%)\n\nVeja o PDF completo no fim desta seção para detalhes visuais e exemplos.",
       "tags": "cronograma, parcelas, pagamento, porto, itau, bradesco, ademicon, quantas vezes, prazo",
       "ordem": 1
     },
@@ -58,8 +58,8 @@ window.KB_ADMIN["comissoes"] = {
       "categoria_label": "Itaú",
       "categoria_ordem": 3,
       "titulo": "Cronograma Itaú Imóvel / Auto",
-      "conteudo": "IMÓVEL — padrão (atualizado 2026): 6 parcelas iguais de 16,67% cada (era 5 parcelas antes).\n\nIMÓVEL — grupo com redutor: 13 parcelas iguais (~7,69% cada). Verifique no contrato se o grupo tem redutor.\n\nAUTOMÓVEL — padrão: 4 parcelas iguais (25% cada).\n\nAUTOMÓVEL — grupo com 50% de redutor: 10 parcelas iguais (10% cada).",
-      "tags": "itau, imovel, automovel, parcelas, redutor, 6x, 13x, 10x",
+      "conteudo": "IMÓVEL — padrão (atualizado 2026): 6 parcelas iguais de 16,67% cada (era 5 parcelas antes).\n\nIMÓVEL — grupo com redutor: depende da DATA DA VENDA. Vendas até 31/01/2026: 13 parcelas iguais (~7,69% cada). Vendas a partir de 01/02/2026: 12 parcelas iguais (~8,33% cada). Verifique no contrato se o grupo tem redutor.\n\nAUTOMÓVEL — padrão: 4 parcelas iguais (25% cada).\n\nAUTOMÓVEL — grupo com 50% de redutor: 10 parcelas iguais (10% cada).",
+      "tags": "itau, imovel, automovel, parcelas, redutor, 6x, 12x, 13x, 10x",
       "ordem": 1
     },
     {

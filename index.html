@@ -3348,14 +3348,24 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       + '<polyline points="' + pts + '" fill="none" stroke="' + cor + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>'
       + '<circle cx="' + w + '" cy="' + y(d[d.length - 1]) + '" r="2.6" fill="' + cor + '"/></svg>';
   };
+  // Bitcoin em reais (AwesomeAPI, gratuita e sem chave): cotação atual com
+  // variação do dia + histórico diário de 12 meses para o mini gráfico.
+  const btcLast = () => fetch('https://economia.awesomeapi.com.br/json/last/BTC-BRL')
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(j => j['BTCBRL']);
+  const btcHist = () => fetch('https://economia.awesomeapi.com.br/json/daily/BTC-BRL/360')
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(d => d.map(x => parseFloat(x.bid)).filter(v => v > 0).reverse());
   Promise.all([
     sgs(432, 13).catch(() => null),   // Meta Selic (diária) · últimos 13 meses
     sgs(4389, 13).catch(() => null),  // CDI anualizado (diária) · últimos 13 meses
     sgs(433, 26).catch(() => null),   // IPCA var. mensal · 26 meses p/ acumulado móvel
     sgs(189, 26).catch(() => null),   // IGP-M var. mensal
     sgs(192, 26).catch(() => null),   // INCC var. mensal
-    sgs(1, 13).catch(() => null)      // Dólar PTAX venda (diária)
-  ]).then(([selic, cdi, ipca, igpm, incc, usd]) => {
+    sgs(1, 13).catch(() => null),     // Dólar PTAX venda (diária)
+    btcLast().catch(() => null),
+    btcHist().catch(() => null)
+  ]).then(([selic, cdi, ipca, igpm, incc, usd, btc, btcH]) => {
     const cards = [];
     if (selic && selic.length) cards.push({ n: 'Selic', v: fmt(selic[selic.length - 1], 2) + '%', s: 'meta a.a. · BCB', d: amostra(selic, 13), cor: '#2D3F5E', tk: ['SELIC', fmt(selic[selic.length - 1], 2) + '% a.a.'] });
     if (cdi && cdi.length) cards.push({ n: 'CDI', v: fmt(cdi[cdi.length - 1], 2) + '%', s: 'a.a. · BCB', d: amostra(cdi, 13), cor: '#2D3F5E', tk: ['CDI', fmt(cdi[cdi.length - 1], 2) + '% a.a.'] });
@@ -3372,6 +3382,17 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       const varDia = ontem ? (hoje / ontem - 1) * 100 : 0;
       const txtVar = (varDia > 0 ? '+' : '') + fmt(varDia, 2) + '% no dia';
       cards.push({ n: 'Dólar', v: 'R$ ' + fmt(hoje, 2), s: 'PTAX venda · ' + txtVar, d: amostra(usd, 13), cor: '#1D7A4C', ref: ontem, tk: ['DÓLAR', 'R$ ' + fmt(hoje, 2)] });
+    }
+    if (btc && parseFloat(btc.bid) > 0) {
+      const v = parseFloat(btc.bid);
+      const pct = parseFloat(String(btc.pctChange).replace(',','.')) || 0;
+      const txtVar = (pct > 0 ? '+' : '') + fmt(pct, 2) + '% no dia';
+      const vTxt = 'R$ ' + fmt(v, 0);
+      // ref = valor de ontem, pra seta seguir a variação do DIA (igual ao dólar)
+      const ontemBtc = pct !== 0 ? v / (1 + pct/100) : v;
+      // último ponto = cotação de agora, pra seta e o gráfico fecharem no mesmo valor
+      const serie = (btcH && btcH.length > 1) ? amostra(btcH, 12).concat([v]) : [v, v];
+      cards.push({ n: 'Bitcoin', v: vTxt, s: 'BTC/BRL · ' + txtVar, d: serie, cor: '#B4700F', ref: ontemBtc, tk: ['BITCOIN', vTxt] });
     }
     if (!cards.length) return;
     // Direção: verde subiu, vermelho caiu. Selic, CDI e índices comparam com ~1 mês atrás
