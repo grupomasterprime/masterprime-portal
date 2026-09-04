@@ -252,7 +252,9 @@ select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 1
   <div class="mod">
     <h2 id="rod-titulo">Rodízio de leads</h2>
     <p style="font-size:12px;color:var(--text-2);margin-bottom:12px">Marque quem vai receber os leads deste indicador. Cada lead novo vai para o próximo da lista, revezando entre os marcados. Sem ninguém marcado, os leads vão para o dono do link.</p>
-    <div id="rod-lista" style="max-height:300px;overflow:auto;border:1px solid var(--border);border-radius:8px;padding:6px 12px"></div>
+    <div id="rod-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
+    <input id="rod-busca" placeholder="Digite o nome do consultor..." autocomplete="off" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 11px;font-size:13px;font-family:inherit">
+    <div id="rod-sug" style="max-height:220px;overflow:auto;border:1px solid var(--border);border-radius:8px;margin-top:4px;display:none"></div>
     <div id="rod-err"></div>
     <div class="mod-ft">
       <button class="btn btn-g" onclick="fechar('ovl-rod')">Cancelar</button>
@@ -626,17 +628,54 @@ async function toggleIndicador(id, ativo){
 }
 // ══════════ RODIZIO DE LEADS DO INDICADOR ══════════
 let rodIndicadorId = null;
+// Rodízio com busca: digita o nome, aparecem sugestões, clica pra adicionar.
+// Só CONSULTORES e SÓCIOS entram nas sugestões (pedido Allan 04/09/2026);
+// quem já estava salvo no rodízio aparece como chip mesmo que o tipo seja outro.
+let rodSel = [];
+function rodElegiveis(){
+  return USUARIOS.filter(u => ['consultor','socio'].includes(String(u.tipo||'').toLowerCase()));
+}
+function rodRender(){
+  $('rod-chips').innerHTML = rodSel.map(id => {
+    const u = USUARIOS.find(x => String(x.id) === String(id));
+    const nome = u ? u.nome : 'ID ' + id;
+    return `<span style="display:inline-flex;align-items:center;gap:6px;background:#E0F2F1;color:#0E7490;border-radius:999px;padding:4px 6px 4px 12px;font-size:12px;font-weight:700">${esc(nome)}<button onclick="rodRemover(${id})" style="border:none;background:#0E7490;color:#fff;border-radius:50%;width:16px;height:16px;font-size:10px;line-height:1;cursor:pointer;padding:0">x</button></span>`;
+  }).join('') || '<span style="font-size:12px;color:var(--text-3)">Ninguém no rodízio: os leads vão para o dono do link</span>';
+  rodSugestoes();
+}
+function rodSugestoes(){
+  const q = ($('rod-busca').value || '').trim().toLowerCase();
+  const sug = rodElegiveis()
+    .filter(u => !rodSel.includes(u.id))
+    .filter(u => !q || u.nome.toLowerCase().includes(q))
+    .sort((a,b) => a.nome.localeCompare(b.nome))
+    .slice(0, 8);
+  const box = $('rod-sug');
+  if (!q && !sug.length) { box.style.display = 'none'; return; }
+  box.innerHTML = sug.length
+    ? sug.map(u => `<div onclick="rodAdicionar(${u.id})" style="padding:8px 12px;font-size:12.5px;cursor:pointer;border-bottom:1px solid #F1F5F9" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background=''">${esc(u.nome)}${String(u.tipo||'').toLowerCase() === 'socio' ? ' <span style="font-size:10px;color:#94A3B8">(sócio)</span>' : ''}</div>`).join('')
+    : '<div style="padding:8px 12px;font-size:12px;color:var(--text-3)">Nenhum consultor com esse nome</div>';
+  box.style.display = q || sug.length ? '' : 'none';
+}
+function rodAdicionar(id){ if (!rodSel.includes(id)) rodSel.push(id); $('rod-busca').value = ''; rodRender(); $('rod-busca').focus(); }
+function rodRemover(id){ rodSel = rodSel.filter(x => x !== id); rodRender(); }
 function abrirRodizio(id){
   const i = INDICADORES.find(x => x.id === id); if (!i) return;
   rodIndicadorId = id;
-  const sel = (i.rodizio_consultores || []).map(String);
+  rodSel = (i.rodizio_consultores || []).map(Number);
   $('rod-titulo').textContent = 'Rodízio de leads: ' + i.nome;
-  $('rod-lista').innerHTML = USUARIOS.map(u => `<label style="display:flex;align-items:center;gap:9px;padding:6px 0;font-size:12.5px;cursor:pointer;border-bottom:1px solid #F1F5F9"><input type="checkbox" value="${u.id}" ${sel.includes(String(u.id)) ? 'checked' : ''}> ${esc(u.nome)}</label>`).join('');
+  $('rod-busca').value = '';
+  rodRender();
   $('rod-err').innerHTML = '';
   $('ovl-rod').classList.remove('hidden');
+  if (!$('rod-busca').dataset.wired) {
+    $('rod-busca').dataset.wired = '1';
+    $('rod-busca').addEventListener('input', rodSugestoes);
+    $('rod-busca').addEventListener('focus', rodSugestoes);
+  }
 }
 async function salvarRodizio(){
-  const ids = [...$('rod-lista').querySelectorAll('input:checked')].map(c => parseInt(c.value, 10));
+  const ids = rodSel.map(x => parseInt(x, 10)).filter(n => !isNaN(n));
   const { error } = await sb.from('crm_indicadores').update({ rodizio_consultores: ids, rodizio_pos: 0 }).eq('id', rodIndicadorId);
   if (error) { $('rod-err').innerHTML = '<div class="msg-err">' + esc(error.message) + '</div>'; return; }
   fechar('ovl-rod'); toast(ids.length ? 'Rodízio salvo' : 'Rodízio removido, leads voltam para o dono do link');

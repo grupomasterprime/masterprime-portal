@@ -887,6 +887,12 @@ const TODOS_SOCIOS = [...ADM_SOCIOS, ...COM_SOCIOS];
 // Default cartaResp = RENATO BENEDETTI quando não há "/ NOME REPASSA" explícito
 const PARCEIROS_CARTA = ['RICARDO CABEZAOLIAS', 'ANDERSON PASSADOR', 'DANIEL BEIRAS'];
 
+// Parceiros que a MASTER paga direto mediante NF (sem carta, sem portal).
+// Aparecem no Resumo de Pagamento numa seção própria pro Carlos repassar
+// depois que a nota chegar. Pra adicionar outro, basta incluir o nome aqui
+// (o nome também deve estar em OCULTOS_LISTA pra não ganhar demonstrativo no portal).
+const PARCEIROS_NF_MASTER = ['ANDERSON PASSADOR'];
+
 // Parceiros que a Master paga com demonstrativo próprio
 const PARCEIROS_DEMO = ['ADVANCED', 'STRADA', 'CAMINO', 'SPOLAOR'];
 
@@ -2024,6 +2030,59 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
     }
   }
 
+  // ── Parceiros com NF própria: a MASTER paga direto, mediante nota ──
+  // Decisão Allan 04/09/2026: parceiro tipo Anderson Passador recebe da Master
+  // (emite NF pra Master), SEM carta de parceria, SEM sair do bolso do consultor
+  // e SEM demonstrativo no portal (o nome está em OCULTOS_LISTA). O % dele sai
+  // do bruto da venda e o RESTANTE segue o split. O DIRETO antigo é ignorado.
+  // Formatos:
+  //   "1% PASSADOR BRUTO / 1,5% RENATO BENEDETTI"       → % absoluto pro 2º nome
+  //   "1% PASSADOR BRUTO DIRETO / 50% RENATO BENEDETTI" → % do RESTANTE pro 2º nome
+  {
+    const segsNF = s.split('/').map(t => t.trim()).filter(Boolean);
+    const m1NF = segsNF.length >= 1
+      ? segsNF[0].replace(/\s+DIRETO\b/g,'').match(/^(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s\.]+?)(?:\s+(BRUTO|LIQUIDO))?$/)
+      : null;
+    const nomeNF = m1NF ? normNome(m1NF[2].trim()) : '';
+    const nfMatch = m1NF ? PARCEIROS_NF_MASTER.find(pn => nomeNF === pn || nomeNF.includes(pn) || pn.includes(nomeNF)) : null;
+    if (nfMatch) {
+      const pctNF   = parseFloat(m1NF[1].replace(',','.'))/100;
+      const ehLiqNF = m1NF[3] !== 'BRUTO'; // BRUTO explícito = sem NF/ADM (ele emite a própria nota)
+      const outrosNF = segsNF.slice(1)
+        .map(t => t.replace(/\s+DIRETO\b/g,'').match(/^(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s\.]+?)(?:\s+(BRUTO|LIQUIDO))?$/))
+        .filter(Boolean)
+        .map(mm => ({ pct: parseFloat(mm[1].replace(',','.'))/100, quem: normNome(mm[2].trim()) }));
+      const temSocioNF = TODOS_SOCIOS.includes(normNome(consultor)) || outrosNF.some(o => TODOS_SOCIOS.includes(o.quem));
+      const baseNF = temSocioNF ? 0.04 : ((multConsultor||0.625) * 4/100);
+      if (pctNF > 0 && pctNF <= 0.04 && baseNF > 0) {
+        // BRUTO = o parceiro recebe o % CHEIO, sem NF nem ADM. O custo disso não é
+        // da Master: a fatia retirada do bolo é o % dividido pelo fator líquido
+        // (1 − NF 17,43%) × (1 − ADM 10%) = 0,74313. Ex: 1% bruto consome 1,346%
+        // do bolo, e o restante (2,654% numa venda de 4%) é o que os consultores
+        // dividem. Corrigido em 04/09/2026 (apontado pelo Allan: antes a Master
+        // bancava a diferença e sobrava 1,5% cheio pra cada).
+        // Na prática marcamos a parte como LIQUIDO com fração já engordada: o
+        // motor desconta NF+ADM da fatia e o parceiro recebe exatamente o % cheio.
+        const fatorLiq = (1 - TRIB_VEND) * (1 - ADM_PCT);
+        const fracNF = ehLiqNF ? (pctNF / baseNF) : (pctNF / fatorLiq / baseNF);
+        const partes = [{ quem: nfMatch, fracBruto: fracNF, pctOrig: pctNF,
+          ehParceiro: true, masterPaga: true, oculto: false, ehCarta: false,
+          ehLiquido: true, ehNfMaster: true }];
+        const pool = Math.max(0, 1 - fracNF);
+        let usado = 0;
+        outrosNF.forEach(o => {
+          // ≤4% = % absoluto do crédito; >4% (ex: 50%) = fatia do RESTANTE
+          const frac = o.pct > 0.04 ? o.pct * pool : o.pct / baseNF;
+          usado += frac;
+          partes.push({ quem: o.quem, fracBruto: frac, pctOrig: o.pct <= 0.04 ? o.pct : null,
+            ehParceiro: false, masterPaga: false, oculto: false, ehCarta: false });
+        });
+        const selfFrac = Math.max(0, pool - usado);
+        return { tipo:'ok', partes, selfFrac };
+      }
+    }
+  }
+
   // ── Anderson / Passador / Moises / Guto / Ricardo — REPASSA ──
   // Formatos reais da base:
   // "X% NOME LIQUIDO / RESP" | "X% NOME - RESP REPASSA" | "NOME X% - RESP REPASSA"
@@ -2589,7 +2648,15 @@ function processarLinha(linha, match, ciclo, mult, split, isAdvanced=false) {
       : fracToPctReal(parte.fracBruto, multEfet, linha);
 
     if (!parte.oculto && !parte.silenciaObs) {
-      if (parte.masterPaga && !parte.ehCarta) {
+      if (parte.ehNfMaster) {
+        // Parceiro com NF: a carta sai no nome do CONSULTOR da venda (pra ele
+        // conferir e mandar ao parceiro), mas o valor NÃO passa pelo demonstrativo
+        // dele — quem transfere é a Master (Carlos), mediante a nota.
+        obsParc.push({ quem:parte.quem, frac:parte.fracBruto, pctOrig:parte.pctOrig, valor:valParc,
+          brutoParc:brutoPart, nfParc, admParc,
+          masterPaga:false, ehLiquido:!!parte.ehLiquido, ehStub:false,
+          ehCarta:true, cartaResp:consultor, ehNfMaster:true });
+      } else if (parte.masterPaga && !parte.ehCarta) {
         // Parceiro masterPaga (CAMINO, SPOLAOR, STRADA, ENOQUE, etc.) → OBS simples
         // em itálico cinza no demo do consultor: "1,50% CAMINO"
         obsParc.push({
@@ -2623,6 +2690,12 @@ function processarLinha(linha, match, ciclo, mult, split, isAdvanced=false) {
         indicacao: parte.ehLiquido ? 'Líquido · '+consultor : 'Bruto · '+consultor
       });
       addExcedente(-valParc, linha.adm);
+      if (parte.ehNfMaster) {
+        addCarta(consultor, parte.quem, {
+          ...linha, dataVenda:dv, nomeCliente:nc,
+          valor:valParc, brutoParc:brutoPart, nfParc, admParc, ehLiquido:!!parte.ehLiquido
+        });
+      }
     }
 
     // Carta de parceria (vc paga): gera entrada no S.cartas E linha no demo do responsável
@@ -3176,7 +3249,7 @@ function mostrarDetalhe(nome) {
         const pctStr = p.pctOrig
           ? (((p.pctOrig*100).toFixed(2).replace('.',',').replace(/,00$/,'')+'%') + ' · ')
           : (p.frac ? (fracToPctReal(p.frac, l.mult, l) + ' · ') : '');
-        return `<span style="font-size:9px;color:var(--amber);white-space:nowrap">${p.quem}: ${pctStr}${fmtBRL(p.valor)} ${p.masterPaga?'<span class="tag tag-green" style="font-size:8px">M.paga</span>':'<span class="tag tag-amber" style="font-size:8px">vc paga</span>'}</span>`;
+        return `<span style="font-size:9px;color:var(--amber);white-space:nowrap">${p.quem}: ${pctStr}${fmtBRL(p.valor)} ${p.ehNfMaster?'<span class="tag tag-green" style="font-size:8px">Master paga · NF</span>':p.masterPaga?'<span class="tag tag-green" style="font-size:8px">M.paga</span>':'<span class="tag tag-amber" style="font-size:8px">vc paga</span>'}</span>`;
       })
     ].join('<br>');
     const rowStyle = ehNegativo ? 'style="background:#FEF2F2;border-left:3px solid #EF4444"' : '';
@@ -4002,10 +4075,13 @@ function renderResumo() {
   const RESUMO_FORCAR_VEND   = new Set(['LE - EDSON', 'ERIK GONCALVES']);
   const RESUMO_EXCLUIR_SOCIOS= new Set(['BRUNO E RENATO']);
   const RESUMO_SO_CARTAS = new Set(['DANIEL BEIRAS','FLAVIA','JOSE CARLOS','MOISES',
-    'RICARDO CABEZAOLIAS','GUTO','ANDERSON PASSADOR']);
+    'RICARDO CABEZAOLIAS','GUTO']);
+  // Parceiros com NF: pagos direto pela Master, listados em seção própria
+  const RESUMO_NF = new Set(PARCEIROS_NF_MASTER);
 
   const resolveRsumoTipo = ([nome, v]) => {
     const nu = nome.toUpperCase();
+    if ([...RESUMO_NF].some(x => nu.includes(x.toUpperCase()))) return 'parceiro_nf';
     if ([...RESUMO_SO_CARTAS].some(x => nu.includes(x.toUpperCase()))) return '__oculto';
     if (RESUMO_EXCLUIR_SOCIOS.has(nome)) return 'vendedor';
     if (RESUMO_FORCAR_VEND.has(nome)) return 'vendedor';
@@ -4017,7 +4093,8 @@ function renderResumo() {
   const socios  = Object.entries(ent).filter(([n,v]) => resolveRsumoTipo([n,v]).startsWith('socio') && !RESUMO_EXCLUIR_SOCIOS.has(n)).sort(([a],[b])=>a.localeCompare(b));
   const vends   = Object.entries(ent).filter(([n,v]) => resolveRsumoTipo([n,v])==='vendedor').sort(([a],[b])=>a.localeCompare(b));
   const parcs   = Object.entries(ent).filter(([n,v]) => resolveRsumoTipo([n,v])==='parceiro').sort(([a],[b])=>a.localeCompare(b));
-  const outros  = Object.entries(ent).filter(([n,v]) => !['__oculto','socio','socio_adm','socio_com','vendedor','parceiro'].includes(resolveRsumoTipo([n,v]))).sort(([a],[b])=>a.localeCompare(b));
+  const parcsNF = Object.entries(ent).filter(([n,v]) => resolveRsumoTipo([n,v])==='parceiro_nf').sort(([a],[b])=>a.localeCompare(b));
+  const outros  = Object.entries(ent).filter(([n,v]) => !['__oculto','socio','socio_adm','socio_com','vendedor','parceiro','parceiro_nf'].includes(resolveRsumoTipo([n,v]))).sort(([a],[b])=>a.localeCompare(b));
 
   let tCorr=0, tCons=0;
   const sep = label => `<tr><td colspan="5" style="padding:6px 12px 2px;font-size:9px;color:var(--text2);background:#F8FAFC;font-weight:600;text-transform:uppercase;letter-spacing:.5px">${label}</td></tr>`;
@@ -4025,11 +4102,11 @@ function renderResumo() {
     const corr = v.corr||0, cons = v.cons||0;
     tCorr += corr; tCons += cons;
     const tipoReal = resolveRsumoTipo([nome,v]);
-    const tipoCls = tipoReal.startsWith('socio') ? 'tag-navy' : tipoReal==='parceiro' ? 'tag-teal' : 'tag-gray';
+    const tipoCls = tipoReal.startsWith('socio') ? 'tag-navy' : tipoReal==='parceiro' ? 'tag-teal' : tipoReal==='parceiro_nf' ? 'tag-amber' : 'tag-gray';
     const fmtC = v => v ? `<span class="${v<0?'neg':'pos'}">${fmtBRL(v)}</span>` : '—';
     return `<tr>
       <td class="fw6">${nome}</td>
-      <td><span class="tag ${tipoCls}">${tipoReal}</span></td>
+      <td><span class="tag ${tipoCls}">${tipoReal==="parceiro_nf"?"NF pendente":tipoReal}</span></td>
       <td class="mono num" style="font-size:11px" data-val="${corr}">${fmtC(corr)}</td>
       <td class="mono num" style="font-size:11px" data-val="${cons}">${fmtC(cons)}</td>
     </tr>`;
@@ -4039,6 +4116,7 @@ function renderResumo() {
   if (socios.length)  html += sep('Sócios') + socios.map(row).join('');
   if (vends.length)   html += sep('Vendedores / Consultores') + vends.map(row).join('');
   if (parcs.length)   html += sep('Parceiros') + parcs.map(row).join('');
+  if (parcsNF.length) html += sep('Parceiros com NF: repassar SOMENTE após receber a nota fiscal') + parcsNF.map(row).join('');
   if (outros.length)  html += sep('Outros') + outros.map(row).join('');
 
   document.getElementById('resumo-body').innerHTML = html;
