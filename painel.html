@@ -1191,8 +1191,10 @@ function fmtData(v) {
 // Quando o ciclo seguinte for lançado na planilha Elite já com a categoria
 // nova, a regra vira só histórico (continua certa para as vendas antigas).
 const MULT_VIGENCIA = {
-  // Douglas entrou no programa Elite em 01/08/2026 com 2,5% (decisão Allan 01/09).
-  'DOUGLAS BOMFIM': [ { desde: { y:2026, m:8, d:1 }, mult: 0.625 } ],
+  // Vazio por enquanto. Exemplo de uso (mudança de categoria no meio do ciclo):
+  //   'DOUGLAS BOMFIM': [ { desde: { y:2026, m:8, d:1 }, mult: 0.625 } ],
+  // Douglas chegou a entrar aqui com 2,5% a partir de 01/08/2026 (01/09), mas
+  // desistiu e voltou ao 1% da planilha Elite (04/09/2026, decisão Allan).
 };
 function getMult(consultor, ciclo, dataVenda) {
   // Normaliza via normNome/ALIASES para que variantes ("JOÃO PORTO MAX",
@@ -3971,16 +3973,18 @@ function renderSocios() {
                 `<tr><td class="dim" style="font-size:11px">ADM ${adm}</td><td class="mono num">${fmtBRL(val/2)}</td><td class="mono num">${fmtBRL(val/2)}</td></tr>`
               ).join('')}
               <tr style="background:#FFFBEB"><td class="fw6">Dist. Excedente</td><td class="mono num">${fmtBRL(d.dist.porSocio['ALLAN ALMEIDA']||0)}</td><td class="mono num">${fmtBRL(d.dist.porSocio['CARLOS EDUARDO']||0)}</td></tr>
+              <tr><td class="fw6">Vendas próprias</td><td class="mono num">${fmtBRL(S.resultado['ALLAN ALMEIDA']?.totLiq||0)}</td><td class="mono num">${fmtBRL(S.resultado['CARLOS EDUARDO']?.totLiq||0)}</td></tr>
             </tbody>
             <tfoot>
-              <tr><td class="fw7">TOTAL</td><td class="mono num pos fw7">${fmtBRL(admAllan)}</td><td class="mono num pos fw7">${fmtBRL(admCarlos)}</td></tr>
+              <tr><td class="fw7">TOTAL</td><td class="mono num pos fw7">${fmtBRL(admAllan + (S.resultado['ALLAN ALMEIDA']?.totLiq||0))}</td><td class="mono num pos fw7">${fmtBRL(admCarlos + (S.resultado['CARLOS EDUARDO']?.totLiq||0))}</td></tr>
               ${ (() => {
                 const tots = S.despesasSala?.totPorSocio || {corretora:{},consultoria:{},socios:{}};
                 const dA = (tots.corretora['ALLAN ALMEIDA']||0)+(tots.consultoria['ALLAN ALMEIDA']||0)+(tots.socios['ALLAN ALMEIDA']||0);
                 const dC = (tots.corretora['CARLOS EDUARDO']||0)+(tots.consultoria['CARLOS EDUARDO']||0)+(tots.socios['CARLOS EDUARDO']||0);
                 if (!dA && !dC) return '';
+                const vA = S.resultado['ALLAN ALMEIDA']?.totLiq||0, vC = S.resultado['CARLOS EDUARDO']?.totLiq||0;
                 return '<tr style="background:#FEF2F2"><td class="fw6" style="color:#991B1B">(-) Despesas da Sala</td><td class="mono num neg">'+fmtBRL(dA)+'</td><td class="mono num neg">'+fmtBRL(dC)+'</td></tr>'
-                     + '<tr style="background:#FEF3C7"><td class="fw7">Total após Despesas</td><td class="mono num pos fw7">'+fmtBRL(admAllan+dA)+'</td><td class="mono num pos fw7">'+fmtBRL(admCarlos+dC)+'</td></tr>';
+                     + '<tr style="background:#FEF3C7"><td class="fw7">Total após Despesas</td><td class="mono num pos fw7">'+fmtBRL(admAllan+vA+dA)+'</td><td class="mono num pos fw7">'+fmtBRL(admCarlos+vC+dC)+'</td></tr>';
               })() }
             </tfoot>
           </table>
@@ -4577,8 +4581,18 @@ ${conteudo}
   setTimeout(() => { win.print(); }, 600);
 }
 
+// Quem está no CONTRATO SOCIAL sai na tabela da DIREITA do resumo exportado
+// (padrão que o Allan montava na mão todo mês — automatizado em 04/09/2026).
+// Pra incluir/tirar alguém, é só editar esta lista.
+const CONTRATO_SOCIAL = [
+  'ALLAN ALMEIDA','CARLOS EDUARDO','RENATO BENEDETTI','VAGNER SANTOS',
+  'BRUNO AFONSO','BRUNO E RENATO',
+  'ALESSANDRO SAKIMOTO','CASSIO MACHADO','EDMUND GOMES','FABRICIO ARAUJO',
+  'PATRICIA FERREIRA','PAULO HENRIQUE','RODRIGUES SILVA','VLAMIR SANTOS',
+  'CAIXA', // fica do lado de dentro, igual o Allan montava
+];
 function exportarResumoExcel() {
-  const rows = [['Nome','Tipo','Corretora (líq.)','Consultoria (líq.)','Total']];
+  const todos = [];
   const body = document.getElementById('resumo-body');
   if (!body) return;
   body.querySelectorAll('tr').forEach(tr => {
@@ -4588,24 +4602,33 @@ function exportarResumoExcel() {
     const tipo = cells[1]?.textContent?.trim() || '';
     const corr = readNumCell(cells[2]);
     const cons = readNumCell(cells[3]);
-    if (nome) rows.push([nome, tipo, corr, cons, corr+cons]);
+    if (nome) todos.push([nome, tipo, corr, cons, corr+cons]);
   });
-  // Rodapé totais
-  const foot = document.getElementById('resumo-foot');
-  if (foot) {
-    const cells = foot.querySelectorAll('td');
-    const c = readNumCell(cells[2]);
-    const co = readNumCell(cells[3]);
-    rows.push(['TOTAL GERAL','', c, co, c+co]);
+  const noContrato = n => CONTRATO_SOCIAL.some(c => n.toUpperCase() === c || n.toUpperCase().includes(c));
+  const dir = todos.filter(r => noContrato(r[0]));   // contrato social
+  const esq = todos.filter(r => !noContrato(r[0]));  // demais + parceiros
+  const somaCol = (lista, i) => lista.reduce((s, r) => s + (r[i]||0), 0);
+
+  // Duas tabelas lado a lado: esquerda = fora do contrato, direita = contrato social
+  const header = ['Nome','Tipo','Corretora (líq.)','Consultoria (líq.)','Total'];
+  const rows = [[...header, '', '', ...header]];
+  const nLinhas = Math.max(esq.length + 2, dir.length + 1);
+  for (let i = 0; i < nLinhas; i++) {
+    let L = esq[i] || null;
+    if (i === esq.length)     L = ['SUBTOTAL (demais)','', somaCol(esq,2), somaCol(esq,3), somaCol(esq,4)];
+    if (i === esq.length + 1) L = ['TOTAL GERAL','', somaCol(todos,2), somaCol(todos,3), somaCol(todos,4)];
+    let R = dir[i] || null;
+    if (i === dir.length)     R = ['TOTAL SÓCIOS','', somaCol(dir,2), somaCol(dir,3), somaCol(dir,4)];
+    rows.push([...(L || ['','','','','']), '', '', ...(R || ['','','','',''])]);
   }
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(rows);
-  ws['!cols'] = [{wch:28},{wch:12},{wch:18},{wch:18},{wch:18}];
+  ws['!cols'] = [{wch:28},{wch:12},{wch:16},{wch:16},{wch:16},{wch:3},{wch:3},{wch:28},{wch:12},{wch:16},{wch:16},{wch:16}];
   // Aplica formato de moeda BRL (R$ #.##0,00) nas colunas C, D, E
   const fmt = '"R$" #,##0.00;[Red]"-R$" #,##0.00';
   const range = XLSX.utils.decode_range(ws['!ref']);
   for (let R = 1; R <= range.e.r; ++R) {
-    for (const C of [2,3,4]) {
+    for (const C of [2,3,4,9,10,11]) {
       const addr = XLSX.utils.encode_cell({r:R, c:C});
       const cell = ws[addr];
       if (cell && typeof cell.v === 'number') {
