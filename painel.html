@@ -2091,7 +2091,10 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
             ehParceiro: false, masterPaga: false, oculto: false, ehCarta: false });
         });
         const selfFrac = Math.max(0, pool - usado);
-        return { tipo:'ok', partes, selfFrac };
+        // tribVendTodos: nos splits com parceiro NF todos usam 17,43% (TRIB_VEND),
+        // inclusive sócio, pra que os líquidos das metades saiam IGUAIS
+        // (regra do Allan, 08/09/2026: "2.700 − 17,43% − 10% − 675 do Passador ÷ 2").
+        return { tipo:'ok', partes, selfFrac, tribVendTodos: true };
       }
     }
   }
@@ -2816,7 +2819,8 @@ function processarLinha(linha, match, ciclo, mult, split, isAdvanced=false) {
   // Consultor principal recebe sua fração do bruto_cons
   if (fracConsultor > 0.001) {
     const bcC = brutConsTotal * fracConsultor;
-    const c   = calcDeFrac(bcC, isSocioC);
+    const c   = calcDeFrac(bcC, split.tribVendTodos ? false : isSocioC);
+    if (split.tribVendTodos) c.excedente = 0;
     const obsC = [...obsParc,
       ...naoParc.map(p => {
       const qn = p.quem==='CONSULTOR'?consultor:p.quem;
@@ -2837,7 +2841,8 @@ function processarLinha(linha, match, ciclo, mult, split, isAdvanced=false) {
     const quem = parte.quem === 'CONSULTOR' ? consultor : parte.quem;
     const bcP  = brutConsTotal * parte.fracBruto;
     const isSocioP = TODOS_SOCIOS.includes(quem);
-    const c    = calcDeFrac(bcP, isSocioP);
+    const c    = calcDeFrac(bcP, split.tribVendTodos ? false : isSocioP);
+    if (split.tribVendTodos) c.excedente = 0;
     const pctLabelP = parte.pctOrig ? ((parte.pctOrig*100).toFixed(2).replace('.',',')+'%') : fracToPctReal(parte.fracBruto, multC, linha);
     const obsP = [{quem: pctLabelP+' '+consultor, valor:0, masterPaga:false, ehInfo:true}];
     addResultado(quem, isSocioP?'socio':'vendedor', {
