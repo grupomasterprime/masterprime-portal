@@ -2074,10 +2074,18 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
           ehParceiro: true, masterPaga: true, oculto: false, ehCarta: false,
           ehLiquido: true, ehNfMaster: true }];
         const pool = Math.max(0, 1 - (custoPct / baseNF));
+        // Regra do Allan (08/09/2026): o custo REAL do parceiro (gross-up incluso)
+        // é dividido PROPORCIONALMENTE entre todos do split — não cai só na sobra
+        // do vendedor. Ex: "1% PASSADOR / 1,5% RENATO" com Arnaldo: sobra nominal
+        // seria 3% (1,5% cada), mas o 1% bruto consome 1,346%, então cada um fica
+        // com 1,327% (metade dos 2,654% que sobram). Antes o Renato levava 1,5%
+        // cheio e o Arnaldo bancava sozinho o gross-up.
+        const poolNominal = Math.max(0.0001, 1 - (pctNF / baseNF));
+        const escala = pool / poolNominal;
         let usado = 0;
         outrosNF.forEach(o => {
-          // ≤4% = % absoluto do crédito; >4% (ex: 50%) = fatia do RESTANTE
-          const frac = o.pct > 0.04 ? o.pct * pool : o.pct / baseNF;
+          // ≤4% = % absoluto do crédito (escalado pro custo real); >4% (ex: 50%) = fatia do RESTANTE
+          const frac = o.pct > 0.04 ? o.pct * pool : (o.pct / baseNF) * escala;
           usado += frac;
           partes.push({ quem: o.quem, fracBruto: frac, pctOrig: o.pct <= 0.04 ? o.pct : null,
             ehParceiro: false, masterPaga: false, oculto: false, ehCarta: false });
