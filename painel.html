@@ -2066,11 +2066,14 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
         // Na prática marcamos a parte como LIQUIDO com fração já engordada: o
         // motor desconta NF+ADM da fatia e o parceiro recebe exatamente o % cheio.
         const fatorLiq = (1 - TRIB_VEND) * (1 - ADM_PCT);
-        const fracNF = ehLiqNF ? (pctNF / baseNF) : (pctNF / fatorLiq / baseNF);
-        const partes = [{ quem: nfMatch, fracBruto: fracNF, pctOrig: pctNF,
+        // Custo do parceiro em % do crédito (bruto engordado pelo fator líquido quando BRUTO)
+        const custoPct = ehLiqNF ? pctNF : (pctNF / fatorLiq);
+        // fracBruto de PARCEIRO multiplica o RECEBIDO (base 4%): usa pctObsToFrac.
+        // A dedução do pool dos consultores é em base categoria (baseNF).
+        const partes = [{ quem: nfMatch, fracBruto: pctObsToFrac(custoPct), pctOrig: pctNF,
           ehParceiro: true, masterPaga: true, oculto: false, ehCarta: false,
           ehLiquido: true, ehNfMaster: true }];
-        const pool = Math.max(0, 1 - fracNF);
+        const pool = Math.max(0, 1 - (custoPct / baseNF));
         let usado = 0;
         outrosNF.forEach(o => {
           // ≤4% = % absoluto do crédito; >4% (ex: 50%) = fatia do RESTANTE
@@ -2465,12 +2468,15 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
         if (pctR > 0 && nomeR && respR) {
           // O RESP não entra como parte do split: a linha de repasse dele é gerada
           // automaticamente pela carta (cartaResp !== consultor → addResultado extra).
-          // Fração convertida pela CATEGORIA do consultor da linha (catDecimalSplit),
-          // igual às outras partes do split, para o % literal da OBS valer de verdade.
-          // Corrigido em 01/09/2026 (mesma correção do Strada de 24/08): antes usava
-          // pctObsToFrac (base 4%) e num consultor 3% um "1%" saía como 0,75%.
-          const fracR = catDecimalSplit > 0 ? pctR / catDecimalSplit : pctObsToFrac(pctR);
-          partes.push({ quem:nomeR, fracBruto:fracR, pctOrig:pctR, ehParceiro:true, masterPaga:false,
+          // ATENÇÃO às DUAS BASES (lição de 07/09/2026, caso Leidiane/Viviane):
+          // - fracBruto de PARCEIRO multiplica o RECEBIDO da administradora (base 4%),
+          //   então a conversão certa é pctObsToFrac: 1% vira 0,25 x recebido = 1% do crédito.
+          // - a DEDUÇÃO do consultor (selfFrac, mais abaixo) é em fração de bruto_cons
+          //   (base categoria), por isso lá usa pctOrig/catDecimalSplit.
+          // Em 01/09 esta linha foi trocada para pctR/catDecimalSplit achando que era o
+          // bug do Strada; isso fazia a carta pagar a mais (1% virava 1,33% num Black).
+          // Revertido em 07/09/2026.
+          partes.push({ quem:nomeR, fracBruto:pctObsToFrac(pctR), pctOrig:pctR, ehParceiro:true, masterPaga:false,
             oculto:false, ehCarta:true, cartaResp:respR, ehLiquido:ehLiqR, ehCartaRepasseSplit:true });
           return;
         }
