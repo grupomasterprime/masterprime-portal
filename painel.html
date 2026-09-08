@@ -3047,7 +3047,10 @@ function _executarCalculo() {
     }
 
     // Enriquecer linha com dados da base quando extrato não tem grupo/cota
-    const linhaEnriq = {...linha};
+    // (parte de linhaEnr, que já traz a parcela Itaú recalculada 13→12 pela
+    // data da venda — antes partia da linha crua e a regra era descartada,
+    // por isso as vendas pós 01/02/2026 seguiam mostrando /13; corrigido 08/09/2026)
+    const linhaEnriq = {...linhaEnr};
     if (match._grupoBase) linhaEnriq.grupo    = match._grupoBase;
     if (match._cotaBase)  linhaEnriq.cota     = match._cotaBase;
     if (match._tipo)      linhaEnriq._tipo    = match._tipo;
