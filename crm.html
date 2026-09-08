@@ -223,9 +223,12 @@ select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 1
     </div>
     <div class="fg"><label>Observação</label><textarea id="md-obs" rows="4"></textarea></div>
     <div class="fg"><label>Linha do tempo</label><div class="tl" id="md-tl"></div></div>
-    <div class="fg"><label>Adicionar anotação</label>
+    <div class="fg"><label id="md-nota-label">Adicionar anotação</label>
       <textarea id="md-nota" rows="3" placeholder="Ex.: liguei, pediu retorno amanhã"></textarea>
-      <div style="display:flex;justify-content:flex-end;margin-top:8px"><button class="btn btn-g" onclick="addNota()">Anotar</button></div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:8px">
+        <button class="btn btn-g hidden" id="md-nota-cancel" onclick="cancelarEdicaoNota()">Cancelar edição</button>
+        <button class="btn btn-g" id="md-nota-btn" onclick="addNota()">Anotar</button>
+      </div>
     </div>
     <div id="md-err"></div>
     <div class="mod-ft">
@@ -245,6 +248,20 @@ select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 1
     <div class="mod-ft">
       <button class="btn btn-g" onclick="fechar('ovl-exc')">Cancelar</button>
       <button class="btn btn-danger" id="exc-btn" onclick="excluirIndicador()">Excluir</button>
+    </div>
+  </div>
+</div>
+
+<!-- modal resetar PIN do indicador -->
+<div class="ovl hidden" id="ovl-pin">
+  <div class="mod" style="max-width:440px">
+    <h2>Resetar PIN</h2>
+    <p style="font-size:13px;color:var(--text-2);margin:8px 0 4px">Resetar o PIN de <b id="pin-nome"></b>?</p>
+    <p style="font-size:12px;color:var(--text-2);margin-bottom:12px">O PIN atual deixa de funcionar na hora. No próximo acesso pelo link, ele confirma o CPF e cadastra um PIN novo, igual ao primeiro acesso.</p>
+    <div id="pin-err"></div>
+    <div class="mod-ft">
+      <button class="btn btn-g" onclick="fechar('ovl-pin')">Cancelar</button>
+      <button class="btn btn-p" id="pin-btn" onclick="resetarPinConfirmar()">Resetar PIN</button>
     </div>
   </div>
 </div>
@@ -497,18 +514,22 @@ async function abrirDetalhe(id, forcarEtapa){
   $('md-motivo').value = l.motivo_perda || '';
   $('md-credito').value = l.valor_credito != null ? fmtBRL(l.valor_credito) : '';
   $('md-cotas').value = l.qtd_cotas != null ? String(l.qtd_cotas) : '';
-  $('md-err').innerHTML = ''; $('md-nota').value = '';
+  $('md-err').innerHTML = ''; cancelarEdicaoNota();
   atualizaMotivo();
   $('md-etapa').onchange = atualizaMotivo;
   $('ovl-det').classList.remove('hidden');
   // timeline
   const { data: evs } = await sb.from('crm_lead_eventos').select('*').eq('lead_id', id).order('criado_em');
+  EVENTOS_ABERTOS = evs || [];
   $('md-tl').innerHTML = (evs || []).map(e => {
     let txt = '';
     if (e.tipo === 'criado') txt = 'Lead criado' + (e.autor === 'indicador' ? ' pelo indicador' : ' pela equipe');
     else if (e.tipo === 'etapa') txt = etapaDef(e.de_etapa).nome + ' para ' + etapaDef(e.para_etapa).nome;
     else txt = esc(e.nota) + (e.autor ? ' (' + esc(e.autor) + ')' : '');
-    return `<div class="tl-i"><div>${txt}</div><div class="dt">${fmtData(e.criado_em)}</div></div>`;
+    // Anotações podem ser editadas pelo autor (ou admin) — pedido Douglas 08/09/2026
+    const podeEditar = e.tipo === 'nota' && (ehAdmin || e.autor === currentUser.nome);
+    const btnEd = podeEditar ? ` <button onclick="editarNota('${e.id}')" style="border:none;background:none;color:#0E7490;font-size:11px;font-weight:700;cursor:pointer;padding:0 2px">editar</button>` : '';
+    return `<div class="tl-i"><div>${txt}${btnEd}</div><div class="dt">${fmtData(e.criado_em)}</div></div>`;
   }).join('') || '<div style="font-size:11.5px;color:var(--text-3)">Sem eventos</div>';
 }
 function atualizaMotivo(){
@@ -537,9 +558,39 @@ async function salvarDetalhe(){
   fechar('ovl-det'); toast('Lead atualizado');
   carregarTudo();
 }
+// Edição de anotações (pedido Douglas 08/09/2026): o autor (ou admin) clica em
+// "editar" na linha do tempo, o texto vai pra caixa de anotação e o Salvar
+// atualiza o MESMO evento em vez de criar um novo.
+let EVENTOS_ABERTOS = [];
+let EDIT_NOTA_ID = null;
+function editarNota(evId){
+  const ev = EVENTOS_ABERTOS.find(e => String(e.id) === String(evId));
+  if (!ev) return;
+  EDIT_NOTA_ID = ev.id;
+  $('md-nota').value = ev.nota || '';
+  $('md-nota-label').textContent = 'Editando anotação';
+  $('md-nota-btn').textContent = 'Salvar edição';
+  $('md-nota-cancel').classList.remove('hidden');
+  $('md-nota').focus();
+}
+function cancelarEdicaoNota(){
+  EDIT_NOTA_ID = null;
+  $('md-nota').value = '';
+  $('md-nota-label').textContent = 'Adicionar anotação';
+  $('md-nota-btn').textContent = 'Anotar';
+  $('md-nota-cancel').classList.add('hidden');
+}
 async function addNota(){
   const l = leadAberto; if (!l) return;
   const nota = $('md-nota').value.trim(); if (!nota) return;
+  if (EDIT_NOTA_ID) {
+    const { error } = await sb.from('crm_lead_eventos').update({ nota }).eq('id', EDIT_NOTA_ID);
+    if (error) { toast('Erro: ' + error.message); return; }
+    cancelarEdicaoNota();
+    toast('Anotação editada');
+    abrirDetalhe(l.id);
+    return;
+  }
   const { error } = await sb.from('crm_lead_eventos').insert({ lead_id: l.id, tipo: 'nota', nota, autor: currentUser.nome });
   if (error) { toast('Erro: ' + error.message); return; }
   $('md-nota').value = '';
@@ -568,6 +619,7 @@ function renderIndicadores(){
         <button class="btn-s" onclick="copiarConvite('${i.token}', '${esc(i.nome).replace(/'/g, '')}')">Copiar convite</button>
         <button class="btn-s" onclick="abrirRodizio('${i.id}')">Rodízio</button>
         ${i.ativo ? `<button class="btn-s" onclick="toggleIndicador('${i.id}', false)">Desativar</button>` : `<button class="btn-s" onclick="toggleIndicador('${i.id}', true)">Reativar</button>`}
+        ${i.pin_hash ? `<button class="btn-s" onclick="abrirResetarPin('${i.id}')">Resetar PIN</button>` : ''}
         ${!leads.length ? `<button class="btn-s btn-danger" onclick="abrirExcluirIndicador('${i.id}')">Excluir</button>` : ''}
       </div>
     </div>`;
@@ -618,6 +670,27 @@ async function excluirIndicador(){
   if (error) { $('exc-err').innerHTML = '<div class="msg-err">' + esc(error.message) + '</div>'; return; }
   fechar('ovl-exc'); EXCLUIR_ID = null;
   toast('Indicador excluído');
+  carregarTudo();
+}
+// Resetar PIN (pedido Allan 08/09/2026): zera o hash do PIN; no próximo acesso
+// pelo link o indicador confirma o CPF e cadastra um PIN novo (tela do 1º acesso).
+let RESET_PIN_ID = null;
+function abrirResetarPin(id){
+  const i = INDICADORES.find(x => String(x.id) === String(id));
+  if (!i) return;
+  RESET_PIN_ID = i.id;
+  $('pin-nome').textContent = i.nome;
+  $('pin-err').innerHTML = '';
+  $('ovl-pin').classList.remove('hidden');
+}
+async function resetarPinConfirmar(){
+  if (!RESET_PIN_ID) return;
+  const btn = $('pin-btn'); btn.disabled = true; btn.textContent = 'Resetando...';
+  const { error } = await sb.from('crm_indicadores').update({ pin_hash: null }).eq('id', RESET_PIN_ID);
+  btn.disabled = false; btn.textContent = 'Resetar PIN';
+  if (error) { $('pin-err').innerHTML = '<div class="msg-err">' + esc(error.message) + '</div>'; return; }
+  fechar('ovl-pin'); RESET_PIN_ID = null;
+  toast('PIN resetado. O indicador cadastra um novo no próximo acesso.');
   carregarTudo();
 }
 async function toggleIndicador(id, ativo){
