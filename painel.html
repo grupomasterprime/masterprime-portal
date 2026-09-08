@@ -4629,11 +4629,15 @@ ${conteudo}
 // Pra incluir/tirar alguém, é só editar esta lista.
 const CONTRATO_SOCIAL = [
   'ALLAN ALMEIDA','CARLOS EDUARDO','RENATO BENEDETTI','VAGNER SANTOS',
-  'BRUNO AFONSO','BRUNO E RENATO',
   'ALESSANDRO SAKIMOTO','CASSIO MACHADO','EDMUND GOMES','FABRICIO ARAUJO',
   'PATRICIA FERREIRA','PAULO HENRIQUE','RODRIGUES SILVA','VLAMIR SANTOS',
-  'CAIXA', // fica do lado de dentro, igual o Allan montava
 ];
+// Regras do Allan (08/09/2026):
+// - BRUNO E RENATO é dividido meio a meio: metade soma no RENATO BENEDETTI
+//   (contrato social) e metade no BRUNO AFONSO.
+// - BRUNO AFONSO e CAIXA saem num bloco separado abaixo do contrato social,
+//   e o TOTAL SÓCIOS soma só a tabela do contrato social.
+const RESUMO_BLOCO_EXTRA = ['BRUNO AFONSO','CAIXA'];
 function exportarResumoExcel() {
   const todos = [];
   const body = document.getElementById('resumo-body');
@@ -4647,21 +4651,39 @@ function exportarResumoExcel() {
     const cons = readNumCell(cells[3]);
     if (nome) todos.push([nome, tipo, corr, cons, corr+cons]);
   });
+  // Divide BRUNO E RENATO meio a meio: Renato (contrato social) + Bruno Afonso
+  const idxBR = todos.findIndex(r => r[0].toUpperCase() === 'BRUNO E RENATO');
+  if (idxBR >= 0) {
+    const br = todos.splice(idxBR, 1)[0];
+    const mCorr = (br[2]||0)/2, mCons = (br[3]||0)/2;
+    const addMetade = (nome, tipo) => {
+      let alvo = todos.find(r => r[0].toUpperCase() === nome);
+      if (!alvo) { alvo = [nome, tipo, 0, 0, 0]; todos.push(alvo); }
+      alvo[2] += mCorr; alvo[3] += mCons; alvo[4] = alvo[2] + alvo[3];
+    };
+    addMetade('RENATO BENEDETTI', 'socio');
+    addMetade('BRUNO AFONSO', 'vendedor');
+  }
+  const ehExtra    = n => RESUMO_BLOCO_EXTRA.includes(n.toUpperCase());
   const noContrato = n => CONTRATO_SOCIAL.some(c => n.toUpperCase() === c || n.toUpperCase().includes(c));
-  const dir = todos.filter(r => noContrato(r[0]));   // contrato social
-  const esq = todos.filter(r => !noContrato(r[0]));  // demais + parceiros
+  const dir   = todos.filter(r => !ehExtra(r[0]) && noContrato(r[0]));   // contrato social
+  const extra = todos.filter(r => ehExtra(r[0]));                        // Bruno Afonso + Caixa
+  const esq   = todos.filter(r => !ehExtra(r[0]) && !noContrato(r[0])); // demais + parceiros
   const somaCol = (lista, i) => lista.reduce((s, r) => s + (r[i]||0), 0);
 
-  // Duas tabelas lado a lado: esquerda = fora do contrato, direita = contrato social
+  // Duas tabelas lado a lado: esquerda = fora do contrato, direita = contrato
+  // social + TOTAL SÓCIOS, e abaixo o bloco separado (Bruno Afonso e Caixa)
   const header = ['Nome','Tipo','Corretora (líq.)','Consultoria (líq.)','Total'];
   const rows = [[...header, '', '', ...header]];
-  const nLinhas = Math.max(esq.length + 2, dir.length + 1);
+  const nLinhas = Math.max(esq.length + 2, dir.length + 2 + extra.length);
   for (let i = 0; i < nLinhas; i++) {
     let L = esq[i] || null;
     if (i === esq.length)     L = ['SUBTOTAL (demais)','', somaCol(esq,2), somaCol(esq,3), somaCol(esq,4)];
     if (i === esq.length + 1) L = ['TOTAL GERAL','', somaCol(todos,2), somaCol(todos,3), somaCol(todos,4)];
-    let R = dir[i] || null;
-    if (i === dir.length)     R = ['TOTAL SÓCIOS','', somaCol(dir,2), somaCol(dir,3), somaCol(dir,4)];
+    let R = null;
+    if (i < dir.length)            R = dir[i];
+    else if (i === dir.length)     R = ['TOTAL SÓCIOS','', somaCol(dir,2), somaCol(dir,3), somaCol(dir,4)];
+    else if (i >= dir.length + 2 && i < dir.length + 2 + extra.length) R = extra[i - dir.length - 2];
     rows.push([...(L || ['','','','','']), '', '', ...(R || ['','','','',''])]);
   }
   const wb = XLSX.utils.book_new();
