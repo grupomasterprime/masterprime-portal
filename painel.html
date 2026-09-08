@@ -1347,6 +1347,19 @@ function enriquecerLinha(linha, match) {
   }
   // Tipo: pega da base
   if (!out._tipo && match._tipo) out._tipo = match._tipo;
+  // Grupos 8+2 (meia parcela): VENDAS A PARTIR DE 09/09/2026 recebem em 10x com
+  // mult ×0,8 (igual aos grupos legado de 10 parcelas) — decisão Allan 08/09/2026.
+  // Motivo: estorno. O cliente precisa pagar 11 parcelas pra não estornar as 10;
+  // se o consultor recebesse só 8 cheias, um cancelamento na 9ª/10ª dava buraco.
+  // Vendas ANTIGAS desses grupos continuam no 8+2 (sem acerto retroativo).
+  if (out.ehItau8Mais2 && match.dataVenda) {
+    const pv = parseDateStr(match.dataVenda);
+    if (pv && (pv.y > 2026 || (pv.y === 2026 && (pv.m > 9 || (pv.m === 9 && pv.d >= 9))))) {
+      out.ehItau8Mais2 = false;
+      out.ehItau10Parc = true;
+      if (out.parcela && out.parcela.includes('/')) out.parcela = out.parcela.split('/')[0] + '/10';
+    }
+  }
   // Recalcula parcela total Itaú com data da venda real (regra 40200+ mudou em 01/02/2026)
   if (out.adm === 'ITAU' && match.dataVenda && out.parcela && out.parcela.includes('/') && !ehGrupo8Mais2(out.grupo)) {
     const [pAtual] = out.parcela.split('/');
