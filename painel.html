@@ -891,7 +891,7 @@ const PARCEIROS_CARTA = ['RICARDO CABEZAOLIAS', 'ANDERSON PASSADOR', 'DANIEL BEI
 // Aparecem no Resumo de Pagamento numa seção própria pro Carlos repassar
 // depois que a nota chegar. Pra adicionar outro, basta incluir o nome aqui
 // (o nome também deve estar em OCULTOS_LISTA pra não ganhar demonstrativo no portal).
-const PARCEIROS_NF_MASTER = ['ANDERSON PASSADOR'];
+const PARCEIROS_NF_MASTER = ['ANDERSON PASSADOR', 'LIGHT YOU'];
 
 // Parceiros que a Master paga com demonstrativo próprio
 const PARCEIROS_DEMO = ['ADVANCED', 'STRADA', 'CAMINO', 'SPOLAOR'];
@@ -2070,9 +2070,13 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
         const custoPct = ehLiqNF ? pctNF : (pctNF / fatorLiq);
         // fracBruto de PARCEIRO multiplica o RECEBIDO (base 4%): usa pctObsToFrac.
         // A dedução do pool dos consultores é em base categoria (baseNF).
+        // Mudança de 08/09/2026 (pedido do Arnaldo): a Master NÃO paga mais o
+        // parceiro NF direto. O CONSULTOR recebe a fatia (com gross-up, então o
+        // líquido dela = o valor cheio do parceiro) e ELE repassa mediante a NF.
+        // ehCarta + cartaResp=consultor → carta Arnaldo → Passador, "vc paga · NF".
         const partes = [{ quem: nfMatch, fracBruto: pctObsToFrac(custoPct), pctOrig: pctNF,
-          ehParceiro: true, masterPaga: true, oculto: false, ehCarta: false,
-          ehLiquido: true, ehNfMaster: true }];
+          ehParceiro: true, masterPaga: false, oculto: false, ehCarta: true,
+          cartaResp: normNome(consultor), ehLiquido: true, ehNfMaster: true }];
         const pool = Math.max(0, 1 - (custoPct / baseNF));
         // Regra do Allan (08/09/2026): o custo REAL do parceiro (gross-up incluso)
         // é dividido PROPORCIONALMENTE entre todos do split — não cai só na sobra
@@ -2090,7 +2094,10 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
           partes.push({ quem: o.quem, fracBruto: frac, pctOrig: o.pct <= 0.04 ? o.pct : null,
             ehParceiro: false, masterPaga: false, oculto: false, ehCarta: false });
         });
-        const selfFrac = Math.max(0, pool - usado);
+        // A fatia do parceiro (com gross-up) ENTRA na linha do consultor: ele
+        // recebe o bruto dela, sofre 17,43%+ADM e o líquido = valor cheio do
+        // parceiro, que ele repassa. Por isso soma custoPct/baseNF ao selfFrac.
+        const selfFrac = Math.max(0, pool - usado) + (custoPct / baseNF);
         // tribVendTodos: nos splits com parceiro NF todos usam 17,43% (TRIB_VEND),
         // inclusive sócio, pra que os líquidos das metades saiam IGUAIS
         // (regra do Allan, 08/09/2026: "2.700 − 17,43% − 10% − 675 do Passador ÷ 2").
@@ -2668,9 +2675,9 @@ function processarLinha(linha, match, ciclo, mult, split, isAdvanced=false) {
 
     if (!parte.oculto && !parte.silenciaObs) {
       if (parte.ehNfMaster) {
-        // Parceiro com NF: a carta sai no nome do CONSULTOR da venda (pra ele
-        // conferir e mandar ao parceiro), mas o valor NÃO passa pelo demonstrativo
-        // dele — quem transfere é a Master (Carlos), mediante a nota.
+        // Parceiro com NF (desde 08/09/2026): a carta sai no nome do CONSULTOR,
+        // o valor PASSA pelo demonstrativo dele (a fatia com gross-up entra no
+        // selfFrac) e é ELE quem repassa ao parceiro, mediante a nota fiscal.
         obsParc.push({ quem:parte.quem, frac:parte.fracBruto, pctOrig:parte.pctOrig, valor:valParc,
           brutoParc:brutoPart, nfParc, admParc,
           masterPaga:false, ehLiquido:!!parte.ehLiquido, ehStub:false,
@@ -3270,7 +3277,7 @@ function mostrarDetalhe(nome) {
         const pctStr = p.pctOrig
           ? (((p.pctOrig*100).toFixed(2).replace('.',',').replace(/,00$/,'')+'%') + ' · ')
           : (p.frac ? (fracToPctReal(p.frac, l.mult, l) + ' · ') : '');
-        return `<span style="font-size:9px;color:var(--amber);white-space:nowrap">${p.quem}: ${pctStr}${fmtBRL(p.valor)} ${p.ehNfMaster?'<span class="tag tag-green" style="font-size:8px">Master paga · NF</span>':p.masterPaga?'<span class="tag tag-green" style="font-size:8px">M.paga</span>':'<span class="tag tag-amber" style="font-size:8px">vc paga</span>'}</span>`;
+        return `<span style="font-size:9px;color:var(--amber);white-space:nowrap">${p.quem}: ${pctStr}${fmtBRL(p.valor)} ${p.ehNfMaster?'<span class="tag tag-amber" style="font-size:8px">vc paga · NF</span>':p.masterPaga?'<span class="tag tag-green" style="font-size:8px">M.paga</span>':'<span class="tag tag-amber" style="font-size:8px">vc paga</span>'}</span>`;
       })
     ].join('<br>');
     const rowStyle = ehNegativo ? 'style="background:#FEF2F2;border-left:3px solid #EF4444"' : '';
