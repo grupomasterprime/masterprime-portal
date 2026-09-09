@@ -144,12 +144,12 @@ select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 1
   <!-- ── ABA FUNIL ── -->
   <div class="wrap" id="aba-funil">
     <div class="toolbar">
-      <select class="f" id="filtro-consultor" onchange="renderKanban()" style="display:none"></select>
+      <input class="f" id="filtro-consultor" list="dl-consultores" placeholder="Consultor: todos" oninput="renderKanban()" autocomplete="off" style="display:none;min-width:180px"><datalist id="dl-consultores"></datalist>
       <input class="f" id="busca" placeholder="Buscar cliente, telefone, indicador..." oninput="renderKanban()" style="min-width:230px">
       <span class="sp"></span>
       <button class="btn btn-g" id="btn-antigos" onclick="toggleAntigos()" style="display:none"></button>
       <button class="btn btn-g" onclick="carregarTudo()">Atualizar</button>
-      <button class="btn btn-p" onclick="abrirNovoLead()">+ Novo Lead</button>
+      <button class="btn btn-p" onclick="abrirNovoLead()">+ Novo Contato</button>
     </div>
     <div class="resumo" id="resumo"></div>
     <div class="kb" id="kanban"></div>
@@ -186,7 +186,7 @@ select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 1
 <!-- modal novo lead -->
 <div class="ovl hidden" id="ovl-lead">
   <div class="mod">
-    <h2 id="ml-titulo">Novo Lead</h2>
+    <h2 id="ml-titulo">Novo Contato</h2>
     <div class="fg"><label>Nome do cliente</label><input id="ml-nome"></div>
     <div class="fg"><label>Telefone</label><input id="ml-tel" placeholder="(11) 99999-9999"></div>
     <div class="fg"><label>Interesse</label>
@@ -267,8 +267,8 @@ select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 1
 </div>
 <div class="ovl hidden" id="ovl-rod">
   <div class="mod">
-    <h2 id="rod-titulo">Rodízio de leads</h2>
-    <p style="font-size:12px;color:var(--text-2);margin-bottom:12px">Marque quem vai receber os leads deste indicador. Cada lead novo vai para o próximo da lista, revezando entre os marcados. Sem ninguém marcado, os leads vão para o dono do link.</p>
+    <h2 id="rod-titulo">Rodízio de contatos</h2>
+    <p style="font-size:12px;color:var(--text-2);margin-bottom:12px">Marque quem vai receber os contatos deste indicador. Cada contato novo vai para o próximo da lista, revezando entre os marcados. Sem ninguém marcado, os contatos vão para o dono do link.</p>
     <div id="rod-chips" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px"></div>
     <input id="rod-busca" placeholder="Digite o nome do consultor..." autocomplete="off" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:9px 11px;font-size:13px;font-family:inherit">
     <div id="rod-sug" style="max-height:220px;overflow:auto;border:1px solid var(--border);border-radius:8px;margin-top:4px;display:none"></div>
@@ -284,7 +284,7 @@ select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 1
 <div class="ovl hidden" id="ovl-ind">
   <div class="mod">
     <h2>Cadastrar Indicador</h2>
-    <p style="font-size:12px;color:var(--text-2);margin-bottom:12px">O indicador recebe um link pessoal para enviar leads e acompanhar o andamento. No primeiro acesso ele confirma o CPF e cria um PIN.</p>
+    <p style="font-size:12px;color:var(--text-2);margin-bottom:12px">O indicador recebe um link pessoal para enviar contatos e acompanhar o andamento. No primeiro acesso ele confirma o CPF e cria um PIN.</p>
     <div class="fg"><label>Nome completo</label><input id="mi-nome"></div>
     <div class="fg"><label>CPF</label><input id="mi-cpf" placeholder="000.000.000-00" maxlength="14"></div>
     <div class="fg"><label>Celular (opcional)</label><input id="mi-cel" placeholder="(11) 99999-9999"></div>
@@ -384,7 +384,7 @@ function montarSelectConsultores(){
   if (ehAdmin) {
     const f = $('filtro-consultor');
     f.style.display = '';
-    f.innerHTML = '<option value="">Todos os consultores</option>' + opts;
+    $('dl-consultores').innerHTML = USUARIOS.map(u => `<option value="${esc(u.nome)}">`).join('');
   }
 }
 
@@ -396,11 +396,12 @@ let MOSTRAR_ANTIGOS = false;
 function idadeDias(l){ const d = new Date(l.atualizado_em || l.criado_em); return (Date.now() - d.getTime()) / 86400000; }
 function ehAntigo(l){ return (l.etapa === 'vendido' || l.etapa === 'perdido') && idadeDias(l) > DIAS_ARQUIVO; }
 function toggleAntigos(){ MOSTRAR_ANTIGOS = !MOSTRAR_ANTIGOS; renderKanban(); }
+function normTxt(s){ return String(s == null ? '' : s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
 function buscaMatch(l, q){
   if (!q) return true;
-  const alvo = [l.nome, l.telefone, l.interesse, l.observacao, l.motivo_perda,
-    l.indicador ? l.indicador.nome : '', l.consultor ? l.consultor.nome : ''].join(' ').toLowerCase();
-  return q.split(/\s+/).every(t => alvo.includes(t));
+  const alvo = normTxt([l.nome, l.telefone, l.interesse, l.observacao, l.motivo_perda,
+    l.indicador ? l.indicador.nome : '', l.consultor ? l.consultor.nome : ''].join(' '));
+  return q.split(/\s+/).every(t => alvo.includes(normTxt(t)));
 }
 let SO_PARADOS = false;
 function ehParado(l){ return ['novo','contato','qualificado','proposta'].includes(l.etapa) && idadeDias(l) >= DIAS_PARADO; }
@@ -418,17 +419,17 @@ function renderResumo(doCons){
   const mes = new Date(); mes.setDate(1); mes.setHours(0,0,0,0);
   const noMes = doCons.filter(l => new Date(l.criado_em) >= mes).length;
   $('resumo').innerHTML = `
-    <div class="rs"><div class="k">Leads</div><div class="v">${total}</div><div class="s">${noMes} neste mês</div></div>
+    <div class="rs"><div class="k">Contatos</div><div class="v">${total}</div><div class="s">${noMes} neste mês</div></div>
     <div class="rs"><div class="k">Em andamento</div><div class="v">${andamento}</div><div class="s">no funil agora</div></div>
     <div class="rs"><div class="k">Vendas</div><div class="v">${vend.length}</div><div class="s">${cotas} cota${cotas === 1 ? '' : 's'}</div></div>
-    <div class="rs"><div class="k">Conversão</div><div class="v">${conv}%</div><div class="s">vendas sobre leads</div></div>
+    <div class="rs"><div class="k">Conversão</div><div class="v">${conv}%</div><div class="s">vendas sobre contatos</div></div>
     <div class="rs"><div class="k">Crédito vendido</div><div class="v" style="color:#065F46">R$ ${fmtBRL0(credito)}</div><div class="s">soma das vendas</div></div>
-    <div class="rs clique${parados ? ' alerta' : ''}${SO_PARADOS ? ' on' : ''}" onclick="toggleParados()" title="Clique para ver só os leads parados"><div class="k">Parados ${DIAS_PARADO}+ dias</div><div class="v">${parados}</div><div class="s">${SO_PARADOS ? 'Mostrando só parados. Clique para voltar' : (parados ? 'Clique para filtrar' : 'Tudo em dia')}</div></div>`;
+    <div class="rs clique${parados ? ' alerta' : ''}${SO_PARADOS ? ' on' : ''}" onclick="toggleParados()" title="Clique para ver só os contatos parados"><div class="k">Parados ${DIAS_PARADO}+ dias</div><div class="v">${parados}</div><div class="s">${SO_PARADOS ? 'Mostrando só parados. Clique para voltar' : (parados ? 'Clique para filtrar' : 'Tudo em dia')}</div></div>`;
 }
 function renderKanban(){
-  const filtro = ehAdmin ? $('filtro-consultor').value : '';
+  const filtro = ehAdmin ? normTxt($('filtro-consultor').value.trim()) : '';
   const q = ($('busca').value || '').trim().toLowerCase();
-  const doCons = LEADS.filter(l => !filtro || String(l.consultor_id) === filtro);
+  const doCons = LEADS.filter(l => !filtro || normTxt(l.consultor ? l.consultor.nome : '').includes(filtro));
   renderResumo(doCons);
   const base = doCons.filter(l => buscaMatch(l, q) && (!SO_PARADOS || ehParado(l)));
   const antigos = base.filter(ehAntigo).length;
@@ -478,7 +479,7 @@ async function dropLead(ev){
   if (error) { toast('Erro: ' + error.message); return; }
   lead.etapa = etapa;
   renderKanban();
-  toast('Lead movido para ' + etapaDef(etapa).nome);
+  toast('Contato movido para ' + etapaDef(etapa).nome);
 }
 
 // ══════════ NOVO LEAD ══════════
@@ -495,7 +496,7 @@ async function salvarNovoLead(){
     observacao: $('ml-obs').value.trim(), consultor_id: parseInt($('ml-cons').value, 10), origem: 'manual'
   });
   if (error) { $('ml-err').innerHTML = '<div class="msg-err">' + esc(error.message) + '</div>'; return; }
-  fechar('ovl-lead'); toast('Lead cadastrado');
+  fechar('ovl-lead'); toast('Contato cadastrado');
   carregarTudo();
 }
 
@@ -523,7 +524,7 @@ async function abrirDetalhe(id, forcarEtapa){
   EVENTOS_ABERTOS = evs || [];
   $('md-tl').innerHTML = (evs || []).map(e => {
     let txt = '';
-    if (e.tipo === 'criado') txt = 'Lead criado' + (e.autor === 'indicador' ? ' pelo indicador' : ' pela equipe');
+    if (e.tipo === 'criado') txt = 'Contato criado' + (e.autor === 'indicador' ? ' pelo indicador' : ' pela equipe');
     else if (e.tipo === 'etapa') txt = etapaDef(e.de_etapa).nome + ' para ' + etapaDef(e.para_etapa).nome;
     else txt = esc(e.nota) + (e.autor ? ' (' + esc(e.autor) + ')' : '');
     // Anotações podem ser editadas pelo autor (ou admin) — pedido Douglas 08/09/2026
@@ -555,7 +556,7 @@ async function salvarDetalhe(){
   if (ehAdmin) { const cv = parseInt($('md-cons').value, 10); if (!isNaN(cv)) upd.consultor_id = cv; }
   const { error } = await sb.from('crm_leads').update(upd).eq('id', l.id);
   if (error) { $('md-err').innerHTML = '<div class="msg-err">' + esc(error.message) + '</div>'; return; }
-  fechar('ovl-det'); toast('Lead atualizado');
+  fechar('ovl-det'); toast('Contato atualizado');
   carregarTudo();
 }
 // Edição de anotações (pedido Douglas 08/09/2026): o autor (ou admin) clica em
@@ -612,8 +613,8 @@ function renderIndicadores(){
         <div class="nm">${esc(i.nome)}</div>${st}
       </div>
       <div class="ln">CPF final ${esc(String(i.cpf).replace(/\D/g,'').slice(-3))}${i.celular ? ' · ' + esc(i.celular) : ''}${ehAdmin && i.consultor ? ' · Consultor: ' + esc(primeiroNome(i.consultor.nome)) : ''}</div>
-      <div class="ln">${leads.length} lead${leads.length === 1 ? '' : 's'} enviado${leads.length === 1 ? '' : 's'} · ${vendidos} vendido${vendidos === 1 ? '' : 's'}</div>
-      <div class="ln" style="color:${rod.length ? '#0E7490' : 'var(--text-3)'}">${rod.length ? 'Rodízio: ' + esc(rod.join(', ')) : 'Leads vão para o dono do link'}</div>
+      <div class="ln">${leads.length} contato${leads.length === 1 ? '' : 's'} enviado${leads.length === 1 ? '' : 's'} · ${vendidos} vendido${vendidos === 1 ? '' : 's'}</div>
+      <div class="ln" style="color:${rod.length ? '#0E7490' : 'var(--text-3)'}">${rod.length ? 'Rodízio: ' + esc(rod.join(', ')) : 'Contatos vão para o dono do link'}</div>
       <div class="ind-a">
         <button class="btn-s p" onclick="copiarLink('${i.token}')">Copiar link</button>
         <button class="btn-s" onclick="copiarConvite('${i.token}', '${esc(i.nome).replace(/'/g, '')}')">Copiar convite</button>
@@ -656,7 +657,7 @@ let EXCLUIR_ID = null;
 function abrirExcluirIndicador(id){
   const i = INDICADORES.find(x => String(x.id) === String(id));
   if (!i) return;
-  if ((i.leads || []).length) { toast('Esse indicador já tem leads. Use Desativar.'); return; }
+  if ((i.leads || []).length) { toast('Esse indicador já tem contatos. Use Desativar.'); return; }
   EXCLUIR_ID = i.id;
   $('exc-nome').textContent = i.nome;
   $('exc-err').innerHTML = '';
@@ -713,7 +714,7 @@ function rodRender(){
     const u = USUARIOS.find(x => String(x.id) === String(id));
     const nome = u ? u.nome : 'ID ' + id;
     return `<span style="display:inline-flex;align-items:center;gap:6px;background:#E0F2F1;color:#0E7490;border-radius:999px;padding:4px 6px 4px 12px;font-size:12px;font-weight:700">${esc(nome)}<button onclick="rodRemover(${id})" style="border:none;background:#0E7490;color:#fff;border-radius:50%;width:16px;height:16px;font-size:10px;line-height:1;cursor:pointer;padding:0">x</button></span>`;
-  }).join('') || '<span style="font-size:12px;color:var(--text-3)">Ninguém no rodízio: os leads vão para o dono do link</span>';
+  }).join('') || '<span style="font-size:12px;color:var(--text-3)">Ninguém no rodízio: os contatos vão para o dono do link</span>';
   rodSugestoes();
 }
 function rodSugestoes(){
@@ -736,7 +737,7 @@ function abrirRodizio(id){
   const i = INDICADORES.find(x => x.id === id); if (!i) return;
   rodIndicadorId = id;
   rodSel = (i.rodizio_consultores || []).map(Number);
-  $('rod-titulo').textContent = 'Rodízio de leads: ' + i.nome;
+  $('rod-titulo').textContent = 'Rodízio de contatos: ' + i.nome;
   $('rod-busca').value = '';
   rodRender();
   $('rod-err').innerHTML = '';
@@ -751,7 +752,7 @@ async function salvarRodizio(){
   const ids = rodSel.map(x => parseInt(x, 10)).filter(n => !isNaN(n));
   const { error } = await sb.from('crm_indicadores').update({ rodizio_consultores: ids, rodizio_pos: 0 }).eq('id', rodIndicadorId);
   if (error) { $('rod-err').innerHTML = '<div class="msg-err">' + esc(error.message) + '</div>'; return; }
-  fechar('ovl-rod'); toast(ids.length ? 'Rodízio salvo' : 'Rodízio removido, leads voltam para o dono do link');
+  fechar('ovl-rod'); toast(ids.length ? 'Rodízio salvo' : 'Rodízio removido, contatos voltam para o dono do link');
   carregarTudo();
 }
 
@@ -814,8 +815,8 @@ function relAgrupa(leads, chave, nomeFn){
 }
 
 function relTabela(el, linhas, rotulo){
-  const head = `<tr><th>${rotulo}</th><th class="num">Leads</th><th class="num">Em andamento</th><th class="num">Vendidos</th><th class="num">Perdidos</th><th class="num">Conversão</th><th class="num">Crédito vendido</th><th class="num">Cotas</th></tr>`;
-  if (!linhas.length) { el.innerHTML = head + `<tr><td colspan="8" style="text-align:center;color:var(--text-3);padding:18px">Sem leads no período</td></tr>`; return; }
+  const head = `<tr><th>${rotulo}</th><th class="num">Contatos</th><th class="num">Em andamento</th><th class="num">Vendidos</th><th class="num">Perdidos</th><th class="num">Conversão</th><th class="num">Crédito vendido</th><th class="num">Cotas</th></tr>`;
+  if (!linhas.length) { el.innerHTML = head + `<tr><td colspan="8" style="text-align:center;color:var(--text-3);padding:18px">Sem contatos no período</td></tr>`; return; }
   const tot = { total: 0, andamento: 0, vendidos: 0, perdidos: 0, credito: 0, cotas: 0 };
   const rows = linhas.map(x => {
     tot.total += x.total; tot.andamento += x.andamento; tot.vendidos += x.vendidos; tot.perdidos += x.perdidos; tot.credito += x.credito; tot.cotas += x.cotas;
@@ -832,9 +833,9 @@ function renderRelatorio(){
   const cotas = vendidos.reduce((s, l) => s + Number(l.qtd_cotas || 0), 0);
   const indicacoes = leads.filter(l => l.origem === 'indicador').length;
   $('rel-cards').innerHTML = `
-    <div class="rep-card"><div class="k">Leads no período</div><div class="v">${leads.length}</div><div class="s">${indicacoes} por indicação</div></div>
+    <div class="rep-card"><div class="k">Contatos no período</div><div class="v">${leads.length}</div><div class="s">${indicacoes} por indicação</div></div>
     <div class="rep-card"><div class="k">Vendas</div><div class="v">${vendidos.length}</div><div class="s">${cotas} cota${cotas === 1 ? '' : 's'}</div></div>
-    <div class="rep-card"><div class="k">Conversão</div><div class="v">${leads.length ? Math.round(vendidos.length / leads.length * 100) : 0}%</div><div class="s">vendas sobre leads</div></div>
+    <div class="rep-card"><div class="k">Conversão</div><div class="v">${leads.length ? Math.round(vendidos.length / leads.length * 100) : 0}%</div><div class="s">vendas sobre contatos</div></div>
     <div class="rep-card"><div class="k">Crédito vendido</div><div class="v" style="color:#065F46">R$ ${fmtBRL0(credito)}</div><div class="s">no período</div></div>`;
   relTabela($('rel-cons'), relAgrupa(leads, l => l.consultor_id == null ? 'sem' : String(l.consultor_id), l => l.consultor ? l.consultor.nome : 'Sem consultor definido'), 'Consultor');
   relTabela($('rel-ind'), relAgrupa(leads.filter(l => l.indicador_id), l => String(l.indicador_id), l => l.indicador ? l.indicador.nome : 'Indicador removido'), 'Indicador');

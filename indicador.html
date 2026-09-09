@@ -173,6 +173,7 @@ button{cursor:pointer;font-family:inherit}
         <h2 style="margin:0">Minhas indicações</h2>
         <button class="btn-l" onclick="carregarLeads()">Atualizar</button>
       </div>
+      <div class="fg" style="margin-bottom:10px"><input id="ap-busca" placeholder="Buscar por nome ou telefone..." oninput="renderLeads(TODOS_LEADS, true)" autocomplete="off"></div>
       <div id="ap-lista"><div class="vazio">Carregando...</div></div>
     </div>
 
@@ -211,6 +212,18 @@ function maskTel(v){ v = v.replace(/\D/g,'').slice(0,11); if (v.length <= 10) re
 $('ap-ltel').addEventListener('input', e => e.target.value = maskTel(e.target.value));
 function fmtData(d){ const x = new Date(d); return x.toLocaleDateString('pt-BR'); }
 function esc(s){ return String(s == null ? '' : s).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
+// Normaliza para busca: minusculas e sem acento
+function normBusca(s){ return String(s == null ? '' : s).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); }
+// Busca por nome, telefone ou interesse. Numeros digitados comparam so com os digitos do telefone.
+function buscaLeadMatch(l, q){
+  if (!q) return true;
+  const texto = normBusca([l.nome, l.interesse].join(' '));
+  const dig = String(l.telefone || '').replace(/\D/g, '');
+  return q.split(/\s+/).every(t => {
+    const td = t.replace(/\D/g, '');
+    return texto.includes(normBusca(t)) || (td.length >= 2 && dig.includes(td));
+  });
+}
 function err(id, m){ $(id).innerHTML = m ? '<div class="msg-err">' + esc(m) + '</div>' : ''; }
 
 let TOKEN = null, PIN = null, NOME = '';
@@ -366,8 +379,10 @@ function renderLeads(leads, manterFiltro){
     <div class="fun-perd"><button class="${FILTRO === 'perdido' ? 'on' : (FILTRO !== 'todas' ? 'dim' : '')}" onclick="filtrar('${FILTRO === 'perdido' ? 'todas' : 'perdido'}')">Não avançou · ${cont('perdido')}</button></div>
     <div class="fun-leg">${FILTRO === 'todas' ? 'Toque numa etapa para ver só aquelas indicações' : '<button class="btn-l" onclick="filtrar(\'todas\')">Mostrar todas as indicações</button>'}</div>` : '<div class="vazio">O funil aparece assim que você enviar a primeira indicação.</div>';
   if (!total) { el.innerHTML = '<div class="vazio">Você ainda não enviou nenhuma indicação.</div>'; return; }
-  const lista = FILTRO === 'todas' ? TODOS_LEADS : TODOS_LEADS.filter(l => l.etapa === FILTRO);
-  if (!lista.length) { el.innerHTML = '<div class="vazio">Nenhuma indicação nesta etapa.</div>'; return; }
+  const q = ($('ap-busca') ? $('ap-busca').value : '').trim();
+  const porEtapa = FILTRO === 'todas' ? TODOS_LEADS : TODOS_LEADS.filter(l => l.etapa === FILTRO);
+  const lista = porEtapa.filter(l => buscaLeadMatch(l, q));
+  if (!lista.length) { el.innerHTML = '<div class="vazio">' + (q ? 'Nenhuma indicação encontrada para essa busca.' : 'Nenhuma indicação nesta etapa.') + '</div>'; return; }
   const ORDEM = ['novo','contato','qualificado','proposta','vendido'];
   const NOMES_CURTOS = ['Recebida','Contato','Qualificada','Proposta','Venda'];
   el.innerHTML = lista.map((l, i) => {
@@ -382,7 +397,7 @@ function renderLeads(leads, manterFiltro){
     }).join('');
     return `<div class="lead" style="--c:${et.cor}">
       <div class="nm">${esc(l.nome)}</div>
-      <div class="dt">Enviada em ${fmtData(l.criado_em)}</div>
+      <div class="dt">Enviada em ${fmtData(l.criado_em)}${l.telefone ? ' · ' + esc(l.telefone) : ''}${l.interesse ? ' · ' + esc(l.interesse) : ''}</div>
       <span class="badge">${et.nome}</span>
       <div class="prog">${segs}</div>
       <div class="prog-steps">${steps}</div>
