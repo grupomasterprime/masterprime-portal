@@ -3367,6 +3367,24 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
     while (FERIADOS.has(iso(d))) d.setDate(d.getDate()+7);
     return d;
   }
+  // Bradesco (regra do Allan 10/09/2026, AGUARDANDO confirmação da Fernanda do
+  // Bradesco): vencimento sempre dia 10, adiado pro 1º dia útil se cair em fds
+  // ou feriado. A assembleia espera passar o primeiro sorteio da Loteria Federal
+  // depois do vencimento (sorteios às quartas e domingos, confirmado pelo Allan)
+  // e acontece no dia útil seguinte ao sorteio — por isso só cai segunda ou quinta.
+  // Pra ligar o bloco na tabela, mudar MOSTRAR_BRADESCO pra true.
+  const MOSTRAR_BRADESCO = false;
+  function assembBradesco(ano, mes){
+    const v = new Date(ano, mes, 10);
+    while (!ehUtil(v)) v.setDate(v.getDate()+1);
+    // primeiro sorteio DEPOIS do vencimento (domingo=0, quarta=3)
+    const s = new Date(v);
+    do { s.setDate(s.getDate()+1); } while (s.getDay() !== 0 && s.getDay() !== 3);
+    // assembleia = dia útil seguinte ao sorteio
+    const a = new Date(s);
+    do { a.setDate(a.getDate()+1); } while (!ehUtil(a));
+    return { venc: v, assemb: a };
+  }
   // Porto: venc = 1º dia útil a partir do dia 15; assembleia = 4º dia útil depois
   function assembPorto(ano, mes){
     const v = new Date(ano, mes, 15);
@@ -3378,13 +3396,7 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
   function render(){
     const grid = document.getElementById('hm-assemb-grid');
     if (!grid) return;
-    // Fase de teste (pedido do Allan, 10/09/2026): só sócios e master veem o
-    // card por enquanto. Se aprovarem, é só remover este bloco pra liberar geral.
-    const u = (typeof currentUser !== 'undefined' && currentUser) ? currentUser : null;
-    if (!u || (u.tipo !== 'master' && u.tipo !== 'socio')) {
-      document.getElementById('hm-assemb').style.display = 'none';
-      return;
-    }
+    // Liberado pra todos em 10/09/2026 (sócios testaram e aprovaram).
     const hoje = new Date(); hoje.setHours(0,0,0,0);
     const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
     const st = d => d >= hoje ? 'color:#1E293B;font-weight:700' : 'color:#94A3B8;text-decoration:line-through';
@@ -3415,6 +3427,24 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       rowsPorto += `<tr><td style="${td};text-align:left;font-weight:700;color:#2D3F5E">${MESES[m]}</td>
         <td style="${td}"><span style="${st(pt.venc)}">${dm(pt.venc)}</span></td><td style="${td}"><span style="${st(pt.assemb)}">${dm(pt.assemb)}</span></td></tr>`;
     });
+    // ── Bloco Bradesco (vermelho), desligado até a Fernanda confirmar a regra ──
+    let blocoBradesco = '';
+    if (MOSTRAR_BRADESCO) {
+      let rowsBra = '';
+      meses.forEach(({y, m}) => {
+        const br = assembBradesco(y, m);
+        rowsBra += `<tr><td style="${td};text-align:left;font-weight:700;color:#2D3F5E">${MESES[m]}</td>
+          <td style="${td}"><span style="${st(br.venc)}">${dm(br.venc)}</span></td><td style="${td}"><span style="${st(br.assemb)}">${dm(br.assemb)}</span></td></tr>`;
+      });
+      blocoBradesco = `<div style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;background:#fff">
+        <div style="background:#CC092F;color:#fff;font-weight:800;font-size:13px;padding:9px 14px">Bradesco</div>
+        <table style="width:100%;border-collapse:collapse">
+          <tr style="background:#FDEEF1;color:#B91C3C"><th style="${th};text-align:left">Mês</th><th style="${th}">Venc. do boleto</th><th style="${th}">Assembleia</th></tr>
+          ${rowsBra}
+        </table>
+        <div style="font-size:11px;color:#8a8984;padding:8px 14px 10px">Boleto vence no primeiro dia útil a partir do dia 10 e a assembleia é no dia útil seguinte ao primeiro sorteio da Loteria Federal após o vencimento.</div>
+      </div>`;
+    }
     grid.innerHTML = `
       <div style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;background:#fff">
         <div style="background:#EC7000;color:#fff;font-weight:800;font-size:13px;padding:9px 14px">Itaú</div>
@@ -3432,7 +3462,7 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
           ${rowsPorto}
         </table>
         <div style="font-size:11px;color:#8a8984;padding:8px 14px 10px">Boleto vence no primeiro dia útil a partir do dia 15 e a assembleia é no 4º dia útil depois do vencimento.</div>
-      </div>`;
+      </div>${blocoBradesco}`;
     document.getElementById('hm-assemb').style.display = '';
     document.getElementById('hm-assemb-foot').textContent = 'Datas calculadas automaticamente pelas regras oficiais, considerando fins de semana e feriados. Datas que já passaram aparecem riscadas.';
   }
