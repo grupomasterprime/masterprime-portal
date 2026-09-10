@@ -3355,6 +3355,18 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
     while (FERIADOS.has(iso(d))) d.setDate(d.getDate()+7);
     return d;
   }
+  // Suplência Itaú (regra deduzida dos cards oficiais de fev e maio/2026, 8/8 datas):
+  // Veículos = assembleia + 10 dias corridos (sexta da semana seguinte);
+  // Imóveis = assembleia + 12 dias corridos (quarta). Caindo em feriado, pula 7.
+  // AGUARDANDO CONFIRMAÇÃO do Allan (10/09/2026) — pra ligar as colunas de
+  // suplência na tabela, basta mudar MOSTRAR_SUPLENCIA pra true.
+  const MOSTRAR_SUPLENCIA = false;
+  function suplItau(assemb, dias){
+    const d = new Date(assemb);
+    d.setDate(d.getDate() + dias);
+    while (FERIADOS.has(iso(d))) d.setDate(d.getDate()+7);
+    return d;
+  }
   // Porto: venc = 1º dia útil a partir do dia 15; assembleia = 4º dia útil depois
   function assembPorto(ano, mes){
     const v = new Date(ano, mes, 15);
@@ -3388,9 +3400,13 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
     meses.forEach(({y, m}) => {
       const it05v = assembItau(y, m, 10, 2), it05i = assembItau(y, m, 10, 5);
       const it20v = assembItau(y, m, 24, 2), it20i = assembItau(y, m, 24, 5);
+      const su05v = suplItau(it05v, 10), su05i = suplItau(it05i, 12);
+      const su20v = suplItau(it20v, 10), su20i = suplItau(it20i, 12);
+      const cSup05 = MOSTRAR_SUPLENCIA ? `<td style="${td}"><span style="${st(su05v)}">${dm(su05v)}</span></td><td style="${td}"><span style="${st(su05i)}">${dm(su05i)}</span></td>` : '';
+      const cSup20 = MOSTRAR_SUPLENCIA ? `<td style="${td}"><span style="${st(su20v)}">${dm(su20v)}</span></td><td style="${td}"><span style="${st(su20i)}">${dm(su20i)}</span></td>` : '';
       rowsItau += `<tr><td style="${td};text-align:left;font-weight:700;color:#2D3F5E" rowspan="2">${MESES[m]}</td>
-          <td style="${td};text-align:left;color:#52514e">até 05</td><td style="${td}"><span style="${st(it05v)}">${dm(it05v)}</span></td><td style="${td}"><span style="${st(it05i)}">${dm(it05i)}</span></td></tr>
-        <tr><td style="${td};text-align:left;color:#52514e">10, 15 e 20</td><td style="${td}"><span style="${st(it20v)}">${dm(it20v)}</span></td><td style="${td}"><span style="${st(it20i)}">${dm(it20i)}</span></td></tr>`;
+          <td style="${td};text-align:left;color:#52514e">até 05</td><td style="${td}"><span style="${st(it05v)}">${dm(it05v)}</span></td><td style="${td}"><span style="${st(it05i)}">${dm(it05i)}</span></td>${cSup05}</tr>
+        <tr><td style="${td};text-align:left;color:#52514e">10, 15 e 20</td><td style="${td}"><span style="${st(it20v)}">${dm(it20v)}</span></td><td style="${td}"><span style="${st(it20i)}">${dm(it20i)}</span></td>${cSup20}</tr>`;
     });
     // ── Bloco Porto (azul), boleto + assembleia ──
     let rowsPorto = '';
@@ -3403,10 +3419,11 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       <div style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;background:#fff">
         <div style="background:#EC7000;color:#fff;font-weight:800;font-size:13px;padding:9px 14px">Itaú</div>
         <table style="width:100%;border-collapse:collapse">
-          <tr style="background:#FFF4EA;color:#B45309"><th style="${th};text-align:left">Mês</th><th style="${th};text-align:left">Vencimento</th><th style="${th}">Veículos</th><th style="${th}">Imóveis</th></tr>
+          ${MOSTRAR_SUPLENCIA ? `<tr style="background:#FFF4EA;color:#B45309"><th style="${th}" colspan="2"></th><th style="${th}" colspan="2">Assembleia</th><th style="${th}" colspan="2">Suplência</th></tr>` : ''}
+          <tr style="background:#FFF4EA;color:#B45309"><th style="${th};text-align:left">Mês</th><th style="${th};text-align:left">Venc.</th><th style="${th}">Veíc.</th><th style="${th}">Imóv.</th>${MOSTRAR_SUPLENCIA ? `<th style="${th}">Veíc.</th><th style="${th}">Imóv.</th>` : ''}</tr>
           ${rowsItau}
         </table>
-        <div style="font-size:11px;color:#8a8984;padding:8px 14px 10px">Veículos às terças e Imóveis às sextas, a partir do dia 10 (venc. até 05) ou do dia 24 (venc. 10, 15 e 20).</div>
+        <div style="font-size:11px;color:#8a8984;padding:8px 14px 10px">Veículos às terças e Imóveis às sextas, a partir do dia 10 (venc. até 05) ou do dia 24 (venc. 10, 15 e 20).${MOSTRAR_SUPLENCIA ? ' Suplência: 10 dias após a assembleia (Veículos) e 12 dias (Imóveis).' : ''}</div>
       </div>
       <div style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;background:#fff">
         <div style="background:#0046AD;color:#fff;font-weight:800;font-size:13px;padding:9px 14px">Porto</div>
