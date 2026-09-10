@@ -3406,8 +3406,8 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
     const hoje = new Date(); hoje.setHours(0,0,0,0);
     const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
     const st = d => d >= hoje ? 'color:#1E293B;font-weight:700' : 'color:#94A3B8;text-decoration:line-through';
-    const td = 'padding:7px 10px;font-size:12.5px;text-align:center;border-top:1px solid #EEF2F7';
-    const th = 'padding:7px 10px;font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;text-align:center';
+    const td = 'padding:7px 8px;font-size:12.5px;text-align:center;border-top:1px solid #EEF2F7;white-space:nowrap';
+    const th = 'padding:7px 8px;font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;text-align:center;white-space:nowrap';
     // meses exibidos: atual e próximo
     const meses = [0, 1].map(off => {
       const ref = new Date(hoje.getFullYear(), hoje.getMonth()+off, 1);
@@ -3425,7 +3425,7 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       const cSup05 = MOSTRAR_SUPLENCIA ? `<td style="${td}"><span style="${st(su05v)}">${dm(su05v)}</span></td><td style="${td}"><span style="${st(su05i)}">${dm(su05i)}</span></td>` : '';
       const cSup20 = MOSTRAR_SUPLENCIA ? `<td style="${td}"><span style="${st(su20v)}">${dm(su20v)}</span></td><td style="${td}"><span style="${st(su20i)}">${dm(su20i)}</span></td>` : '';
       rowsItau += `<tr><td style="${td};text-align:left;font-weight:700;color:#2D3F5E" rowspan="2">${MESES[m]}</td>
-          <td style="${td};text-align:left;color:#52514e">até 05</td><td style="${td}"><span style="${st(so05v)}">${dm(so05v)}</span></td><td style="${td}"><span style="${st(it05v)}">${dm(it05v)}</span></td><td style="${td}"><span style="${st(so05i)}">${dm(so05i)}</span></td><td style="${td}"><span style="${st(it05i)}">${dm(it05i)}</span></td>${cSup05}</tr>
+          <td style="${td};text-align:left;color:#52514e">05</td><td style="${td}"><span style="${st(so05v)}">${dm(so05v)}</span></td><td style="${td}"><span style="${st(it05v)}">${dm(it05v)}</span></td><td style="${td}"><span style="${st(so05i)}">${dm(so05i)}</span></td><td style="${td}"><span style="${st(it05i)}">${dm(it05i)}</span></td>${cSup05}</tr>
         <tr><td style="${td};text-align:left;color:#52514e">10, 15 e 20</td><td style="${td}"><span style="${st(so20v)}">${dm(so20v)}</span></td><td style="${td}"><span style="${st(it20v)}">${dm(it20v)}</span></td><td style="${td}"><span style="${st(so20i)}">${dm(so20i)}</span></td><td style="${td}"><span style="${st(it20i)}">${dm(it20i)}</span></td>${cSup20}</tr>`;
     });
     // ── Bloco Porto (azul), boleto + assembleia ──
@@ -3448,7 +3448,7 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       blocoBradesco = `<div style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;background:#fff">
         <div style="background:#CC092F;color:#fff;font-weight:800;font-size:13px;padding:9px 14px">Bradesco</div>
         <table style="width:100%;border-collapse:collapse">
-          <tr style="background:#FDEEF1;color:#B91C3C"><th style="${th};text-align:left">Mês</th><th style="${th}">Venc. do boleto</th><th style="${th}">Sorteio</th><th style="${th}">Assembleia</th></tr>
+          <tr style="background:#FDEEF1;color:#B91C3C"><th style="${th};text-align:left">Mês</th><th style="${th}">Vencimento</th><th style="${th}">Sorteio</th><th style="${th}">Assembleia</th></tr>
           ${rowsBra}
         </table>
         <div style="font-size:11px;color:#8a8984;padding:8px 14px 10px">Boleto vence no primeiro dia útil a partir do dia 10 e a assembleia é 2 dias úteis depois do vencimento. Sorteio: extração da Loteria Federal imediatamente anterior à assembleia (a extração de sábado passou pro domingo de manhã, o Newcon ainda registra a data antiga). <b style="color:#B91C3C">Cliente novo só concorre no mês se entrar antes do vencimento E antes do sorteio, o que vier primeiro</b>; depois disso participa a partir da assembleia seguinte.</div>
@@ -3458,16 +3458,16 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       <div style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;background:#fff">
         <div style="background:#EC7000;color:#fff;font-weight:800;font-size:13px;padding:9px 14px">Itaú</div>
         <table style="width:100%;border-collapse:collapse">
-          <tr style="background:#FFF4EA;color:#B45309"><th style="${th}" colspan="2"></th><th style="${th}" colspan="2">Veículos</th><th style="${th}" colspan="2">Imóveis</th>${MOSTRAR_SUPLENCIA ? `<th style="${th}" colspan="2">Suplência</th>` : ''}</tr>
+          <tr style="background:#FFF4EA;color:#B45309"><th style="${th}" colspan="2"></th><th style="${th}" colspan="2">Automóvel</th><th style="${th}" colspan="2">Imóvel</th>${MOSTRAR_SUPLENCIA ? `<th style="${th}" colspan="2">Suplência</th>` : ''}</tr>
           <tr style="background:#FFF4EA;color:#B45309"><th style="${th};text-align:left">Mês</th><th style="${th};text-align:left">Venc.</th><th style="${th}">Sorteio</th><th style="${th}">Assemb.</th><th style="${th}">Sorteio</th><th style="${th}">Assemb.</th>${MOSTRAR_SUPLENCIA ? `<th style="${th}">Veíc.</th><th style="${th}">Imóv.</th>` : ''}</tr>
           ${rowsItau}
         </table>
-        <div style="font-size:11px;color:#8a8984;padding:8px 14px 10px">Veículos às terças e Imóveis às sextas, a partir do dia 10 (venc. até 05) ou do dia 24 (venc. 10, 15 e 20).${MOSTRAR_SUPLENCIA ? ' Suplência: 10 dias após a assembleia (Veículos) e 12 dias (Imóveis).' : ''}</div>
+        <div style="font-size:11px;color:#8a8984;padding:8px 14px 10px">Automóvel às terças e Imóvel às sextas, a partir do dia 10 (venc. até 05) ou do dia 24 (venc. 10, 15 e 20).${MOSTRAR_SUPLENCIA ? ' Suplência: 10 dias após a assembleia (Automóvel) e 12 dias (Imóvel).' : ''}</div>
       </div>
       <div style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;background:#fff">
         <div style="background:#0046AD;color:#fff;font-weight:800;font-size:13px;padding:9px 14px">Porto</div>
         <table style="width:100%;border-collapse:collapse">
-          <tr style="background:#EDF3FF;color:#1D4ED8"><th style="${th};text-align:left">Mês</th><th style="${th}">Venc. do boleto</th><th style="${th}">Sorteio</th><th style="${th}">Assembleia</th></tr>
+          <tr style="background:#EDF3FF;color:#1D4ED8"><th style="${th};text-align:left">Mês</th><th style="${th}">Vencimento</th><th style="${th}">Sorteio</th><th style="${th}">Assembleia</th></tr>
           ${rowsPorto}
         </table>
         <div style="font-size:11px;color:#8a8984;padding:8px 14px 10px">Boleto vence no primeiro dia útil a partir do dia 15 e a assembleia é no 4º dia útil depois do vencimento. Sorteio: extração da Loteria Federal imediatamente anterior à assembleia.</div>
