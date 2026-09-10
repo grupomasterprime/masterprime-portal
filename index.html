@@ -507,6 +507,19 @@ body.embedded-mode .portal-menu-fab { display:flex; }
           <a class="hm-btn-tabelas" style="margin-top:0;background:#2D3F5E;color:#fff" href="https://tanamao.figma.site/consorcio" target="_blank" rel="noopener">Tabelas &amp; Materiais Porto — Tá na Mão!</a>
           <a class="hm-btn-tabelas" style="margin-top:0;background:#fff;border:1.5px solid #2D3F5E;color:#2D3F5E" href="javascript:void(0)" onclick="abrirTabelasPorto()">Grupos em Campanha — Tabelas</a>
         </div>
+        <!-- ═══ Assembleias Itaú: calculadas automaticamente pela regra oficial ═══
+             Veículos = 1ª terça útil, Imóveis = 1ª sexta útil, a partir do dia 10
+             (venc. até 05) e do dia 24 (venc. 10, 15 e 20). Feriados nacionais via
+             BrasilAPI + feriados de São Paulo (25/01 e 09/07): se a data cair num
+             feriado, pula pra mesma semana seguinte. -->
+        <div class="hm-card" id="hm-assemb" style="display:none;margin:14px 0 2px">
+          <h2 style="display:flex;align-items:center;gap:8px">Próximas assembleias
+            <span style="font-size:10px;font-weight:700;letter-spacing:1px;color:#64748B;text-transform:uppercase;background:#F1F5F9;border-radius:8px;padding:2px 8px">automático</span>
+          </h2>
+          <div class="hm-csub">Itaú: Veículos às terças e Imóveis às sextas, a partir do dia 10 (venc. até 05) ou do dia 24 (venc. 10, 15 e 20). Porto: boleto vence no primeiro dia útil a partir do dia 15 e a assembleia é no 4º dia útil depois. O cliente precisa pagar até o vencimento pra participar.</div>
+          <div id="hm-assemb-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-top:10px"></div>
+          <div class="hm-foot" id="hm-assemb-foot"></div>
+        </div>
         <!-- Hero do Setembro Recorde: visível SÓ para sócios e master (hmPlacarOculto).
              Consultores e parceiros veem apenas os índices de mercado por enquanto. -->
         <div class="hm-hero" id="hm-hero" style="display:none">
@@ -1647,7 +1660,7 @@ function nav(id) {
     }
   }
   // Home: carrega/atualiza o placar da campanha ao entrar na tela
-  if (id === 'home') { try { initHome(); } catch(e) { console.warn('home:', e); } }
+  if (id === 'home') { try { initHome(); } catch(e) { console.warn('home:', e); } try { window.__renderAssembleias && window.__renderAssembleias(); } catch(e) {} }
   // Apenas o Painel Split abre em tela cheia (esconde sidebar do portal)
   const app = document.getElementById('portal-app');
   const fab = document.getElementById('portal-menu-fab');
@@ -3307,6 +3320,94 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
 }
 </script>
 
+<script id="home-assembleias">
+// ═══════════════════════════════════════════════════════════════════
+// HOME — Próximas assembleias Itaú e Porto, calculadas pelas regras
+// oficiais + feriados (nacionais calculados localmente, SP fixos, e
+// BrasilAPI como reforço quando a rede deixar).
+// Itaú (comunicado 2026): Veículos = 1ª terça útil e Imóveis = 1ª sexta
+// útil a partir do dia 10 (venc. até 05) e do dia 24 (venc. 10, 15 e 20).
+// Caindo em feriado, pula pra mesma semana seguinte.
+// Porto (Calendário Assembleias 2026): boleto vence no 1º dia útil a
+// partir do dia 15; assembleia no 4º dia útil após o vencimento.
+// Validado contra os 12 meses do PDF oficial da Porto de 2026.
+// ═══════════════════════════════════════════════════════════════════
+(function assembleias() {
+  const iso = d => d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  const dm  = d => String(d.getDate()).padStart(2,'0') + '/' + String(d.getMonth()+1).padStart(2,'0');
+  // Páscoa (algoritmo de Meeus) → carnaval, sexta santa e corpus christi
+  function pascoa(ano){ const a=ano%19,b=Math.floor(ano/100),c=ano%100,dd=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-dd-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mes=Math.floor((h+l-7*m+114)/31),dia=((h+l-7*m+114)%31)+1; return new Date(ano, mes-1, dia); }
+  function feriadosAno(ano){
+    const out = [];
+    // Nacionais fixos + São Paulo (25/01 capital, 09/07 estado)
+    [[1,1],[4,21],[5,1],[9,7],[10,12],[11,2],[11,15],[11,20],[12,25],[1,25],[7,9]].forEach(([m,d]) => out.push(iso(new Date(ano, m-1, d))));
+    const p = pascoa(ano);
+    [-48,-47,-2,60].forEach(off => { const d = new Date(p); d.setDate(d.getDate()+off); out.push(iso(d)); });
+    return out;
+  }
+  const anoAtual = new Date().getFullYear();
+  const FERIADOS = new Set([...feriadosAno(anoAtual), ...feriadosAno(anoAtual+1)]);
+  const ehUtil = d => d.getDay() !== 0 && d.getDay() !== 6 && !FERIADOS.has(iso(d));
+  // Itaú: 1ª terça (dow=2) ou sexta (dow=5) a partir do diaMin; feriado pula 7 dias
+  function assembItau(ano, mes, diaMin, dow){
+    const d = new Date(ano, mes, diaMin);
+    while (d.getDay() !== dow) d.setDate(d.getDate()+1);
+    while (FERIADOS.has(iso(d))) d.setDate(d.getDate()+7);
+    return d;
+  }
+  // Porto: venc = 1º dia útil a partir do dia 15; assembleia = 4º dia útil depois
+  function assembPorto(ano, mes){
+    const v = new Date(ano, mes, 15);
+    while (!ehUtil(v)) v.setDate(v.getDate()+1);
+    const a = new Date(v);
+    for (let i = 0; i < 4; i++) { do { a.setDate(a.getDate()+1); } while (!ehUtil(a)); }
+    return { venc: v, assemb: a };
+  }
+  function render(){
+    const grid = document.getElementById('hm-assemb-grid');
+    if (!grid) return;
+    // Fase de teste (pedido do Allan, 10/09/2026): só sócios e master veem o
+    // card por enquanto. Se aprovarem, é só remover este bloco pra liberar geral.
+    const u = (typeof currentUser !== 'undefined' && currentUser) ? currentUser : null;
+    if (!u || (u.tipo !== 'master' && u.tipo !== 'socio')) {
+      document.getElementById('hm-assemb').style.display = 'none';
+      return;
+    }
+    const hoje = new Date(); hoje.setHours(0,0,0,0);
+    const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+    let html = '';
+    for (let off = 0; off < 2; off++) {
+      const ref = new Date(hoje.getFullYear(), hoje.getMonth()+off, 1);
+      const y = ref.getFullYear(), m = ref.getMonth();
+      const it05v = assembItau(y, m, 10, 2), it05i = assembItau(y, m, 10, 5);
+      const it20v = assembItau(y, m, 24, 2), it20i = assembItau(y, m, 24, 5);
+      const pt = assembPorto(y, m);
+      const st = d => d >= hoje ? 'color:#2D3F5E' : 'color:#94A3B8;text-decoration:line-through';
+      html += `<div style="border:1px solid #E2E8F0;border-radius:12px;padding:14px 16px;background:#FBFCFE">
+        <div style="font-size:12px;font-weight:800;color:#2D3F5E;letter-spacing:.5px;text-transform:uppercase">${MESES[m]} ${y}</div>
+        <div style="margin-top:9px;display:flex;flex-direction:column;gap:7px;font-size:12.5px;color:#52514e">
+          <div><span style="font-weight:700;color:#eda100">Itaú Veículos</span><br>venc. até 05: <b style="${st(it05v)}">${dm(it05v)}</b> &nbsp;·&nbsp; venc. 10 a 20: <b style="${st(it20v)}">${dm(it20v)}</b></div>
+          <div><span style="font-weight:700;color:#2a78d6">Itaú Imóveis</span><br>venc. até 05: <b style="${st(it05i)}">${dm(it05i)}</b> &nbsp;·&nbsp; venc. 10 a 20: <b style="${st(it20i)}">${dm(it20i)}</b></div>
+          <div><span style="font-weight:700;color:#0a7f3f">Porto</span><br>boleto: <b style="${st(pt.venc)}">${dm(pt.venc)}</b> &nbsp;·&nbsp; assembleia: <b style="${st(pt.assemb)}">${dm(pt.assemb)}</b></div>
+        </div>
+      </div>`;
+    }
+    grid.innerHTML = html;
+    document.getElementById('hm-assemb').style.display = '';
+    document.getElementById('hm-assemb-foot').textContent = 'Datas calculadas pelas regras oficiais do Itaú e da Porto, considerando fins de semana e feriados nacionais e de São Paulo. Datas que já passaram aparecem riscadas.';
+  }
+  render();
+  window.__renderAssembleias = render; // re-render ao entrar na home (pós-login)
+  // Reforço: BrasilAPI soma feriados que porventura faltem e re-renderiza
+  Promise.all([anoAtual, anoAtual+1].map(ano =>
+    fetch('https://brasilapi.com.br/api/feriados/v1/' + ano).then(r => r.ok ? r.json() : []).catch(() => [])
+  )).then(listas => {
+    let mudou = false;
+    listas.flat().forEach(f => { if (f && f.date && !FERIADOS.has(f.date)) { FERIADOS.add(f.date); mudou = true; } });
+    if (mudou) render();
+  });
+})();
+</script>
 <script id="home-indices-bcb">
 // ═══════════════════════════════════════════════════════════════════
 // HOME — Índices de mercado (API pública do BCB/SGS, sem chave).
