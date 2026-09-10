@@ -499,6 +499,9 @@ body.embedded-mode .portal-menu-fab { display:flex; }
           #s-home .idx-card .n{font-size:10px;font-weight:700;letter-spacing:1px;color:#64748B;text-transform:uppercase}
           #s-home .idx-card .v{font-size:17px;font-weight:800;color:#2D3F5E;margin-top:3px}
           #s-home .idx-card .s{font-size:10.5px;color:#94A3B8;margin-top:1px}
+          /* Assembleias: Itaú ocupa a linha de cima inteira; Porto e Bradesco dividem a de baixo 50/50 */
+          #s-home #hm-assemb-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+          @media (max-width:900px){#s-home #hm-assemb-grid{grid-template-columns:1fr}}
         </style>
         <div class="idx-ticker" id="idxTicker"><div class="idx-track" id="idxTrack"></div></div>
         <div class="idx-painel" id="idxPainel"></div>
@@ -517,7 +520,7 @@ body.embedded-mode .portal-menu-fab { display:flex; }
             <span style="font-size:10px;font-weight:700;letter-spacing:1px;color:#64748B;text-transform:uppercase;background:#F1F5F9;border-radius:8px;padding:2px 8px">automático</span>
           </h2>
           <div class="hm-csub">Pra participar da assembleia do mês, o cliente precisa pagar até a data de vencimento do grupo.</div>
-          <div id="hm-assemb-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px;margin-top:10px"></div>
+          <div id="hm-assemb-grid" style="display:grid;gap:12px;margin-top:10px"></div>
           <div class="hm-foot" id="hm-assemb-foot"></div>
         </div>
         <!-- Hero do Setembro Recorde: visível SÓ para sócios e master (hmPlacarOculto).
@@ -3406,6 +3409,14 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
     const hoje = new Date(); hoje.setHours(0,0,0,0);
     const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
     const st = d => d >= hoje ? 'color:#1E293B;font-weight:700' : 'color:#94A3B8;text-decoration:line-through';
+    // Sorteio que ja aconteceu vira link: abre popup com o resultado oficial da
+    // Loteria Federal (API publica da Caixa). Futuro fica so texto normal.
+    const soCell = d => {
+      const isoD = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      if (d < hoje || (d.getTime() === hoje.getTime()))
+        return `<a href="javascript:void(0)" onclick="abrirSorteioFederal('${isoD}')" title="Ver resultado da extração" style="color:#2a78d6;font-weight:700;text-decoration:underline dotted">${dm(d)}</a>`;
+      return `<span style="color:#1E293B;font-weight:700">${dm(d)}</span>`;
+    };
     const td = 'padding:7px 8px;font-size:12.5px;text-align:center;border-top:1px solid #EEF2F7;white-space:nowrap';
     const th = 'padding:7px 8px;font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;text-align:center;white-space:nowrap';
     // meses exibidos: atual e próximo
@@ -3425,8 +3436,8 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       const cSup05 = MOSTRAR_SUPLENCIA ? `<td style="${td}"><span style="${st(su05v)}">${dm(su05v)}</span></td><td style="${td}"><span style="${st(su05i)}">${dm(su05i)}</span></td>` : '';
       const cSup20 = MOSTRAR_SUPLENCIA ? `<td style="${td}"><span style="${st(su20v)}">${dm(su20v)}</span></td><td style="${td}"><span style="${st(su20i)}">${dm(su20i)}</span></td>` : '';
       rowsItau += `<tr><td style="${td};text-align:left;font-weight:700;color:#2D3F5E" rowspan="2">${MESES[m]}</td>
-          <td style="${td};text-align:left;color:#52514e">05</td><td style="${td}"><span style="${st(so05v)}">${dm(so05v)}</span></td><td style="${td}"><span style="${st(it05v)}">${dm(it05v)}</span></td><td style="${td}"><span style="${st(so05i)}">${dm(so05i)}</span></td><td style="${td}"><span style="${st(it05i)}">${dm(it05i)}</span></td>${cSup05}</tr>
-        <tr><td style="${td};text-align:left;color:#52514e">10, 15 e 20</td><td style="${td}"><span style="${st(so20v)}">${dm(so20v)}</span></td><td style="${td}"><span style="${st(it20v)}">${dm(it20v)}</span></td><td style="${td}"><span style="${st(so20i)}">${dm(so20i)}</span></td><td style="${td}"><span style="${st(it20i)}">${dm(it20i)}</span></td>${cSup20}</tr>`;
+          <td style="${td};text-align:left;color:#52514e">05</td><td style="${td}">${soCell(so05v)}</td><td style="${td}"><span style="${st(it05v)}">${dm(it05v)}</span></td><td style="${td}">${soCell(so05i)}</td><td style="${td}"><span style="${st(it05i)}">${dm(it05i)}</span></td>${cSup05}</tr>
+        <tr><td style="${td};text-align:left;color:#52514e">10, 15 e 20</td><td style="${td}">${soCell(so20v)}</td><td style="${td}"><span style="${st(it20v)}">${dm(it20v)}</span></td><td style="${td}">${soCell(so20i)}</td><td style="${td}"><span style="${st(it20i)}">${dm(it20i)}</span></td>${cSup20}</tr>`;
     });
     // ── Bloco Porto (azul), boleto + assembleia ──
     let rowsPorto = '';
@@ -3434,7 +3445,7 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       const pt = assembPorto(y, m);
       const so = sorteioAntes(pt.assemb);
       rowsPorto += `<tr><td style="${td};text-align:left;font-weight:700;color:#2D3F5E">${MESES[m]}</td>
-        <td style="${td}"><span style="${st(pt.venc)}">${dm(pt.venc)}</span></td><td style="${td}"><span style="${st(so)}">${dm(so)}</span></td><td style="${td}"><span style="${st(pt.assemb)}">${dm(pt.assemb)}</span></td></tr>`;
+        <td style="${td}"><span style="${st(pt.venc)}">${dm(pt.venc)}</span></td><td style="${td}">${soCell(so)}</td><td style="${td}"><span style="${st(pt.assemb)}">${dm(pt.assemb)}</span></td></tr>`;
     });
     // ── Bloco Bradesco (vermelho), desligado até a Fernanda confirmar a regra ──
     let blocoBradesco = '';
@@ -3443,7 +3454,7 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       meses.forEach(({y, m}) => {
         const br = assembBradesco(y, m);
         rowsBra += `<tr><td style="${td};text-align:left;font-weight:700;color:#2D3F5E">${MESES[m]}</td>
-          <td style="${td}"><span style="${st(br.venc)}">${dm(br.venc)}</span></td><td style="${td}"><span style="${st(br.sorteio)}">${dm(br.sorteio)}</span></td><td style="${td}"><span style="${st(br.assemb)}">${dm(br.assemb)}</span></td></tr>`;
+          <td style="${td}"><span style="${st(br.venc)}">${dm(br.venc)}</span></td><td style="${td}">${soCell(br.sorteio)}</td><td style="${td}"><span style="${st(br.assemb)}">${dm(br.assemb)}</span></td></tr>`;
       });
       blocoBradesco = `<div style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;background:#fff">
         <div style="background:#CC092F;color:#fff;font-weight:800;font-size:13px;padding:9px 14px">Bradesco</div>
@@ -3455,7 +3466,7 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       </div>`;
     }
     grid.innerHTML = `
-      <div style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;background:#fff">
+      <div style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;background:#fff;grid-column:1 / -1">
         <div style="background:#EC7000;color:#fff;font-weight:800;font-size:13px;padding:9px 14px">Itaú</div>
         <table style="width:100%;border-collapse:collapse">
           <tr style="background:#FFF4EA;color:#B45309"><th style="${th}" colspan="2"></th><th style="${th}" colspan="2">Automóvel</th><th style="${th}" colspan="2">Imóvel</th>${MOSTRAR_SUPLENCIA ? `<th style="${th}" colspan="2">Suplência</th>` : ''}</tr>
@@ -3475,6 +3486,68 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
     document.getElementById('hm-assemb').style.display = '';
     document.getElementById('hm-assemb-foot').textContent = 'Datas calculadas automaticamente pelas regras oficiais, considerando fins de semana e feriados. Datas que já passaram aparecem riscadas.';
   }
+  // ── Popup do resultado da Loteria Federal (API pública da Caixa) ──
+  // Clique numa data de sorteio já ocorrida: descobre o concurso contando as
+  // extrações (quartas e domingos) entre a data e o último concurso publicado,
+  // busca o resultado e mostra os 5 prêmios com a centena destacada.
+  let FED_ULT = null;
+  window.abrirSorteioFederal = async function(isoData){
+    let ovl = document.getElementById('fed-ovl');
+    if (!ovl) {
+      ovl = document.createElement('div');
+      ovl.id = 'fed-ovl';
+      ovl.style.cssText = 'position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:9999;display:none;overflow:auto';
+      ovl.innerHTML = '<div id="fed-box" style="max-width:430px;margin:7vh auto;background:#fff;border-radius:14px;padding:20px 22px;box-shadow:0 20px 60px rgba(0,0,0,.3)"></div>';
+      ovl.addEventListener('click', e => { if (e.target === ovl) ovl.style.display = 'none'; });
+      document.body.appendChild(ovl);
+    }
+    const box = document.getElementById('fed-box');
+    ovl.style.display = 'block';
+    box.innerHTML = '<div style="font-size:13px;color:#64748B;padding:18px 0;text-align:center">Buscando o resultado na Caixa...</div>';
+    try {
+      const [y, mo, dd] = isoData.split('-').map(Number);
+      const alvo = new Date(y, mo - 1, dd);
+      if (!FED_ULT) {
+        const r = await fetch('https://servicebus2.caixa.gov.br/portaldeloterias/api/federal', {cache:'no-store'});
+        if (!r.ok) throw new Error('API da Caixa indisponível');
+        FED_ULT = await r.json();
+      }
+      const [ud, um, uy] = String(FED_ULT.dataApuracao).split('/').map(Number);
+      const ultData = new Date(uy, um - 1, ud);
+      // conta extrações (dom=0, qua=3) depois da data alvo até a data do último
+      let delta = 0; const c = new Date(alvo);
+      while (c < ultData) { c.setDate(c.getDate() + 1); if (c.getDay() === 0 || c.getDay() === 3) delta++; }
+      let conc = FED_ULT.numero - delta;
+      let dados = (delta === 0) ? FED_ULT : null;
+      const alvoBR = String(dd).padStart(2,'0') + '/' + String(mo).padStart(2,'0') + '/' + y;
+      for (const tent of (dados ? [] : [conc, conc - 1, conc + 1])) {
+        const r2 = await fetch('https://servicebus2.caixa.gov.br/portaldeloterias/api/federal/' + tent, {cache:'no-store'});
+        if (!r2.ok) continue;
+        const j = await r2.json();
+        if (String(j.dataApuracao) === alvoBR) { dados = j; break; }
+        if (!dados) dados = j; // guarda o mais próximo como fallback
+      }
+      if (!dados) throw new Error('resultado não encontrado');
+      const avisoData = String(dados.dataApuracao) !== alvoBR
+        ? '<div style="font-size:11px;color:#B45309;background:#FFF4EA;border-radius:8px;padding:7px 10px;margin-top:8px">A Caixa registrou esta extração em ' + dados.dataApuracao + ' (a data pode deslocar por feriado).</div>' : '';
+      const linhas = (dados.listaDezenas || []).map((b, i) => {
+        const bil = String(b);
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #F1F5F9">' +
+          '<span style="font-size:12px;color:#64748B">' + (i+1) + 'º prêmio</span>' +
+          '<span style="font-family:monospace;font-size:16px;letter-spacing:1px;color:#1E293B">' + bil.slice(0, -3) + '<b style="color:#C2410C">' + bil.slice(-3) + '</b></span></div>';
+      }).join('');
+      box.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center">' +
+        '<div><div style="font-size:11px;font-weight:800;letter-spacing:1.5px;color:#2a78d6;text-transform:uppercase">Loteria Federal</div>' +
+        '<div style="font-size:16px;font-weight:800;color:#1E293B;margin-top:2px">Extração ' + dados.numero + ' · ' + dados.dataApuracao + '</div></div>' +
+        '<button onclick="document.getElementById(\'fed-ovl\').style.display=\'none\'" style="border:none;background:#F1F5F9;border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer;color:#334155">Fechar</button></div>' +
+        '<div style="margin-top:12px">' + linhas + '</div>' + avisoData +
+        '<div style="font-size:11px;color:#8a8984;margin-top:10px">Os 3 últimos números destacados são a centena que define a cota contemplada. Grupos com 1.000 cotas ou mais usam os 4 últimos.</div>';
+    } catch(e) {
+      box.innerHTML = '<div style="font-size:13px;color:#B91C1C;padding:10px 0">Não consegui buscar o resultado agora (' + e.message + '). Tente de novo em instantes ou consulte loterias.caixa.gov.br.</div>' +
+        '<button onclick="document.getElementById(\'fed-ovl\').style.display=\'none\'" style="border:none;background:#F1F5F9;border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer;margin-top:6px">Fechar</button>';
+    }
+  };
+
   render();
   window.__renderAssembleias = render; // re-render ao entrar na home (pós-login)
   // Reforço: BrasilAPI soma feriados que porventura faltem e re-renderiza
