@@ -188,7 +188,7 @@ select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 1
   <div class="mod">
     <h2 id="ml-titulo">Novo Contato</h2>
     <div class="fg"><label>Nome do cliente</label><input id="ml-nome"></div>
-    <div class="fg"><label>Telefone</label><input id="ml-tel" placeholder="(11) 99999-9999"></div>
+    <div class="fg"><label>Telefone</label><input id="ml-tel" inputmode="numeric" placeholder="(11) 99999-9999" maxlength="15"></div>
     <div class="fg"><label>Interesse</label>
       <select id="ml-int"><option value="">Selecione...</option><option>Automóvel</option><option>Imóvel</option><option>Pesados</option><option>Investimento</option><option>Outro</option></select>
     </div>
@@ -483,14 +483,40 @@ async function dropLead(ev){
 }
 
 // ══════════ NOVO LEAD ══════════
+let ML_DUP_OK = false;
+function telDigitos(t){ let d = String(t||'').replace(/\D/g,''); if (d.startsWith('55') && d.length > 11) d = d.slice(2); return d; }
+// Máscara (11) 99999-9999: não deixa digitar a mais e formata sozinho
+function maskTelCRM(v){ v = String(v||'').replace(/\D/g,'').slice(0,11); if (v.length <= 10) return v.replace(/(\d{2})(\d)/,'($1) $2').replace(/(\d{4})(\d)/,'$1-$2'); return v.replace(/(\d{2})(\d)/,'($1) $2').replace(/(\d{5})(\d)/,'$1-$2'); }
+document.addEventListener('DOMContentLoaded', () => {
+  const tl = document.getElementById('ml-tel');
+  if (tl) tl.addEventListener('input', e => e.target.value = maskTelCRM(e.target.value));
+});
 function abrirNovoLead(){
   ['ml-nome','ml-tel','ml-obs'].forEach(id => $(id).value = '');
   $('ml-int').value = ''; $('ml-cons').value = currentUser.id; $('ml-err').innerHTML = '';
+  ML_DUP_OK = false;
   $('ovl-lead').classList.remove('hidden');
 }
 async function salvarNovoLead(){
   const nome = $('ml-nome').value.trim();
   if (!nome) { $('ml-err').innerHTML = '<div class="msg-err">Informe o nome do cliente</div>'; return; }
+  // Trava de telefone duplicado (pedido do Renato, 10/09/2026): avisa se o número
+  // já existe. Na equipe dá pra salvar mesmo assim clicando em Salvar de novo
+  // (caso legítimo: mesmo cliente comprando outra cota).
+  const telDig = telDigitos($('ml-tel').value);
+  // Telefone preenchido precisa estar completo: DDD + número (10 ou 11 dígitos)
+  if (telDig.length > 0 && telDig.length < 10) {
+    $('ml-err').innerHTML = '<div class="msg-err">Telefone incompleto. Digite o DDD e o número, ex: (11) 99999-9999.</div>';
+    return;
+  }
+  if (telDig.length >= 8 && !ML_DUP_OK) {
+    const dup = LEADS.find(l => { const d = telDigitos(l.telefone); return d && (d === telDig || (d.length >= 9 && telDig.length >= 9 && d.slice(-9) === telDig.slice(-9))); });
+    if (dup) {
+      ML_DUP_OK = true;
+      $('ml-err').innerHTML = '<div class="msg-err">Telefone já cadastrado para o contato ' + esc(dup.nome) + '. Se for outra venda do mesmo cliente, clique em Salvar de novo para confirmar.</div>';
+      return;
+    }
+  }
   const { error } = await sb.from('crm_leads').insert({
     nome, telefone: $('ml-tel').value.trim(), interesse: $('ml-int').value,
     observacao: $('ml-obs').value.trim(), consultor_id: parseInt($('ml-cons').value, 10), origem: 'manual'

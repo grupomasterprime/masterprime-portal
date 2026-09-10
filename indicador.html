@@ -318,11 +318,20 @@ async function enviarLead(){
   const tel = $('ap-ltel').value.trim();
   if (nome.length < 3) { $('ap-msg').innerHTML = '<div class="msg-err">Informe o nome do cliente</div>'; return; }
   if (tel.replace(/\D/g, '').length < 10) { $('ap-msg').innerHTML = '<div class="msg-err">Informe o celular com DDD</div>'; return; }
+  let erroMsg = '';
   const ok = await rpc('crm_indicador_enviar_lead', {
     p_token: TOKEN, p_pin: PIN, p_nome: nome, p_telefone: tel,
     p_interesse: $('ap-lint').value, p_obs: $('ap-lobs').value.trim()
-  }).catch(() => false);
-  if (!ok) { $('ap-msg').innerHTML = '<div class="msg-err">Não foi possível enviar. Tente novamente.</div>'; return; }
+  }).catch(e => { erroMsg = String((e && e.message) || ''); return false; });
+  if (!ok) {
+    // Trava de duplicidade (pedido do Renato, 10/09/2026): o banco recusa telefone
+    // que já foi indicado antes e devolve TELEFONE_DUPLICADO.
+    const ehDup = erroMsg.includes('TELEFONE_DUPLICADO');
+    $('ap-msg').innerHTML = '<div class="msg-err">' + (ehDup
+      ? 'Este telefone já foi indicado antes, a indicação não foi enviada de novo. Se precisar atualizar algo, fale com seu consultor.'
+      : 'Não foi possível enviar. Tente novamente.') + '</div>';
+    return;
+  }
   $('ap-msg').innerHTML = '<div class="msg-ok">Indicação enviada! Nossa equipe vai entrar em contato com ' + esc(nome.split(' ')[0]) + '.</div>';
   ['ap-lnome','ap-ltel','ap-lobs'].forEach(id => $(id).value = '');
   $('ap-lint').value = '';
