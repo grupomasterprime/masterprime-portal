@@ -3367,22 +3367,18 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
     while (FERIADOS.has(iso(d))) d.setDate(d.getDate()+7);
     return d;
   }
-  // Bradesco (regra do Allan 10/09/2026, AGUARDANDO confirmação da Fernanda do
-  // Bradesco): vencimento sempre dia 10, adiado pro 1º dia útil se cair em fds
-  // ou feriado. A assembleia espera passar o primeiro sorteio da Loteria Federal
-  // depois do vencimento (sorteios às quartas e domingos, confirmado pelo Allan)
-  // e acontece no dia útil seguinte ao sorteio — por isso só cai segunda ou quinta.
-  // Pra ligar o bloco na tabela, mudar MOSTRAR_BRADESCO pra true.
-  const MOSTRAR_BRADESCO = false;
+  // Bradesco: vencimento no 1º dia útil a partir do dia 10, e assembleia 2 dias
+  // úteis depois do vencimento. Regra descoberta no Consórcio Parceiro em
+  // 10/09/2026, validada contra 15 assembleias reais do grupo 010706
+  // (jul/2025 a set/2026), 15 de 15 datas batendo, incluindo meses em que o
+  // dia 10 caiu em fds e em que a assembleia pulou o fim de semana.
+  // Ligado em 10/09/2026 (regra validada com 15 meses da tela + 254 contemplações do RelAssembleia).
+  const MOSTRAR_BRADESCO = true;
   function assembBradesco(ano, mes){
     const v = new Date(ano, mes, 10);
     while (!ehUtil(v)) v.setDate(v.getDate()+1);
-    // primeiro sorteio DEPOIS do vencimento (domingo=0, quarta=3)
-    const s = new Date(v);
-    do { s.setDate(s.getDate()+1); } while (s.getDay() !== 0 && s.getDay() !== 3);
-    // assembleia = dia útil seguinte ao sorteio
-    const a = new Date(s);
-    do { a.setDate(a.getDate()+1); } while (!ehUtil(a));
+    const a = new Date(v);
+    for (let i = 0; i < 2; i++) { do { a.setDate(a.getDate()+1); } while (!ehUtil(a)); }
     return { venc: v, assemb: a };
   }
   // Porto: venc = 1º dia útil a partir do dia 15; assembleia = 4º dia útil depois
@@ -3442,7 +3438,7 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
           <tr style="background:#FDEEF1;color:#B91C3C"><th style="${th};text-align:left">Mês</th><th style="${th}">Venc. do boleto</th><th style="${th}">Assembleia</th></tr>
           ${rowsBra}
         </table>
-        <div style="font-size:11px;color:#8a8984;padding:8px 14px 10px">Boleto vence no primeiro dia útil a partir do dia 10 e a assembleia é no dia útil seguinte ao primeiro sorteio da Loteria Federal após o vencimento.</div>
+        <div style="font-size:11px;color:#8a8984;padding:8px 14px 10px">Boleto vence no primeiro dia útil a partir do dia 10 e a assembleia é 2 dias úteis depois do vencimento.</div>
       </div>`;
     }
     grid.innerHTML = `
