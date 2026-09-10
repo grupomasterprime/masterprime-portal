@@ -1875,6 +1875,14 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
   const s   = raw.toUpperCase().replace(/(\d+),(\d+)%/g, '$1.$2%') // normaliza decimais
                                .replace(/(\d+)\.(\d+)%/g, (m,a,b) => a+','+b+'%'); // volta p/ vírgula
 
+  // ── REGRA 10/09/2026 (Allan): venda com SÓCIO por CATEGORIA ──
+  // Vendas a partir de 01/09/2026: split com sócio deixa de usar a base cheia
+  // (4%) e passa a usar a CATEGORIA do consultor que está no nome da venda
+  // (sócio no nome = 100%). O que passa da categoria vai pro excedente.
+  // Vendas até 31/08/2026 seguem a regra antiga (base 4% quando há sócio).
+  const _pvSoc = parseDateStr(linhaCtx && (linhaCtx.dataVendaReal || linhaCtx.dataVenda));
+  const socioPorCategoria = !!(_pvSoc && (_pvSoc.y > 2026 || (_pvSoc.y === 2026 && _pvSoc.m >= 9)));
+
   // ── RATEIO SOCIOS: venda interna Master Prime pra si mesma ────────────────
   // OBS "RATEIO SOCIOS" (ou "RATEIO SÓCIOS") → divide 100% da comissão entre
   // os 4 sócios (Allan, Carlos, Renato, Vagner), 25% cada. ADM descontado em
@@ -2046,6 +2054,37 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
     }
   }
 
+  // ── "1% GUSTAVO IRMÃO DO RENATO / 0,5% RENATO" (venda do Paulo, 31/08/2026) ──
+  // Regra do Allan (10/09/2026): o consultor recebe pela CATEGORIA dele e manda
+  // as duas fatias (a do Gustavo e a do sócio) DIRETO no demonstrativo do sócio,
+  // sem carta entre eles. O Gustavo aparece na CARTA DE PARCERIA do sócio (é ele
+  // quem repassa ao irmão). O que passa da categoria fica na Master (excedente).
+  // Percentuais líquidos (sem a palavra BRUTO).
+  {
+    const mIrmao = s.match(/^(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s]+?)\s+IRM[ÃA]O\s+DO\s+([A-ZÀ-Ö\s]+?)\s*\/\s*(\d+[,.]?\d*)\s*%\s+([A-ZÀ-Ö\s]+?)$/);
+    if (mIrmao) {
+      const pctG  = parseFloat(mIrmao[1].replace(',','.'))/100;
+      const nomeG = normNome(mIrmao[2].trim());
+      const resp  = normNome(mIrmao[3].trim());
+      const pctR  = parseFloat(mIrmao[4].replace(',','.'))/100;
+      const resp2 = normNome(mIrmao[5].trim());
+      if (pctG > 0 && pctR > 0 && TODOS_SOCIOS.includes(resp) && resp === resp2) {
+        const multCat   = TODOS_SOCIOS.includes(normNome(consultor)) ? 1 : (multConsultor || 0.625);
+        const fracRecG  = pctObsToFrac(pctG);       // fatia do Gustavo (fração do recebido)
+        const fracRecR  = pctObsToFrac(pctR);       // fatia própria do sócio
+        const fracSocio = fracRecG + fracRecR;      // linha do sócio: as duas juntas
+        const selfFracC = Math.max(0, multCat - fracSocio); // consultor: categoria menos o repasse
+        return { tipo:'ok', fracDeRec:true, excFracRec: Math.max(0, 1 - multCat),
+          selfFrac: selfFracC,
+          partes: [
+            { quem: nomeG, fracBruto: fracRecG, pctOrig: pctG, ehParceiro:true, masterPaga:false,
+              oculto:false, ehCarta:true, cartaResp:resp, ehLiquido:true, semLinhaResp:true },
+            { quem: resp, fracBruto: fracSocio, ehParceiro:false, masterPaga:false, oculto:false, ehCarta:false },
+          ]};
+      }
+    }
+  }
+
   // ── Parceiros com NF própria: a MASTER paga direto, mediante nota ──
   // Decisão Allan 04/09/2026: parceiro tipo Anderson Passador recebe da Master
   // (emite NF pra Master), SEM carta de parceria, SEM sair do bolso do consultor
@@ -2069,7 +2108,36 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
         .filter(Boolean)
         .map(mm => ({ pct: parseFloat(mm[1].replace(',','.'))/100, quem: normNome(mm[2].trim()) }));
       const temSocioNF = TODOS_SOCIOS.includes(normNome(consultor)) || outrosNF.some(o => TODOS_SOCIOS.includes(o.quem));
-      const baseNF = temSocioNF ? 0.04 : ((multConsultor||0.625) * 4/100);
+      // Regra sócio por categoria (vendas ≥ 01/09/2026): sócio no split não força mais base 4%
+      const baseNF = TODOS_SOCIOS.includes(normNome(consultor)) ? 0.04
+        : ((temSocioNF && !socioPorCategoria) ? 0.04 : ((multConsultor||0.625) * 4/100));
+      // ── MUDANÇA 10/09/2026 (Renato): "1% PASSADOR BRUTO DIRETO / 50% SÓCIO" ──
+      // Vendas do Arnaldo (Sueli, Sergio, Adriano, Olivio, Veronica, Ricardo…):
+      // a conta deixa de ser sobre a base cheia (4%) e passa pela CATEGORIA do
+      // consultor da venda (Black = 3%). O consultor MANTÉM a fatia antiga (a
+      // metade da sobra calculada sobre 4) e o sócio fica só com o que restar
+      // da conta sobre a categoria. A diferença (4 − categoria) é excedente.
+      // Vale pra TODAS as cotas com essa anotação, mesmo vendas de agosto.
+      {
+        const outroMaior = outrosNF.find(o => o.pct > 0.04 && TODOS_SOCIOS.includes(o.quem));
+        if (outroMaior && pctNF > 0 && pctNF <= 0.04) {
+          const fatorLiq2 = (1 - TRIB_VEND) * (1 - ADM_PCT);
+          const custoPct2 = ehLiqNF ? pctNF : (pctNF / fatorLiq2);
+          const multCat = TODOS_SOCIOS.includes(normNome(consultor)) ? 1 : (multConsultor || 0.625);
+          const fracRecCusto = custoPct2 / 0.04;              // fatia do recebido consumida pelo passador (gross-up incluso)
+          const pool4 = Math.max(0, 1 - fracRecCusto);        // sobra da conta ANTIGA (base 4)
+          const fatiaCons  = (1 - outroMaior.pct) * pool4;    // parte antiga do consultor (50% → metade)
+          const fatiaSocio = Math.max(0, multCat - fracRecCusto - fatiaCons); // resto da conta na categoria
+          const partes2 = [
+            { quem: nfMatch, fracBruto: pctObsToFrac(custoPct2), pctOrig: pctNF, ehParceiro: true,
+              masterPaga: false, oculto: false, ehCarta: true, cartaResp: normNome(consultor),
+              ehLiquido: true, ehNfMaster: true },
+            { quem: outroMaior.quem, fracBruto: fatiaSocio, ehParceiro: false, masterPaga: false, oculto: false, ehCarta: false },
+          ];
+          return { tipo:'ok', partes: partes2, selfFrac: fatiaCons + fracRecCusto,
+                   tribVendTodos: true, fracDeRec: true, excFracRec: Math.max(0, 1 - multCat) };
+        }
+      }
       if (pctNF > 0 && pctNF <= 0.04 && baseNF > 0) {
         // BRUTO = o parceiro recebe o % CHEIO, sem NF nem ADM. O custo disso não é
         // da Master: a fatia retirada do bolo é o % dividido pelo fator líquido
@@ -2426,7 +2494,9 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
         // Ex: "1,5% FABRICIO" + Rodrigues Black (3% = 0.03): frac = 0.015/0.03 = 0.50 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
         // Ex: "2% ALLAN" + Bruno e Renato (4% = 0.04): frac = 0.02/0.04 = 0.50 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg>
         // Se o nome é sócio, usa base 4%; senão usa categoria do consultor
-        const catDecimalM = (ehSocioNome || TODOS_SOCIOS.includes(consultor)) ? 0.04 : (multConsultor * 4 / 100);
+        // Sócio por categoria (vendas ≥ 01/09/2026): sócio anotado não força mais 4%
+        const catDecimalM = TODOS_SOCIOS.includes(consultor) ? 0.04
+          : ((ehSocioNome && !socioPorCategoria) ? 0.04 : (multConsultor * 4 / 100));
         const fracOutro = pct / catDecimalM;
         return { tipo:'ok', partes:[
           { quem:nome, fracBruto:fracOutro, pctOrig:pct, ehParceiro:false, masterPaga:false, oculto:false, ehCarta:false }
@@ -2484,7 +2554,9 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
       const nm = p.match(/^\d+[,.]?\d*\s*%\s+([A-ZÀ-Ö\s\.\-]+?)(?:\s+(?:BRUTO|LIQUIDO))?$/);
       return nm ? TODOS_SOCIOS.includes(normNome(nm[1].trim())) : false;
     });
-    const catDecimalSplit = hasSocioInSplit ? 0.04 : ((multConsultor || 0.625) * 4 / 100);
+    // Sócio por categoria (vendas ≥ 01/09/2026): sócio no split não força mais 4%
+    const catDecimalSplit = TODOS_SOCIOS.includes(consultor) ? 0.04
+      : ((hasSocioInSplit && !socioPorCategoria) ? 0.04 : ((multConsultor || 0.625) * 4 / 100));
     partsDiv.forEach(p => {
       // "X% NOME [BRUTO|LIQUIDO] RESP REPASSA" dentro de um split →
       // carta de parceria do NOME paga pelo RESP (o RESP recebe o mesmo % para repassar).
@@ -2611,7 +2683,14 @@ function processarLinha(linha, match, ciclo, mult, split, isAdvanced=false) {
   // Detecta se há sócio no split → todos usam mult=1
   const temSocio = isSocioC || (split.partes && split.partes.some(p =>
     TODOS_SOCIOS.includes(p.quem) || p.ehSocio));
-  let multEfet = temSocio ? 1 : mult;
+  // Regra 10/09/2026: vendas ≥ 01/09/2026 com sócio no split usam a CATEGORIA
+  // do consultor no nome da venda (sócio no nome = 100%), não mais a base 4%.
+  // split.fracDeRec: frações já expressas sobre o recebido (regras do passador
+  // Renato e do Gustavo irmão) → base 1, sem conversão por categoria.
+  const _pvL = parseDateStr(dv);
+  const socioCat = !!(_pvL && (_pvL.y > 2026 || (_pvL.y === 2026 && _pvL.m >= 9)));
+  const usaBase1 = split.fracDeRec ? true : (temSocio && !(socioCat && !isSocioC));
+  let multEfet = usaBase1 ? 1 : mult;
   // Grupos Itaú 10 parcelas (50141, 50127, 50136, 50142): comissão paga em 10 × 0,5%
   // (= 5% total, em vez dos 4% normais). Mult ajustado × 0,8 nos tiers Padrão/Gold/Black
   // preserva os percentuais finais (2,5% / 2,75% / 3% sobre o crédito).
@@ -2819,7 +2898,7 @@ function processarLinha(linha, match, ciclo, mult, split, isAdvanced=false) {
   const fracConsultor = (split.selfFrac !== undefined)
     ? split.selfFrac
     : Math.max(0, 1 - somaFrac);
-  const multC = temSocio ? 1 : mult; // categoria de quem registrou
+  const multC = usaBase1 ? 1 : mult; // categoria de quem registrou (base 1 na regra antiga com sócio)
   const brutConsTotal = rec * multC; // bruto_cons total antes do split
 
   // Calcula a partir do bruto_cons (NF e ADM sobre a fração do bruto_cons)
@@ -2874,6 +2953,16 @@ function processarLinha(linha, match, ciclo, mult, split, isAdvanced=false) {
     });
     addExcedente(c.excedente, linha.adm);
   });
+
+  // Fatia NÃO distribuída quando a conta passa pela categoria (regras 10/09/2026:
+  // passador do Renato base 3 e Gustavo irmão): o que sobra entre a categoria e a
+  // base cheia fica na Master → excedente pela trilha PCO (15,5% + 10%).
+  if (split.excFracRec > 0) {
+    const recRetido = rec * split.excFracRec;
+    const nfRet  = Math.ceil(recRetido * TRIB_PCO * 10000) / 10000;
+    const liqRet = (recRetido - nfRet) * (1 - ADM_PCT);
+    addExcedente(liqRet, linha.adm);
+  }
 
   // Auto-split (ex: vendas Sublime/Portomax → gera linhas extras pra Letícia e Wilker)
   aplicarAutoSplit(consultor, linha, match, ciclo);
@@ -3024,7 +3113,7 @@ function _executarCalculo() {
       const dv = match.dataVenda || linha.dataVenda;
       const ciclo = toCiclo(dv);
       const mult = getMult(consultor, ciclo, dv);
-      const split = parseInd(indicacao, consultor, mult, linha);
+      const split = parseInd(indicacao, consultor, mult, {...linha, dataVendaReal: dv});
       if (split.tipo === 'revisar') {
         S.excecoes.push({linha, idx, tipo:'estorno_split_complexo', consultor, indicacao, ciclo});
         return;
@@ -3052,7 +3141,7 @@ function _executarCalculo() {
     const dv        = match.dataVenda || linha.dataVenda;
     const ciclo     = toCiclo(dv);
     const mult      = getMult(consultor, ciclo, dv);
-    const split     = parseInd(indicacao, consultor, mult, linha);
+    const split     = parseInd(indicacao, consultor, mult, {...linha, dataVendaReal: dv});
 
     if (split.tipo === 'revisar') {
       S.excecoes.push({linha, idx, tipo:'split_complexo', consultor, indicacao, ciclo});
@@ -4246,7 +4335,7 @@ function resolverExc(i) {
   if (!consultor) return;
   const indicacao = prompt('Indicação (deixe vazio se não tiver):', exc.indicacao||'');
   const mult = getMult(normNome(consultor), toCiclo(exc.linha.dataVenda), exc.linha.dataVenda);
-  const split = parseInd(indicacao||'', normNome(consultor), getMult(normNome(consultor), toCiclo(exc.linha.dataVenda), exc.linha.dataVenda), exc.linha);
+  const split = parseInd(indicacao||'', normNome(consultor), getMult(normNome(consultor), toCiclo(exc.linha.dataVenda), exc.linha.dataVenda), {...exc.linha, dataVendaReal: exc.linha.dataVenda});
   processarLinha(exc.linha, {
     consultor: normNome(consultor),
     indicacao: indicacao||'',
