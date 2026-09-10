@@ -3374,12 +3374,22 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
   // dia 10 caiu em fds e em que a assembleia pulou o fim de semana.
   // Ligado em 10/09/2026 (regra validada com 15 meses da tela + 254 contemplações do RelAssembleia).
   const MOSTRAR_BRADESCO = true;
+  // Sorteio (as 3 administradoras): extração da Loteria Federal imediatamente
+  // ANTERIOR à assembleia (regra dos regulamentos Porto/Itaú e conferida no
+  // calendário oficial do Bradesco). Extrações reais: QUARTA e DOMINGO — a
+  // Caixa mudou a extração de sábado à noite pra domingo de manhã (o Newcon do
+  // Bradesco ainda registra o sábado antigo; aqui mostramos a data real).
+  function sorteioAntes(assemb){
+    const s = new Date(assemb);
+    do { s.setDate(s.getDate()-1); } while (s.getDay() !== 0 && s.getDay() !== 3);
+    return s;
+  }
   function assembBradesco(ano, mes){
     const v = new Date(ano, mes, 10);
     while (!ehUtil(v)) v.setDate(v.getDate()+1);
     const a = new Date(v);
     for (let i = 0; i < 2; i++) { do { a.setDate(a.getDate()+1); } while (!ehUtil(a)); }
-    return { venc: v, assemb: a };
+    return { venc: v, assemb: a, sorteio: sorteioAntes(a) };
   }
   // Porto: venc = 1º dia útil a partir do dia 15; assembleia = 4º dia útil depois
   function assembPorto(ano, mes){
@@ -3410,18 +3420,21 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       const it20v = assembItau(y, m, 24, 2), it20i = assembItau(y, m, 24, 5);
       const su05v = suplItau(it05v, 10), su05i = suplItau(it05i, 12);
       const su20v = suplItau(it20v, 10), su20i = suplItau(it20i, 12);
+      const so05v = sorteioAntes(it05v), so05i = sorteioAntes(it05i);
+      const so20v = sorteioAntes(it20v), so20i = sorteioAntes(it20i);
       const cSup05 = MOSTRAR_SUPLENCIA ? `<td style="${td}"><span style="${st(su05v)}">${dm(su05v)}</span></td><td style="${td}"><span style="${st(su05i)}">${dm(su05i)}</span></td>` : '';
       const cSup20 = MOSTRAR_SUPLENCIA ? `<td style="${td}"><span style="${st(su20v)}">${dm(su20v)}</span></td><td style="${td}"><span style="${st(su20i)}">${dm(su20i)}</span></td>` : '';
       rowsItau += `<tr><td style="${td};text-align:left;font-weight:700;color:#2D3F5E" rowspan="2">${MESES[m]}</td>
-          <td style="${td};text-align:left;color:#52514e">até 05</td><td style="${td}"><span style="${st(it05v)}">${dm(it05v)}</span></td><td style="${td}"><span style="${st(it05i)}">${dm(it05i)}</span></td>${cSup05}</tr>
-        <tr><td style="${td};text-align:left;color:#52514e">10, 15 e 20</td><td style="${td}"><span style="${st(it20v)}">${dm(it20v)}</span></td><td style="${td}"><span style="${st(it20i)}">${dm(it20i)}</span></td>${cSup20}</tr>`;
+          <td style="${td};text-align:left;color:#52514e">até 05</td><td style="${td}"><span style="${st(so05v)}">${dm(so05v)}</span></td><td style="${td}"><span style="${st(it05v)}">${dm(it05v)}</span></td><td style="${td}"><span style="${st(so05i)}">${dm(so05i)}</span></td><td style="${td}"><span style="${st(it05i)}">${dm(it05i)}</span></td>${cSup05}</tr>
+        <tr><td style="${td};text-align:left;color:#52514e">10, 15 e 20</td><td style="${td}"><span style="${st(so20v)}">${dm(so20v)}</span></td><td style="${td}"><span style="${st(it20v)}">${dm(it20v)}</span></td><td style="${td}"><span style="${st(so20i)}">${dm(so20i)}</span></td><td style="${td}"><span style="${st(it20i)}">${dm(it20i)}</span></td>${cSup20}</tr>`;
     });
     // ── Bloco Porto (azul), boleto + assembleia ──
     let rowsPorto = '';
     meses.forEach(({y, m}) => {
       const pt = assembPorto(y, m);
+      const so = sorteioAntes(pt.assemb);
       rowsPorto += `<tr><td style="${td};text-align:left;font-weight:700;color:#2D3F5E">${MESES[m]}</td>
-        <td style="${td}"><span style="${st(pt.venc)}">${dm(pt.venc)}</span></td><td style="${td}"><span style="${st(pt.assemb)}">${dm(pt.assemb)}</span></td></tr>`;
+        <td style="${td}"><span style="${st(pt.venc)}">${dm(pt.venc)}</span></td><td style="${td}"><span style="${st(so)}">${dm(so)}</span></td><td style="${td}"><span style="${st(pt.assemb)}">${dm(pt.assemb)}</span></td></tr>`;
     });
     // ── Bloco Bradesco (vermelho), desligado até a Fernanda confirmar a regra ──
     let blocoBradesco = '';
@@ -3430,23 +3443,23 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       meses.forEach(({y, m}) => {
         const br = assembBradesco(y, m);
         rowsBra += `<tr><td style="${td};text-align:left;font-weight:700;color:#2D3F5E">${MESES[m]}</td>
-          <td style="${td}"><span style="${st(br.venc)}">${dm(br.venc)}</span></td><td style="${td}"><span style="${st(br.assemb)}">${dm(br.assemb)}</span></td></tr>`;
+          <td style="${td}"><span style="${st(br.venc)}">${dm(br.venc)}</span></td><td style="${td}"><span style="${st(br.sorteio)}">${dm(br.sorteio)}</span></td><td style="${td}"><span style="${st(br.assemb)}">${dm(br.assemb)}</span></td></tr>`;
       });
       blocoBradesco = `<div style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;background:#fff">
         <div style="background:#CC092F;color:#fff;font-weight:800;font-size:13px;padding:9px 14px">Bradesco</div>
         <table style="width:100%;border-collapse:collapse">
-          <tr style="background:#FDEEF1;color:#B91C3C"><th style="${th};text-align:left">Mês</th><th style="${th}">Venc. do boleto</th><th style="${th}">Assembleia</th></tr>
+          <tr style="background:#FDEEF1;color:#B91C3C"><th style="${th};text-align:left">Mês</th><th style="${th}">Venc. do boleto</th><th style="${th}">Sorteio</th><th style="${th}">Assembleia</th></tr>
           ${rowsBra}
         </table>
-        <div style="font-size:11px;color:#8a8984;padding:8px 14px 10px">Boleto vence no primeiro dia útil a partir do dia 10 e a assembleia é 2 dias úteis depois do vencimento.</div>
+        <div style="font-size:11px;color:#8a8984;padding:8px 14px 10px">Boleto vence no primeiro dia útil a partir do dia 10 e a assembleia é 2 dias úteis depois do vencimento. Sorteio: extração da Loteria Federal imediatamente anterior à assembleia (a extração de sábado passou pro domingo de manhã, o Newcon ainda registra a data antiga). <b style="color:#B91C3C">Cliente novo só concorre no mês se entrar antes do vencimento E antes do sorteio, o que vier primeiro</b>; depois disso participa a partir da assembleia seguinte.</div>
       </div>`;
     }
     grid.innerHTML = `
       <div style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;background:#fff">
         <div style="background:#EC7000;color:#fff;font-weight:800;font-size:13px;padding:9px 14px">Itaú</div>
         <table style="width:100%;border-collapse:collapse">
-          ${MOSTRAR_SUPLENCIA ? `<tr style="background:#FFF4EA;color:#B45309"><th style="${th}" colspan="2"></th><th style="${th}" colspan="2">Assembleia</th><th style="${th}" colspan="2">Suplência</th></tr>` : ''}
-          <tr style="background:#FFF4EA;color:#B45309"><th style="${th};text-align:left">Mês</th><th style="${th};text-align:left">Venc.</th><th style="${th}">Veíc.</th><th style="${th}">Imóv.</th>${MOSTRAR_SUPLENCIA ? `<th style="${th}">Veíc.</th><th style="${th}">Imóv.</th>` : ''}</tr>
+          <tr style="background:#FFF4EA;color:#B45309"><th style="${th}" colspan="2"></th><th style="${th}" colspan="2">Veículos</th><th style="${th}" colspan="2">Imóveis</th>${MOSTRAR_SUPLENCIA ? `<th style="${th}" colspan="2">Suplência</th>` : ''}</tr>
+          <tr style="background:#FFF4EA;color:#B45309"><th style="${th};text-align:left">Mês</th><th style="${th};text-align:left">Venc.</th><th style="${th}">Sorteio</th><th style="${th}">Assemb.</th><th style="${th}">Sorteio</th><th style="${th}">Assemb.</th>${MOSTRAR_SUPLENCIA ? `<th style="${th}">Veíc.</th><th style="${th}">Imóv.</th>` : ''}</tr>
           ${rowsItau}
         </table>
         <div style="font-size:11px;color:#8a8984;padding:8px 14px 10px">Veículos às terças e Imóveis às sextas, a partir do dia 10 (venc. até 05) ou do dia 24 (venc. 10, 15 e 20).${MOSTRAR_SUPLENCIA ? ' Suplência: 10 dias após a assembleia (Veículos) e 12 dias (Imóveis).' : ''}</div>
@@ -3454,10 +3467,10 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       <div style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;background:#fff">
         <div style="background:#0046AD;color:#fff;font-weight:800;font-size:13px;padding:9px 14px">Porto</div>
         <table style="width:100%;border-collapse:collapse">
-          <tr style="background:#EDF3FF;color:#1D4ED8"><th style="${th};text-align:left">Mês</th><th style="${th}">Venc. do boleto</th><th style="${th}">Assembleia</th></tr>
+          <tr style="background:#EDF3FF;color:#1D4ED8"><th style="${th};text-align:left">Mês</th><th style="${th}">Venc. do boleto</th><th style="${th}">Sorteio</th><th style="${th}">Assembleia</th></tr>
           ${rowsPorto}
         </table>
-        <div style="font-size:11px;color:#8a8984;padding:8px 14px 10px">Boleto vence no primeiro dia útil a partir do dia 15 e a assembleia é no 4º dia útil depois do vencimento.</div>
+        <div style="font-size:11px;color:#8a8984;padding:8px 14px 10px">Boleto vence no primeiro dia útil a partir do dia 15 e a assembleia é no 4º dia útil depois do vencimento. Sorteio: extração da Loteria Federal imediatamente anterior à assembleia.</div>
       </div>${blocoBradesco}`;
     document.getElementById('hm-assemb').style.display = '';
     document.getElementById('hm-assemb-foot').textContent = 'Datas calculadas automaticamente pelas regras oficiais, considerando fins de semana e feriados. Datas que já passaram aparecem riscadas.';
