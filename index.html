@@ -3413,7 +3413,11 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
     // Loteria Federal (API publica da Caixa). Futuro fica so texto normal.
     const soCell = d => {
       const isoD = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
-      if (d < hoje || (d.getTime() === hoje.getTime()))
+      // passou: riscado como as outras datas, mas sublinhado e clicável (abre o resultado)
+      if (d < hoje)
+        return `<a href="javascript:void(0)" onclick="abrirSorteioFederal('${isoD}')" title="Ver resultado da extração" style="color:#94A3B8;text-decoration-line:underline line-through;cursor:pointer">${dm(d)}</a>`;
+      // é hoje: resultado pode já ter saído, link azul sem risco
+      if (d.getTime() === hoje.getTime())
         return `<a href="javascript:void(0)" onclick="abrirSorteioFederal('${isoD}')" title="Ver resultado da extração" style="color:#2a78d6;font-weight:700;text-decoration:underline dotted">${dm(d)}</a>`;
       return `<span style="color:#1E293B;font-weight:700">${dm(d)}</span>`;
     };
