@@ -347,55 +347,117 @@
     // Botão de PDF: só aparece quando a página carrega html2canvas + jsPDF
     _tituloAtual = d.titulo || '';
     const _btnPdf = document.getElementById('aceBtnPdf');
-    if (_btnPdf) _btnPdf.style.display = (window.html2canvas && window.jspdf && window.jspdf.jsPDF) ? '' : 'none';
+    if (_btnPdf) _btnPdf.style.display = (window.jspdf && window.jspdf.jsPDF) ? '' : 'none';
     document.getElementById('aceModal').classList.add('aberto');
   }
 
-  // ─── Baixar o popup em PDF (html2canvas + jsPDF, já carregados nos simuladores) ───
-  // Captura o estado ATUAL (com os anos que o usuário abriu), em A4 multipágina.
+  // ─── Baixar o popup em PDF (jsPDF, já carregado nos simuladores) ───
+  // Gera o PDF em TEXTO direto do conteúdo renderizado (memória + tabela, com
+  // os anos que o usuário abriu). A 1ª versão fotografava a tela com html2canvas,
+  // mas em produção o clone fora da tela saía em branco (bug conhecido do
+  // html2canvas com position:fixed) — caso do Paulo em 11/09/2026.
   let _tituloAtual = '';
+  const NAVY = [45, 63, 94], CINZA = [107, 114, 128], TXTC = [31, 41, 55];
   async function baixarPdf(){
-    const box = document.querySelector('#aceModal .ace-box');
-    if (!box || !window.html2canvas || !window.jspdf || !window.jspdf.jsPDF) return;
+    if (!window.jspdf || !window.jspdf.jsPDF) return;
     const btn = document.getElementById('aceBtnPdf');
     if (btn) { btn.disabled = true; btn.textContent = 'Gerando...'; }
     try {
-      const clone = box.cloneNode(true);
-      const foot = clone.querySelector('.ace-foot'); if (foot) foot.remove();
-      const fechar = clone.querySelector('.ace-close'); if (fechar) fechar.remove();
-      const body = clone.querySelector('.ace-body');
-      if (body) { body.style.maxHeight = 'none'; body.style.overflow = 'visible'; }
-      clone.style.maxHeight = 'none';
-      const holder = document.createElement('div');
-      holder.style.cssText = 'position:fixed;left:-10000px;top:0;width:880px;background:#fff;';
-      holder.appendChild(clone);
-      document.body.appendChild(holder);
-      const canvas = await html2canvas(clone, { scale: 2, backgroundColor: '#FFFFFF', logging: false });
-      document.body.removeChild(holder);
       const { jsPDF } = window.jspdf;
       const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
       const pw = pdf.internal.pageSize.getWidth();
       const ph = pdf.internal.pageSize.getHeight();
-      const margem = 8;
-      const imgW = pw - margem*2;
-      const pageHpx = Math.floor((ph - margem*2) * canvas.width / imgW);
-      let y = 0, primeira = true;
-      while (y < canvas.height) {
-        const h = Math.min(pageHpx, canvas.height - y);
-        const pc = document.createElement('canvas');
-        pc.width = canvas.width; pc.height = h;
-        pc.getContext('2d').drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
-        if (!primeira) pdf.addPage();
-        pdf.addImage(pc.toDataURL('image/jpeg', 0.92), 'JPEG', margem, margem, imgW, h * imgW / canvas.width);
-        primeira = false;
-        y += h;
+      const mx = 14;
+      const largura = pw - mx*2;
+      let y = 16;
+      const quebra = (alt) => { if (y + alt > ph - 12) { pdf.addPage(); y = 16; } };
+
+      // Cabeçalho
+      pdf.setFont('helvetica', 'bold'); pdf.setFontSize(15); pdf.setTextColor(NAVY[0], NAVY[1], NAVY[2]);
+      pdf.text('Analítico', mx, y); y += 6;
+      pdf.setFont('helvetica', 'normal'); pdf.setFontSize(9.5); pdf.setTextColor(CINZA[0], CINZA[1], CINZA[2]);
+      pdf.text((document.getElementById('aceSub') || {}).textContent || '', mx, y); y += 7;
+
+      // Memória de cálculo (lê o que está renderizado — funciona pra CET e projeção)
+      const mem = document.getElementById('aceMem');
+      if (mem) {
+        const h4 = mem.querySelector('h4');
+        if (h4) {
+          quebra(7);
+          pdf.setFont('helvetica', 'bold'); pdf.setFontSize(10); pdf.setTextColor(NAVY[0], NAVY[1], NAVY[2]);
+          pdf.text(h4.textContent.trim(), mx, y); y += 6;
+        }
+        mem.querySelectorAll('.ace-mem-step').forEach(step => {
+          const spans = step.querySelectorAll(':scope > span');
+          if (spans.length < 1) return;
+          const rotulo = (spans[0].textContent || '').replace(/\s+/g, ' ').trim();
+          const valor = spans.length > 1 ? (spans[1].textContent || '').replace(/\s+/g, ' ').trim() : '';
+          if (!rotulo && !valor) return;
+          pdf.setFontSize(9); pdf.setTextColor(TXTC[0], TXTC[1], TXTC[2]);
+          const larguraRotulo = valor ? largura - 42 : largura;
+          const linhas = pdf.splitTextToSize(rotulo, larguraRotulo);
+          quebra(linhas.length * 4.4 + 2);
+          pdf.setFont('helvetica', 'normal');
+          pdf.text(linhas, mx, y);
+          if (valor) {
+            pdf.setFont('helvetica', 'bold'); pdf.setTextColor(NAVY[0], NAVY[1], NAVY[2]);
+            pdf.text(valor, pw - mx, y, { align: 'right' });
+          }
+          y += linhas.length * 4.4 + 2;
+        });
+        y += 4;
       }
+
+      // Tabela — mesmas colunas do popup; inclui os meses dos anos ABERTOS
+      const ths = Array.from(document.querySelectorAll('.ace-tab thead th')).map(th => th.textContent.trim());
+      const colX = [mx, mx + 22, mx + 62, mx + 102, mx + 142, mx + largura];
+      const cabecalhoTabela = () => {
+        quebra(9);
+        pdf.setFillColor(NAVY[0], NAVY[1], NAVY[2]);
+        pdf.rect(mx, y - 4.2, largura, 6.4, 'F');
+        pdf.setFont('helvetica', 'bold'); pdf.setFontSize(8); pdf.setTextColor(255, 255, 255);
+        pdf.text(ths[0] || 'ANO', colX[0] + 2, y);
+        for (let c = 1; c < 5; c++) pdf.text((ths[c] || '').toUpperCase(), colX[c + 1] - 2, y, { align: 'right' });
+        y += 6;
+      };
+      cabecalhoTabela();
+      const linhasTab = Array.from(document.querySelectorAll('#aceBody tr')).filter(tr =>
+        !tr.classList.contains('ace-mes') || tr.classList.contains('aberto'));
+      linhasTab.forEach(tr => {
+        const ehMes = tr.classList.contains('ace-mes');
+        const tds = Array.from(tr.querySelectorAll('td')).map(td => td.textContent.replace(/\s+/g, ' ').trim());
+        if (!tds.length) return;
+        quebra(6);
+        pdf.setFontSize(ehMes ? 7.6 : 8.4);
+        pdf.setFont('helvetica', ehMes ? 'normal' : 'bold');
+        if (ehMes) pdf.setTextColor(CINZA[0], CINZA[1], CINZA[2]); else pdf.setTextColor(TXTC[0], TXTC[1], TXTC[2]);
+        const rot = tds[0].replace('Contemplação', ' · contemplação');
+        pdf.text(rot, colX[0] + (ehMes ? 6 : 2), y);
+        pdf.setFont('helvetica', 'normal');
+        for (let c = 1; c < 5; c++) if (tds[c]) pdf.text(tds[c], colX[c + 1] - 2, y, { align: 'right' });
+        y += ehMes ? 4.2 : 5.4;
+        pdf.setDrawColor(229, 231, 235);
+        pdf.line(mx, y - 3.4, mx + largura, y - 3.4);
+      });
+      // Total
+      quebra(9);
+      pdf.setFillColor(NAVY[0], NAVY[1], NAVY[2]);
+      pdf.rect(mx, y - 4.2, largura, 6.4, 'F');
+      pdf.setFont('helvetica', 'bold'); pdf.setFontSize(8.6); pdf.setTextColor(255, 255, 255);
+      pdf.text('TOTAL', mx + 2, y);
+      pdf.text((document.getElementById('aceTotal') || {}).textContent || '', pw - mx - 2, y, { align: 'right' });
+      y += 8;
+      pdf.setFont('helvetica', 'normal'); pdf.setFontSize(7.5); pdf.setTextColor(CINZA[0], CINZA[1], CINZA[2]);
+      quebra(5);
+      pdf.text('Gerado em ' + new Date().toLocaleDateString('pt-BR') + ' · Master Prime', mx, y);
+
       const nome = ('analitico-' + (_tituloAtual || 'evolucao')).toLowerCase()
         .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
         .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') + '.pdf';
       pdf.save(nome);
     } catch(e) {
       console.error('PDF do analitico:', e);
+      alert('Não consegui gerar o PDF: ' + (e && e.message ? e.message : e));
     }
     if (btn) { btn.disabled = false; btn.textContent = 'Baixar PDF'; }
   }
