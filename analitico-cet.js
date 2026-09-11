@@ -413,5 +413,5 @@
   }
 
   // expõe global
-  window.AnaliticoCet = { set, abrir, fechar, eyeHTML, SVG_EYE, fmt, fmtPct, _toggleAno };
+  window.AnaliticoCet = { set, abrir, fechar, eyeHTML, SVG_EYE, fmt, fmtPct, _toggleAno, baixarPdf };
 })();
