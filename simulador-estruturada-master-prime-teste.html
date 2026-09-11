@@ -396,6 +396,7 @@
       <div class="pos-card">
         <h3>Pós contemplação · Redução de parcela</h3>
         <div class="pos-row highlight"><span>Parcela</span><span class="pos-value" id="reducaoParcela_parc">R$ 0,00</span></div>
+        <div class="pos-row" id="rowAdesaoRestante" style="display:none"><span id="lblAdesaoRestante">Com adesão restante</span><span class="pos-value" id="reducaoParcela_comAdesao">R$ 0,00</span></div>
         <div class="pos-row"><span>Prazo restante</span><span class="pos-value" id="reducaoParcela_prazo">0</span></div>
         <div class="pos-row"><span>Custo efetivo mensal</span><span class="pos-value" id="reducaoParcela_cm">0,00 %</span></div>
         <div class="pos-row"><span>Custo efetivo anual</span><span class="pos-value" id="reducaoParcela_ca">0,00 %</span></div>
@@ -570,8 +571,14 @@ function wireModalLogic() {
       // Ao ENTRAR no modo Porto, o embutido volta ao teto (30% da carta):
       // o usuário digita só o % total; o simulador limita o embutido à oferta
       // sozinho (caso Fidelidade). Evita o erro de digitar o embutido em outra base.
+      // O % Total também é LIMPO: nos outros modos ele é um campo calculado, e o
+      // valor que estava na tela (ex.: 16,8067% = embutido de 20% da carta visto
+      // na base categoria) ficava preso como se fosse a oferta digitada — foi
+      // exatamente isso que gerou o lance de R$ 61.008,32 na bateria de 10/09/2026
+      // (o certo, oferta de 20% na categoria, é R$ 72.600,00).
       if (tipoLanceSel.value === 'porto') {
         document.getElementById('lanceEmbutido').value = '30,0000 %';
+        document.getElementById('totalLance').value = '';
       }
       syncLanceFieldsUI(); recalc();
     });
@@ -784,7 +791,27 @@ function recalc() {
     parcReducaoPrazo = parcelaAtual + novoSeguroPos;
   }
 
+  // Adesão remanescente: contemplando ANTES do fim da diluição da adesão, as
+  // parcelas seguintes ainda carregam a adesão mensal. A SimulaKey mostra a
+  // parcela pós-contemplação JÁ com essa adesão na Estruturada (bateria do
+  // Arnaldo 10/09/2026: 1.420,18 + 2.000,00 de adesão = 3.420,18); a tabela e o
+  // PDF daqui seguem o mesmo critério via _mpParcPosComAdesao (snapshotForm).
+  const adesaoMesesRestantes = (adesaoOn && adesao>0 && prazoAdesao>expectativa) ? (prazoAdesao - expectativa) : 0;
+  const adesaoRestanteMensal = adesaoMesesRestantes > 0 ? adesaoMensal : 0;
+  window._mpParcPosComAdesao = parcReducaoParcela + adesaoRestanteMensal;
+
   document.getElementById('reducaoParcela_parc').textContent = formatMoney(parcReducaoParcela);
+  const _rowAdes = document.getElementById('rowAdesaoRestante');
+  if (_rowAdes) {
+    if (adesaoRestanteMensal > 0) {
+      _rowAdes.style.display = '';
+      document.getElementById('lblAdesaoRestante').textContent =
+        `Com adesão (${adesaoMesesRestantes} parcela${adesaoMesesRestantes>1?'s':''} restante${adesaoMesesRestantes>1?'s':''})`;
+      document.getElementById('reducaoParcela_comAdesao').textContent = formatMoney(window._mpParcPosComAdesao);
+    } else {
+      _rowAdes.style.display = 'none';
+    }
+  }
   document.getElementById('reducaoParcela_prazo').textContent = prazoRestante;
   document.getElementById('reducaoPrazo_parc').textContent = formatMoney(parcReducaoPrazo);
   document.getElementById('reducaoPrazo_prazo').textContent = novoPrazoReducao;
@@ -816,10 +843,20 @@ function recalc() {
       total += pPos;
       if (reajuste > 0 && tipoReajuste && m % period === 0) pPos *= (1 + reajuste);
     }
+    // v3 (bateria Arnaldo x SimulaKey 10/09/2026): a adesão diluída também é
+    // dinheiro que o cliente paga — entra no custo. Sem ela o CET saía 1,09%
+    // ao ano contra 1,45% da SimulaKey no caso 300k/200m/17+2/adesão 2% em 3.
+    if (adesaoOn && adesao > 0 && prazoAdesao > 0) {
+      total += adesaoMensal * Math.min(prazoAdesao, expectativa + prazoPosCont);
+    }
     return total;
   }
   function cetConkey(prazoEf, parcelaPosCont, prazoPosCont) {
-    const disponivel = credito - lanceProprios_v;
+    // v3: o capital líquido que sobra na mão do tomador desconta TAMBÉM o
+    // embutido e o FGTS (crédito disponível), não só o recurso próprio.
+    // Igual à SimulaKey: disponível 227.400 num crédito de 300k com embutido
+    // de 72.600. Sem embutido/FGTS/adesão, v3 = v2 (casos Conkey já validados).
+    const disponivel = creditoDisp - lanceProprios_v;
     if (prazoEf <= 0 || disponivel <= 0) return { mensal: 0, anual: 0 };
     const totalPagas = totalParcelasComReajuste(parcelaPosCont, prazoPosCont);
     const custo = totalPagas + valorTotalLance - credito;
@@ -885,7 +922,13 @@ function snapshotForm() {
     mesesPosCont: document.getElementById('mesesPosCont').value,
     // Resultados (lidos da tela atual)
     parcelaInicialUnit: unmaskMoney(document.getElementById('parcelaInicial').textContent.replace('R$','')),
-    parcelaPosUnit: unmaskMoney(document.getElementById('reducaoParcela_parc').textContent.replace('R$','')),
+    // Parcela pós COM a adesão remanescente (critério SimulaKey na Estruturada:
+    // contemplou no mês 1 com adesão em 3, a parcela seguinte ainda paga adesão).
+    // Arredondada em centavos POR COTA antes de multiplicar pela qtd, senão o
+    // total sai 1 centavo menor que a SimulaKey (6.840,35 x 6.840,36).
+    parcelaPosUnit: (typeof window._mpParcPosComAdesao === 'number' && isFinite(window._mpParcPosComAdesao) && window._mpParcPosComAdesao > 0)
+      ? Math.round(window._mpParcPosComAdesao * 100) / 100
+      : unmaskMoney(document.getElementById('reducaoParcela_parc').textContent.replace('R$','')),
     creditoDispUnit: unmaskMoney(document.getElementById('creditoDisponivel').textContent.replace('R$','')),
     valorTotalLanceUnit: unmaskMoney(document.getElementById('valorTotalLance').value.replace('R$','')),
     lanceProprios_v: unmaskMoney(document.getElementById('lanceProprios_v').value.replace('R$','')),
@@ -897,7 +940,14 @@ function snapshotForm() {
     // % que a administradora oficial mostra.
     totalLancePct: unmaskPct(document.getElementById('totalLance').value),
     lanceProprios_pct: unmaskPct(document.getElementById('lanceProprios').value),
-    lanceEmbutido_pct: unmaskPct(document.getElementById('lanceEmbutido').value),
+    // Modo Porto: o campo digitado é o TETO em % da carta (30 por padrão); pro
+    // resumo/PDF vale a equivalência na base categoria (embutido R$ / valor de
+    // referência), que é como a SimulaKey e o dedicado da Porto exibem (20%).
+    lanceEmbutido_pct: (document.getElementById('tipoLance').value === 'porto')
+      ? (function(){ const vr = unmaskMoney(document.getElementById('valorRef').value.replace('R$',''));
+                     const ev = unmaskMoney(document.getElementById('lanceEmbutido_v').value.replace('R$',''));
+                     return vr > 0 ? (ev / vr) * 100 : 0; })()
+      : unmaskPct(document.getElementById('lanceEmbutido').value),
     lanceFGTS_pct: unmaskPct(document.getElementById('lanceFGTS').value),
     rentabilidadeUnit: unmaskMoney(document.getElementById('rentabilidade').textContent.replace('R$','')),
     prazoRestante: parseInt(document.getElementById('reducaoParcela_prazo').textContent || '0', 10),
@@ -1157,11 +1207,16 @@ function renderOps() {
         fluxoAgregado[idx] = (fluxoAgregado[idx] || 0) + pPos;
       }
     });
+    // Mês de contemplação pro detalhe mensal: só marca quando TODAS as
+    // operações contemplam no mesmo mês (senão não tem um mês único pra marcar)
+    const expsOps = operacoes.map(op => parseInt(op.expectativa || '1', 10) || 1);
+    const expUnica = expsOps.length && expsOps.every(e => e === expsOps[0]) ? expsOps[0] : -1;
     AnaliticoCet.set('agregado', {
       titulo: 'Proposta Estruturada · CET agregado',
       credito: sumTotal,
       parcelaInicial: sumParc,
       expectativa: 1,
+      contemplacaoMes: expUnica,
       parcelaPos: sumParcPos,
       prazoRestPos: restMed,
       parcelas: fluxoAgregado,

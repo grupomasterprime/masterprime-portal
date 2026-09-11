@@ -85,6 +85,16 @@
 
       .ace-eye{background:transparent;border:none;padding:2px;cursor:pointer;color:#2D3F5E;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;transition:background .15s;vertical-align:middle;}
       .ace-eye:hover{background:rgba(45,63,94,.10);}
+
+      .ace-ano-row{cursor:pointer;}
+      .ace-ano-row td:first-child{white-space:nowrap;}
+      .ace-chev{display:inline-block;width:0;height:0;border-left:5px solid #9CA3AF;border-top:4px solid transparent;border-bottom:4px solid transparent;margin-right:8px;transition:transform .15s;vertical-align:middle;}
+      .ace-ano-row.aberto .ace-chev{transform:rotate(90deg);}
+      .ace-mes{display:none;background:#F9FAFB;}
+      .ace-mes.aberto{display:table-row;}
+      .ace-mes td{padding:6px 14px;font-size:12px;color:#6B7280;border-bottom:1px solid #F3F4F6;}
+      .ace-mes td:first-child{font-weight:400;color:#6B7280;padding-left:34px;}
+      .ace-badge-cont{display:inline-block;background:#2D3F5E;color:#fff;font-size:9.5px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;border-radius:4px;padding:2px 7px;margin-left:8px;vertical-align:middle;}
     `;
     document.head.appendChild(css);
   }
@@ -285,15 +295,43 @@
     }
     document.getElementById('aceMem').innerHTML = memHTML;
 
-    document.getElementById('aceBody').innerHTML = anos.map(a => `
-      <tr>
-        <td>${a.ano}</td>
+    // Linhas de ano clicáveis: clicar abre os meses daquele ano (a contemplação
+    // pode cair em qualquer mês, e no detalhe dá pra ver a parcela exata de
+    // cada mês, com o mês da contemplação marcado). Mesmo padrão do analítico
+    // da Operação Simples: saldo devedor do mês e acumulado pago até o mês.
+    const saldosMes = [], acumsMes = [];
+    let _acumM = 0;
+    for (let m = 0; m < N; m++) {
+      saldosMes.push(totalGeral - _acumM - parcelas[m]);
+      _acumM += parcelas[m];
+      acumsMes.push(_acumM);
+    }
+    document.getElementById('aceBody').innerHTML = anos.map(a => {
+      const i0 = (a.ano - 1) * 12;
+      const meses = parcelas.slice(i0, i0 + 12).map((p, j) => {
+        const mGlobal = i0 + j + 1;
+        // contemplacaoMes: caller pode informar o mês exato (ou -1 pra não marcar,
+        // ex.: agregado da Estruturada com operações contemplando em meses diferentes)
+        const mesCont = (d.contemplacaoMes != null) ? d.contemplacaoMes : exp;
+        const badge = (mGlobal === mesCont) ? '<span class="ace-badge-cont">Contemplação</span>' : '';
+        return `
+        <tr class="ace-mes ace-mes-a${a.ano}">
+          <td>Mês ${mGlobal}${badge}</td>
+          <td>${fmt(cartas[mGlobal-1] != null ? cartas[mGlobal-1] : d.credito)}</td>
+          <td>${fmt(saldosMes[mGlobal-1])}</td>
+          <td>${fmt(p)}</td>
+          <td title="Acumulado pago até este mês">${fmt(acumsMes[mGlobal-1])}</td>
+        </tr>`;
+      }).join('');
+      return `
+      <tr class="ace-ano-row" onclick="AnaliticoCet._toggleAno(${a.ano})" title="Clique para ver os meses">
+        <td><span class="ace-chev"></span>${a.ano}</td>
         <td>${fmt(a.carta)}</td>
         <td>${fmt(a.saldo)}</td>
         <td>${fmt(a.parcela)}</td>
         <td>${fmt(a.total)}</td>
-      </tr>
-    `).join('');
+      </tr>${meses}`;
+    }).join('');
     document.getElementById('aceTotal').textContent = fmt(totalGeral);
     document.getElementById('aceSub').textContent = (d.titulo||'') + ' · memória de cálculo ano a ano';
     document.getElementById('aceModal').classList.add('aberto');
@@ -304,6 +342,13 @@
     if (m) m.classList.remove('aberto');
   }
 
+  function _toggleAno(n){
+    document.querySelectorAll('.ace-mes-a' + n).forEach(tr => tr.classList.toggle('aberto'));
+    document.querySelectorAll('#aceBody .ace-ano-row').forEach(tr => {
+      if (tr.getAttribute('onclick') === `AnaliticoCet._toggleAno(${n})`) tr.classList.toggle('aberto');
+    });
+  }
+
   // expõe global
-  window.AnaliticoCet = { set, abrir, fechar, eyeHTML, SVG_EYE, fmt, fmtPct };
+  window.AnaliticoCet = { set, abrir, fechar, eyeHTML, SVG_EYE, fmt, fmtPct, _toggleAno };
 })();
