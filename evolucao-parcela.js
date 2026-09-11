@@ -115,19 +115,29 @@
 
     card.querySelector('.evo-head').addEventListener('click', () => card.classList.toggle('aberto'));
 
-    // Chips INCC / IPCA / IGP-M — clicou, aplica no campo
+    // Chips de reajuste — clicou, aplica no campo.
+    // chipsFixos (opcional no init): atalhos de % fixo do produto, ex. grupos
+    // Itaú pré-fixados 3% e 5%. Aparecem na hora, sem depender da API do BCB.
+    // Os índices oficiais (INCC/IPCA/IGP-M, acumulado 12m) entram quando chegam.
     const campoReaj = card.querySelector('.evo-reajuste');
     const divInd = card.querySelector('.evo-indices');
-    buscarIndices().then(ok => {
-      if (!ok.length) return;
-      divInd.innerHTML = 'Acumulado 12m (Banco Central), clique p/ aplicar: ' + ok.map(x =>
-        '<a data-pct="' + x.pct.toFixed(2) + '">' + x.nome + ' ' + x.pct.toFixed(2).replace('.', ',') + '%</a>').join(' · ');
+    const fixos = (Array.isArray(cfg.chipsFixos) ? cfg.chipsFixos : []).filter(f => f && isFinite(f.pct));
+    function _chip(nome, pct){ return '<a data-pct="' + Number(pct).toFixed(2) + '">' + nome + '</a>'; }
+    function renderChips(indicesBcb){
+      const partes = [];
+      if (fixos.length) partes.push('Clique p/ aplicar: ' + fixos.map(f => _chip(f.nome, f.pct)).join(' · '));
+      if (indicesBcb && indicesBcb.length) partes.push((fixos.length ? '' : 'Clique p/ aplicar: ') + 'Acumulado 12m (Banco Central): ' + indicesBcb.map(x =>
+        _chip(x.nome + ' ' + x.pct.toFixed(2).replace('.', ',') + '%', x.pct)).join(' · '));
+      if (!partes.length) return;
+      divInd.innerHTML = partes.join('<br>');
       divInd.style.display = 'block';
       divInd.querySelectorAll('a').forEach(a => a.addEventListener('click', ev => {
         ev.preventDefault();
         campoReaj.value = a.dataset.pct.replace('.', ',') + ' %';
       }));
-    });
+    }
+    renderChips(null);
+    buscarIndices().then(ok => renderChips(ok));
 
     card.querySelector('.evo-btn').addEventListener('click', () => abrir(cfg, campoReaj));
   }
@@ -201,7 +211,7 @@
       </div>`;
 
     AnaliticoCet.set('evolucao_dedicado', {
-      titulo: (cfg.titulo || 'Evolução da parcela'),
+      titulo: (typeof cfg.titulo === 'function' ? cfg.titulo() : cfg.titulo) || 'Evolução da parcela',
       credito: dados.credito,
       parcelaInicial: primeira,
       expectativa: contempla > 0 ? contempla : 1,
