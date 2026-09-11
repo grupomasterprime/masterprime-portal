@@ -35,7 +35,7 @@ button{cursor:pointer;font-family:inherit}
 select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12.5px;background:#fff;color:var(--text)}
 
 /* kanban */
-.resumo{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.resumo{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-bottom:12px}
 .rs{background:#fff;border:1px solid var(--border);border-radius:10px;padding:9px 12px;min-width:0}
 .rs .k{font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rs .v{font-size:18px;font-weight:800;color:var(--ink);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -60,6 +60,15 @@ select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 1
 .tg-man{background:#E0E7FF;color:#3730A3}
 .lead.atrasado{border-color:#F59E0B;border-left-color:#F59E0B !important}
 .parado{color:#B45309 !important;font-weight:700}
+/* Follow-up (pedido do Renato, 11/09/2026): etiqueta de retorno marcado no card */
+.fu-hoje{color:#B45309 !important;font-weight:700}
+.fu-atrasado{color:#DC2626 !important;font-weight:700}
+.fu-prox{color:#0E7490 !important}
+.rs.alerta-fu .v{color:#DC2626}
+.rs.on-fu{background:#FEF2F2;border-color:#DC2626;box-shadow:0 0 0 2px rgba(220,38,38,.18)}
+.rs.on-fu .s{color:#DC2626;font-weight:700}
+.fup-chip{border:1px solid var(--border);background:#fff;border-radius:8px;padding:6px 10px;font-size:11.5px;font-weight:700;color:var(--text-2);cursor:pointer;font-family:inherit}
+.fup-chip:hover{border-color:#0E7490;color:#0E7490}
 .wa-btn{font-size:10px;font-weight:700;color:#128C7E;border:1px solid #128C7E;border-radius:8px;padding:1px 7px;text-decoration:none;white-space:nowrap}
 .wa-btn:hover{background:#128C7E;color:#fff}
 
@@ -222,6 +231,16 @@ select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 1
       <div class="fg"><label>Interesse</label><input id="md-int"></div>
     </div>
     <div class="fg"><label>Observação</label><textarea id="md-obs" rows="4"></textarea></div>
+    <div class="fg"><label>Próximo contato (follow-up)</label>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <input type="date" id="md-fup" style="flex:0 0 170px">
+        <button type="button" class="fup-chip" onclick="fupAtalho(1)">Amanhã</button>
+        <button type="button" class="fup-chip" onclick="fupAtalho(3)">+3 dias</button>
+        <button type="button" class="fup-chip" onclick="fupAtalho(7)">+7 dias</button>
+        <button type="button" class="fup-chip" onclick="document.getElementById('md-fup').value=''">Limpar</button>
+      </div>
+      <div style="font-size:11px;color:var(--text-3);margin-top:5px">No dia marcado o contato ganha a etiqueta de retorno no funil, e o contador "Follow-ups hoje" avisa lá em cima.</div>
+    </div>
     <div class="fg"><label>Linha do tempo</label><div class="tl" id="md-tl"></div></div>
     <div class="fg"><label id="md-nota-label">Adicionar anotação</label>
       <textarea id="md-nota" rows="3" placeholder="Ex.: liguei, pediu retorno amanhã"></textarea>
@@ -405,7 +424,27 @@ function buscaMatch(l, q){
 }
 let SO_PARADOS = false;
 function ehParado(l){ return ['novo','contato','qualificado','proposta'].includes(l.etapa) && idadeDias(l) >= DIAS_PARADO; }
-function toggleParados(){ SO_PARADOS = !SO_PARADOS; renderKanban(); }
+function toggleParados(){ SO_PARADOS = !SO_PARADOS; if (SO_PARADOS) SO_FOLLOWUP = false; renderKanban(); }
+
+// ══ Follow-up (pedido do Renato, 11/09/2026): data de próximo contato no lead ══
+let SO_FOLLOWUP = false;
+function toggleFollowups(){ SO_FOLLOWUP = !SO_FOLLOWUP; if (SO_FOLLOWUP) SO_PARADOS = false; renderKanban(); }
+function hojeISO(){ const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+// Status do follow-up: só vale pra lead ativo no funil (vendido/perdido não lembra)
+function followInfo(l){
+  if (!l.proximo_contato || !['novo','contato','qualificado','proposta'].includes(l.etapa)) return null;
+  const d = String(l.proximo_contato).slice(0,10);
+  const hoje = hojeISO();
+  if (d < hoje) { const dias = Math.round((new Date(hoje + 'T00:00:00') - new Date(d + 'T00:00:00')) / 86400000); return { tipo:'atrasado', dias, data:d }; }
+  if (d === hoje) return { tipo:'hoje', data:d };
+  return { tipo:'futuro', data:d };
+}
+function ehFollowupDevido(l){ const f = followInfo(l); return !!f && (f.tipo === 'hoje' || f.tipo === 'atrasado'); }
+function fmtDataCurta(iso){ const p = String(iso).slice(0,10).split('-'); return p[2] + '/' + p[1]; }
+function fupAtalho(dias){
+  const d = new Date(); d.setDate(d.getDate() + dias);
+  $('md-fup').value = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+}
 // Faixa de numeros em cima do kanban. Consultor ve os dele; socio/admin ve o que o
 // dropdown de consultor escolher (todos ou um). Nao considera a busca nem o arquivamento.
 function renderResumo(doCons){
@@ -413,6 +452,7 @@ function renderResumo(doCons){
   const vend = doCons.filter(l => l.etapa === 'vendido');
   const andamento = doCons.filter(l => !['vendido','perdido'].includes(l.etapa)).length;
   const parados = doCons.filter(ehParado).length;
+  const fups = doCons.filter(ehFollowupDevido).length;
   const credito = vend.reduce((s, l) => s + Number(l.valor_credito || 0), 0);
   const cotas = vend.reduce((s, l) => s + Number(l.qtd_cotas || 0), 0);
   const conv = total ? Math.round(vend.length / total * 100) : 0;
@@ -424,6 +464,7 @@ function renderResumo(doCons){
     <div class="rs"><div class="k">Vendas</div><div class="v">${vend.length}</div><div class="s">${cotas} cota${cotas === 1 ? '' : 's'}</div></div>
     <div class="rs"><div class="k">Conversão</div><div class="v">${conv}%</div><div class="s">vendas sobre contatos</div></div>
     <div class="rs"><div class="k">Crédito vendido</div><div class="v" style="color:#065F46">R$ ${fmtBRL0(credito)}</div><div class="s">soma das vendas</div></div>
+    <div class="rs clique${fups ? ' alerta-fu' : ''}${SO_FOLLOWUP ? ' on-fu' : ''}" onclick="toggleFollowups()" title="Contatos com retorno marcado pra hoje ou atrasado"><div class="k">Follow-ups hoje</div><div class="v">${fups}</div><div class="s">${SO_FOLLOWUP ? 'Mostrando só follow-ups. Clique para voltar' : (fups ? 'Clique para filtrar' : 'Nenhum retorno pendente')}</div></div>
     <div class="rs clique${parados ? ' alerta' : ''}${SO_PARADOS ? ' on' : ''}" onclick="toggleParados()" title="Clique para ver só os contatos parados"><div class="k">Parados ${DIAS_PARADO}+ dias</div><div class="v">${parados}</div><div class="s">${SO_PARADOS ? 'Mostrando só parados. Clique para voltar' : (parados ? 'Clique para filtrar' : 'Tudo em dia')}</div></div>`;
 }
 function renderKanban(){
@@ -431,7 +472,7 @@ function renderKanban(){
   const q = ($('busca').value || '').trim().toLowerCase();
   const doCons = LEADS.filter(l => !filtro || normTxt(l.consultor ? l.consultor.nome : '').includes(filtro));
   renderResumo(doCons);
-  const base = doCons.filter(l => buscaMatch(l, q) && (!SO_PARADOS || ehParado(l)));
+  const base = doCons.filter(l => buscaMatch(l, q) && (!SO_PARADOS || ehParado(l)) && (!SO_FOLLOWUP || ehFollowupDevido(l)));
   const antigos = base.filter(ehAntigo).length;
   const visiveis = (q || MOSTRAR_ANTIGOS) ? base : base.filter(l => !ehAntigo(l));
   const ba = $('btn-antigos');
@@ -444,6 +485,11 @@ function renderKanban(){
       <div class="kb-h"><span class="t" style="color:${et.cor}">${et.nome}</span><span class="n">${itens.length}</span></div>
       ${itens.map(l => {
         const parado = ehParado(l);
+        const fu = followInfo(l);
+        const fuHtml = !fu ? '' :
+          fu.tipo === 'atrasado' ? `<div class="mt fu-atrasado">Retorno atrasado: era ${fmtDataCurta(fu.data)} (há ${fu.dias} dia${fu.dias === 1 ? '' : 's'})</div>` :
+          fu.tipo === 'hoje' ? `<div class="mt fu-hoje">Retorno marcado pra HOJE</div>` :
+          `<div class="mt fu-prox">Retorno ${fmtDataCurta(fu.data)}</div>`;
         const tel = String(l.telefone || '').replace(/\D/g, '');
         const wa = tel.length >= 10 ? `<a class="wa-btn" href="https://wa.me/55${tel}" target="_blank" rel="noopener" onclick="event.stopPropagation()">WhatsApp</a>` : '';
         return `
@@ -451,6 +497,7 @@ function renderKanban(){
           <div class="nm">${esc(l.nome)}</div>
           <div class="mt">${esc(l.interesse || 'Sem interesse definido')}${l.consultor ? ' · ' + esc(primeiroNome(l.consultor.nome)) : ''}</div>
           ${l.etapa === 'vendido' && l.valor_credito != null ? `<div class="mt" style="color:#065F46;font-weight:700">R$ ${fmtBRL(l.valor_credito)}${l.qtd_cotas ? ' · ' + l.qtd_cotas + ' cota' + (l.qtd_cotas > 1 ? 's' : '') : ''}</div>` : ''}
+          ${fuHtml}
           ${parado ? `<div class="mt parado">Parado há ${Math.floor(idadeDias(l))} dia${Math.floor(idadeDias(l)) === 1 ? '' : 's'}</div>` : ''}
           <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-top:6px">
             <span class="tg ${l.origem === 'indicador' ? 'tg-ind' : 'tg-man'}" style="margin-top:0">${l.origem === 'indicador' ? 'Indicação: ' + esc(l.indicador ? l.indicador.nome : '') : 'Cadastro manual'}</span>
@@ -538,6 +585,7 @@ async function abrirDetalhe(id, forcarEtapa){
   $('md-tel').value = l.telefone || '';
   $('md-int').value = l.interesse || '';
   $('md-obs').value = l.observacao || '';
+  $('md-fup').value = l.proximo_contato ? String(l.proximo_contato).slice(0,10) : '';
   $('md-motivo').value = l.motivo_perda || '';
   $('md-credito').value = l.valor_credito != null ? fmtBRL(l.valor_credito) : '';
   $('md-cotas').value = l.qtd_cotas != null ? String(l.qtd_cotas) : '';
@@ -571,7 +619,8 @@ async function salvarDetalhe(){
   const upd = {
     etapa, motivo_perda: etapa === 'perdido' ? motivo : null,
     telefone: $('md-tel').value.trim(), interesse: $('md-int').value.trim(),
-    observacao: $('md-obs').value.trim()
+    observacao: $('md-obs').value.trim(),
+    proximo_contato: $('md-fup').value || null
   };
   if (etapa === 'vendido') {
     const cred = parseMoney($('md-credito').value);
