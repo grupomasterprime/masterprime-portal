@@ -163,6 +163,7 @@
       <div class="pos-card">
         <h4>Pós contemplação - Redução de parcela</h4>
         <div class="pos-row"><span>Parcela</span><span id="reducaoParcela_parc">R$ 0,00</span></div>
+        <div class="pos-row"><span>Parcela final</span><span id="reducaoParcela_fim">R$ 0,00</span></div>
         <div class="pos-row"><span>Prazo restante</span><span id="reducaoParcela_prazo">0</span></div>
         <div class="pos-row"><span>Custo efetivo mensal</span><span id="reducaoParcela_cm">0,00 %</span></div>
         <div class="pos-row"><span>Custo efetivo anual</span><span style="display:inline-flex;align-items:center;gap:8px;"><span id="reducaoParcela_ca">0,00 %</span><button type="button" class="ace-eye" onclick="AnaliticoCet.abrir('cons_parcela')" title="Ver memória de cálculo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></div>
@@ -170,6 +171,7 @@
       <div class="pos-card">
         <h4>Pós contemplação - Redução de prazo</h4>
         <div class="pos-row"><span>Parcela</span><span id="reducaoPrazo_parc">R$ 0,00</span></div>
+        <div class="pos-row"><span>Parcela final</span><span id="reducaoPrazo_fim">R$ 0,00</span></div>
         <div class="pos-row"><span>Prazo restante</span><span id="reducaoPrazo_prazo">0</span></div>
         <div class="pos-row"><span>Custo efetivo mensal</span><span id="reducaoPrazo_cm">0,00 %</span></div>
         <div class="pos-row"><span>Custo efetivo anual</span><span style="display:inline-flex;align-items:center;gap:8px;"><span id="reducaoPrazo_ca">0,00 %</span><button type="button" class="ace-eye" onclick="AnaliticoCet.abrir('cons_prazo')" title="Ver memória de cálculo"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button></span></div>
@@ -587,11 +589,37 @@ function recalc(){
   }
   const cetA = cetConsorcio(parcReducaoParcela, prazo);                            // Reduç Parcela: prazoFinal = prazo total
   const cetB = cetConsorcio(parcReducaoPrazo, expectativa + novoPrazoReducao);     // Reduç Prazo: prazoFinal = expectativa + novoPrazoRestante
+
+  // Fluxo mês a mês do consórcio (mesma convenção do calcSumParcelas: reajuste
+  // fire ANTES de pagar no mês do aniversário, adesão nas primeiras parcelas).
+  // Usado pra (1) mostrar a "Parcela final" no card — pedido do Paulo, espelhando
+  // o que o lado do financiamento já mostrava — e (2) alimentar a tabela mês a
+  // mês do Analítico, que antes recebia o fluxo SEM reajuste (parcela fixa).
+  function fluxoConsorcio(parcelaPos, prazoFinal) {
+    const arr = [];
+    let pPre = parcelaBase;
+    let pPreDemais = parcelaDemais;
+    let pPos = parcelaPos;
+    for(let m = 1; m <= prazoFinal; m++) {
+      if(reajusteAplicaEm(m)) {
+        if(m <= expectativa) { pPre *= (1+reajuste); pPreDemais *= (1+reajuste); }
+        else                 { pPos *= (1+reajuste); }
+      }
+      if(m <= expectativa) arr.push((adesaoOn && m <= prazoAdesao) ? pPre : pPreDemais);
+      else arr.push(pPos);
+    }
+    return arr;
+  }
+  const fluxoRedParcela = fluxoConsorcio(parcReducaoParcela, prazo);
+  const fluxoRedPrazo = fluxoConsorcio(parcReducaoPrazo, expectativa + novoPrazoReducao);
+
   document.getElementById('reducaoParcela_parc').textContent = fmtMoney(parcReducaoParcela);
+  document.getElementById('reducaoParcela_fim').textContent = fmtMoney(fluxoRedParcela.length ? fluxoRedParcela[fluxoRedParcela.length-1] : 0);
   document.getElementById('reducaoParcela_prazo').textContent = prazoRestante;
   document.getElementById('reducaoParcela_cm').textContent = fmtPct(cetA.m, 2);
   document.getElementById('reducaoParcela_ca').textContent = fmtPct(cetA.a, 2);
   document.getElementById('reducaoPrazo_parc').textContent = fmtMoney(parcReducaoPrazo);
+  document.getElementById('reducaoPrazo_fim').textContent = fmtMoney(fluxoRedPrazo.length ? fluxoRedPrazo[fluxoRedPrazo.length-1] : 0);
   document.getElementById('reducaoPrazo_prazo').textContent = novoPrazoReducao;
   document.getElementById('reducaoPrazo_cm').textContent = fmtPct(cetB.m, 2);
   document.getElementById('reducaoPrazo_ca').textContent = fmtPct(cetB.a, 2);
@@ -654,22 +682,30 @@ function recalc(){
         </div>
       `;
     }
+    // `parcelas` leva o fluxo REAL (reajuste + adesão) pra tabela ano a ano /
+    // mês a mês do popup; antes o popup montava o fluxo sem reajuste.
     AnaliticoCet.set('cons_parcela', {
       titulo: 'Consórcio · Redução de parcela',
       credito: credito,
+      creditoAtualizado: creditoAtualizado,
+      reajuste: reajuste, tipoReajuste: tipoReajuste, period: periodoReaj,
       parcelaInicial: parcelaAtualNoMomento,
       expectativa: expectativa,
       parcelaPos: parcReducaoParcela,
       prazoRestPos: prazoRestante,
+      parcelas: fluxoRedParcela,
       memoriaHtml: memCons(parcReducaoParcela, prazo, cetA),
     });
     AnaliticoCet.set('cons_prazo', {
       titulo: 'Consórcio · Redução de prazo',
       credito: credito,
+      creditoAtualizado: creditoAtualizado,
+      reajuste: reajuste, tipoReajuste: tipoReajuste, period: periodoReaj,
       parcelaInicial: parcelaAtualNoMomento,
       expectativa: expectativa,
       parcelaPos: parcReducaoPrazo,
       prazoRestPos: novoPrazoReducao,
+      parcelas: fluxoRedPrazo,
       memoriaHtml: memCons(parcReducaoPrazo, expectativa + novoPrazoReducao, cetB),
     });
   }
@@ -989,6 +1025,7 @@ function _coletarBlocosConsXFinanc() {
       colunas:['REDUÇÃO DE PARCELA','REDUÇÃO DE PRAZO'],
       linhas:[
         { label:'Parcela',                valores:[_v('reducaoParcela_parc'), _v('reducaoPrazo_parc')] },
+        { label:'Parcela final',          valores:[_v('reducaoParcela_fim'), _v('reducaoPrazo_fim')] },
         { label:'Prazo restante',         valores:[_v('reducaoParcela_prazo')+' meses', _v('reducaoPrazo_prazo')+' meses'] },
         { label:'CET (Custo Efetivo Total)', valores:[_v('reducaoParcela_cm')+' ao mês | '+_v('reducaoParcela_ca')+' ao ano', _v('reducaoPrazo_cm')+' ao mês | '+_v('reducaoPrazo_ca')+' ao ano'] }
       ]

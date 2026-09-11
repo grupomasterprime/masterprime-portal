@@ -299,10 +299,13 @@
     // pode cair em qualquer mês, e no detalhe dá pra ver a parcela exata de
     // cada mês, com o mês da contemplação marcado). Mesmo padrão do analítico
     // da Operação Simples: saldo devedor do mês e acumulado pago até o mês.
+    // Saldo do mês na MESMA convenção Conkey da linha do ano (parcela vigente
+    // seguinte × meses restantes), senão o detalhe contradiz a linha do ano.
     const saldosMes = [], acumsMes = [];
     let _acumM = 0;
     for (let m = 0; m < N; m++) {
-      saldosMes.push(totalGeral - _acumM - parcelas[m]);
+      const parcVigProx = (parcelas[m+1] != null ? parcelas[m+1] : parcelas[m]) || 0;
+      saldosMes.push(parcVigProx * Math.max(0, N - m - 1));
       _acumM += parcelas[m];
       acumsMes.push(_acumM);
     }
