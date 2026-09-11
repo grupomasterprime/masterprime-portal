@@ -1121,5 +1121,35 @@ if (window.PdfConfigPersonalizado) {
 })();
 </script>
 
+
+<!-- Evolução da parcela (projeção opcional — não altera nenhum cálculo validado) -->
+<script src="analitico-cet.js"></script>
+<script src="evolucao-parcela.js"></script>
+<script>
+EvolucaoParcela.init({
+  montarApos: '#pp-card-prazo',
+  titulo: 'Porto Pesados',
+  ler: function() {
+    var t = function(id) {
+      var el = document.getElementById(id);
+      if (!el) return '';
+      return (el.tagName === 'INPUT' || el.tagName === 'SELECT') ? el.value : el.textContent;
+    };
+    var N = EvolucaoParcela.num, I = EvolucaoParcela.int;
+    // Respeita o cenário escolhido no toggle (reduzir parcela x reduzir prazo)
+    var modoPrazo = (window._ppRedmode === 'prazo');
+    return {
+      credito: N(t('pp-credito')),
+        preInicial: N(t('pp-parcelaInicialDestaqueAtual')),
+        qtdIniciais: 0,
+        preDemais: N(t('pp-parcelaInicialDestaqueAtual')),
+      contempla: I(t('pp-contempla')),
+      prazo: I(t('pp-prazo')),
+      parcelaPos: N(modoPrazo ? t('pp-parcelaSeReduzPrazo') : t('pp-novaParcela')),
+      prazoRest: I(modoPrazo ? t('pp-prazoReduzido') : t('pp-novoPrazo')),
+    };
+  }
+});
+</script>
 </body>
 </html>

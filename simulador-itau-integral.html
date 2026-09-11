@@ -850,5 +850,34 @@ if (window.PdfConfigPersonalizado) {
 })();
 </script>
 
+
+<!-- Evolução da parcela (projeção opcional — não altera nenhum cálculo validado) -->
+<script src="analitico-cet.js"></script>
+<script src="evolucao-parcela.js"></script>
+<script>
+EvolucaoParcela.init({
+  montarApos: '#ii-posReduzirPrazo',
+  titulo: 'Itaú Integral',
+  ler: function() {
+    var t = function(id) {
+      var el = document.getElementById(id);
+      if (!el) return '';
+      return (el.tagName === 'INPUT' || el.tagName === 'SELECT') ? el.value : el.textContent;
+    };
+    var N = EvolucaoParcela.num, I = EvolucaoParcela.int;
+    var modoPrazo = (window._iiRedmode === 'prazo');
+    return {
+      credito: N(t('ii-credito')),
+      preInicial: N(t('ii-parcelaInicialDestaque')),
+      qtdIniciais: 0,
+      preDemais: N(t('ii-parcelaInicialDestaque')),
+      contempla: I(t('ii-contempla')),
+      prazo: I(t('ii-prazo')),
+      parcelaPos: N(modoPrazo ? t('ii-parcelaMantida') : t('ii-novaParcela')),
+      prazoRest: I(modoPrazo ? t('ii-novoPrazo') : t('ii-prazoRestante')),
+    };
+  }
+});
+</script>
 </body>
 </html>

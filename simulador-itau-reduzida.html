@@ -876,5 +876,34 @@ if (window.PdfConfigPersonalizado) {
 })();
 </script>
 
+
+<!-- Evolução da parcela (projeção opcional — não altera nenhum cálculo validado) -->
+<script src="analitico-cet.js"></script>
+<script src="evolucao-parcela.js"></script>
+<script>
+EvolucaoParcela.init({
+  montarApos: '#ir-posReduzirPrazo',
+  titulo: 'Itaú Reduzida',
+  ler: function() {
+    var t = function(id) {
+      var el = document.getElementById(id);
+      if (!el) return '';
+      return (el.tagName === 'INPUT' || el.tagName === 'SELECT') ? el.value : el.textContent;
+    };
+    var N = EvolucaoParcela.num, I = EvolucaoParcela.int;
+    var modoPrazo = (window._irRedmode === 'prazo');
+    return {
+      credito: N(t('ir-credito')),
+      preInicial: N(t('ir-parcelaReduzidaDestaque')),
+      qtdIniciais: 0,
+      preDemais: N(t('ir-parcelaReduzidaDestaque')),
+      contempla: I(t('ir-contempla')),
+      prazo: I(t('ir-prazo')),
+      parcelaPos: N(modoPrazo ? t('ir-parcelaMantida') : t('ir-novaParcela')),
+      prazoRest: I(modoPrazo ? t('ir-novoPrazo') : t('ir-prazoRestante')),
+    };
+  }
+});
+</script>
 </body>
 </html>

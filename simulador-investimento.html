@@ -716,7 +716,7 @@ function renderOps(){
     <td>${fmtMoney(c.lucroBruto)}</td>
     <td>${fmtPct(c.retorno,2)}</td>
     <td>${ESTRATEGIA_LABEL[c.estrategia]}</td>
-    <td><div class="row-actions"><button data-action="dup" data-id="${c.id}" title="Duplicar" aria-label="Duplicar"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button><button data-action="edit" data-id="${c.id}" title="Editar" aria-label="Editar"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button data-action="del" data-id="${c.id}" title="Excluir" aria-label="Excluir" class="ra-del"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button></div></td>
+    <td><div class="row-actions"><button data-action="evo" data-id="${c.id}" title="Evolução da parcela mês a mês" aria-label="Evolução da parcela"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg></button><button data-action="dup" data-id="${c.id}" title="Duplicar" aria-label="Duplicar"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button><button data-action="edit" data-id="${c.id}" title="Editar" aria-label="Editar"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button><button data-action="del" data-id="${c.id}" title="Excluir" aria-label="Excluir" class="ra-del"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg></button></div></td>
   </tr>`).join('');
 
   // Totals
@@ -809,7 +809,70 @@ document.getElementById('opsBody').addEventListener('click',e=>{
     renderOps();
   }
   else if(btn.dataset.action==='del'){if(confirm('Excluir?')){operacoes=operacoes.filter(o=>o.id!==id); renderOps();}}
+  else if(btn.dataset.action==='evo'){const idx=operacoes.findIndex(o=>o.id===id); abrirEvolucaoOp(op, idx+1);}
 });
+
+// ─── Evolução da parcela por operação (olho na tabela — pedido do Paulo 11/09/2026) ───
+// Reconstrói o fluxo mês a mês com a MESMA fórmula parcelaMes do calcularOperacao
+// (reajuste no aniversário, embutido reduzindo pós proporcionalmente, seguro e
+// adesão) e abre a tabela ano a ano / mês a mês do Analítico compartilhado.
+function abrirEvolucaoOp(op, indice){
+  if (!window.AnaliticoCet || !op) return;
+  const credito=unmaskMoney(op.credito);
+  const prazo=parseInt(op.prazo||'0',10);
+  if(!(credito>0)||!(prazo>0)){ alert('Preencha primeiro a operação.'); return; }
+  const taxaAdm=unmaskPct(op.taxaAdm)/100;
+  const fundo=unmaskPct(op.fundo)/100;
+  const reajuste=unmaskPct(op.reajuste)/100;
+  const expectativa=Math.min(parseInt(op.expectativa||'1',10)||1, prazo);
+  const _tipoLance=op.tipoLance||'carta';
+  const _isBrad=(_tipoLance==='bradesco-imovel'||_tipoLance==='bradesco-auto');
+  const pE=_isBrad?0:unmaskPct(op.lanceE)/100;
+  const totalDevido=credito*(1+taxaAdm+fundo);
+  const redutor=op.redutorOn?unmaskPct(op.redutor)/100:0;
+  const parcelaBase=(totalDevido/prazo)*(1-redutor);
+  let creditoAtualizado=credito;
+  if(reajuste>0){creditoAtualizado=credito*Math.pow(1+reajuste,Math.floor(expectativa/12));}
+  const _baseLance=(_tipoLance==='categoria')?creditoAtualizado*(1+taxaAdm+fundo):creditoAtualizado;
+  const lanceE=_baseLance*pE;
+  const pEcarta=creditoAtualizado>0?lanceE/creditoAtualizado:0;
+  const seguroMensal=op.seguroOn?(unmaskPct(op.seguro)/100)*totalDevido:0;
+  const prazoAdesao=op.adesaoOn?(parseInt(op.adesaoMeses||'0',10)||prazo):0;
+  const adesaoMensal=(op.adesaoOn&&prazoAdesao>0)?(unmaskPct(op.adesao)/100)*credito/prazoAdesao:0;
+  const parcelaMes=m=>parcelaBase*Math.pow(1+reajuste,Math.floor(m/12))*(m>expectativa?(1-pEcarta):1)
+                      + seguroMensal + (m<=prazoAdesao?adesaoMensal:0);
+  const arr=[]; for(let m=1;m<=prazo;m++) arr.push(parcelaMes(m));
+  const primeira=arr[0], ultima=arr[arr.length-1];
+  const naCont=arr[expectativa-1];
+  const total=arr.reduce((a,b)=>a+b,0);
+  const fmt$=AnaliticoCet.fmt;
+  const reajTxt=reajuste>0?(reajuste*100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' % ao ano':'sem reajuste';
+  const memoriaHtml=`
+    <h4>Projeção da parcela — ${reajTxt}</h4>
+    <div class="ace-mem-step"><span><strong>1.</strong> Parcela de hoje (1º mês):</span><span class="ace-mem-res">${fmt$(primeira)}</span></div>
+    <div class="ace-mem-step"><span><strong>2.</strong> Parcela no mês da contemplação (mês ${expectativa}):</span><span class="ace-mem-res">${fmt$(naCont)}</span></div>
+    <div class="ace-mem-step dest"><span><strong>3.</strong> Última parcela projetada (mês ${prazo}):</span><span class="ace-mem-res">${fmt$(ultima)}</span></div>
+    <div class="ace-mem-step"><span><strong>4.</strong> Total projetado das ${prazo} parcelas:</span><span class="ace-mem-res">${fmt$(total)}</span></div>
+    <div class="ace-mem-step" style="border-bottom:none;font-size:11.5px;color:#6B7280;font-style:italic;padding-top:10px;">
+      <span>Mesma fórmula do cálculo da operação (reajuste no aniversário; embutido reduz as parcelas pós-contemplação). Clique num ano da tabela pra abrir o mês a mês.</span><span></span>
+    </div>`;
+  AnaliticoCet.set('evo_op', {
+    titulo: 'Modo Investidor · Operação ' + indice,
+    credito: credito,
+    creditoAtualizado: creditoAtualizado,
+    expectativa: expectativa,
+    contemplacaoMes: expectativa,
+    parcelaInicial: primeira,
+    parcelaPos: arr[Math.min(expectativa, arr.length-1)]||0,
+    prazoRestPos: prazo-expectativa,
+    reajuste: reajuste,
+    tipoReajuste: reajuste>0?(op.tipoReajuste||'cota-anual'):'',
+    period: 12,
+    parcelas: arr,
+    memoriaHtml: memoriaHtml,
+  });
+  AnaliticoCet.abrir('evo_op');
+}
 document.getElementById('btnLimpar').addEventListener('click',()=>{if(operacoes.length && !confirm('Limpar tudo?'))return; operacoes=[]; const obsEl=document.getElementById('inv-observacoes'); if(obsEl)obsEl.value=''; renderOps();});
 document.getElementById('btnLimparObs').addEventListener('click',()=>{const obsEl=document.getElementById('inv-observacoes'); if(obsEl)obsEl.value='';});
 // ─── COLETA DE BLOCOS PARA O PDF ───
@@ -948,5 +1011,7 @@ renderOps();
   });
 })();
 </script>
+
+<script src="analitico-cet.js"></script>
 </body>
 </html>

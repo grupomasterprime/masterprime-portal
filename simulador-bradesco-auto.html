@@ -967,5 +967,36 @@ function fecharAnaliticoLance() {
   </div>
 </div>
 
+
+<!-- Evolução da parcela (projeção opcional — não altera nenhum cálculo validado) -->
+<script src="analitico-cet.js"></script>
+<script src="evolucao-parcela.js"></script>
+<script>
+EvolucaoParcela.init({
+  montarApos: '#br-card-antecipar',
+  titulo: 'Bradesco Auto',
+  ler: function() {
+    var t = function(id) {
+      var el = document.getElementById(id);
+      if (!el) return '';
+      return (el.tagName === 'INPUT' || el.tagName === 'SELECT') ? el.value : el.textContent;
+    };
+    var N = EvolucaoParcela.num, I = EvolucaoParcela.int;
+    var modoAnt = (window._brRedmode === 'antecipar');
+    return {
+      credito: N(t('br-credito')),
+      preInicial: N(t('br-parcelaInicialDestaque')),
+      qtdIniciais: 0,
+      preDemais: N(t('br-parcelaInicialDestaque')),
+      contempla: I(t('br-contempla')),
+      prazo: I(t('br-prazo')),
+      // Bradesco: a 1ª parcela pós mantém o valor; a mudança vem da 2ª em diante
+      posPrimeira: N(t('br-parcelaPos1')),
+      parcelaPos: N(modoAnt ? t('br-parcAntecipar') : t('br-parcDiluir')),
+      prazoRest: I(t('br-prazoOut')),
+    };
+  }
+});
+</script>
 </body>
 </html>

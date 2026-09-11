@@ -779,5 +779,34 @@ if (window.PdfConfigPersonalizado) {
 })();
 </script>
 
+
+<!-- Evolução da parcela (projeção opcional — não altera nenhum cálculo validado) -->
+<script src="analitico-cet.js"></script>
+<script src="evolucao-parcela.js"></script>
+<script>
+EvolucaoParcela.init({
+  montarApos: '#sa-posReduzirPrazo',
+  titulo: 'Santander',
+  ler: function() {
+    var t = function(id) {
+      var el = document.getElementById(id);
+      if (!el) return '';
+      return (el.tagName === 'INPUT' || el.tagName === 'SELECT') ? el.value : el.textContent;
+    };
+    var N = EvolucaoParcela.num, I = EvolucaoParcela.int;
+    var modoPrazo = (window._saRedmode === 'prazo');
+    return {
+      credito: N(t('sa-credito')),
+      preInicial: N(t('sa-parcelaInicialDestaque')),
+      qtdIniciais: 0,
+      preDemais: N(t('sa-parcelaInicialDestaque')),
+      contempla: I(t('sa-contempla')),
+      prazo: I(t('sa-prazo')),
+      parcelaPos: N(modoPrazo ? t('sa-parcelaMantida') : t('sa-novaParcela')),
+      prazoRest: I(modoPrazo ? t('sa-novoPrazo') : t('sa-prazoRestante')),
+    };
+  }
+});
+</script>
 </body>
 </html>

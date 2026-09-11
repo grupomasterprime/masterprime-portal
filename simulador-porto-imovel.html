@@ -1100,5 +1100,35 @@ if (window.PdfConfigPersonalizado) {
 })();
 </script>
 
+
+<!-- Evolução da parcela (projeção opcional — não altera nenhum cálculo validado) -->
+<script src="analitico-cet.js"></script>
+<script src="evolucao-parcela.js"></script>
+<script>
+EvolucaoParcela.init({
+  montarApos: '#pi-card-prazo',
+  titulo: 'Porto Imóvel',
+  ler: function() {
+    var t = function(id) {
+      var el = document.getElementById(id);
+      if (!el) return '';
+      return (el.tagName === 'INPUT' || el.tagName === 'SELECT') ? el.value : el.textContent;
+    };
+    var N = EvolucaoParcela.num, I = EvolucaoParcela.int;
+    // Respeita o cenário escolhido no toggle (reduzir parcela x reduzir prazo)
+    var modoPrazo = (window._piRedmode === 'prazo');
+    return {
+      credito: N(t('pi-credito')),
+        preInicial: N(t('pi-parcelaInicial')),
+        qtdIniciais: I(t('pi-qtdAdesao')),
+        preDemais: N(t('pi-parcelaDemais')),
+      contempla: I(t('pi-contempla')),
+      prazo: I(t('pi-prazo')),
+      parcelaPos: N(modoPrazo ? t('pi-parcelaSeReduzPrazo') : t('pi-novaParcela')),
+      prazoRest: I(modoPrazo ? t('pi-prazoReduzido') : t('pi-novoPrazo')),
+    };
+  }
+});
+</script>
 </body>
 </html>

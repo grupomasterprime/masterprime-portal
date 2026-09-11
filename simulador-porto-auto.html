@@ -1361,5 +1361,35 @@ if (window.PdfConfigPersonalizado) {
 })();
 </script>
 
+
+<!-- Evolução da parcela (projeção opcional — não altera nenhum cálculo validado) -->
+<script src="analitico-cet.js"></script>
+<script src="evolucao-parcela.js"></script>
+<script>
+EvolucaoParcela.init({
+  montarApos: '#pa-card-prazo',
+  titulo: 'Porto Auto',
+  ler: function() {
+    var t = function(id) {
+      var el = document.getElementById(id);
+      if (!el) return '';
+      return (el.tagName === 'INPUT' || el.tagName === 'SELECT') ? el.value : el.textContent;
+    };
+    var N = EvolucaoParcela.num, I = EvolucaoParcela.int;
+    // Respeita o cenário escolhido no toggle (reduzir parcela x reduzir prazo)
+    var modoPrazo = (window._paRedmode === 'prazo');
+    return {
+      credito: N(t('pa-credito')),
+        preInicial: N(t('pa-parcelaInicialDestaqueAtual')),
+        qtdIniciais: 0,
+        preDemais: N(t('pa-parcelaInicialDestaqueAtual')),
+      contempla: I(t('pa-contempla')),
+      prazo: I(t('pa-prazo')),
+      parcelaPos: N(modoPrazo ? t('pa-parcelaSeReduzPrazo') : t('pa-novaParcela')),
+      prazoRest: I(modoPrazo ? t('pa-prazoReduzido') : t('pa-novoPrazo')),
+    };
+  }
+});
+</script>
 </body>
 </html>

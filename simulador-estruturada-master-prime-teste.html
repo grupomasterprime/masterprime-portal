@@ -354,8 +354,8 @@
         </div>
         <div class="field"><label>Valor de referência</label><input type="text" id="valorRef" placeholder="R$ 0,00" disabled class="disabled"></div>
         <div class="field"><label>Crédito atualizado</label><input type="text" id="creditoAtualizado" placeholder="R$ 0,00" disabled class="disabled"></div>
-        <div class="field"><label>% Lance rec. próprios</label><input type="text" id="lanceProprios" placeholder="0,0000 %" data-mask="pct4" disabled></div>
-        <div class="field"><label id="lblLanceEmbutido">% Lance embutido</label><input type="text" id="lanceEmbutido" placeholder="0,0000 %" data-mask="pct4" disabled><small id="embEquivCat" style="display:none;color:#6B7280;font-size:11px;margin-top:2px"></small></div>
+        <div class="field"><label>% Lance rec. próprios</label><input type="text" id="lanceProprios" placeholder="0,0000 %" data-mask="pct4" disabled><small id="recPropHint" style="display:none;color:#DC2626;font-size:11px;margin-top:2px;font-weight:600"></small></div>
+        <div class="field"><label id="lblLanceEmbutido">% Lance embutido</label><input type="text" id="lanceEmbutido" placeholder="0,0000 %" data-mask="pct4" disabled><small id="embEquivCat" style="display:none;color:#6B7280;font-size:11px;margin-top:2px"></small><small id="embMaxHint" style="display:none;color:#6B7280;font-size:11px;margin-top:2px"></small></div>
         <div class="field">
           <label>% Lance com FGTS <span class="toggle-input"><input type="checkbox" id="fgtsOn" disabled><span class="toggle-slider"></span></span></label>
           <input type="text" id="lanceFGTS" placeholder="0,0000 %" data-mask="pct4" disabled>
@@ -531,6 +531,15 @@ function syncLanceFieldsUI() {
   // Rótulo do embutido muda no modo Porto: deixa claro que a base é a CARTA
   const lblEmb = document.getElementById('lblLanceEmbutido');
   if (lblEmb) lblEmb.textContent = isPorto ? '% Emb. máx (da carta)' : '% Lance embutido';
+  // À prova de erro (caso Arnaldo 10/09): no Porto o campo de total ganha
+  // placeholder dizendo O QUE digitar, e o teto do embutido ganha a dica de
+  // que 30% é o teto da Porto e o simulador limita sozinho.
+  tot.placeholder = (isLance && isPorto) ? 'oferta, ex.: 20 %' : '0,0000 %';
+  const embHint = document.getElementById('embMaxHint');
+  if (embHint) {
+    embHint.textContent = 'Teto da Porto: 30% da carta. O simulador limita sozinho, não precisa mudar.';
+    embHint.style.display = (isLance && isPorto) ? 'block' : 'none';
+  }
 }
 
 function wireModalLogic() {
@@ -738,6 +747,18 @@ function recalc() {
   if (!_isPorto) document.getElementById('totalLance').value = formatPct(totalLancePct, 4);
   // No modo Porto o % de rec. próprios vira campo calculado (base categoria)
   if (_isPorto) document.getElementById('lanceProprios').value = formatPct(valorRef > 0 ? (lanceProprios_v/valorRef)*100 : 0, 4);
+  // Aviso à prova de erro: se no modo Porto sobrar dinheiro DO BOLSO, avisa na
+  // cara. Foi assim que a bateria de 10/09 saiu com R$ 1.008,32 "inventados":
+  // % total herdado errado + teto do embutido reduzido, e ninguém percebeu.
+  const _recHint = document.getElementById('recPropHint');
+  if (_recHint) {
+    if (_isPorto && lanceProprios_v > 0.005) {
+      _recHint.textContent = formatMoney(lanceProprios_v) + ' sairão do bolso do cliente. Se a oferta era só embutido, confira o % Total e o teto do embutido.';
+      _recHint.style.display = 'block';
+    } else {
+      _recHint.style.display = 'none';
+    }
+  }
   // Mostra a equivalência do embutido na base CATEGORIA (o simulador simples da
   // Porto exibe nessa base; sem isso parece que os % divergem entre os dois)
   const _embEq = document.getElementById('embEquivCat');
@@ -1277,6 +1298,12 @@ document.getElementById('btnSaveOp').addEventListener('click', () => {
   const data = snapshotForm();
   if (!data.qtdCartas || data.qtdCartas <= 0) { alert('Informe a Quantidade de cartas (maior que 0).'); return; }
   if (!unmaskMoney(data.credito)) { alert('Informe o Crédito (cota unitária).'); return; }
+  // Modo Porto: sem o % total digitado o lance sai zerado — bloqueia o salvar
+  // pra ninguém montar proposta com lance errado sem perceber (caso Arnaldo 10/09).
+  if (data.tipoContemplacao === 'lance' && data.tipoLance === 'porto' && !(data.totalLancePct > 0)) {
+    alert('Modo Porto: digite o % Total de lance (a oferta na base categoria, ex.: 20%).');
+    return;
+  }
   if (editingId) {
     operacoes = operacoes.map(o => o.id === editingId ? { ...o, ...data, id: editingId } : o);
   } else {

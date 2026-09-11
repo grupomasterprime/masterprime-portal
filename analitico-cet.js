@@ -61,6 +61,9 @@
       .ace-foot{padding:14px 26px;border-top:1px solid #E5E7EB;display:flex;justify-content:center;}
       .ace-btn{padding:10px 22px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:#2D3F5E;color:#fff;}
       .ace-btn:hover{background:#1E2D45;}
+      .ace-btn-sec{background:#fff;color:#2D3F5E;border:1px solid #2D3F5E;margin-right:10px;}
+      .ace-btn-sec:hover{background:#F3F4F6;}
+      .ace-btn-sec:disabled{opacity:.6;cursor:wait;}
 
       .ace-mem{background:#FAFCFE;border:1px solid #E5E7EB;border-radius:10px;padding:16px 18px;margin-bottom:18px;}
       .ace-mem h4{font-size:12px;font-weight:700;color:#2D3F5E;text-transform:uppercase;letter-spacing:.5px;margin:0 0 12px;}
@@ -131,6 +134,7 @@
           </table>
         </div>
         <div class="ace-foot">
+          <button class="ace-btn ace-btn-sec" id="aceBtnPdf" onclick="AnaliticoCet.baixarPdf()" style="display:none">Baixar PDF</button>
           <button class="ace-btn" onclick="AnaliticoCet.fechar()">Fechar</button>
         </div>
       </div>
@@ -232,8 +236,11 @@
     // Memória de cálculo — aceita HTML customizado (memoriaHtml) ou usa fórmula padrão Op Simples
     let memHTML;
     if (d.memoriaHtml) {
-      // Caller passou HTML pronto (fórmula específica do simulador)
-      memHTML = `<h4>Memória de cálculo do CET</h4>${d.memoriaHtml}`;
+      // Caller passou HTML pronto (fórmula específica do simulador).
+      // Se já vier com o próprio <h4>, não duplica o título padrão.
+      memHTML = d.memoriaHtml.indexOf('<h4') !== -1
+        ? d.memoriaHtml
+        : `<h4>Memória de cálculo do CET</h4>${d.memoriaHtml}`;
     } else {
       // Memória narrativa (formato didático para apresentar ao cliente)
       const lanceProp = d.lanceProprios || 0;
@@ -337,7 +344,60 @@
     }).join('');
     document.getElementById('aceTotal').textContent = fmt(totalGeral);
     document.getElementById('aceSub').textContent = (d.titulo||'') + ' · memória de cálculo ano a ano';
+    // Botão de PDF: só aparece quando a página carrega html2canvas + jsPDF
+    _tituloAtual = d.titulo || '';
+    const _btnPdf = document.getElementById('aceBtnPdf');
+    if (_btnPdf) _btnPdf.style.display = (window.html2canvas && window.jspdf && window.jspdf.jsPDF) ? '' : 'none';
     document.getElementById('aceModal').classList.add('aberto');
+  }
+
+  // ─── Baixar o popup em PDF (html2canvas + jsPDF, já carregados nos simuladores) ───
+  // Captura o estado ATUAL (com os anos que o usuário abriu), em A4 multipágina.
+  let _tituloAtual = '';
+  async function baixarPdf(){
+    const box = document.querySelector('#aceModal .ace-box');
+    if (!box || !window.html2canvas || !window.jspdf || !window.jspdf.jsPDF) return;
+    const btn = document.getElementById('aceBtnPdf');
+    if (btn) { btn.disabled = true; btn.textContent = 'Gerando...'; }
+    try {
+      const clone = box.cloneNode(true);
+      const foot = clone.querySelector('.ace-foot'); if (foot) foot.remove();
+      const fechar = clone.querySelector('.ace-close'); if (fechar) fechar.remove();
+      const body = clone.querySelector('.ace-body');
+      if (body) { body.style.maxHeight = 'none'; body.style.overflow = 'visible'; }
+      clone.style.maxHeight = 'none';
+      const holder = document.createElement('div');
+      holder.style.cssText = 'position:fixed;left:-10000px;top:0;width:880px;background:#fff;';
+      holder.appendChild(clone);
+      document.body.appendChild(holder);
+      const canvas = await html2canvas(clone, { scale: 2, backgroundColor: '#FFFFFF', logging: false });
+      document.body.removeChild(holder);
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4' });
+      const pw = pdf.internal.pageSize.getWidth();
+      const ph = pdf.internal.pageSize.getHeight();
+      const margem = 8;
+      const imgW = pw - margem*2;
+      const pageHpx = Math.floor((ph - margem*2) * canvas.width / imgW);
+      let y = 0, primeira = true;
+      while (y < canvas.height) {
+        const h = Math.min(pageHpx, canvas.height - y);
+        const pc = document.createElement('canvas');
+        pc.width = canvas.width; pc.height = h;
+        pc.getContext('2d').drawImage(canvas, 0, y, canvas.width, h, 0, 0, canvas.width, h);
+        if (!primeira) pdf.addPage();
+        pdf.addImage(pc.toDataURL('image/jpeg', 0.92), 'JPEG', margem, margem, imgW, h * imgW / canvas.width);
+        primeira = false;
+        y += h;
+      }
+      const nome = ('analitico-' + (_tituloAtual || 'evolucao')).toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+        .replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'') + '.pdf';
+      pdf.save(nome);
+    } catch(e) {
+      console.error('PDF do analitico:', e);
+    }
+    if (btn) { btn.disabled = false; btn.textContent = 'Baixar PDF'; }
   }
 
   function fechar(){
