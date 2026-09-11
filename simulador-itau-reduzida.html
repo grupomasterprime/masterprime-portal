@@ -225,6 +225,9 @@
         <div class="field-hint" style="margin-top: 6px;">
           <strong>Seguro Itaú:</strong> 0,0472% a.m. (imóvel) · 0,056% a.m. (veículo)
         </div>
+        <div class="field-hint" id="hint-contempla" style="margin-top: 6px; display:none; color:#B45309;">
+          <strong>Contempla mês em branco:</strong> consideramos contemplação na 1ª assembleia (mês 1), o mesmo padrão da SimulaKey. Se a expectativa for outra, digite o mês.
+        </div>
 
         <div class="redmode-toggle" style="margin-top: 10px;">
           <span class="lbl">Reduzir após contemplação:</span>
@@ -510,6 +513,15 @@ function calc(i) {
 
 function recalc() {
   const i = readInputs();
+
+  // Prova de burros (caso Arnaldo 11/09/2026): lance preenchido + "Contempla mês" em
+  // branco = contemplação na 1ª assembleia (mês 1), padrão SimulaKey, com aviso na tela.
+  const _temLance = (i.pctEmbutido + i.pctAPagar) > 0;
+  const _contemplaAuto = _temLance && !(i.contempla > 0);
+  if (_contemplaAuto) i.contempla = 1;
+  window._irContemplaEfetivo = i.contempla;
+  const _hintC = document.getElementById('hint-contempla');
+  if (_hintC) _hintC.style.display = (_contemplaAuto && i.credito > 0 && i.prazo > 0) ? '' : 'none';
 
   if (!(i.credito > 0) || !(i.prazo > 0)) {
     const ids = ['ir-categoria','ir-saldoDevedor','ir-parcelaIntegral','ir-parcelaIntegralDestaque','ir-parcelaReduzida','ir-parcelaReduzidaDestaque','ir-pctReducao','ir-seguroMensal','ir-lanceEmbutido','ir-lanceAPagar','ir-totalLance','ir-totalLancePct','ir-creditoLiquido','ir-novaParcela','ir-novoPrazoOut','ir-prazoRestante','ir-saldoPos','ir-novoPrazo','ir-parcelaMantida','ir-saldoPosPrazo','ir-taxaMes','ir-taxaAno'];
@@ -897,7 +909,7 @@ EvolucaoParcela.init({
       preInicial: N(t('ir-parcelaReduzidaDestaque')),
       qtdIniciais: 0,
       preDemais: N(t('ir-parcelaReduzidaDestaque')),
-      contempla: I(t('ir-contempla')),
+      contempla: (window._irContemplaEfetivo != null ? window._irContemplaEfetivo : I(t('ir-contempla'))),
       prazo: I(t('ir-prazo')),
       parcelaPos: N(modoPrazo ? t('ir-parcelaMantida') : t('ir-novaParcela')),
       prazoRest: I(modoPrazo ? t('ir-novoPrazo') : t('ir-prazoRestante')),
