@@ -427,17 +427,42 @@
         const ehMes = tr.classList.contains('ace-mes');
         const tds = Array.from(tr.querySelectorAll('td')).map(td => td.textContent.replace(/\s+/g, ' ').trim());
         if (!tds.length) return;
-        quebra(6);
-        pdf.setFontSize(ehMes ? 7.6 : 8.4);
+        const altura = ehMes ? 4.8 : 5.8;
+        // quebra de página repetindo o cabeçalho da tabela
+        if (y + altura + 2 > ph - 12) { pdf.addPage(); y = 16; cabecalhoTabela(); }
+        if (ehMes) {
+          // faixa cinza-claro contínua atrás dos meses, igual ao popup
+          pdf.setFillColor(246, 248, 250);
+          pdf.rect(mx, y - 3.5, largura, altura, 'F');
+        }
+        const temCont = tds[0].indexOf('Contemplação') !== -1;
+        const rot = tds[0].replace('Contemplação', '').trim();
+        const tamFonte = ehMes ? 7.8 : 8.4;
+        pdf.setFontSize(tamFonte);
         pdf.setFont('helvetica', ehMes ? 'normal' : 'bold');
         if (ehMes) pdf.setTextColor(CINZA[0], CINZA[1], CINZA[2]); else pdf.setTextColor(TXTC[0], TXTC[1], TXTC[2]);
-        const rot = tds[0].replace('Contemplação', ' · contemplação');
-        pdf.text(rot, colX[0] + (ehMes ? 6 : 2), y);
+        const xRot = colX[0] + (ehMes ? 7 : 2);
+        pdf.text(rot, xRot, y);
+        if (temCont) {
+          // etiqueta azul "CONTEMPLAÇÃO", igual ao badge do popup
+          const xIni = xRot + pdf.getTextWidth(rot) + 2;
+          pdf.setFont('helvetica', 'bold'); pdf.setFontSize(5.6);
+          const wPill = pdf.getTextWidth('CONTEMPLAÇÃO') + 3.2;
+          pdf.setFillColor(NAVY[0], NAVY[1], NAVY[2]);
+          pdf.roundedRect(xIni, y - 2.8, wPill, 3.8, 0.9, 0.9, 'F');
+          pdf.setTextColor(255, 255, 255);
+          pdf.text('CONTEMPLAÇÃO', xIni + wPill/2, y - 0.1, { align: 'center' });
+          pdf.setFontSize(tamFonte);
+          if (ehMes) pdf.setTextColor(CINZA[0], CINZA[1], CINZA[2]); else pdf.setTextColor(TXTC[0], TXTC[1], TXTC[2]);
+        }
         pdf.setFont('helvetica', 'normal');
         for (let c = 1; c < 5; c++) if (tds[c]) pdf.text(tds[c], colX[c + 1] - 2, y, { align: 'right' });
-        y += ehMes ? 4.2 : 5.4;
-        pdf.setDrawColor(229, 231, 235);
-        pdf.line(mx, y - 3.4, mx + largura, y - 3.4);
+        y += altura;
+        if (!ehMes) {
+          // linha separadora só entre linhas de ANO (os meses ficam num bloco limpo)
+          pdf.setDrawColor(229, 231, 235);
+          pdf.line(mx, y - 3.5, mx + largura, y - 3.5);
+        }
       });
       // Total
       quebra(9);
