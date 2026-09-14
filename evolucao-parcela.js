@@ -222,7 +222,9 @@
       tipoReajuste: reaj > 0 ? 'cota-anual' : '',
       period: 12,
       parcelas: arr,
-      cartaReajusteTotal: true,
+      // Carta corrige ATÉ a contemplação e congela depois (regra real: o crédito
+      // liberado não corrige mais). Sem contemplação, corrige o fluxo inteiro.
+      cartaReajusteTotal: contempla === 0,
       memoriaHtml: memoriaHtml,
     });
     AnaliticoCet.abrir('evolucao_dedicado');
