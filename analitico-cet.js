@@ -199,7 +199,10 @@
     // agregado da Proposta Estruturada) a carta permanece fixa, como antes.
     // Se o caller informar `creditoAtualizado` (o valor que a própria tela mostra),
     // ele é o teto — assim a coluna nunca contradiz o campo exibido no simulador.
-    const maxReajCarta = reajOn ? Math.floor(exp / period) : 0;
+    // cartaReajusteTotal (Evolução da parcela, pedido do Allan 14/09/2026): a carta
+    // corrige ano a ano no fluxo INTEIRO, junto com a parcela — sem congelar na
+    // contemplação (que na projeção costuma ser o mês 1 e travava a coluna).
+    const maxReajCarta = reajOn ? (d.cartaReajusteTotal ? Infinity : Math.floor(exp / period)) : 0;
     const tetoCarta = (d.creditoAtualizado != null && d.creditoAtualizado > 0) ? d.creditoAtualizado : null;
     const cartas = [];
     let cartaAtual = d.credito;

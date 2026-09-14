@@ -222,6 +222,7 @@
       tipoReajuste: reaj > 0 ? 'cota-anual' : '',
       period: 12,
       parcelas: arr,
+      cartaReajusteTotal: true,
       memoriaHtml: memoriaHtml,
     });
     AnaliticoCet.abrir('evolucao_dedicado');
