@@ -3407,14 +3407,16 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
     const st = d => d >= hoje ? 'color:#1E293B;font-weight:700' : 'color:#94A3B8;text-decoration:line-through';
     // Sorteio que ja aconteceu vira link: abre popup com o resultado oficial da
     // Loteria Federal (API publica da Caixa). Futuro fica so texto normal.
-    const soCell = d => {
+    const soCell = (d, admin) => {
       const isoD = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+      const arg = `'${isoD}'` + (admin ? `,'${admin}'` : '');
+      const tit = admin === 'porto' ? 'Ver resultado e calcular as cotas contempladas (centenas equivalentes)' : 'Ver resultado da extração';
       // passou: riscado como as outras datas, mas sublinhado e clicável (abre o resultado)
       if (d < hoje)
-        return `<a href="javascript:void(0)" onclick="abrirSorteioFederal('${isoD}')" title="Ver resultado da extração" style="color:#94A3B8;text-decoration-line:underline line-through;cursor:pointer">${dm(d)}</a>`;
+        return `<a href="javascript:void(0)" onclick="abrirSorteioFederal(${arg})" title="${tit}" style="color:#94A3B8;text-decoration-line:underline line-through;cursor:pointer">${dm(d)}</a>`;
       // é hoje: resultado pode já ter saído, link azul sem risco
       if (d.getTime() === hoje.getTime())
-        return `<a href="javascript:void(0)" onclick="abrirSorteioFederal('${isoD}')" title="Ver resultado da extração" style="color:#2a78d6;font-weight:700;text-decoration:underline dotted">${dm(d)}</a>`;
+        return `<a href="javascript:void(0)" onclick="abrirSorteioFederal(${arg})" title="${tit}" style="color:#2a78d6;font-weight:700;text-decoration:underline dotted">${dm(d)}</a>`;
       return `<span style="color:#1E293B;font-weight:700">${dm(d)}</span>`;
     };
     const td = 'padding:7px 8px;font-size:12.5px;text-align:center;border-top:1px solid #EEF2F7;white-space:nowrap';
@@ -3449,7 +3451,7 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       const pt = assembPorto(y, m);
       const so = sorteioAntes(pt.assemb);
       rowsPorto += `<tr><td style="${td};text-align:left;font-weight:700;color:#2D3F5E">${MESES[m]}</td>
-        <td style="${td}"><span style="${st(pt.venc)}">${dm(pt.venc)}</span></td><td style="${td}">${soCell(so)}</td><td style="${td}"><span style="${st(pt.assemb)}">${dm(pt.assemb)}</span></td></tr>`;
+        <td style="${td}"><span style="${st(pt.venc)}">${dm(pt.venc)}</span></td><td style="${td}">${soCell(so, 'porto')}</td><td style="${td}"><span style="${st(pt.assemb)}">${dm(pt.assemb)}</span></td></tr>`;
     });
     // ── Bloco Bradesco (vermelho), desligado até a Fernanda confirmar a regra ──
     let blocoBradesco = '';
@@ -3495,7 +3497,85 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
   // extrações (quartas e domingos) entre a data e o último concurso publicado,
   // busca o resultado e mostra os 5 prêmios com a centena destacada.
   let FED_ULT = null;
-  window.abrirSorteioFederal = async function(isoData){
+  // ── Calculadora de sorteio Porto (planilha do Allan, regra 35.2-35.5) ──
+  // Tamanhos de grupo fixos; teto = maior múltiplo do tamanho dentro de 999.
+  // Cota equivalente: subtrai o tamanho quantas vezes couber (centena 000 não vale).
+  const GRUPOS_PORTO = [999, 900, 800, 700, 600, 540, 504, 400, 360, 350, 320];
+  function cotaEqPorto(cent, tam){
+    if (!(cent >= 1)) return null;
+    if (cent > Math.floor(999 / tam) * tam) return null;
+    return ((cent - 1) % tam) + 1;
+  }
+  // Grupo 2.500 (Sorteio por Equivalência, grupos novos desde 01/08/2026):
+  // cada cota concorre com 4 números da sorte (cota, +2500, +5000, +7500),
+  // então a milhar sorteada volta pra cota subtraindo 2.500 quantas vezes couber.
+  function cotaEq2500(milhar){
+    if (!(milhar >= 0)) return null;
+    const m = milhar === 0 ? 10000 : milhar;
+    return ((m - 1) % 2500) + 1;
+  }
+  window._fedCalcPorto = function(){
+    const alvo = document.getElementById('fed-calc');
+    if (!alvo) return;
+    const premios = [];
+    for (let i = 1; i <= 5; i++) {
+      const el = document.getElementById('fed-p' + i);
+      const dig = (el && el.value ? el.value : '').replace(/\D/g, '');
+      premios.push(dig.length === 5 ? dig : null);
+    }
+    if (premios.every(p => !p)) { alvo.innerHTML = '<div style="font-size:12px;color:#64748B;padding:8px 0">Digite os 5 prêmios da extração (5 algarismos cada) pra calcular as centenas.</div>'; return; }
+    // 10 centenas na ordem de preferência (35.3): últimos 3 do prêmio, depois os 3 do meio
+    const centenas = [];
+    premios.forEach((p, pi) => {
+      if (!p) { centenas.push(null, null); return; }
+      centenas.push({ c: parseInt(p.slice(2), 10), de: (pi+1) + 'º prêmio · 3 últimos' });
+      centenas.push({ c: parseInt(p.slice(1, 4), 10), de: (pi+1) + 'º prêmio · 3 do meio' });
+    });
+    const th2 = 'padding:5px 7px;font-size:10px;font-weight:800;color:#1D4ED8;background:#EDF3FF;white-space:nowrap;text-align:center';
+    const td2 = 'padding:5px 7px;font-size:12px;text-align:center;border-top:1px solid #EEF2F7;white-space:nowrap';
+    let html = '<div style="overflow-x:auto;margin-top:10px"><table style="border-collapse:collapse;width:100%">' +
+      '<tr><th style="' + th2 + ';text-align:left">Ordem</th><th style="' + th2 + '">Centena</th>' +
+      GRUPOS_PORTO.map(t => '<th style="' + th2 + '">' + t + '</th>').join('') + '</tr>';
+    centenas.forEach((x, i) => {
+      const dest = i === 0 ? 'background:#F0FDF4;font-weight:700' : '';
+      html += '<tr style="' + dest + '"><td style="' + td2 + ';text-align:left;color:#64748B;font-size:10.5px">' + (i+1) + 'ª' + (i === 0 ? ' · preferência' : '') + '</td>' +
+        '<td style="' + td2 + ';font-family:monospace;font-weight:800;color:#C2410C">' + (x ? String(x.c).padStart(3,'0') : '—') + '</td>' +
+        GRUPOS_PORTO.map(t => {
+          const ct = x ? cotaEqPorto(x.c, t) : null;
+          return '<td style="' + td2 + (ct == null ? ';color:#CBD5E1">—' : '">' + ct) + '</td>';
+        }).join('') + '</tr>';
+    });
+    html += '</table></div>' +
+      '<div style="font-size:10.5px;color:#8a8984;margin-top:6px">Cabeçalho = participantes do grupo. A cota da coluna é a centena equivalente (a centena menos o tamanho do grupo, quantas vezes couber). Traço = centena fora do teto do grupo, não vale. Se nenhuma das 10 contemplar, vale a centena imediatamente posterior (depois a anterior) à 1ª centena, regra 35.5.</div>';
+    // bloco do grupo 2.500 (milhar)
+    let l2500 = '';
+    premios.forEach((p, pi) => {
+      if (!p) return;
+      const mi = parseInt(p.slice(1), 10);
+      l2500 += '<tr><td style="' + td2 + ';text-align:left;color:#64748B;font-size:10.5px">' + (pi+1) + 'º prêmio</td>' +
+        '<td style="' + td2 + ';font-family:monospace;font-weight:800;color:#7C3AED">' + p.slice(1) + '</td>' +
+        '<td style="' + td2 + ';font-weight:700">' + cotaEq2500(mi) + '</td></tr>';
+    });
+    if (l2500) {
+      html += '<div style="margin-top:12px;border:1px solid #EDE9FE;border-radius:10px;overflow:hidden">' +
+        '<div style="background:#F5F3FF;color:#6D28D9;font-size:10.5px;font-weight:800;letter-spacing:.5px;padding:6px 10px;text-transform:uppercase">Grupos de 2.500 · Sorteio por Equivalência (em validação)</div>' +
+        '<table style="border-collapse:collapse;width:100%"><tr><th style="' + th2 + ';background:#F5F3FF;color:#6D28D9;text-align:left">Prêmio</th><th style="' + th2 + ';background:#F5F3FF;color:#6D28D9">Milhar (4 últimos)</th><th style="' + th2 + ';background:#F5F3FF;color:#6D28D9">Cota</th></tr>' + l2500 + '</table>' +
+        '<div style="font-size:10.5px;color:#8a8984;padding:6px 10px 8px">Cada cota concorre com 4 números da sorte (a cota, +2.500, +5.000 e +7.500), então a milhar volta pra cota subtraindo 2.500 quantas vezes couber. Regra nova dos grupos formados a partir de 01/08/2026: confirmar no primeiro resultado oficial.</div></div>';
+    }
+    alvo.innerHTML = html;
+  };
+  // Troca a exibição dos prêmios (texto) por campos digitáveis, mantendo os valores
+  window._fedEditarPremios = function(){
+    const wrap = document.getElementById('fed-premios');
+    if (!wrap) return;
+    const vals = [1,2,3,4,5].map(i => { const el = document.getElementById('fed-p' + i); return el ? el.value : ''; });
+    wrap.innerHTML = vals.map((v, i) =>
+      '<div style="text-align:center"><div style="font-size:10px;color:#64748B;font-weight:700">' + (i+1) + 'º prêmio</div>' +
+      '<input id="fed-p' + (i+1) + '" value="' + v + '" maxlength="5" inputmode="numeric" placeholder="00000" oninput="_fedCalcPorto()" ' +
+      'style="width:86px;text-align:center;font-family:monospace;font-size:16px;letter-spacing:1px;border:1px solid #D1D5DB;border-radius:8px;padding:7px 4px;margin-top:3px"></div>').join('');
+    _fedCalcPorto();
+  };
+  window.abrirSorteioFederal = async function(isoData, admin){
     let ovl = document.getElementById('fed-ovl');
     if (!ovl) {
       ovl = document.createElement('div');
@@ -3505,7 +3585,9 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       ovl.addEventListener('click', e => { if (e.target === ovl) ovl.style.display = 'none'; });
       document.body.appendChild(ovl);
     }
+    const ehPorto = admin === 'porto';
     const box = document.getElementById('fed-box');
+    box.style.maxWidth = ehPorto ? '780px' : '430px';
     ovl.style.display = 'block';
     box.innerHTML = '<div style="font-size:13px;color:#64748B;padding:18px 0;text-align:center">Buscando o resultado na Caixa...</div>';
     try {
@@ -3534,21 +3616,51 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       if (!dados) throw new Error('resultado não encontrado');
       const avisoData = String(dados.dataApuracao) !== alvoBR
         ? '<div style="font-size:11px;color:#B45309;background:#FFF4EA;border-radius:8px;padding:7px 10px;margin-top:8px">A Caixa registrou esta extração em ' + dados.dataApuracao + ' (a data pode deslocar por feriado).</div>' : '';
-      const linhas = (dados.listaDezenas || []).map((b, i) => {
-        const bil = String(b);
-        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #F1F5F9">' +
-          '<span style="font-size:12px;color:#64748B">' + (i+1) + 'º prêmio</span>' +
-          '<span style="font-family:monospace;font-size:16px;letter-spacing:1px;color:#1E293B">' + bil.slice(0, -3) + '<b style="color:#C2410C">' + bil.slice(-3) + '</b></span></div>';
-      }).join('');
-      box.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center">' +
-        '<div><div style="font-size:11px;font-weight:800;letter-spacing:1.5px;color:#2a78d6;text-transform:uppercase">Loteria Federal</div>' +
+      const cab = '<div style="display:flex;justify-content:space-between;align-items:center">' +
+        '<div><div style="font-size:11px;font-weight:800;letter-spacing:1.5px;color:#2a78d6;text-transform:uppercase">Loteria Federal' + (ehPorto ? ' · Calculadora de sorteio Porto' : '') + '</div>' +
         '<div style="font-size:16px;font-weight:800;color:#1E293B;margin-top:2px">Extração ' + dados.numero + ' · ' + dados.dataApuracao + '</div></div>' +
-        '<button onclick="document.getElementById(\'fed-ovl\').style.display=\'none\'" style="border:none;background:#F1F5F9;border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer;color:#334155">Fechar</button></div>' +
-        '<div style="margin-top:12px">' + linhas + '</div>' + avisoData +
-        '<div style="font-size:11px;color:#8a8984;margin-top:10px">Os 3 últimos números destacados são a centena que define a cota contemplada. Grupos com 1.000 cotas ou mais usam os 4 últimos.</div>';
+        '<button onclick="document.getElementById(\'fed-ovl\').style.display=\'none\'" style="border:none;background:#F1F5F9;border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer;color:#334155">Fechar</button></div>';
+      if (ehPorto) {
+        // Porto: prêmios vindos da API viram TEXTO (não parece formulário);
+        // campos hidden alimentam a calculadora. "Ajustar manualmente" libera edição.
+        const vals = (dados.listaDezenas || []).map(b => String(b));
+        const mostra = vals.map((b, i) =>
+          '<div style="text-align:center"><div style="font-size:10px;color:#64748B;font-weight:700">' + (i+1) + 'º prêmio</div>' +
+          '<div style="font-family:monospace;font-size:17px;letter-spacing:1px;color:#1E293B;margin-top:3px">' + b.slice(0, 2) + '<b style="color:#C2410C">' + b.slice(2) + '</b></div>' +
+          '<input type="hidden" id="fed-p' + (i+1) + '" value="' + b + '"></div>').join('');
+        box.innerHTML = cab +
+          '<div id="fed-premios" style="display:flex;gap:18px;flex-wrap:wrap;margin-top:12px;justify-content:center;align-items:flex-end">' + mostra + '</div>' + avisoData +
+          '<div id="fed-calc"></div>';
+        _fedCalcPorto();
+      } else {
+        const linhas = (dados.listaDezenas || []).map((b, i) => {
+          const bil = String(b);
+          return '<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #F1F5F9">' +
+            '<span style="font-size:12px;color:#64748B">' + (i+1) + 'º prêmio</span>' +
+            '<span style="font-family:monospace;font-size:16px;letter-spacing:1px;color:#1E293B">' + bil.slice(0, -3) + '<b style="color:#C2410C">' + bil.slice(-3) + '</b></span></div>';
+        }).join('');
+        box.innerHTML = cab +
+          '<div style="margin-top:12px">' + linhas + '</div>' + avisoData +
+          '<div style="font-size:11px;color:#8a8984;margin-top:10px">Os 3 últimos números destacados são a centena que define a cota contemplada. Grupos com 1.000 cotas ou mais usam os 4 últimos.</div>';
+      }
     } catch(e) {
-      box.innerHTML = '<div style="font-size:13px;color:#B91C1C;padding:10px 0">Não consegui buscar o resultado agora (' + e.message + '). Tente de novo em instantes ou consulte loterias.caixa.gov.br.</div>' +
-        '<button onclick="document.getElementById(\'fed-ovl\').style.display=\'none\'" style="border:none;background:#F1F5F9;border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer;margin-top:6px">Fechar</button>';
+      if (admin === 'porto') {
+        // Sem resultado da Caixa: a calculadora abre mesmo assim pra digitar na mão
+        const inputs = [1,2,3,4,5].map(i =>
+          '<div style="text-align:center"><div style="font-size:10px;color:#64748B;font-weight:700">' + i + 'º prêmio</div>' +
+          '<input id="fed-p' + i + '" maxlength="5" inputmode="numeric" placeholder="00000" oninput="_fedCalcPorto()" ' +
+          'style="width:86px;text-align:center;font-family:monospace;font-size:16px;letter-spacing:1px;border:1px solid #D1D5DB;border-radius:8px;padding:7px 4px;margin-top:3px"></div>').join('');
+        box.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center">' +
+          '<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;color:#2a78d6;text-transform:uppercase">Calculadora de sorteio Porto</div>' +
+          '<button onclick="document.getElementById(\'fed-ovl\').style.display=\'none\'" style="border:none;background:#F1F5F9;border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer;color:#334155">Fechar</button></div>' +
+          '<div style="font-size:11.5px;color:#B45309;background:#FFF4EA;border-radius:8px;padding:7px 10px;margin-top:10px">Não consegui buscar o resultado na Caixa agora (' + e.message + '). Digite os 5 prêmios da extração abaixo que a calculadora funciona igual.</div>' +
+          '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;justify-content:center">' + inputs + '</div>' +
+          '<div id="fed-calc"></div>';
+        _fedCalcPorto();
+      } else {
+        box.innerHTML = '<div style="font-size:13px;color:#B91C1C;padding:10px 0">Não consegui buscar o resultado agora (' + e.message + '). Tente de novo em instantes ou consulte loterias.caixa.gov.br.</div>' +
+          '<button onclick="document.getElementById(\'fed-ovl\').style.display=\'none\'" style="border:none;background:#F1F5F9;border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer;margin-top:6px">Fechar</button>';
+      }
     }
   };
 
