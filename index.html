@@ -3520,7 +3520,10 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
     const premios = [];
     for (let i = 1; i <= 5; i++) {
       const el = document.getElementById('fed-p' + i);
-      const dig = (el && el.value ? el.value : '').replace(/\D/g, '');
+      let dig = (el && el.value ? el.value : '').replace(/\D/g, '');
+      // A API da Caixa manda o bilhete com 6 dígitos (zero à esquerda); o número
+      // da Federal tem 5 algarismos, então valem os 5 últimos.
+      if (dig.length > 5) dig = dig.slice(-5);
       premios.push(dig.length === 5 ? dig : null);
     }
     if (premios.every(p => !p)) { alvo.innerHTML = '<div style="font-size:12px;color:#64748B;padding:8px 0">Digite os 5 prêmios da extração (5 algarismos cada) pra calcular as centenas.</div>'; return; }
@@ -3623,7 +3626,7 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       if (ehPorto) {
         // Porto: prêmios vindos da API viram TEXTO (não parece formulário);
         // campos hidden alimentam a calculadora. "Ajustar manualmente" libera edição.
-        const vals = (dados.listaDezenas || []).map(b => String(b));
+        const vals = (dados.listaDezenas || []).map(b => String(b).replace(/\D/g, '').slice(-5).padStart(5, '0'));
         const mostra = vals.map((b, i) =>
           '<div style="text-align:center"><div style="font-size:10px;color:#64748B;font-weight:700">' + (i+1) + 'º prêmio</div>' +
           '<div style="font-family:monospace;font-size:17px;letter-spacing:1px;color:#1E293B;margin-top:3px">' + b.slice(0, 2) + '<b style="color:#C2410C">' + b.slice(2) + '</b></div>' +
@@ -3722,6 +3725,28 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
   const btcLast = () => fetch('https://economia.awesomeapi.com.br/json/last/BTC-BRL')
     .then(r => r.ok ? r.json() : Promise.reject())
     .then(j => j['BTCBRL']);
+  // Bitcoin no referencial do Google (pedido do Allan, 14/09/2026): o Google usa o
+  // índice internacional (fonte Coinbase) convertido pra reais, não o preço das
+  // corretoras brasileiras (que negociam com ágio). Buscamos o BTC-USD na Coinbase
+  // (spot de agora + fechamento de ontem pra variação) e convertemos pelo dólar
+  // comercial ao vivo. Se falhar, cai no BTC-BRL da AwesomeAPI como antes.
+  const btcCoinbase = () => {
+    const ontem = new Date(Date.now() - 86400000);
+    const iso = ontem.getFullYear() + '-' + String(ontem.getMonth()+1).padStart(2,'0') + '-' + String(ontem.getDate()).padStart(2,'0');
+    return Promise.all([
+      fetch('https://api.coinbase.com/v2/prices/BTC-USD/spot').then(r => r.ok ? r.json() : Promise.reject()),
+      fetch('https://api.coinbase.com/v2/prices/BTC-USD/spot?date=' + iso).then(r => r.ok ? r.json() : Promise.reject()).catch(() => null)
+    ]).then(([agora, ant]) => ({
+      usd: parseFloat(agora && agora.data && agora.data.amount),
+      usdOntem: ant && ant.data ? parseFloat(ant.data.amount) : null
+    }));
+  };
+  // Dólar comercial AO VIVO (AwesomeAPI): mesmo referencial do Google. A série
+  // PTAX do BCB continua alimentando o mini gráfico, mas o valor do card é o
+  // de agora — a PTAX só sai no fim do dia útil e ficava defasada (caso 14/09).
+  const usdLast = () => fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL')
+    .then(r => r.ok ? r.json() : Promise.reject())
+    .then(j => j['USDBRL']);
   const btcHist = () => fetch('https://economia.awesomeapi.com.br/json/daily/BTC-BRL/360')
     .then(r => r.ok ? r.json() : Promise.reject())
     .then(d => d.map(x => parseFloat(x.bid)).filter(v => v > 0).reverse());
@@ -3731,10 +3756,12 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
     sgs(433, 26).catch(() => null),   // IPCA var. mensal · 26 meses p/ acumulado móvel
     sgs(189, 26).catch(() => null),   // IGP-M var. mensal
     sgs(192, 26).catch(() => null),   // INCC var. mensal
-    sgs(1, 13).catch(() => null),     // Dólar PTAX venda (diária)
+    sgs(1, 13).catch(() => null),     // Dólar PTAX venda (diária) · só pro mini gráfico
     btcLast().catch(() => null),
-    btcHist().catch(() => null)
-  ]).then(([selic, cdi, ipca, igpm, incc, usd, btc, btcH]) => {
+    btcHist().catch(() => null),
+    usdLast().catch(() => null),
+    btcCoinbase().catch(() => null)
+  ]).then(([selic, cdi, ipca, igpm, incc, usd, btc, btcH, usdLive, btcCb]) => {
     const cards = [];
     if (selic && selic.length) cards.push({ n: 'Selic', v: fmt(selic[selic.length - 1], 2) + '%', s: 'meta a.a. · BCB', d: amostra(selic, 13), cor: '#2D3F5E', tk: ['SELIC', fmt(selic[selic.length - 1], 2) + '% a.a.'] });
     if (cdi && cdi.length) cards.push({ n: 'CDI', v: fmt(cdi[cdi.length - 1], 2) + '%', s: 'a.a. · BCB', d: amostra(cdi, 13), cor: '#2D3F5E', tk: ['CDI', fmt(cdi[cdi.length - 1], 2) + '% a.a.'] });
@@ -3744,15 +3771,30 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       const ac = acum12(serie);
       cards.push({ n: nome, v: fmt(ac[ac.length - 1], 2) + '%', s: 'acum. 12 meses', d: ac, cor: '#B4552D', tk: [nome + ' 12M', fmt(ac[ac.length - 1], 2) + '%'] });
     });
-    if (usd && usd.length) {
-      // Dólar: a seta compara com o dia útil anterior (não com o ponto da amostra do gráfico,
-      // que fica ~1 mês atrás e fazia o dólar cair e aparecer verde).
+    if (usdLive && parseFloat(usdLive.bid) > 0) {
+      // Dólar comercial ao vivo (mesmo número que o Google mostra)
+      const v = parseFloat(usdLive.bid);
+      const pct = parseFloat(String(usdLive.pctChange).replace(',','.')) || 0;
+      const txtVar = (pct > 0 ? '+' : '') + fmt(pct, 2) + '% no dia';
+      const serie = (usd && usd.length > 1) ? amostra(usd, 12).concat([v]) : [v, v];
+      cards.push({ n: 'Dólar', v: 'R$ ' + fmt(v, 2), s: 'comercial · ' + txtVar, d: serie, cor: '#1D7A4C', ref: pct !== 0 ? v / (1 + pct/100) : v, tk: ['DÓLAR', 'R$ ' + fmt(v, 2)] });
+    } else if (usd && usd.length) {
+      // Sem a cotação ao vivo: cai na PTAX do BCB (fecha só no fim do dia útil)
       const hoje = usd[usd.length - 1], ontem = usd.length > 1 ? usd[usd.length - 2] : hoje;
       const varDia = ontem ? (hoje / ontem - 1) * 100 : 0;
       const txtVar = (varDia > 0 ? '+' : '') + fmt(varDia, 2) + '% no dia';
       cards.push({ n: 'Dólar', v: 'R$ ' + fmt(hoje, 2), s: 'PTAX venda · ' + txtVar, d: amostra(usd, 13), cor: '#1D7A4C', ref: ontem, tk: ['DÓLAR', 'R$ ' + fmt(hoje, 2)] });
     }
-    if (btc && parseFloat(btc.bid) > 0) {
+    const usdBidLive = usdLive ? parseFloat(usdLive.bid) : 0;
+    if (btcCb && btcCb.usd > 0 && usdBidLive > 0) {
+      // Referencial do Google: índice internacional (Coinbase) × dólar comercial
+      const v = btcCb.usd * usdBidLive;
+      const pct = btcCb.usdOntem > 0 ? (btcCb.usd / btcCb.usdOntem - 1) * 100 : 0;
+      const txtVar = (pct > 0 ? '+' : '') + fmt(pct, 2) + '% no dia';
+      const vTxt = 'R$ ' + fmt(v, 0);
+      const serie = (btcH && btcH.length > 1) ? amostra(btcH, 12).concat([v]) : [v, v];
+      cards.push({ n: 'Bitcoin', v: vTxt, s: 'BTC/BRL · ' + txtVar, d: serie, cor: '#B4700F', ref: pct !== 0 ? v / (1 + pct/100) : v, tk: ['BITCOIN', vTxt] });
+    } else if (btc && parseFloat(btc.bid) > 0) {
       const v = parseFloat(btc.bid);
       const pct = parseFloat(String(btc.pctChange).replace(',','.')) || 0;
       const txtVar = (pct > 0 ? '+' : '') + fmt(pct, 2) + '% no dia';
