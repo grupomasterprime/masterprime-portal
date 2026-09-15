@@ -3404,7 +3404,10 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
     // Liberado pra todos em 10/09/2026 (sócios testaram e aprovaram).
     const hoje = new Date(); hoje.setHours(0,0,0,0);
     const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-    const st = d => d >= hoje ? 'color:#1E293B;font-weight:700' : 'color:#94A3B8;text-decoration:line-through';
+    // Data de HOJE ganha destaque (pill amarela) pra saltar aos olhos no dia
+    const st = d => d.getTime() === hoje.getTime()
+      ? 'background:#FEF3C7;color:#92400E;font-weight:800;border-radius:6px;padding:2px 8px;box-shadow:inset 0 0 0 1px #F59E0B;white-space:nowrap'
+      : d >= hoje ? 'color:#1E293B;font-weight:700' : 'color:#94A3B8;text-decoration:line-through';
     // Sorteio que ja aconteceu vira link: abre popup com o resultado oficial da
     // Loteria Federal (API publica da Caixa). Futuro fica so texto normal.
     const soCell = (d, admin) => {
@@ -3414,9 +3417,9 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       // passou: riscado como as outras datas, mas sublinhado e clicável (abre o resultado)
       if (d < hoje)
         return `<a href="javascript:void(0)" onclick="abrirSorteioFederal(${arg})" title="${tit}" style="color:#94A3B8;text-decoration-line:underline line-through;cursor:pointer">${dm(d)}</a>`;
-      // é hoje: resultado pode já ter saído, link azul sem risco
+      // é hoje: destaque amarelo + link (resultado pode já ter saído)
       if (d.getTime() === hoje.getTime())
-        return `<a href="javascript:void(0)" onclick="abrirSorteioFederal(${arg})" title="${tit}" style="color:#2a78d6;font-weight:700;text-decoration:underline dotted">${dm(d)}</a>`;
+        return `<a href="javascript:void(0)" onclick="abrirSorteioFederal(${arg})" title="${tit}" style="background:#FEF3C7;color:#92400E;font-weight:800;border-radius:6px;padding:2px 8px;box-shadow:inset 0 0 0 1px #F59E0B;white-space:nowrap;text-decoration:underline dotted;cursor:pointer">${dm(d)}</a>`;
       return `<span style="color:#1E293B;font-weight:700">${dm(d)}</span>`;
     };
     const td = 'padding:7px 8px;font-size:12.5px;text-align:center;border-top:1px solid #EEF2F7;white-space:nowrap';
