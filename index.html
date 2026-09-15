@@ -3361,10 +3361,18 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
   //   Porto    = 1ª chamada assembleia + 5 dias úteis, 2ª chamada + 5 dias úteis.
   // Enquanto estiver em teste, a tabela mostra a etiqueta EM TESTE e o aviso.
   const MOSTRAR_SUPLENCIA = true;        // Porto e Bradesco
-  // Itaú DESLIGADO por enquanto (Allan 15/09/2026): o prazo muda conforme o ciclo
-  // de vencimento (junho oficial: venc.05 = 6du veíc / 10du imóv; venc.10-20 = 8du)
-  // e sem regra estável preferimos não mostrar. Pra religar: SUPL_ITAU = true.
-  const SUPL_ITAU = false;
+  // Itaú CONFIRMADO nos cards oficiais de fev, maio e junho/2026 (12 de 12 datas):
+  // Veículos = assembleia + 10 dias corridos (terça -> sexta da semana seguinte);
+  // Imóveis = assembleia + 12 dias corridos (sexta -> quarta, 2 semanas depois).
+  // Obs.: o card de junho trocou Veíc/Imóv na linha do venc. 05 (24/06 e 26/06
+  // invertidos) - único caso que foge do padrão de dia da semana, erro do card.
+  const SUPL_ITAU = true;
+  function suplItauCorr(assemb, dias){
+    const d = new Date(assemb);
+    d.setDate(d.getDate() + dias);
+    while (!ehUtil(d)) d.setDate(d.getDate()+7); // feriado: pula pra mesma posição da semana seguinte
+    return d;
+  }
   function addDiasUteis(base, n){
     const d = new Date(base);
     for (let i = 0; i < n; i++) { do { d.setDate(d.getDate()+1); } while (!ehUtil(d)); }
@@ -3442,11 +3450,9 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
     meses.forEach(({y, m}) => {
       const it05v = assembItau(y, m, 10, 2), it05i = assembItau(y, m, 10, 5);
       const it20v = assembItau(y, m, 24, 2), it20i = assembItau(y, m, 24, 5);
-      // Suplência Itaú EM TESTE, calibrada pelo calendário oficial de junho/2026:
-      // venc. 05 = Veículos +6 e Imóveis +10 dias úteis; venc. 10/15/20 = +8 e +8.
-      // (junho oficial: 16/06→24/06 = 6du · 12/06→26/06 = 10du · 30/06→10/07 = 8du · 26/06→08/07 = 8du)
-      const su05v = addDiasUteis(it05v, 6), su05i = addDiasUteis(it05i, 10);
-      const su20v = addDiasUteis(it20v, 8), su20i = addDiasUteis(it20i, 8);
+      // Suplência Itaú: Veículos +10 corridos (sexta), Imóveis +12 corridos (quarta)
+      const su05v = suplItauCorr(it05v, 10), su05i = suplItauCorr(it05i, 12);
+      const su20v = suplItauCorr(it20v, 10), su20i = suplItauCorr(it20i, 12);
       const so05v = sorteioAntes(it05v), so05i = sorteioAntes(it05i);
       const so20v = sorteioAntes(it20v), so20i = sorteioAntes(it20i);
       // Suplência dentro de cada grupo (Allan 15/09): Automóvel = Sorteio/Assemb./Supl.
@@ -3499,7 +3505,7 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
           <tr style="background:#FFF4EA;color:#B45309"><th style="${th};text-align:left">Mês</th><th style="${th};text-align:left">Venc.</th><th style="${th};${sepIt}">Sorteio</th><th style="${th}">Assemb.</th>${SUPL_ITAU ? `<th style="${th}">Supl.</th>` : ''}<th style="${th};${sepIt}">Sorteio</th><th style="${th}">Assemb.</th>${SUPL_ITAU ? `<th style="${th}">Supl.</th>` : ''}</tr>
           ${rowsItau}
         </table>
-        <div style="font-size:11px;color:#8a8984;padding:8px 14px 10px">Automóvel às terças e Imóvel às sextas, a partir do dia 10 (venc. 05) ou do dia 24 (venc. 10, 15 e 20).${SUPL_ITAU ? ' <b style="color:#B45309">Suplência em teste:</b> calibrada pelo calendário oficial de junho/2026 (venc. 05: Veículos 6 e Imóveis 10 dias úteis após a assembleia; venc. 10, 15 e 20: 8 dias úteis). Sem regra oficial confirmada, acompanhe de perto pra não perder contemplação.' : ''}</div>
+        <div style="font-size:11px;color:#8a8984;padding:8px 14px 10px">Automóvel às terças e Imóvel às sextas, a partir do dia 10 (venc. 05) ou do dia 24 (venc. 10, 15 e 20).${SUPL_ITAU ? ' <b style="color:#B45309">Suplência:</b> Veículos na sexta da semana seguinte à assembleia (10 dias corridos) e Imóveis na quarta 2 semanas depois (12 dias corridos), padrão confirmado nos calendários oficiais de fev, maio e junho/2026.' : ''}</div>
       </div>
       <div style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;background:#fff;grid-column:1 / -1">
         <div style="background:#0046AD;color:#fff;font-weight:800;font-size:13px;padding:9px 14px">Porto</div>
