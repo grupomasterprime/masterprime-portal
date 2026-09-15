@@ -3425,8 +3425,6 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
     // e fundo levemente tingido no grupo Imóvel, senão parece uma coisa só (Allan, 11/09/2026)
     const sepIt = 'border-left:2px solid #F2D9BD';
     const tintIm = 'background:#FFF9F1';
-    // Etiqueta das colunas de suplência enquanto a regra está em observação
-    const tagTeste = '<span style="background:#FEF3C7;color:#92400E;font-size:8.5px;font-weight:800;border-radius:4px;padding:1px 5px;margin-left:5px;letter-spacing:.5px;vertical-align:middle">EM TESTE</span>';
     // meses exibidos: atual e próximo
     const meses = [0, 1].map(off => {
       const ref = new Date(hoje.getFullYear(), hoje.getMonth()+off, 1);
@@ -3475,10 +3473,10 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
         rowsBra += `<tr><td style="${td};text-align:left;font-weight:700;color:#2D3F5E">${MESES[m]}</td>
           <td style="${td}"><span style="${st(br.venc)}">${dm(br.venc)}</span></td><td style="${td}">${soCell(br.sorteio)}</td><td style="${td}"><span style="${st(br.assemb)}">${dm(br.assemb)}</span></td>${cSupBr}</tr>`;
       });
-      blocoBradesco = `<div style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;background:#fff">
+      blocoBradesco = `<div style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;background:#fff;grid-column:1 / -1">
         <div style="background:#CC092F;color:#fff;font-weight:800;font-size:13px;padding:9px 14px">Bradesco</div>
         <table style="width:100%;border-collapse:collapse">
-          <tr style="background:#FDEEF1;color:#B91C3C"><th style="${th};text-align:left">Mês</th><th style="${th}">Vencimento</th><th style="${th}">Sorteio</th><th style="${th}">Assembleia</th>${MOSTRAR_SUPLENCIA ? `<th style="${th}">Supl. 1ª${tagTeste}</th><th style="${th}">Supl. 2ª</th>` : ''}</tr>
+          <tr style="background:#FDEEF1;color:#B91C3C"><th style="${th};text-align:left">Mês</th><th style="${th}">Vencimento</th><th style="${th}">Sorteio</th><th style="${th}">Assembleia</th>${MOSTRAR_SUPLENCIA ? `<th style="${th}">1ª Supl.</th><th style="${th}">2ª Supl.</th>` : ''}</tr>
           ${rowsBra}
         </table>
         <div style="font-size:11px;color:#8a8984;padding:8px 14px 10px">Boleto vence no primeiro dia útil a partir do dia 10 e a assembleia é 2 dias úteis depois do vencimento. Sorteio: extração da Loteria Federal imediatamente anterior à assembleia (a extração de sábado passou pro domingo de manhã, o Newcon ainda registra a data antiga). <b style="color:#B91C3C">Cliente novo só concorre no mês se entrar antes do vencimento E antes do sorteio, o que vier primeiro</b>; depois disso participa a partir da assembleia seguinte.${MOSTRAR_SUPLENCIA ? ' <b style="color:#B45309">Suplência em teste:</b> 1ª chamada 4 dias úteis após a assembleia e 2ª chamada 4 dias úteis depois, prazos observados pela nossa operação, sem confirmação oficial do Bradesco. Acompanhe de perto pra não perder contemplação.' : ''}</div>
@@ -3489,15 +3487,15 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
         <div style="background:#EC7000;color:#fff;font-weight:800;font-size:13px;padding:9px 14px">Itaú</div>
         <table style="width:100%;border-collapse:collapse">
           <tr style="background:#FFF4EA;color:#B45309"><th style="${th}" colspan="2"></th><th style="${th};${sepIt}" colspan="${MOSTRAR_SUPLENCIA ? 3 : 2}">Automóvel</th><th style="${th};${sepIt}" colspan="${MOSTRAR_SUPLENCIA ? 3 : 2}">Imóvel</th></tr>
-          <tr style="background:#FFF4EA;color:#B45309"><th style="${th};text-align:left">Mês</th><th style="${th};text-align:left">Venc.</th><th style="${th};${sepIt}">Sorteio</th><th style="${th}">Assemb.</th>${MOSTRAR_SUPLENCIA ? `<th style="${th}">Supl.${tagTeste}</th>` : ''}<th style="${th};${sepIt}">Sorteio</th><th style="${th}">Assemb.</th>${MOSTRAR_SUPLENCIA ? `<th style="${th}">Supl.${tagTeste}</th>` : ''}</tr>
+          <tr style="background:#FFF4EA;color:#B45309"><th style="${th};text-align:left">Mês</th><th style="${th};text-align:left">Venc.</th><th style="${th};${sepIt}">Sorteio</th><th style="${th}">Assemb.</th>${MOSTRAR_SUPLENCIA ? `<th style="${th}">Supl.</th>` : ''}<th style="${th};${sepIt}">Sorteio</th><th style="${th}">Assemb.</th>${MOSTRAR_SUPLENCIA ? `<th style="${th}">Supl.</th>` : ''}</tr>
           ${rowsItau}
         </table>
         <div style="font-size:11px;color:#8a8984;padding:8px 14px 10px">Automóvel às terças e Imóvel às sextas, a partir do dia 10 (venc. 05) ou do dia 24 (venc. 10, 15 e 20).${MOSTRAR_SUPLENCIA ? ' <b style="color:#B45309">Suplência em teste:</b> 8 dias úteis após a assembleia, prazo observado pela nossa operação, sem confirmação oficial do Itaú. Acompanhe de perto pra não perder contemplação.' : ''}</div>
       </div>
-      <div style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;background:#fff">
+      <div style="border:1px solid #E2E8F0;border-radius:12px;overflow:hidden;background:#fff;grid-column:1 / -1">
         <div style="background:#0046AD;color:#fff;font-weight:800;font-size:13px;padding:9px 14px">Porto</div>
         <table style="width:100%;border-collapse:collapse">
-          <tr style="background:#EDF3FF;color:#1D4ED8"><th style="${th};text-align:left">Mês</th><th style="${th}">Vencimento</th><th style="${th}">Sorteio</th><th style="${th}">Assembleia</th>${MOSTRAR_SUPLENCIA ? `<th style="${th}">Supl. 1ª${tagTeste}</th><th style="${th}">Supl. 2ª</th>` : ''}</tr>
+          <tr style="background:#EDF3FF;color:#1D4ED8"><th style="${th};text-align:left">Mês</th><th style="${th}">Vencimento</th><th style="${th}">Sorteio</th><th style="${th}">Assembleia</th>${MOSTRAR_SUPLENCIA ? `<th style="${th}">1ª Supl.</th><th style="${th}">2ª Supl.</th>` : ''}</tr>
           ${rowsPorto}
         </table>
         <div style="font-size:11px;color:#8a8984;padding:8px 14px 10px">Boleto vence no primeiro dia útil a partir do dia 15 e a assembleia é no 4º dia útil depois do vencimento. Sorteio: extração da Loteria Federal imediatamente anterior à assembleia. Grupos novos de 2.500 participantes (formados a partir de 01/08/2026) usam o Sorteio por Equivalência: cada cota concorre com 4 números da sorte (a cota, +2.500, +5.000 e +7.500).${MOSTRAR_SUPLENCIA ? ' <b style="color:#B45309">Suplência em teste:</b> 1ª chamada 5 dias úteis após a assembleia e 2ª chamada 5 dias úteis depois, prazos observados pela nossa operação, sem confirmação oficial da Porto. Acompanhe de perto pra não perder contemplação.' : ''}</div>
