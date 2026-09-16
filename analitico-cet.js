@@ -191,28 +191,18 @@
 
     const totalGeral = parcelas.reduce((a,b)=>a+b, 0);
 
-    // Carta de crédito mês a mês: reajusta nos aniversários ATÉ a contemplação e
-    // congela depois (mesma convenção Conkey usada nas parcelas — o reajuste
-    // incide JÁ no mês do aniversário). O teto de reajustes é Math.floor(exp/period),
-    // o mesmo do campo "Crédito atualizado" dos simuladores.
-    // Sem índice de reajuste (ex.: lado do financiamento no Cons × Financ, e o
-    // agregado da Proposta Estruturada) a carta permanece fixa, como antes.
-    // Se o caller informar `creditoAtualizado` (o valor que a própria tela mostra),
-    // ele é o teto — assim a coluna nunca contradiz o campo exibido no simulador.
-    // cartaReajusteTotal (Evolução da parcela, pedido do Allan 14/09/2026): a carta
-    // corrige ano a ano no fluxo INTEIRO, junto com a parcela — sem congelar na
-    // contemplação (que na projeção costuma ser o mês 1 e travava a coluna).
-    const maxReajCarta = reajOn ? (d.cartaReajusteTotal ? Infinity : Math.floor(exp / period)) : 0;
-    const tetoCarta = (d.creditoAtualizado != null && d.creditoAtualizado > 0) ? d.creditoAtualizado : null;
+    // Carta de crédito mês a mês: reajusta em TODOS os aniversários do fluxo,
+    // inclusive DEPOIS da contemplação (regra confirmada pelo time em 16/09/2026:
+    // na prática o crédito continua corrigindo mesmo contemplado, até ser usado).
+    // Mesma convenção Conkey das parcelas — o reajuste incide JÁ no mês do
+    // aniversário. Sem índice de reajuste (ex.: lado do financiamento no
+    // Cons × Financ) a carta permanece fixa, como antes.
+    // Nota: até 15/09 a carta congelava na contemplação (floor(exp/period) com
+    // teto no creditoAtualizado); a regra foi substituída por esta.
     const cartas = [];
     let cartaAtual = d.credito;
-    let nReajCarta = 0;
     for (let m = 1; m <= parcelas.length; m++) {
-      if (reajOn && m % period === 0 && nReajCarta < maxReajCarta) {
-        cartaAtual *= (1 + reaj);
-        nReajCarta++;
-        if (tetoCarta != null) cartaAtual = Math.min(cartaAtual, tetoCarta);
-      }
+      if (reajOn && m % period === 0) cartaAtual *= (1 + reaj);
       cartas.push(cartaAtual);
     }
 
