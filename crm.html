@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
   --navy:#0F2A4A; --navy-2:#1D4E89; --teal:#0FA3A3; --cta:#F4C24A;
@@ -157,6 +158,7 @@ select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 1
       <input class="f" id="busca" placeholder="Buscar cliente, telefone, indicador..." oninput="renderKanban()" style="min-width:230px">
       <span class="sp"></span>
       <button class="btn btn-g" id="btn-antigos" onclick="toggleAntigos()" style="display:none"></button>
+      <button class="btn btn-g" onclick="exportarExcel()">Exportar Excel</button>
       <button class="btn btn-g" onclick="carregarTudo()">Atualizar</button>
       <button class="btn btn-p" onclick="abrirNovoLead()">+ Novo Contato</button>
     </div>
@@ -344,6 +346,36 @@ function toast(t){
 }
 function esc(s){ return String(s == null ? '' : s).replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c])); }
 function fmtData(d){ if(!d) return ''; const x = new Date(d); return x.toLocaleDateString('pt-BR') + ' ' + x.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); }
+
+// ── Exportar Excel (pedido do Arnaldo, 18/09/2026) ─────────────────────────
+// Gera um .xlsx com TODOS os contatos que o usuário enxerga (consultor: só os
+// dele; master e sócio: todo mundo), incluindo vendidos e perdidos arquivados.
+function exportarExcel(){
+  if (typeof XLSX === 'undefined') { alert('Biblioteca de planilha ainda carregando. Tente de novo em alguns segundos.'); return; }
+  if (!LEADS.length) { alert('Sem contatos pra exportar.'); return; }
+  const nomeCons = id => { const u = USUARIOS.find(x => String(x.id) === String(id)); return u ? u.nome : ''; };
+  const fmtD = d => d ? new Date(d).toLocaleDateString('pt-BR') : '';
+  const rows = LEADS.map(l => ({
+    'Cliente': l.nome || '',
+    'Telefone': l.telefone || '',
+    'Interesse': l.interesse || '',
+    'Etapa': etapaDef(l.etapa).nome,
+    'Consultor': nomeCons(l.consultor_id),
+    'Origem': l.origem === 'indicador' ? 'Indicação' : 'Cadastro manual',
+    'Indicador': l.indicador ? (l.indicador.nome || '') : '',
+    'Próximo contato': l.proximo_contato ? String(l.proximo_contato).slice(0,10).split('-').reverse().join('/') : '',
+    'Motivo da perda': l.motivo_perda || '',
+    'Observação': l.observacao || '',
+    'Criado em': fmtD(l.criado_em),
+    'Atualizado em': fmtD(l.atualizado_em)
+  }));
+  const ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:28},{wch:16},{wch:16},{wch:12},{wch:20},{wch:16},{wch:18},{wch:14},{wch:24},{wch:40},{wch:12},{wch:14}];
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Contatos');
+  const hoje = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, 'CRM_Contatos_' + hoje + '.xlsx');
+}
 function maskCPF(v){ v = v.replace(/\D/g,'').slice(0,11); return v.replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d)/,'$1.$2').replace(/(\d{3})(\d{1,2})$/,'$1-$2'); }
 $('mi-cpf').addEventListener('input', e => e.target.value = maskCPF(e.target.value));
 function maskMoney(v){ v = String(v).replace(/\D/g,''); if (!v) return ''; v = (parseInt(v, 10) / 100).toFixed(2); return v.replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.'); }
