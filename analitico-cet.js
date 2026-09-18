@@ -178,11 +178,18 @@
       // Convenção Conkey: o reajuste incide JÁ na parcela do mês do aniversário
       // (12ª, 24ª...), não a partir da seguinte.
       let pPre = parcBase;
+      let fatorAteContempla = 1;
       for (let m = 1; m <= exp; m++) {
-        if (reajOn && m % period === 0) pPre *= (1 + reaj);
+        if (reajOn && m % period === 0) { pPre *= (1 + reaj); fatorAteContempla *= (1 + reaj); }
         parcelas.push(pPre);
       }
-      let pPos = parcPos;
+      // A parcela pós-contemplação parte do valor JÁ CORRIGIDO pelos aniversários
+      // ocorridos até a contemplação (caso Arnaldo, 18/09/2026): se o grupo
+      // reajustou no mês 12 e a contemplação é no mês 12, a parcela do mês 13
+      // nasce reajustada, acompanhando a carta (que também subiu no aniversário).
+      // Antes ela partia do valor de hoje e só corrigia no aniversário seguinte,
+      // ficando defasada da carta e do saldo.
+      let pPos = parcPos * fatorAteContempla;
       for (let m = exp + 1; m <= exp + prazoRestPos; m++) {
         if (reajOn && m % period === 0) pPos *= (1 + reaj);
         parcelas.push(pPos);

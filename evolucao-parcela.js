@@ -160,17 +160,24 @@
     // Fluxo mês a mês: reajuste incide JÁ no mês do aniversário (mesma convenção
     // Conkey usada em todos os simuladores da casa).
     const arr = [];
-    let pIni = preIni, pDem = preDem, pPos = dados.parcelaPos || 0;
+    let pIni = preIni, pDem = preDem;
+    let fatorAteContempla = 1;
     const mesesPre = contempla > 0 ? contempla : prazo;
     for (let m = 1; m <= mesesPre; m++) {
-      if (reaj > 0 && m % 12 === 0) { pIni *= (1 + reaj); pDem *= (1 + reaj); }
+      if (reaj > 0 && m % 12 === 0) { pIni *= (1 + reaj); pDem *= (1 + reaj); fatorAteContempla *= (1 + reaj); }
       arr.push(m <= qtdIni ? pIni : pDem);
     }
+    // A parcela pós-contemplação parte do valor JÁ CORRIGIDO pelos aniversários
+    // ocorridos até a contemplação (caso Arnaldo, 18/09/2026): se o grupo
+    // reajustou no mês 12 e a contemplação é no 12, a parcela do mês 13 nasce
+    // reajustada, acompanhando a carta e o saldo. Antes ela partia do valor de
+    // hoje e só corrigia no aniversário seguinte, ficando defasada da carta.
+    let pPos = (dados.parcelaPos || 0) * fatorAteContempla;
     if (contempla > 0) {
       const rest = Math.max(0, Math.round(dados.prazoRest != null ? dados.prazoRest : (prazo - contempla)));
       // posPrimeira: 1ª parcela pós-contemplação diferente das demais
       // (Bradesco: a 1ª pós mantém o valor da inicial e a redução vem na 2ª)
-      let pPos1 = dados.posPrimeira > 0 ? dados.posPrimeira : null;
+      let pPos1 = dados.posPrimeira > 0 ? dados.posPrimeira * fatorAteContempla : null;
       for (let m = contempla + 1; m <= contempla + rest; m++) {
         if (reaj > 0 && m % 12 === 0) { pPos *= (1 + reaj); if (pPos1) pPos1 *= (1 + reaj); }
         arr.push(m === contempla + 1 && pPos1 ? pPos1 : pPos);
