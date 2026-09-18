@@ -213,17 +213,22 @@
       cartas.push(cartaAtual);
     }
 
-    // Agrupa por ano (Conkey style). Saldo devedor do ano = parcela vigente ×
-    // meses restantes após o 1º mês do ano — idêntico à fórmula antiga quando
-    // a parcela é fixa, e igual ao demonstrativo Conkey quando há reajuste.
+    // Agrupa por ano (Conkey style). Saldo devedor = SOMA das parcelas ainda
+    // não pagas (revisão de 18/09/2026, pedido do Arnaldo): a convenção antiga
+    // (parcela vigente × meses restantes) dava o mesmo número com parcela fixa,
+    // mas com redutor de grupo o saldo PULAVA pra cima na contemplação, quando
+    // a parcela reduzida vira integral. Somando o fluxo restante o saldo só
+    // desce, e continua batendo com a coluna de parcelas e com o total.
     const anos = [];
     const N = parcelas.length;
+    // restante[m] = soma das parcelas dos meses m+1..N (índice 0-based)
+    const restante = new Array(N + 1).fill(0);
+    for (let m = N - 1; m >= 0; m--) restante[m] = restante[m + 1] + parcelas[m];
     for (let i = 0; i < N; i += 12) {
       const slice = parcelas.slice(i, i+12);
       const totalAno = slice.reduce((a,b)=>a+b, 0);
-      const parcVigente = (parcelas[i+1] != null ? parcelas[i+1] : parcelas[i]) || 0;
       const parcMensal = slice.length ? totalAno / slice.length : parcPos;   // média do ano (padrão Conkey)
-      const saldoInicio = parcVigente * Math.max(0, N - i - 1);
+      const saldoInicio = restante[Math.min(i + 1, N)];
       anos.push({
         ano: anos.length+1,
         carta: (cartas[i] != null ? cartas[i] : d.credito),
@@ -306,13 +311,12 @@
     // pode cair em qualquer mês, e no detalhe dá pra ver a parcela exata de
     // cada mês, com o mês da contemplação marcado). Mesmo padrão do analítico
     // da Operação Simples: saldo devedor do mês e acumulado pago até o mês.
-    // Saldo do mês na MESMA convenção Conkey da linha do ano (parcela vigente
-    // seguinte × meses restantes), senão o detalhe contradiz a linha do ano.
+    // Saldo do mês na MESMA convenção da linha do ano (soma das parcelas ainda
+    // não pagas após o mês), senão o detalhe contradiz a linha do ano.
     const saldosMes = [], acumsMes = [];
     let _acumM = 0;
     for (let m = 0; m < N; m++) {
-      const parcVigProx = (parcelas[m+1] != null ? parcelas[m+1] : parcelas[m]) || 0;
-      saldosMes.push(parcVigProx * Math.max(0, N - m - 1));
+      saldosMes.push(restante[Math.min(m + 1, N)]);
       _acumM += parcelas[m];
       acumsMes.push(_acumM);
     }
