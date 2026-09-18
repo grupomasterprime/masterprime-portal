@@ -3845,9 +3845,11 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       const dlt = c.d[c.d.length - 1] - ant;
       return Math.abs(dlt) < 1e-9 ? 0 : (dlt > 0 ? 1 : -1);
     };
-    // Painel com mini gráficos
+    // Painel com mini gráficos — DESLIGADO em 18/09/2026 (pedido do Allan:
+    // "deixa só a faixa rodando no index"). Pra reativar, troque a constante.
+    const MOSTRAR_PAINEL_INDICES = false;
     const painel = document.getElementById('idxPainel');
-    if (painel) {
+    if (painel && MOSTRAR_PAINEL_INDICES) {
       painel.innerHTML = cards.map(c => {
         const dir = dirDe(c);
         const seta = dir > 0 ? '<span style="color:#1D7A4C;font-size:11px;margin-left:4px">&#9650;</span>'
