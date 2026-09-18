@@ -523,10 +523,10 @@ body.embedded-mode .portal-menu-fab { display:flex; }
              Consultores e parceiros veem apenas os índices de mercado por enquanto. -->
         <div class="hm-hero" id="hm-hero" style="display:none">
           <div>
-            <div class="hm-camp">Setembro 2026 · Todas as administradoras</div>
-            <h1>Setembro Recorde</h1>
-            <div class="hm-sub" id="hm-sub-txt">O melhor setembro da nossa história foi o de 2025: <b>R$ 35,17 milhões</b> e <b>136 cotas</b>.
-            Este mês o objetivo é <b>bater esse recorde</b>.</div>
+            <div class="hm-camp">Setembro 2026 · Porto Seguro</div>
+            <h1>Campanha Porto: crescer 25%</h1>
+            <div class="hm-sub" id="hm-sub-txt">Elegibilidade da campanha: crescer <b>25%</b> nas vendas Porto de setembro.
+            A disputa entre as corretoras considera a produção de <b>14 a 30/09</b>.</div>
             <a class="hm-btn-tabelas" href="https://tanamao.figma.site/consorcio" target="_blank" rel="noopener">Tabelas &amp; Materiais Porto — Tá na Mão!</a>
           </div>
           <div class="hm-badge">
@@ -538,8 +538,8 @@ body.embedded-mode .portal-menu-fab { display:flex; }
         <!-- Placar e gráfico ocultos por enquanto (decisão Allan 07/08/2026) — pra reativar, remover os display:none abaixo e restaurar a frase do placar no hm-sub -->
         <div class="hm-tiles" id="hm-tiles" style="display:none"></div>
         <div class="hm-card" id="hm-card" style="display:none">
-          <h2>Setembro Recorde: acumulado do mês, dia a dia</h2>
-          <div class="hm-csub">Linha = crédito vendido acumulado (R$) · Barras = cotas acumuladas · todas as administradoras · setembro/2026 vs setembro/2025</div>
+          <h2>Campanha Porto: acumulado do mês, dia a dia</h2>
+          <div class="hm-csub">Linha = crédito vendido acumulado (R$) · Barras = cotas acumuladas · só Porto Seguro · setembro/2026 vs setembro/2025</div>
           <div class="hm-legend">
             <span class="it"><span class="hm-sw" style="background:#2a78d6"></span> Crédito 2026</span>
             <span class="it"><span class="hm-sw" style="background:#eda100"></span> Crédito 2025</span>
@@ -3093,6 +3093,14 @@ const _crmNotifInterval = setInterval(() => {
 const HM_RECORDE = 35170572.70;
 let HM_META = HM_RECORDE;
 const HM_TOTAL_2025_FIXO = 35170572.70;
+// ── Campanha Porto (18/09/2026, pedido do Allan) ─────────────────────────
+// Elegibilidade: crescer 25% nas vendas PORTO de setembro inteiro (vs set/2025).
+// A disputa entre corretoras considera a produção de 14 a 30/09.
+// Pra voltar ao placar geral (todas as adms, objetivo recorde): HM_SO_PORTO = false.
+const HM_SO_PORTO = true;
+const HM_CRESC_META = 0.25;      // objetivo = setembro/2025 Porto × 1,25
+const HM_JANELA_INI = 14;        // início da janela da disputa (14/09)
+const hmEhPorto = r => String(r.adm || '').toUpperCase().includes('PORTO');
 const HM_ANO_BASE = 2025, HM_ANO_ATUAL = 2026, HM_MES = 9, HM_DIAS = 30;
 let _hmLastFetch = 0;
 
@@ -3129,7 +3137,8 @@ function hmMesNum(s){
 function hmAgrega(rows, ano, ateDia){
   const cred = new Array(HM_DIAS).fill(0), cot = new Array(HM_DIAS).fill(0);
   rows.forEach(r => {
-    // Setembro Recorde conta todas as administradoras (o Acelera Agosto filtrava Porto).
+    // Campanha Porto: só vendas Porto. (Com HM_SO_PORTO = false volta a contar todas.)
+    if (HM_SO_PORTO && !hmEhPorto(r)) return;
     const dt = hmDia(r);
     // Mês e ano seguem as COLUNAS da planilha (mesma regra do Dashboard);
     // a data da venda só define o DIA no gráfico. Sem data ou com data de
@@ -3189,14 +3198,6 @@ async function initHome(force){
   if (tiles) tiles.style.display = HM_PLACAR_OCULTO ? 'none' : '';
   if (vazio) vazio.style.display = 'none';
 
-  // Objetivo do mês: fixo em HM_META (recorde de setembro). O crescimento do ano
-  // deixou de entrar na conta a pedido do Allan (01/09) até os sócios definirem.
-  const objV = document.getElementById('hm-obj-v'), objK = document.getElementById('hm-obj-k');
-  if (objV) objV.textContent = 'R$ ' + Math.round(HM_META).toLocaleString('pt-BR');
-  if (objK) objK.textContent = 'melhor setembro (2025)';
-  const legObj = document.getElementById('hm-leg-obj');
-  if (legObj) legObj.textContent = 'Objetivo ' + hmFmtMi(HM_META);
-
   const agora = new Date();
   let hoje;
   if (agora.getFullYear() === HM_ANO_ATUAL && agora.getMonth()+1 === HM_MES) hoje = agora.getDate();
@@ -3205,7 +3206,23 @@ async function initHome(force){
 
   const a25 = hmAgrega(payload.dados, HM_ANO_BASE);
   const a26 = hmAgrega(payload.dados, HM_ANO_ATUAL, hoje);
-  const tot25 = a25.cred[HM_DIAS-1] || HM_TOTAL_2025_FIXO;
+  const tot25 = a25.cred[HM_DIAS-1] || (HM_SO_PORTO ? 0 : HM_TOTAL_2025_FIXO);
+  const q25tot = a25.cot[HM_DIAS-1] || 0;
+
+  // Objetivo do mês: campanha Porto = setembro/2025 da Porto + 25%.
+  // (Sem base de 2025 no cache, cai no recorde geral só pra não zerar a tela.)
+  HM_META = (HM_SO_PORTO && tot25 > 0) ? tot25 * (1 + HM_CRESC_META) : HM_RECORDE;
+  const objV = document.getElementById('hm-obj-v'), objK = document.getElementById('hm-obj-k');
+  if (objV) objV.textContent = 'R$ ' + Math.round(HM_META).toLocaleString('pt-BR');
+  if (objK) objK.textContent = HM_SO_PORTO ? 'setembro/2025 Porto + 25%' : 'melhor setembro (2025)';
+  const legObj = document.getElementById('hm-leg-obj');
+  if (legObj) legObj.textContent = 'Objetivo ' + hmFmtMi(HM_META);
+  if (HM_SO_PORTO && tot25 > 0) {
+    const sub = document.getElementById('hm-sub-txt');
+    if (sub) sub.innerHTML = 'Setembro/2025 da Porto fechou em <b>' + hmFmtMi(tot25) + '</b> e <b>' + q25tot +
+      ' cotas</b>. Pra disputar a campanha, o objetivo é crescer <b>25%</b>: fechar o mês em <b>' + hmFmtMi(HM_META) +
+      '</b>. A disputa entre as corretoras considera a produção de <b>14 a 30/09</b>.';
+  }
   const v26 = a26.cred[hoje-1] || 0, q26 = a26.cot[hoje-1] || 0;
   const v25hj = a25.cred[hoje-1] || 0;
   const pctMeta = v26/HM_META*100;
@@ -3222,10 +3239,15 @@ async function initHome(force){
   const pctProj = projecao / HM_META * 100;
   const clsProj = projecao >= HM_META ? 'up' : 'down';
 
+  // Janela da disputa entre corretoras: produção de 14 a 30/09
+  const vJan = hoje >= HM_JANELA_INI ? v26 - (a26.cred[HM_JANELA_INI-2] || 0) : 0;
+  const qJan = hoje >= HM_JANELA_INI ? q26 - (a26.cot[HM_JANELA_INI-2] || 0) : 0;
+
   document.getElementById('hm-tiles').innerHTML = `
-    <div class="hm-tile"><div class="k">Vendido até dia ${hoje}</div><div class="v">${hmFmtMi(v26)}</div><div class="d">${q26} cotas · todas as adms</div></div>
+    <div class="hm-tile"><div class="k">Vendido até dia ${hoje}</div><div class="v">${hmFmtMi(v26)}</div><div class="d">${q26} cotas · ${HM_SO_PORTO ? 'só Porto' : 'todas as adms'}</div></div>
     <div class="hm-tile"><div class="k">% do objetivo</div><div class="v">${pctMeta.toLocaleString('pt-BR',{maximumFractionDigits:1})}%</div><div class="d">objetivo ${hmFmtMi(HM_META)}</div></div>
-    <div class="hm-tile"><div class="k">vs mesmo dia de 2025</div><div class="v ${cls}">${sinal}${vsAno.toLocaleString('pt-BR',{maximumFractionDigits:0})}%</div><div class="d">${hmFmtMi(v25hj)} em 2025</div></div>
+    <div class="hm-tile"><div class="k">vs mesmo dia de 2025</div><div class="v ${cls}">${sinal}${vsAno.toLocaleString('pt-BR',{maximumFractionDigits:0})}%</div><div class="d">${hmFmtMi(v25hj)} em 2025 · precisa de +25%</div></div>
+    <div class="hm-tile"><div class="k">Disputa 14 a 30/09</div><div class="v">${hmFmtMi(vJan)}</div><div class="d">${qJan} cotas na janela da campanha</div></div>
     <div class="hm-tile"><div class="k">Projeção de fechamento</div><div class="v ${clsProj}">${hmFmtMi(projecao)}</div><div class="d">no ritmo atual, pela curva de 2025 · ${pctProj.toLocaleString('pt-BR',{maximumFractionDigits:0})}% do objetivo</div></div>
     <div class="hm-tile"><div class="k">Faltam</div><div class="v">${hmFmtMi(Math.max(0,HM_META-v26))}</div><div class="d">${HM_DIAS-hoje} dias restantes</div></div>`;
 
