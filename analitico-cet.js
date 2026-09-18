@@ -124,7 +124,7 @@
           <table class="ace-tab">
             <thead>
               <tr>
-                <th>Ano</th><th>Carta de crédito</th><th>Saldo devedor</th><th>Parcela</th><th>Total pago</th>
+                <th>Ano</th><th>Carta de crédito</th><th>Saldo devedor</th><th>Parcela</th><th>Total pago (acumulado)</th>
               </tr>
             </thead>
             <tbody id="aceBody"></tbody>
@@ -224,17 +224,21 @@
     // restante[m] = soma das parcelas dos meses m+1..N (índice 0-based)
     const restante = new Array(N + 1).fill(0);
     for (let m = N - 1; m >= 0; m--) restante[m] = restante[m + 1] + parcelas[m];
+    // Total pago ACUMULADO até o fim de cada ano (pedido do Arnaldo, 18/09/2026):
+    // o cliente vê o montante já pago crescendo enquanto o saldo devedor desce.
+    let acumPago = 0;
     for (let i = 0; i < N; i += 12) {
       const slice = parcelas.slice(i, i+12);
       const totalAno = slice.reduce((a,b)=>a+b, 0);
       const parcMensal = slice.length ? totalAno / slice.length : parcPos;   // média do ano (padrão Conkey)
       const saldoInicio = restante[Math.min(i + 1, N)];
+      acumPago += totalAno;
       anos.push({
         ano: anos.length+1,
         carta: (cartas[i] != null ? cartas[i] : d.credito),
         saldo: saldoInicio,
         parcela: parcMensal,
-        total: totalAno
+        total: acumPago
       });
     }
 
