@@ -259,6 +259,8 @@
             <option value="bradesco-imovel">Bradesco Imóvel</option>
             <option value="bradesco-auto">Bradesco Auto</option>
           </select>
+          <small style="color:#6B7280;font-size:11px;margin-top:3px;display:block">Porto usa Categoria · Itaú usa Carta de crédito</small>
+          <small id="tipoLanceAviso" style="display:none;color:#92400E;background:#FEF3C7;border-radius:6px;padding:5px 8px;font-size:11px;margin-top:4px"></small>
         </div>
         <div class="field"><label>% Lance recursos próprios</label><input type="text" id="lanceP" placeholder="0,00 %" data-mask="pct2"></div>
         <div class="field"><label>% Lance embutido</label><input type="text" id="lanceE" placeholder="0,00 %" data-mask="pct2"></div>
@@ -677,13 +679,45 @@ function wireToggles(root){
   const lP = document.getElementById('lanceP'), lE = document.getElementById('lanceE'), lT = document.getElementById('lanceTotalCalc');
   if(lP && lE && lT && !lP.dataset.wt) {
     lP.dataset.wt='1';
+    // Mostra o lance também em R$, calculado pela base do tipo de lance escolhido
+    // (pedido do Arnaldo, 21/09/2026: ele abria o simulador dedicado da Porto só
+    // pra ver o valor do lance em reais). Mesmas bases do cálculo da operação:
+    // carta = % sobre o crédito; categoria = % sobre crédito × (1 + adm + fundo),
+    // que é a base da Porto; bradesco-* = categoria ÷ fator no lance próprio.
     const recalc = () => {
       const p = parseFloat(String(lP.value).replace('%','').replace(',','.').replace(/[^\d.\-]/g,'').trim()||'0');
       const e = parseFloat(String(lE.value).replace('%','').replace(',','.').replace(/[^\d.\-]/g,'').trim()||'0');
-      lT.value = (p+e).toFixed(2).replace('.',',') + ' %';
+      let txt = (p+e).toFixed(2).replace('.',',') + ' %';
+      const cred = unmaskMoney((document.getElementById('credito')||{}).value || '');
+      if (cred > 0 && (p+e) > 0) {
+        const adm = unmaskPct((document.getElementById('taxaAdm')||{}).value || '')/100;
+        const fdo = unmaskPct((document.getElementById('fundo')||{}).value || '')/100;
+        const tl = (document.getElementById('tipoLance')||{}).value || 'carta';
+        const isBrad = tl === 'bradesco-imovel' || tl === 'bradesco-auto';
+        const fator = tl === 'bradesco-imovel' ? 1.0425 : tl === 'bradesco-auto' ? 1.0525 : 1;
+        const base = tl === 'categoria' ? cred*(1+adm+fdo) : cred;
+        const rs = (isBrad ? cred*(1+adm+fdo)*(p/100)/fator : base*(p/100)) + base*(e/100);
+        txt += '  ·  ' + fmtMoney(rs);
+      }
+      lT.value = txt;
+      // Prova de burros (21/09/2026): avisos quando a combinação não faz sentido
+      const av = document.getElementById('tipoLanceAviso');
+      if (av) {
+        const tl2 = (document.getElementById('tipoLance')||{}).value || 'carta';
+        const isBrad2 = tl2 === 'bradesco-imovel' || tl2 === 'bradesco-auto';
+        let msg = '';
+        if (isBrad2 && e > 0) msg = 'A base Bradesco não trabalha com lance embutido. Confira se é isso mesmo.';
+        else if (e > 30) msg = 'Lance embutido acima de 30% do crédito: confira o limite do grupo.';
+        av.textContent = msg;
+        av.style.display = msg ? 'block' : 'none';
+      }
     };
     lP.addEventListener('input', recalc); lP.addEventListener('blur', recalc);
     lE.addEventListener('input', recalc); lE.addEventListener('blur', recalc);
+    ['credito','taxaAdm','fundo','tipoLance'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && !el.dataset.wtl) { el.dataset.wtl='1'; el.addEventListener('input', recalc); el.addEventListener('change', recalc); el.addEventListener('blur', recalc); }
+    });
     recalc();
   }
 }
