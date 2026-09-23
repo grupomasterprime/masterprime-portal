@@ -388,6 +388,7 @@ const DOCS = {
     { key:'comprovante_residencia', label:'Comprovante de residência', sub:'Conta de luz, água ou similar (últimos 90 dias)', obrigatorio:true, iconKey:'home' },
     { key:'comprovante_renda', label:'Comprovante de renda', sub:'Holerite, extrato bancário ou declaração de IR', obrigatorio:true, iconKey:'docs' },
     { key:'documento_foto_vendedor', label:'Documento com foto do vendedor', sub:'RG ou CNH (frente e verso)', obrigatorio:true, iconKey:'id' },
+    { key:'comprovante_endereco_vendedor', label:'Comprovante de endereço do vendedor', sub:'Conta de luz, água ou similar (últimos 90 dias)', obrigatorio:true, iconKey:'home' },
     { key:'Doc.CRLV', label:'CRLV do bem', sub:'Documento do veículo', obrigatorio:false, iconKey:'car' },
     { key:'outros', label:'Outros documentos', sub:'Declarações, comprovantes adicionais (opcional)', obrigatorio:false, iconKey:'docs' },
   ],
@@ -1099,7 +1100,7 @@ function renderWizDados(){
             <div class="campo"><label>Nome do vendedor</label><input type="text" id="f-vend-nome"></div>
             <div class="campo"><label>CPF / CNPJ</label><input type="text" id="f-vend-cpf" inputmode="numeric" placeholder="000.000.000-00" maxlength="18" oninput="mascaraCpfCnpj(this)"></div>
           </div>
-          <div class="campo"><label>Endereço</label><input type="text" id="f-vend-endereco"></div>
+          <div class="campo"><label>Endereço <span class="req">*</span></label><input type="text" id="f-vend-endereco" placeholder="Rua, número, bairro, cidade - UF, CEP"></div>
           <div class="grid-2">
             <div class="campo"><label>Banco</label><input type="text" id="f-vend-banco"></div>
             <div class="campo"><label>Agência</label><input type="text" id="f-vend-agencia" placeholder="Ex: 1234"></div>
@@ -1117,7 +1118,7 @@ function renderWizDados(){
       </div>
       <div class="wiz-painel" data-sub="4" style="display:none">
         <div class="card">
-          <div class="card-head"><div><div class="card-title">${ico('upload')} Documentos</div><div class="card-sub">PDF, JPG ou PNG — até 16MB cada. Os quatro primeiros são obrigatórios para o Bradesco.</div></div></div>
+          <div class="card-head"><div><div class="card-title">${ico('upload')} Documentos</div><div class="card-sub">PDF, JPG ou PNG — até 16MB cada. Os cinco primeiros são obrigatórios para o Bradesco.</div></div></div>
           <div class="card-body"><div class="doc-slots" id="doc-slots"></div></div>
         </div>
         ${blocoLgpdEnvio()}
@@ -1605,6 +1606,8 @@ async function enviarCadastro(){
     if (!arquivosPendentes['comprovante_residencia']) return alerta('alerta-cadastro','Anexe o comprovante de residência.','erro');
     if (!arquivosPendentes['comprovante_renda']) return alerta('alerta-cadastro','Anexe o comprovante de renda.','erro');
     if (!arquivosPendentes['documento_foto_vendedor']) return alerta('alerta-cadastro','Anexe o documento com foto do vendedor.','erro');
+    if (!arquivosPendentes['comprovante_endereco_vendedor']) return alerta('alerta-cadastro','Anexe o comprovante de endereço do vendedor.','erro');
+    if (!val('f-vend-endereco')) return alerta('alerta-cadastro','Endereço do vendedor é obrigatório.','erro');
     Object.assign(dadosExtras, {
       estado_civil: estadoCivil, conjuge: { nome: conjugeNome, cpf: conjugeCpf },
       consorciado: {

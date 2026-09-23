@@ -407,6 +407,7 @@ const BANCOS = [
           { key: 'comprovante_residencia', label: 'Comprovante de residência', sub: 'Conta de luz, água ou similar (últimos 90 dias)', obrigatorio: true, iconKey: 'home' },
           { key: 'comprovante_renda', label: 'Comprovante de renda', sub: 'Holerite, extrato bancário ou declaração de IR', obrigatorio: true, iconKey: 'docs' },
           { key: 'documento_foto_vendedor',  label: 'Documento com foto do vendedor', sub: 'RG ou CNH (frente e verso)', obrigatorio: true, iconKey: 'id' },
+          { key: 'comprovante_endereco_vendedor', label: 'Comprovante de endereço do vendedor', sub: 'Conta de luz, água ou similar (últimos 90 dias)', obrigatorio: true, iconKey: 'home' },
           { key: 'Doc.CRLV', label: 'CRLV do bem', sub: 'Documento do Veículo', obrigatorio: false, iconKey: 'car' },
           { key: 'outros',          label: 'Outros documentos', sub: 'Declarações, comprovantes adicionais (opcional)', obrigatorio: false, iconKey: 'docs' }
         ]
@@ -974,7 +975,7 @@ function renderTelaCadastro(banco, operacao){
               <div class="campo"><label>Nome do Vendedor</label><input type="text" id="f-vend-nome"></div>
               <div class="campo"><label>CPF/CNPJ</label><input type="text" id="f-vend-cpf" placeholder="000.000.000-00" maxlength="18" oninput="mascaraCpfCnpjGenerico(this)"></div>
             </div>
-            <div class="campo"><label>Endereço</label><input type="text" id="f-vend-endereco"></div>
+            <div class="campo"><label>Endereço <span class="req">*</span></label><input type="text" id="f-vend-endereco" placeholder="Rua, número, bairro, cidade - UF, CEP"></div>
             <div class="grid-3">
               <div class="campo"><label>Banco</label><input type="text" id="f-vend-banco"></div>
               <div class="campo"><label>Agência</label><input type="text" id="f-vend-agencia" placeholder="Ex: 1234"></div>
@@ -1295,6 +1296,8 @@ async function enviarCadastro(){
     if (!arquivosPendentes['comprovante_renda']) return alerta('alerta-cadastro','⚠️ Anexe o Comprovante de renda.','erro');
     if (!arquivosPendentes['documento_foto']) return alerta('alerta-cadastro','⚠️ Anexe o Documento com foto do consorciado.','erro');
     if (!arquivosPendentes['documento_foto_vendedor']) return alerta('alerta-cadastro','⚠️ Anexe o Documento com foto do vendedor.','erro');
+    if (!arquivosPendentes['comprovante_endereco_vendedor']) return alerta('alerta-cadastro','Anexe o Comprovante de endereço do vendedor.','erro');
+    if (!document.getElementById('f-vend-endereco')?.value?.trim()) return alerta('alerta-cadastro','Endereço do vendedor é obrigatório.','erro');
 
     dadosExtras = {
       banco: bancoSelecionado.id, tipo_operacao: operacaoSelecionada.id, tipo_pessoa: tipoPessoa,
