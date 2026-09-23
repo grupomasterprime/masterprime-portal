@@ -3586,21 +3586,23 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
     const th2 = 'padding:5px 7px;font-size:10px;font-weight:800;color:#1D4ED8;background:#EDF3FF;white-space:nowrap;text-align:center';
     const td2 = 'padding:5px 7px;font-size:12px;text-align:center;border-top:1px solid #EEF2F7;white-space:nowrap';
     let html = '<div style="overflow-x:auto;margin-top:10px"><table style="border-collapse:collapse;width:100%">' +
-      '<tr><th style="' + th2 + ';text-align:left">Ordem</th><th style="' + th2 + '">Centena</th>' +
+      '<tr><th style="' + th2 + ';text-align:left">Ordem</th>' +
+      '<th style="' + th2 + ';color:#6D28D9">Milhar</th><th style="' + th2 + '">Centena</th>' +
       '<th style="' + th2 + ';background:#F5F3FF;color:#6D28D9">2.500</th>' +
       GRUPOS_PORTO.map(t => '<th style="' + th2 + '">' + t + '</th>').join('') + '</tr>';
     centenas.forEach((x, i) => {
       const dest = i === 0 ? 'background:#F0FDF4;font-weight:700' : '';
-      html += '<tr style="' + dest + '"><td style="' + td2 + ';text-align:left;color:#64748B;font-size:10.5px">' + (i+1) + 'ª' + (i === 0 ? ' · preferência' : '') + '</td>' +
+      html += '<tr style="' + dest + '"><td style="' + td2 + ';text-align:left;color:#64748B;font-size:10.5px">' + (i+1) + 'ª</td>' +
+        '<td style="' + td2 + ';font-family:monospace;font-weight:800;color:#7C3AED">' + (x ? x.m : '—') + '</td>' +
         '<td style="' + td2 + ';font-family:monospace;font-weight:800;color:#C2410C">' + (x ? String(x.c).padStart(3,'0') : '—') + '</td>' +
-        '<td style="' + td2 + ';line-height:1.15">' + (x ? cotaEq2500(parseInt(x.m, 10)) + '<div style="font-size:9px;color:#7C3AED;font-family:monospace">' + x.m + '</div>' : '<span style="color:#CBD5E1">—</span>') + '</td>' +
+        '<td style="' + td2 + '">' + (x ? cotaEq2500(parseInt(x.m, 10)) : '<span style="color:#CBD5E1">—</span>') + '</td>' +
         GRUPOS_PORTO.map(t => {
           const ct = x ? cotaEqPorto(x.c, t) : null;
           return '<td style="' + td2 + (ct == null ? ';color:#CBD5E1">—' : '">' + ct) + '</td>';
         }).join('') + '</tr>';
     });
     html += '</table></div>' +
-      '<div style="font-size:10.5px;color:#8a8984;margin-top:6px">Cabeçalho = participantes do grupo. A cota da coluna é a centena equivalente (a centena menos o tamanho do grupo, quantas vezes couber). Traço = centena fora do teto do grupo, não vale. Se nenhuma das 10 contemplar, vale a centena imediatamente posterior (depois a anterior) à 1ª centena, regra 35.5. <b style="color:#6D28D9">Coluna 2.500</b> (Sorteio por Equivalência, grupos novos desde 01/08/2026, em validação): usa a milhar, os 4 dígitos da mesma janela do prêmio (mostrada em roxo abaixo da cota), e cada cota concorre com 4 números da sorte (a cota, +2.500, +5.000 e +7.500).</div>';
+      '<div style="font-size:10.5px;color:#8a8984;margin-top:6px">Cabeçalho = participantes do grupo. A cota da coluna é a centena equivalente (a centena menos o tamanho do grupo, quantas vezes couber). Traço = centena fora do teto do grupo, não vale. Se nenhuma das 10 contemplar, vale a centena imediatamente posterior (depois a anterior) à 1ª centena, regra 35.5. <b style="color:#6D28D9">Coluna 2.500</b> (Sorteio por Equivalência, grupos novos desde 01/08/2026, em validação): usa a milhar em roxo, os 4 dígitos da mesma janela do prêmio, e cada cota concorre com 4 números da sorte (a cota, +2.500, +5.000 e +7.500).</div>';
     alvo.innerHTML = html;
   };
   // Troca a exibição dos prêmios (texto) por campos digitáveis, mantendo os valores
