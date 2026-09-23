@@ -3574,52 +3574,33 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       premios.push(dig.length === 5 ? dig : null);
     }
     if (premios.every(p => !p)) { alvo.innerHTML = '<div style="font-size:12px;color:#64748B;padding:8px 0">Digite os 5 prêmios da extração (5 algarismos cada) pra calcular as centenas.</div>'; return; }
-    // 10 centenas na ordem de preferência (35.3): últimos 3 do prêmio, depois os 3 do meio
+    // 10 centenas na ordem de preferência (35.3): últimos 3 do prêmio, depois os 3 do meio.
+    // A milhar (m) é a mesma janela com um dígito a mais, usada nos grupos de 2.500
+    // (Sorteio por Equivalência): 83520 -> centena 520 / milhar 3520, depois 352 / 8352.
     const centenas = [];
     premios.forEach((p, pi) => {
       if (!p) { centenas.push(null, null); return; }
-      centenas.push({ c: parseInt(p.slice(2), 10), de: (pi+1) + 'º prêmio · 3 últimos' });
-      centenas.push({ c: parseInt(p.slice(1, 4), 10), de: (pi+1) + 'º prêmio · 3 do meio' });
+      centenas.push({ c: parseInt(p.slice(2), 10), m: p.slice(1), de: (pi+1) + 'º prêmio · 3 últimos' });
+      centenas.push({ c: parseInt(p.slice(1, 4), 10), m: p.slice(0, 4), de: (pi+1) + 'º prêmio · 3 do meio' });
     });
     const th2 = 'padding:5px 7px;font-size:10px;font-weight:800;color:#1D4ED8;background:#EDF3FF;white-space:nowrap;text-align:center';
     const td2 = 'padding:5px 7px;font-size:12px;text-align:center;border-top:1px solid #EEF2F7;white-space:nowrap';
     let html = '<div style="overflow-x:auto;margin-top:10px"><table style="border-collapse:collapse;width:100%">' +
       '<tr><th style="' + th2 + ';text-align:left">Ordem</th><th style="' + th2 + '">Centena</th>' +
+      '<th style="' + th2 + ';background:#F5F3FF;color:#6D28D9">2.500</th>' +
       GRUPOS_PORTO.map(t => '<th style="' + th2 + '">' + t + '</th>').join('') + '</tr>';
     centenas.forEach((x, i) => {
       const dest = i === 0 ? 'background:#F0FDF4;font-weight:700' : '';
       html += '<tr style="' + dest + '"><td style="' + td2 + ';text-align:left;color:#64748B;font-size:10.5px">' + (i+1) + 'ª' + (i === 0 ? ' · preferência' : '') + '</td>' +
         '<td style="' + td2 + ';font-family:monospace;font-weight:800;color:#C2410C">' + (x ? String(x.c).padStart(3,'0') : '—') + '</td>' +
+        '<td style="' + td2 + ';line-height:1.15">' + (x ? cotaEq2500(parseInt(x.m, 10)) + '<div style="font-size:9px;color:#7C3AED;font-family:monospace">' + x.m + '</div>' : '<span style="color:#CBD5E1">—</span>') + '</td>' +
         GRUPOS_PORTO.map(t => {
           const ct = x ? cotaEqPorto(x.c, t) : null;
           return '<td style="' + td2 + (ct == null ? ';color:#CBD5E1">—' : '">' + ct) + '</td>';
         }).join('') + '</tr>';
     });
     html += '</table></div>' +
-      '<div style="font-size:10.5px;color:#8a8984;margin-top:6px">Cabeçalho = participantes do grupo. A cota da coluna é a centena equivalente (a centena menos o tamanho do grupo, quantas vezes couber). Traço = centena fora do teto do grupo, não vale. Se nenhuma das 10 contemplar, vale a centena imediatamente posterior (depois a anterior) à 1ª centena, regra 35.5.</div>';
-    // bloco do grupo 2.500 (milhar): mesma lógica da centena, com 4 dígitos.
-    // 10 ordens de preferência intercaladas por prêmio: 4 últimos, depois os
-    // 4 primeiros (a milhar deslocada uma casa). Ex: 83520 -> 3520 e 8352.
-    const milhares = [];
-    premios.forEach((p, pi) => {
-      if (!p) { milhares.push(null, null); return; }
-      milhares.push({ m: p.slice(1), de: (pi+1) + 'º prêmio · 4 últimos' });
-      milhares.push({ m: p.slice(0, 4), de: (pi+1) + 'º prêmio · 4 primeiros' });
-    });
-    let l2500 = '';
-    milhares.forEach((x, i) => {
-      const dest = i === 0 ? 'background:#F0FDF4;font-weight:700' : '';
-      l2500 += '<tr style="' + dest + '"><td style="' + td2 + ';text-align:left;color:#64748B;font-size:10.5px">' + (i+1) + 'ª' + (i === 0 ? ' · preferência' : '') + '</td>' +
-        '<td style="' + td2 + ';text-align:left;color:#64748B;font-size:10.5px">' + (x ? x.de : '—') + '</td>' +
-        '<td style="' + td2 + ';font-family:monospace;font-weight:800;color:#7C3AED">' + (x ? x.m : '—') + '</td>' +
-        '<td style="' + td2 + ';font-weight:700">' + (x ? cotaEq2500(parseInt(x.m, 10)) : '—') + '</td></tr>';
-    });
-    if (l2500) {
-      html += '<div style="margin-top:12px;border:1px solid #EDE9FE;border-radius:10px;overflow:hidden">' +
-        '<div style="background:#F5F3FF;color:#6D28D9;font-size:10.5px;font-weight:800;letter-spacing:.5px;padding:6px 10px;text-transform:uppercase">Grupos de 2.500 · Sorteio por Equivalência (em validação)</div>' +
-        '<table style="border-collapse:collapse;width:100%"><tr><th style="' + th2 + ';background:#F5F3FF;color:#6D28D9;text-align:left">Ordem</th><th style="' + th2 + ';background:#F5F3FF;color:#6D28D9;text-align:left">Origem</th><th style="' + th2 + ';background:#F5F3FF;color:#6D28D9">Milhar</th><th style="' + th2 + ';background:#F5F3FF;color:#6D28D9">Cota</th></tr>' + l2500 + '</table>' +
-        '<div style="font-size:10.5px;color:#8a8984;padding:6px 10px 8px">Mesma lógica da regra da centena, com 4 dígitos: pra cada prêmio valem os 4 últimos e depois os 4 primeiros (a milhar deslocada uma casa), na ordem dos prêmios. Cada cota concorre com 4 números da sorte (a cota, +2.500, +5.000 e +7.500), então a milhar volta pra cota subtraindo 2.500 quantas vezes couber. Regra dos grupos formados a partir de 01/08/2026, observada na prática e em validação: confirmar no resultado oficial.</div></div>';
-    }
+      '<div style="font-size:10.5px;color:#8a8984;margin-top:6px">Cabeçalho = participantes do grupo. A cota da coluna é a centena equivalente (a centena menos o tamanho do grupo, quantas vezes couber). Traço = centena fora do teto do grupo, não vale. Se nenhuma das 10 contemplar, vale a centena imediatamente posterior (depois a anterior) à 1ª centena, regra 35.5. <b style="color:#6D28D9">Coluna 2.500</b> (Sorteio por Equivalência, grupos novos desde 01/08/2026, em validação): usa a milhar, os 4 dígitos da mesma janela do prêmio (mostrada em roxo abaixo da cota), e cada cota concorre com 4 números da sorte (a cota, +2.500, +5.000 e +7.500).</div>';
     alvo.innerHTML = html;
   };
   // Troca a exibição dos prêmios (texto) por campos digitáveis, mantendo os valores
@@ -3661,10 +3642,12 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       }
       const ultData = _fedData(FED_ULT);
       const alvoBRc = String(dd).padStart(2,'0') + '/' + String(mo).padStart(2,'0') + '/' + y;
-      // Extração clicada ainda não aconteceu: nada de mostrar números velhos,
-      // só o aviso com dia e hora do sorteio (Porto abre a calculadora manual).
-      if (alvo > ultData) {
-        const hj = new Date(); hj.setHours(0,0,0,0);
+      // Extração clicada ainda não aconteceu (hoje ou futura): nada de mostrar
+      // números velhos, só o aviso com dia e hora do sorteio (Porto abre a
+      // calculadora manual). Data passada segue o fluxo normal e mostra a
+      // extração imediatamente anterior.
+      const hj = new Date(); hj.setHours(0,0,0,0);
+      if (alvo > ultData && alvo >= hj) {
         const difDias = Math.round((alvo - hj) / 86400000);
         const quando = difDias === 0 ? 'hoje' : (difDias === 1 ? 'amanhã' : 'em ' + alvoBRc);
         const quandoSai = alvo.getDay() === 0
