@@ -3597,20 +3597,28 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
     });
     html += '</table></div>' +
       '<div style="font-size:10.5px;color:#8a8984;margin-top:6px">Cabeçalho = participantes do grupo. A cota da coluna é a centena equivalente (a centena menos o tamanho do grupo, quantas vezes couber). Traço = centena fora do teto do grupo, não vale. Se nenhuma das 10 contemplar, vale a centena imediatamente posterior (depois a anterior) à 1ª centena, regra 35.5.</div>';
-    // bloco do grupo 2.500 (milhar)
-    let l2500 = '';
+    // bloco do grupo 2.500 (milhar): mesma lógica da centena, com 4 dígitos.
+    // 10 ordens de preferência intercaladas por prêmio: 4 últimos, depois os
+    // 4 primeiros (a milhar deslocada uma casa). Ex: 83520 -> 3520 e 8352.
+    const milhares = [];
     premios.forEach((p, pi) => {
-      if (!p) return;
-      const mi = parseInt(p.slice(1), 10);
-      l2500 += '<tr><td style="' + td2 + ';text-align:left;color:#64748B;font-size:10.5px">' + (pi+1) + 'º prêmio</td>' +
-        '<td style="' + td2 + ';font-family:monospace;font-weight:800;color:#7C3AED">' + p.slice(1) + '</td>' +
-        '<td style="' + td2 + ';font-weight:700">' + cotaEq2500(mi) + '</td></tr>';
+      if (!p) { milhares.push(null, null); return; }
+      milhares.push({ m: p.slice(1), de: (pi+1) + 'º prêmio · 4 últimos' });
+      milhares.push({ m: p.slice(0, 4), de: (pi+1) + 'º prêmio · 4 primeiros' });
+    });
+    let l2500 = '';
+    milhares.forEach((x, i) => {
+      const dest = i === 0 ? 'background:#F0FDF4;font-weight:700' : '';
+      l2500 += '<tr style="' + dest + '"><td style="' + td2 + ';text-align:left;color:#64748B;font-size:10.5px">' + (i+1) + 'ª' + (i === 0 ? ' · preferência' : '') + '</td>' +
+        '<td style="' + td2 + ';text-align:left;color:#64748B;font-size:10.5px">' + (x ? x.de : '—') + '</td>' +
+        '<td style="' + td2 + ';font-family:monospace;font-weight:800;color:#7C3AED">' + (x ? x.m : '—') + '</td>' +
+        '<td style="' + td2 + ';font-weight:700">' + (x ? cotaEq2500(parseInt(x.m, 10)) : '—') + '</td></tr>';
     });
     if (l2500) {
       html += '<div style="margin-top:12px;border:1px solid #EDE9FE;border-radius:10px;overflow:hidden">' +
         '<div style="background:#F5F3FF;color:#6D28D9;font-size:10.5px;font-weight:800;letter-spacing:.5px;padding:6px 10px;text-transform:uppercase">Grupos de 2.500 · Sorteio por Equivalência (em validação)</div>' +
-        '<table style="border-collapse:collapse;width:100%"><tr><th style="' + th2 + ';background:#F5F3FF;color:#6D28D9;text-align:left">Prêmio</th><th style="' + th2 + ';background:#F5F3FF;color:#6D28D9">Milhar (4 últimos)</th><th style="' + th2 + ';background:#F5F3FF;color:#6D28D9">Cota</th></tr>' + l2500 + '</table>' +
-        '<div style="font-size:10.5px;color:#8a8984;padding:6px 10px 8px">Cada cota concorre com 4 números da sorte (a cota, +2.500, +5.000 e +7.500), então a milhar volta pra cota subtraindo 2.500 quantas vezes couber. Regra nova dos grupos formados a partir de 01/08/2026: confirmar no primeiro resultado oficial.</div></div>';
+        '<table style="border-collapse:collapse;width:100%"><tr><th style="' + th2 + ';background:#F5F3FF;color:#6D28D9;text-align:left">Ordem</th><th style="' + th2 + ';background:#F5F3FF;color:#6D28D9;text-align:left">Origem</th><th style="' + th2 + ';background:#F5F3FF;color:#6D28D9">Milhar</th><th style="' + th2 + ';background:#F5F3FF;color:#6D28D9">Cota</th></tr>' + l2500 + '</table>' +
+        '<div style="font-size:10.5px;color:#8a8984;padding:6px 10px 8px">Mesma lógica da regra da centena, com 4 dígitos: pra cada prêmio valem os 4 últimos e depois os 4 primeiros (a milhar deslocada uma casa), na ordem dos prêmios. Cada cota concorre com 4 números da sorte (a cota, +2.500, +5.000 e +7.500), então a milhar volta pra cota subtraindo 2.500 quantas vezes couber. Regra dos grupos formados a partir de 01/08/2026, observada na prática e em validação: confirmar no resultado oficial.</div></div>';
     }
     alvo.innerHTML = html;
   };
@@ -3643,13 +3651,16 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
     try {
       const [y, mo, dd] = isoData.split('-').map(Number);
       const alvo = new Date(y, mo - 1, dd);
-      if (!FED_ULT) {
+      const _fedData = o => { const p = String(o.dataApuracao).split('/').map(Number); return new Date(p[2], p[1] - 1, p[0]); };
+      // Rebusca na Caixa se ainda não temos resultado OU se o guardado é anterior à
+      // data clicada (a extração pode ter acabado de ser publicada).
+      if (!FED_ULT || _fedData(FED_ULT) < alvo) {
         const r = await fetch('https://servicebus2.caixa.gov.br/portaldeloterias/api/federal', {cache:'no-store'});
         if (!r.ok) throw new Error('API da Caixa indisponível');
         FED_ULT = await r.json();
       }
-      const [ud, um, uy] = String(FED_ULT.dataApuracao).split('/').map(Number);
-      const ultData = new Date(uy, um - 1, ud);
+      const ultData = _fedData(FED_ULT);
+      const aindaNaoSaiu = alvo > ultData;
       // conta extrações (dom=0, qua=3) depois da data alvo até a data do último
       let delta = 0; const c = new Date(alvo);
       while (c < ultData) { c.setDate(c.getDate() + 1); if (c.getDay() === 0 || c.getDay() === 3) delta++; }
@@ -3664,8 +3675,10 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
         if (!dados) dados = j; // guarda o mais próximo como fallback
       }
       if (!dados) throw new Error('resultado não encontrado');
-      const avisoData = String(dados.dataApuracao) !== alvoBR
-        ? '<div style="font-size:11px;color:#B45309;background:#FFF4EA;border-radius:8px;padding:7px 10px;margin-top:8px">A Caixa registrou esta extração em ' + dados.dataApuracao + ' (a data pode deslocar por feriado).</div>' : '';
+      const avisoData = aindaNaoSaiu
+        ? '<div style="font-size:11px;color:#B45309;background:#FFF4EA;border-radius:8px;padding:7px 10px;margin-top:8px"><b>A extração de ' + alvoBR + ' ainda não saiu.</b> A Caixa publica o resultado na noite do sorteio (o de sábado sai no domingo de manhã). O que está aí em cima é a última extração disponível, de ' + dados.dataApuracao + '. Clique de novo mais tarde que ele atualiza sozinho.</div>'
+        : (String(dados.dataApuracao) !== alvoBR
+        ? '<div style="font-size:11px;color:#B45309;background:#FFF4EA;border-radius:8px;padding:7px 10px;margin-top:8px">A Caixa registrou esta extração em ' + dados.dataApuracao + ' (a data pode deslocar por feriado).</div>' : '');
       const cab = '<div style="display:flex;justify-content:space-between;align-items:center">' +
         '<div><div style="font-size:11px;font-weight:800;letter-spacing:1.5px;color:#2a78d6;text-transform:uppercase">Loteria Federal' + (ehPorto ? ' · Calculadora de sorteio Porto' : '') + '</div>' +
         '<div style="font-size:16px;font-weight:800;color:#1E293B;margin-top:2px">Extração ' + dados.numero + ' · ' + dados.dataApuracao + '</div></div>' +
