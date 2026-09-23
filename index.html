@@ -3660,7 +3660,36 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
         FED_ULT = await r.json();
       }
       const ultData = _fedData(FED_ULT);
-      const aindaNaoSaiu = alvo > ultData;
+      const alvoBRc = String(dd).padStart(2,'0') + '/' + String(mo).padStart(2,'0') + '/' + y;
+      // Extração clicada ainda não aconteceu: nada de mostrar números velhos,
+      // só o aviso com dia e hora do sorteio (Porto abre a calculadora manual).
+      if (alvo > ultData) {
+        const hj = new Date(); hj.setHours(0,0,0,0);
+        const difDias = Math.round((alvo - hj) / 86400000);
+        const quando = difDias === 0 ? 'hoje' : (difDias === 1 ? 'amanhã' : 'em ' + alvoBRc);
+        const quandoSai = alvo.getDay() === 0
+          ? 'A Caixa faz esse sorteio ' + quando + ' de manhã (é a extração de sábado, que passou pro domingo)'
+          : 'A Caixa faz esse sorteio ' + quando + ' às 19h';
+        const cabA = '<div style="display:flex;justify-content:space-between;align-items:center">' +
+          '<div><div style="font-size:11px;font-weight:800;letter-spacing:1.5px;color:#2a78d6;text-transform:uppercase">Loteria Federal' + (ehPorto ? ' · Calculadora de sorteio Porto' : '') + '</div>' +
+          '<div style="font-size:16px;font-weight:800;color:#1E293B;margin-top:2px">Extração de ' + alvoBRc + '</div></div>' +
+          '<button onclick="document.getElementById(\'fed-ovl\').style.display=\'none\'" style="border:none;background:#F1F5F9;border-radius:8px;padding:6px 12px;font-weight:700;cursor:pointer;color:#334155">Fechar</button></div>';
+        const avisoA = '<div style="font-size:12px;color:#B45309;background:#FFF4EA;border-radius:8px;padding:10px 12px;margin-top:12px"><b>Essa extração ainda não aconteceu.</b> ' + quandoSai + ' e o resultado aparece aqui pouco depois, é só clicar de novo que atualiza sozinho.</div>';
+        if (ehPorto) {
+          const inputsA = [1,2,3,4,5].map(i =>
+            '<div style="text-align:center"><div style="font-size:10px;color:#64748B;font-weight:700">' + i + 'º prêmio</div>' +
+            '<input id="fed-p' + i + '" maxlength="5" inputmode="numeric" placeholder="00000" oninput="_fedCalcPorto()" ' +
+            'style="width:86px;text-align:center;font-family:monospace;font-size:16px;letter-spacing:1px;border:1px solid #D1D5DB;border-radius:8px;padding:7px 4px;margin-top:3px"></div>').join('');
+          box.innerHTML = cabA + avisoA +
+            '<div style="font-size:11px;color:#8a8984;margin-top:10px">Se já tiver os prêmios em mãos, digite abaixo que a calculadora funciona igual.</div>' +
+            '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;justify-content:center">' + inputsA + '</div>' +
+            '<div id="fed-calc"></div>';
+          _fedCalcPorto();
+        } else {
+          box.innerHTML = cabA + avisoA;
+        }
+        return;
+      }
       // conta extrações (dom=0, qua=3) depois da data alvo até a data do último
       let delta = 0; const c = new Date(alvo);
       while (c < ultData) { c.setDate(c.getDate() + 1); if (c.getDay() === 0 || c.getDay() === 3) delta++; }
@@ -3675,19 +3704,8 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
         if (!dados) dados = j; // guarda o mais próximo como fallback
       }
       if (!dados) throw new Error('resultado não encontrado');
-      let quandoSai = '';
-      if (aindaNaoSaiu) {
-        const hj = new Date(); hj.setHours(0,0,0,0);
-        const difDias = Math.round((alvo - hj) / 86400000);
-        const quando = difDias === 0 ? 'hoje' : (difDias === 1 ? 'amanhã' : 'em ' + alvoBR);
-        quandoSai = alvo.getDay() === 0
-          ? 'A Caixa faz esse sorteio ' + quando + ' de manhã (é a extração de sábado, que passou pro domingo)'
-          : 'A Caixa faz esse sorteio ' + quando + ' às 19h';
-      }
-      const avisoData = aindaNaoSaiu
-        ? '<div style="font-size:11px;color:#B45309;background:#FFF4EA;border-radius:8px;padding:7px 10px;margin-top:8px"><b>Aguarde: ' + quandoSai + '</b> e o resultado aparece aqui pouco depois, é só clicar de novo que atualiza sozinho. Enquanto isso, os números acima são da última extração, de ' + dados.dataApuracao + '.</div>'
-        : (String(dados.dataApuracao) !== alvoBR
-        ? '<div style="font-size:11px;color:#B45309;background:#FFF4EA;border-radius:8px;padding:7px 10px;margin-top:8px">A Caixa registrou esta extração em ' + dados.dataApuracao + ' (a data pode deslocar por feriado).</div>' : '');
+      const avisoData = String(dados.dataApuracao) !== alvoBR
+        ? '<div style="font-size:11px;color:#B45309;background:#FFF4EA;border-radius:8px;padding:7px 10px;margin-top:8px">A Caixa registrou esta extração em ' + dados.dataApuracao + ' (a data pode deslocar por feriado).</div>' : '';
       const cab = '<div style="display:flex;justify-content:space-between;align-items:center">' +
         '<div><div style="font-size:11px;font-weight:800;letter-spacing:1.5px;color:#2a78d6;text-transform:uppercase">Loteria Federal' + (ehPorto ? ' · Calculadora de sorteio Porto' : '') + '</div>' +
         '<div style="font-size:16px;font-weight:800;color:#1E293B;margin-top:2px">Extração ' + dados.numero + ' · ' + dados.dataApuracao + '</div></div>' +
