@@ -3675,8 +3675,17 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
         if (!dados) dados = j; // guarda o mais próximo como fallback
       }
       if (!dados) throw new Error('resultado não encontrado');
+      let quandoSai = '';
+      if (aindaNaoSaiu) {
+        const hj = new Date(); hj.setHours(0,0,0,0);
+        const difDias = Math.round((alvo - hj) / 86400000);
+        const quando = difDias === 0 ? 'hoje' : (difDias === 1 ? 'amanhã' : 'em ' + alvoBR);
+        quandoSai = alvo.getDay() === 0
+          ? 'A Caixa faz esse sorteio ' + quando + ' de manhã (é a extração de sábado, que passou pro domingo)'
+          : 'A Caixa faz esse sorteio ' + quando + ' às 19h';
+      }
       const avisoData = aindaNaoSaiu
-        ? '<div style="font-size:11px;color:#B45309;background:#FFF4EA;border-radius:8px;padding:7px 10px;margin-top:8px"><b>A extração de ' + alvoBR + ' ainda não saiu.</b> A Caixa publica o resultado na noite do sorteio (o de sábado sai no domingo de manhã). O que está aí em cima é a última extração disponível, de ' + dados.dataApuracao + '. Clique de novo mais tarde que ele atualiza sozinho.</div>'
+        ? '<div style="font-size:11px;color:#B45309;background:#FFF4EA;border-radius:8px;padding:7px 10px;margin-top:8px"><b>Aguarde: ' + quandoSai + '</b> e o resultado aparece aqui pouco depois, é só clicar de novo que atualiza sozinho. Enquanto isso, os números acima são da última extração, de ' + dados.dataApuracao + '.</div>'
         : (String(dados.dataApuracao) !== alvoBR
         ? '<div style="font-size:11px;color:#B45309;background:#FFF4EA;border-radius:8px;padding:7px 10px;margin-top:8px">A Caixa registrou esta extração em ' + dados.dataApuracao + ' (a data pode deslocar por feriado).</div>' : '');
       const cab = '<div style="display:flex;justify-content:space-between;align-items:center">' +
