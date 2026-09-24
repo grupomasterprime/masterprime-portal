@@ -3887,7 +3887,7 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
         const rMes = f.rent_mes_liq != null ? f.rent_mes_liq : f.rent_mes;
         const r12 = f.rent_12m_liq != null ? f.rent_12m_liq : f.rent_12m;
         const txt = fmt(rMes, 2) + '% ' + mesTxt + ' líq.' + (r12 != null ? ' · ' + fmt(r12, 1) + '% 12m' : '');
-        cards.push({ n: f.apelido, v: fmt(rMes, 2) + '%', s: mesTxt + ' líquido · carta contemplada', d: serie.length > 1 ? serie : [f.rent_mes, f.rent_mes], cor: '#5B4A9E', tk: [f.apelido.toUpperCase() + ' (CARTA)', txt] });
+        cards.push({ n: f.apelido, v: fmt(rMes, 2) + '%', s: mesTxt + ' líquido · carta contemplada', d: serie.length > 1 ? serie : [f.rent_mes, f.rent_mes], cor: '#5B4A9E', tk: [f.apelido.toUpperCase(), txt] });
       });
     }
     if (usdLive && parseFloat(usdLive.bid) > 0) {
