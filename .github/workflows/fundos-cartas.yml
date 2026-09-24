@@ -5,7 +5,7 @@ name: Atualizar fundos das cartas (CVM)
 # a rentabilidade dos fundos Porto e Itau e commita fundos-cartas.json se mudou.
 on:
   schedule:
-    - cron: "30 12 * * 1-5"
+    - cron: "30 12 * * 1-5"→ Runs at 12:30, Monday through Friday
   workflow_dispatch:
 
 permissions:
@@ -22,7 +22,7 @@ jobs:
           python-version: "3.12"
 
       - name: Recalcular fundos-cartas.json
-        run: python scripts/atualizar_fundos_cartas.py
+        run: python atualizar_fundos_cartas.py
 
       - name: Commitar se mudou
         run: |
@@ -34,4 +34,3 @@ jobs:
             git add fundos-cartas.json
             git commit -m "Fundos das cartas: atualizacao automatica $(date -u +%Y-%m-%d)"
             git push
-          fi
