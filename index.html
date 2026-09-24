@@ -3858,12 +3858,15 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
     sgs(189, 26).catch(() => null),   // IGP-M var. mensal
     sgs(192, 26).catch(() => null),   // INCC var. mensal
     sgs(1, 13).catch(() => null),     // Dólar PTAX venda (diária) · só pro mini gráfico
-    btcHist().catch(() => null)
+    btcHist().catch(() => null),
+    // Fundos onde ficam as cartas contempladas (Porto e Itaú): rentabilidade da
+    // cota pela CVM, atualizada mês a mês no arquivo fundos-cartas.json (Allan, 24/09)
+    fetch('fundos-cartas.json?v=' + Date.now()).then(r => r.ok ? r.json() : null).catch(() => null)
   ]).then(r => (_idxCacheBcb = r))).then(bcb => Promise.all([
     btcLast().catch(() => null),
     usdLast().catch(() => null),
     btcCoinbase().catch(() => null)
-  ]).then(vivos => [bcb, vivos])).then(([[selic, cdi, ipca, igpm, incc, usd, btcH], [btc, usdLive, btcCb]]) => {
+  ]).then(vivos => [bcb, vivos])).then(([[selic, cdi, ipca, igpm, incc, usd, btcH, fundos], [btc, usdLive, btcCb]]) => {
     const cards = [];
     if (selic && selic.length) cards.push({ n: 'Selic', v: fmt(selic[selic.length - 1], 2) + '%', s: 'meta a.a. · BCB', d: amostra(selic, 13), cor: '#2D3F5E', tk: ['SELIC', fmt(selic[selic.length - 1], 2) + '% a.a.'] });
     if (cdi && cdi.length) cards.push({ n: 'CDI', v: fmt(cdi[cdi.length - 1], 2) + '%', s: 'a.a. · BCB', d: amostra(cdi, 13), cor: '#2D3F5E', tk: ['CDI', fmt(cdi[cdi.length - 1], 2) + '% a.a.'] });
@@ -3873,6 +3876,20 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
       const ac = acum12(serie);
       cards.push({ n: nome, v: fmt(ac[ac.length - 1], 2) + '%', s: 'acum. 12 meses', d: ac, cor: '#B4552D', tk: [nome + ' 12M', fmt(ac[ac.length - 1], 2) + '%'] });
     });
+    // Fundos das cartas contempladas: rendimento do último mês fechado + 12 meses
+    if (fundos && Array.isArray(fundos.fundos)) {
+      const MES3 = ['jan','fev','mar','abr','mai','jun','jul','ago','set','out','nov','dez'];
+      fundos.fundos.forEach(f => {
+        if (f.rent_mes == null) return;
+        const mesTxt = MES3[parseInt(String(f.ultimo_mes).slice(5, 7), 10) - 1] || '';
+        const serie = Object.keys(f.mensal || {}).sort().filter(k => k <= f.ultimo_mes).slice(-13).map(k => f.mensal[k]);
+        // Mostra o LÍQUIDO (IR de 22,5% já descontado), que é o que o cliente recebe (Allan, 24/09)
+        const rMes = f.rent_mes_liq != null ? f.rent_mes_liq : f.rent_mes;
+        const r12 = f.rent_12m_liq != null ? f.rent_12m_liq : f.rent_12m;
+        const txt = fmt(rMes, 2) + '% ' + mesTxt + ' líq.' + (r12 != null ? ' · ' + fmt(r12, 1) + '% 12m' : '');
+        cards.push({ n: f.apelido, v: fmt(rMes, 2) + '%', s: mesTxt + ' líquido · carta contemplada', d: serie.length > 1 ? serie : [f.rent_mes, f.rent_mes], cor: '#5B4A9E', tk: [f.apelido.toUpperCase() + ' (CARTA)', txt] });
+      });
+    }
     if (usdLive && parseFloat(usdLive.bid) > 0) {
       // Dólar comercial ao vivo (mesmo número que o Google mostra)
       const v = parseFloat(usdLive.bid);
