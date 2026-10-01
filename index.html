@@ -3369,7 +3369,18 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
   const FERIADOS = new Set([...feriadosAno(anoAtual), ...feriadosAno(anoAtual+1)]);
   const ehUtil = d => d.getDay() !== 0 && d.getDay() !== 6 && !FERIADOS.has(iso(d));
   // Itaú: 1ª terça (dow=2) ou sexta (dow=5) a partir do diaMin; feriado pula 7 dias
+  // Exceções divulgadas pelo Itaú no card oficial "Datas de Assembleias" do 4º tri/2026
+  // (recebido em 01/10/2026). Chave: ano-mes|diaMin|dow (mes de 0 a 11), valor: [ano, mes, dia].
+  //   09/10/2026: veículos venc. 05 antecipada por causa do feriado de 12/10 (regra daria 13/10)
+  //   22/12/2026: veículos e imóveis venc. 10, 15 e 20 no mesmo dia (regra daria 29/12 e 25/12)
+  const ITAU_EXCECOES = {
+    '2026-9|10|2':  [2026, 9, 9],
+    '2026-11|24|2': [2026, 11, 22],
+    '2026-11|24|5': [2026, 11, 22]
+  };
   function assembItau(ano, mes, diaMin, dow){
+    const exc = ITAU_EXCECOES[ano + '-' + mes + '|' + diaMin + '|' + dow];
+    if (exc) return new Date(exc[0], exc[1], exc[2]);
     const d = new Date(ano, mes, diaMin);
     while (d.getDay() !== dow) d.setDate(d.getDate()+1);
     while (FERIADOS.has(iso(d))) d.setDate(d.getDate()+7);
