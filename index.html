@@ -3490,8 +3490,24 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
     // e fundo levemente tingido no grupo Imóvel, senão parece uma coisa só (Allan, 11/09/2026)
     const sepIt = 'border-left:2px solid #F2D9BD';
     const tintIm = 'background:#FFF9F1';
-    // meses exibidos: atual e próximo
-    const meses = [0, 1].map(off => {
+    // meses exibidos: dois meses. Normalmente o atual e o próximo, mas enquanto o mês
+    // anterior ainda tiver alguma data por acontecer (assembleia ou suplência), ele
+    // continua na tabela e o próximo mês espera. Quando a última suplência do mês
+    // anterior passar, a tabela vira sozinha (Allan, 01/10/2026).
+    function mesTemDataFutura(y, m){
+      const datas = [];
+      [[10, 2], [10, 5], [24, 2], [24, 5]].forEach(([dia, dow]) => {
+        const a = assembItau(y, m, dia, dow);
+        datas.push(a, suplItauCorr(a, dow === 2 ? 10 : 12));
+      });
+      const pt = assembPorto(y, m);
+      datas.push(pt.assemb, addDiasUteis(addDiasUteis(pt.assemb, 5), 5));
+      const br = assembBradesco(y, m);
+      datas.push(br.assemb, addDiasUteis(addDiasUteis(br.assemb, 4), 4));
+      return datas.some(d => d >= hoje);
+    }
+    const inicio = mesTemDataFutura(hoje.getFullYear(), hoje.getMonth()-1) ? -1 : 0;
+    const meses = [inicio, inicio+1].map(off => {
       const ref = new Date(hoje.getFullYear(), hoje.getMonth()+off, 1);
       return { y: ref.getFullYear(), m: ref.getMonth() };
     });
