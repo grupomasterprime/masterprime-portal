@@ -464,6 +464,28 @@ body.embedded-mode .portal-menu-fab { display:flex; }
           #s-home .hm-tile .d{font-size:11px;color:#8a8984;margin-top:2px}
           #s-home .hm-tile .up{color:#0a7f3f}
           #s-home .hm-tile .down{color:#b91c1c}
+          /* Onda Laranja Itaú (4º tri/2026): acompanhamento só pros sócios */
+          #s-home .ol-hero{background:linear-gradient(120deg,#2D3F5E 0%,#22314b 70%);border-left:6px solid #EC7000;border-radius:16px;color:#fff;padding:22px 24px;margin:14px 0 12px;display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end;justify-content:space-between}
+          #s-home .ol-hero .ol-k{font-size:11px;font-weight:700;letter-spacing:2.5px;color:#FFB36B;text-transform:uppercase}
+          #s-home .ol-hero h1{margin:6px 0 4px;font-size:22px;color:#fff}
+          #s-home .ol-hero .sub{font-size:12.5px;opacity:.85;max-width:560px;line-height:1.45}
+          #s-home .ol-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin:0 0 12px}
+          #s-home .ol-box{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:16px 18px}
+          #s-home .ol-box .t{font-size:10.5px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#EC7000}
+          #s-home .ol-box .v{font-size:24px;font-weight:800;color:#2D3F5E;margin-top:4px}
+          #s-home .ol-box .d{font-size:11.5px;color:#64748B;margin-top:6px;line-height:1.45}
+          #s-home .ol-bar{height:9px;background:#F1F5F9;border-radius:99px;margin:10px 0 6px;overflow:hidden}
+          #s-home .ol-bar i{display:block;height:100%;background:linear-gradient(90deg,#EC7000,#FFB36B);border-radius:99px}
+          #s-home .ol-row{display:flex;justify-content:space-between;gap:10px;font-size:11.5px;color:#52514e;margin-top:4px}
+          #s-home .ol-row b{color:#2D3F5E}
+          #s-home .ol-tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;border-radius:8px;padding:2px 8px;background:#FFF3E8;color:#B45309;margin-left:6px;vertical-align:middle}
+          #s-home .ol-tbl{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+          #s-home .ol-tbl th{font-size:10.5px;color:#64748B;text-transform:uppercase;letter-spacing:.6px;text-align:right;padding:6px 8px;border-bottom:1px solid #e5e7eb;white-space:nowrap}
+          #s-home .ol-tbl th:first-child,#s-home .ol-tbl td:first-child{text-align:left}
+          #s-home .ol-tbl td{padding:7px 8px;text-align:right;border-bottom:1px solid #f1f5f9;color:#2D3F5E;white-space:nowrap}
+          #s-home .ol-tbl tr.tot td{font-weight:800;border-top:2px solid #e5e7eb;border-bottom:0}
+          #s-home .ol-tbl .ok{color:#0a7f3f}
+          #s-home .ol-tbl .nok{color:#b91c1c}
           #s-home .hm-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:18px 20px}
           #s-home .hm-card h2{margin:0;font-size:15px}
           #s-home .hm-csub{font-size:12px;color:#52514e;margin:3px 0 8px}
@@ -519,8 +541,34 @@ body.embedded-mode .portal-menu-fab { display:flex; }
           <div id="hm-assemb-grid" style="display:grid;gap:12px;margin-top:10px"></div>
           <div class="hm-foot" id="hm-assemb-foot"></div>
         </div>
-        <!-- Hero do Setembro Recorde: visível SÓ para sócios e master (hmPlacarOculto).
-             Consultores e parceiros veem apenas os índices de mercado por enquanto. -->
+        <!-- ═══ Onda Laranja Itaú, 4º tri/2026 (02/10/2026, pedido do Allan) ═══
+             Acompanhamento das três frentes da campanha. Visível SÓ pros sócios
+             (hmPlacarOculto). Metas e regras no objeto OL, no script da home. -->
+        <div id="ol-wrap" style="display:none">
+          <div class="ol-hero">
+            <div>
+              <div class="ol-k">Outubro a dezembro de 2026 · Itaú</div>
+              <h1>Onda Laranja Itaú</h1>
+              <div class="sub">Três frentes: bater a meta total de <b>R$ 45,2 mi</b> pra ganhar o bônus de <b>0,5%</b> de carteira ativa,
+              crescer <b>20% em Auto</b> pra disputar a viagem a Maragogi e, em outubro, <b>parcela reduzida em 50%</b> em Auto e Imóvel nos grupos disponíveis.</div>
+            </div>
+            <div class="hm-badge">
+              <div class="k">VENDIDO NO 4º TRI</div>
+              <div class="v" id="ol-badge-v">R$ 0</div>
+              <div class="k" style="margin-top:2px" id="ol-badge-k">Itaú · sem as canceladas</div>
+            </div>
+          </div>
+          <div class="ol-grid" id="ol-grid"></div>
+          <div class="hm-card">
+            <h2>Mês a mês <span class="ol-tag">4º tri</span></h2>
+            <div class="hm-csub">Produção Itaú por mês contra a referência mensal de cada meta. Cotas canceladas não contam.</div>
+            <table class="ol-tbl" id="ol-tbl"></table>
+            <div class="hm-foot" id="ol-foot"></div>
+          </div>
+        </div>
+        <!-- Campanha Porto de setembro/2026: encerrada em 30/09. O bloco abaixo fica
+             desligado (HM_CAMPANHA_PORTO = false no script). Visível SÓ para sócios
+             e master quando ligado (hmPlacarOculto). -->
         <div class="hm-hero" id="hm-hero" style="display:none">
           <div>
             <div class="hm-camp">Setembro 2026 · Porto Seguro</div>
@@ -555,17 +603,8 @@ body.embedded-mode .portal-menu-fab { display:flex; }
           <div class="hm-foot" id="hm-foot">Carregando dados…</div>
         </div>
         <div class="hm-vazio" id="hm-vazio" style="display:none">O placar ainda não tem dados — um administrador precisa abrir o <b>Dashboard Vendas</b> para a primeira atualização do OneDrive.</div>
-        <div class="hm-news" id="hm-news-box" style="display:none">
-          <div class="n"><div class="tag">CAMPANHA</div><h3>Acelera Agosto: comissão em cronograma especial</h3>
-            <p>Vendas de 02 a 31/08 nas condições da campanha: Imóvel em 12 parcelas com a 12ª de 17,5%; Auto e Pesados em 7 parcelas iguais. Confira o Cronograma de Comissionamento no Material de Apoio.</p>
-            <div class="dt">06/08/2026</div></div>
-          <div class="n"><div class="tag">FERRAMENTAS</div><h3>Simuladores Porto com botão Fidelidade 20%</h3>
-            <p>Os simuladores de Imóvel, Auto e Pesados agora têm as estratégias "Fidelidade 20% · Bolso" e "Fidelidade 20% + Embutido", e a barra do lance mostra a representatividade real na categoria.</p>
-            <div class="dt">05/08/2026</div></div>
-          <div class="n"><div class="tag">COMISSÕES</div><h3>Dúvidas de comissão? Use o chamado do portal</h3>
-            <p>Os chamados do Histórico são respondidos primeiro — com registro completo pra consultar depois. A Maia também responde regras de comissionamento na hora.</p>
-            <div class="dt">04/08/2026</div></div>
-        </div>
+        <!-- Notícias de agosto/2026 removidas em 02/10/2026 (pedido do Allan). O JS ainda
+             procura #hm-news-box e tolera a ausência. -->
       </div>
 
       <!-- DASHBOARD -->
@@ -3097,8 +3136,111 @@ const HM_TOTAL_2025_FIXO = 35170572.70;
 // Elegibilidade: crescer 25% nas vendas PORTO de setembro inteiro (vs set/2025).
 // A disputa entre corretoras considera a produção de 14 a 30/09.
 // Pra voltar ao placar geral (todas as adms, objetivo recorde): HM_SO_PORTO = false.
+// Campanha Porto encerrada em 30/09/2026. Com false, a home não mostra mais o hero,
+// os tiles e o gráfico de setembro (Allan, 02/10/2026). Pra reativar numa próxima
+// campanha Porto, ajustar HM_MES/HM_ANO_* e voltar pra true.
+const HM_CAMPANHA_PORTO = false;
 const HM_SO_PORTO = true;
 const HM_CRESC_META = 0.25;      // objetivo = setembro/2025 Porto × 1,25
+
+// ── Onda Laranja Itaú, 4º tri/2026 (02/10/2026, pedido do Allan) ─────────────
+// Metas conforme a apresentação do Itaú e as confirmações da Gabi em 01/10/2026.
+// Quando a Gabi confirmar a base oficial de Auto, ajustar autoBase3T, metaAuto
+// e trocar autoProvisoria pra false.
+const OL = {
+  ano: 2026, meses: [10, 11, 12],
+  metaTotal: 45200000,   // informada pelo Itaú: base 3º tri R$ 39,3 mi + 15%
+  baseItau3T: 39300000,
+  refMensal: 15070000,
+  metaAuto: 5063115,     // nossa base 3º tri R$ 4.219.262 + 20%
+  autoBase3T: 4219262,
+  autoProvisoria: true,
+  bonusPct: 0.005,
+};
+const olEhItau = r => String(r.adm || '').toUpperCase().includes('ITAU');
+const olCancelada = r => /CANCEL|DESIST|EXCLU/i.test([r.status, r.sit, r.sitRaw].join(' '));
+function olAgrega(rows){
+  const pm = {}; OL.meses.forEach(m => pm[m] = { total: 0, auto: 0, cotas: 0 });
+  rows.forEach(r => {
+    if (!olEhItau(r) || olCancelada(r)) return;
+    const dt = hmDia(r);
+    const ano = parseInt(r.ano) || (dt ? dt.y : null);
+    const mes = hmMesNum(r.mes) || (dt ? dt.m : null);
+    if (ano !== OL.ano || !pm[mes]) return;
+    const cred = parseFloat(r.credito) || 0;
+    pm[mes].total += cred; pm[mes].cotas += 1;
+    if (String(r.tipo || '').toUpperCase() === 'AUT') pm[mes].auto += cred;
+  });
+  return pm;
+}
+function olRender(payload){
+  const wrap = document.getElementById('ol-wrap'); if (!wrap) return;
+  if (hmPlacarOculto() || !payload || !Array.isArray(payload.dados)) { wrap.style.display = 'none'; return; }
+  wrap.style.display = '';
+  const pm = olAgrega(payload.dados);
+  const soma = k => OL.meses.reduce((s, m) => s + pm[m][k], 0);
+  const total = soma('total'), auto = soma('auto'), cotas = soma('cotas');
+  const hoje = new Date(); hoje.setHours(0,0,0,0);
+  const fim = new Date(OL.ano, 11, 31);
+  const diasRest = Math.max(0, Math.round((fim - hoje) / 86400000));
+  const pct = (v, m) => Math.min(100, v / m * 100);
+  const pctTxt = (v, m) => (v / m * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%';
+  const faltaT = Math.max(0, OL.metaTotal - total), faltaA = Math.max(0, OL.metaAuto - auto);
+  const ritmoT = diasRest > 0 ? faltaT / diasRest * 30.4 : 0;
+  const ritmoA = diasRest > 0 ? faltaA / diasRest * 30.4 : 0;
+  const refAuto = OL.metaAuto / 3;
+
+  const bv = document.getElementById('ol-badge-v'), bk = document.getElementById('ol-badge-k');
+  if (bv) bv.textContent = hmFmtBR(total);
+  if (bk) bk.textContent = cotas + ' cotas Itaú · ' + pctTxt(total, OL.metaTotal) + ' da meta · ' + diasRest + ' dias restantes';
+
+  document.getElementById('ol-grid').innerHTML = `
+    <div class="ol-box">
+      <div class="t">Meta total · bônus de carteira</div>
+      <div class="v">${hmFmtMi(OL.metaTotal)}</div>
+      <div class="ol-bar"><i style="width:${pct(total, OL.metaTotal)}%"></i></div>
+      <div class="ol-row"><span>Vendido <b>${hmFmtBR(total)}</b></span><span>Faltam <b>${hmFmtBR(faltaT)}</b></span></div>
+      <div class="d">Base do Itaú no 3º tri ${hmFmtMi(OL.baseItau3T)} + 15% · referência ${hmFmtBR(OL.refMensal)} por mês.
+      ${faltaT > 0 ? 'Pra fechar, precisa de <b>' + hmFmtMi(ritmoT) + ' por mês</b> até 31/12.' : '<b>Meta atingida.</b>'}</div>
+    </div>
+    <div class="ol-box">
+      <div class="t">Auto · Maragogi ${OL.autoProvisoria ? '<span class="ol-tag">meta provisória</span>' : ''}</div>
+      <div class="v">${hmFmtBR(OL.metaAuto)}</div>
+      <div class="ol-bar"><i style="width:${pct(auto, OL.metaAuto)}%"></i></div>
+      <div class="ol-row"><span>Vendido <b>${hmFmtBR(auto)}</b></span><span>Faltam <b>${hmFmtBR(faltaA)}</b></span></div>
+      <div class="d">Nossa base de Auto no 3º tri ${hmFmtBR(OL.autoBase3T)} + 20%${OL.autoProvisoria ? ', aguardando a base oficial da Gabi' : ''}.
+      ${faltaA > 0 ? 'Precisa de <b>' + hmFmtMi(ritmoA) + ' por mês</b>. ' : '<b>Meta atingida.</b> '}
+      Bater a meta permite disputar o Top 7 Diamante no ranking nacional, não garante a viagem. Seguro vale 2x só no ranking.</div>
+    </div>
+    <div class="ol-box">
+      <div class="t">Bônus de 0,5% sobre a carteira ativa</div>
+      <div class="v">${hmFmtBR(OL.metaTotal * OL.bonusPct)}</div>
+      <div class="ol-row"><span>0,5% do vendido até agora <b>${hmFmtBR(total * OL.bonusPct)}</b></span></div>
+      <div class="d">Simulação sobre a meta cheia. Só vale se a meta total for batida, e incide sobre as cotas ativas elegíveis.
+      Cancelada no mês zero ou em até 7 dias não conta. Metade em janeiro/2027, metade até junho/2027.</div>
+    </div>`;
+
+  const NOME = { 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro' };
+  // Cor só nos meses já fechados; o mês em andamento e os futuros ficam neutros.
+  const mesAtual = hoje.getFullYear() === OL.ano ? hoje.getMonth() + 1 : (hoje.getFullYear() > OL.ano ? 13 : 0);
+  const cls = (v, ref, m) => m < mesAtual ? (v >= ref ? 'ok' : 'nok') : '';
+  const linhas = OL.meses.map(m => `
+    <tr><td>${NOME[m]}</td><td>${pm[m].cotas}</td>
+      <td class="${cls(pm[m].total, OL.refMensal, m)}">${hmFmtBR(pm[m].total)}</td><td>${hmFmtBR(OL.refMensal)}</td>
+      <td class="${cls(pm[m].auto, refAuto, m)}">${hmFmtBR(pm[m].auto)}</td><td>${hmFmtBR(refAuto)}</td></tr>`).join('');
+  document.getElementById('ol-tbl').innerHTML = `
+    <tr><th>Mês</th><th>Cotas</th><th>Total vendido</th><th>Ref. total</th><th>Auto vendido</th><th>Ref. Auto</th></tr>
+    ${linhas}
+    <tr class="tot"><td>4º tri</td><td>${cotas}</td><td>${hmFmtBR(total)}</td><td>${hmFmtBR(OL.metaTotal)}</td><td>${hmFmtBR(auto)}</td><td>${hmFmtBR(OL.metaAuto)}</td></tr>`;
+
+  const ft = document.getElementById('ol-foot');
+  if (ft) {
+    let quando = '';
+    if (payload.atualizado_em) { try { quando = new Date(payload.atualizado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }); } catch(e) {} }
+    ft.textContent = 'Fonte: Base de Vendas (OneDrive)' + (quando ? ', atualizada em ' + quando : '') +
+      '. A produção reconhecida pelo Itaú pode ser diferente da nossa base (no 3º tri o Itaú apurou R$ 39,3 mi e a nossa base R$ 36,3 mi). Auto considera só o tipo AUT.';
+  }
+}
 const HM_JANELA_INI = 14;        // início da janela da disputa (14/09)
 const hmEhPorto = r => String(r.adm || '').toUpperCase().includes('PORTO');
 const HM_ANO_BASE = 2025, HM_ANO_ATUAL = 2026, HM_MES = 9, HM_DIAS = 30;
@@ -3187,6 +3329,13 @@ async function initHome(force){
   // Hero e notícias seguem a mesma regra do placar: só sócios e master veem.
   if (hero) hero.style.display = HM_PLACAR_OCULTO ? 'none' : '';
   if (news) news.style.display = HM_PLACAR_OCULTO ? 'none' : '';
+  try { olRender(payload); } catch(e) { console.warn('onda laranja:', e); }
+  if (!HM_CAMPANHA_PORTO) {
+    // Campanha Porto encerrada: esconde hero, tiles, gráfico e aviso de vazio.
+    [hero, tiles, card, vazio].forEach(el => { if (el) el.style.display = 'none'; });
+    if (payload && Array.isArray(payload.dados) && payload.dados.length) _hmLastFetch = Date.now();
+    return;
+  }
   if (!payload || !Array.isArray(payload.dados) || !payload.dados.length) {
     if (card) card.style.display = 'none';
     if (tiles) tiles.style.display = 'none';
