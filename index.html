@@ -572,7 +572,7 @@ body.embedded-mode .portal-menu-fab { display:flex; }
             </div>
             <div class="ol-charts">
               <div class="hm-chartbox"><div class="ol-ct">Total · meta R$ 45,2 mi</div><svg id="ol-chart-total" width="100%" height="260" viewBox="0 0 520 260" role="img" aria-label="Total Itaú acumulado no 4º tri contra o ritmo da meta"></svg><div class="hm-tip" id="ol-tip-total"></div></div>
-              <div class="hm-chartbox"><div class="ol-ct" id="ol-ct-auto">Auto · meta R$ 5.063.115</div><svg id="ol-chart-auto" width="100%" height="260" viewBox="0 0 520 260" role="img" aria-label="Auto Itaú acumulado no 4º tri contra o ritmo da meta"></svg><div class="hm-tip" id="ol-tip-auto"></div></div>
+              <div class="hm-chartbox"><div class="ol-ct" id="ol-ct-auto">Auto · meta R$ 6.800.000</div><svg id="ol-chart-auto" width="100%" height="260" viewBox="0 0 520 260" role="img" aria-label="Auto Itaú acumulado no 4º tri contra o ritmo da meta"></svg><div class="hm-tip" id="ol-tip-auto"></div></div>
             </div>
           </div>
           <div class="hm-card">
@@ -3160,17 +3160,16 @@ const HM_SO_PORTO = true;
 const HM_CRESC_META = 0.25;      // objetivo = setembro/2025 Porto × 1,25
 
 // ── Onda Laranja Itaú, 4º tri/2026 (02/10/2026, pedido do Allan) ─────────────
-// Metas conforme a apresentação do Itaú e as confirmações da Gabi em 01/10/2026.
-// Quando a Gabi confirmar a base oficial de Auto, ajustar autoBase3T, metaAuto
-// e trocar autoProvisoria pra false.
+// Metas conforme o card oficial do Itaú (02/10/2026): total R$ 39,3 mi + 15% = 45,2 mi;
+// Auto R$ 5,7 mi + 20% = 6,8 mi (o Itaú conta rodas, pesados e motos como Auto).
 const OL = {
   ano: 2026, meses: [10, 11, 12],
   metaTotal: 45200000,   // informada pelo Itaú: base 3º tri R$ 39,3 mi + 15%
   baseItau3T: 39300000,
   refMensal: 15070000,
-  metaAuto: 5063115,     // nossa base 3º tri R$ 4.219.262 + 20%
-  autoBase3T: 4219262,
-  autoProvisoria: true,
+  metaAuto: 6800000,     // card do Itaú: meta de elegibilidade R$ 6,8 mi
+  autoBase3T: 5700000,   // card do Itaú: produção Auto 3º tri R$ 5,7 mi (59 cotas)
+  autoProvisoria: false,
   bonusPct: 0.005,
 };
 const olEhItau = r => String(r.adm || '').toUpperCase().includes('ITAU');
@@ -3189,7 +3188,7 @@ function olAgrega(rows){
     const mes = hmMesNum(r.mes) || (dt ? dt.m : null);
     if (ano !== OL.ano || !pm[mes]) return;
     const cred = parseFloat(r.credito) || 0;
-    const ehAuto = String(r.tipo || '').toUpperCase() === 'AUT';
+    const ehAuto = /^(AUT|MOT|PES|CAM)/.test(String(r.tipo || '').toUpperCase());  // Itaú conta rodas, pesados e motos
     pm[mes].total += cred; pm[mes].cotas += 1;
     if (ehAuto) pm[mes].auto += cred;
     // Dia da venda. Sem data válida dentro do trimestre, cai no 1º dia do mês da coluna.
@@ -3299,7 +3298,7 @@ function olRender(payload){
       <div class="v">${hmFmtBR(OL.metaAuto)}</div>
       <div class="ol-bar"><i style="width:${pct(auto, OL.metaAuto)}%"></i></div>
       <div class="ol-row"><span>Vendido <b>${hmFmtBR(auto)}</b></span><span>Faltam <b>${hmFmtBR(faltaA)}</b></span></div>
-      <div class="d">Nossa base de Auto no 3º tri ${hmFmtBR(OL.autoBase3T)} + 20%${OL.autoProvisoria ? ', aguardando a base oficial da Gabi' : ''}.
+      <div class="d">Produção de Auto no 3º tri apurada pelo Itaú ${hmFmtBR(OL.autoBase3T)} + 20%${OL.autoProvisoria ? ', aguardando a base oficial da Gabi' : ''}.
       ${faltaA > 0 ? 'Precisa de <b>' + hmFmtMi(ritmoA) + ' por mês</b>. ' : '<b>Meta atingida.</b> '}
       Bater a meta permite disputar o Top 7 Diamante no ranking nacional, não garante a viagem. Seguro vale 2x só no ranking.</div>
     </div>
@@ -3336,7 +3335,7 @@ function olRender(payload){
     let quando = '';
     if (payload.atualizado_em) { try { quando = new Date(payload.atualizado_em).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }); } catch(e) {} }
     ft.textContent = 'Fonte: Base de Vendas (OneDrive)' + (quando ? ', atualizada em ' + quando : '') +
-      '. A produção reconhecida pelo Itaú pode ser diferente da nossa base (no 3º tri o Itaú apurou R$ 39,3 mi e a nossa base R$ 36,3 mi). Auto considera só o tipo AUT.';
+      '. A produção reconhecida pelo Itaú pode ser diferente da nossa base (no 3º tri o Itaú apurou R$ 39,3 mi e a nossa base R$ 37,4 mi; em Auto, R$ 5,7 mi contra R$ 4,9 mi). Auto inclui automóvel, pesados e moto, como o Itaú conta.';
   }
 }
 const HM_JANELA_INI = 14;        // início da janela da disputa (14/09)
