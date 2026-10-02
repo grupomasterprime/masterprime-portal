@@ -486,6 +486,9 @@ body.embedded-mode .portal-menu-fab { display:flex; }
           #s-home .ol-tbl tr.tot td{font-weight:800;border-top:2px solid #e5e7eb;border-bottom:0}
           #s-home .ol-tbl .ok{color:#0a7f3f}
           #s-home .ol-tbl .nok{color:#b91c1c}
+          #s-home .ol-charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;margin-top:6px}
+          @media (max-width:900px){#s-home .ol-charts{grid-template-columns:1fr}}
+          #s-home .ol-ct{font-size:11px;font-weight:800;letter-spacing:.8px;text-transform:uppercase;color:#52514e;margin:4px 0 2px}
           #s-home .hm-card{background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:18px 20px}
           #s-home .hm-card h2{margin:0;font-size:15px}
           #s-home .hm-csub{font-size:12px;color:#52514e;margin:3px 0 8px}
@@ -559,6 +562,19 @@ body.embedded-mode .portal-menu-fab { display:flex; }
             </div>
           </div>
           <div class="ol-grid" id="ol-grid"></div>
+          <div class="hm-card" style="margin-bottom:12px">
+            <h2>Acumulado do trimestre, dia a dia</h2>
+            <div class="hm-csub">Linha laranja = vendido acumulado. Linha pontilhada = ritmo necessário pra bater a meta em 31/12. Passe o mouse pra ver o dia.</div>
+            <div class="hm-legend">
+              <span class="it"><span class="hm-sw" style="background:#EC7000"></span> Vendido 2026</span>
+              <span class="it"><span class="hm-sw" style="height:0;border-top:2px dashed #94A3B8;background:none"></span> Ritmo da meta</span>
+              <span class="it"><span class="hm-sw" style="height:0;border-top:2px dashed #475569;background:none"></span> Meta</span>
+            </div>
+            <div class="ol-charts">
+              <div class="hm-chartbox"><div class="ol-ct">Total · meta R$ 45,2 mi</div><svg id="ol-chart-total" width="100%" height="260" viewBox="0 0 520 260" role="img" aria-label="Total Itaú acumulado no 4º tri contra o ritmo da meta"></svg><div class="hm-tip" id="ol-tip-total"></div></div>
+              <div class="hm-chartbox"><div class="ol-ct" id="ol-ct-auto">Auto · meta R$ 5.063.115</div><svg id="ol-chart-auto" width="100%" height="260" viewBox="0 0 520 260" role="img" aria-label="Auto Itaú acumulado no 4º tri contra o ritmo da meta"></svg><div class="hm-tip" id="ol-tip-auto"></div></div>
+            </div>
+          </div>
           <div class="hm-card">
             <h2>Mês a mês <span class="ol-tag">4º tri</span></h2>
             <div class="hm-csub">Produção Itaú por mês contra a referência mensal de cada meta. Cotas canceladas não contam.</div>
@@ -3159,8 +3175,13 @@ const OL = {
 };
 const olEhItau = r => String(r.adm || '').toUpperCase().includes('ITAU');
 const olCancelada = r => /CANCEL|DESIST|EXCLU/i.test([r.status, r.sit, r.sitRaw].join(' '));
+const OL_INI = new Date(OL.ano, OL.meses[0] - 1, 1);                       // 01/10
+const OL_FIM = new Date(OL.ano, OL.meses[OL.meses.length - 1], 0);          // 31/12
+const OL_DIAS = Math.round((OL_FIM - OL_INI) / 86400000) + 1;               // 92
 function olAgrega(rows){
   const pm = {}; OL.meses.forEach(m => pm[m] = { total: 0, auto: 0, cotas: 0 });
+  // por dia do trimestre (índice 0 = 01/10), pro gráfico acumulado
+  const diaTotal = new Array(OL_DIAS).fill(0), diaAuto = new Array(OL_DIAS).fill(0);
   rows.forEach(r => {
     if (!olEhItau(r) || olCancelada(r)) return;
     const dt = hmDia(r);
@@ -3168,10 +3189,80 @@ function olAgrega(rows){
     const mes = hmMesNum(r.mes) || (dt ? dt.m : null);
     if (ano !== OL.ano || !pm[mes]) return;
     const cred = parseFloat(r.credito) || 0;
+    const ehAuto = String(r.tipo || '').toUpperCase() === 'AUT';
     pm[mes].total += cred; pm[mes].cotas += 1;
-    if (String(r.tipo || '').toUpperCase() === 'AUT') pm[mes].auto += cred;
+    if (ehAuto) pm[mes].auto += cred;
+    // Dia da venda. Sem data válida dentro do trimestre, cai no 1º dia do mês da coluna.
+    let idx = null;
+    if (dt && dt.y === OL.ano && dt.m === mes) idx = Math.round((new Date(dt.y, dt.m - 1, dt.d) - OL_INI) / 86400000);
+    if (idx === null || idx < 0 || idx >= OL_DIAS) idx = Math.round((new Date(OL.ano, mes - 1, 1) - OL_INI) / 86400000);
+    diaTotal[idx] += cred; if (ehAuto) diaAuto[idx] += cred;
   });
-  return pm;
+  const acum = a => { const o = []; let s = 0; a.forEach(v => { s += v; o.push(s); }); return o; };
+  return Object.assign(pm, { acumTotal: acum(diaTotal), acumAuto: acum(diaAuto) });
+}
+// Gráfico acumulado do trimestre: linha do vendido até hoje, reta do ritmo da meta e a meta.
+function olChart(svgId, tipId, acum, meta, ateIdx){
+  const svg = document.getElementById(svgId); if (!svg) return;
+  svg.innerHTML = '';
+  const NS = 'http://www.w3.org/2000/svg';
+  const W = 520, H = 260, ML = 56, MR = 16, MT = 14, MB = 30, PW = W - ML - MR, PH = H - MT - MB;
+  const X = i => ML + i / (OL_DIAS - 1) * PW;
+  const vendido = acum[Math.max(0, ateIdx)] || 0;
+  const maxY = Math.max(meta, vendido) * 1.06;
+  const Y = v => MT + PH - v / maxY * PH;
+  const el = (t, a, parent) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); (parent || svg).appendChild(e); return e; };
+  const txt = (x, y, c, a) => { const e = el('text', Object.assign({ x, y, 'font-size': 10.5, fill: '#8a8984' }, a || {})); e.textContent = c; return e; };
+  const fmtEixo = v => v >= 1e6 ? (v / 1e6).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' mi' : (v / 1e3).toFixed(0) + ' mil';
+  [0.25, 0.5, 0.75, 1].forEach(f => {
+    const v = meta * f;
+    el('line', { x1: ML, x2: W - MR, y1: Y(v), y2: Y(v), stroke: '#eceae6', 'stroke-width': 1 });
+    txt(ML - 6, Y(v) + 4, fmtEixo(v), { 'text-anchor': 'end' });
+  });
+  el('line', { x1: ML, x2: W - MR, y1: Y(0), y2: Y(0), stroke: '#d6d4cf', 'stroke-width': 1 });
+  // marcas de mês
+  OL.meses.forEach((m, i) => {
+    const idx = Math.round((new Date(OL.ano, m - 1, 1) - OL_INI) / 86400000);
+    if (i > 0) el('line', { x1: X(idx), x2: X(idx), y1: MT, y2: Y(0), stroke: '#eceae6', 'stroke-width': 1 });
+    txt(X(idx) + 3, H - MB + 16, ['', 'jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'][m], {});
+  });
+  txt(X(OL_DIAS - 1), H - MB + 16, '31/12', { 'text-anchor': 'end' });
+  // meta e ritmo
+  el('line', { x1: ML, x2: W - MR, y1: Y(meta), y2: Y(meta), stroke: '#475569', 'stroke-width': 1.4, 'stroke-dasharray': '6 5' });
+  txt(W - MR, Y(meta) - 5, 'META ' + hmFmtMi(meta), { 'text-anchor': 'end', 'font-weight': '700', fill: '#475569' });
+  el('line', { x1: X(0), y1: Y(0), x2: X(OL_DIAS - 1), y2: Y(meta), stroke: '#94A3B8', 'stroke-width': 1.6, 'stroke-dasharray': '4 4' });
+  // vendido acumulado até hoje (área leve + linha)
+  if (ateIdx >= 0) {
+    const pts = []; for (let i = 0; i <= ateIdx; i++) pts.push(X(i) + ' ' + Y(acum[i] || 0));
+    el('path', { d: 'M' + X(0) + ' ' + Y(0) + ' L' + pts.join(' L') + ' L' + X(ateIdx) + ' ' + Y(0) + ' Z', fill: '#EC7000', opacity: .10 });
+    el('path', { d: 'M' + pts.join(' L'), fill: 'none', stroke: '#EC7000', 'stroke-width': 2.4, 'stroke-linecap': 'round', 'stroke-linejoin': 'round' });
+    el('circle', { cx: X(ateIdx), cy: Y(vendido), r: 4.5, fill: '#EC7000', stroke: '#fff', 'stroke-width': 2 });
+  }
+  // hover: crosshair + tooltip
+  const cross = el('line', { x1: 0, x2: 0, y1: MT, y2: Y(0), stroke: '#2D3F5E', 'stroke-width': 1, 'stroke-dasharray': '3 3', opacity: 0 });
+  const tip = document.getElementById(tipId);
+  const box = svg.parentElement;
+  svg.onmousemove = ev => {
+    const r = svg.getBoundingClientRect();
+    const xs = (ev.clientX - r.left) / r.width * W;
+    const i = Math.max(0, Math.min(OL_DIAS - 1, Math.round((xs - ML) / PW * (OL_DIAS - 1))));
+    const d = new Date(OL_INI); d.setDate(d.getDate() + i);
+    const ritmo = meta * i / (OL_DIAS - 1);
+    const v = i <= ateIdx ? (acum[i] || 0) : null;
+    cross.setAttribute('x1', X(i)); cross.setAttribute('x2', X(i)); cross.setAttribute('opacity', 1);
+    if (tip) {
+      tip.style.display = 'block';
+      tip.innerHTML = '<b>' + d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }) + '</b>' +
+        '<div class="row"><span><span class="dot" style="background:#EC7000"></span>Vendido</span><b>' + (v === null ? 'ainda não chegou' : hmFmtBR(v)) + '</b></div>' +
+        '<div class="row"><span><span class="dot" style="background:#94A3B8"></span>Ritmo da meta</span><b>' + hmFmtBR(ritmo) + '</b></div>' +
+        (v === null ? '' : '<div class="row"><span>Diferença</span><b style="color:' + (v >= ritmo ? '#0a7f3f' : '#b91c1c') + '">' + (v >= ritmo ? '+' : '') + hmFmtBR(v - ritmo) + '</b></div>');
+      const bw = box.getBoundingClientRect();
+      const px = (ev.clientX - bw.left), py = (ev.clientY - bw.top);
+      tip.style.left = Math.min(px + 14, bw.width - 230) + 'px';
+      tip.style.top = Math.max(0, py - 70) + 'px';
+    }
+  };
+  svg.onmouseleave = () => { cross.setAttribute('opacity', 0); if (tip) tip.style.display = 'none'; };
 }
 function olRender(payload){
   const wrap = document.getElementById('ol-wrap'); if (!wrap) return;
@@ -3219,6 +3310,13 @@ function olRender(payload){
       <div class="d">Simulação sobre a meta cheia. Só vale se a meta total for batida, e incide sobre as cotas ativas elegíveis.
       Cancelada no mês zero ou em até 7 dias não conta. Metade em janeiro/2027, metade até junho/2027.</div>
     </div>`;
+
+  // Gráficos: até ontem o dia fica fechado; o dia de hoje entra como está até agora.
+  const ateIdx = Math.min(OL_DIAS - 1, Math.round((hoje - OL_INI) / 86400000));
+  olChart('ol-chart-total', 'ol-tip-total', pm.acumTotal, OL.metaTotal, ateIdx);
+  olChart('ol-chart-auto', 'ol-tip-auto', pm.acumAuto, OL.metaAuto, ateIdx);
+  const ctAuto = document.getElementById('ol-ct-auto');
+  if (ctAuto) ctAuto.textContent = 'Auto · meta ' + hmFmtBR(OL.metaAuto) + (OL.autoProvisoria ? ' (provisória)' : '');
 
   const NOME = { 10: 'Outubro', 11: 'Novembro', 12: 'Dezembro' };
   // Cor só nos meses já fechados; o mês em andamento e os futuros ficam neutros.
