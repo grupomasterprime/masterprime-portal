@@ -2239,11 +2239,11 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
       // em venda da Patricia): linha única com o valor cheio + carta "você paga" na linha.
       if (normNome(resp) === normNome(consultor)) {
         return { tipo:'ok', selfFrac:1, partes:[
-          { quem:nomeP, fracBruto:pctObsToFrac(pctP), ehParceiro:true, masterPaga:false, oculto:false, ehCarta, cartaResp:normNome(consultor), ehLiquido:ehLiqCarta, semLinhaResp:ehExternoP },
+          { quem:nomeP, fracBruto:pctObsToFrac(pctP), pctOrig:pctP, ehParceiro:true, masterPaga:false, oculto:false, ehCarta, cartaResp:normNome(consultor), ehLiquido:ehLiqCarta, semLinhaResp:ehExternoP },
         ]};
       }
       return { tipo:'ok', partes:[
-        { quem:nomeP, fracBruto:pctObsToFrac(pctP), ehParceiro:true, masterPaga:false, oculto:false, ehCarta, cartaResp:resp, ehLiquido:ehLiqCarta, semLinhaResp:ehExternoP },
+        { quem:nomeP, fracBruto:pctObsToFrac(pctP), pctOrig:pctP, ehParceiro:true, masterPaga:false, oculto:false, ehCarta, cartaResp:resp, ehLiquido:ehLiqCarta, semLinhaResp:ehExternoP },
         { quem:resp, fracBruto:pctObsToFrac(pctP), ehParceiro:false, masterPaga:false, oculto:false, ehCarta:false },
       ]};
     }
