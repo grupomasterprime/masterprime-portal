@@ -2641,6 +2641,25 @@ function parseInd(ind, consultor, multConsultor=0.625, linhaCtx={}) {
         selfFrac = Math.max(0, 1 - somaOutros - fracCartaRep);
       }
     }
+    // Carta com repasse pelo PRÓPRIO consultor da venda (06/10/2026, caso Arnaldo/Almir:
+    // "2,5% ANTONIO ALMIR LIQUIDO ARNALDO COSTA REPASSA / 0,5% ARNALDO COSTA").
+    // O valor da carta tem que PASSAR pela linha do consultor (ele recebe e repassa),
+    // senão a carta fica sem dinheiro: ele receberia só os 0,5% e teria que pagar os
+    // 2,5% do bolso. Soma a fração da carta ao selfFrac, declarado ou calculado.
+    {
+      const fracCartaSelf = partes
+        .filter(p => p.ehCartaRepasseSplit && catDecimalSplit > 0 && p.cartaResp === normNome(consultor))
+        .reduce((t, p) => t + (p.pctOrig / catDecimalSplit), 0);
+      if (fracCartaSelf > 0) {
+        if (selfFrac === undefined) {
+          const somaOutros = partes.filter(p => !p.ehParceiro && !p.ehSelf)
+            .reduce((t, p) => t + p.fracBruto, 0);
+          selfFrac = Math.max(0, 1 - somaOutros);
+        } else {
+          selfFrac = Math.min(1, selfFrac + fracCartaSelf);
+        }
+      }
+    }
     const temSelf = partes.some(p => p.ehSelf);
     if (temSelf) {
       partes.forEach(p => {
@@ -4181,6 +4200,15 @@ function renderResumo() {
     });
   }
 
+  // Excedente Advanced (1/5 pra Allan, Carlos, Renato, Vagner e Leidiane): já aparece
+  // no demonstrativo de cada um, mas faltava no resumo (06/10/2026: resumo ficava
+  // R$ 252,81 abaixo do demonstrativo pros 5, fechamentos de ago e set/26).
+  Object.entries(S.socios?.advExc || {}).forEach(([n, v]) => {
+    if (!v) return;
+    ensureEnt(n, TODOS_SOCIOS.includes(n) ? 'socio' : 'vendedor');
+    ent[n].corr += v;
+  });
+
   // Avulsos: split por CNPJ
   S.avulsos.forEach(a => {
     ensureEnt(a.nome, TODOS_SOCIOS.includes(a.nome) ? 'socio' : 'vendedor');
@@ -4200,9 +4228,11 @@ function renderResumo() {
   // Sempre inclui PARCEIROS_DEMO no resumo (mesmo sem vendas no mês)
   PARCEIROS_DEMO.forEach(n => { if (!ent[n]) ent[n] = {corr:0, cons:0, tipo:'parceiro'}; });
   // Inclui entradas LE - XXXX (Edson etc.) que estão em S.resultado
+  // (06/10/2026) Só cria a entrada se ela ainda não existir: o loop de S.resultado lá
+  // em cima já somou o totLiq, e somar de novo aqui dobrava o Edson no resumo
+  // (R$ 518,33 no resumo contra R$ 259,17 no demonstrativo, fechamento de set/26).
   Object.entries(S.resultado).filter(([n]) => n.startsWith('LE -')).forEach(([n, r]) => {
-    if (!ent[n]) ent[n] = {corr:0, cons:0, tipo:'parceiro'};
-    ent[n].corr += r.totLiq||0;
+    if (!ent[n]) ent[n] = {corr:r.totLiq||0, cons:0, tipo:'parceiro'};
   });
 
   // Regras de reclassificação para o resumo
