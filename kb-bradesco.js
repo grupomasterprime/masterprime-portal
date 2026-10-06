@@ -436,9 +436,18 @@ window.KB_ADMIN["bradesco"] = {
       "categoria_label": "Contemplação",
       "categoria_ordem": 6,
       "titulo": "O cliente pode juntar cotas para comprar um bem maior?",
-      "conteudo": "Sim — é a unificação de cotas: a soma dos créditos de mais de uma cota para a compra de um único bem.\n\nPara unificar, as cotas precisam estar contempladas e em dia, e ser do mesmo segmento. Não é permitida a unificação de cotas de titulares diferentes. É uma boa saída quando o cliente precisa de um crédito maior.",
-      "tags": "unificação de cotas, juntar cotas, crédito maior",
+      "conteudo": "Sim — é a unificação de cotas: a soma dos créditos de mais de uma cota para a compra de um único bem.\n\nPara unificar, as cotas precisam estar contempladas e em dia, e ser do mesmo titular (não é permitida a unificação de cotas de titulares diferentes). Em bens móveis, não há restrição para misturar cota de automóvel com cota de pesados, ou vice-versa: o que precisa é o bem estar enquadrado nas regras de aquisição e o valor ser compatível com o saldo devedor das cotas. Imóvel só unifica com imóvel. É uma boa saída quando o cliente precisa de um crédito maior.\n\nReferência: Manual do Parceiro Bradesco Consórcios (versão 10/2024), itens L (Unificação de cotas) e N (Regras para aquisição de bens móveis).",
+      "tags": "unificação de cotas, juntar cotas, junção, somar cotas, crédito maior, pesados com auto, misturar categoria, titularidade",
       "ordem": 7
+    },
+    {
+      "categoria_key": "contemplacao",
+      "categoria_label": "Contemplação",
+      "categoria_ordem": 6,
+      "titulo": "Pode juntar cota de pesados com cota de automóvel no Bradesco?",
+      "conteudo": "Pode. No Bradesco não há restrição para aquisição de bem leve com cota de pesados e vice-versa, desde que o bem esteja enquadrado nas regras de aquisição e o valor seja compatível com o saldo devedor da(s) cota(s). Ou seja, dá para unificar uma cota de automóvel com uma cota de pesados para comprar um único veículo, ou usar cota de pesados para comprar um carro.\n\nCondições da unificação: todas as cotas contempladas e em dia, e do mesmo titular. O que não mistura é imóvel com veículo.\n\nAtenção: a exigência de \"mesma categoria (Automóvel, Imóvel, Pesados)\" vale só para a mudança do bem antes da contemplação, não para a junção de cotas.\n\nReferência: Manual do Parceiro Bradesco Consórcios (versão 10/2024), item N (Regras para aquisição, bens móveis) e item L (Unificação de cotas).",
+      "tags": "pesados, auto, automóvel, juntar, junção, unificar, unificação, misturar, caminhão, leve, categoria, mesma categoria",
+      "ordem": 8
     },
     {
       "categoria_key": "lance",
@@ -574,8 +583,8 @@ window.KB_ADMIN["bradesco"] = {
       "categoria_label": "Crédito e compra — Automóvel",
       "categoria_ordem": 8,
       "titulo": "Dá para comprar mais de um bem com uma cota?",
-      "conteudo": "Sim. É permitida a aquisição de dois ou mais bens com uma única cota — desde que cada bem esteja enquadrado nas regras. Nesse caso, é feito um contrato para cada bem alienado.\n\nTambém é possível unificar cotas do mesmo segmento para comprar um bem de maior valor.",
-      "tags": "dois bens, unificação, cota, vários bens",
+      "conteudo": "Sim. É permitida a aquisição de dois ou mais bens com uma única cota — desde que cada bem esteja enquadrado nas regras. Nesse caso, é feito um contrato para cada bem alienado.\n\nTambém é possível unificar cotas do mesmo titular para comprar um bem de maior valor, inclusive juntando cota de automóvel com cota de pesados (bens móveis não têm restrição de categoria entre si; imóvel só com imóvel).",
+      "tags": "dois bens, unificação, cota, vários bens, junção, pesados, auto",
       "ordem": 10
     },
     {
