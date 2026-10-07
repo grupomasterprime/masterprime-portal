@@ -23,7 +23,7 @@ import zipfile
 from datetime import date, timedelta
 
 BASE = "https://dados.cvm.gov.br/dados/FI/DOC/INF_DIARIO/DADOS/"
-SAIDA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "fundos-cartas.json")
+SAIDA = os.path.join(os.path.dirname(os.path.abspath(__file__)), "fundos-cartas.json")
 ALIQUOTA_IR = 0.225
 
 FUNDOS = [
