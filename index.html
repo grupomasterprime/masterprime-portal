@@ -3739,30 +3739,33 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
     // e fundo levemente tingido no grupo Imóvel, senão parece uma coisa só (Allan, 11/09/2026)
     const sepIt = 'border-left:2px solid #F2D9BD';
     const tintIm = 'background:#FFF9F1';
-    // meses exibidos: dois meses. Normalmente o atual e o próximo, mas enquanto o mês
-    // anterior ainda tiver alguma data por acontecer (assembleia ou suplência), ele
-    // continua na tabela e o próximo mês espera. Quando a última suplência do mês
-    // anterior passar, a tabela vira sozinha (Allan, 01/10/2026).
-    function mesTemDataFutura(y, m){
+    // meses exibidos: dois meses POR ADMINISTRADORA. Normalmente o atual e o
+    // próximo, mas enquanto o mês anterior ainda tiver alguma data por acontecer
+    // (assembleia ou suplência) naquela administradora, ele continua na tabela
+    // dela e o próximo mês espera. Cada bloco vira sozinho quando a própria
+    // última suplência passar (Allan, 01/10 e 09/10/2026): a Itaú pode ainda
+    // estar em setembro enquanto Porto e Bradesco já mostram outubro e novembro.
+    const datasItau = (y, m) => {
       const datas = [];
       [[10, 2], [10, 5], [24, 2], [24, 5]].forEach(([dia, dow]) => {
         const a = assembItau(y, m, dia, dow);
         datas.push(a, suplItauCorr(a, dow === 2 ? 10 : 12));
       });
-      const pt = assembPorto(y, m);
-      datas.push(pt.assemb, addDiasUteis(addDiasUteis(pt.assemb, 5), 5));
-      const br = assembBradesco(y, m);
-      datas.push(br.assemb, addDiasUteis(addDiasUteis(br.assemb, 4), 4));
-      return datas.some(d => d >= hoje);
+      return datas;
+    };
+    const datasPorto = (y, m) => { const pt = assembPorto(y, m); return [pt.assemb, addDiasUteis(addDiasUteis(pt.assemb, 5), 5)]; };
+    const datasBradesco = (y, m) => { const br = assembBradesco(y, m); return [br.assemb, addDiasUteis(addDiasUteis(br.assemb, 4), 4)]; };
+    function mesesAdmin(datasFn){
+      const inicio = datasFn(hoje.getFullYear(), hoje.getMonth()-1).some(d => d >= hoje) ? -1 : 0;
+      return [inicio, inicio+1].map(off => {
+        const ref = new Date(hoje.getFullYear(), hoje.getMonth()+off, 1);
+        return { y: ref.getFullYear(), m: ref.getMonth() };
+      });
     }
-    const inicio = mesTemDataFutura(hoje.getFullYear(), hoje.getMonth()-1) ? -1 : 0;
-    const meses = [inicio, inicio+1].map(off => {
-      const ref = new Date(hoje.getFullYear(), hoje.getMonth()+off, 1);
-      return { y: ref.getFullYear(), m: ref.getMonth() };
-    });
+    const mesesItau = mesesAdmin(datasItau), mesesPorto = mesesAdmin(datasPorto), mesesBradesco = mesesAdmin(datasBradesco);
     // ── Bloco Itaú (laranja oficial), tabela no formato do comunicado ──
     let rowsItau = '';
-    meses.forEach(({y, m}) => {
+    mesesItau.forEach(({y, m}) => {
       const it05v = assembItau(y, m, 10, 2), it05i = assembItau(y, m, 10, 5);
       const it20v = assembItau(y, m, 24, 2), it20i = assembItau(y, m, 24, 5);
       // Suplência Itaú: Veículos +10 corridos (sexta), Imóveis +12 corridos (quarta)
@@ -3782,7 +3785,7 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
     });
     // ── Bloco Porto (azul), boleto + assembleia ──
     let rowsPorto = '';
-    meses.forEach(({y, m}) => {
+    mesesPorto.forEach(({y, m}) => {
       const pt = assembPorto(y, m);
       const so = sorteioAntes(pt.assemb);
       // Suplência Porto EM TESTE: 1ª chamada +5 dias úteis, 2ª chamada +5 dias úteis
@@ -3795,7 +3798,7 @@ function hmRenderChart(cred25, cot25, cred26, cot26, hoje, tot25, proj){
     let blocoBradesco = '';
     if (MOSTRAR_BRADESCO) {
       let rowsBra = '';
-      meses.forEach(({y, m}) => {
+      mesesBradesco.forEach(({y, m}) => {
         const br = assembBradesco(y, m);
         // Suplência Bradesco EM TESTE: 1ª chamada +4 dias úteis, 2ª chamada +4 dias úteis
         const sb1 = addDiasUteis(br.assemb, 4), sb2 = addDiasUteis(sb1, 4);
