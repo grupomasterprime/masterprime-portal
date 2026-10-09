@@ -1788,7 +1788,10 @@ function renderDemo(data, mes) {
   // separadas, Cartas de Parceria etc.). Renderizamos direto.
   if (data && data.html) {
     const nome = data.nome || currentUser.nome;
-    const nomeSafe = nome.replace(/[^a-zA-Z0-9]/g,'_');
+    // id inclui o mês: o Demonstrativo (mês atual) e o Histórico renderizam o
+    // mesmo nome, e sem o mês os botões Excel/PDF achavam sempre o primeiro
+    // (o atual) em vez do mês escolhido no Histórico.
+    const nomeSafe = nome.replace(/[^a-zA-Z0-9]/g,'_') + '-' + String(mes||'').replace(/[^a-zA-Z0-9]/g,'_');
     return `
     <div class="card"><div class="card-head"><div><div class="card-title">Demonstrativo - ${nome}</div><div class="card-sub">${fmtMes(mes)}</div></div><div style="display:flex;gap:8px"><button class="btn btn-outline btn-sm" onclick="baixarDemoExcel('${nomeSafe}', '${nome.replace(/'/g,"\\'")}', '${mes}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg> Excel</button><button class="btn btn-outline btn-sm" onclick="imprimirDemo('${nomeSafe}')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:4px"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg> PDF / Imprimir</button></div></div>
       <div class="card-body" id="demo-body-${nomeSafe}" style="padding:20px">${data.html}</div>
