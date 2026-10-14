@@ -1,7 +1,7 @@
 {
   "fonte": "CVM · Informe Diário de Fundos (dados.cvm.gov.br). Bruto = variação da cota; líquido = bruto com IR de 22,5% sobre o ganho (resgate em até 180 dias).",
   "aliquota_ir": 0.225,
-  "atualizado_em": "2026-10-13",
+  "atualizado_em": "2026-10-14",
   "fundos": [
     {
       "apelido": "Fundo Porto",
@@ -19,9 +19,9 @@
       "rent_ano_anterior": 13.18,
       "parcial": {
         "mes": "2026-10",
-        "rent": 0.2953,
-        "rent_liq": 0.23,
-        "ate": "2026-10-08"
+        "rent": 0.3413,
+        "rent_liq": 0.26,
+        "ate": "2026-10-09"
       },
       "mensal": {
         "2025-01": 1.0441,
@@ -45,7 +45,7 @@
         "2026-07": 1.2012,
         "2026-08": 1.076,
         "2026-09": 1.0358,
-        "2026-10": 0.2953
+        "2026-10": 0.3413
       }
     },
     {
