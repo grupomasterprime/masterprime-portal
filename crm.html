@@ -396,16 +396,25 @@ function mostrarAba(a){
 
 // ══════════ CARGA ══════════
 async function carregarTudo(){
-  const [leads, inds, users] = await Promise.all([
+  const [leads, inds, users, indNomes] = await Promise.all([
     sb.from('crm_leads').select('*, indicador:crm_indicadores(nome)').order('criado_em', { ascending:false }),
     sb.from('crm_indicadores').select('*, leads:crm_leads(id, etapa)').order('criado_em', { ascending:false }),
     // Lista da equipe via função segura (id, nome, tipo): a tabela portal_users só deixa
     // admin/master ler todo mundo, e consultor comum via só a própria linha (ficava em branco).
-    sb.rpc('crm_usuarios')
+    sb.rpc('crm_usuarios'),
+    // Nomes de TODOS os indicadores via função segura (id, nome): o consultor comum só
+    // lê na tabela os indicadores dele, então o lead que chega pelo rodízio de um
+    // indicador de outro consultor vinha com "Indicação:" em branco (caso André, 15/10/2026).
+    sb.rpc('crm_indicadores_nomes')
   ]);
   LEADS = leads.data || [];
   INDICADORES = inds.data || [];
   USUARIOS = users.data || [];
+  const IND_NOMES = {};
+  (indNomes && indNomes.data || []).forEach(i => { IND_NOMES[String(i.id)] = i.nome; });
+  LEADS.forEach(l => {
+    if (l.indicador_id && !(l.indicador && l.indicador.nome) && IND_NOMES[String(l.indicador_id)]) l.indicador = { nome: IND_NOMES[String(l.indicador_id)] };
+  });
   // Resolve o nome do consultor pela lista (mesmo resultado pra qualquer usuário)
   const nomeDe = id => { const u = USUARIOS.find(x => String(x.id) === String(id)); return u ? u.nome : null; };
   LEADS.forEach(l => { const n = nomeDe(l.consultor_id); l.consultor = n ? { nome: n } : null; });
