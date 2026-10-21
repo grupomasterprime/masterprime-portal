@@ -63,11 +63,11 @@ input.f{min-width:260px}
 .card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;min-width:0}
 .card h3{font-size:12px;font-weight:800;color:var(--ink);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
 .card h3 small{font-weight:600;color:var(--text-3);font-size:10.5px}
-.bars .row{display:grid;grid-template-columns:150px 1fr 70px;gap:8px;align-items:center;margin:5px 0;font-size:11.5px}
-.bars .lb{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.bars .row{display:grid;grid-template-columns:minmax(120px,1.1fr) minmax(80px,1.5fr) auto;gap:8px;align-items:center;margin:5px 0;font-size:11.5px}
+.bars .lb{color:var(--text);line-height:1.2;font-size:11px;overflow-wrap:anywhere}
 .bars .bar{height:14px;background:#EEF2F7;border-radius:6px;overflow:hidden;display:flex}
 .bars .bar i{display:block;height:100%}
-.bars .vl{text-align:right;font-weight:700;color:var(--ink);font-size:11px;white-space:nowrap}
+.bars .vl{text-align:right;font-weight:700;color:var(--ink);font-size:11px;white-space:nowrap;min-width:48px}
 .leg{display:flex;gap:12px;flex-wrap:wrap;font-size:10.5px;color:var(--text-2);margin-top:8px}
 .leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
 .tabs{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0 10px}
@@ -97,7 +97,7 @@ tr:hover td{background:#FAFBFD}
 .md .acts{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
 .btn-navy{background:var(--navy);color:#fff}
 .note{font-size:11px;color:var(--text-3);margin-top:6px}
-@media(max-width:700px){.bars .row{grid-template-columns:110px 1fr 60px}.wrap{padding:12px}}
+@media(max-width:700px){.wrap{padding:12px}}
 </style>
 </head>
 <body>
@@ -200,6 +200,13 @@ const mesesEntre = (a,b) => Math.round(diasEntre(a,b)/30.4*10)/10;
   } catch (e) { $('loading').textContent = 'Erro ao carregar: ' + (e.message || e); }
 })();
 
+function nComisDe(r){
+  if (r.produto !== 'IMV') return 6;
+  const ad = r.parcelas_adesao || 0, plano = String(r.plano||'').toUpperCase();
+  if (ad === 5) return 5;
+  if (ad === 12 || ad === 24 || /CAMP|24X/.test(plano)) return 12;
+  return 6;
+}
 async function carregar(){
   const m = await sb.from('portal_carteira_meta').select('*').eq('adm', ADM).maybeSingle();
   META = m.data || null;
@@ -212,17 +219,23 @@ async function carregar(){
   }
   ROWS.forEach(r => {
     r.ativa = r.status === 'Ativa'; r.cancelada = r.status === 'Cancelada'; r.quitada = r.status === 'Quitada';
-    r.contemplada = !!r.data_contemplacao;
+    // Contemplacao a confirmar: contemplada ha mais de 180 dias sem o bem entregue (lance nao pago, credito nao usado ou descontemplada).
+    r.diasContempl = r.data_contemplacao ? diasEntre(r.data_contemplacao, hojeISO) : null;
+    r.contemplAConfirmar = r.status === 'Ativa' && !!r.data_contemplacao && !r.data_entrega && r.diasContempl > 180;
+    r.contemplada = !!r.data_contemplacao && !r.contemplAConfirmar;
     r.atraso = r.parcelas_atraso || 0; r.pagas = r.parcelas_pagas || 0;
     r.restante = Math.max(0, (r.prazo_cota||0) - r.pagas);
     r.ano = r.data_venda ? +r.data_venda.slice(0,4) : null;
     r.cobranca = r.ativa && r.situacao_cobranca && !/^NORMAL|^QUITADO/.test(r.situacao_cobranca);
     // Porto nao estorna: o risco e parar de receber as parcelas de comissao ainda nao pagas
     // (auto/pesados 6 parcelas, imovel ate 12). Em atraso dentro desse periodo = comissao em risco.
-    r.nComis = r.produto === 'IMV' ? 12 : 6;
-    r.comisRestante = r.ativa ? Math.max(0, r.nComis - r.pagas) : 0;
-    r.comissaoRisco = r.ativa && r.atraso > 0 && r.comisRestante > 0;
-    r.semEntrega = r.ativa && r.contemplada && !r.data_entrega;
+    // Cronograma Porto (kb-comissoes): auto/pesados 6 parcelas; imovel 6 (a vista, A e B), 5 (adesao 5x), 12 (adesao 12x, 24x ou campanha).
+    r.nComis = nComisDe(r);
+    r.comisRestante = (r.ativa || r.cancelada) ? Math.max(0, r.nComis - r.pagas) : 0;
+    // Em risco = ainda da para recuperar (ate 3 atrasos). Com 4 ou mais a Porto ja mandou para cobranca/cancelamento: comissao perdida.
+    r.comissaoRisco = r.ativa && r.atraso > 0 && r.atraso <= 3 && r.comisRestante > 0;
+    r.comissaoPerdida = r.comisRestante > 0 && ((r.ativa && r.atraso >= 4) || r.cancelada);
+    r.semEntrega = r.ativa && r.contemplada && !r.data_entrega; // contemplada ha ate 180 dias, faturamento pendente
     r.quaseQuitando = r.ativa && r.restante > 0 && r.restante <= 6;
     r.cancel90 = r.cancelada && r.data_cancelamento && diasEntre(r.data_cancelamento, hojeISO) <= 90;
     r.consultorNome = r.consultor || '(sem consultor)';
@@ -256,7 +269,7 @@ function kp(k, v, s, c, click){ return `<div class="kp${click?' clk':''}" style=
 function renderKPIs(){
   const V = VIEW, at = V.filter(r => r.ativa), ca = V.filter(r => r.cancelada), qu = V.filter(r => r.quitada);
   const credAt = at.reduce((s,r) => s + (+r.valor_bem||0), 0);
-  const cont = at.filter(r => r.contemplada), aguard = at.filter(r => !r.contemplada);
+  const cont = at.filter(r => r.contemplada), aguard = at.filter(r => !r.contemplada && !r.contemplAConfirmar);
   const atr = at.filter(r => r.atraso > 0), atr1 = at.filter(r => r.atraso === 1), atr2 = at.filter(r => r.atraso === 2), atr3 = at.filter(r => r.atraso >= 3);
   const cob = at.filter(r => r.cobranca), risco = V.filter(r => r.comissaoRisco), semEnt = V.filter(r => r.semEntrega), quase = V.filter(r => r.quaseQuitando);
   const c90 = V.filter(r => r.cancel90);
@@ -276,13 +289,14 @@ function renderKPIs(){
   const mesesCont = contAll.map(r => r.data_contemplacao.slice(0,7)).sort(); const ultMes = mesesCont[mesesCont.length-1];
   const contUlt = ultMes ? contAll.filter(r => r.data_contemplacao.slice(0,7) === ultMes) : [];
   const comisAReceber = at.filter(r=>r.atraso===0).reduce((s,r)=>s+r.comisRestante,0), comisTravada = risco.reduce((s,r)=>s+r.comisRestante,0);
+  const perdida = V.filter(r=>r.comissaoPerdida), comisPerdida = perdida.reduce((s,r)=>s+r.comisRestante,0);
 
   const hc = (cls, v, k, s, tab) => `<div class="hc ${cls}" onclick="irTab('${tab}')"><div class="v">${v}</div><div class="k">${k}</div><div class="s">${s}</div></div>`;
   $('hero').innerHTML = [
     hc('h-navy', fmtBRL0(clientes), 'Clientes', `${fmtBRL0(at.length)} cotas ativas`, 'ativas'),
     hc('h-blue', 'R$ '+fmtMi(credAt), 'Crédito ativo', `ticket médio R$ ${fmtMi(ticket)}`, 'ativas'),
     hc('h-red', fmtBRL0(atr.length), 'Cotas em atraso', `${pct(atr.length, at.length)} das ativas`, 'atraso'),
-    hc('h-amber', fmtBRL0(risco.length), 'Comissão em risco', `${fmtBRL0(comisTravada)} parcelas travadas`, 'risco'),
+    hc('h-amber', fmtBRL0(risco.length), 'Comissão em risco', `${fmtBRL0(comisTravada)} parcelas · até 3 atrasos, dá para recuperar`, 'risco'),
     hc('h-purple', fmtBRL0(contUlt.length), 'Contempladas na última assembleia', ultMes ? ultMes.split('-').reverse().join('/') : '—', 'contempladas'),
     hc('h-green', fmtBRL0(qu.length), 'Cotas quitadas', `${fmtBRL0(cont.length)} contempladas ativas`, 'quitadas'),
     hc('h-gray', fmtBRL0(ca.length), 'Cotas canceladas', `${pct(ca.length, V.length)} do total vendido`, 'canceladas'),
@@ -303,6 +317,7 @@ function renderKPIs(){
     kp('3 ou mais', fmtBRL0(atr3.length), 'risco de cancelamento', '#EF4444', 'atraso'),
     kp('Em cobrança', fmtBRL0(cob.length), `${pct(cob.length, at.length)} das ativas`, '#EF4444', 'cobranca'),
     kp('Comissão a receber', fmtBRL0(comisAReceber)+' parc.', 'cotas em dia dentro do período comissionável', '#10B981'),
+    kp('Comissão perdida', fmtBRL0(perdida.length), `${fmtBRL0(comisPerdida)} parcelas · 4+ atrasos ou cancelada no período`, '#64748B', 'perdida'),
     kp('Cancelamento', pct(ca.length, V.length), `${fmtBRL0(ca.length)} de ${fmtBRL0(V.length)} vendidas`, '#F59E0B', 'canceladas'),
     kp('Canceladas 90 dias', fmtBRL0(c90.length), `${fmtBRL0(cancCedo)} cancelaram com até 2 pagas (histórico)`, '#F59E0B', 'canceladas'),
   ].join('');
@@ -312,7 +327,8 @@ function renderKPIs(){
     kp('Aguardando', fmtBRL0(aguard.length), `${pct(aguard.length, at.length)} das ativas`, '#2563EB', 'aguardando'),
     kp('Tempo p/ contemplar', tMed!=null ? tMed.toLocaleString('pt-BR',{maximumFractionDigits:1})+' meses' : '—', 'mediana (todas as contempladas)', '#7C3AED'),
     kp('Lance livre', pct(lanceLivre, contAll.length), `sorteio ${pct(sorteio, contAll.length)} · fixo ${pct(lanceFixo, contAll.length)}`, '#7C3AED'),
-    kp('Sem bem entregue', fmtBRL0(semEnt.length), 'faturamento pendente', '#F59E0B', 'semEntrega'),
+    kp('Sem bem entregue', fmtBRL0(semEnt.length), 'contemplada há até 180 dias, faturamento pendente', '#F59E0B', 'semEntrega'),
+    kp('Contemplação a confirmar', fmtBRL0(V.filter(r=>r.contemplAConfirmar).length), 'há mais de 180 dias sem bem entregue', '#64748B', 'aConfirmar'),
     kp('Contempl. em atraso', fmtBRL0(cont.filter(r=>r.atraso>0).length), 'contemplada e com parcela atrasada', '#EF4444', 'atraso'),
     kp('Próximas de quitar', fmtBRL0(quase.length), 'até 6 parcelas restantes', '#10B981', 'quase'),
   ].join('');
@@ -350,7 +366,7 @@ function renderCharts(){
   const cobRows = Object.entries(cobs).sort((a,b)=>b[1]-a[1]).slice(0,8);
   if (cobRows.length) out.push(barras('Situação de cobrança (fora do normal)', cobRows.map(([k,n]) => ({ lb:k, segs:[{v:n,c:C.r}], txt:String(n) })), { sub:'cotas ativas' }));
   // Motivos de cancelamento
-  const mot = {}; V.filter(r=>r.cancelada).forEach(r => { const k=r.motivo_cancelamento||'NÃO INFORMADO'; mot[k]=(mot[k]||0)+1; });
+  const mot = {}; V.filter(r=>r.cancelada).forEach(r => { let k=(r.motivo_cancelamento||'NÃO INFORMADO').trim(); if (normN(k)==='NAO INFORMADO') k='NÃO INFORMADO'; mot[k]=(mot[k]||0)+1; });
   const motRows = Object.entries(mot).sort((a,b)=>b[1]-a[1]).slice(0,8);
   if (motRows.length) out.push(barras('Motivos de cancelamento', motRows.map(([k,n]) => ({ lb:k, segs:[{v:n,c:C.n}], txt:String(n) }))));
   // Parcelas pagas antes de cancelar
@@ -384,11 +400,13 @@ function renderCharts(){
 const TABS = [
   { id:'atraso',       lb:'Em atraso',                f:r=>r.ativa&&r.atraso>0,  sort:['atraso',-1] },
   { id:'risco',        lb:'Comissão em risco',        f:r=>r.comissaoRisco,      sort:['comisRestante',-1] },
+  { id:'perdida',      lb:'Comissão perdida',         f:r=>r.comissaoPerdida,    sort:['data_venda',-1] },
   { id:'cobranca',     lb:'Em cobrança',              f:r=>r.cobranca,           sort:['atraso',-1] },
   { id:'semEntrega',   lb:'Contemplada sem bem',      f:r=>r.semEntrega,         sort:['data_contemplacao',1] },
+  { id:'aConfirmar',   lb:'Contemplação a confirmar', f:r=>r.contemplAConfirmar, sort:['data_contemplacao',1] },
   { id:'quase',        lb:'Próximas de quitar',       f:r=>r.quaseQuitando,      sort:['restante',1] },
   { id:'canceladas',   lb:'Canceladas',               f:r=>r.cancelada,          sort:['data_cancelamento',-1] },
-  { id:'aguardando',   lb:'Aguardando',  f:r=>r.ativa&&!r.contemplada, sort:['pagas',-1] },
+  { id:'aguardando',   lb:'Aguardando',  f:r=>r.ativa&&!r.contemplada&&!r.contemplAConfirmar, sort:['pagas',-1] },
   { id:'contempladas', lb:'Contempladas',             f:r=>r.ativa&&r.contemplada, sort:['data_contemplacao',-1] },
   { id:'quitadas',     lb:'Quitadas',                 f:r=>r.quitada,            sort:['data_venda',-1] },
   { id:'ativas',       lb:'Todas as ativas',          f:r=>r.ativa,              sort:['data_venda',-1] },
@@ -412,7 +430,7 @@ function recalcTabela(){
     ['data_venda','Venda'], ['pagas','Pagas','r'], ['restante','Restam','r'], ['atraso','Atraso','r'], ['comisRestante','Comis. restantes','r'], ['situacao_cobranca','Cobrança'], ['data_contemplacao','Contempl.'], ['forma_contemplacao','Forma'],
     ['data_entrega','Bem entregue'], ['data_cancelamento','Cancel.'], ['motivo_cancelamento','Motivo'], ['forma_pagamento','Pgto'], ['telefone','Telefone'], ['email','E-mail'], ['contrato','Contrato'], ['susep','SUSEP']
   ].filter(c => c[2] !== false);
-  const tag = r => r.cancelada ? '<span class="tg tg-r">Cancelada</span>' : r.quitada ? '<span class="tg tg-b">Quitada</span>' : r.contemplada ? '<span class="tg tg-g">Ativa · contemplada</span>' : '<span class="tg tg-n">Ativa</span>';
+  const tag = r => r.cancelada ? '<span class="tg tg-r">Cancelada</span>' : r.quitada ? '<span class="tg tg-b">Quitada</span>' : r.contemplAConfirmar ? '<span class="tg tg-a">Ativa · contempl. a confirmar</span>' : r.contemplada ? '<span class="tg tg-g">Ativa · contemplada</span>' : '<span class="tg tg-n">Ativa</span>';
   const atrTag = r => r.atraso>=3 ? `<span class="tg tg-r">${r.atraso}</span>` : r.atraso>0 ? `<span class="tg tg-a">${r.atraso}</span>` : '<span class="tg tg-g">0</span>';
   const cell = (r,c) => { const k=c[0]; switch(k){
     case 'cliente': return `<td class="nm" title="${r.cliente||''}">${r.cliente||''}</td>`;
@@ -422,7 +440,7 @@ function recalcTabela(){
     case 'status': return `<td>${tag(r)}</td>`;
     case 'atraso': return `<td class="r">${r.ativa?atrTag(r):''}</td>`;
     case 'pagas': case 'restante': return `<td class="r">${r.ativa||r.quitada?r[k]:''}</td>`;
-    case 'comisRestante': return `<td class="r">${r.ativa?(r.comisRestante>0?`<span class="tg ${r.atraso>0?'tg-r':'tg-g'}">${r.comisRestante} de ${r.nComis}</span>`:'<span class="tg tg-n">paga</span>'):''}</td>`;
+    case 'comisRestante': return `<td class="r">${(r.ativa||r.cancelada)?(r.comisRestante>0?`<span class="tg ${(r.atraso>0||r.cancelada)?'tg-r':'tg-g'}">${r.comisRestante} de ${r.nComis}</span>`:'<span class="tg tg-n">paga</span>'):''}</td>`;
     case 'situacao_cobranca': return `<td>${r.cobranca?`<span class="tg tg-r">${r.situacao_cobranca}</span>`:(r.situacao_cobranca||'')}</td>`;
     case 'data_venda': case 'data_contemplacao': case 'data_entrega': case 'data_cancelamento': return `<td>${fmtD(r[k])}</td>`;
     default: return `<td>${r[k]??''}</td>`; } };
