@@ -53,8 +53,8 @@ input.f{min-width:260px}
 .vazio h2{font-size:18px;font-weight:800;color:var(--ink);margin-bottom:8px}
 .vazio p{color:var(--text-2);font-size:13px;max-width:520px;margin:0 auto 18px;line-height:1.5}
 .kp{background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 12px;min-width:0;border-left:4px solid var(--c,#CBD5E1)}
-.kp .k{font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.kp .v{font-size:19px;font-weight:800;color:var(--ink);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kp .k{font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--text-2);line-height:1.3}
+.kp .v{font-size:19px;font-weight:800;color:var(--ink);margin-top:3px}
 .kp .s{font-size:10.5px;color:var(--text-3);margin-top:2px;line-height:1.3}
 .kp.clk{cursor:pointer}
 .kp.clk:hover{border-color:var(--amber)}
@@ -292,7 +292,7 @@ function renderKPIs(){
     kp('Imóvel', fmtBRL0(at.filter(r=>r.produto==='IMV').length), 'R$ '+fmtMi(at.filter(r=>r.produto==='IMV').reduce((s,r)=>s+(+r.valor_bem||0),0)), '#0FA3A3'),
     kp('Pesados', fmtBRL0(at.filter(r=>r.produto==='PES').length), 'R$ '+fmtMi(at.filter(r=>r.produto==='PES').reduce((s,r)=>s+(+r.valor_bem||0),0)), '#0FA3A3'),
     kp('Vendas 12 meses', fmtBRL0(v12.length), `${pct(v12c.length, v12.length)} já canceladas`, '#7C3AED'),
-    kp('Parcelas pagas (média)', pagasMed.toLocaleString('pt-BR',{maximumFractionDigits:1}), `restam ${restMed.toLocaleString('pt-BR',{maximumFractionDigits:0})} meses em média`, '#64748B'),
+    kp('Parcelas pagas', pagasMed.toLocaleString('pt-BR',{maximumFractionDigits:1}), `média · restam ${restMed.toLocaleString('pt-BR',{maximumFractionDigits:0})} meses em média`, '#64748B'),
     kp('Pagam no cartão', pct(cartao.length, at.length), `débito ${pct(debito.length, at.length)} · boleto ${pct(at.length-cartao.length-debito.length, at.length)}`, '#64748B'),
   ].join('');
 
@@ -301,19 +301,19 @@ function renderKPIs(){
     kp('1 parcela atrasada', fmtBRL0(atr1.length), 'ainda dá para recuperar', '#F59E0B', 'atraso'),
     kp('2 parcelas', fmtBRL0(atr2.length), 'perto da cobrança', '#F59E0B', 'atraso'),
     kp('3 ou mais', fmtBRL0(atr3.length), 'risco de cancelamento', '#EF4444', 'atraso'),
-    kp('Em cobrança/assessoria', fmtBRL0(cob.length), `${pct(cob.length, at.length)} das ativas`, '#EF4444', 'cobranca'),
+    kp('Em cobrança', fmtBRL0(cob.length), `${pct(cob.length, at.length)} das ativas`, '#EF4444', 'cobranca'),
     kp('Comissão a receber', fmtBRL0(comisAReceber)+' parc.', 'cotas em dia dentro do período comissionável', '#10B981'),
-    kp('Taxa de cancelamento', pct(ca.length, V.length), `${fmtBRL0(ca.length)} de ${fmtBRL0(V.length)} vendidas`, '#F59E0B', 'canceladas'),
+    kp('Cancelamento', pct(ca.length, V.length), `${fmtBRL0(ca.length)} de ${fmtBRL0(V.length)} vendidas`, '#F59E0B', 'canceladas'),
     kp('Canceladas 90 dias', fmtBRL0(c90.length), `${fmtBRL0(cancCedo)} cancelaram com até 2 pagas (histórico)`, '#F59E0B', 'canceladas'),
   ].join('');
 
   $('k3').innerHTML = [
     kp('Contempladas ativas', fmtBRL0(cont.length), `${pct(cont.length, at.length)} · R$ ${fmtMi(credCont)}`, '#10B981', 'contempladas'),
-    kp('Aguardando contemplação', fmtBRL0(aguard.length), `${pct(aguard.length, at.length)} das ativas`, '#2563EB', 'aguardando'),
-    kp('Tempo até contemplar', tMed!=null ? tMed.toLocaleString('pt-BR',{maximumFractionDigits:1})+' meses' : '—', 'mediana (todas as contempladas)', '#7C3AED'),
+    kp('Aguardando', fmtBRL0(aguard.length), `${pct(aguard.length, at.length)} das ativas`, '#2563EB', 'aguardando'),
+    kp('Tempo p/ contemplar', tMed!=null ? tMed.toLocaleString('pt-BR',{maximumFractionDigits:1})+' meses' : '—', 'mediana (todas as contempladas)', '#7C3AED'),
     kp('Lance livre', pct(lanceLivre, contAll.length), `sorteio ${pct(sorteio, contAll.length)} · fixo ${pct(lanceFixo, contAll.length)}`, '#7C3AED'),
-    kp('Contemplada sem bem entregue', fmtBRL0(semEnt.length), 'faturamento pendente', '#F59E0B', 'semEntrega'),
-    kp('Contempladas em atraso', fmtBRL0(cont.filter(r=>r.atraso>0).length), 'contemplada e com parcela atrasada', '#EF4444', 'atraso'),
+    kp('Sem bem entregue', fmtBRL0(semEnt.length), 'faturamento pendente', '#F59E0B', 'semEntrega'),
+    kp('Contempl. em atraso', fmtBRL0(cont.filter(r=>r.atraso>0).length), 'contemplada e com parcela atrasada', '#EF4444', 'atraso'),
     kp('Próximas de quitar', fmtBRL0(quase.length), 'até 6 parcelas restantes', '#10B981', 'quase'),
   ].join('');
 }
@@ -388,7 +388,7 @@ const TABS = [
   { id:'semEntrega',   lb:'Contemplada sem bem',      f:r=>r.semEntrega,         sort:['data_contemplacao',1] },
   { id:'quase',        lb:'Próximas de quitar',       f:r=>r.quaseQuitando,      sort:['restante',1] },
   { id:'canceladas',   lb:'Canceladas',               f:r=>r.cancelada,          sort:['data_cancelamento',-1] },
-  { id:'aguardando',   lb:'Aguardando contemplação',  f:r=>r.ativa&&!r.contemplada, sort:['pagas',-1] },
+  { id:'aguardando',   lb:'Aguardando',  f:r=>r.ativa&&!r.contemplada, sort:['pagas',-1] },
   { id:'contempladas', lb:'Contempladas',             f:r=>r.ativa&&r.contemplada, sort:['data_contemplacao',-1] },
   { id:'quitadas',     lb:'Quitadas',                 f:r=>r.quitada,            sort:['data_venda',-1] },
   { id:'ativas',       lb:'Todas as ativas',          f:r=>r.ativa,              sort:['data_venda',-1] },
