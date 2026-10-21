@@ -221,7 +221,8 @@ async function carregar(){
     r.ativa = r.status === 'Ativa'; r.cancelada = r.status === 'Cancelada'; r.quitada = r.status === 'Quitada';
     // Contemplacao a confirmar: contemplada ha mais de 180 dias sem o bem entregue (lance nao pago, credito nao usado ou descontemplada).
     r.diasContempl = r.data_contemplacao ? diasEntre(r.data_contemplacao, hojeISO) : null;
-    r.contemplAConfirmar = r.status === 'Ativa' && !!r.data_contemplacao && !r.data_entrega && r.diasContempl > 180;
+    // Imovel demora mais para faturar (mediana 7 meses, 10% passam de 1 ano e meio): 365 dias; auto/pesados 180.
+    r.contemplAConfirmar = r.status === 'Ativa' && !!r.data_contemplacao && !r.data_entrega && r.diasContempl > (r.produto === 'IMV' ? 365 : 180);
     r.contemplada = !!r.data_contemplacao && !r.contemplAConfirmar;
     r.atraso = r.parcelas_atraso || 0; r.pagas = r.parcelas_pagas || 0;
     r.restante = Math.max(0, (r.prazo_cota||0) - r.pagas);
@@ -230,8 +231,10 @@ async function carregar(){
     // Porto nao estorna: o risco e parar de receber as parcelas de comissao ainda nao pagas
     // (auto/pesados 6 parcelas, imovel ate 12). Em atraso dentro desse periodo = comissao em risco.
     // Cronograma Porto (kb-comissoes): auto/pesados 6 parcelas; imovel 6 (a vista, A e B), 5 (adesao 5x), 12 (adesao 12x, 24x ou campanha).
-    r.nComis = nComisDe(r);
-    r.comisRestante = (r.ativa || r.cancelada) ? Math.max(0, r.nComis - r.pagas) : 0;
+    r.nComis = r.comis_total || nComisDe(r);
+    r.comisRecebidas = r.comis_recebidas != null ? r.comis_recebidas : Math.min(r.pagas, r.nComis);
+    r.comisRestante = (r.ativa || r.cancelada) ? Math.max(0, r.nComis - r.comisRecebidas) : 0;
+    r.comisFonte = r.comis_fonte || 'regra';
     // Em risco = ainda da para recuperar (ate 3 atrasos). Com 4 ou mais a Porto ja mandou para cobranca/cancelamento: comissao perdida.
     r.comissaoRisco = r.ativa && r.atraso > 0 && r.atraso <= 3 && r.comisRestante > 0;
     r.comissaoPerdida = r.comisRestante > 0 && ((r.ativa && r.atraso >= 4) || r.cancelada);
@@ -243,6 +246,11 @@ async function carregar(){
   // filtros
   const cons = [...new Set(ROWS.map(r => r.consultorNome))].sort();
   $('f-cons').innerHTML = '<option value="">Todos os consultores</option>' + cons.map(c => `<option value="${c}">${c}</option>`).join('');
+  // Sócio (Vagner, Renato): abre já filtrado nas próprias cotas, mas pode trocar para ver todos.
+  if (String(currentUser.tipo||'').toLowerCase() === 'socio' && !$('f-cons').value) {
+    const meu = cons.find(c => normN(c) === normN(currentUser.nome));
+    if (meu) $('f-cons').value = meu;
+  }
   const sus = [...new Set(ROWS.map(r => r.susep).filter(Boolean))].sort();
   $('f-susep').innerHTML = '<option value="">Todas as SUSEP</option>' + sus.map(s => `<option value="${s}">${s} ${ROWS.find(r=>r.susep===s).susep_nome||''}</option>`).join('');
   const anos = [...new Set(ROWS.map(r => r.ano).filter(a=>a && a>=2019))].sort();
@@ -317,7 +325,7 @@ function renderKPIs(){
     kp('3 parcelas', fmtBRL0(at.filter(r=>r.atraso===3).length), 'última chance antes do cancelamento', '#EF4444', 'atraso'),
     kp('4 ou mais', fmtBRL0(at.filter(r=>r.atraso>=4).length), 'atraso grave, já com a cobrança da Porto', '#64748B', 'atrasoGrave'),
     kp('Em cobrança', fmtBRL0(cob.length), `${pct(cob.length, at.length)} das ativas`, '#EF4444', 'cobranca'),
-    kp('Comissão a receber', fmtBRL0(comisAReceber)+' parc.', 'cotas em dia dentro do período comissionável', '#10B981'),
+    kp('Comissão a receber', fmtBRL0(comisAReceber)+' parc.', `cotas em dia · ${fmtBRL0(at.filter(r=>r.comisFonte==='fechamento').length)} conferidas nos fechamentos`, '#10B981'),
     kp('Comissão perdida', fmtBRL0(perdida.length), `${fmtBRL0(comisPerdida)} parcelas · 4+ atrasos ou cancelada no período`, '#64748B', 'perdida'),
     kp('Cancelamento', pct(ca.length, V.length), `${fmtBRL0(ca.length)} de ${fmtBRL0(V.length)} vendidas`, '#F59E0B', 'canceladas'),
     kp('Canceladas 90 dias', fmtBRL0(c90.length), `${fmtBRL0(cancCedo)} cancelaram com até 2 pagas (histórico)`, '#F59E0B', 'canceladas'),
@@ -328,8 +336,8 @@ function renderKPIs(){
     kp('Aguardando', fmtBRL0(aguard.length), `${pct(aguard.length, at.length)} das ativas`, '#2563EB', 'aguardando'),
     kp('Tempo p/ contemplar', tMed!=null ? tMed.toLocaleString('pt-BR',{maximumFractionDigits:1})+' meses' : '—', 'mediana (todas as contempladas)', '#7C3AED'),
     kp('Lance livre', pct(lanceLivre, contAll.length), `sorteio ${pct(sorteio, contAll.length)} · fixo ${pct(lanceFixo, contAll.length)}`, '#7C3AED'),
-    kp('Sem bem entregue', fmtBRL0(semEnt.length), 'contemplada há até 180 dias, faturamento pendente', '#F59E0B', 'semEntrega'),
-    kp('Contemplação a confirmar', fmtBRL0(V.filter(r=>r.contemplAConfirmar).length), 'há mais de 180 dias sem bem entregue', '#64748B', 'aConfirmar'),
+    kp('Sem bem entregue', fmtBRL0(semEnt.length), 'contemplada há pouco tempo, faturamento pendente', '#F59E0B', 'semEntrega'),
+    kp('Contemplação a confirmar', fmtBRL0(V.filter(r=>r.contemplAConfirmar).length), 'sem bem entregue há mais de 1 ano (imóvel) ou 6 meses (auto/pesados)', '#64748B', 'aConfirmar'),
     kp('Contempl. em atraso', fmtBRL0(cont.filter(r=>r.atraso>0).length), 'contemplada e com parcela atrasada', '#EF4444', 'atraso'),
     kp('Próximas de quitar', fmtBRL0(quase.length), 'até 6 parcelas restantes', '#10B981', 'quase'),
   ].join('');
@@ -429,7 +437,7 @@ function recalcTabela(){
   rows = [...rows].sort((a,b) => { const x=a[sc], y=b[sc]; if (x==null&&y==null) return 0; if (x==null) return 1; if (y==null) return -1; return (x>y?1:x<y?-1:0)*sd; });
   const cols = [
     ['cliente','Cliente'], ['consultorNome','Consultor', ehAdmin], ['produto','Prod.'], ['grupo','Grupo/Cota'], ['valor_bem','Crédito','r'], ['status','Status'],
-    ['data_venda','Venda'], ['pagas','Pagas','r'], ['restante','Restam','r'], ['atraso','Atraso','r'], ['comisRestante','Comis. restantes','r'], ['situacao_cobranca','Cobrança'], ['data_contemplacao','Contempl.'], ['forma_contemplacao','Forma'],
+    ['data_venda','Venda'], ['pagas','Pagas','r'], ['restante','Restam','r'], ['atraso','Atraso','r'], ['comisRestante','Comissão restante','r'], ['situacao_cobranca','Cobrança'], ['data_contemplacao','Contempl.'], ['forma_contemplacao','Forma'],
     ['data_entrega','Bem entregue'], ['data_cancelamento','Cancel.'], ['motivo_cancelamento','Motivo'], ['forma_pagamento','Pgto'], ['telefone','Telefone'], ['email','E-mail'], ['contrato','Contrato'], ['susep','SUSEP']
   ].filter(c => c[2] !== false);
   const tag = r => r.cancelada ? '<span class="tg tg-r">Cancelada</span>' : r.quitada ? '<span class="tg tg-b">Quitada</span>' : r.contemplAConfirmar ? '<span class="tg tg-a">Ativa · contempl. a confirmar</span>' : r.contemplada ? '<span class="tg tg-g">Ativa · contemplada</span>' : '<span class="tg tg-n">Ativa</span>';
@@ -442,7 +450,7 @@ function recalcTabela(){
     case 'status': return `<td>${tag(r)}</td>`;
     case 'atraso': return `<td class="r">${r.ativa?atrTag(r):''}</td>`;
     case 'pagas': case 'restante': return `<td class="r">${r.ativa||r.quitada?r[k]:''}</td>`;
-    case 'comisRestante': return `<td class="r">${(r.ativa||r.cancelada)?(r.comisRestante>0?`<span class="tg ${(r.atraso>0||r.cancelada)?'tg-r':'tg-g'}">${r.comisRestante} de ${r.nComis}</span>`:'<span class="tg tg-n">paga</span>'):''}</td>`;
+    case 'comisRestante': return `<td class="r" title="${r.comisFonte==='fechamento'?'Conforme fechamentos: '+r.comisRecebidas+' de '+r.nComis+' recebidas (último '+(r.comis_ult_mes||'')+')':'Estimado pela regra do cronograma Porto'}">${(r.ativa||r.cancelada)?(r.comisRestante>0?`<span class="tg ${(r.atraso>0||r.cancelada)?'tg-r':'tg-g'}">${r.comisRestante} de ${r.nComis}</span>`:'<span class="tg tg-n">paga</span>')+(r.comisFonte==='fechamento'?' <small style="color:#94A3B8">✓</small>':''):''}</td>`;
     case 'situacao_cobranca': return `<td>${r.cobranca?`<span class="tg tg-r">${r.situacao_cobranca}</span>`:(r.situacao_cobranca||'')}</td>`;
     case 'data_venda': case 'data_contemplacao': case 'data_entrega': case 'data_cancelamento': return `<td>${fmtD(r[k])}</td>`;
     default: return `<td>${r[k]??''}</td>`; } };
@@ -514,6 +522,13 @@ async function gravar(){
     const porContrato = {}, porGrupoCota = {};
     base.forEach(v => { if (!v.consultor) return; if (v.contrato) porContrato[String(v.contrato).trim()] = v.consultor; if (v.grupo && v.cota) porGrupoCota[normN(v.grupo)+'/'+String(v.cota).replace(/^0+/,'')] = v.consultor; });
     log(`Base: ${base.length} vendas (atualizada ${fmtDT(vc&&vc.atualizado_em)}).`);
+    log('Lendo parcelas de comissão dos fechamentos...');
+    const fe = await sb.rpc('portal_comissao_parcelas_porto');
+    if (fe.error) log('Aviso: não consegui ler os fechamentos (' + fe.error.message + '). Vou usar a regra do cronograma.');
+    const FECH = {};
+    (fe.data||[]).forEach(x => { const k = normN(x.ref.split('/')[0]) + '/' + String(x.ref.split('/')[1]).replace(/^0+/,''); const f = FECH[k] || (FECH[k] = { total:0, n:0, mes:'' }); f.total = Math.max(f.total, x.parcela_total||0); f.n = Math.max(f.n, x.parcela_n||0); if ((x.mes||'') > f.mes) f.mes = x.mes; });
+    log(`Fechamentos: ${(fe.data||[]).length} lançamentos Porto, ${Object.keys(FECH).length} cotas.`);
+    let comFech = 0;
     const userPorNome = {}; USUARIOS.forEach(u => { userPorNome[normN(u.nome)] = u.id; });
     const todos = []; const seen = new Set(); let semBase = 0, semUser = 0; const nomesSemUser = {};
     ARQ.forEach(a => a.recs.forEach(r => {
@@ -524,9 +539,14 @@ async function gravar(){
       const uid = cons ? (userPorNome[normN(cons)] ?? null) : null;
       if (cons && uid == null) { semUser++; nomesSemUser[cons]=(nomesSemUser[cons]||0)+1; }
       const { cod_comissionado, ...rest } = r;
-      todos.push({ adm: ADM, ...rest, consultor: cons || null, consultor_user_id: uid, origem_consultor: origem, atualizado_em: inicio });
+      const fk = normN(r.grupo) + '/' + String(r.cota).replace(/^0+/,''), f = FECH[fk];
+      const regra = nComisDe({ produto: r.produto, parcelas_adesao: r.parcelas_adesao, plano: r.plano });
+      const comis = f ? { comis_total: f.total || regra, comis_recebidas: f.n, comis_fonte: 'fechamento', comis_ult_mes: f.mes } : { comis_total: regra, comis_recebidas: Math.min(r.parcelas_pagas||0, regra), comis_fonte: 'regra', comis_ult_mes: null };
+      if (f) comFech++;
+      todos.push({ adm: ADM, ...rest, consultor: cons || null, consultor_user_id: uid, origem_consultor: origem, ...comis, atualizado_em: inicio });
     }));
     log(`Cruzamento: ${todos.length} cotas, ${todos.length-semBase} com consultor na Base (${semBase} sem venda na Base), ${semUser} de consultores sem login no portal (só admin vê).`);
+    log(`Comissão: ${comFech} cotas com parcelas conferidas nos fechamentos (mai/26 em diante), ${todos.length-comFech} pela regra do cronograma.`);
     const top = Object.entries(nomesSemUser).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([k,n])=>`${k} (${n})`).join(', ');
     if (top) log(`Sem login no portal: ${top}`);
     for (let i=0; i<todos.length; i+=500) {
