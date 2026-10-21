@@ -33,7 +33,25 @@ button{cursor:pointer;font-family:inherit}
 select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12.5px;background:#fff;color:var(--text)}
 input.f{min-width:260px}
 .sec-t{font-size:11px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:var(--text-2);margin:18px 0 8px}
-.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:8px}
+.hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:4px}
+.hc{position:relative;overflow:hidden;border-radius:14px;padding:18px 18px 16px;color:#fff;min-height:112px;cursor:pointer;transition:transform .15s,box-shadow .15s;box-shadow:0 6px 18px rgba(15,42,74,.12)}
+.hc:hover{transform:translateY(-2px);box-shadow:0 10px 24px rgba(15,42,74,.2)}
+.hc::after{content:"";position:absolute;right:-30px;top:-30px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.08)}
+.hc .v{font-size:26px;font-weight:800;letter-spacing:-.5px;line-height:1}
+.hc .k{font-size:12px;font-weight:600;opacity:.95;margin-top:8px}
+.hc .s{font-size:11px;opacity:.75;margin-top:4px}
+.hc.h-navy{background:linear-gradient(135deg,#1D3A6B,#0F2A4A)}
+.hc.h-red{background:linear-gradient(135deg,#DC2626,#7F1D1D)}
+.hc.h-green{background:linear-gradient(135deg,#059669,#065F46)}
+.hc.h-blue{background:linear-gradient(135deg,#2563EB,#1E3A8A)}
+.hc.h-purple{background:linear-gradient(135deg,#7C3AED,#4C1D95)}
+.hc.h-teal{background:linear-gradient(135deg,#0D9488,#134E4A)}
+.hc.h-amber{background:linear-gradient(135deg,#D97706,#92400E)}
+.hc.h-gray{background:linear-gradient(135deg,#64748B,#334155)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+.vazio{background:#fff;border:1px dashed #CBD5E1;border-radius:16px;padding:60px 24px;text-align:center;margin-top:20px}
+.vazio h2{font-size:18px;font-weight:800;color:var(--ink);margin-bottom:8px}
+.vazio p{color:var(--text-2);font-size:13px;max-width:520px;margin:0 auto 18px;line-height:1.5}
 .kp{background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 12px;min-width:0;border-left:4px solid var(--c,#CBD5E1)}
 .kp .k{font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .kp .v{font-size:19px;font-weight:800;color:var(--ink);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -107,6 +125,13 @@ tr:hover td{background:#FAFBFD}
     <span class="note" id="escopo"></span>
   </div>
 
+  <div class="vazio hidden" id="vazio">
+    <h2>Nenhuma carga ainda</h2>
+    <p id="vazio-txt">A carteira é alimentada pelo relatório Gestão de Carteira da Porto (Corretor Online). Assim que a primeira carga for feita, os indicadores aparecem aqui.</p>
+    <button class="btn btn-navy hidden" id="vazio-btn" onclick="abrirUpload()">Atualizar carteira</button>
+  </div>
+  <div id="conteudo">
+  <div class="hero" id="hero"></div>
   <div class="sec-t">Carteira ativa</div>
   <div class="kpis" id="k1"></div>
   <div class="sec-t">Saúde da carteira</div>
@@ -119,6 +144,7 @@ tr:hover td{background:#FAFBFD}
 
   <div class="tabs" id="tabs"></div>
   <div class="tw" id="tw"></div>
+  </div>
 </div>
 
 <div class="ov hidden" id="ov-up">
@@ -218,6 +244,10 @@ function recalc(){
   const fc = $('f-cons').value, fs = $('f-susep').value, fp = $('f-prod').value, fa = $('f-ano').value;
   VIEW = ROWS.filter(r => (!fc || r.consultorNome === fc) && (!fs || r.susep === fs) && (!fp || r.produto === fp) && (!fa || String(r.ano) === fa));
   $('escopo').textContent = `${fmtBRL0(VIEW.length)} cotas no recorte (${fmtBRL0(ROWS.length)} no total)`;
+  const vazio = !ROWS.length;
+  $('vazio').classList.toggle('hidden', !vazio); $('conteudo').classList.toggle('hidden', vazio);
+  document.querySelector('.toolbar').classList.toggle('hidden', vazio);
+  if (vazio) { $('vazio-btn').classList.toggle('hidden', !ehAdmin); $('vazio-txt').textContent = ehAdmin ? 'A carteira é alimentada pelo relatório Gestão de Carteira da Porto (Corretor Online). Baixe o CSV das duas SUSEP e suba aqui.' : 'Sua carteira aparece aqui assim que a administração fizer a primeira carga do relatório da Porto.'; return; }
   renderKPIs(); renderCharts(); renderTabs();
 }
 
@@ -247,10 +277,17 @@ function renderKPIs(){
   const contUlt = ultMes ? contAll.filter(r => r.data_contemplacao.slice(0,7) === ultMes) : [];
   const comisAReceber = at.filter(r=>r.atraso===0).reduce((s,r)=>s+r.comisRestante,0), comisTravada = risco.reduce((s,r)=>s+r.comisRestante,0);
 
+  const hc = (cls, v, k, s, tab) => `<div class="hc ${cls}" onclick="irTab('${tab}')"><div class="v">${v}</div><div class="k">${k}</div><div class="s">${s}</div></div>`;
+  $('hero').innerHTML = [
+    hc('h-navy', fmtBRL0(clientes), 'Clientes', `${fmtBRL0(at.length)} cotas ativas`, 'ativas'),
+    hc('h-blue', 'R$ '+fmtMi(credAt), 'Crédito ativo', `ticket médio R$ ${fmtMi(ticket)}`, 'ativas'),
+    hc('h-red', fmtBRL0(atr.length), 'Cotas em atraso', `${pct(atr.length, at.length)} das ativas`, 'atraso'),
+    hc('h-amber', fmtBRL0(risco.length), 'Comissão em risco', `${fmtBRL0(comisTravada)} parcelas travadas`, 'risco'),
+    hc('h-purple', fmtBRL0(contUlt.length), 'Contempladas na última assembleia', ultMes ? ultMes.split('-').reverse().join('/') : '—', 'contempladas'),
+    hc('h-green', fmtBRL0(qu.length), 'Cotas quitadas', `${fmtBRL0(cont.length)} contempladas ativas`, 'quitadas'),
+    hc('h-gray', fmtBRL0(ca.length), 'Cotas canceladas', `${pct(ca.length, V.length)} do total vendido`, 'canceladas'),
+  ].join('');
   $('k1').innerHTML = [
-    kp('Clientes', fmtBRL0(clientes), 'CPF/CNPJ distintos no recorte', '#0F2A4A'),
-    kp('Cotas ativas', fmtBRL0(at.length), `${fmtBRL0(qu.length)} quitadas · ${fmtBRL0(ca.length)} canceladas`, '#10B981', 'ativas'),
-    kp('Crédito ativo', 'R$ '+fmtMi(credAt), `ticket médio R$ ${fmtMi(ticket)}`, '#2563EB'),
     kp('Automóvel', fmtBRL0(at.filter(r=>r.produto==='AUT').length), 'R$ '+fmtMi(at.filter(r=>r.produto==='AUT').reduce((s,r)=>s+(+r.valor_bem||0),0)), '#0FA3A3'),
     kp('Imóvel', fmtBRL0(at.filter(r=>r.produto==='IMV').length), 'R$ '+fmtMi(at.filter(r=>r.produto==='IMV').reduce((s,r)=>s+(+r.valor_bem||0),0)), '#0FA3A3'),
     kp('Pesados', fmtBRL0(at.filter(r=>r.produto==='PES').length), 'R$ '+fmtMi(at.filter(r=>r.produto==='PES').reduce((s,r)=>s+(+r.valor_bem||0),0)), '#0FA3A3'),
@@ -260,12 +297,11 @@ function renderKPIs(){
   ].join('');
 
   $('k2').innerHTML = [
-    kp('Em atraso', fmtBRL0(atr.length), `${pct(atr.length, at.length)} das ativas · ${fmtBRL0(parcAtrasadas)} parcelas`, '#EF4444', 'atraso'),
+    kp('Parcelas atrasadas', fmtBRL0(parcAtrasadas), `em ${fmtBRL0(atr.length)} cotas`, '#EF4444', 'atraso'),
     kp('1 parcela atrasada', fmtBRL0(atr1.length), 'ainda dá para recuperar', '#F59E0B', 'atraso'),
     kp('2 parcelas', fmtBRL0(atr2.length), 'perto da cobrança', '#F59E0B', 'atraso'),
     kp('3 ou mais', fmtBRL0(atr3.length), 'risco de cancelamento', '#EF4444', 'atraso'),
     kp('Em cobrança/assessoria', fmtBRL0(cob.length), `${pct(cob.length, at.length)} das ativas`, '#EF4444', 'cobranca'),
-    kp('Comissão em risco', fmtBRL0(risco.length), `${fmtBRL0(comisTravada)} parcelas de comissão travadas`, '#EF4444', 'risco'),
     kp('Comissão a receber', fmtBRL0(comisAReceber)+' parc.', 'cotas em dia dentro do período comissionável', '#10B981'),
     kp('Taxa de cancelamento', pct(ca.length, V.length), `${fmtBRL0(ca.length)} de ${fmtBRL0(V.length)} vendidas`, '#F59E0B', 'canceladas'),
     kp('Canceladas 90 dias', fmtBRL0(c90.length), `${fmtBRL0(cancCedo)} cancelaram com até 2 pagas (histórico)`, '#F59E0B', 'canceladas'),
@@ -273,14 +309,12 @@ function renderKPIs(){
 
   $('k3').innerHTML = [
     kp('Contempladas ativas', fmtBRL0(cont.length), `${pct(cont.length, at.length)} · R$ ${fmtMi(credCont)}`, '#10B981', 'contempladas'),
-    kp('Contempladas na última assembleia', fmtBRL0(contUlt.length), ultMes ? ultMes.split('-').reverse().join('/') : '—', '#7C3AED', 'contempladas'),
     kp('Aguardando contemplação', fmtBRL0(aguard.length), `${pct(aguard.length, at.length)} das ativas`, '#2563EB', 'aguardando'),
     kp('Tempo até contemplar', tMed!=null ? tMed.toLocaleString('pt-BR',{maximumFractionDigits:1})+' meses' : '—', 'mediana (todas as contempladas)', '#7C3AED'),
     kp('Lance livre', pct(lanceLivre, contAll.length), `sorteio ${pct(sorteio, contAll.length)} · fixo ${pct(lanceFixo, contAll.length)}`, '#7C3AED'),
     kp('Contemplada sem bem entregue', fmtBRL0(semEnt.length), 'faturamento pendente', '#F59E0B', 'semEntrega'),
     kp('Contempladas em atraso', fmtBRL0(cont.filter(r=>r.atraso>0).length), 'contemplada e com parcela atrasada', '#EF4444', 'atraso'),
     kp('Próximas de quitar', fmtBRL0(quase.length), 'até 6 parcelas restantes', '#10B981', 'quase'),
-    kp('Quitadas', fmtBRL0(qu.length), 'ciclo completo', '#10B981', 'quitadas'),
   ].join('');
 }
 function med(a){ if(!a.length) return null; const s=[...a].sort((x,y)=>x-y); const m=Math.floor(s.length/2); return s.length%2 ? s[m] : (s[m-1]+s[m])/2; }
