@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Master Prime - Carteira</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --navy:#0F2A4A; --navy-2:#1D4E89; --teal:#0FA3A3; --cta:#F4C24A;
+  --bg:#F6F8FB; --card:#FFFFFF; --border:#E6EBF2; --ink:#152A43;
+  --text:#334155; --text-2:#64748B; --text-3:#94A3B8;
+  --green:#10B981; --amber:#F59E0B; --red:#EF4444; --purple:#7C3AED; --blue:#2563EB;
+}
+*{margin:0;box-sizing:border-box;font-family:'Inter',-apple-system,sans-serif}
+body{background:var(--bg);color:var(--text);font-size:13px;min-height:100vh}
+button{cursor:pointer;font-family:inherit}
+.hidden{display:none !important}
+.a-top{background:var(--navy);color:#fff;padding:16px 26px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.a-top h1{font-size:19px;font-weight:800;letter-spacing:-.3px}
+.a-top .sub{font-size:11.5px;opacity:.75;margin-top:3px}
+.a-top .sub b{color:var(--cta);font-weight:700}
+.btn{border:none;border-radius:8px;font-size:12.5px;font-weight:700;padding:9px 16px}
+.btn-p{background:var(--cta);color:var(--ink)}
+.btn-g{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff}
+.btn-w{background:#fff;border:1px solid var(--border);color:var(--text)}
+.btn:disabled{opacity:.5;cursor:default}
+.wrap{padding:16px 26px 40px;max-width:1700px;margin:0 auto}
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.toolbar .sp{flex:1}
+select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12.5px;background:#fff;color:var(--text)}
+input.f{min-width:260px}
+.sec-t{font-size:11px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:var(--text-2);margin:18px 0 8px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:8px}
+.kp{background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px 12px;min-width:0;border-left:4px solid var(--c,#CBD5E1)}
+.kp .k{font-size:9.5px;font-weight:800;letter-spacing:.5px;text-transform:uppercase;color:var(--text-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kp .v{font-size:19px;font-weight:800;color:var(--ink);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kp .s{font-size:10.5px;color:var(--text-3);margin-top:2px;line-height:1.3}
+.kp.clk{cursor:pointer}
+.kp.clk:hover{border-color:var(--amber)}
+.kp.on{background:#FFFBEB;border-color:var(--amber)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:10px}
+.card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:14px 16px;min-width:0}
+.card h3{font-size:12px;font-weight:800;color:var(--ink);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.card h3 small{font-weight:600;color:var(--text-3);font-size:10.5px}
+.bars .row{display:grid;grid-template-columns:150px 1fr 70px;gap:8px;align-items:center;margin:5px 0;font-size:11.5px}
+.bars .lb{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text)}
+.bars .bar{height:14px;background:#EEF2F7;border-radius:6px;overflow:hidden;display:flex}
+.bars .bar i{display:block;height:100%}
+.bars .vl{text-align:right;font-weight:700;color:var(--ink);font-size:11px;white-space:nowrap}
+.leg{display:flex;gap:12px;flex-wrap:wrap;font-size:10.5px;color:var(--text-2);margin-top:8px}
+.leg i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:16px 0 10px}
+.tab{background:#fff;border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:700;color:var(--text-2)}
+.tab.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.tab .n{background:rgba(0,0,0,.08);border-radius:10px;padding:1px 7px;margin-left:6px;font-size:10.5px}
+.tab.on .n{background:rgba(255,255,255,.2)}
+.tw{background:#fff;border:1px solid var(--border);border-radius:12px;overflow:auto;max-height:620px}
+table{width:100%;border-collapse:collapse;font-size:11.5px}
+th{position:sticky;top:0;background:#F1F5F9;text-align:left;font-size:10px;letter-spacing:.4px;text-transform:uppercase;color:var(--text-2);padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+th.r,td.r{text-align:right}
+td{padding:7px 10px;border-bottom:1px solid #F1F5F9;white-space:nowrap;color:var(--text)}
+td.nm{font-weight:700;color:var(--ink);max-width:260px;overflow:hidden;text-overflow:ellipsis}
+tr:hover td{background:#FAFBFD}
+.tg{display:inline-block;font-size:10px;font-weight:700;border-radius:8px;padding:2px 7px}
+.tg-g{background:#D1FAE5;color:#065F46}.tg-r{background:#FEE2E2;color:#991B1B}.tg-a{background:#FEF3C7;color:#92400E}.tg-b{background:#DBEAFE;color:#1E40AF}.tg-n{background:#F1F5F9;color:#475569}.tg-p{background:#EDE9FE;color:#5B21B6}
+.empty{padding:30px;text-align:center;color:var(--text-3)}
+.loading{padding:60px;text-align:center;color:var(--text-2);font-size:14px}
+/* modal */
+.ov{position:fixed;inset:0;background:rgba(15,42,74,.55);display:flex;align-items:center;justify-content:center;z-index:50;padding:16px}
+.md{background:#fff;border-radius:14px;width:min(760px,100%);max-height:92vh;overflow:auto;padding:22px 24px}
+.md h2{font-size:16px;font-weight:800;color:var(--ink);margin-bottom:6px}
+.md p{font-size:12.5px;color:var(--text-2);margin-bottom:12px;line-height:1.5}
+.drop{border:2px dashed #CBD5E1;border-radius:12px;padding:26px;text-align:center;color:var(--text-2);cursor:pointer;background:#F8FAFC}
+.drop.on{border-color:var(--teal);background:#ECFEFF}
+.log{background:#0F172A;color:#E2E8F0;font-family:ui-monospace,Menlo,monospace;font-size:11.5px;border-radius:10px;padding:12px;max-height:260px;overflow:auto;white-space:pre-wrap;margin-top:12px}
+.md .acts{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+.btn-navy{background:var(--navy);color:#fff}
+.note{font-size:11px;color:var(--text-3);margin-top:6px}
+@media(max-width:700px){.bars .row{grid-template-columns:110px 1fr 60px}.wrap{padding:12px}}
+</style>
+</head>
+<body>
+<div class="a-top">
+  <div>
+    <h1>Carteira</h1>
+    <div class="sub" id="sub">Carregando...</div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn btn-g" id="btn-export" onclick="exportarCSV()">Exportar CSV</button>
+    <button class="btn btn-p hidden" id="btn-upload" onclick="abrirUpload()">Atualizar carteira</button>
+  </div>
+</div>
+
+<div class="loading" id="loading">Carregando carteira...</div>
+
+<div class="wrap hidden" id="app">
+  <div class="toolbar">
+    <select class="f hidden" id="f-cons" onchange="recalc()"><option value="">Todos os consultores</option></select>
+    <select class="f hidden" id="f-susep" onchange="recalc()"><option value="">Todas as SUSEP</option></select>
+    <select class="f" id="f-prod" onchange="recalc()"><option value="">Todos os produtos</option><option value="AUT">Automóvel</option><option value="IMV">Imóvel</option><option value="PES">Pesados</option></select>
+    <select class="f" id="f-ano" onchange="recalc()"><option value="">Todos os anos de venda</option></select>
+    <input class="f" id="f-q" placeholder="Buscar cliente, grupo, cota ou contrato" oninput="recalcTabela()">
+    <div class="sp"></div>
+    <span class="note" id="escopo"></span>
+  </div>
+
+  <div class="sec-t">Carteira ativa</div>
+  <div class="kpis" id="k1"></div>
+  <div class="sec-t">Saúde da carteira</div>
+  <div class="kpis" id="k2"></div>
+  <div class="sec-t">Contemplação e ciclo de vida</div>
+  <div class="kpis" id="k3"></div>
+
+  <div class="sec-t">Análises</div>
+  <div class="grid2" id="charts"></div>
+
+  <div class="tabs" id="tabs"></div>
+  <div class="tw" id="tw"></div>
+</div>
+
+<div class="ov hidden" id="ov-up">
+  <div class="md">
+    <h2>Atualizar carteira (Porto)</h2>
+    <p>Solte aqui os CSV do <b>Gestão de Carteira</b> do Corretor Online (uma ou as duas SUSEP). A página cruza cada contrato com a Base de Vendas para achar o consultor, grava no banco e substitui a carga anterior. Nada é alterado no Corretor Online.</p>
+    <div class="drop" id="drop" onclick="document.getElementById('file').click()">Clique ou arraste os arquivos CSV aqui<br><small>relatorio_carteira_AAAAMMDD_HHMM_SUSEP.csv</small></div>
+    <input type="file" id="file" accept=".csv,text/csv" multiple class="hidden" onchange="arquivosEscolhidos(this.files)">
+    <div class="log hidden" id="log"></div>
+    <div class="acts">
+      <button class="btn btn-w" onclick="fecharUpload()">Fechar</button>
+      <button class="btn btn-navy" id="btn-gravar" onclick="gravar()" disabled>Gravar no portal</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://jhwciwvgagnuxakukyob.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const $ = id => document.getElementById(id);
+const ADM = 'PORTO';
+
+let currentUser = null, ehAdmin = false, USUARIOS = [], META = null;
+let ROWS = [];      // todas as linhas visiveis pro usuario (RLS)
+let VIEW = [];      // apos filtros
+let tabAtual = 'atraso', ordem = { col: null, dir: 1 };
+
+const fmtBRL0 = v => (v||0).toLocaleString('pt-BR', { maximumFractionDigits: 0 });
+const fmtMi = v => v >= 1e6 ? (v/1e6).toLocaleString('pt-BR',{maximumFractionDigits:1})+' mi' : v >= 1e3 ? (v/1e3).toLocaleString('pt-BR',{maximumFractionDigits:0})+' mil' : fmtBRL0(v);
+const pct = (a,b) => b ? (100*a/b).toLocaleString('pt-BR',{maximumFractionDigits:1})+'%' : '0%';
+const fmtD = d => d ? d.split('-').reverse().join('/') : '';
+const fmtDT = s => { if(!s) return ''; const d=new Date(s); return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}); };
+const normN = s => String(s||'').toUpperCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\s+/g,' ').trim();
+const PROD = { AUT:'Automóvel', IMV:'Imóvel', PES:'Pesados', BIKE:'Bike' };
+const hoje = new Date(); const hojeISO = hoje.toISOString().slice(0,10);
+const diasEntre = (a,b) => Math.round((new Date(b) - new Date(a))/864e5);
+const mesesEntre = (a,b) => Math.round(diasEntre(a,b)/30.4*10)/10;
+
+// ══════════ INIT ══════════
+(async function init(){
+  try {
+    const { data: sess } = await sb.auth.getSession();
+    if (!sess?.session?.user) { if (window.parent && window.parent !== window) window.parent.location.href = '/'; else window.location.href = '/'; return; }
+    const { data: user } = await sb.from('portal_users').select('*').eq('auth_id', sess.session.user.id).maybeSingle();
+    if (!user) { $('loading').textContent = 'Perfil não encontrado. Contate o administrador.'; return; }
+    currentUser = user;
+    ehAdmin = ['admin','socio','master'].includes(String(user.tipo||'').toLowerCase());
+    if (ehAdmin) { $('btn-upload').classList.remove('hidden'); $('f-cons').classList.remove('hidden'); $('f-susep').classList.remove('hidden'); }
+    const u = await sb.rpc('crm_usuarios'); USUARIOS = u.data || [];
+    await carregar();
+    $('loading').classList.add('hidden'); $('app').classList.remove('hidden');
+  } catch (e) { $('loading').textContent = 'Erro ao carregar: ' + (e.message || e); }
+})();
+
+async function carregar(){
+  const m = await sb.from('portal_carteira_meta').select('*').eq('adm', ADM).maybeSingle();
+  META = m.data || null;
+  ROWS = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await sb.from('portal_carteira').select('*').eq('adm', ADM).order('contrato').range(from, from + 999);
+    if (error) throw error;
+    ROWS.push(...(data||[]));
+    if (!data || data.length < 1000) break;
+  }
+  ROWS.forEach(r => {
+    r.ativa = r.status === 'Ativa'; r.cancelada = r.status === 'Cancelada'; r.quitada = r.status === 'Quitada';
+    r.contemplada = !!r.data_contemplacao;
+    r.atraso = r.parcelas_atraso || 0; r.pagas = r.parcelas_pagas || 0;
+    r.restante = Math.max(0, (r.prazo_cota||0) - r.pagas);
+    r.ano = r.data_venda ? +r.data_venda.slice(0,4) : null;
+    r.cobranca = r.ativa && r.situacao_cobranca && !/^NORMAL|^QUITADO/.test(r.situacao_cobranca);
+    // Porto nao estorna: o risco e parar de receber as parcelas de comissao ainda nao pagas
+    // (auto/pesados 6 parcelas, imovel ate 12). Em atraso dentro desse periodo = comissao em risco.
+    r.nComis = r.produto === 'IMV' ? 12 : 6;
+    r.comisRestante = r.ativa ? Math.max(0, r.nComis - r.pagas) : 0;
+    r.comissaoRisco = r.ativa && r.atraso > 0 && r.comisRestante > 0;
+    r.semEntrega = r.ativa && r.contemplada && !r.data_entrega;
+    r.quaseQuitando = r.ativa && r.restante > 0 && r.restante <= 6;
+    r.cancel90 = r.cancelada && r.data_cancelamento && diasEntre(r.data_cancelamento, hojeISO) <= 90;
+    r.consultorNome = r.consultor || '(sem consultor)';
+  });
+  // filtros
+  const cons = [...new Set(ROWS.map(r => r.consultorNome))].sort();
+  $('f-cons').innerHTML = '<option value="">Todos os consultores</option>' + cons.map(c => `<option value="${c}">${c}</option>`).join('');
+  const sus = [...new Set(ROWS.map(r => r.susep).filter(Boolean))].sort();
+  $('f-susep').innerHTML = '<option value="">Todas as SUSEP</option>' + sus.map(s => `<option value="${s}">${s} ${ROWS.find(r=>r.susep===s).susep_nome||''}</option>`).join('');
+  const anos = [...new Set(ROWS.map(r => r.ano).filter(Boolean))].sort();
+  $('f-ano').innerHTML = '<option value="">Todos os anos de venda</option>' + anos.map(a => `<option value="${a}">${a}</option>`).join('');
+  const subMeta = META ? `Última atualização <b>${fmtDT(META.atualizado_em)}</b> por ${META.atualizado_por||'?'} · carga Porto de ${fmtDT(META.data_carga)} · ${fmtBRL0(META.linhas)} cotas` : 'Nenhuma carga ainda';
+  $('sub').innerHTML = (ehAdmin ? 'Porto Seguro · Gestão de Carteira · ' : `Porto Seguro · cotas de <b>${currentUser.nome}</b> · `) + subMeta;
+  recalc();
+}
+
+// ══════════ FILTRO + KPIs ══════════
+function recalc(){
+  const fc = $('f-cons').value, fs = $('f-susep').value, fp = $('f-prod').value, fa = $('f-ano').value;
+  VIEW = ROWS.filter(r => (!fc || r.consultorNome === fc) && (!fs || r.susep === fs) && (!fp || r.produto === fp) && (!fa || String(r.ano) === fa));
+  $('escopo').textContent = `${fmtBRL0(VIEW.length)} cotas no recorte (${fmtBRL0(ROWS.length)} no total)`;
+  renderKPIs(); renderCharts(); renderTabs();
+}
+
+function kp(k, v, s, c, click){ return `<div class="kp${click?' clk':''}" style="--c:${c||'#CBD5E1'}" ${click?`onclick="irTab('${click}')"`:''}><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s||''}</div></div>`; }
+
+function renderKPIs(){
+  const V = VIEW, at = V.filter(r => r.ativa), ca = V.filter(r => r.cancelada), qu = V.filter(r => r.quitada);
+  const credAt = at.reduce((s,r) => s + (+r.valor_bem||0), 0);
+  const cont = at.filter(r => r.contemplada), aguard = at.filter(r => !r.contemplada);
+  const atr = at.filter(r => r.atraso > 0), atr1 = at.filter(r => r.atraso === 1), atr2 = at.filter(r => r.atraso === 2), atr3 = at.filter(r => r.atraso >= 3);
+  const cob = at.filter(r => r.cobranca), risco = V.filter(r => r.comissaoRisco), semEnt = V.filter(r => r.semEntrega), quase = V.filter(r => r.quaseQuitando);
+  const c90 = V.filter(r => r.cancel90);
+  const d12 = new Date(hoje); d12.setMonth(d12.getMonth()-12); const iso12 = d12.toISOString().slice(0,10);
+  const v12 = V.filter(r => r.data_venda && r.data_venda >= iso12), v12c = v12.filter(r => r.cancelada);
+  const cartao = at.filter(r => /Cart/i.test(r.forma_pagamento||'')), debito = at.filter(r => /D[eé]bito/i.test(r.forma_pagamento||''));
+  const ticket = at.length ? credAt/at.length : 0;
+  const restMed = at.length ? at.reduce((s,r)=>s+r.restante,0)/at.length : 0;
+  const pagasMed = at.length ? at.reduce((s,r)=>s+r.pagas,0)/at.length : 0;
+  const parcAtrasadas = atr.reduce((s,r)=>s+r.atraso,0);
+  const contAll = V.filter(r => r.contemplada && r.data_venda);
+  const tMed = med(contAll.map(r => mesesEntre(r.data_venda, r.data_contemplacao)));
+  const lanceLivre = contAll.filter(r => /Livre/i.test(r.forma_contemplacao||'')).length, sorteio = contAll.filter(r => /Sorteio/i.test(r.forma_contemplacao||'')).length, lanceFixo = contAll.filter(r => /Fixo/i.test(r.forma_contemplacao||'')).length;
+  const cancCedo = ca.filter(r => r.pagas <= 2).length;
+  const credCont = cont.reduce((s,r)=>s+(+r.valor_bem||0),0);
+  const clientes = new Set(V.map(r => r.cpf || r.cliente)).size;
+  const mesesCont = contAll.map(r => r.data_contemplacao.slice(0,7)).sort(); const ultMes = mesesCont[mesesCont.length-1];
+  const contUlt = ultMes ? contAll.filter(r => r.data_contemplacao.slice(0,7) === ultMes) : [];
+  const comisAReceber = at.filter(r=>r.atraso===0).reduce((s,r)=>s+r.comisRestante,0), comisTravada = risco.reduce((s,r)=>s+r.comisRestante,0);
+
+  $('k1').innerHTML = [
+    kp('Clientes', fmtBRL0(clientes), 'CPF/CNPJ distintos no recorte', '#0F2A4A'),
+    kp('Cotas ativas', fmtBRL0(at.length), `${fmtBRL0(qu.length)} quitadas · ${fmtBRL0(ca.length)} canceladas`, '#10B981', 'ativas'),
+    kp('Crédito ativo', 'R$ '+fmtMi(credAt), `ticket médio R$ ${fmtMi(ticket)}`, '#2563EB'),
+    kp('Automóvel', fmtBRL0(at.filter(r=>r.produto==='AUT').length), 'R$ '+fmtMi(at.filter(r=>r.produto==='AUT').reduce((s,r)=>s+(+r.valor_bem||0),0)), '#0FA3A3'),
+    kp('Imóvel', fmtBRL0(at.filter(r=>r.produto==='IMV').length), 'R$ '+fmtMi(at.filter(r=>r.produto==='IMV').reduce((s,r)=>s+(+r.valor_bem||0),0)), '#0FA3A3'),
+    kp('Pesados', fmtBRL0(at.filter(r=>r.produto==='PES').length), 'R$ '+fmtMi(at.filter(r=>r.produto==='PES').reduce((s,r)=>s+(+r.valor_bem||0),0)), '#0FA3A3'),
+    kp('Vendas 12 meses', fmtBRL0(v12.length), `${pct(v12c.length, v12.length)} já canceladas`, '#7C3AED'),
+    kp('Parcelas pagas (média)', pagasMed.toLocaleString('pt-BR',{maximumFractionDigits:1}), `restam ${restMed.toLocaleString('pt-BR',{maximumFractionDigits:0})} meses em média`, '#64748B'),
+    kp('Pagam no cartão', pct(cartao.length, at.length), `débito ${pct(debito.length, at.length)} · boleto ${pct(at.length-cartao.length-debito.length, at.length)}`, '#64748B'),
+  ].join('');
+
+  $('k2').innerHTML = [
+    kp('Em atraso', fmtBRL0(atr.length), `${pct(atr.length, at.length)} das ativas · ${fmtBRL0(parcAtrasadas)} parcelas`, '#EF4444', 'atraso'),
+    kp('1 parcela atrasada', fmtBRL0(atr1.length), 'ainda dá para recuperar', '#F59E0B', 'atraso'),
+    kp('2 parcelas', fmtBRL0(atr2.length), 'perto da cobrança', '#F59E0B', 'atraso'),
+    kp('3 ou mais', fmtBRL0(atr3.length), 'risco de cancelamento', '#EF4444', 'atraso'),
+    kp('Em cobrança/assessoria', fmtBRL0(cob.length), `${pct(cob.length, at.length)} das ativas`, '#EF4444', 'cobranca'),
+    kp('Comissão em risco', fmtBRL0(risco.length), `${fmtBRL0(comisTravada)} parcelas de comissão travadas`, '#EF4444', 'risco'),
+    kp('Comissão a receber', fmtBRL0(comisAReceber)+' parc.', 'cotas em dia dentro do período comissionável', '#10B981'),
+    kp('Taxa de cancelamento', pct(ca.length, V.length), `${fmtBRL0(ca.length)} de ${fmtBRL0(V.length)} vendidas`, '#F59E0B', 'canceladas'),
+    kp('Canceladas 90 dias', fmtBRL0(c90.length), `${fmtBRL0(cancCedo)} cancelaram com até 2 pagas (histórico)`, '#F59E0B', 'canceladas'),
+  ].join('');
+
+  $('k3').innerHTML = [
+    kp('Contempladas ativas', fmtBRL0(cont.length), `${pct(cont.length, at.length)} · R$ ${fmtMi(credCont)}`, '#10B981', 'contempladas'),
+    kp('Contempladas na última assembleia', fmtBRL0(contUlt.length), ultMes ? ultMes.split('-').reverse().join('/') : '—', '#7C3AED', 'contempladas'),
+    kp('Aguardando contemplação', fmtBRL0(aguard.length), `${pct(aguard.length, at.length)} das ativas`, '#2563EB', 'aguardando'),
+    kp('Tempo até contemplar', tMed!=null ? tMed.toLocaleString('pt-BR',{maximumFractionDigits:1})+' meses' : '—', 'mediana (todas as contempladas)', '#7C3AED'),
+    kp('Lance livre', pct(lanceLivre, contAll.length), `sorteio ${pct(sorteio, contAll.length)} · fixo ${pct(lanceFixo, contAll.length)}`, '#7C3AED'),
+    kp('Contemplada sem bem entregue', fmtBRL0(semEnt.length), 'faturamento pendente', '#F59E0B', 'semEntrega'),
+    kp('Contempladas em atraso', fmtBRL0(cont.filter(r=>r.atraso>0).length), 'contemplada e com parcela atrasada', '#EF4444', 'atraso'),
+    kp('Próximas de quitar', fmtBRL0(quase.length), 'até 6 parcelas restantes', '#10B981', 'quase'),
+    kp('Quitadas', fmtBRL0(qu.length), 'ciclo completo', '#10B981', 'quitadas'),
+  ].join('');
+}
+function med(a){ if(!a.length) return null; const s=[...a].sort((x,y)=>x-y); const m=Math.floor(s.length/2); return s.length%2 ? s[m] : (s[m-1]+s[m])/2; }
+
+// ══════════ GRAFICOS (barras em HTML) ══════════
+function barras(titulo, rows, opts={}){
+  // rows: [{lb, segs:[{v,c}], total, txt}]
+  const max = Math.max(1, ...rows.map(r => r.segs.reduce((s,x)=>s+x.v,0)));
+  return `<div class="card"><h3>${titulo}${opts.sub?`<small>${opts.sub}</small>`:''}</h3><div class="bars">` +
+    rows.map(r => `<div class="row"><div class="lb" title="${r.lb}">${r.lb}</div><div class="bar">${r.segs.map(s=>`<i style="width:${100*s.v/max}%;background:${s.c}" title="${s.t||''}"></i>`).join('')}</div><div class="vl">${r.txt}</div></div>`).join('') +
+    `</div>${opts.leg?`<div class="leg">${opts.leg.map(l=>`<span><i style="background:${l.c}"></i>${l.t}</span>`).join('')}</div>`:''}</div>`;
+}
+const C = { g:'#10B981', r:'#EF4444', a:'#F59E0B', b:'#2563EB', n:'#94A3B8', p:'#7C3AED', t:'#0FA3A3' };
+
+function renderCharts(){
+  const V = VIEW, at = V.filter(r=>r.ativa);
+  const out = [];
+  // Status por ano de venda
+  const anos = [...new Set(V.map(r=>r.ano).filter(Boolean))].sort();
+  out.push(barras('Status por ano de venda', anos.map(a => { const s=V.filter(r=>r.ano===a); const n=x=>s.filter(x).length; return { lb:String(a), segs:[{v:n(r=>r.ativa),c:C.g,t:'ativas'},{v:n(r=>r.quitada),c:C.b,t:'quitadas'},{v:n(r=>r.cancelada),c:C.r,t:'canceladas'}], txt:`${s.length} · ${pct(n(r=>r.cancelada),s.length)} canc.` }; }),
+    { leg:[{c:C.g,t:'Ativas'},{c:C.b,t:'Quitadas'},{c:C.r,t:'Canceladas'}], sub:'cancelamento por safra' }));
+  // Inadimplencia por produto
+  const prods = ['AUT','IMV','PES'].filter(p => at.some(r=>r.produto===p));
+  out.push(barras('Inadimplência por produto', prods.map(p => { const s=at.filter(r=>r.produto===p); const a=s.filter(r=>r.atraso>0).length; return { lb:PROD[p], segs:[{v:a,c:C.r,t:'em atraso'},{v:s.length-a,c:'#D1FAE5',t:'em dia'}], txt:`${pct(a,s.length)} (${a})` }; }), { leg:[{c:C.r,t:'Em atraso'},{c:'#D1FAE5',t:'Em dia'}], sub:'cotas ativas' }));
+  // Inadimplencia por forma de pagamento
+  const fps = [...new Set(at.map(r=>r.forma_pagamento).filter(Boolean))];
+  out.push(barras('Inadimplência por forma de pagamento', fps.map(p => { const s=at.filter(r=>r.forma_pagamento===p); const a=s.filter(r=>r.atraso>0).length; return { lb:p, segs:[{v:a,c:C.r},{v:s.length-a,c:'#D1FAE5'}], txt:`${pct(a,s.length)} (${a}/${s.length})` }; }), { sub:'cotas ativas' }));
+  // Atrasos por faixa
+  const fx = [['1 parcela',r=>r.atraso===1],['2 parcelas',r=>r.atraso===2],['3 a 5',r=>r.atraso>=3&&r.atraso<=5],['6 a 11',r=>r.atraso>=6&&r.atraso<=11],['12 ou mais',r=>r.atraso>=12]];
+  out.push(barras('Atrasos por faixa', fx.map(([lb,f]) => { const n=at.filter(f).length; return { lb, segs:[{v:n,c:C.a}], txt:String(n) }; }), { sub:'cotas ativas em atraso' }));
+  // Situacao de cobranca
+  const cobs = {}; at.filter(r=>r.cobranca).forEach(r => { const k=(r.situacao_cobranca||'').replace(/\s+/g,' '); cobs[k]=(cobs[k]||0)+1; });
+  const cobRows = Object.entries(cobs).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if (cobRows.length) out.push(barras('Situação de cobrança (fora do normal)', cobRows.map(([k,n]) => ({ lb:k, segs:[{v:n,c:C.r}], txt:String(n) })), { sub:'cotas ativas' }));
+  // Motivos de cancelamento
+  const mot = {}; V.filter(r=>r.cancelada).forEach(r => { const k=r.motivo_cancelamento||'NÃO INFORMADO'; mot[k]=(mot[k]||0)+1; });
+  const motRows = Object.entries(mot).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  if (motRows.length) out.push(barras('Motivos de cancelamento', motRows.map(([k,n]) => ({ lb:k, segs:[{v:n,c:C.n}], txt:String(n) }))));
+  // Parcelas pagas antes de cancelar
+  const cc = V.filter(r=>r.cancelada);
+  const fc = [['0 pagas',r=>r.pagas===0],['1',r=>r.pagas===1],['2',r=>r.pagas===2],['3',r=>r.pagas===3],['4 a 5',r=>r.pagas>=4&&r.pagas<=5],['6 a 10',r=>r.pagas>=6&&r.pagas<=10],['11 ou mais',r=>r.pagas>=11]];
+  if (cc.length) out.push(barras('Parcelas pagas antes de cancelar', fc.map(([lb,f]) => { const n=cc.filter(f).length; return { lb, segs:[{v:n,c:C.r}], txt:`${n} (${pct(n,cc.length)})` }; }), { sub:'cancelou no período comissionável = comissão que deixou de entrar' }));
+  // Forma de contemplacao
+  const ct = V.filter(r=>r.contemplada);
+  const fcs = [...new Set(ct.map(r=>r.forma_contemplacao).filter(Boolean))];
+  if (ct.length) out.push(barras('Forma de contemplação', fcs.map(f => { const n=ct.filter(r=>r.forma_contemplacao===f).length; return { lb:f, segs:[{v:n,c:C.p}], txt:`${n} (${pct(n,ct.length)})` }; }), { sub:'todas as contempladas' }));
+  // Tempo ate contemplar por produto
+  out.push(barras('Tempo até contemplar (mediana, meses)', prods.map(p => { const s=ct.filter(r=>r.produto===p&&r.data_venda); const m=med(s.map(r=>mesesEntre(r.data_venda,r.data_contemplacao)))||0; return { lb:PROD[p], segs:[{v:m,c:C.t}], txt:`${m.toLocaleString('pt-BR',{maximumFractionDigits:1})} m (${s.length})` }; })));
+  // Fase do prazo
+  const fases = [['0 a 25% pago',0,.25],['25 a 50%',.25,.5],['50 a 75%',.5,.75],['75 a 100%',.75,1.01]];
+  out.push(barras('Fase do prazo (cotas ativas)', fases.map(([lb,a,b]) => { const n=at.filter(r=>{const f=r.prazo_cota?r.pagas/r.prazo_cota:0; return f>=a&&f<b;}).length; return { lb, segs:[{v:n,c:C.b}], txt:`${n} (${pct(n,at.length)})` }; })));
+  // Por consultor (admin)
+  if (ehAdmin && !$('f-cons').value) {
+    const cons = {}; V.forEach(r => { (cons[r.consultorNome] = cons[r.consultorNome] || []).push(r); });
+    const rows = Object.entries(cons).map(([k,s]) => { const a=s.filter(r=>r.ativa); const atr=a.filter(r=>r.atraso>0).length; const canc=s.filter(r=>r.cancelada).length; return { k, n:s.length, at:a.length, atr, canc, cred:a.reduce((x,r)=>x+(+r.valor_bem||0),0) }; }).sort((a,b)=>b.at-a.at).slice(0,25);
+    out.push(barras('Carteira ativa por consultor', rows.map(r => ({ lb:r.k, segs:[{v:r.at-r.atr,c:C.g,t:'em dia'},{v:r.atr,c:C.r,t:'em atraso'}], txt:`${r.at} · ${pct(r.atr,r.at)} atr.` })), { leg:[{c:C.g,t:'Em dia'},{c:C.r,t:'Em atraso'}], sub:'top 25' }));
+    out.push(barras('Cancelamento por consultor', rows.filter(r=>r.n>=10).sort((a,b)=>b.canc/b.n-a.canc/a.n).map(r => ({ lb:r.k, segs:[{v:r.canc,c:C.r},{v:r.n-r.canc,c:'#E2E8F0'}], txt:`${pct(r.canc,r.n)} (${r.canc}/${r.n})` })), { sub:'consultores com 10+ cotas' }));
+  }
+  // Top grupos
+  const gr = {}; at.forEach(r => { gr[r.grupo]=(gr[r.grupo]||0)+1; });
+  const grRows = Object.entries(gr).sort((a,b)=>b[1]-a[1]).slice(0,10);
+  if (grRows.length) out.push(barras('Grupos com mais cotas ativas', grRows.map(([k,n]) => ({ lb:k, segs:[{v:n,c:C.t}], txt:String(n) })), { sub:'top 10' }));
+  $('charts').innerHTML = out.join('');
+}
+
+// ══════════ TABELAS ══════════
+const TABS = [
+  { id:'atraso',       lb:'Em atraso',                f:r=>r.ativa&&r.atraso>0,  sort:['atraso',-1] },
+  { id:'risco',        lb:'Comissão em risco',        f:r=>r.comissaoRisco,      sort:['comisRestante',-1] },
+  { id:'cobranca',     lb:'Em cobrança',              f:r=>r.cobranca,           sort:['atraso',-1] },
+  { id:'semEntrega',   lb:'Contemplada sem bem',      f:r=>r.semEntrega,         sort:['data_contemplacao',1] },
+  { id:'quase',        lb:'Próximas de quitar',       f:r=>r.quaseQuitando,      sort:['restante',1] },
+  { id:'canceladas',   lb:'Canceladas',               f:r=>r.cancelada,          sort:['data_cancelamento',-1] },
+  { id:'aguardando',   lb:'Aguardando contemplação',  f:r=>r.ativa&&!r.contemplada, sort:['pagas',-1] },
+  { id:'contempladas', lb:'Contempladas',             f:r=>r.ativa&&r.contemplada, sort:['data_contemplacao',-1] },
+  { id:'quitadas',     lb:'Quitadas',                 f:r=>r.quitada,            sort:['data_venda',-1] },
+  { id:'ativas',       lb:'Todas as ativas',          f:r=>r.ativa,              sort:['data_venda',-1] },
+  { id:'todas',        lb:'Todas',                    f:r=>true,                 sort:['data_venda',-1] },
+];
+function irTab(id){ tabAtual = id; ordem = { col:null, dir:1 }; renderTabs(); document.getElementById('tabs').scrollIntoView({ behavior:'smooth', block:'start' }); }
+function renderTabs(){
+  $('tabs').innerHTML = TABS.map(t => `<button class="tab${t.id===tabAtual?' on':''}" onclick="irTab('${t.id}')">${t.lb}<span class="n">${fmtBRL0(VIEW.filter(t.f).length)}</span></button>`).join('');
+  recalcTabela();
+}
+function ordenar(col){ ordem = ordem.col === col ? { col, dir:-ordem.dir } : { col, dir:1 }; recalcTabela(); }
+function recalcTabela(){
+  const t = TABS.find(x=>x.id===tabAtual) || TABS[0];
+  const q = normN($('f-q').value);
+  let rows = VIEW.filter(t.f);
+  if (q) rows = rows.filter(r => normN(r.cliente).includes(q) || normN(r.grupo+'/'+r.cota).includes(q) || String(r.contrato).includes(q) || normN(r.grupo).includes(q) || normN(r.consultorNome).includes(q));
+  const [sc, sd] = ordem.col ? [ordem.col, ordem.dir] : t.sort;
+  rows = [...rows].sort((a,b) => { const x=a[sc], y=b[sc]; if (x==null&&y==null) return 0; if (x==null) return 1; if (y==null) return -1; return (x>y?1:x<y?-1:0)*sd; });
+  const cols = [
+    ['cliente','Cliente'], ['consultorNome','Consultor', ehAdmin], ['produto','Prod.'], ['grupo','Grupo/Cota'], ['valor_bem','Crédito','r'], ['status','Status'],
+    ['data_venda','Venda'], ['pagas','Pagas','r'], ['restante','Restam','r'], ['atraso','Atraso','r'], ['comisRestante','Comis. restantes','r'], ['situacao_cobranca','Cobrança'], ['data_contemplacao','Contempl.'], ['forma_contemplacao','Forma'],
+    ['data_entrega','Bem entregue'], ['data_cancelamento','Cancel.'], ['motivo_cancelamento','Motivo'], ['forma_pagamento','Pgto'], ['telefone','Telefone'], ['email','E-mail'], ['contrato','Contrato'], ['susep','SUSEP']
+  ].filter(c => c[2] !== false);
+  const tag = r => r.cancelada ? '<span class="tg tg-r">Cancelada</span>' : r.quitada ? '<span class="tg tg-b">Quitada</span>' : r.contemplada ? '<span class="tg tg-g">Ativa · contemplada</span>' : '<span class="tg tg-n">Ativa</span>';
+  const atrTag = r => r.atraso>=3 ? `<span class="tg tg-r">${r.atraso}</span>` : r.atraso>0 ? `<span class="tg tg-a">${r.atraso}</span>` : '<span class="tg tg-g">0</span>';
+  const cell = (r,c) => { const k=c[0]; switch(k){
+    case 'cliente': return `<td class="nm" title="${r.cliente||''}">${r.cliente||''}</td>`;
+    case 'produto': return `<td>${PROD[r.produto]||r.produto||''}</td>`;
+    case 'grupo': return `<td><b>${r.grupo}/${r.cota}</b></td>`;
+    case 'valor_bem': return `<td class="r">${fmtBRL0(+r.valor_bem)}</td>`;
+    case 'status': return `<td>${tag(r)}</td>`;
+    case 'atraso': return `<td class="r">${r.ativa?atrTag(r):''}</td>`;
+    case 'pagas': case 'restante': return `<td class="r">${r.ativa||r.quitada?r[k]:''}</td>`;
+    case 'comisRestante': return `<td class="r">${r.ativa?(r.comisRestante>0?`<span class="tg ${r.atraso>0?'tg-r':'tg-g'}">${r.comisRestante} de ${r.nComis}</span>`:'<span class="tg tg-n">paga</span>'):''}</td>`;
+    case 'situacao_cobranca': return `<td>${r.cobranca?`<span class="tg tg-r">${r.situacao_cobranca}</span>`:(r.situacao_cobranca||'')}</td>`;
+    case 'data_venda': case 'data_contemplacao': case 'data_entrega': case 'data_cancelamento': return `<td>${fmtD(r[k])}</td>`;
+    default: return `<td>${r[k]??''}</td>`; } };
+  if (!rows.length) { $('tw').innerHTML = '<div class="empty">Nenhuma cota neste recorte.</div>'; return; }
+  const lim = rows.slice(0, 1500);
+  $('tw').innerHTML = `<table><thead><tr>${cols.map(c=>`<th class="${c[2]==='r'?'r':''}" onclick="ordenar('${c[0]}')">${c[1]}${ordem.col===c[0]?(ordem.dir>0?' ▲':' ▼'):''}</th>`).join('')}</tr></thead><tbody>` +
+    lim.map(r => `<tr>${cols.map(c=>cell(r,c)).join('')}</tr>`).join('') + `</tbody></table>` + (rows.length>1500?`<div class="empty">Mostrando 1.500 de ${fmtBRL0(rows.length)}. Use a busca ou exporte o CSV.</div>`:'');
+  window.__exportRows = rows;
+}
+
+function exportarCSV(){
+  const rows = window.__exportRows || VIEW; if (!rows.length) return;
+  const cols = ['cliente','cpf','consultorNome','susep','produto','grupo','cota','contrato','valor_bem','status','data_venda','prazo_cota','pagas','restante','atraso','situacao_cobranca','data_contemplacao','forma_contemplacao','data_entrega','data_cancelamento','motivo_cancelamento','forma_pagamento','telefone','email'];
+  const esc = v => { v = v==null?'':String(v); return /[;"\n]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v; };
+  const csv = '﻿' + cols.join(';') + '\n' + rows.map(r => cols.map(c => esc(r[c])).join(';')).join('\n');
+  const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})); a.download = `carteira_${tabAtual}_${hojeISO}.csv`; a.click();
+}
+
+// ══════════ UPLOAD (admin) ══════════
+let ARQ = [];
+function abrirUpload(){ $('ov-up').classList.remove('hidden'); $('log').classList.add('hidden'); $('log').textContent=''; ARQ=[]; $('btn-gravar').disabled = true; }
+function fecharUpload(){ $('ov-up').classList.add('hidden'); }
+const drop = $('drop');
+drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('on'); });
+drop.addEventListener('dragleave', () => drop.classList.remove('on'));
+drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('on'); arquivosEscolhidos(e.dataTransfer.files); });
+function log(s){ const l=$('log'); l.classList.remove('hidden'); l.textContent += s + '\n'; l.scrollTop = l.scrollHeight; }
+
+function parseCSV(text){
+  // separador ; com campos entre aspas
+  const rows=[]; let row=[], cur='', q=false;
+  for (let i=0;i<text.length;i++){ const ch=text[i];
+    if (q){ if (ch==='"'){ if (text[i+1]==='"'){ cur+='"'; i++; } else q=false; } else cur+=ch; }
+    else if (ch==='"') q=true; else if (ch===';'){ row.push(cur); cur=''; } else if (ch==='\n'){ row.push(cur); rows.push(row); row=[]; cur=''; } else if (ch!=='\r') cur+=ch; }
+  if (cur.length||row.length){ row.push(cur); rows.push(row); }
+  return rows.filter(r => r.length>1);
+}
+const H = {
+  'Cliente':'cliente','CPF/CNPJ':'cpf','E-mail':'email','Telefone':'telefone','Plano':'plano','Data venda':'data_venda','Qtd parcelas adesão':'parcelas_adesao','Valor do bem':'valor_bem','Produto':'produto','Prazo do grupo':'prazo_grupo','Contrato':'contrato','Grupo':'grupo','Cota':'cota','Versão':'versao','Prazo da cota':'prazo_cota','Status':'status','Data da contemplação':'data_contemplacao','Forma da contemplação':'forma_contemplacao','Data da entrega do bem':'data_entrega','Data do cancelamento':'data_cancelamento','Motivo do cancelamento':'motivo_cancelamento','Forma de pagamento':'forma_pagamento','Situação da cobrança':'situacao_cobranca','Qtd parcelas pagas':'parcelas_pagas','Qtd parcelas em atraso':'parcelas_atraso','Código comissionado':'cod_comissionado','Nome comissionado':'susep_nome','SUSEP':'susep','Data carga':'data_carga'
+};
+const INT = ['parcelas_adesao','prazo_grupo','prazo_cota','parcelas_pagas','parcelas_atraso'];
+const DT = ['data_venda','data_contemplacao','data_entrega','data_cancelamento'];
+
+async function arquivosEscolhidos(files){
+  ARQ = []; $('log').textContent=''; $('btn-gravar').disabled = true;
+  for (const f of files) {
+    const text = await f.text();
+    const rows = parseCSV(text.replace(/^﻿/,''));
+    const head = rows[0].map(h => h.trim());
+    const idx = {}; head.forEach((h,i) => { const k = H[h] || H[Object.keys(H).find(x => normN(x)===normN(h))]; if (k) idx[k]=i; });
+    const falta = ['contrato','grupo','cota','status','susep'].filter(k => idx[k]==null);
+    if (falta.length) { log(`${f.name}: não parece o Gestão de Carteira (faltam ${falta.join(', ')}). Ignorado.`); continue; }
+    const recs = rows.slice(1).map(r => { const o={}; for (const k in idx){ let v=(r[idx[k]]??'').trim(); if (INT.includes(k)) v = v===''?null:parseInt(v,10); else if (k==='valor_bem') v = v===''?null:parseFloat(v.replace(',','.')); else if (DT.includes(k)) v = v||null; else if (k==='data_carga') v = v?new Date(v).toISOString():null; else v = v||null; o[k]=v; } return o; }).filter(o => o.contrato);
+    ARQ.push({ nome:f.name, recs });
+    const sus = [...new Set(recs.map(r=>r.susep))].join(', ');
+    log(`${f.name}: ${recs.length} cotas · SUSEP ${sus} · carga Porto ${recs[0].data_carga?fmtDT(recs[0].data_carga):'?'}`);
+  }
+  if (ARQ.length) { log(`\nPronto para gravar ${ARQ.reduce((s,a)=>s+a.recs.length,0)} cotas. Clique em "Gravar no portal".`); $('btn-gravar').disabled = false; }
+}
+
+async function gravar(){
+  $('btn-gravar').disabled = true;
+  try {
+    const inicio = new Date().toISOString();
+    log('\nLendo Base de Vendas (cache do portal)...');
+    const ru = await sb.rpc('crm_usuarios'); if (ru.data && ru.data.length) USUARIOS = ru.data;
+    const { data: vc } = await sb.from('portal_vendas_cache').select('dados,atualizado_em').eq('id',1).maybeSingle();
+    const base = (vc && vc.dados) || [];
+    const porContrato = {}, porGrupoCota = {};
+    base.forEach(v => { if (!v.consultor) return; if (v.contrato) porContrato[String(v.contrato).trim()] = v.consultor; if (v.grupo && v.cota) porGrupoCota[normN(v.grupo)+'/'+String(v.cota).replace(/^0+/,'')] = v.consultor; });
+    log(`Base: ${base.length} vendas (atualizada ${fmtDT(vc&&vc.atualizado_em)}).`);
+    const userPorNome = {}; USUARIOS.forEach(u => { userPorNome[normN(u.nome)] = u.id; });
+    const todos = []; const seen = new Set(); let semBase = 0, semUser = 0; const nomesSemUser = {};
+    ARQ.forEach(a => a.recs.forEach(r => {
+      if (seen.has(r.contrato)) return; seen.add(r.contrato);
+      let cons = porContrato[r.contrato], origem = cons ? 'contrato' : null;
+      if (!cons) { cons = porGrupoCota[normN(r.grupo)+'/'+String(r.cota).replace(/^0+/,'')]; origem = cons ? 'grupo_cota' : null; }
+      if (!cons) semBase++;
+      const uid = cons ? (userPorNome[normN(cons)] ?? null) : null;
+      if (cons && uid == null) { semUser++; nomesSemUser[cons]=(nomesSemUser[cons]||0)+1; }
+      const { cod_comissionado, ...rest } = r;
+      todos.push({ adm: ADM, ...rest, consultor: cons || null, consultor_user_id: uid, origem_consultor: origem, atualizado_em: inicio });
+    }));
+    log(`Cruzamento: ${todos.length} cotas, ${todos.length-semBase} com consultor na Base (${semBase} sem venda na Base), ${semUser} de consultores sem login no portal (só admin vê).`);
+    const top = Object.entries(nomesSemUser).sort((a,b)=>b[1]-a[1]).slice(0,8).map(([k,n])=>`${k} (${n})`).join(', ');
+    if (top) log(`Sem login no portal: ${top}`);
+    for (let i=0; i<todos.length; i+=500) {
+      const { error } = await sb.from('portal_carteira').upsert(todos.slice(i,i+500), { onConflict: 'adm,contrato' });
+      if (error) throw error;
+      log(`Gravadas ${Math.min(i+500,todos.length)} de ${todos.length}...`);
+    }
+    const susepsEnviadas = [...new Set(todos.map(r=>r.susep))];
+    // remove cotas antigas das SUSEP enviadas que não vieram nesta carga
+    for (const s of susepsEnviadas) {
+      const { error } = await sb.from('portal_carteira').delete().eq('adm', ADM).eq('susep', s).lt('atualizado_em', inicio);
+      if (error) throw error;
+    }
+    const cargas = todos.map(r=>r.data_carga).filter(Boolean).sort();
+    const meta = { adm: ADM, atualizado_em: inicio, atualizado_por: currentUser.nome, data_carga: cargas[cargas.length-1] || null, linhas: todos.length, sem_consultor: semBase, detalhe: { susep: susepsEnviadas, arquivos: ARQ.map(a=>a.nome), sem_login: nomesSemUser } };
+    const { error: me } = await sb.from('portal_carteira_meta').upsert(meta, { onConflict: 'adm' });
+    if (me) throw me;
+    log('\nConcluído. Recarregando a página...');
+    await carregar();
+    setTimeout(fecharUpload, 1200);
+  } catch (e) { log('ERRO: ' + (e.message || JSON.stringify(e))); $('btn-gravar').disabled = false; }
+}
+</script>
+</body>
+</html>
