@@ -245,7 +245,7 @@ async function carregar(){
   $('f-cons').innerHTML = '<option value="">Todos os consultores</option>' + cons.map(c => `<option value="${c}">${c}</option>`).join('');
   const sus = [...new Set(ROWS.map(r => r.susep).filter(Boolean))].sort();
   $('f-susep').innerHTML = '<option value="">Todas as SUSEP</option>' + sus.map(s => `<option value="${s}">${s} ${ROWS.find(r=>r.susep===s).susep_nome||''}</option>`).join('');
-  const anos = [...new Set(ROWS.map(r => r.ano).filter(Boolean))].sort();
+  const anos = [...new Set(ROWS.map(r => r.ano).filter(a=>a && a>=2019))].sort();
   $('f-ano').innerHTML = '<option value="">Todos os anos de venda</option>' + anos.map(a => `<option value="${a}">${a}</option>`).join('');
   const subMeta = META ? `Última atualização <b>${fmtDT(META.atualizado_em)}</b> por ${META.atualizado_por||'?'} · carga Porto de ${fmtDT(META.data_carga)} · ${fmtBRL0(META.linhas)} cotas` : 'Nenhuma carga ainda';
   $('sub').innerHTML = (ehAdmin ? 'Porto Seguro · Gestão de Carteira · ' : `Porto Seguro · cotas de <b>${currentUser.nome}</b> · `) + subMeta;
@@ -295,7 +295,7 @@ function renderKPIs(){
   $('hero').innerHTML = [
     hc('h-navy', fmtBRL0(clientes), 'Clientes', `${fmtBRL0(at.length)} cotas ativas`, 'ativas'),
     hc('h-blue', 'R$ '+fmtMi(credAt), 'Crédito ativo', `ticket médio R$ ${fmtMi(ticket)}`, 'ativas'),
-    hc('h-red', fmtBRL0(atr.length), 'Cotas em atraso', `${pct(atr.length, at.length)} das ativas`, 'atraso'),
+    hc('h-red', fmtBRL0(atr.filter(r=>r.atraso<=3).length), 'Em atraso (ação do consultor)', `1 a 3 parcelas · ${fmtBRL0(atr.length)} no total`, 'atraso'),
     hc('h-amber', fmtBRL0(risco.length), 'Comissão em risco', `${fmtBRL0(comisTravada)} parcelas · até 3 atrasos, dá para recuperar`, 'risco'),
     hc('h-purple', fmtBRL0(contUlt.length), 'Contempladas na última assembleia', ultMes ? ultMes.split('-').reverse().join('/') : '—', 'contempladas'),
     hc('h-green', fmtBRL0(qu.length), 'Cotas quitadas', `${fmtBRL0(cont.length)} contempladas ativas`, 'quitadas'),
@@ -314,7 +314,8 @@ function renderKPIs(){
     kp('Parcelas atrasadas', fmtBRL0(parcAtrasadas), `em ${fmtBRL0(atr.length)} cotas`, '#EF4444', 'atraso'),
     kp('1 parcela atrasada', fmtBRL0(atr1.length), 'ainda dá para recuperar', '#F59E0B', 'atraso'),
     kp('2 parcelas', fmtBRL0(atr2.length), 'perto da cobrança', '#F59E0B', 'atraso'),
-    kp('3 ou mais', fmtBRL0(atr3.length), 'risco de cancelamento', '#EF4444', 'atraso'),
+    kp('3 parcelas', fmtBRL0(at.filter(r=>r.atraso===3).length), 'última chance antes do cancelamento', '#EF4444', 'atraso'),
+    kp('4 ou mais', fmtBRL0(at.filter(r=>r.atraso>=4).length), 'atraso grave, já com a cobrança da Porto', '#64748B', 'atrasoGrave'),
     kp('Em cobrança', fmtBRL0(cob.length), `${pct(cob.length, at.length)} das ativas`, '#EF4444', 'cobranca'),
     kp('Comissão a receber', fmtBRL0(comisAReceber)+' parc.', 'cotas em dia dentro do período comissionável', '#10B981'),
     kp('Comissão perdida', fmtBRL0(perdida.length), `${fmtBRL0(comisPerdida)} parcelas · 4+ atrasos ou cancelada no período`, '#64748B', 'perdida'),
@@ -349,7 +350,7 @@ function renderCharts(){
   const V = VIEW, at = V.filter(r=>r.ativa);
   const out = [];
   // Status por ano de venda
-  const anos = [...new Set(V.map(r=>r.ano).filter(Boolean))].sort();
+  const anos = [...new Set(V.map(r=>r.ano).filter(a=>a && a>=2019))].sort();
   out.push(barras('Status por ano de venda', anos.map(a => { const s=V.filter(r=>r.ano===a); const n=x=>s.filter(x).length; return { lb:String(a), segs:[{v:n(r=>r.ativa),c:C.g,t:'ativas'},{v:n(r=>r.quitada),c:C.b,t:'quitadas'},{v:n(r=>r.cancelada),c:C.r,t:'canceladas'}], txt:`${s.length} · ${pct(n(r=>r.cancelada),s.length)} canc.` }; }),
     { leg:[{c:C.g,t:'Ativas'},{c:C.b,t:'Quitadas'},{c:C.r,t:'Canceladas'}], sub:'cancelamento por safra' }));
   // Inadimplencia por produto
@@ -398,7 +399,8 @@ function renderCharts(){
 
 // ══════════ TABELAS ══════════
 const TABS = [
-  { id:'atraso',       lb:'Em atraso',                f:r=>r.ativa&&r.atraso>0,  sort:['atraso',-1] },
+  { id:'atraso',       lb:'Em atraso (1 a 3)',        f:r=>r.ativa&&r.atraso>0&&r.atraso<=3,  sort:['atraso',-1] },
+  { id:'atrasoGrave',  lb:'Atraso grave (4 ou mais)',  f:r=>r.ativa&&r.atraso>=4, sort:['atraso',-1] },
   { id:'risco',        lb:'Comissão em risco',        f:r=>r.comissaoRisco,      sort:['comisRestante',-1] },
   { id:'perdida',      lb:'Comissão perdida',         f:r=>r.comissaoPerdida,    sort:['data_venda',-1] },
   { id:'cobranca',     lb:'Em cobrança',              f:r=>r.cobranca,           sort:['atraso',-1] },
