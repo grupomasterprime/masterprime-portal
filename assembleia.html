@@ -291,7 +291,7 @@ function render(g){
   const mwd=gd.filter(x=>x!=null).length;
   document.getElementById("rId").textContent=g;
   const pz=prazoInfo(g); const rp=document.getElementById("rPrazo");
-  rp.innerHTML=pz?`<b>${pz.rest}/${pz.tot}</b> meses restantes · <b>${pz.part}/${pz.cap}</b> participantes`:"Prazo não disponível (grupo fechado para venda)";
+  rp.innerHTML=pz?`<b>${pz.rest}/${pz.tot}</b> meses restantes · <b>${pz.part}/${pz.cap}</b> participantes`:"Prazo não disponível (grupo sem vagas livres para venda)";
   document.getElementById("rMes").textContent=comp;
   document.getElementById("rSub").textContent=mwd+" competências com dados";
   document.getElementById("hBg").textContent=mwd+" competências";
