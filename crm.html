@@ -217,6 +217,7 @@ select.f, input.f{border:1px solid var(--border);border-radius:8px;padding:8px 1
 <div class="ovl hidden" id="ovl-det">
   <div class="mod mod-lg">
     <h2 id="md-nome"></h2>
+    <div id="md-criado" style="font-size:11px;color:#94A3B8;margin:-4px 0 8px"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <div class="fg"><label>Etapa</label>
         <select id="md-etapa"></select>
@@ -537,6 +538,7 @@ function renderKanban(){
         <div class="lead${parado ? ' atrasado' : ''}" style="--c:${et.cor}" draggable="true" ondragstart="dragStart(event,'${l.id}')" onclick="abrirDetalhe('${l.id}')">
           <div class="nm">${esc(l.nome)}</div>
           <div class="mt">${esc(l.interesse || 'Sem interesse definido')}${l.consultor ? ' · ' + esc(primeiroNome(l.consultor.nome)) : ''}</div>
+          <div class="mt" style="color:#94A3B8" title="Data em que o lead foi cadastrado no CRM">Cadastrado em ${l.criado_em ? new Date(l.criado_em).toLocaleDateString('pt-BR') : ''}</div>
           ${l.etapa === 'vendido' && l.valor_credito != null ? `<div class="mt" style="color:#065F46;font-weight:700">R$ ${fmtBRL(l.valor_credito)}${l.qtd_cotas ? ' · ' + l.qtd_cotas + ' cota' + (l.qtd_cotas > 1 ? 's' : '') : ''}</div>` : ''}
           ${fuHtml}
           ${parado ? `<div class="mt parado">Parado há ${Math.floor(idadeDias(l))} dia${Math.floor(idadeDias(l)) === 1 ? '' : 's'}</div>` : ''}
@@ -620,6 +622,7 @@ async function abrirDetalhe(id, forcarEtapa){
   if (!l) return;
   leadAberto = l;
   $('md-nome').textContent = l.nome;
+  $('md-criado').textContent = l.criado_em ? 'Cadastrado no CRM em ' + new Date(l.criado_em).toLocaleDateString('pt-BR') + ' às ' + new Date(l.criado_em).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}) + (l.atualizado_em ? ' · última atualização ' + new Date(l.atualizado_em).toLocaleDateString('pt-BR') : '') : '';
   $('md-etapa').innerHTML = ETAPAS.map(e => `<option value="${e.id}">${e.nome}</option>`).join('');
   $('md-etapa').value = forcarEtapa || l.etapa;
   $('md-cons').value = l.consultor_id || '';
