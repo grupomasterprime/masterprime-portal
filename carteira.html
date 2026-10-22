@@ -282,6 +282,7 @@ function renderKPIs(){
   const cob = at.filter(r => r.cobranca), risco = V.filter(r => r.comissaoRisco), semEnt = V.filter(r => r.semEntrega), quase = V.filter(r => r.quaseQuitando);
   const c90 = V.filter(r => r.cancel90);
   const d12 = new Date(hoje); d12.setMonth(d12.getMonth()-12); const iso12 = d12.toISOString().slice(0,10);
+  window.__iso12 = iso12;
   const v12 = V.filter(r => r.data_venda && r.data_venda >= iso12), v12c = v12.filter(r => r.cancelada);
   const cartao = at.filter(r => /Cart/i.test(r.forma_pagamento||'')), debito = at.filter(r => /D[eé]bito/i.test(r.forma_pagamento||''));
   const ticket = at.length ? credAt/at.length : 0;
@@ -301,7 +302,7 @@ function renderKPIs(){
 
   const hc = (cls, v, k, s, tab) => `<div class="hc ${cls}" onclick="irTab('${tab}')"><div class="v">${v}</div><div class="k">${k}</div><div class="s">${s}</div></div>`;
   $('hero').innerHTML = [
-    hc('h-navy', fmtBRL0(clientes), 'Clientes', `${fmtBRL0(at.length)} cotas ativas`, 'ativas'),
+    hc('h-navy', fmtBRL0(clientes), 'Clientes', `${fmtBRL0(at.length)} cotas ativas`, 'todas'),
     hc('h-blue', 'R$ '+fmtMi(credAt), 'Crédito ativo', `ticket médio R$ ${fmtMi(ticket)}`, 'ativas'),
     hc('h-red', fmtBRL0(atr.filter(r=>r.atraso<=3).length), 'Em atraso (ação do consultor)', `1 a 3 parcelas · ${fmtBRL0(atr.length)} no total`, 'atraso'),
     hc('h-amber', fmtBRL0(risco.length), 'Comissão em risco', `${fmtBRL0(comisTravada)} parcelas · até 3 atrasos, dá para recuperar`, 'risco'),
@@ -310,25 +311,25 @@ function renderKPIs(){
     hc('h-gray', fmtBRL0(ca.length), 'Cotas canceladas', `${pct(ca.length, V.length)} do total vendido`, 'canceladas'),
   ].join('');
   $('k1').innerHTML = [
-    kp('Automóvel', fmtBRL0(at.filter(r=>r.produto==='AUT').length), 'R$ '+fmtMi(at.filter(r=>r.produto==='AUT').reduce((s,r)=>s+(+r.valor_bem||0),0)), '#0FA3A3'),
-    kp('Imóvel', fmtBRL0(at.filter(r=>r.produto==='IMV').length), 'R$ '+fmtMi(at.filter(r=>r.produto==='IMV').reduce((s,r)=>s+(+r.valor_bem||0),0)), '#0FA3A3'),
-    kp('Pesados', fmtBRL0(at.filter(r=>r.produto==='PES').length), 'R$ '+fmtMi(at.filter(r=>r.produto==='PES').reduce((s,r)=>s+(+r.valor_bem||0),0)), '#0FA3A3'),
-    kp('Vendas 12 meses', fmtBRL0(v12.length), `${pct(v12c.length, v12.length)} já canceladas`, '#7C3AED'),
+    kp('Automóvel', fmtBRL0(at.filter(r=>r.produto==='AUT').length), 'R$ '+fmtMi(at.filter(r=>r.produto==='AUT').reduce((s,r)=>s+(+r.valor_bem||0),0)), '#0FA3A3', 'ativasAUT'),
+    kp('Imóvel', fmtBRL0(at.filter(r=>r.produto==='IMV').length), 'R$ '+fmtMi(at.filter(r=>r.produto==='IMV').reduce((s,r)=>s+(+r.valor_bem||0),0)), '#0FA3A3', 'ativasIMV'),
+    kp('Pesados', fmtBRL0(at.filter(r=>r.produto==='PES').length), 'R$ '+fmtMi(at.filter(r=>r.produto==='PES').reduce((s,r)=>s+(+r.valor_bem||0),0)), '#0FA3A3', 'ativasPES'),
+    kp('Vendas 12 meses', fmtBRL0(v12.length), `${pct(v12c.length, v12.length)} já canceladas`, '#7C3AED', 'vendas12'),
     kp('Parcelas pagas', pagasMed.toLocaleString('pt-BR',{maximumFractionDigits:1}), `média · restam ${restMed.toLocaleString('pt-BR',{maximumFractionDigits:0})} meses em média`, '#64748B'),
     kp('Pagam no cartão', pct(cartao.length, at.length), `débito ${pct(debito.length, at.length)} · boleto ${pct(at.length-cartao.length-debito.length, at.length)}`, '#64748B'),
   ].join('');
 
   $('k2').innerHTML = [
-    kp('Parcelas atrasadas', fmtBRL0(parcAtrasadas), `em ${fmtBRL0(atr.length)} cotas`, '#EF4444', 'atraso'),
-    kp('1 parcela atrasada', fmtBRL0(atr1.length), 'ainda dá para recuperar', '#F59E0B', 'atraso'),
-    kp('2 parcelas', fmtBRL0(atr2.length), 'perto da cobrança', '#F59E0B', 'atraso'),
-    kp('3 parcelas', fmtBRL0(at.filter(r=>r.atraso===3).length), 'última chance antes do cancelamento', '#EF4444', 'atraso'),
+    kp('Parcelas atrasadas', fmtBRL0(parcAtrasadas), `em ${fmtBRL0(atr.length)} cotas`, '#EF4444', 'atrasoTodas'),
+    kp('1 parcela atrasada', fmtBRL0(atr1.length), 'ainda dá para recuperar', '#F59E0B', 'atraso1'),
+    kp('2 parcelas', fmtBRL0(atr2.length), 'perto da cobrança', '#F59E0B', 'atraso2'),
+    kp('3 parcelas', fmtBRL0(at.filter(r=>r.atraso===3).length), 'última chance antes do cancelamento', '#EF4444', 'atraso3'),
     kp('4 ou mais', fmtBRL0(at.filter(r=>r.atraso>=4).length), 'atraso grave, já com a cobrança da Porto', '#64748B', 'atrasoGrave'),
     kp('Em cobrança', fmtBRL0(cob.length), `${pct(cob.length, at.length)} das ativas`, '#EF4444', 'cobranca'),
     kp('Comissão a receber', fmtBRL0(comisAReceber)+' parc.', `cotas em dia · ${fmtBRL0(at.filter(r=>r.comisFonte==='fechamento').length)} conferidas nos fechamentos`, '#10B981'),
     kp('Comissão perdida', fmtBRL0(perdida.length), `${fmtBRL0(comisPerdida)} parcelas · 4+ atrasos ou cancelada no período`, '#64748B', 'perdida'),
     kp('Cancelamento', pct(ca.length, V.length), `${fmtBRL0(ca.length)} de ${fmtBRL0(V.length)} vendidas`, '#F59E0B', 'canceladas'),
-    kp('Canceladas 90 dias', fmtBRL0(c90.length), `${fmtBRL0(cancCedo)} cancelaram com até 2 pagas (histórico)`, '#F59E0B', 'canceladas'),
+    kp('Canceladas 90 dias', fmtBRL0(c90.length), `${fmtBRL0(cancCedo)} cancelaram com até 2 pagas (histórico)`, '#F59E0B', 'cancel90'),
   ].join('');
 
   $('k3').innerHTML = [
@@ -338,7 +339,7 @@ function renderKPIs(){
     kp('Lance livre', pct(lanceLivre, contAll.length), `sorteio ${pct(sorteio, contAll.length)} · fixo ${pct(lanceFixo, contAll.length)}`, '#7C3AED'),
     kp('Sem bem entregue', fmtBRL0(semEnt.length), 'contemplada há pouco tempo, faturamento pendente', '#F59E0B', 'semEntrega'),
     kp('Contemplação a confirmar', fmtBRL0(V.filter(r=>r.contemplAConfirmar).length), 'sem bem entregue há mais de 1 ano (imóvel) ou 6 meses (auto/pesados)', '#64748B', 'aConfirmar'),
-    kp('Contempl. em atraso', fmtBRL0(cont.filter(r=>r.atraso>0).length), 'contemplada e com parcela atrasada', '#EF4444', 'atraso'),
+    kp('Contempl. em atraso', fmtBRL0(cont.filter(r=>r.atraso>0).length), 'contemplada e com parcela atrasada', '#EF4444', 'contAtraso'),
     kp('Próximas de quitar', fmtBRL0(quase.length), 'até 6 parcelas restantes', '#10B981', 'quase'),
   ].join('');
 }
@@ -423,14 +424,28 @@ const TABS = [
   { id:'ativas',       lb:'Todas as ativas',          f:r=>r.ativa,              sort:['data_venda',-1] },
   { id:'todas',        lb:'Todas',                    f:r=>true,                 sort:['data_venda',-1] },
 ];
+const CARD_TABS = [
+  { id:'ativasAUT',   lb:'Ativas · Automóvel',      f:r=>r.ativa&&r.produto==='AUT', sort:['data_venda',-1] },
+  { id:'ativasIMV',   lb:'Ativas · Imóvel',         f:r=>r.ativa&&r.produto==='IMV', sort:['data_venda',-1] },
+  { id:'ativasPES',   lb:'Ativas · Pesados',        f:r=>r.ativa&&r.produto==='PES', sort:['data_venda',-1] },
+  { id:'vendas12',    lb:'Vendas últimos 12 meses', f:r=>r.data_venda&&r.data_venda>=window.__iso12, sort:['data_venda',-1] },
+  { id:'atrasoTodas', lb:'Em atraso (todas)',       f:r=>r.ativa&&r.atraso>0, sort:['atraso',-1] },
+  { id:'atraso1',     lb:'1 parcela atrasada',      f:r=>r.ativa&&r.atraso===1, sort:['pagas',-1] },
+  { id:'atraso2',     lb:'2 parcelas atrasadas',    f:r=>r.ativa&&r.atraso===2, sort:['pagas',-1] },
+  { id:'atraso3',     lb:'3 parcelas atrasadas',    f:r=>r.ativa&&r.atraso===3, sort:['pagas',-1] },
+  { id:'cancel90',    lb:'Canceladas há 90 dias',   f:r=>r.cancel90, sort:['data_cancelamento',-1] },
+  { id:'contAtraso',  lb:'Contempladas em atraso',  f:r=>r.ativa&&r.contemplada&&r.atraso>0, sort:['atraso',-1] },
+];
+const tabDef = id => TABS.find(x=>x.id===id) || CARD_TABS.find(x=>x.id===id) || TABS[0];
 function irTab(id){ tabAtual = id; ordem = { col:null, dir:1 }; renderTabs(); document.getElementById('tabs').scrollIntoView({ behavior:'smooth', block:'start' }); }
 function renderTabs(){
-  $('tabs').innerHTML = TABS.map(t => `<button class="tab${t.id===tabAtual?' on':''}" onclick="irTab('${t.id}')">${t.lb}<span class="n">${fmtBRL0(VIEW.filter(t.f).length)}</span></button>`).join('');
+  const extra = CARD_TABS.find(x=>x.id===tabAtual);
+  $('tabs').innerHTML = TABS.concat(extra?[extra]:[]).map(t => `<button class="tab${t.id===tabAtual?' on':''}" onclick="irTab('${t.id}')">${t.lb}<span class="n">${fmtBRL0(VIEW.filter(t.f).length)}</span></button>`).join('');
   recalcTabela();
 }
 function ordenar(col){ ordem = ordem.col === col ? { col, dir:-ordem.dir } : { col, dir:1 }; recalcTabela(); }
 function recalcTabela(){
-  const t = TABS.find(x=>x.id===tabAtual) || TABS[0];
+  const t = tabDef(tabAtual);
   const q = normN($('f-q').value);
   let rows = VIEW.filter(t.f);
   if (q) rows = rows.filter(r => normN(r.cliente).includes(q) || normN(r.grupo+'/'+r.cota).includes(q) || String(r.contrato).includes(q) || normN(r.grupo).includes(q) || normN(r.consultorNome).includes(q));
