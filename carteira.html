@@ -294,7 +294,7 @@ function renderKPIs(){
   const cancCedo = ca.filter(r => r.pagas <= 2).length;
   const credCont = cont.reduce((s,r)=>s+(+r.valor_bem||0),0);
   const clientes = new Set(V.map(r => r.cpf || r.cliente)).size;
-  const mesesCont = contAll.map(r => r.data_contemplacao.slice(0,7)).sort(); const ultMes = mesesCont[mesesCont.length-1];
+  const mesesCont = contAll.map(r => r.data_contemplacao.slice(0,7)).sort(); const ultMes = mesesCont[mesesCont.length-1]; window.__ultMes = ultMes;
   const contUlt = ultMes ? contAll.filter(r => r.data_contemplacao.slice(0,7) === ultMes) : [];
   const comisAReceber = at.filter(r=>r.atraso===0).reduce((s,r)=>s+r.comisRestante,0), comisTravada = risco.reduce((s,r)=>s+r.comisRestante,0);
   const perdida = V.filter(r=>r.comissaoPerdida), comisPerdida = perdida.reduce((s,r)=>s+r.comisRestante,0);
@@ -305,7 +305,7 @@ function renderKPIs(){
     hc('h-blue', 'R$ '+fmtMi(credAt), 'Crédito ativo', `ticket médio R$ ${fmtMi(ticket)}`, 'ativas'),
     hc('h-red', fmtBRL0(atr.filter(r=>r.atraso<=3).length), 'Em atraso (ação do consultor)', `1 a 3 parcelas · ${fmtBRL0(atr.length)} no total`, 'atraso'),
     hc('h-amber', fmtBRL0(risco.length), 'Comissão em risco', `${fmtBRL0(comisTravada)} parcelas · até 3 atrasos, dá para recuperar`, 'risco'),
-    hc('h-purple', fmtBRL0(contUlt.length), 'Contempladas na última assembleia', ultMes ? ultMes.split('-').reverse().join('/') : '—', 'contempladas'),
+    hc('h-purple', fmtBRL0(contUlt.length), 'Contempladas na última assembleia', ultMes ? ultMes.split('-').reverse().join('/') : '—', 'ultAssembleia'),
     hc('h-green', fmtBRL0(qu.length), 'Cotas quitadas', `${fmtBRL0(cont.length)} contempladas ativas`, 'quitadas'),
     hc('h-gray', fmtBRL0(ca.length), 'Cotas canceladas', `${pct(ca.length, V.length)} do total vendido`, 'canceladas'),
   ].join('');
@@ -417,6 +417,7 @@ const TABS = [
   { id:'quase',        lb:'Próximas de quitar',       f:r=>r.quaseQuitando,      sort:['restante',1] },
   { id:'canceladas',   lb:'Canceladas',               f:r=>r.cancelada,          sort:['data_cancelamento',-1] },
   { id:'aguardando',   lb:'Aguardando',  f:r=>r.ativa&&!r.contemplada&&!r.contemplAConfirmar, sort:['pagas',-1] },
+  { id:'ultAssembleia',lb:'Última assembleia',        f:r=>!!r.data_contemplacao&&window.__ultMes&&r.data_contemplacao.slice(0,7)===window.__ultMes, sort:['cliente',1] },
   { id:'contempladas', lb:'Contempladas',             f:r=>r.ativa&&r.contemplada, sort:['data_contemplacao',-1] },
   { id:'quitadas',     lb:'Quitadas',                 f:r=>r.quitada,            sort:['data_venda',-1] },
   { id:'ativas',       lb:'Todas as ativas',          f:r=>r.ativa,              sort:['data_venda',-1] },
