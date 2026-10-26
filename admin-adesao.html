@@ -472,6 +472,7 @@ let currentUserCodigo = '';
 let currentUserTipo = '';
 let currentUserAuthId = '';
 let currentUserNome = '';
+let currentUserEmail = '';
 
 // ═══ VERIFICA SESSÃO ═══
 async function checkSession() {
@@ -488,6 +489,7 @@ async function checkSession() {
       currentUserTipo = profile.tipo;
       currentUserAuthId = session.user.id;
       currentUserNome = profile.nome || '';
+      currentUserEmail = session.user.email || '';
       document.getElementById('loading-state').style.display = 'none';
       document.getElementById('main-state').style.display = 'block';
       renderLinks();
@@ -797,7 +799,7 @@ function renderList() {
         <div class="ad-card-header-right">
           <span class="mono" style="font-size:11px;color:var(--text2);">${a.protocolo || ''}</span>
           <span style="color:var(--text3);font-size:11px;" title="Recebido em ${fmtDataHora(a.criado_em)}">${fmtDataHora(a.criado_em)}</span>
-          ${(currentUserTipo === 'master' || currentUserTipo === 'admin') && a._source === 'nova' && a.tipo_pessoa === 'pf' ? `
+          ${EM_ADMIN() && a._source === 'nova' && a.tipo_pessoa === 'pf' ? `
             <button onclick="event.stopPropagation();abrirEmitir('${a.id}')" title="Mandar o robô emitir esta proposta na Porto" style="background:#0a52a8;color:#fff;border:0;padding:4px 9px;border-radius:6px;font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap">Emitir na Porto</button>
           ` : ''}
           ${(currentUserTipo === 'master' || currentUserTipo === 'admin') && a._source === 'nova' ? `
@@ -1370,7 +1372,10 @@ let _consultoresCache = null;
 
 // ═══ EMISSAO PELO ROBO PORTO (so admin/master) ═══
 let _emPropostaId = null, _emProposta = null, _filaTimer = null, _filaItens = [];
-const EM_ADMIN = () => currentUserTipo === 'master' || currentUserTipo === 'admin';
+// Por enquanto a emissao pelo robo aparece so para estes e-mails (alem de ser admin/master).
+// Para liberar para Carlos, Erik e Leonardo, acrescente os e-mails deles aqui.
+const EM_LIBERADO = ['allan@grupomasterprime.com.br'];
+const EM_ADMIN = () => (currentUserTipo === 'master' || currentUserTipo === 'admin') && EM_LIBERADO.includes(String(currentUserEmail || '').toLowerCase());
 
 function brMoney(v) { const n = parseFloat(String(v||'').replace(/[R$\s.]/g,'').replace(',','.')); return isNaN(n) ? null : n; }
 function fmtBRL(v) { return v == null ? '—' : 'R$ ' + Number(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
