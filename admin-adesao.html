@@ -398,24 +398,21 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
           <select id="em-tipo" class="em-input"><option>Em formação</option><option>Em andamento</option></select>
         </div>
         <div>
-          <label class="em-label">Crédito (R$)</label>
-          <input id="em-credito" class="em-input mono" placeholder="ex: 30.000" inputmode="numeric">
-        </div>
-        <div>
-          <label class="em-label">1ª parcela combinada (R$)</label>
-          <input id="em-parcela" class="em-input mono" placeholder="ex: 338,00" inputmode="decimal">
-        </div>
-        <div>
-          <label class="em-label">Grupo específico (opcional)</label>
-          <input id="em-grupo" class="em-input mono" placeholder="ex: AF472" style="text-transform:uppercase">
-        </div>
-        <div>
           <label class="em-label">Pagamento da 1ª parcela</label>
           <select id="em-pag" class="em-input"><option>BolePix</option><option>Cartão de crédito</option><option>Pix Automático</option></select>
         </div>
-        <div style="grid-column:1/-1;display:flex;align-items:center;gap:8px">
-          <input type="checkbox" id="em-seguro" checked style="width:16px;height:16px">
-          <label for="em-seguro" style="font-size:12.5px;color:var(--text)">Cota com seguro de vida (a parcela combinada inclui o seguro)</label>
+        <div>
+          <label class="em-label">Renda para a consulta (R$)</label>
+          <input id="em-renda" class="em-input mono" placeholder="vem da ficha" inputmode="numeric" title="A Porto usa a renda para liberar a capacidade de pagamento. Vem da ficha; ajuste se precisar.">
+        </div>
+        <div style="grid-column:1/-1">
+          <label class="em-label">Cotas a emitir (uma linha por tipo de cota; use Qtd para repetir)</label>
+          <table class="em-tb" id="em-tabela">
+            <thead><tr><th>Crédito (R$)</th><th>Plano / redutor</th><th>Grupo</th><th>1ª parcela (R$)</th><th>Seguro</th><th>Cota</th><th>Qtd</th><th></th></tr></thead>
+            <tbody id="em-linhas"></tbody>
+          </table>
+          <button type="button" onclick="emAddLinha()" style="margin-top:8px;background:#fff;border:1px dashed var(--border2);color:var(--mp-navy);padding:6px 12px;border-radius:7px;font-size:11.5px;cursor:pointer;font-weight:600">+ Adicionar linha</button>
+          <div style="font-size:10.5px;color:var(--text2);margin-top:6px">Plano: trecho do nome na Porto (RED 50%, S/RED, 12X, AV). Grupo em branco: o robô escolhe pela faixa de crédito. Cota: automática, "centenas" (uma em cada centena) ou números separados por vírgula.</div>
         </div>
         <div style="grid-column:1/-1">
           <label class="em-label">Observação para o robô (opcional)</label>
@@ -446,6 +443,14 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
   <style>
     .em-label { font-size:10.5px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:.3px; display:block; margin-bottom:4px; }
     .em-input { width:100%; padding:9px 11px; border:1px solid var(--border); border-radius:7px; font-size:13px; font-family:inherit; }
+    .em-tb { width:100%; border-collapse:collapse; font-size:12px; }
+    .em-tb th { font-size:9.5px; color:var(--text2); text-transform:uppercase; letter-spacing:.3px; text-align:left; padding:4px 4px; }
+    .em-tb td { padding:3px 3px; vertical-align:middle; }
+    .em-tb input, .em-tb select { width:100%; padding:7px 8px; border:1px solid var(--border); border-radius:6px; font-size:12px; font-family:inherit; }
+    .em-tb input[type=checkbox] { width:16px; height:16px; }
+    .em-tb .rm { background:none; border:0; color:var(--red); cursor:pointer; font-size:16px; line-height:1; }
+    .fila-bar { height:6px; background:#E2E8F0; border-radius:4px; overflow:hidden; margin-top:4px; width:150px; }
+    .fila-bar > div { height:100%; background:#0a52a8; transition:width .4s; }
     .fila-tb { width:100%; border-collapse:collapse; font-size:12px; }
     .fila-tb th { text-align:left; font-size:10px; color:var(--text2); text-transform:uppercase; letter-spacing:.4px; padding:9px 12px; border-bottom:1px solid var(--border); background:#F8FAFC; }
     .fila-tb td { padding:9px 12px; border-bottom:1px solid #F1F5F9; vertical-align:top; }
@@ -1371,12 +1376,37 @@ let _consultoresCache = null;
 
 
 // ═══ EMISSAO PELO ROBO PORTO (so admin/master) ═══
-let _emPropostaId = null, _emProposta = null, _filaTimer = null, _filaItens = [];
-// Por enquanto a emissao pelo robo aparece so para estes e-mails (alem de ser admin/master).
-// Para liberar para Carlos, Erik e Leonardo, acrescente os e-mails deles aqui.
-const EM_LIBERADO = ['allan@grupomasterprime.com.br'];
-const EM_ADMIN = () => (currentUserTipo === 'master' || currentUserTipo === 'admin') && EM_LIBERADO.includes(String(currentUserEmail || '').toLowerCase());
+let _emPropostaId = null, _emProposta = null, _filaTimer = null, _filaItens = [], _filaUlt = 0;
+// Por enquanto a emissao pelo robo aparece so para estes logins (alem de ser admin/master).
+// O login do portal e a parte antes do @ do e-mail interno (ex.: allan.almeida).
+// Para liberar para Carlos, Erik e Leonardo, acrescente os logins deles aqui.
+const EM_LIBERADO = ['allan.almeida'];
+const EM_ADMIN = () => (currentUserTipo === 'master' || currentUserTipo === 'admin') && EM_LIBERADO.includes(String(currentUserEmail || '').toLowerCase().split('@')[0]);
 
+function emAddLinha(v) {
+  v = v || {};
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td><input class="mono l-credito" placeholder="ex: 70.000" inputmode="numeric" value="${v.credito != null ? Number(v.credito).toLocaleString('pt-BR') : ''}"></td>
+    <td><input class="l-plano" placeholder="RED 50%" value="${v.plano || ''}" style="text-transform:uppercase"></td>
+    <td><input class="mono l-grupo" placeholder="opcional" value="${v.grupo || ''}" style="text-transform:uppercase"></td>
+    <td><input class="mono l-parcela" placeholder="ex: 790,00" inputmode="decimal" value="${v.parcela != null ? Number(v.parcela).toLocaleString('pt-BR', {minimumFractionDigits:2}) : ''}"></td>
+    <td style="text-align:center"><input type="checkbox" class="l-seguro" ${v.com_seguro === false ? '' : 'checked'} title="Cota com seguro de vida"></td>
+    <td><input class="mono l-cotas" placeholder="auto / centenas / 123,245" value="${v.cotas || ''}"></td>
+    <td><input class="mono l-qtd" type="number" min="1" value="${v.qtd || 1}" style="width:56px"></td>
+    <td><button type="button" class="rm" onclick="this.closest('tr').remove()" title="Remover linha">&times;</button></td>`;
+  document.getElementById('em-linhas').appendChild(tr);
+}
+function emLerLinhas() {
+  return [...document.querySelectorAll('#em-linhas tr')].map(tr => ({
+    credito: brMoney(tr.querySelector('.l-credito').value),
+    plano: (tr.querySelector('.l-plano').value || '').trim().toUpperCase() || null,
+    grupo: (tr.querySelector('.l-grupo').value || '').trim().toUpperCase() || null,
+    parcela: brMoney(tr.querySelector('.l-parcela').value),
+    com_seguro: tr.querySelector('.l-seguro').checked,
+    cotas: (() => { const c = (tr.querySelector('.l-cotas').value || '').trim().toLowerCase(); if (!c || c === 'auto') return null; if (/centena/.test(c)) return 'centenas'; return c.replace(/[^\d,]/g, '') || null; })(),
+    qtd: Math.max(1, parseInt(tr.querySelector('.l-qtd').value, 10) || 1)
+  }));
+}
 function brMoney(v) { const n = parseFloat(String(v||'').replace(/[R$\s.]/g,'').replace(',','.')); return isNaN(n) ? null : n; }
 function fmtBRL(v) { return v == null ? '—' : 'R$ ' + Number(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
 
@@ -1386,12 +1416,10 @@ async function abrirEmitir(propostaId) {
   _emPropostaId = propostaId; _emProposta = a;
   const d = a.dados || {};
   document.getElementById('em-cliente').textContent = `${a.nome_cliente || ''} · CPF ${a.cpf_cnpj || ''} · ${a.consultor_nome || 'sem vendedor'} · ${a.protocolo || ''}`;
-  document.getElementById('em-credito').value = '';
-  document.getElementById('em-parcela').value = '';
-  document.getElementById('em-grupo').value = '';
+  document.getElementById('em-linhas').innerHTML = ''; emAddLinha({ com_seguro: d.aceita_seguro !== false });
+  document.getElementById('em-renda').value = d.renda_mensal ? Number(d.renda_mensal).toLocaleString('pt-BR') : '';
   document.getElementById('em-obs').value = '';
   document.getElementById('em-erro').textContent = '';
-  document.getElementById('em-seguro').checked = d.aceita_seguro !== false;
   const fp = String(d.forma_pagamento_1 || '').toLowerCase();
   document.getElementById('em-pag').value = fp.includes('cart') ? 'Cartão de crédito' : (fp.includes('pix') ? 'Pix Automático' : 'BolePix');
   // evita duplicar: avisa se ja tem emissao ativa dessa proposta
@@ -1403,10 +1431,15 @@ function fecharEmitir() { document.getElementById('modal-emitir').style.display 
 
 async function enviarEmissao() {
   const err = document.getElementById('em-erro');
-  const credito = brMoney(document.getElementById('em-credito').value);
-  const parcela = brMoney(document.getElementById('em-parcela').value);
-  if (!credito || credito < 1000) { err.textContent = 'Informe o crédito.'; return; }
-  if (!parcela) { err.textContent = 'Informe a 1ª parcela combinada: é com ela que o robô confere se pegou a cota certa.'; return; }
+  const linhas = emLerLinhas();
+  if (!linhas.length) { err.textContent = 'Adicione pelo menos uma linha de cota.'; return; }
+  for (let i = 0; i < linhas.length; i++) {
+    const l = linhas[i];
+    if (!l.credito || l.credito < 1000) { err.textContent = `Linha ${i+1}: informe o crédito.`; return; }
+    if (!l.parcela) { err.textContent = `Linha ${i+1}: informe a 1ª parcela combinada (é com ela que o robô confere a cota).`; return; }
+    if (!l.plano) { err.textContent = `Linha ${i+1}: informe o plano (ex.: RED 50%, S/RED, 12X).`; return; }
+  }
+  const credito = linhas[0].credito, parcela = linhas[0].parcela;
   const a = _emProposta;
   const item = {
     criado_por: currentUserNome || null,
@@ -1420,9 +1453,14 @@ async function enviarEmissao() {
     produto: document.getElementById('em-produto').value,
     credito,
     tipo_grupo: document.getElementById('em-tipo').value,
-    grupo: (document.getElementById('em-grupo').value || '').trim().toUpperCase() || null,
+    grupo: linhas[0].grupo,
+    plano: linhas[0].plano,
+    quantidade: linhas.reduce((n, l) => n + l.qtd, 0),
+    cotas: linhas[0].cotas,
+    itens: linhas,
+    renda: brMoney(document.getElementById('em-renda').value) || null,
     parcela,
-    com_seguro: document.getElementById('em-seguro').checked,
+    com_seguro: linhas[0].com_seguro,
     pagamento_1a: document.getElementById('em-pag').value,
     observacao: (document.getElementById('em-obs').value || '').trim() || null,
     status: 'pendente'
@@ -1446,9 +1484,25 @@ async function carregarFila() {
   if (error) { el.innerHTML = `<div style="padding:14px;color:var(--red);font-size:12px">Erro ao ler a fila: ${error.message}${/does not exist|schema cache/i.test(error.message) ? ' · rode o SQL _supabase_emissoes.sql no Supabase.' : ''}</div>`; return; }
   _filaItens = data || [];
   renderFila();
-  if (!_filaTimer) _filaTimer = setInterval(() => { if (document.visibilityState === 'visible') carregarFila(); }, 30000);
+  if (!_filaTimer) _filaTimer = setInterval(() => { if (document.visibilityState !== 'visible') return; const ativo = _filaItens.some(e => e.status === 'processando'); if (ativo || (Date.now() - (_filaUlt || 0)) > 30000) carregarFila(); }, 10000);
+  _filaUlt = Date.now();
 }
-function filaPlano(e) { return `${e.produto} · ${fmtBRL(e.credito)} · ${e.tipo_grupo}${e.grupo ? ' · ' + e.grupo : ''} · parc. ${fmtBRL(e.parcela)}${e.com_seguro ? ' c/ seg.' : ' s/ seg.'} · ${e.pagamento_1a}`; }
+function filaPlano(e) {
+  const cab = `${e.produto} · ${e.tipo_grupo} · ${e.pagamento_1a}`;
+  const itens = Array.isArray(e.itens) && e.itens.length ? e.itens : [{ credito: e.credito, plano: e.plano, grupo: e.grupo, parcela: e.parcela, com_seguro: e.com_seguro, cotas: e.cotas, qtd: e.quantidade || 1 }];
+  const ls = itens.map(l => `${l.qtd > 1 ? l.qtd + 'x ' : ''}${fmtBRL(l.credito)}${l.plano ? ' ' + l.plano : ''}${l.grupo ? ' ' + l.grupo : ''} · parc. ${fmtBRL(l.parcela)}${l.com_seguro === false ? ' s/ seg.' : ' c/ seg.'}${l.cotas === 'centenas' ? ' · centenas' : (l.cotas ? ' · cotas ' + l.cotas : '')}`);
+  return cab + '<br>' + ls.join('<br>');
+}
+const ETAPA_PCT = { consulta: 8, reserva: 25, 'cadastro:dados': 35, 'cadastro:contato': 42, 'cadastro:adicionais': 49, 'cadastro:endereco': 56, 'cadastro:extras': 60, pagamento: 70, dps: 78, resumo: 85, transmitir: 92, pdf: 97, concluida: 100 };
+function filaBarra(e) {
+  if (!['processando','aguardando','retomar','concluida'].includes(e.status)) return '';
+  const total = Math.max(1, e.quantidade || 1);
+  const feitas = (e.contratos || '').split(',').filter(Boolean).length;
+  const pctEtapa = e.status === 'concluida' ? 100 : (ETAPA_PCT[e.etapa] || 3);
+  const pct = e.status === 'concluida' ? 100 : Math.min(99, Math.round((feitas * 100 + pctEtapa) / total));
+  return `<div class="fila-bar" title="${pct}%"><div style="width:${pct}%"></div></div><span style="font-size:10px;color:var(--text2)">${pct}%${total > 1 ? ' · cota ' + Math.min(total, feitas + 1) + ' de ' + total : ''}</span>`;
+}
+function haQuanto(iso) { if (!iso) return ''; const s = Math.round((Date.now() - new Date(iso)) / 1000); return s < 60 ? `há ${s}s` : (s < 3600 ? `há ${Math.round(s/60)} min` : `há ${Math.round(s/3600)} h`); }
 function renderFila() {
   const el = document.getElementById('fila-list');
   const ativos = _filaItens.filter(e => ['pendente','processando','aguardando','retomar'].includes(e.status)).length;
@@ -1459,8 +1513,8 @@ function renderFila() {
       <td class="mono" style="white-space:nowrap;color:var(--text2)">${fmtDataHora(e.criado_em)}<br><span style="font-size:10px">${e.criado_por || ''}</span></td>
       <td><strong style="color:var(--mp-navy)">${e.cliente || ''}</strong><br><span style="font-size:10.5px;color:var(--text2)">${e.consultor || 'sem vendedor'} · ${e.protocolo || ''}</span></td>
       <td style="font-size:11.5px">${filaPlano(e)}${e.observacao ? `<br><span style="color:var(--text2)">Obs: ${e.observacao}</span>` : ''}</td>
-      <td><span class="fila-st ${e.status}">${e.status}</span>${e.etapa ? `<br><span style="font-size:10.5px;color:var(--text2)">${e.etapa}</span>` : ''}${e.motivo ? `<br><span style="font-size:10.5px;color:#92400E">${e.motivo}</span>` : ''}</td>
-      <td class="mono" style="font-size:11.5px">${e.contrato ? `Contrato ${e.contrato}<br>` : ''}${e.grupo_cota ? `${e.grupo_cota}<br>` : ''}${e.parcela_final ? `1ª parc. ${fmtBRL(e.parcela_final)}` : ''}${e.pdf_path ? `<br><a href="#" onclick="abrirArquivo('${e.pdf_path}');return false" style="color:#0a52a8">PDF da proposta</a>` : ''}</td>
+      <td><span class="fila-st ${e.status}">${e.status}</span>${filaBarra(e)}${e.etapa ? `<br><span style="font-size:10.5px;color:var(--text2)">${e.etapa} · ${haQuanto(e.atualizado_em)}</span>` : ''}${e.status === 'processando' && e.progresso ? `<br><span style="font-size:10.5px;color:#1D4ED8">${e.progresso}</span>` : ''}${e.motivo ? `<br><span style="font-size:10.5px;color:#92400E">${e.motivo}</span>` : ''}</td>
+      <td class="mono" style="font-size:11.5px">${e.contrato ? `Contrato ${e.contrato}<br>` : ''}${e.grupo_cota ? `${e.grupo_cota}<br>` : ''}${e.parcela_final ? `1ª parc. ${fmtBRL(e.parcela_final)}` : ''}${e.pdf_path ? e.pdf_path.split(',').map((pp, i) => `<br><a href="#" onclick="abrirArquivo('${pp.trim()}');return false" style="color:#0a52a8">PDF da proposta${e.pdf_path.includes(',') ? ' ' + (i+1) : ''}</a>`).join('') : ''}</td>
       <td style="white-space:nowrap">
         <button class="fila-btn" onclick="verLog('${e.id}')">Log</button>
         ${['aguardando','erro'].includes(e.status) ? `<button class="fila-btn" onclick="filaStatus('${e.id}','retomar')" title="O robô continua de onde parou">Retomar</button><button class="fila-btn" onclick="filaStatus('${e.id}','pendente')" title="Começa do zero">Refazer</button>` : ''}
@@ -1495,8 +1549,7 @@ async function abrirArquivo(path) {
   if (error) { alert('Erro ao abrir arquivo: ' + error.message); return; }
   window.open(data.signedUrl, '_blank');
 }
-document.getElementById('em-credito').addEventListener('blur', e => { const n = brMoney(e.target.value); if (n) e.target.value = n.toLocaleString('pt-BR'); });
-document.getElementById('em-parcela').addEventListener('blur', e => { const n = brMoney(e.target.value); if (n) e.target.value = n.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); });
+document.getElementById('em-linhas').addEventListener('focusout', e => { const t = e.target; if (!t.classList) return; const n = brMoney(t.value); if (t.classList.contains('l-credito') && n) t.value = n.toLocaleString('pt-BR'); if (t.classList.contains('l-parcela') && n) t.value = n.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); });
 
 async function abrirAtribuir(propostaId, consultorAtual) {
   _atribPropostaId = propostaId;
