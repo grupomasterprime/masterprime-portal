@@ -324,6 +324,18 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
       </div>
     </div>
 
+    <!-- FILA DO ROBO PORTO (so admin/master) -->
+    <div id="fila-section" class="links-section" style="display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:12px;flex-wrap:wrap">
+        <div class="links-title" style="margin-bottom:0">Fila do robô Porto · emissões enviadas pelo admin</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span id="fila-robo-status" style="font-size:11px;color:var(--text2)"></span>
+          <button class="btn btn-outline" onclick="carregarFila()" style="font-size:11px;padding:6px 12px;border:1px solid var(--border2);background:#fff">Atualizar</button>
+        </div>
+      </div>
+      <div id="fila-list" style="background:#fff;border:1px solid var(--border);border-radius:10px;overflow:hidden"></div>
+    </div>
+
     <!-- BUSCA -->
     <div class="search-box">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
@@ -360,6 +372,95 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
   </div>
 </div>
 
+
+  <!-- MODAL: EMITIR NA PORTO (robo) -->
+  <div id="modal-emitir" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;padding:20px">
+    <div style="background:#fff;border-radius:12px;max-width:560px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+      <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:16px;font-weight:700;color:var(--mp-navy)">Emitir na Porto (robô)</div>
+          <div id="em-cliente" style="font-size:12px;color:var(--text2);margin-top:2px"></div>
+        </div>
+        <button onclick="fecharEmitir()" style="background:none;border:0;padding:4px;cursor:pointer;color:var(--text2);font-size:22px;line-height:1">&times;</button>
+      </div>
+      <div style="padding:18px 24px;display:grid;grid-template-columns:1fr 1fr;gap:12px 14px" id="em-form">
+        <div style="grid-column:1/-1;font-size:11.5px;color:var(--text2);background:#F8FAFC;border:1px solid var(--border);border-radius:8px;padding:10px 12px;line-height:1.5">
+          O robô vai consultar o cliente, reservar a cota, preencher o cadastro com os dados da ficha, lançar o pagamento, responder a DPS e transmitir o contrato para assinatura. Se a 1ª parcela encontrada não bater com a combinada, ele para e avisa aqui na fila.
+        </div>
+        <div>
+          <label class="em-label">Produto</label>
+          <select id="em-produto" class="em-input">
+            <option>Automóveis</option><option>Imóveis</option><option>Veículos pesados</option><option>Auto Data Certa</option>
+          </select>
+        </div>
+        <div>
+          <label class="em-label">Tipo de grupo</label>
+          <select id="em-tipo" class="em-input"><option>Em formação</option><option>Em andamento</option></select>
+        </div>
+        <div>
+          <label class="em-label">Crédito (R$)</label>
+          <input id="em-credito" class="em-input mono" placeholder="ex: 30.000" inputmode="numeric">
+        </div>
+        <div>
+          <label class="em-label">1ª parcela combinada (R$)</label>
+          <input id="em-parcela" class="em-input mono" placeholder="ex: 338,00" inputmode="decimal">
+        </div>
+        <div>
+          <label class="em-label">Grupo específico (opcional)</label>
+          <input id="em-grupo" class="em-input mono" placeholder="ex: AF472" style="text-transform:uppercase">
+        </div>
+        <div>
+          <label class="em-label">Pagamento da 1ª parcela</label>
+          <select id="em-pag" class="em-input"><option>BolePix</option><option>Cartão de crédito</option><option>Pix Automático</option></select>
+        </div>
+        <div style="grid-column:1/-1;display:flex;align-items:center;gap:8px">
+          <input type="checkbox" id="em-seguro" checked style="width:16px;height:16px">
+          <label for="em-seguro" style="font-size:12.5px;color:var(--text)">Cota com seguro de vida (a parcela combinada inclui o seguro)</label>
+        </div>
+        <div style="grid-column:1/-1">
+          <label class="em-label">Observação para o robô (opcional)</label>
+          <input id="em-obs" class="em-input" placeholder="ex: cliente quer vencimento dia 10">
+        </div>
+      </div>
+      <div style="padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;align-items:center">
+        <span id="em-erro" style="font-size:11.5px;color:var(--red);margin-right:auto"></span>
+        <button onclick="fecharEmitir()" style="background:#fff;border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:7px;cursor:pointer;font-weight:600;font-size:12.5px">Cancelar</button>
+        <button id="em-enviar" onclick="enviarEmissao()" style="background:#0a52a8;color:#fff;border:0;padding:8px 18px;border-radius:7px;cursor:pointer;font-weight:700;font-size:12.5px">Enviar para o robô</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: LOG DA EMISSAO -->
+  <div id="modal-log" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;padding:20px">
+    <div style="background:#fff;border-radius:12px;max-width:720px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+      <div style="padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:16px;font-weight:700;color:var(--mp-navy)">Andamento da emissão</div>
+          <div id="log-sub" style="font-size:12px;color:var(--text2);margin-top:2px"></div>
+        </div>
+        <button onclick="document.getElementById('modal-log').style.display='none'" style="background:none;border:0;padding:4px;cursor:pointer;color:var(--text2);font-size:22px;line-height:1">&times;</button>
+      </div>
+      <div id="log-body" style="padding:14px 24px;font-size:12px"></div>
+    </div>
+  </div>
+  <style>
+    .em-label { font-size:10.5px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:.3px; display:block; margin-bottom:4px; }
+    .em-input { width:100%; padding:9px 11px; border:1px solid var(--border); border-radius:7px; font-size:13px; font-family:inherit; }
+    .fila-tb { width:100%; border-collapse:collapse; font-size:12px; }
+    .fila-tb th { text-align:left; font-size:10px; color:var(--text2); text-transform:uppercase; letter-spacing:.4px; padding:9px 12px; border-bottom:1px solid var(--border); background:#F8FAFC; }
+    .fila-tb td { padding:9px 12px; border-bottom:1px solid #F1F5F9; vertical-align:top; }
+    .fila-st { display:inline-block; padding:2px 8px; border-radius:10px; font-size:10.5px; font-weight:700; }
+    .fila-st.pendente { background:#F1F5F9; color:#475569; }
+    .fila-st.processando { background:#DBEAFE; color:#1D4ED8; }
+    .fila-st.retomar { background:#DBEAFE; color:#1D4ED8; }
+    .fila-st.aguardando { background:#FEF3C7; color:#92400E; }
+    .fila-st.concluida { background:#DCFCE7; color:#15803D; }
+    .fila-st.erro { background:#FEE2E2; color:#B91C1C; }
+    .fila-st.cancelada { background:#F1F5F9; color:#94A3B8; text-decoration:line-through; }
+    .fila-btn { background:#fff; border:1px solid var(--border2); color:var(--mp-navy); padding:4px 9px; border-radius:6px; font-size:10.5px; font-weight:600; cursor:pointer; margin-right:4px; }
+    .fila-btn:hover { background:#F8FAFC; }
+  </style>
+
 <script>
 const SUPABASE_URL = 'https://jhwciwvgagnuxakukyob.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_fy-iwSFNHKRuqP1pDokFuQ_X_UCiqzx';
@@ -370,6 +471,7 @@ let filteredAdesoes = [];
 let currentUserCodigo = '';
 let currentUserTipo = '';
 let currentUserAuthId = '';
+let currentUserNome = '';
 
 // ═══ VERIFICA SESSÃO ═══
 async function checkSession() {
@@ -379,16 +481,18 @@ async function checkSession() {
 
   const { data: { session } } = await sb.auth.getSession();
   if (session && session.user) {
-    const { data: profile } = await sb.from('portal_users').select('tipo, codigo_link').eq('auth_id', session.user.id).single();
+    const { data: profile } = await sb.from('portal_users').select('tipo, codigo_link, nome').eq('auth_id', session.user.id).single();
     // Admin, master, ou consultor (todos podem ver e enviar links)
     if (profile && ['admin','master','consultor','socio','parceiro'].includes(profile.tipo)) {
       currentUserCodigo = profile.codigo_link || '';
       currentUserTipo = profile.tipo;
       currentUserAuthId = session.user.id;
+      currentUserNome = profile.nome || '';
       document.getElementById('loading-state').style.display = 'none';
       document.getElementById('main-state').style.display = 'block';
       renderLinks();
       loadAdesoes();
+      if (EM_ADMIN()) carregarFila();
       return;
     }
   }
@@ -693,6 +797,9 @@ function renderList() {
         <div class="ad-card-header-right">
           <span class="mono" style="font-size:11px;color:var(--text2);">${a.protocolo || ''}</span>
           <span style="color:var(--text3);font-size:11px;" title="Recebido em ${fmtDataHora(a.criado_em)}">${fmtDataHora(a.criado_em)}</span>
+          ${(currentUserTipo === 'master' || currentUserTipo === 'admin') && a._source === 'nova' && a.tipo_pessoa === 'pf' ? `
+            <button onclick="event.stopPropagation();abrirEmitir('${a.id}')" title="Mandar o robô emitir esta proposta na Porto" style="background:#0a52a8;color:#fff;border:0;padding:4px 9px;border-radius:6px;font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap">Emitir na Porto</button>
+          ` : ''}
           ${(currentUserTipo === 'master' || currentUserTipo === 'admin') && a._source === 'nova' ? `
             <button onclick="event.stopPropagation();abrirAtribuir('${a.id}','${(a.consultor_nome||'').replace(/'/g,'\\\'')}')" style="background:var(--mp-teal);color:#fff;border:0;padding:4px 9px;border-radius:6px;font-size:10.5px;font-weight:600;cursor:pointer;margin-left:4px">${a.consultor_nome ? 'Reatribuir' : 'Atribuir'}</button>
           ` : ''}
@@ -1260,6 +1367,132 @@ function getCamposPorAdmTipo(adm, tipo) {
 let _atribPropostaId = null;
 let _consultoresCache = null;
 
+
+// ═══ EMISSAO PELO ROBO PORTO (so admin/master) ═══
+let _emPropostaId = null, _emProposta = null, _filaTimer = null, _filaItens = [];
+const EM_ADMIN = () => currentUserTipo === 'master' || currentUserTipo === 'admin';
+
+function brMoney(v) { const n = parseFloat(String(v||'').replace(/[R$\s.]/g,'').replace(',','.')); return isNaN(n) ? null : n; }
+function fmtBRL(v) { return v == null ? '—' : 'R$ ' + Number(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
+
+async function abrirEmitir(propostaId) {
+  const a = allAdesoes.find(x => x.id === propostaId);
+  if (!a) return;
+  _emPropostaId = propostaId; _emProposta = a;
+  const d = a.dados || {};
+  document.getElementById('em-cliente').textContent = `${a.nome_cliente || ''} · CPF ${a.cpf_cnpj || ''} · ${a.consultor_nome || 'sem vendedor'} · ${a.protocolo || ''}`;
+  document.getElementById('em-credito').value = '';
+  document.getElementById('em-parcela').value = '';
+  document.getElementById('em-grupo').value = '';
+  document.getElementById('em-obs').value = '';
+  document.getElementById('em-erro').textContent = '';
+  document.getElementById('em-seguro').checked = d.aceita_seguro !== false;
+  const fp = String(d.forma_pagamento_1 || '').toLowerCase();
+  document.getElementById('em-pag').value = fp.includes('cart') ? 'Cartão de crédito' : (fp.includes('pix') ? 'Pix Automático' : 'BolePix');
+  // evita duplicar: avisa se ja tem emissao ativa dessa proposta
+  const ativa = _filaItens.find(e => e.proposta_id === propostaId && ['pendente','processando','aguardando','retomar'].includes(e.status));
+  if (ativa) document.getElementById('em-erro').textContent = 'Atenção: já existe uma emissão ' + ativa.status + ' para esta ficha.';
+  document.getElementById('modal-emitir').style.display = 'flex';
+}
+function fecharEmitir() { document.getElementById('modal-emitir').style.display = 'none'; _emPropostaId = null; }
+
+async function enviarEmissao() {
+  const err = document.getElementById('em-erro');
+  const credito = brMoney(document.getElementById('em-credito').value);
+  const parcela = brMoney(document.getElementById('em-parcela').value);
+  if (!credito || credito < 1000) { err.textContent = 'Informe o crédito.'; return; }
+  if (!parcela) { err.textContent = 'Informe a 1ª parcela combinada: é com ela que o robô confere se pegou a cota certa.'; return; }
+  const a = _emProposta;
+  const item = {
+    criado_por: currentUserNome || null,
+    criado_por_auth: currentUserAuthId || null,
+    adm: 'PORTO',
+    proposta_id: _emPropostaId,
+    protocolo: a.protocolo || null,
+    cliente: a.nome_cliente || null,
+    cpf: a.cpf_cnpj || null,
+    consultor: a.consultor_nome || null,
+    produto: document.getElementById('em-produto').value,
+    credito,
+    tipo_grupo: document.getElementById('em-tipo').value,
+    grupo: (document.getElementById('em-grupo').value || '').trim().toUpperCase() || null,
+    parcela,
+    com_seguro: document.getElementById('em-seguro').checked,
+    pagamento_1a: document.getElementById('em-pag').value,
+    observacao: (document.getElementById('em-obs').value || '').trim() || null,
+    status: 'pendente'
+  };
+  const btn = document.getElementById('em-enviar'); btn.disabled = true; btn.textContent = 'Enviando...';
+  try {
+    const { error } = await sb.from('portal_emissoes').insert(item);
+    if (error) throw error;
+    showToast('Enviado para o robô. Acompanhe na Fila do robô Porto.');
+    fecharEmitir(); carregarFila();
+  } catch(e) { err.textContent = 'Erro: ' + e.message; }
+  btn.disabled = false; btn.textContent = 'Enviar para o robô';
+}
+
+async function carregarFila() {
+  if (!EM_ADMIN()) return;
+  const sec = document.getElementById('fila-section'); sec.style.display = '';
+  const desde = new Date(Date.now() - 45*86400000).toISOString();
+  const { data, error } = await sb.from('portal_emissoes').select('*').gte('criado_em', desde).order('criado_em', { ascending: false }).limit(200);
+  const el = document.getElementById('fila-list');
+  if (error) { el.innerHTML = `<div style="padding:14px;color:var(--red);font-size:12px">Erro ao ler a fila: ${error.message}${/does not exist|schema cache/i.test(error.message) ? ' · rode o SQL _supabase_emissoes.sql no Supabase.' : ''}</div>`; return; }
+  _filaItens = data || [];
+  renderFila();
+  if (!_filaTimer) _filaTimer = setInterval(() => { if (document.visibilityState === 'visible') carregarFila(); }, 30000);
+}
+function filaPlano(e) { return `${e.produto} · ${fmtBRL(e.credito)} · ${e.tipo_grupo}${e.grupo ? ' · ' + e.grupo : ''} · parc. ${fmtBRL(e.parcela)}${e.com_seguro ? ' c/ seg.' : ' s/ seg.'} · ${e.pagamento_1a}`; }
+function renderFila() {
+  const el = document.getElementById('fila-list');
+  const ativos = _filaItens.filter(e => ['pendente','processando','aguardando','retomar'].includes(e.status)).length;
+  document.getElementById('fila-robo-status').textContent = _filaItens.length ? `${_filaItens.length} itens · ${ativos} em aberto` : '';
+  if (!_filaItens.length) { el.innerHTML = '<div style="padding:16px;color:var(--text2);font-size:12px">Nenhuma emissão na fila. Abra uma ficha PF e clique em "Emitir na Porto".</div>'; return; }
+  el.innerHTML = `<table class="fila-tb"><thead><tr><th>Quando</th><th>Cliente</th><th>Plano combinado</th><th>Status</th><th>Resultado</th><th></th></tr></thead><tbody>` +
+    _filaItens.map(e => `<tr>
+      <td class="mono" style="white-space:nowrap;color:var(--text2)">${fmtDataHora(e.criado_em)}<br><span style="font-size:10px">${e.criado_por || ''}</span></td>
+      <td><strong style="color:var(--mp-navy)">${e.cliente || ''}</strong><br><span style="font-size:10.5px;color:var(--text2)">${e.consultor || 'sem vendedor'} · ${e.protocolo || ''}</span></td>
+      <td style="font-size:11.5px">${filaPlano(e)}${e.observacao ? `<br><span style="color:var(--text2)">Obs: ${e.observacao}</span>` : ''}</td>
+      <td><span class="fila-st ${e.status}">${e.status}</span>${e.etapa ? `<br><span style="font-size:10.5px;color:var(--text2)">${e.etapa}</span>` : ''}${e.motivo ? `<br><span style="font-size:10.5px;color:#92400E">${e.motivo}</span>` : ''}</td>
+      <td class="mono" style="font-size:11.5px">${e.contrato ? `Contrato ${e.contrato}<br>` : ''}${e.grupo_cota ? `${e.grupo_cota}<br>` : ''}${e.parcela_final ? `1ª parc. ${fmtBRL(e.parcela_final)}` : ''}${e.pdf_path ? `<br><a href="#" onclick="abrirArquivo('${e.pdf_path}');return false" style="color:#0a52a8">PDF da proposta</a>` : ''}</td>
+      <td style="white-space:nowrap">
+        <button class="fila-btn" onclick="verLog('${e.id}')">Log</button>
+        ${['aguardando','erro'].includes(e.status) ? `<button class="fila-btn" onclick="filaStatus('${e.id}','retomar')" title="O robô continua de onde parou">Retomar</button><button class="fila-btn" onclick="filaStatus('${e.id}','pendente')" title="Começa do zero">Refazer</button>` : ''}
+        ${['pendente','aguardando','erro','retomar'].includes(e.status) ? `<button class="fila-btn" style="color:var(--red)" onclick="filaStatus('${e.id}','cancelada')">Cancelar</button>` : ''}
+      </td>
+    </tr>`).join('') + '</tbody></table>';
+}
+async function filaStatus(id, status) {
+  if (status === 'cancelada' && !confirm('Cancelar esta emissão? Se o robô já reservou cota, libere a cota na Porto.')) return;
+  const patch = { status, motivo: null };
+  if (status === 'pendente') { patch.etapa = null; patch.tentativas = 0; }
+  const { error } = await sb.from('portal_emissoes').update(patch).eq('id', id);
+  if (error) { alert('Erro: ' + error.message); return; }
+  carregarFila();
+}
+async function verLog(id) {
+  const e = _filaItens.find(x => x.id === id); if (!e) return;
+  document.getElementById('log-sub').textContent = `${e.cliente || ''} · ${filaPlano(e)}`;
+  const body = document.getElementById('log-body'); body.innerHTML = '<div class="spinner"></div>';
+  document.getElementById('modal-log').style.display = 'flex';
+  const { data, error } = await sb.from('portal_emissoes_log').select('*').eq('emissao_id', id).order('id');
+  if (error) { body.innerHTML = 'Erro: ' + error.message; return; }
+  if (!data || !data.length) { body.innerHTML = '<div style="color:var(--text2)">O robô ainda não começou este item.</div>'; return; }
+  body.innerHTML = data.map(l => `<div style="display:flex;gap:10px;padding:6px 0;border-bottom:1px solid #F1F5F9">
+      <span class="mono" style="color:var(--text2);white-space:nowrap">${fmtDataHora(l.criado_em)}</span>
+      <span style="min-width:110px;color:var(--mp-navy);font-weight:600">${l.etapa || ''}</span>
+      <span style="flex:1;color:${l.nivel === 'erro' ? 'var(--red)' : (l.nivel === 'aviso' ? '#92400E' : 'var(--text)')}">${l.mensagem || ''}${l.print_path ? ` · <a href="#" onclick="abrirArquivo('${l.print_path}');return false" style="color:#0a52a8">ver print</a>` : ''}</span>
+    </div>`).join('');
+}
+async function abrirArquivo(path) {
+  const { data, error } = await sb.storage.from('emissoes').createSignedUrl(path, 600);
+  if (error) { alert('Erro ao abrir arquivo: ' + error.message); return; }
+  window.open(data.signedUrl, '_blank');
+}
+document.getElementById('em-credito').addEventListener('blur', e => { const n = brMoney(e.target.value); if (n) e.target.value = n.toLocaleString('pt-BR'); });
+document.getElementById('em-parcela').addEventListener('blur', e => { const n = brMoney(e.target.value); if (n) e.target.value = n.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); });
+
 async function abrirAtribuir(propostaId, consultorAtual) {
   _atribPropostaId = propostaId;
   document.getElementById('atrib-protocolo').textContent = 'Proposta ' + propostaId.substring(0,8);
@@ -1311,4 +1544,3 @@ checkSession();
 </script>
 </body>
 </html>
-```
