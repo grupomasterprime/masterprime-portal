@@ -386,7 +386,7 @@ function calcularOperacao(op){
   //   reajuste anual — e não num valor fixo. Com reajuste = 0 as duas formas coincidem,
   //   então os cenários calibrados anteriormente continuam batendo.
   const parcelaMes = m => parcelaBase*Math.pow(1+reajuste, Math.floor(m/12)) * (m > expectativa ? (1-pEcarta) : 1)
-                          + seguroMensal
+                          + seguroMensal*Math.pow(1+reajuste, Math.floor(m/12)) * (m > expectativa ? (1-pEcarta) : 1)
                           + (m <= prazoAdesao ? adesaoMensal : 0);
   const parcelaInicial = parcelaMes(1);
 
@@ -406,13 +406,13 @@ function calcularOperacao(op){
   let custoCheio = lanceP;
   for(let m = 1; m <= prazo; m++){
     custoCheio += parcelaCheia*Math.pow(1+reajuste, Math.floor(m/12)) * (m > expectativa ? (1-pEcarta) : 1)
-                + seguroMensal
+                + (m <= expectativa ? seguroMensal*Math.pow(1+reajuste, Math.floor(m/12)) : 0)
                 + (m <= prazoAdesao ? adesaoMensal : 0);
   }
   // Aporte de referência da previdência (denominador do % de retorno e "valor investido"
   //   da renda fixa equivalente no Conkey) = custo cheio efetivamente pago, com redutor.
   // Conferido exato no SimulaKey: aporte = lance próprio integral + parcelas com redutor.
-  const aportePrevidencia = lanceP + (custoCheio - lanceP) * (1 - redutor);
+  const aportePrevidencia = totalPagoConsorcio; // conferido no Simulakey 28/10/2026 (com seguro)
   const totalPagoForLucro = custoCheio;
 
   // ════════ FÓRMULAS DO CONKEY/SIMULAKEY — decifradas por engenharia reversa ════════
@@ -874,7 +874,7 @@ function abrirEvolucaoOp(op, indice){
   const prazoAdesao=op.adesaoOn?(parseInt(op.adesaoMeses||'0',10)||prazo):0;
   const adesaoMensal=(op.adesaoOn&&prazoAdesao>0)?(unmaskPct(op.adesao)/100)*credito/prazoAdesao:0;
   const parcelaMes=m=>parcelaBase*Math.pow(1+reajuste,Math.floor(m/12))*(m>expectativa?(1-pEcarta):1)
-                      + seguroMensal + (m<=prazoAdesao?adesaoMensal:0);
+                      + seguroMensal*Math.pow(1+reajuste,Math.floor(m/12))*(m>expectativa?(1-pEcarta):1) + (m<=prazoAdesao?adesaoMensal:0);
   const arr=[]; for(let m=1;m<=prazo;m++) arr.push(parcelaMes(m));
   const primeira=arr[0], ultima=arr[arr.length-1];
   const naCont=arr[expectativa-1];
@@ -980,15 +980,19 @@ renderOps();
   const campo = document.getElementById('selic');
   const nota  = document.getElementById('selicFonte');
   if (!campo) return;
-  const valorInicial = campo.value;
+  let digitou = false;
+  campo.addEventListener('input', e => { if (e.isTrusted) digitou = true; });
   fetch('https://api.bcb.gov.br/dados/serie/bcdata.sgs.432/dados/ultimos/1?formato=json')
     .then(r => r.ok ? r.json() : Promise.reject())
     .then(d => {
       const v = parseFloat(String(d && d[0] && d[0].valor).replace(',', '.'));
       if (!isFinite(v) || v <= 0 || v >= 100) return;
-      // Só sobrescreve se o usuário ainda não mexeu no campo.
-      if (campo.value !== valorInicial) return;
+      // Sempre usa a Selic oficial ao abrir (o autosave guardava a Selic antiga).
+      // So respeita o valor se o consultor digitar outro nesta mesma sessao.
+      if (digitou) return;
       campo.value = v.toFixed(2).replace('.', ',') + ' %';
+      campo.dispatchEvent(new Event('input', { bubbles: true }));
+      campo.dispatchEvent(new Event('change', { bubbles: true }));
       if (nota) {
         nota.textContent = 'Selic oficial do Banco Central, atualizada automaticamente';
         nota.style.display = 'block';
