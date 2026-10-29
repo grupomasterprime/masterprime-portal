@@ -437,7 +437,9 @@ function calcularOperacao(op){
   // IMÓVEIS ALUGADOS — conferido exato: crédito disponível valorizado pelos
   //   anos entre a contemplação e o fim do plano.
   const aluguelMensal = creditoDisp * pctAluguel;
-  const stImoveis = creditoDisp * Math.pow(1+valImob, (prazo-expectativa)/12);
+  // Conferido no SimulaKey em 28/10/2026 (lance embutido 30%): o imovel valorizado
+  //   parte do CREDITO CONTRATADO (nominal), nao do credito disponivel.
+  const stImoveis = credito * Math.pow(1+valImob, (prazo-expectativa)/12);
 
   // DIFERENÇA ALUGUEL × PARCELA — conferido exato contra Conkey (centavos):
   //   anuidade da sobra (aluguel − parcela BASE) capitalizada ao CDI mensal
@@ -445,17 +447,45 @@ function calcularOperacao(op){
   //   Usa a parcela BASE (com redutor aplicado): conferido em 2 ops Conkey:
   //     Op A (red 45, alu 1.5%, exp 40): Master 4.874.957,648 = Conkey 4.874.957,64 ✓
   //     Op B (sem red,  alu 1.0%, exp 40): Master 1.674.256,258 = Conkey 1.674.256,26 ✓
-  const sobraMensalDif = aluguelMensal - parcelaBase;
+  // Recalibrado em 28/10/2026 contra o detalhe mensal do backend do SimulaKey
+  //   (detalhesMensais), exato na casa dos centavos com e sem rentabilidade do aluguel:
+  //   • aluguel do mes = % aluguel x credito disponivel, reajustado todo ano junto com a
+  //     cota (mesmo % de reajuste da parcela), a partir do ano da contemplacao;
+  //   • parcela do mes = parcelaMes(m) (com redutor, seguro reajustado, embutido);
+  //   • a sobra (aluguel - parcela) vai para um fundo que rende CDI x rentabilidade do
+  //     aluguel ao mes (juros compostos sobre o saldo);
+  //   • IR de 15% sobre o rendimento do fundo (regressivo pelo prazo);
+  //   • "Lucro bruto" exibido = saldo final - IR; lucro liquido = isso - soma das sobras.
+  const rentAluguel = unmaskPct(op.rentAluguel)/100;
+  const sobraMensalDif = aluguelMensal - parcelaMes(expectativa + 1);
   const mesesPosDif = Math.max(0, prazo - expectativa);
-  let stDiferenca;
-  if (cdiMensal > 0 && mesesPosDif > 0) {
-    const fvDif = sobraMensalDif * (Math.pow(1+cdiMensal, mesesPosDif) - 1) / cdiMensal;
-    const jurosDif = fvDif - sobraMensalDif * mesesPosDif;
-    const irDif = mesesPosDif<=6 ? 0.225 : mesesPosDif<=12 ? 0.20 : mesesPosDif<=24 ? 0.175 : 0.15;
-    stDiferenca = fvDif - Math.max(0, jurosDif) * irDif;
-  } else {
-    stDiferenca = sobraMensalDif * mesesPosDif;
+  const anoCont = Math.floor(expectativa/12);
+  let saldoDif = 0, sobraTotalDif = 0;
+  for (let m = expectativa + 1; m <= prazo; m++) {
+    const aluguelM = aluguelMensal * Math.pow(1+reajuste, Math.floor(m/12) - anoCont);
+    const sobra = aluguelM - parcelaMes(m);
+    sobraTotalDif += sobra;
+    saldoDif = saldoDif + sobra + saldoDif * cdiMensal * rentAluguel;
   }
+  const irDif = mesesPosDif<=6 ? 0.225 : mesesPosDif<=12 ? 0.20 : mesesPosDif<=24 ? 0.175 : 0.15;
+  const stDiferenca = saldoDif - Math.max(0, saldoDif - sobraTotalDif) * irDif;
+  // Parcela CHEIA (sem redutor) do primeiro mes pos-contemplacao: e a referencia que o
+  //   SimulaKey usa para decidir se o Aluguel entra como estrategia (aluguel >= 1,5x essa
+  //   parcela). Conferido em 17 cenarios (alu 0,65% a 1,5%, Selic 13,75 e 15, com e sem
+  //   reajuste, redutor 10% e 25%): abaixo de 1,5x ele escolhe Previdencia.
+  const parcelaCheiaPos = parcelaCheia*Math.pow(1+reajuste, Math.floor((expectativa+1)/12)) * (1-pEcarta)
+                        + seguroMensal*Math.pow(1+reajuste, Math.floor((expectativa+1)/12)) * (1-pEcarta);
+  const aluguelCobre = aluguelMensal >= 1.5 * parcelaCheiaPos;
+  // "Lucro original" do aluguel no SimulaKey (formula legada, sem seguro e sem CDB):
+  //   soma dos alugueis - parcela cheia x (1 - embutido) x (1 + exp x redutor / meses pos)
+  //   reajustada. E o lucro liquido que ele exibe quando a rentabilidade do aluguel e 0%.
+  //   Conferido exato em 3 cenarios (redutor 25% e 10%, com e sem reajuste).
+  let somaAluguel = 0, somaFatorPos = 0;
+  for (let m = expectativa + 1; m <= prazo; m++) {
+    somaAluguel += aluguelMensal * Math.pow(1+reajuste, Math.floor(m/12) - anoCont);
+    somaFatorPos += Math.pow(1+reajuste, Math.floor(m/12));
+  }
+  const lucroAluguelLegado = somaAluguel - parcelaCheia * (1-pEcarta) * (1 + (mesesPosDif > 0 ? expectativa*redutor/mesesPosDif : 0)) * somaFatorPos;
 
   // ── Lucro de cada estratégia ──
   // Venda e Previdência: lucro bruto = lucro líquido.
@@ -468,8 +498,9 @@ function calcularOperacao(op){
   const lucroImoveisCard  = stImoveis;
   const lucroDiferenca    = stDiferenca;
   const lucroPrevidencia  = stPrevidencia - totalPagoForLucro;
-  const sobraTotalDif     = sobraMensalDif * mesesPosDif;
-  const lucroLiqDiferenca = stDiferenca - sobraTotalDif;
+  // Rentabilidade do aluguel 0%: o fundo nao rende, o ganho liquido e zero e o SimulaKey
+  //   cai no lucro legado (foi o 394,01% da simulacao do Arnaldo em 28/10/2026).
+  const lucroLiqDiferenca = rentAluguel > 0 ? (stDiferenca - sobraTotalDif) : lucroAluguelLegado;
 
   // ── SELEÇÃO DA ESTRATÉGIA CAMPEÃ ─────────────────────────────────────────
   // Lucro real = Patrimônio Final − Aporte Total (cada estratégia tem seu aporte)
@@ -556,12 +587,15 @@ function calcularOperacao(op){
 
     if (vendaVenceRf) {
       melhor = {key:'venda', valor: stVenda, lucro: lucroVendaReal, lucroLiq: lucroVendaLiq, aporteRf: valorInvestidoAteCont, prazoRf: expectativa};
-    } else if (sobraMensalDif > 0 && expectativa > 30 && lucroDiferencaReal > lucroPrevidenciaReal) {
+    } else if (aluguelCobre && valorInvestidoAteCont > 0) {
+      // 28/10/2026: no SimulaKey o Aluguel vence sempre que o aluguel cobre 1,5x a parcela
+      //   cheia (sem redutor) do mes seguinte a contemplacao; nao depende da Selic nem do
+      //   lucro da Previdencia. Aporte do aluguel = valor investido ate a contemplacao.
       // Aluguel/Diferença vence quando o lucro ABSOLUTO supera o da Previdência.
       // Validado contra Conkey (C05 vs C11): em exp=100 com alu=0,65%, lucroDif R$ 607k <
       // lucroPrev R$ 1.539k → Conkey escolhe PREVIDÊNCIA. Com alu=1,5%, lucroDif R$ 2.060k >
       // lucroPrev → Conkey escolhe ALUGUEL.
-      melhor = {key:'diferenca', valor: stImoveis + stDiferenca, lucro: lucroDiferencaReal, lucroLiq: lucroDiferencaReal, aporteRf: aporteAluguelConkey, prazoRf: expectativa};
+      melhor = {key:'diferenca', valor: 0, lucro: lucroDiferencaReal, lucroLiq: lucroLiqDiferenca, aporteRf: valorInvestidoAteCont, prazoRf: expectativa};
     } else {
       // Default: PREVIDÊNCIA. Aporte de referência = custo cheio com redutor (aportePrevidencia),
       //   conferido contra o "valor investido" da renda fixa da previdência no Conkey.
