@@ -1556,6 +1556,7 @@ function renderFila() {
       <td class="mono" style="font-size:11.5px">${e.contrato ? `Contrato ${e.contrato}<br>` : ''}${e.grupo_cota ? `${e.grupo_cota}<br>` : ''}${e.parcela_final ? `1ª parc. ${fmtBRL(e.parcela_final)}` : ''}${e.pdf_path ? e.pdf_path.split(',').map((pp, i) => `<br><a href="#" onclick="abrirArquivo('${pp.trim()}');return false" style="color:#0a52a8">PDF da proposta${e.pdf_path.includes(',') ? ' ' + (i+1) : ''}</a>`).join('') : ''}</td>
       <td style="white-space:nowrap">
         <button class="fila-btn" onclick="verLog('${e.id}')">Log</button>
+        ${e.status === 'concluida' ? `<button class="fila-btn" style="color:#0a52a8" onclick="copiarMsgEmissao('${e.id}')" title="Copia a mensagem pronta para mandar ao consultor">Copiar msg</button>` : ''}
         ${['aguardando','erro'].includes(e.status) ? `<button class="fila-btn" onclick="filaStatus('${e.id}','pendente')" title="O robô começa esta emissão do zero">Refazer</button>` : ''}
         ${['pendente','aguardando','erro','retomar','processando'].includes(e.status) ? `<button class="fila-btn" style="color:var(--red)" onclick="filaStatus('${e.id}','cancelada')" title="${e.status === 'processando' ? 'O robô para na próxima tela' : 'Tira da fila'}">${e.status === 'processando' ? 'Parar' : 'Cancelar'}</button>` : ''}
         ${e.status === 'cancelada' ? `<button class="fila-btn" onclick="filaRemover('${e.id}')" title="Apaga da fila (some de vez)">Remover</button>` : ''}
@@ -1578,12 +1579,43 @@ async function filaStatus(id, status) {
   if (error) { alert('Erro: ' + error.message); return; }
   carregarFila();
 }
+// Mensagem pronta (WhatsApp) para avisar o consultor que a proposta foi emitida
+function copiarMsgEmissao(id) {
+  const e = _filaItens.find(x => x.id === id); if (!e) return;
+  const a = allAdesoes.find(x => x.id === e.proposta_id);
+  const d = (a && a.dados) || {};
+  const primeiroNome = s => String(s || '').trim().split(/\s+/)[0];
+  const cap = s => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : '';
+  const itens = Array.isArray(e.itens) && e.itens.length ? e.itens : [{ credito: e.credito, plano: e.plano, com_seguro: e.com_seguro }];
+  const l = itens[0];
+  const produto = /im[oó]ve/i.test(e.produto || '') ? 'imóvel' : (/auto/i.test(e.produto || '') ? 'automóvel' : String(e.produto || '').toLowerCase());
+  const tipoGrupo = e.tipo_grupo ? 'grupo ' + String(e.tipo_grupo).toLowerCase() : '';
+  const plano = l.plano === 'R0' ? 'sem redutor' : (/^R\d+$/.test(l.plano || '') ? 'redutor ' + l.plano.slice(1) + '%' : (l.plano ? 'plano ' + l.plano : ''));
+  const seguro = l.com_seguro === false ? 'sem seguro de vida' : 'com seguro de vida';
+  const contratos = String(e.contratos || e.contrato || '').split(',').map(s => s.trim()).filter(Boolean);
+  const grupos = String(e.grupo_cota || '').split(',').map(s => s.trim()).filter(Boolean).map(gc => { const [g, c] = gc.split('/'); return `Grupo ${g}${c ? ' cota ' + c : ''}`; });
+  const pag = /cart[aã]o/i.test(e.pagamento_1a || '') ? 'Pagamento no Cartão, a Porto envia o link direto pro cliente'
+            : (/bolepix|boleto|pix/i.test(e.pagamento_1a || '') ? 'Pagamento por BolePix, a Porto envia o boleto/Pix direto pro cliente'
+            : (e.pagamento_1a ? 'Pagamento: ' + e.pagamento_1a : ''));
+  const qtd = contratos.length > 1 ? contratos.length : 1;
+  let t = `Emitida${qtd > 1 ? 's as ' + qtd + ' propostas' : ' a proposta'} do ${cap(primeiroNome(e.cliente))}!\n\n`;
+  if (qtd > 1) contratos.forEach((c, i) => { t += `*Contrato ${i + 1}:* ${c}${grupos[i] ? ' · ' + grupos[i] : ''}\n`; });
+  else { if (contratos[0]) t += `*Contrato:* ${contratos[0]}\n`; if (grupos[0]) t += `*${grupos[0]}*`; }
+  const detalhe = [produto, tipoGrupo].filter(Boolean).join(', ');
+  if (qtd === 1 && grupos[0]) t += detalhe ? ` (${detalhe})\n` : '\n'; else if (detalhe) t += `${cap(detalhe)}\n`;
+  t += `*Crédito* ${fmtBRL(e.credito_final || l.credito)}${qtd > 1 ? ' cada' : ''}\n`;
+  if (e.parcela_final) t += `*1ª parcela* ${fmtBRL(e.parcela_final)}${qtd > 1 ? ' cada' : ''} (${[plano, seguro].filter(Boolean).join(', ')})\n`;
+  if (pag) t += pag + '\n';
+  t += `\nO contrato foi pra assinatura${d.email ? ' no e-mail ' + d.email : ' no e-mail do cliente'}. O cliente tem 48h pra assinar, depois disso a proposta transmite automaticamente.`;
+  if (e.pdf_path) t += `\n\nSegue o PDF em anexo.`;
+  copyText(t);
+}
 async function verLog(id) {
   const e = _filaItens.find(x => x.id === id); if (!e) return;
   document.getElementById('log-sub').textContent = `${e.cliente || ''} · ${filaPlano(e)}`;
   const body = document.getElementById('log-body'); body.innerHTML = '<div class="spinner"></div>';
   document.getElementById('modal-log').style.display = 'flex';
-  const { data, error } = await sb.from('portal_emissoes_log').select('*').eq('emissao_id', id).order('id');
+  const { data, error } = await sb.from('portal_emissoes_log').select('*').eq('emissao_id', id).order('id', { ascending: false });
   if (error) { body.innerHTML = 'Erro: ' + error.message; return; }
   if (!data || !data.length) { body.innerHTML = '<div style="color:var(--text2)">O robô ainda não começou este item.</div>'; return; }
   body.innerHTML = data.map(l => `<div style="display:flex;gap:10px;padding:6px 0;border-bottom:1px solid #F1F5F9">
