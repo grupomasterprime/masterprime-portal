@@ -807,7 +807,7 @@ function renderList() {
         <div class="ad-card-header-right">
           <span class="mono" style="font-size:11px;color:var(--text2);">${a.protocolo || ''}</span>
           <span style="color:var(--text3);font-size:11px;" title="Recebido em ${fmtDataHora(a.criado_em)}">${fmtDataHora(a.criado_em)}</span>
-          ${EM_ADMIN() && a._source === 'nova' && a.tipo_pessoa === 'pf' ? `
+          ${EM_ADMIN() && a._source === 'nova' && a.tipo_pessoa === 'pf' && (a.administradora === 'porto' || a.origem_link === 'master_prime' || !a.administradora) ? `
             <button onclick="event.stopPropagation();abrirEmitir('${a.id}')" title="Mandar o robô emitir esta proposta na Porto" style="background:#0a52a8;color:#fff;border:0;padding:4px 9px;border-radius:6px;font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap">Emitir na Porto</button>
           ` : ''}
           ${(currentUserTipo === 'master' || currentUserTipo === 'admin') && a._source === 'nova' ? `
@@ -1534,10 +1534,21 @@ function haQuanto(iso) { if (!iso) return ''; const s = Math.round((Date.now() -
 function renderFila() {
   const el = document.getElementById('fila-list');
   const ativos = _filaItens.filter(e => ['pendente','processando','aguardando','retomar'].includes(e.status)).length;
-  document.getElementById('fila-robo-status').textContent = _filaItens.length ? `${_filaItens.length} itens · ${ativos} em aberto` : '';
-  if (!_filaItens.length) { el.innerHTML = '<div style="padding:16px;color:var(--text2);font-size:12px">Nenhuma emissão na fila. Abra uma ficha PF e clique em "Emitir na Porto".</div>'; return; }
+  const canceladas = _filaItens.filter(e => e.status === 'cancelada').length;
+  // Por padrao: em aberto + encerradas dos ultimos 7 dias (sem canceladas). "ver tudo" abre os 45 dias.
+  const corte = Date.now() - 7*86400000;
+  const aberto = e => ['pendente','processando','aguardando','retomar'].includes(e.status);
+  let visiveis = _filaMostrarCanceladas ? _filaItens : _filaItens.filter(e => e.status !== 'cancelada');
+  const antigas = visiveis.filter(e => !aberto(e) && new Date(e.criado_em) < corte).length;
+  if (!_filaMostrarTudo) visiveis = visiveis.filter(e => aberto(e) || new Date(e.criado_em) >= corte);
+  const stEl = document.getElementById('fila-robo-status');
+  const links = [];
+  if (antigas) links.push(`<a href="#" onclick="_filaMostrarTudo=!_filaMostrarTudo;renderFila();return false" style="color:var(--text2)">${_filaMostrarTudo ? 'só recentes' : 'ver ' + antigas + ' mais antiga' + (antigas > 1 ? 's' : '')}</a>`);
+  if (canceladas) links.push(`<a href="#" onclick="_filaMostrarCanceladas=!_filaMostrarCanceladas;renderFila();return false" style="color:var(--text2)">${_filaMostrarCanceladas ? 'ocultar' : 'ver'} ${canceladas} cancelada${canceladas > 1 ? 's' : ''}</a>`);
+  stEl.innerHTML = _filaItens.length ? `${visiveis.length} ${visiveis.length === 1 ? 'item' : 'itens'} · ${ativos} em aberto${links.length ? ' · ' + links.join(' · ') : ''}` : '';
+  if (!visiveis.length) { el.innerHTML = '<div style="padding:16px;color:var(--text2);font-size:12px">Nenhuma emissão na fila. Abra uma ficha PF e clique em "Emitir na Porto".</div>'; return; }
   el.innerHTML = `<table class="fila-tb"><thead><tr><th>Quando</th><th>Cliente</th><th>Plano combinado</th><th>Status</th><th>Resultado</th><th></th></tr></thead><tbody>` +
-    _filaItens.map(e => `<tr>
+    visiveis.map(e => `<tr>
       <td class="mono" style="white-space:nowrap;color:var(--text2)">${fmtDataHora(e.criado_em)}<br><span style="font-size:10px">${e.criado_por || ''}</span></td>
       <td><strong style="color:var(--mp-navy)">${e.cliente || ''}</strong><br><span style="font-size:10.5px;color:var(--text2)">${e.consultor || 'sem vendedor'} · ${e.protocolo || ''}</span></td>
       <td style="font-size:11.5px">${filaPlano(e)}${e.observacao ? `<br><span style="color:var(--text2)">Obs: ${e.observacao}</span>` : ''}</td>
@@ -1547,8 +1558,17 @@ function renderFila() {
         <button class="fila-btn" onclick="verLog('${e.id}')">Log</button>
         ${['aguardando','erro'].includes(e.status) ? `<button class="fila-btn" onclick="filaStatus('${e.id}','retomar')" title="O robô continua de onde parou">Retomar</button><button class="fila-btn" onclick="filaStatus('${e.id}','pendente')" title="Começa do zero">Refazer</button>` : ''}
         ${['pendente','aguardando','erro','retomar','processando'].includes(e.status) ? `<button class="fila-btn" style="color:var(--red)" onclick="filaStatus('${e.id}','cancelada')" title="${e.status === 'processando' ? 'O robô para na próxima tela' : 'Tira da fila'}">${e.status === 'processando' ? 'Parar' : 'Cancelar'}</button>` : ''}
+        ${e.status === 'cancelada' ? `<button class="fila-btn" onclick="filaRemover('${e.id}')" title="Apaga da fila (some de vez)">Remover</button>` : ''}
       </td>
     </tr>`).join('') + '</tbody></table>';
+}
+let _filaMostrarCanceladas = false, _filaMostrarTudo = false;
+async function filaRemover(id) {
+  if (!confirm('Remover esta emissão cancelada da fila? Ela some de vez (o log também).')) return;
+  await sb.from('portal_emissoes_log').delete().eq('emissao_id', id);
+  const { error } = await sb.from('portal_emissoes').delete().eq('id', id);
+  if (error) { alert('Erro: ' + error.message); return; }
+  carregarFila();
 }
 async function filaStatus(id, status) {
   if (status === 'cancelada' && !confirm('Cancelar esta emissão? Se o robô estiver rodando, ele para na próxima tela. Se já reservou cota, libere a cota na Porto.')) return;
