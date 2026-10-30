@@ -375,7 +375,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
 
   <!-- MODAL: EMITIR NA PORTO (robo) -->
   <div id="modal-emitir" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;padding:20px">
-    <div style="background:#fff;border-radius:12px;max-width:560px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <div style="background:#fff;border-radius:12px;max-width:760px;width:100%;max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)">
       <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
         <div>
           <div style="font-size:16px;font-weight:700;color:var(--mp-navy)">Emitir na Porto (robô)</div>
@@ -385,7 +385,7 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
       </div>
       <div style="padding:18px 24px;display:grid;grid-template-columns:1fr 1fr;gap:12px 14px" id="em-form">
         <div style="grid-column:1/-1;font-size:11.5px;color:var(--text2);background:#F8FAFC;border:1px solid var(--border);border-radius:8px;padding:10px 12px;line-height:1.5">
-          O robô vai consultar o cliente, reservar a cota, preencher o cadastro com os dados da ficha, lançar o pagamento, responder a DPS e transmitir o contrato para assinatura. Se a 1ª parcela encontrada não bater com a combinada, ele para e avisa aqui na fila.
+          O robô usa os dados da ficha. Aqui você só diz <b>o que emitir</b>: produto, tipo de grupo e as cotas. Ele para e avisa na fila se a Porto não liberar capacidade, se a parcela não bater ou se algo da ficha estiver faltando.
         </div>
         <div>
           <label class="em-label">Produto</label>
@@ -397,26 +397,26 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
           <label class="em-label">Tipo de grupo</label>
           <select id="em-tipo" class="em-input"><option>Em formação</option><option>Em andamento</option></select>
         </div>
-        <div>
-          <label class="em-label">Pagamento da 1ª parcela</label>
-          <select id="em-pag" class="em-input"><option>BolePix</option><option>Cartão de crédito</option><option>Pix Automático</option></select>
-        </div>
-        <div>
-          <label class="em-label">Renda para a consulta (R$)</label>
-          <input id="em-renda" class="em-input mono" placeholder="vem da ficha" inputmode="numeric" title="A Porto usa a renda para liberar a capacidade de pagamento. Vem da ficha; ajuste se precisar.">
-        </div>
-        <div style="grid-column:1/-1">
-          <label class="em-label">Cotas a emitir (uma linha por tipo de cota; use Qtd para repetir)</label>
-          <table class="em-tb" id="em-tabela">
-            <thead><tr><th>Crédito (R$)</th><th>Plano / redutor</th><th>Grupo</th><th>1ª parcela (R$)</th><th>Seguro</th><th>Cota</th><th>Qtd</th><th></th></tr></thead>
-            <tbody id="em-linhas"></tbody>
-          </table>
-          <button type="button" onclick="emAddLinha()" style="margin-top:8px;background:#fff;border:1px dashed var(--border2);color:var(--mp-navy);padding:6px 12px;border-radius:7px;font-size:11.5px;cursor:pointer;font-weight:600">+ Adicionar linha</button>
-          <div style="font-size:10.5px;color:var(--text2);margin-top:6px">Plano: trecho do nome na Porto (RED 50%, S/RED, 12X, AV). Grupo em branco: o robô escolhe pela faixa de crédito. Cota: automática, "centenas" (uma em cada centena) ou números separados por vírgula.</div>
+        <div style="grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;background:#F8FAFC;border:1px solid var(--border);border-radius:8px;padding:10px 12px">
+          <div style="grid-column:1/-1;font-size:10.5px;color:var(--text2);text-transform:uppercase;letter-spacing:.3px">Da ficha de adesão (já preenchido; mude só se precisar)</div>
+          <div>
+            <label class="em-label">Pagamento da 1ª parcela</label>
+            <select id="em-pag" class="em-input"><option>BolePix</option><option>Cartão de crédito</option><option>Pix Automático</option></select>
+          </div>
+          <div>
+            <label class="em-label">Renda bruta (R$)</label>
+            <input id="em-renda" class="em-input mono" placeholder="sem renda na ficha" inputmode="numeric" title="A Porto usa a renda para liberar a capacidade de pagamento.">
+          </div>
         </div>
         <div style="grid-column:1/-1">
-          <label class="em-label">Observação para o robô (opcional)</label>
-          <input id="em-obs" class="em-input" placeholder="ex: cliente quer vencimento dia 10">
+          <label class="em-label">Cotas a emitir</label>
+          <div id="em-linhas"></div>
+          <button type="button" onclick="emAddLinha()" style="margin-top:4px;background:#fff;border:1px dashed var(--border2);color:var(--mp-navy);padding:8px 14px;border-radius:7px;font-size:12px;cursor:pointer;font-weight:600;width:100%">+ Adicionar outra cota (crédito ou plano diferente)</button>
+          <div style="font-size:11px;color:var(--text2);margin-top:8px;line-height:1.5">Mesma cota várias vezes: aumente a <b>Quantidade</b>. Grupo em branco: o robô escolhe pela faixa de crédito e, entre grupos iguais, o que tem menos vagas livres (desde que caibam todas as cotas). 1ª parcela preenchida: o robô só reserva se a da Porto bater (2%); em branco: reserva a do plano e mostra o valor na fila.</div>
+        </div>
+        <div style="grid-column:1/-1">
+          <label class="em-label">Observação (opcional, fica no log da fila)</label>
+          <input id="em-obs" class="em-input" placeholder="ex: se o grupo lotar, pode ir no próximo da mesma faixa">
         </div>
       </div>
       <div style="padding:14px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;align-items:center">
@@ -443,12 +443,15 @@ body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-ser
   <style>
     .em-label { font-size:10.5px; font-weight:600; color:var(--text2); text-transform:uppercase; letter-spacing:.3px; display:block; margin-bottom:4px; }
     .em-input { width:100%; padding:9px 11px; border:1px solid var(--border); border-radius:7px; font-size:13px; font-family:inherit; }
-    .em-tb { width:100%; border-collapse:collapse; font-size:12px; }
-    .em-tb th { font-size:9.5px; color:var(--text2); text-transform:uppercase; letter-spacing:.3px; text-align:left; padding:4px 4px; }
-    .em-tb td { padding:3px 3px; vertical-align:middle; }
-    .em-tb input, .em-tb select { width:100%; padding:7px 8px; border:1px solid var(--border); border-radius:6px; font-size:12px; font-family:inherit; }
-    .em-tb input[type=checkbox] { width:16px; height:16px; }
-    .em-tb .rm { background:none; border:0; color:var(--red); cursor:pointer; font-size:16px; line-height:1; }
+    .em-cota { border:1px solid var(--border); border-radius:10px; padding:12px 14px 14px; margin-bottom:10px; background:#FAFBFD; position:relative; }
+    .em-cota .em-cota-h { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
+    .em-cota .em-cota-t { font-size:11px; font-weight:700; color:var(--mp-navy); text-transform:uppercase; letter-spacing:.4px; }
+    .em-cota .rm { background:none; border:0; color:var(--red); cursor:pointer; font-size:12px; font-weight:600; padding:2px 6px; }
+    .em-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:10px 12px; }
+    .em-grid .em-label { display:block; font-size:10.5px; color:var(--text2); text-transform:uppercase; letter-spacing:.3px; margin-bottom:4px; line-height:1.3; min-height:14px; }
+    .em-grid input, .em-grid select { width:100%; padding:9px 10px; border:1px solid var(--border); border-radius:7px; font-size:13px; font-family:inherit; background:#fff; min-width:0; }
+    .em-grid .em-chk { display:flex; align-items:center; gap:8px; padding:9px 10px; border:1px solid var(--border); border-radius:7px; background:#fff; font-size:13px; cursor:pointer; user-select:none; }
+    .em-grid .em-chk input { width:17px; height:17px; margin:0; }
     .fila-bar { height:6px; background:#E2E8F0; border-radius:4px; overflow:hidden; margin-top:4px; width:150px; }
     .fila-bar > div { height:100%; background:#0a52a8; transition:width .4s; }
     .fila-tb { width:100%; border-collapse:collapse; font-size:12px; }
@@ -1383,29 +1386,52 @@ let _emPropostaId = null, _emProposta = null, _filaTimer = null, _filaItens = []
 const EM_LIBERADO = ['allan.almeida'];
 const EM_ADMIN = () => (currentUserTipo === 'master' || currentUserTipo === 'admin') && EM_LIBERADO.includes(String(currentUserEmail || '').toLowerCase().split('@')[0]);
 
+// Cada cota e um bloco com campos rotulados (nada cortado). Plano e cota viram seletores;
+// "Outro" abre um campo de texto. Os valores enviados ao robo continuam os mesmos:
+//   plano: 'R0' | 'R25' | 'R50' | texto livre (trecho do nome do plano na Porto)
+//   cotas: null (automatica) | 'centenas' | '123,245'
+const EM_PLANOS = [['R50','Redutor 50%'],['R45','Redutor 45%'],['R40','Redutor 40%'],['R25','Redutor 25%'],['R0','Sem redutor'],['__pct','Outro % de redutor'],['__outro','Outro plano (nome)']];
 function emAddLinha(v) {
   v = v || {};
-  const tr = document.createElement('tr');
-  tr.innerHTML = `<td><input class="mono l-credito" placeholder="ex: 70.000" inputmode="numeric" value="${v.credito != null ? Number(v.credito).toLocaleString('pt-BR') : ''}"></td>
-    <td><input class="l-plano" placeholder="RED 50%" value="${v.plano || ''}" style="text-transform:uppercase"></td>
-    <td><input class="mono l-grupo" placeholder="opcional" value="${v.grupo || ''}" style="text-transform:uppercase"></td>
-    <td><input class="mono l-parcela" placeholder="ex: 790,00" inputmode="decimal" value="${v.parcela != null ? Number(v.parcela).toLocaleString('pt-BR', {minimumFractionDigits:2}) : ''}"></td>
-    <td style="text-align:center"><input type="checkbox" class="l-seguro" ${v.com_seguro === false ? '' : 'checked'} title="Cota com seguro de vida"></td>
-    <td><input class="mono l-cotas" placeholder="auto / centenas / 123,245" value="${v.cotas || ''}"></td>
-    <td><input class="mono l-qtd" type="number" min="1" value="${v.qtd || 1}" style="width:56px"></td>
-    <td><button type="button" class="rm" onclick="this.closest('tr').remove()" title="Remover linha">&times;</button></td>`;
-  document.getElementById('em-linhas').appendChild(tr);
+  const n = document.querySelectorAll('#em-linhas .em-cota').length + 1;
+  const planoPadrao = EM_PLANOS.some(p => p[0] === (v.plano || '')) ? v.plano : (/^R\d+$/.test(v.plano || '') ? '__pct' : (v.plano ? '__outro' : 'R50'));
+  const cotaModo = !v.cotas || v.cotas === 'centenas' ? 'centenas' : (v.cotas === 'auto' ? 'auto' : (v.cotas === 'aleatoria' ? 'aleatoria' : 'lista'));
+  const d = document.createElement('div'); d.className = 'em-cota';
+  d.innerHTML = `<div class="em-cota-h"><span class="em-cota-t">Cota ${n}</span><button type="button" class="rm" onclick="emRemoverLinha(this)">Remover</button></div>
+    <div class="em-grid">
+      <div><label class="em-label">Crédito (R$)</label><input class="mono l-credito" placeholder="70.000" inputmode="numeric" value="${v.credito != null ? Number(v.credito).toLocaleString('pt-BR') : ''}"></div>
+      <div><label class="em-label">1ª parcela (R$), opcional</label><input class="mono l-parcela" placeholder="ex: 790,00" inputmode="decimal" value="${v.parcela != null ? Number(v.parcela).toLocaleString('pt-BR', {minimumFractionDigits:2}) : ''}"></div>
+      <div><label class="em-label">Quantidade</label><input class="mono l-qtd" type="number" min="1" value="${v.qtd || 1}"></div>
+      <div><label class="em-label">Plano / redutor</label><select class="l-plano-sel" onchange="emPlanoMudou(this)">${EM_PLANOS.map(p => `<option value="${p[0]}" ${p[0] === planoPadrao ? 'selected' : ''}>${p[1]}</option>`).join('')}</select>
+        <input class="l-plano" placeholder="trecho do nome do plano na Porto" value="${planoPadrao === '__outro' ? (v.plano || '') : ''}" style="text-transform:uppercase;margin-top:6px;display:${planoPadrao === '__outro' ? 'block' : 'none'}">
+        <input class="mono l-plano-pct" type="number" min="1" max="99" placeholder="% do redutor, ex: 35" value="${planoPadrao === '__pct' ? v.plano.slice(1) : ''}" style="margin-top:6px;display:${planoPadrao === '__pct' ? 'block' : 'none'}"></div>
+      <div><label class="em-label">Grupo (opcional)</label><input class="mono l-grupo" placeholder="ex: IP006" value="${v.grupo || ''}" style="text-transform:uppercase"></div>
+      <div><label class="em-label">Taxa do grupo</label><select class="l-prefixado"><option value="" ${!v.prefixado ? 'selected' : ''}>Normal</option><option value="1" ${v.prefixado ? 'selected' : ''}>Pré-fixado (IP / AP)</option></select></div>
+      <div><label class="em-label">Cota</label><select class="l-cotas-modo" onchange="emCotaMudou(this)"><option value="centenas" ${cotaModo === 'centenas' ? 'selected' : ''}>Uma em cada centena</option><option value="aleatoria" ${cotaModo === 'aleatoria' ? 'selected' : ''}>Aleatória entre as livres</option><option value="lista" ${cotaModo === 'lista' ? 'selected' : ''}>Números específicos</option><option value="auto" ${cotaModo === 'auto' ? 'selected' : ''}>Automática da Porto (menor livre)</option></select>
+        <input class="mono l-cotas" placeholder="ex: 123, 245" value="${cotaModo === 'lista' ? v.cotas : ''}" style="margin-top:6px;display:${cotaModo === 'lista' ? 'block' : 'none'}"></div>
+      <div><label class="em-label">Seguro de vida</label><label class="em-chk"><input type="checkbox" class="l-seguro" ${v.com_seguro === false ? '' : 'checked'}> Cota com seguro</label></div>
+    </div>`;
+  document.getElementById('em-linhas').appendChild(d);
 }
+function emRemoverLinha(btn) { btn.closest('.em-cota').remove(); document.querySelectorAll('#em-linhas .em-cota .em-cota-t').forEach((t, i) => t.textContent = 'Cota ' + (i + 1)); }
+function emPlanoMudou(sel) { const inp = sel.parentElement.querySelector('.l-plano'), pct = sel.parentElement.querySelector('.l-plano-pct'); inp.style.display = sel.value === '__outro' ? 'block' : 'none'; pct.style.display = sel.value === '__pct' ? 'block' : 'none'; if (sel.value === '__outro') inp.focus(); if (sel.value === '__pct') pct.focus(); }
+function emCotaMudou(sel) { const inp = sel.parentElement.querySelector('.l-cotas'); inp.style.display = sel.value === 'lista' ? 'block' : 'none'; if (sel.value === 'lista') inp.focus(); }
 function emLerLinhas() {
-  return [...document.querySelectorAll('#em-linhas tr')].map(tr => ({
-    credito: brMoney(tr.querySelector('.l-credito').value),
-    plano: (tr.querySelector('.l-plano').value || '').trim().toUpperCase() || null,
-    grupo: (tr.querySelector('.l-grupo').value || '').trim().toUpperCase() || null,
-    parcela: brMoney(tr.querySelector('.l-parcela').value),
-    com_seguro: tr.querySelector('.l-seguro').checked,
-    cotas: (() => { const c = (tr.querySelector('.l-cotas').value || '').trim().toLowerCase(); if (!c || c === 'auto') return null; if (/centena/.test(c)) return 'centenas'; return c.replace(/[^\d,]/g, '') || null; })(),
-    qtd: Math.max(1, parseInt(tr.querySelector('.l-qtd').value, 10) || 1)
-  }));
+  return [...document.querySelectorAll('#em-linhas .em-cota')].map(b => {
+    const psel = b.querySelector('.l-plano-sel').value;
+    const pct = parseInt(b.querySelector('.l-plano-pct').value, 10);
+    const plano = psel === '__outro' ? ((b.querySelector('.l-plano').value || '').trim().toUpperCase() || null) : (psel === '__pct' ? (pct > 0 ? 'R' + pct : null) : psel);
+    const modo = b.querySelector('.l-cotas-modo').value;
+    const cotas = modo === 'auto' ? 'auto' : (modo === 'aleatoria' ? 'aleatoria' : (modo === 'centenas' ? 'centenas' : ((b.querySelector('.l-cotas').value || '').replace(/[^\d,]/g, '').replace(/,+/g, ',').replace(/^,|,$/g, '') || 'centenas')));
+    return {
+      credito: brMoney(b.querySelector('.l-credito').value),
+      plano, grupo: (b.querySelector('.l-grupo').value || '').trim().toUpperCase() || null,
+      prefixado: b.querySelector('.l-prefixado').value === '1',
+      parcela: brMoney(b.querySelector('.l-parcela').value),
+      com_seguro: b.querySelector('.l-seguro').checked,
+      cotas, qtd: Math.max(1, parseInt(b.querySelector('.l-qtd').value, 10) || 1)
+    };
+  });
 }
 function brMoney(v) { const n = parseFloat(String(v||'').replace(/[R$\s.]/g,'').replace(',','.')); return isNaN(n) ? null : n; }
 function fmtBRL(v) { return v == null ? '—' : 'R$ ' + Number(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2}); }
@@ -1418,6 +1444,9 @@ async function abrirEmitir(propostaId) {
   document.getElementById('em-cliente').textContent = `${a.nome_cliente || ''} · CPF ${a.cpf_cnpj || ''} · ${a.consultor_nome || 'sem vendedor'} · ${a.protocolo || ''}`;
   document.getElementById('em-linhas').innerHTML = ''; emAddLinha({ com_seguro: d.aceita_seguro !== false });
   document.getElementById('em-renda').value = d.renda_mensal ? Number(d.renda_mensal).toLocaleString('pt-BR') : '';
+  // forma de pagamento da ficha (Porto: Boleto / Cartão de Crédito / Cartão Porto) -> opcao da Porto
+  const fpFicha = String(d.forma_pagamento_1 || '').toLowerCase();
+  document.getElementById('em-pag').value = /cart/.test(fpFicha) ? 'Cartão de crédito' : (/pix autom/.test(fpFicha) ? 'Pix Automático' : 'BolePix');
   document.getElementById('em-obs').value = '';
   document.getElementById('em-erro').textContent = '';
   const fp = String(d.forma_pagamento_1 || '').toLowerCase();
@@ -1435,9 +1464,8 @@ async function enviarEmissao() {
   if (!linhas.length) { err.textContent = 'Adicione pelo menos uma linha de cota.'; return; }
   for (let i = 0; i < linhas.length; i++) {
     const l = linhas[i];
-    if (!l.credito || l.credito < 1000) { err.textContent = `Linha ${i+1}: informe o crédito.`; return; }
-    if (!l.parcela) { err.textContent = `Linha ${i+1}: informe a 1ª parcela combinada (é com ela que o robô confere a cota).`; return; }
-    if (!l.plano) { err.textContent = `Linha ${i+1}: informe o plano (ex.: RED 50%, S/RED, 12X).`; return; }
+    if (!l.credito || l.credito < 1000) { err.textContent = `Cota ${i+1}: informe o crédito.`; return; }
+    if (!l.plano) { err.textContent = `Cota ${i+1}: escolha o plano/redutor (ou informe o % / nome do plano em "Outro").`; return; }
   }
   const credito = linhas[0].credito, parcela = linhas[0].parcela;
   const a = _emProposta;
@@ -1490,7 +1518,7 @@ async function carregarFila() {
 function filaPlano(e) {
   const cab = `${e.produto} · ${e.tipo_grupo} · ${e.pagamento_1a}`;
   const itens = Array.isArray(e.itens) && e.itens.length ? e.itens : [{ credito: e.credito, plano: e.plano, grupo: e.grupo, parcela: e.parcela, com_seguro: e.com_seguro, cotas: e.cotas, qtd: e.quantidade || 1 }];
-  const ls = itens.map(l => `${l.qtd > 1 ? l.qtd + 'x ' : ''}${fmtBRL(l.credito)}${l.plano ? ' ' + l.plano : ''}${l.grupo ? ' ' + l.grupo : ''} · parc. ${fmtBRL(l.parcela)}${l.com_seguro === false ? ' s/ seg.' : ' c/ seg.'}${l.cotas === 'centenas' ? ' · centenas' : (l.cotas ? ' · cotas ' + l.cotas : '')}`);
+  const ls = itens.map(l => `${l.qtd > 1 ? l.qtd + 'x ' : ''}${fmtBRL(l.credito)}${l.plano ? ' ' + (l.plano === 'R0' ? 'sem red.' : (/^R\d+$/.test(l.plano) ? 'red. ' + l.plano.slice(1) + '%' : l.plano)) : ''}${l.prefixado ? ' pré-fixado' : ''}${l.grupo ? ' ' + l.grupo : ''} · parc. ${fmtBRL(l.parcela)}${l.com_seguro === false ? ' s/ seg.' : ' c/ seg.'}${l.cotas === 'centenas' ? ' · centenas' : (l.cotas === 'auto' ? ' · cota auto Porto' : (l.cotas && l.cotas !== 'aleatoria' ? ' · cotas ' + l.cotas : ''))}`);
   return cab + '<br>' + ls.join('<br>');
 }
 const ETAPA_PCT = { consulta: 8, reserva: 25, 'cadastro:dados': 35, 'cadastro:contato': 42, 'cadastro:adicionais': 49, 'cadastro:endereco': 56, 'cadastro:extras': 60, pagamento: 70, dps: 78, resumo: 85, transmitir: 92, pdf: 97, concluida: 100 };
