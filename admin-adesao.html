@@ -1612,20 +1612,23 @@ function copiarMsgEmissao(id) {
 }
 async function verLog(id) {
   const e = _filaItens.find(x => x.id === id); if (!e) return;
-  document.getElementById('log-sub').textContent = `${e.cliente || ''} · ${filaPlano(e)}`;
+  document.getElementById('log-sub').textContent = `${e.cliente || ''} · ${filaPlano(e).replace(/<br>/g, ' · ')}`;
   const body = document.getElementById('log-body'); body.innerHTML = '<div class="spinner"></div>';
   document.getElementById('modal-log').style.display = 'flex';
   const { data, error } = await sb.from('portal_emissoes_log').select('*').eq('emissao_id', id).order('id', { ascending: false });
   if (error) { body.innerHTML = 'Erro: ' + error.message; return; }
   if (!data || !data.length) { body.innerHTML = '<div style="color:var(--text2)">O robô ainda não começou este item.</div>'; return; }
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   body.innerHTML = data.map(l => `<div style="display:flex;gap:10px;padding:6px 0;border-bottom:1px solid #F1F5F9">
       <span class="mono" style="color:var(--text2);white-space:nowrap">${fmtDataHora(l.criado_em)}</span>
-      <span style="min-width:110px;color:var(--mp-navy);font-weight:600">${l.etapa || ''}</span>
-      <span style="flex:1;color:${l.nivel === 'erro' ? 'var(--red)' : (l.nivel === 'aviso' ? '#92400E' : 'var(--text)')}">${l.mensagem || ''}${l.print_path ? ` · <a href="#" onclick="abrirArquivo('${l.print_path}');return false" style="color:#0a52a8">ver print</a>` : ''}</span>
+      <span style="min-width:110px;color:var(--mp-navy);font-weight:600">${esc(l.etapa)}</span>
+      <span style="flex:1;color:${l.nivel === 'erro' ? 'var(--red)' : (l.nivel === 'aviso' ? '#92400E' : 'var(--text)')};word-break:break-word">${esc(l.mensagem)}${l.print_path ? ` · <a href="#" onclick="abrirArquivo('${l.print_path}');return false" style="color:#0a52a8">ver print</a>` : ''}</span>
     </div>`).join('');
 }
 async function abrirArquivo(path) {
-  const { data, error } = await sb.storage.from('emissoes').createSignedUrl(path, 600);
+  // PDFs baixam com o nome que o robo deu ("Proposta Porto <contrato> - <CLIENTE>.pdf"); prints abrem na aba
+  const opts = /\.pdf$/i.test(path) ? { download: path.split('/').pop() } : undefined;
+  const { data, error } = await sb.storage.from('emissoes').createSignedUrl(path, 600, opts);
   if (error) { alert('Erro ao abrir arquivo: ' + error.message); return; }
   window.open(data.signedUrl, '_blank');
 }
