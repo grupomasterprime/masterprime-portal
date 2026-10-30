@@ -1546,12 +1546,12 @@ function renderFila() {
       <td style="white-space:nowrap">
         <button class="fila-btn" onclick="verLog('${e.id}')">Log</button>
         ${['aguardando','erro'].includes(e.status) ? `<button class="fila-btn" onclick="filaStatus('${e.id}','retomar')" title="O robô continua de onde parou">Retomar</button><button class="fila-btn" onclick="filaStatus('${e.id}','pendente')" title="Começa do zero">Refazer</button>` : ''}
-        ${['pendente','aguardando','erro','retomar'].includes(e.status) ? `<button class="fila-btn" style="color:var(--red)" onclick="filaStatus('${e.id}','cancelada')">Cancelar</button>` : ''}
+        ${['pendente','aguardando','erro','retomar','processando'].includes(e.status) ? `<button class="fila-btn" style="color:var(--red)" onclick="filaStatus('${e.id}','cancelada')" title="${e.status === 'processando' ? 'O robô para na próxima tela' : 'Tira da fila'}">${e.status === 'processando' ? 'Parar' : 'Cancelar'}</button>` : ''}
       </td>
     </tr>`).join('') + '</tbody></table>';
 }
 async function filaStatus(id, status) {
-  if (status === 'cancelada' && !confirm('Cancelar esta emissão? Se o robô já reservou cota, libere a cota na Porto.')) return;
+  if (status === 'cancelada' && !confirm('Cancelar esta emissão? Se o robô estiver rodando, ele para na próxima tela. Se já reservou cota, libere a cota na Porto.')) return;
   const patch = { status, motivo: null };
   if (status === 'pendente') { patch.etapa = null; patch.tentativas = 0; }
   const { error } = await sb.from('portal_emissoes').update(patch).eq('id', id);
