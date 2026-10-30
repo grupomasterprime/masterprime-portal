@@ -807,7 +807,7 @@ function renderList() {
         <div class="ad-card-header-right">
           <span class="mono" style="font-size:11px;color:var(--text2);">${a.protocolo || ''}</span>
           <span style="color:var(--text3);font-size:11px;" title="Recebido em ${fmtDataHora(a.criado_em)}">${fmtDataHora(a.criado_em)}</span>
-          ${EM_ADMIN() && a._source === 'nova' && a.tipo_pessoa === 'pf' && (a.administradora === 'porto' || a.origem_link === 'master_prime' || !a.administradora) ? `
+          ${EM_ADMIN() && a._source === 'nova' && a.tipo_pessoa === 'pf' && (a.administradora === 'porto' || !a.administradora) ? `
             <button onclick="event.stopPropagation();abrirEmitir('${a.id}')" title="Mandar o robô emitir esta proposta na Porto" style="background:#0a52a8;color:#fff;border:0;padding:4px 9px;border-radius:6px;font-size:10.5px;font-weight:700;cursor:pointer;white-space:nowrap">Emitir na Porto</button>
           ` : ''}
           ${(currentUserTipo === 'master' || currentUserTipo === 'admin') && a._source === 'nova' ? `
@@ -1556,7 +1556,7 @@ function renderFila() {
       <td class="mono" style="font-size:11.5px">${e.contrato ? `Contrato ${e.contrato}<br>` : ''}${e.grupo_cota ? `${e.grupo_cota}<br>` : ''}${e.parcela_final ? `1ª parc. ${fmtBRL(e.parcela_final)}` : ''}${e.pdf_path ? e.pdf_path.split(',').map((pp, i) => `<br><a href="#" onclick="abrirArquivo('${pp.trim()}');return false" style="color:#0a52a8">PDF da proposta${e.pdf_path.includes(',') ? ' ' + (i+1) : ''}</a>`).join('') : ''}</td>
       <td style="white-space:nowrap">
         <button class="fila-btn" onclick="verLog('${e.id}')">Log</button>
-        ${['aguardando','erro'].includes(e.status) ? `<button class="fila-btn" onclick="filaStatus('${e.id}','retomar')" title="O robô continua de onde parou">Retomar</button><button class="fila-btn" onclick="filaStatus('${e.id}','pendente')" title="Começa do zero">Refazer</button>` : ''}
+        ${['aguardando','erro'].includes(e.status) ? `<button class="fila-btn" onclick="filaStatus('${e.id}','pendente')" title="O robô começa esta emissão do zero">Refazer</button>` : ''}
         ${['pendente','aguardando','erro','retomar','processando'].includes(e.status) ? `<button class="fila-btn" style="color:var(--red)" onclick="filaStatus('${e.id}','cancelada')" title="${e.status === 'processando' ? 'O robô para na próxima tela' : 'Tira da fila'}">${e.status === 'processando' ? 'Parar' : 'Cancelar'}</button>` : ''}
         ${e.status === 'cancelada' ? `<button class="fila-btn" onclick="filaRemover('${e.id}')" title="Apaga da fila (some de vez)">Remover</button>` : ''}
       </td>
