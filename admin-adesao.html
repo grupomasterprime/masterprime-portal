@@ -1379,7 +1379,7 @@ let _consultoresCache = null;
 
 
 // ═══ EMISSAO PELO ROBO PORTO (so admin/master) ═══
-let _emPropostaId = null, _emProposta = null, _filaTimer = null, _filaItens = [], _filaUlt = 0;
+let _emPropostaId = null, _emProposta = null, _emEditId = null, _filaTimer = null, _filaItens = [], _filaUlt = 0;
 // Por enquanto a emissao pelo robo aparece so para estes logins (alem de ser admin/master).
 // O login do portal e a parte antes do @ do e-mail interno (ex.: allan.almeida).
 // Para liberar para Carlos, Erik e Leonardo, acrescente os logins deles aqui.
@@ -1439,7 +1439,8 @@ function fmtBRL(v) { return v == null ? '—' : 'R$ ' + Number(v).toLocaleString
 async function abrirEmitir(propostaId) {
   const a = allAdesoes.find(x => x.id === propostaId);
   if (!a) return;
-  _emPropostaId = propostaId; _emProposta = a;
+  _emPropostaId = propostaId; _emProposta = a; _emEditId = null;
+  document.getElementById('em-enviar').textContent = 'Enviar para o robô';
   const d = a.dados || {};
   document.getElementById('em-cliente').textContent = `${a.nome_cliente || ''} · CPF ${a.cpf_cnpj || ''} · ${a.consultor_nome || 'sem vendedor'} · ${a.protocolo || ''}`;
   document.getElementById('em-linhas').innerHTML = ''; emAddLinha({ com_seguro: d.aceita_seguro !== false });
@@ -1456,7 +1457,27 @@ async function abrirEmitir(propostaId) {
   if (ativa) document.getElementById('em-erro').textContent = 'Atenção: já existe uma emissão ' + ativa.status + ' para esta ficha.';
   document.getElementById('modal-emitir').style.display = 'flex';
 }
-function fecharEmitir() { document.getElementById('modal-emitir').style.display = 'none'; _emPropostaId = null; }
+function fecharEmitir() { document.getElementById('modal-emitir').style.display = 'none'; _emPropostaId = null; _emEditId = null; }
+
+// Editar uma emissao parada (pendente/aguardando/erro): abre a mesma janela com os dados dela.
+// Ao salvar, atualiza a linha e volta para "pendente" (o robo refaz do zero com os dados novos).
+function editarEmissao(id) {
+  const e = _filaItens.find(x => x.id === id); if (!e) return;
+  if (!['pendente','aguardando','erro','retomar'].includes(e.status)) { alert('Só dá para editar uma emissão parada. Clique em Parar primeiro.'); return; }
+  const a = allAdesoes.find(x => x.id === e.proposta_id);
+  _emPropostaId = e.proposta_id; _emProposta = a || { nome_cliente: e.cliente, cpf_cnpj: e.cpf, consultor_nome: e.consultor, protocolo: e.protocolo }; _emEditId = id;
+  document.getElementById('em-cliente').textContent = `${e.cliente || ''} · CPF ${e.cpf || ''} · ${e.consultor || 'sem vendedor'} · ${e.protocolo || ''}`;
+  document.getElementById('em-produto').value = e.produto || document.getElementById('em-produto').value;
+  document.getElementById('em-tipo').value = e.tipo_grupo || 'Em formação';
+  const itens = Array.isArray(e.itens) && e.itens.length ? e.itens : [{ credito: e.credito, plano: e.plano, grupo: e.grupo, parcela: e.parcela, com_seguro: e.com_seguro, cotas: e.cotas, qtd: e.quantidade || 1 }];
+  document.getElementById('em-linhas').innerHTML = ''; itens.forEach(l => emAddLinha(l));
+  document.getElementById('em-renda').value = e.renda ? Number(e.renda).toLocaleString('pt-BR') : '';
+  document.getElementById('em-pag').value = e.pagamento_1a || 'BolePix';
+  document.getElementById('em-obs').value = e.observacao || '';
+  document.getElementById('em-erro').textContent = e.grupo_cota ? 'Atenção: o robô já reservou ' + e.grupo_cota + ' na Porto. Ao salvar ele recomeça do zero; libere a cota antiga na Porto se não for usar.' : '';
+  document.getElementById('em-enviar').textContent = 'Salvar e refazer';
+  document.getElementById('modal-emitir').style.display = 'flex';
+}
 
 async function enviarEmissao() {
   const err = document.getElementById('em-erro');
@@ -1495,9 +1516,17 @@ async function enviarEmissao() {
   };
   const btn = document.getElementById('em-enviar'); btn.disabled = true; btn.textContent = 'Enviando...';
   try {
-    const { error } = await sb.from('portal_emissoes').insert(item);
-    if (error) throw error;
-    showToast('Enviado para o robô. Acompanhe na Fila do robô Porto.');
+    if (_emEditId) {
+      const patch = { ...item, etapa: null, tentativas: 0, motivo: null, progresso: null, grupo_cota: null, parcela_final: null, credito_final: null };
+      delete patch.criado_por; delete patch.criado_por_auth; delete patch.proposta_id; delete patch.adm;
+      const { error } = await sb.from('portal_emissoes').update(patch).eq('id', _emEditId);
+      if (error) throw error;
+      showToast('Emissão atualizada. O robô vai refazer com os dados novos.');
+    } else {
+      const { error } = await sb.from('portal_emissoes').insert(item);
+      if (error) throw error;
+      showToast('Enviado para o robô. Acompanhe na Fila do robô Porto.');
+    }
     fecharEmitir(); carregarFila();
   } catch(e) { err.textContent = 'Erro: ' + e.message; }
   btn.disabled = false; btn.textContent = 'Enviar para o robô';
@@ -1521,7 +1550,8 @@ function filaPlano(e) {
   const ls = itens.map(l => `${l.qtd > 1 ? l.qtd + 'x ' : ''}${fmtBRL(l.credito)}${l.plano ? ' ' + (l.plano === 'R0' ? 'sem red.' : (/^R\d+$/.test(l.plano) ? 'red. ' + l.plano.slice(1) + '%' : l.plano)) : ''}${l.prefixado ? ' pré-fixado' : ''}${l.grupo ? ' ' + l.grupo : ''} · parc. ${fmtBRL(l.parcela)}${l.com_seguro === false ? ' s/ seg.' : ' c/ seg.'}${l.cotas === 'centenas' ? ' · centenas' : (l.cotas === 'auto' ? ' · cota auto Porto' : (l.cotas && l.cotas !== 'aleatoria' ? ' · cotas ' + l.cotas : ''))}`);
   return cab + '<br>' + ls.join('<br>');
 }
-const ETAPA_PCT = { consulta: 8, reserva: 25, 'cadastro:dados': 35, 'cadastro:contato': 42, 'cadastro:adicionais': 49, 'cadastro:endereco': 56, 'cadastro:extras': 60, pagamento: 70, dps: 78, resumo: 85, transmitir: 92, pdf: 97, concluida: 100 };
+const ETAPA_PCT = { login: 2, consulta: 6, reserva: 12, 'reserva:produto': 12, 'reserva:busca': 16, 'reserva:grupo': 20, 'reserva:cota': 24, 'reserva:plano': 28, 'reserva:confirmar': 32, 'cadastro:dados': 38, 'cadastro:contato': 44, 'cadastro:adicionais': 50, 'cadastro:endereco': 56, 'cadastro:extras': 62, pagamento: 70, dps: 78, resumo: 85, transmitir: 92, pdf: 97, concluida: 100 };
+const ETAPA_NOME = { login: 'login na Porto', consulta: 'consulta do CPF', reserva: 'reserva', 'reserva:produto': 'escolhendo produto', 'reserva:busca': 'buscando grupos', 'reserva:grupo': 'escolhendo grupo', 'reserva:cota': 'escolhendo cota', 'reserva:plano': 'conferindo plano e parcela', 'reserva:confirmar': 'confirmando reserva', 'cadastro:dados': 'cadastro: dados', 'cadastro:contato': 'cadastro: contato', 'cadastro:adicionais': 'cadastro: adicionais', 'cadastro:endereco': 'cadastro: endereço', 'cadastro:extras': 'cadastro: extras', pagamento: 'pagamento', dps: 'DPS', resumo: 'resumo', transmitir: 'transmitindo', pdf: 'baixando PDF', concluida: 'concluída', capacidade: 'capacidade' };
 function filaBarra(e) {
   if (!['processando','aguardando','retomar','concluida'].includes(e.status)) return '';
   const total = Math.max(1, e.quantidade || 1);
@@ -1552,11 +1582,12 @@ function renderFila() {
       <td class="mono" style="white-space:nowrap;color:var(--text2)">${fmtDataHora(e.criado_em)}<br><span style="font-size:10px">${e.criado_por || ''}</span></td>
       <td><strong style="color:var(--mp-navy)">${e.cliente || ''}</strong><br><span style="font-size:10.5px;color:var(--text2)">${e.consultor || 'sem vendedor'} · ${e.protocolo || ''}</span></td>
       <td style="font-size:11.5px">${filaPlano(e)}${e.observacao ? `<br><span style="color:var(--text2)">Obs: ${e.observacao}</span>` : ''}</td>
-      <td><span class="fila-st ${e.status}">${e.status}</span>${filaBarra(e)}${e.etapa ? `<br><span style="font-size:10.5px;color:var(--text2)">${e.etapa} · ${haQuanto(e.atualizado_em)}</span>` : ''}${e.status === 'processando' && e.progresso ? `<br><span style="font-size:10.5px;color:#1D4ED8">${e.progresso}</span>` : ''}${e.motivo ? `<br><span style="font-size:10.5px;color:#92400E">${e.motivo}</span>` : ''}</td>
+      <td><span class="fila-st ${e.status}">${e.status}</span>${filaBarra(e)}${e.etapa ? `<br><span style="font-size:10.5px;color:var(--text2)">${ETAPA_NOME[e.etapa] || e.etapa} · ${haQuanto(e.atualizado_em)}</span>` : ''}${e.status === 'processando' && e.progresso ? `<br><span style="font-size:10.5px;color:#1D4ED8">${e.progresso}</span>` : ''}${e.motivo ? `<br><span style="font-size:10.5px;color:#92400E">${e.motivo}</span>` : ''}</td>
       <td class="mono" style="font-size:11.5px">${e.contrato ? `Contrato ${e.contrato}<br>` : ''}${e.grupo_cota ? `${e.grupo_cota}<br>` : ''}${e.parcela_final ? `1ª parc. ${fmtBRL(e.parcela_final)}` : ''}${e.pdf_path ? e.pdf_path.split(',').map((pp, i) => `<br><a href="#" onclick="abrirArquivo('${pp.trim()}');return false" style="color:#0a52a8">PDF da proposta${e.pdf_path.includes(',') ? ' ' + (i+1) : ''}</a>`).join('') : ''}</td>
       <td style="white-space:nowrap">
         <button class="fila-btn" onclick="verLog('${e.id}')">Log</button>
         ${e.status === 'concluida' ? `<button class="fila-btn" style="color:#0a52a8" onclick="copiarMsgEmissao('${e.id}')" title="Copia a mensagem pronta para mandar ao consultor">Copiar msg</button>` : ''}
+        ${['pendente','aguardando','erro','retomar'].includes(e.status) ? `<button class="fila-btn" onclick="editarEmissao('${e.id}')" title="Corrigir crédito, plano, cota... e refazer">Editar</button>` : ''}
         ${['aguardando','erro'].includes(e.status) ? `<button class="fila-btn" onclick="filaStatus('${e.id}','pendente')" title="O robô começa esta emissão do zero">Refazer</button>` : ''}
         ${['pendente','aguardando','erro','retomar','processando'].includes(e.status) ? `<button class="fila-btn" style="color:var(--red)" onclick="filaStatus('${e.id}','cancelada')" title="${e.status === 'processando' ? 'O robô para na próxima tela' : 'Tira da fila'}">${e.status === 'processando' ? 'Parar' : 'Cancelar'}</button>` : ''}
         ${e.status === 'cancelada' ? `<button class="fila-btn" onclick="filaRemover('${e.id}')" title="Apaga da fila (some de vez)">Remover</button>` : ''}
